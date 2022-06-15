@@ -9,7 +9,7 @@ import unittest
 import time
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, KeyVaultPreparer, record_only
+    StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
 from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
@@ -214,10 +214,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm1': vm1,
             'vm2': vm2,
             'policy5': self.create_random_name('clitest-policy5', 24),
+            'enhpolicy': self.create_random_name('clitest-enhpolicy', 24),
         })
 
         self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy1}', checks=[
             self.check('name', '{policy1}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['enhpolicy_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {enhanced}', checks=[
+            self.check('name', '{enhanced}'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
@@ -244,7 +250,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy5_json'] = json.dumps(self.kwargs['policy1_json'])
         self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {policy5} --policy '{policy5_json}'")
 
+        self.kwargs['enhpolicy_json']['name'] = self.kwargs['enhpolicy']
+        self.kwargs['backup-management-type'] = self.kwargs['enhpolicy_json']['properties']['backupManagementType']
+        self.kwargs['enhpolicy_json'] = json.dumps(self.kwargs['enhpolicy_json'])
+        self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {enhpolicy} --policy '{enhpolicy_json}'", checks=[
+            self.check('properties.schedulePolicy.scheduleRunFrequency', 'Hourly')
+        ])
+
         self.cmd('backup policy delete -g {rg} -v {vault} -n {policy5}')
+        self.cmd('backup policy delete -g {rg} -v {vault} -n {enhpolicy}')
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
@@ -435,6 +449,70 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="southeastasia")
+    @VaultPreparer(soft_delete=False)
+    @VMPreparer()
+    @ItemPreparer()
+    @RPPreparer()
+    @live_only()
+    def test_backup_csr(self, resource_group, vault_name, vm_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'target_sub': "da364f0f-307b-41c9-9d47-b7413ec45535", 
+            'target_rg': "clitest-iaasvm-rg-donotuse",
+            'rg': resource_group,
+            'sa_id': "/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/clitest-iaasvm-rg-donotuse/providers/Microsoft.Storage/storageAccounts/clitestiaasvmsadonotuse",
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'vnet_name': self.create_random_name('clitest-vnet', 30),
+            'subnet_name': self.create_random_name('clitest-subnet', 30),
+            'target_vm_name': self.create_random_name('clitest-tvm', 15)
+        })
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --target-subscription {target_sub} -t {target_rg} --storage-account {sa_id} --restore-to-staging-storage-account', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        trigger_restore_job_details = self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+
+        vnet_json = self.cmd('network vnet create -g {target_rg} -n {vnet_name} --subnet-name {subnet_name} --subscription {target_sub}',
+                 checks=[
+            self.check("newVNet.name", '{vnet_name}')
+        ]).get_output_in_json()
+
+        self.assertIn(self.kwargs['subnet_name'].lower(), vnet_json['newVNet']['subnets'][0]['name'].lower())
+
+        trigger_restore_job4_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa_id} --restore-mode AlternateLocation --target-vm-name {target_vm_name} --target-vnet-name {vnet_name} --target-subnet-name {subnet_name} --target-vnet-resource-group {target_rg} -t {target_rg} --target-subscription {target_sub}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.extendedInfo.internalPropertyBag.restoreLocationType", "AlternateLocation")
+        ]).get_output_in_json()
+        self.kwargs['job4'] = trigger_restore_job4_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job4}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job4}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
@@ -1125,3 +1203,63 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.useSystemAssignedIdentity', False),
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
+
+
+    @ResourceGroupPreparer(location="centraluseuap")
+    @VaultPreparer()
+    @VMPreparer(parameter_name='vm1')
+    @ItemPreparer(vm_parameter_name='vm1')
+    @PolicyPreparer(parameter_name='policy1', instant_rp_days='4')
+    @PolicyPreparer(parameter_name='policy2', instant_rp_days='2')
+    def test_backup_rg_mapping(self, resource_group, vault_name, vm1, policy1, policy2):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm1': vm1,
+            'policy1': policy1,
+            'policy2': policy2,
+            'default': 'DefaultPolicy',
+            'resource_graph': '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/clitest-rg/providers/Microsoft.DataProtection/resourceGuards/clitest-resource-guard'
+        })
+        # associate vault with an already present resource guard
+        self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
+            self.check('name', 'VaultProxy'),
+            self.check('length(properties.resourceGuardOperationDetails)', 6)
+        ])
+
+        self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
+            self.check('name', 'VaultProxy'),
+            self.check('length(properties.resourceGuardOperationDetails)', 6)
+        ])
+
+        # Try disabling soft delete
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable', checks=[
+            self.check('properties.softDeleteFeatureState', 'Disabled')
+        ])
+
+        time.sleep(300)
+
+        # try modifying protection using the second policy
+        self.cmd('backup item set-policy --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm1} -n {vm1} -p {policy1}', checks=[
+            self.check("properties.entityFriendlyName", '{vm1}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item set-policy --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm1} -n {vm1} -p {policy2}', checks=[
+            self.check("properties.entityFriendlyName", '{vm1}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # try deleting protection
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm1} -i {vm1} --delete-backup-data --yes', checks=[
+            self.check("properties.entityFriendlyName", '{vm1}'),
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # try deleting resource guard mapping
+        self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg} -y')

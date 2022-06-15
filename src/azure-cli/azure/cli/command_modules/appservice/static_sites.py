@@ -364,8 +364,8 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
                                           static_site_user_envelope=user_envelope)
 
 
-def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals,
-                       source, branch, token=None,
+def create_staticsites(cmd, resource_group_name, name, location="centralus",  # pylint: disable=too-many-locals,
+                       source=None, branch=None, token=None,
                        app_location="/", api_location=None, output_location=None,
                        tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
@@ -377,14 +377,19 @@ def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disa
     except _ResourceNotFoundError:
         pass
 
-    if not token and not login_with_github:
-        raise_missing_token_suggestion()
-    elif not token:
-        from ._github_oauth import get_github_access_token
-        scopes = ["admin:repo_hook", "repo", "workflow"]
-        token = get_github_access_token(cmd, scopes)
-    elif token and login_with_github:
-        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
+    if source or branch or login_with_github or token:
+        if not source:
+            raise ValidationError("--source is required to make a static web app connected to a github repo")
+        if not branch:
+            raise ValidationError("--branch is required to make a static web app connected to a github repo")
+        if not token and not login_with_github:
+            raise_missing_token_suggestion()
+        elif not token:
+            from ._github_oauth import get_github_access_token
+            scopes = ["admin:repo_hook", "repo", "workflow"]
+            token = get_github_access_token(cmd, scopes)
+        elif token and login_with_github:
+            logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')

@@ -283,8 +283,10 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings create') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-        c.argument('logs', type=get_json_object)
-        c.argument('metrics', type=get_json_object)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file."
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings')
+        c.argument('metrics', type=get_json_object, help="JSON encoded list of metric settings. Use '@{file}' to load from a file. "
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings')
         c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
                    help='Indicate that the export to LA must be done to a resource specific table, '
                         'a.k.a. dedicated or fixed schema table, '
@@ -333,11 +335,10 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
+        c.argument('resource_provider', options_list=['--namespace'])
         c.argument('caller')
         c.argument('status')
     # endregion

@@ -25,8 +25,22 @@ location_arg_type = CLIArgumentType(options_list=('--location', '-l'), metavar='
 # Alerts
 alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss" and "activate"')
 
+
+# Alerts Suppression Rules
+suppression_rule_name_arg_type = CLIArgumentType(options_list=('--rule-name'), metavar='RULENAME', help='The unique name of the alerts suppression rule.')
+suppression_alert_type_arg_type = CLIArgumentType(options_list=('--alert-type'), metavar='ALERTTYPE', help='Type of the alert to automatically suppress. For all alert types, use "*".')
+suppression_reason_arg_type = CLIArgumentType(options_list=('--reason'), metavar='REASON', help='The reason for dismissing the alert.')
+suppression_expiration_date_utc_arg_type = CLIArgumentType(options_list=('--expiration-date-utc'), metavar='EXPIRATIONDATEUTC', help='Expiration date of the rule, if value is not provided or provided as null this field will default to the maximum allowed expiration date.')
+suppression_state_arg_type = CLIArgumentType(options_list=('--state'), metavar='STATE', help='Possible states of the rule. Possible values are "Enabled" and "Disabled".')
+suppression_comment_arg_type = CLIArgumentType(options_list=('--comment'), metavar='COMMENT', help='Any comment regarding the rule.')
+suppression_all_of_arg_type = CLIArgumentType(options_list=('--all-of'), metavar='ALLOF', help='The suppression conditions. Should be provided in a json array format.')
+suppression_rule_scope_field_arg_type = CLIArgumentType(options_list=('--field'), metavar='FIELD', help='Entity name.')
+suppression_rule_scope_contains_arg_type = CLIArgumentType(options_list=('--contains-substring'), metavar='CONTAINSSUBSTRING', help='The string to scope the suppression rule by.')
+suppression_rule_scope_any_of_arg_type = CLIArgumentType(options_list=('--any-of'), metavar='ANYOF', help='A list of strings to scope the suppression rule by.')
+
 # Atp
-storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
+storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing Storage account.')
+cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmosdb-account'), metavar='NAME', help='Name of an existing Cosmos DB account.')
 
 # Sql Vulnerability Assessment
 va_sql_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
@@ -90,10 +104,35 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 # Adaptive Application Controls
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
 
+# Automations
+automation_scopes_arg_type = CLIArgumentType(options_list=('--scopes'), metavar='SCOPES', help='A collection of scopes on which the security automations logic is applied')
+automation_sources_arg_type = CLIArgumentType(options_list=('--sources'), metavar='SOURCES', help='A collection of the source event types which evaluate the security automation set of rules')
+automation_actions_arg_type = CLIArgumentType(options_list=('--actions'), metavar='ACTIONS', help='A collection of the actions which are triggered if all the configured rules evaluations, within at least one rule set, are true')
+automation_etag_arg_type = CLIArgumentType(options_list=('--etag'), metavar='ETAG', help='Entity tag is used for comparing two or more entities from the same requested resource')
+automation_tags_arg_type = CLIArgumentType(options_list=('--tags'), metavar='TAGS', help='A list of key value pairs that describe the resource')
+automation_description_arg_type = CLIArgumentType(options_list=('--description'), metavar='DESCRIPTION', help='The security automation description')
+automation_isEnabled_arg_type = CLIArgumentType(options_list=('--isEnabled'), metavar='ISENABLED', help='Indicates whether the security automation is enabled')
+automation_scope_description = CLIArgumentType(options_list=('--description'), metavar='DESCRIPTION', help='The resources scope description')
+automation_scope_path = CLIArgumentType(options_list=('--scope-path'), metavar='SCOPEPATH', help='The resources scope path. Can be the subscription on which the automation is defined on or a resource group under that subscription (fully qualified Azure resource IDs)')
+automation_rule_expected_value = CLIArgumentType(options_list=('--expected-value'), metavar='EXPECTEDVALUE', help='The expected value')
+automation_rule_operator = CLIArgumentType(options_list=('--operator'), metavar='OPERATOR', help='A valid comparer operator to use. A case-insensitive comparison will be applied for String PropertyType')
+automation_rule_property_j_path = CLIArgumentType(options_list=('--property-j-path'), metavar='PROPERTYJPATH', help='The JPath of the entity model property that should be checked')
+automation_rule_property_type = CLIArgumentType(options_list=('--property-type'), metavar='PROPERTYTYPE', help='The data type of the compared operands (string, integer, floating point number or a boolean [true/false]]')
+automation_rule_set_rules = CLIArgumentType(options_list=('--rules'), metavar='RULES', help='A rule which is evaluated upon event interception. The rule is configured by comparing a specific value from the event model to an expected value. This comparison is done by using one of the supported operators set')
+automation_source_event_source = CLIArgumentType(options_list=('--event-source'), metavar='EVENTSOURCE', help='A valid event source type')
+automation_source_rule_sets = CLIArgumentType(options_list=('--rule-sets'), metavar='RULESETS', help='A set of rules which evaluate upon event interception. A logical disjunction is applied between defined rule sets (logical "or").')
+automation_action_logic_app_resource_id = CLIArgumentType(options_list=('--logic-app-resource-id'), metavar='LOGICAPPRESOURCEID', help='The triggered Logic App Azure Resource ID. This can also reside on other subscriptions, given that you have permissions to trigger the Logic App')
+automation_action_logic_app_uri = CLIArgumentType(options_list=('--uri'), metavar='URI', help='The Logic App trigger URI endpoint (it will not be included in any response)')
+automation_action_event_hub_connection_string = CLIArgumentType(options_list=('--connection-string'), metavar='', help='The target Event Hub connection string (it will not be included in any response)')
+automation_action_event_hub_resource_id = CLIArgumentType(options_list=('--event-hub-resource-id'), metavar='EVENTHUBRESOURCEID', help='The target Event Hub Azure Resource ID')
+automation_action_event_hub_sas_policy_name = CLIArgumentType(options_list=('--sas-policy-name'), metavar='SASPOLICYNAME', help='The target Event Hub SAS policy name')
+automation_action_workspace_resource_id = CLIArgumentType(options_list=('--workspace-resource-id'), metavar='WORKSPACERESOURCEID', help='The fully qualified Log Analytics Workspace Azure Resource ID')
+
 
 # pylint: disable=too-many-branches
 def load_arguments(self, _):
     for scope in ['alert',
+                  'alerts-suppression-rule',
                   'atp',
                   'va sql',
                   'task',
@@ -123,7 +162,8 @@ def load_arguments(self, _):
                   'secure-scores',
                   'secure-score-controls',
                   'secure-score-control-definitions',
-                  'setting'
+                  'setting',
+                  'automation'
                   ]:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -136,9 +176,6 @@ def load_arguments(self, _):
             c.argument(
                 'location',
                 arg_type=location_arg_type)
-            c.argument(
-                'storage_account_name',
-                arg_type=storage_account_arg_type)
             c.argument(
                 'vm_resource_id',
                 arg_type=va_sql_vm_resource_id_arg_type)
@@ -160,6 +197,15 @@ def load_arguments(self, _):
             c.argument(
                 'vm_uuid',
                 arg_type=va_sql_vm_uuid_arg_type)
+
+    with self.argument_context('security atp storage') as c:
+        c.argument(
+            'storage_account_name',
+            arg_type=storage_account_arg_type)
+    with self.argument_context('security atp cosmosdb') as c:
+        c.argument(
+            'cosmos_db_account_name',
+            arg_type=cosmos_db_account_arg_type)
 
     for scope in ['regulatory-compliance-controls']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -183,6 +229,63 @@ def load_arguments(self, _):
                 validator=validate_alert_status,
                 arg_type=alert_status_arg_type)
 
+    for scope in ['alerts-suppression-rule update']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+            c.argument(
+                'alert_type',
+                arg_type=suppression_alert_type_arg_type)
+            c.argument(
+                'reason',
+                arg_type=suppression_reason_arg_type)
+            c.argument(
+                'expiration_date_utc',
+                arg_type=suppression_expiration_date_utc_arg_type)
+            c.argument(
+                'state',
+                arg_type=suppression_state_arg_type)
+            c.argument(
+                'comment',
+                arg_type=suppression_comment_arg_type)
+
+    for scope in ['alerts-suppression-rule show']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+
+    for scope in ['alerts-suppression-rule delete']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+
+    for scope in ['alerts-suppression-rule upsert_scope']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+            c.argument(
+                'field',
+                arg_type=suppression_rule_scope_field_arg_type)
+            c.argument(
+                'contains_substring',
+                arg_type=suppression_rule_scope_contains_arg_type)
+            c.argument(
+                'any_of',
+                arg_type=suppression_rule_scope_any_of_arg_type)
+
+    for scope in ['alerts-suppression-rule delete_scope']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rule_name',
+                arg_type=suppression_rule_name_arg_type)
+            c.argument(
+                'field',
+                arg_type=suppression_rule_scope_field_arg_type)
+
     for scope in ['auto-provisioning-setting update']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -190,9 +293,9 @@ def load_arguments(self, _):
                 validator=validate_auto_provisioning_toggle,
                 arg_type=auto_provisioning_auto_provision_arg_type)
 
-    for scope in ['atp storage update']:
+    for scope in ['atp storage update', 'atp cosmosdb update']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage account.', arg_type=get_three_state_flag())
+            c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage or Cosmos DB account.', arg_type=get_three_state_flag())
 
     for scope in ['va sql scans show',
                   'va sql results']:
@@ -348,3 +451,86 @@ def load_arguments(self, _):
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(Enum69))
             c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
+
+    for scope in ['automation create_or_update', 'automation validate']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'scopes',
+                arg_type=automation_scopes_arg_type)
+            c.argument(
+                'sources',
+                arg_type=automation_sources_arg_type)
+            c.argument(
+                'actions',
+                arg_type=automation_actions_arg_type)
+            c.argument(
+                'etag',
+                arg_type=automation_etag_arg_type)
+            c.argument(
+                'tags',
+                arg_type=automation_tags_arg_type)
+            c.argument(
+                'description',
+                arg_type=automation_description_arg_type)
+            c.argument(
+                'isEnabled',
+                arg_type=automation_isEnabled_arg_type)
+    for scope in ['automation-scope create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'scope_path',
+                arg_type=automation_scope_path)
+            c.argument(
+                'description',
+                arg_type=automation_scope_description)
+    for scope in ['automation-rule create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'expected_value',
+                arg_type=automation_rule_expected_value)
+            c.argument(
+                'operator',
+                arg_type=automation_rule_operator)
+            c.argument(
+                'property_j_path',
+                arg_type=automation_rule_property_j_path)
+            c.argument(
+                'property_type',
+                arg_type=automation_rule_property_type)
+    for scope in ['automation-rule-set create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'rules',
+                arg_type=automation_rule_set_rules)
+    for scope in ['automation-source create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'event_source',
+                arg_type=automation_source_event_source)
+            c.argument(
+                'rule_sets',
+                arg_type=automation_source_rule_sets)
+    for scope in ['automation-action-logic-app create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'logic_app_resource_id',
+                arg_type=automation_action_logic_app_resource_id)
+            c.argument(
+                'uri',
+                arg_type=automation_action_logic_app_uri)
+    for scope in ['automation-action-event-hub create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'event_hub_resource_id',
+                arg_type=automation_action_event_hub_resource_id)
+            c.argument(
+                'connection_string',
+                arg_type=automation_action_event_hub_connection_string)
+            c.argument(
+                'sas_policy_name',
+                arg_type=automation_action_event_hub_sas_policy_name)
+    for scope in ['automation-action-workspace create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'workspace_resource_id',
+                arg_type=automation_action_workspace_resource_id)

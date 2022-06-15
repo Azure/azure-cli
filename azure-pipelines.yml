@@ -386,15 +386,10 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       echo "== Testing pip install on Python 3.8 =="
+       echo "== Testing pip install on Python 3.9 =="
        docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
-       # echo "== Testing pip install on Python 3.9 =="
-       # docker run \
-       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.10 =="
        docker run \
@@ -412,8 +407,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -433,8 +426,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -457,8 +448,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -482,8 +471,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -503,8 +490,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -524,8 +509,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -545,8 +528,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -560,14 +541,14 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 20
+  timeoutInMinutes: 40
 
   pool:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python38:
-        python.version: '3.8'
+      Python310:
+        python.version: '3.10'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -705,12 +686,23 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      1.0:
+        image: cblmariner.azurecr.io/base/core
+        tag: 1.0
+      2.0:
+        image: mcr.microsoft.com/cbl-mariner/base/core
+        tag: 2.0
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+    env:
+      IMAGE: $(image)
+      TAG: $(tag)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -721,7 +713,7 @@ jobs:
     displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-mariner
+      ArtifactName: rpm-mariner$(tag)
 
 
 - job: BuildRpmPackageCentOS7
@@ -746,7 +738,8 @@ jobs:
     displayName: 'Publish Artifact: rpm'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-centos7
+      # Should be 'rpm-centos7', but we keep 'yum' for backward compatibility
+      ArtifactName: yum
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 # We use a separate job for Red Hat UBI 8 instead of strategy.matrix so that TestRpmPackage can start right after
@@ -795,7 +788,7 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: rpm-centos7
+      artifactName: yum
 
 
   - bash: |
@@ -815,18 +808,12 @@ jobs:
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
-
-  dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       # https://wiki.ubuntu.com/Releases
-      Xenial:
-        # 16.04
-        deb_system: ubuntu
-        distro: xenial
       Bionic:
         # 18.04
         deb_system: ubuntu
@@ -839,12 +826,12 @@ jobs:
         # 21.10
         deb_system: ubuntu
         distro: impish
+      Jammy:
+        # 22.04
+        deb_system: ubuntu
+        distro: jammy
 
       # https://wiki.debian.org/DebianReleases
-      Stretch:
-        # 9
-        deb_system: debian
-        distro: stretch
       Buster:
         # 10
         deb_system: debian
@@ -854,12 +841,6 @@ jobs:
         deb_system: debian
         distro: bullseye
   steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
@@ -882,7 +863,6 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-
   dependsOn:
    - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -891,9 +871,15 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
+      Jammy:
+        deb_system: ubuntu
+        distro: jammy
       Buster:
         deb_system: debian
         distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -963,8 +949,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
