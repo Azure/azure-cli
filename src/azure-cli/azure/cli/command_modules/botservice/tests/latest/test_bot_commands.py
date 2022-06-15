@@ -106,7 +106,7 @@ class BotTests(ScenarioTest):
         })
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} '
+            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant'
             '--tags key1=value1',
             checks=[
                 self.check('name', '{botname}'),
@@ -214,7 +214,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id}',
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -258,7 +258,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -309,7 +309,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        results = self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        results = self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                            checks={
                                self.check('resourceGroup', '{rg}'),
                                self.check('id', '{botname}'),
@@ -350,7 +350,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id} ',
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
             checks={
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -389,7 +389,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -421,7 +421,7 @@ class BotTests(ScenarioTest):
         # Delete the bot if already exists
         self.cmd('az bot delete -g {rg} -n {botname}')
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id}')
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_webapp_bot_should_succeed_with_ending_hyphen(self, resource_group):
@@ -443,7 +443,7 @@ class BotTests(ScenarioTest):
             # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -467,7 +467,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -497,7 +497,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -649,7 +649,7 @@ class BotTests(ScenarioTest):
 
         self.cmd('az bot delete -g {rg} -n {botname}')
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id}',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -825,7 +825,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
             'password': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} '
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant'
                  '-e https://testurl.com/api/messages',
                  checks={
                      self.check('resourceGroup', '{rg}'),
@@ -843,7 +843,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
             'password': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} ',
+        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{valid_bot_name}'),
@@ -877,7 +877,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         cmk_url = resultAzKey['key']['kid']
 
         resultsCreate = self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id} --cmk-key-vault-key-url ' + cmk_url,
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant --cmk-key-vault-key-url ' + cmk_url,
             checks={
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -909,7 +909,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
 
         self.cmd('az bot delete -g {rg} -n {botname}')
 
-        resultsCreate = self.cmd('az bot create -g {rg} -n {botname} --appid {app_id}',
+        resultsCreate = self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                                  checks={
                                      self.check('resourceGroup', '{rg}'),
                                      self.check('id', '{botname}'),
@@ -968,7 +968,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         cmk_url = resultAzKey['key']['kid']
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id}   --password {pass} --cmk-key-vault-key-url ' + cmk_url,
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant --password {pass} --cmk-key-vault-key-url ' + cmk_url,
             checks={
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
