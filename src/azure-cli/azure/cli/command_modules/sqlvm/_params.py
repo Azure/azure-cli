@@ -346,3 +346,7 @@ def load_arguments(self, _):
                    options_list=['--assessment-start-time-local', '--am-time'],
                    help='Time of the day in HH:mm format. Examples include 17:30, 05:13.',
                    validator=validate_assessment_start_time_local)
+        c.argument('workspace_name',
+                   help='Name of the Log Analytics workspace to associate with VM.')
+        c.argument('workspace_rg',
+                   help='Resource group containing the Log Analytics workspace.')

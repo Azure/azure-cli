@@ -33,6 +33,11 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('profiles[0].capacity.minimum', 2),
             self.check('profiles[0].capacity.maximum', 2)
         ])
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --count 0', checks=[
+            self.check('profiles[0].capacity.default', 0),
+            self.check('profiles[0].capacity.minimum', 0),
+            self.check('profiles[0].capacity.maximum', 0)
+        ])
         self.cmd('monitor autoscale update -g {rg} -n {vmss} --min-count 1 --count 2 --max-count 4', checks=[
             self.check('profiles[0].capacity.default', 2),
             self.check('profiles[0].capacity.minimum', 1),

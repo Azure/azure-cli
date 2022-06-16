@@ -3327,7 +3327,8 @@ def elastic_pool_update(
         tier=None,
         family=None,
         capacity=None,
-        maintenance_configuration_id=None):
+        maintenance_configuration_id=None,
+        high_availability_replica_count=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3365,6 +3366,9 @@ def elastic_pool_update(
     instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
         maintenance_configuration_id)
+
+    if high_availability_replica_count is not None:
+        instance.high_availability_replica_count = high_availability_replica_count
 
     return instance
 

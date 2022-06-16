@@ -1983,12 +1983,19 @@ def _get_principal_dics(cli_ctx, role_assignments):
     if principal_ids:
         from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+            from azure.cli.command_modules.role.custom import (_get_displayable_name, _get_object_stubs,
+                                                               _odata_type_to_arm_principal_type)
 
             graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
 
+            results = {}
+            for i in principals:
+                object_id = i['id']
+                display_name = _get_displayable_name(i)
+                principal_type = _odata_type_to_arm_principal_type(i['@odata.type'])
+                results[object_id] = (display_name, principal_type)
+            return results
         except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
@@ -2023,6 +2030,11 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# for injecting test seems to produce predictable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
+
+
 # pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
@@ -2045,7 +2057,7 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                        'to check whether the role is existing.'.format(role))
 
     if role_assignment_name is None:
-        role_assignment_name = str(uuid.uuid4())
+        role_assignment_name = str(_gen_guid())
 
     if scope is None:
         scope = ''
