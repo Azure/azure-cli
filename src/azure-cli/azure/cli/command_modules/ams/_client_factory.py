@@ -27,7 +27,6 @@ def _auth_client_factory(cli_ctx, scope=None):
 
 
 def _graph_client_factory(cli_ctx, **_):
-    from azure.cli.core._profile import Profile
     from azure.cli.command_modules.role import graph_client_factory
     client = graph_client_factory(cli_ctx)
     return client
