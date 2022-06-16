@@ -138,7 +138,7 @@ def load_arguments(self, _):
 
     for scope in ['disk', 'snapshot']:
         with self.argument_context(scope) as c:
-            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
+            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot', 'source_restore_point')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)

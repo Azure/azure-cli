@@ -27,7 +27,8 @@ from azure.cli.command_modules.vm._format import (
     get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
-    process_disk_create_namespace, process_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
+    process_disk_create_namespace, process_snapshot_create_namespace,
+    process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace)

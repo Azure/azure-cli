@@ -1718,10 +1718,12 @@ def process_disk_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     if namespace.source:
-        usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
+        usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
+                      '--source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, namespace.source_restore_point, source_info = \
-                _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
+                namespace.source_restore_point, _ = _figure_out_storage_source(
+                    cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
         except HttpResponseError:
