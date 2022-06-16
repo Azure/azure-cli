@@ -374,8 +374,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
-    if security_type.lower()[:15] == 'confidentialvm_' and not hyper_v_generation.lower() == 'v2':
-        raise ArgumentUsageError('usage error: --security-type should be ConfidentialVM_* ONLY if --hyper-v-generation is set to V2')
+    if security_type is not None:
+        if security_type.lower()[:15] == 'confidentialvm_' and not hyper_v_generation.lower() == 'v2':
+            raise ArgumentUsageError('usage error: --security-type should be ConfidentialVM_* ONLY if --hyper-v-generation is set to V2')
 
     if securevm_disk_encryption_set is not None:
         if not security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
