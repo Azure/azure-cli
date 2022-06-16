@@ -177,7 +177,7 @@ Add new parameter key value pair to support password from KeyVault (#22319)
 * Fix #22209: `az storage entity insert`: Fix `Edm.Boolean` not working (#22483)
 * `az storage directory/file list`: Add `--exclude-extended-info` to exclude some properties info from response, default to `False` (#22490)
 * Fix #21781: `az storage blob upload/download`: Progress fix (#22504)
-* `az stroage entity query`: Fix UUID type is not JSON serializable (#22492)
+* `az storage entity query`: Fix UUID type is not JSON serializable (#22492)
 * `az storage blob delete-batch`: No longer exits after individual delete failure (#22309)
 
 2.36.0
