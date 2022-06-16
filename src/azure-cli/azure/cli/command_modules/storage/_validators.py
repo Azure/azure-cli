@@ -1145,6 +1145,28 @@ def add_progress_callback(cmd, namespace):
             hook.add(message=message, value=current, total_val=total)
             if total == current and not reuse:
                 hook.end()
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def add_progress_callback_v2(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
 
     hook = cmd.cli_ctx.get_progress_controller(det=True)
     _update_progress.hook = hook
@@ -1281,6 +1303,7 @@ def process_file_upload_batch_parameters(cmd, namespace):
             namespace.account_name = identifier.account_name
 
     namespace.source = os.path.realpath(namespace.source)
+    namespace.share_name = namespace.destination
 
 
 def process_file_download_batch_parameters(cmd, namespace):
