@@ -286,7 +286,7 @@ def create_application(client, display_name):
 
 def update_application(client, app_object_id, display_name):
     try:
-        return client.application_patch(app_object_id, {"displayName": display_name})
+        return client.application_update(app_object_id, {"displayName": display_name})
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(
             "Updating service principal failed for appid '%s'. Trace followed:\n%s",
