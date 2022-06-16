@@ -12,7 +12,7 @@ import dateutil
 import dateutil.parser
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import MOCKED_TENANT_ID
-from azure.cli.testsdk import ScenarioTest, MSGraphUserReplacer, MOCKED_USER_NAME
+from azure.cli.testsdk import ScenarioTest, MSGraphNameReplacer, MOCKED_USER_NAME
 from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
@@ -363,7 +363,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
             'owner': owner,
             'display_name': self.create_random_name('azure-cli-test', 30)
         }
-        self.recording_processors.append(MSGraphUserReplacer(owner, 'example@example.com'))
+        self.recording_processors.append(MSGraphNameReplacer(owner, 'example@example.com'))
 
         self.kwargs['owner_object_id'] = self.cmd('ad user show --id {owner}').get_output_in_json()['id']
         self.kwargs['app_id'] = self.cmd('ad app create --display-name {display_name}').get_output_in_json()['appId']
@@ -753,7 +753,7 @@ class GroupScenarioTest(GraphScenarioTestBase):
             'app_name': self.create_random_name(prefix='testgroupapp', length=24)
         }
 
-        self.recording_processors.append(MSGraphUserReplacer('@' + domain, '@example.com'))
+        self.recording_processors.append(MSGraphNameReplacer('@' + domain, '@example.com'))
         try:
             # create group
             group_result = self.cmd(
@@ -877,6 +877,35 @@ class GroupScenarioTest(GraphScenarioTestBase):
             self.clean_resource('{}@{}'.format(self.kwargs['user2'], self.kwargs['domain']), type='user')
             if self.kwargs.get('app_id'):
                 self.clean_resource(self.kwargs['app_id'], type='app')
+
+
+class MiscellaneousScenarioTest(GraphScenarioTestBase):
+    def test_special_characters(self):
+        # Test special characters in object names. Ensure these characters are correctly percent-encoded.
+        # For example, displayName with +(%2B), /(%2F)
+        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
+        prefix = 'azure-cli-test-group+/'
+        mock_name = prefix + '000001'
+        if self.in_recording:
+            display_name = create_random_name(prefix=prefix, length=32)
+            self.recording_processors.append(MSGraphNameReplacer(display_name, mock_name))
+        else:
+            display_name = mock_name
+
+        self.kwargs = {
+            'display_name': display_name,
+            'mail_nick_name': 'deleteme11'
+        }
+        self.cmd('ad group create --display-name {display_name} --mail-nickname {mail_nick_name}',
+                 checks=self.check('displayName', '{display_name}'))
+        self.cmd('ad group show --group {display_name}',
+                 checks=self.check('displayName', '{display_name}'))
+        self.cmd('ad group list --display-name {display_name}',
+                 checks=[self.check('length(@)', 1),
+                         self.check('[0].displayName', '{display_name}')])
+        self.cmd('ad group delete --group {display_name}')
+        self.cmd('ad group list --display-name {display_name}',
+                 checks=self.check('length(@)', 0))
 
 
 def _get_id_from_value(permissions, value):
