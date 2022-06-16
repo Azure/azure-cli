@@ -517,6 +517,6 @@ def validate_defender_config_parameter(namespace):
         raise RequiredArgumentMissingError("Please specify --enable-defnder")
 
 
-def validate_disable_and_enable_parameters(namespace):
+def validate_defender_disable_and_enable_parameters(namespace):
     if namespace.disable_defender and namespace.enable_defender:
         raise ArgumentUsageError('Providing both --disable-defender and --enable-defender flags is invalid')
