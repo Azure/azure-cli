@@ -31,23 +31,20 @@ def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None
 def generate_sas(cmd, client, services, resource_types, permission, expiry, start=None,
                  ip=None, protocol=None, **kwargs):
     from azure.cli.core.azclierror import RequiredArgumentMissingError
-
-    try:
-        if not client.account_name or not client.credential or not client.credential.account_key:
-            error_msg = """
-            Missing/Invalid credentials to access storage service. The following variations are accepted:
-                (1) account name and key (--account-name and --account-key options or
-                    set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
-                (2) account name (--account-name option or AZURE_STORAGE_ACCOUNT environment variable;
-                    this will make calls to query for a storage account key using login credentials)
-                (3) connection string (--connection-string option or
-                    set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
-                    quoting to preserve literal character interpretation.
-            """
-            raise RequiredArgumentMissingError(error_msg)
-    except AttributeError:
-        if client.account_name:
-            client.credential.account_key = _query_account_key(cmd.cli_ctx, client.account_name)
+    if client.account_name:
+        client.credential.account_key = _query_account_key(cmd.cli_ctx, client.account_name)
+    if not client.account_name or not client.credential or not client.credential.account_key:
+        error_msg = """
+        Missing/Invalid credentials to access storage service. The following variations are accepted:
+            (1) account name and key (--account-name and --account-key options or
+                set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
+            (2) account name (--account-name option or AZURE_STORAGE_ACCOUNT environment variable;
+                this will make calls to query for a storage account key using login credentials)
+            (3) connection string (--connection-string option or
+                set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
+                quoting to preserve literal character interpretation.
+        """
+        raise RequiredArgumentMissingError(error_msg)
 
     t_account_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                             '_shared.shared_access_signature#SharedAccessSignature')
