@@ -1792,7 +1792,6 @@ def process_image_create_namespace(cmd, namespace):
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
-        # namespace.data_restore_points = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
                 source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
@@ -1803,8 +1802,6 @@ def process_image_create_namespace(cmd, namespace):
                     namespace.data_disks.append(source_disk)
                 if source_snapshot:
                     namespace.data_snapshots.append(source_snapshot)
-                # if source_restore_point:
-                #     namespace.data_restore_points.append(source_restore_point)
         if not namespace.os_type:
             raise CLIError("usage error: os type is required to create the image, "
                            "please specify '--os-type OS_TYPE'")
