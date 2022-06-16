@@ -162,7 +162,7 @@ def load_arguments(self, _):
                    arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
         c.argument('expand',
-                   help='Get the SQLIaaSExtension configuration settings. To view all settings, use *. To select only a few, the settings must be space-separted.',
+                   help='Get the SQLIaaSExtension configuration settings. To view all settings, use *. To select only a few, the settings must be space-separated.',
                    nargs='+',
                    validator=validate_expand,
                    arg_type=get_enum_type(['*', 'AssessmentSettings', 'AutoBackupSettings', 'AutoPatchingSettings', 'KeyVaultCredentialSettings', 'ServerConfigurationsManagementSettings']))
