@@ -577,7 +577,25 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if getattr(namespace, 'security_type', None):
         if namespace.security_type.lower() == 'confidentialvm' and namespace.os_disk_security_encryption_type is None:
             raise ArgumentUsageError('usage error: --os-disk-security-encryption-type is required'
-                                     ' when os is specified as ConfidentialVM')
+                                     ' when --security-type is specified as ConfidentialVM')
+        confidential_vm_sku = ['standard_dc2as_v5', 'standard_dc4as_v5', 'standard_dc8as_v5', 'standard_dc16as_v5',
+                               'standard_dc32as_v5', 'standard_dc48as_v5', 'standard_dc64as_v5', 'standard_dc96as_v5',
+                               'standard_dc2ads_v5', 'standard_dc4ads_v5', 'standard_dc8ads_v5', 'standard_dc16ads_v5',
+                               'standard_dc32ads_v5', 'standard_dc48ads_v5', 'standard_dc64ads_v5',
+                               'standard_dc96ads_v5', 'standard_ec2as_v5', 'standard_ec4as_v5', 'standard_ec8as_v5',
+                               'standard_ec16as_v5', 'standard_ec32as_v5', 'standard_ec48as_v5', 'standard_ec64as_v5',
+                               'standard_ec96as_v5', 'standard_ec2ads_v5', 'standard_ec4ads_v5', 'standard_ec8ads_v5',
+                               'standard_ec16ads_v5', 'standard_ec32ads_v5', 'standard_ec48ads_v5',
+                               'standard_ec64ads_v5', 'standard_ec96ads_v5',
+                               ]
+        if namespace.security_type.lower() == 'confidentialvm'and getattr(namespace, 'size', None):
+            if namespace.size.lower() not in confidential_vm_sku:
+                raise ArgumentUsageError('usage error: when --security-type is set to ConfidentialVM,'
+                                         ' the --size should be one of the following: {}'.format(confidential_vm_sku))
+        if namespace.security_type.lower() == 'confidentialvm'and getattr(namespace, 'vm_sku', None):
+            if namespace.vm_sku.lower() not in confidential_vm_sku:
+                raise ArgumentUsageError('usage error: when --security-type is set to ConfidentialVM,'
+                                         ' the --vm-sku should be one of the following: {}'.format(confidential_vm_sku))
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 

@@ -303,7 +303,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
-        os_disk_security_encryption_type=None, os_disk_securevm_disk_encryption_set=None):
+        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -494,11 +494,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 'id': os_disk_encryption_set,
             }
         if os_disk_security_encryption_type is not None:
+            if os_disk_security_encryption_type != 'DiskwithVMGuestState' and \
+                    os_disk_secure_vm_disk_encryption_set is not None:
+                raise InvalidArgumentValueError('The --os-disk-securevm-disk-encryption-set can only be passed in '
+                                                'when --os-disk-security-encryption-type is DiskwithVMGuestState')
             storage_profiles['ManagedPirImage']['osDisk']['managedDisk'].update({
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
@@ -506,7 +510,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
@@ -514,7 +518,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
@@ -522,7 +526,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
@@ -902,7 +906,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
-                        os_disk_securevm_disk_encryption_set=None):
+                        os_disk_secure_vm_disk_encryption_set=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -980,11 +984,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                 'id': os_disk_encryption_set
             }
         if os_disk_security_encryption_type is not None:
+            if os_disk_security_encryption_type != 'DiskwithVMGuestState' and \
+                    os_disk_secure_vm_disk_encryption_set is not None:
+                raise InvalidArgumentValueError('The --os-disk-securevm-disk-encryption-set can only be passed in '
+                                                'when --os-disk-security-encryption-type is DiskwithVMGuestState')
             storage_properties['osDisk']['managedDisk'].update({
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
@@ -1020,11 +1028,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                 'id': os_disk_encryption_set
             }
         if os_disk_security_encryption_type is not None:
+            if os_disk_security_encryption_type != 'DiskwithVMGuestState' and \
+                    os_disk_secure_vm_disk_encryption_set is not None:
+                raise InvalidArgumentValueError('The --os-disk-securevm-disk-encryption-set can only be passed in '
+                                                'when --os-disk-security-encryption-type is DiskwithVMGuestState')
             storage_properties['osDisk']['managedDisk'].update({
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
@@ -1043,11 +1055,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                 'id': os_disk_encryption_set
             }
         if os_disk_security_encryption_type is not None:
+            if os_disk_security_encryption_type != 'DiskwithVMGuestState' and \
+                    os_disk_secure_vm_disk_encryption_set is not None:
+                raise InvalidArgumentValueError('The --os-disk-securevm-disk-encryption-set can only be passed in '
+                                                'when --os-disk-security-encryption-type is DiskwithVMGuestState')
             storage_properties['osDisk']['managedDisk'].update({
                 'securityProfile': {
                     'securityEncryptionType': os_disk_security_encryption_type,
                     'diskEncryptionSet': {
-                        'id': os_disk_securevm_disk_encryption_set
+                        'id': os_disk_secure_vm_disk_encryption_set
                     }
                 }
             })
