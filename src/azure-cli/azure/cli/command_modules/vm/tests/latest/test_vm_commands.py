@@ -5250,8 +5250,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('uniqueId', '/CommunityGalleries/{public_name}')
         ])
 
-        self.cmd('sig image-definition show-community --gallery-image-definition {image} '
-                 '--public-gallery-name {public_name} --location {location}', checks=[
+        self.cmd('sig image-definition show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location {location}', checks=[
             self.check('location', '{location}'),
             self.check('name', '{image}'),
             self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}')
