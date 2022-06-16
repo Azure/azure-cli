@@ -6913,7 +6913,8 @@ class DiskEncryptionSetTest(ScenarioTest):
             'vault': self.create_random_name(prefix='vault-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des': self.create_random_name(prefix='des-', length=20),
-            'disk': self.create_random_name(prefix='disk-', length=20),
+            'disk1': self.create_random_name(prefix='d1-', length=20),
+            'disk2': self.create_random_name(prefix='d2-', length=20),
             'vm': self.create_random_name(prefix='vm1-', length=20),
             'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\')
         })
@@ -6951,7 +6952,14 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des_pattern': '.*/{}$'.format(self.kwargs['des']),
         })
 
-        self.cmd('disk create -g {rg} -n {disk} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --secure-vm-disk-encryption-set {des} --image-reference "MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest"', checks=[
+        # create disk with des name
+        self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --securevm-disk-encryption-set {des} --image-reference "MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest"', checks=[
+            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
+        ])
+
+        # create disk with des id
+        self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --securevm-disk-encryption-set {des} --image-reference "MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest"', checks=[
             self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
