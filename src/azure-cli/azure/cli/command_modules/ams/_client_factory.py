@@ -30,8 +30,6 @@ def _graph_client_factory(cli_ctx, **_):
     from azure.cli.core._profile import Profile
     from azure.cli.command_modules.role import graph_client_factory
     profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(  # pylint: disable=unused-variable
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     client = graph_client_factory(cli_ctx)
     return client
 
