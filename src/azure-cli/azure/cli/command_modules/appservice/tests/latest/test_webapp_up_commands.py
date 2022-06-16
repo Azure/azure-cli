@@ -1076,7 +1076,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertEqual(result['sku'].lower(), 'premiumv2')
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'node|16-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|14-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -1092,7 +1092,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|16-lts'),
+            JMESPathCheck('linuxFxVersion', 'NODE|14-lts'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -1144,7 +1144,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(linux_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'node|16-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|14-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full linux E2E operation works
@@ -1162,7 +1162,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|16-lts'),
+            JMESPathCheck('linuxFxVersion', 'NODE|14-lts'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
