@@ -296,7 +296,10 @@ class GraphClient:
 
 def _filter_to_query(filter):
     if filter is not None:
-        return "?$filter={}".format(filter)
+        # https://docs.microsoft.com/en-us/graph/query-parameters#encoding-query-parameters
+        # The values of query parameters should be percent-encoded.
+        from urllib.parse import quote
+        return "?$filter={}".format(quote(filter, safe=''))
     return ''
 
 
