@@ -372,7 +372,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
     encryption = None
-    if disk_encryption_set:
+    if disk_encryption_set or encryption_type:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
 
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
@@ -436,7 +436,7 @@ def list_managed_disks(cmd, resource_group_name=None):
     return client.disks.list()
 
 
-def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
+def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,  # pylint: disable=too-many-branches
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
                         disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
@@ -469,6 +469,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.disk_encryption_set_id = disk_encryption_set
     if encryption_type is not None:
         instance.encryption.type = encryption_type
+        if encryption_type != 'EncryptionAtRestWithCustomerKey':
+            instance.encryption.disk_encryption_set_id = None
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
     if disk_access is not None:
@@ -1909,7 +1911,9 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
+                                             resource_type=ResourceType.MGMT_COMPUTE,
+                                             operation_group='virtual_machines')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
@@ -3252,6 +3256,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 resource_group_name, vmss_name, vmss))
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
+            VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+            instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=['*'])
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
+                resource_group_name, vmss_name, instance_ids))
         except Exception as e:
             logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
 
@@ -4199,7 +4207,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
-                         replication_mode=None, target_region_cvm_encryption=None):
+                         replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
+                         image_version=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 

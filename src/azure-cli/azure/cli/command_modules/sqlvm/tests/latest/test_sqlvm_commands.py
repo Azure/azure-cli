@@ -3,30 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
-import os
-import unittest
-
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
-from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import (
+    RequiredArgumentMissingError
+)
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
     JMESPathCheck,
     JMESPathCheckExists,
-    JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    LiveScenarioTest,
-    record_only)
+    LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from datetime import datetime, timedelta
 from time import sleep
 
 
@@ -118,6 +111,69 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
 class SqlVmScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
+    @LogAnalyticsWorkspacePreparer(location="westus")
+    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
+        
+        # create sqlvm1 with minimal required parameters
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
+                 .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                 ])
+
+        # test assessment schedule enabling succeeds
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Assessment requires a Log Analytics workspace and Log Analytics extension on VM"):
+            self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
+
+        # test assessment schedule enabling succeeds
+        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 '--workspace-rg {} --workspace-name {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # verify assessment settings were processed
+        expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, 'AssessmentSettings')
+                              ).get_output_in_json()
+        assessment_settings = expand_all['assessmentSettings']
+        self.assertTrue(assessment_settings['enable'])
+        self.assertTrue(assessment_settings['schedule']['enable'])
+        self.assertEqual(1, assessment_settings['schedule']['weeklyInterval'])
+        self.assertEqual("Monday", assessment_settings['schedule']['dayOfWeek'])
+        self.assertEqual("20:30", assessment_settings['schedule']['startTimeLocal'])
+
+        # test start-assessment succeeds
+        self.cmd('sql vm start-assessment -n {} -g {}'
+                 .format(sqlvm, resource_group))
+
+        # verify start-assessment succeeded
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # test assessment disabling succeeds
+        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
+                 .format(sqlvm, resource_group, False),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+    @ResourceGroupPreparer()
+    @SqlVirtualMachinePreparer()
     @StorageAccountPreparer()
     def test_sqlvm_mgmt(self, resource_group, resource_group_location, sqlvm, storage_account):
 
@@ -131,7 +187,7 @@ class SqlVmScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
-        with self.assertRaisesRegex(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
             self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                      .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
 
@@ -260,40 +316,6 @@ class SqlVmScenarioTest(ScenarioTest):
         self.cmd('sql vm update -n {} -g {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-hour {} --full-backup-duration {} '
                  '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {}'
                  .format(sqlvm, resource_group, 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id'])
-                 ])
-
-        # test assessment schedule enabling succeeds
-        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {}'
-                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id'])
-                 ])
-
-        # test start-assessment succeeds
-        self.cmd('sql vm start-assessment -n {} -g {}'
-                 .format(sqlvm, resource_group))
-
-        # verify start-assessment succeeded
-        self.cmd('sql vm show -n {} -g {}'
-                 .format(sqlvm, resource_group),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id'])
-                 ])
-
-        # test assessment disabling succeeds
-        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
-                 .format(sqlvm, resource_group, False),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),
