@@ -190,3 +190,13 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('name', '{acc2_name}'),
             self.check('encryption.keySource', '{encryption}')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus')
+    def test_create_account_with_no_location(self):
+        self.kwargs.update({
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24)
+        })
+        self.cmd("az netappfiles account create -g {rg} -a {acc_name}")
+        self.cmd("az netappfiles account show --resource-group {rg} -a {acc_name}", checks=[
+            self.check('location', 'eastus')
+        ])
