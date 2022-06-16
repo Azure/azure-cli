@@ -588,11 +588,11 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                'standard_ec16ads_v5', 'standard_ec32ads_v5', 'standard_ec48ads_v5',
                                'standard_ec64ads_v5', 'standard_ec96ads_v5',
                                ]
-        if namespace.security_type.lower() == 'confidentialvm'and getattr(namespace, 'size', None):
+        if namespace.security_type.lower() == 'confidentialvm' and getattr(namespace, 'size', None):
             if namespace.size.lower() not in confidential_vm_sku:
                 raise ArgumentUsageError('usage error: when --security-type is set to ConfidentialVM,'
                                          ' the --size should be one of the following: {}'.format(confidential_vm_sku))
-        if namespace.security_type.lower() == 'confidentialvm'and getattr(namespace, 'vm_sku', None):
+        if namespace.security_type.lower() == 'confidentialvm' and getattr(namespace, 'vm_sku', None):
             if namespace.vm_sku.lower() not in confidential_vm_sku:
                 raise ArgumentUsageError('usage error: when --security-type is set to ConfidentialVM,'
                                          ' the --vm-sku should be one of the following: {}'.format(confidential_vm_sku))
