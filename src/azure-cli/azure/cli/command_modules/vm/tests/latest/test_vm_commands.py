@@ -7774,6 +7774,22 @@ class DiskRPTestScenario(ScenarioTest):
             self.check_pattern('completionPercent', '\d?.\d?')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')
+    def test_snapshot_incremental(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+            'snapshot1': self.create_random_name('snap', 10),
+        })
+
+        self.cmd('disk create -n {disk} -g {rg} --size-gb 10')
+        self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
+            self.check('creationData.createOption', 'Copy')
+        ])
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {snapshot} --incremental true -l eastus2euap', checks=[
+            self.check('creationData.createOption', 'CopyStart')
+        ])
+
 
 class RestorePointScenarioTest(ScenarioTest):
 

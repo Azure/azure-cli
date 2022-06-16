@@ -1743,7 +1743,8 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                 if not namespace.location:
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
-                namespace.copy_start = source_info.location != namespace.location
+                if namespace.incremental:
+                    namespace.copy_start = source_info.location != namespace.location
         except HttpResponseError:
             raise CLIError(usage_error)
 
