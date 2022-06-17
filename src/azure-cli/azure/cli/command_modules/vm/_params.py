@@ -166,7 +166,7 @@ def load_arguments(self, _):
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
             c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
-            c.argument('securevm_disk_encryption_set', help='Name or ID of disk encryption set created with ConfidentialVmEncryptedWithCustomerKey encryption type.')
+            c.argument('secure_vm_disk_encryption_set', options_list=['--securevm-disk-encryption-set'], help='Name or ID of disk encryption set created with ConfidentialVmEncryptedWithCustomerKey encryption type.')
     # endregion
 
     # region Disks

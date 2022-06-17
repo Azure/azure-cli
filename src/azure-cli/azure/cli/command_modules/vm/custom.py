@@ -378,13 +378,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         if security_type.lower()[:15] == 'confidentialvm_' and not hyper_v_generation.lower() == 'v2':
             raise ArgumentUsageError('usage error: --security-type should be ConfidentialVM_* ONLY if --hyper-v-generation is set to V2')
 
-    if securevm_disk_encryption_set is not None:
+    if secure_vm_disk_encryption_set is not None:
         if not security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
             raise ArgumentUsageError('usage error: --securevm-disk-encryption-set is mandatory and required only when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
-        if not is_valid_resource_id(securevm_disk_encryption_set):
-            securevm_disk_encryption_set = resource_id(
+        if not is_valid_resource_id(secure_vm_disk_encryption_set):
+            secure_vm_disk_encryption_set = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                namespace='Microsoft.Compute', type='diskEncryptionSets', name=securevm_disk_encryption_set)
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=secure_vm_disk_encryption_set)
 
     encryption = None
     if disk_encryption_set or encryption_type:
@@ -420,8 +420,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.extended_location = edge_zone
     if security_type:
         disk.security_profile = {'securityType': security_type}
-    if securevm_disk_encryption_set:
-        disk.security_profile['secure_vm_disk_encryption_set_id'] = securevm_disk_encryption_set
+    if secure_vm_disk_encryption_set:
+        disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
     if support_hibernation is not None:
         disk.supports_hibernation = support_hibernation
     if public_network_access is not None:
