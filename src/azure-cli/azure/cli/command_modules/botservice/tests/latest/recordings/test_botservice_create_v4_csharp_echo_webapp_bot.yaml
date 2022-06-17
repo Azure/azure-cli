@@ -25,7 +25,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Fri, 17 Jun 2022 07:18:12 GMT
+      - Fri, 17 Jun 2022 09:40:19 GMT
       expires:
       - '-1'
       pragma:
@@ -35,8 +35,109 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14997'
     status:
       code: 204
       message: No Content
+- request:
+    body: '{"name": "cli000002", "type": "azurebot"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --appid --app-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"valid":true,"message":"","absCode":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '42'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jun 2022 09:40:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global", "sku": {"name": "F0"}, "kind": "azurebot", "properties":
+      {"displayName": "cli000002", "endpoint": "", "msaAppType": "MultiTenant", "msaAppId":
+      "9e732a1b-d096-4897-9af2-9833a528f049", "isCmekEnabled": false, "publicNetworkAccess":
+      "Enabled", "isStreamingSupported": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '295'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --appid --app-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"fd03e2d1-0000-0800-0000-62ac4c0f0000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.scratch.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"","msaAppId":"9e732a1b-d096-4897-9af2-9833a528f049","msaAppTenantId":null,"msaAppType":"MultiTenant","msaAppMSIResourceId":null,"developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"33e01921-4d64-4f8c-a055-5bdaffd5e33d","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1322'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jun 2022 09:40:33 GMT
+      etag:
+      - '"fd03e2d1-0000-0800-0000-62ac4c0f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
 version: 1

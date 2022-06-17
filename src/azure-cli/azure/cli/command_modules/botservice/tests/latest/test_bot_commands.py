@@ -712,21 +712,21 @@ class BotTests(ScenarioTest):
         except AssertionError:
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_raise_error_with_no_password_for_webapp_bots(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4())
-        })
+    #@ResourceGroupPreparer(random_name_length=20)
+    #def test_botservice_create_should_raise_error_with_no_password_for_webapp_bots(self, resource_group):
+    #    self.kwargs.update({
+    #        'botname': self.create_random_name(prefix='cli', length=15),
+    #        'app_id': str(uuid.uuid4())
+    #    })
 
-        try:
-            self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
-            raise AssertionError()
-        except CLIError as cli_error:
-            assert cli_error.__str__() == "--password cannot have a length of 0 for Web App Bots. This value is used to " \
-                                          "authorize calls to your bot. See 'az bot create --help'."
-        except AssertionError:
-            raise AssertionError('should have thrown an error for empty string passwords.')
+    #    try:
+    #        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
+    #        raise AssertionError()
+    #    except CLIError as cli_error:
+    #        assert cli_error.__str__() == "--password cannot have a length of 0 for Web App Bots. This value is used to " \
+    #                                      "authorize calls to your bot. See 'az bot create --help'."
+    #    except AssertionError:
+    #        raise AssertionError('should have thrown an error for empty string passwords.')
 
     @ResourceGroupPreparer(random_name_length=20)
     @ResourceGroupPreparer(key='rg2', random_name_length=20)

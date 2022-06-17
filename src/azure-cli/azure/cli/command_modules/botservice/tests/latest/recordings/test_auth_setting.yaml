@@ -1,5 +1,107 @@
 interactions:
 - request:
+    body: '{"name": "cli000002", "type": "azurebot"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -e --app-type --appid
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"valid":true,"message":"","absCode":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '42'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jun 2022 09:40:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global", "sku": {"name": "F0"}, "kind": "azurebot", "properties":
+      {"displayName": "cli000002", "endpoint": "https://www.google.com/api/messages",
+      "msaAppType": "MultiTenant", "msaAppId": "e7f8945d-cd05-4322-b2f2-8f5bfaed88a1",
+      "isCmekEnabled": false, "publicNetworkAccess": "Enabled", "isStreamingSupported":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '330'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -e --app-type --appid
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"e1025a4f-0000-0800-0000-62ac4c0d0000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.scratch.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"e7f8945d-cd05-4322-b2f2-8f5bfaed88a1","msaAppTenantId":null,"msaAppType":"MultiTenant","msaAppMSIResourceId":null,"developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"33e01921-4d64-4f8c-a055-5bdaffd5e33d","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1357'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jun 2022 09:40:31 GMT
+      etag:
+      - '"e1025a4f-0000-0800-0000-62ac4c0d0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
+- request:
     body: null
     headers:
       Accept:
@@ -7,11 +109,13 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - bot authsetting list-providers
+      - bot authsetting create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -g -n --client-id --client-secret --provider-scope-string --service -c
       User-Agent:
       - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: POST
@@ -303,7 +407,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 17 Jun 2022 09:40:18 GMT
+      - Fri, 17 Jun 2022 09:40:33 GMT
       expires:
       - '-1'
       pragma:
@@ -317,7 +421,109 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global", "properties": {"clientId": "clientid", "clientSecret":
+      "secret", "scopes": "scope1 scope2", "serviceProviderId": "01340562-8c8f-4892-abd4-90daf0e5face",
+      "parameters": []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot authsetting create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '194'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --client-id --client-secret --provider-scope-string --service -c
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/connections/myconnname?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/connections/myconnname","name":"cli000002/myconnname","type":"Microsoft.BotService/botServices/connections","etag":"W/\"f4097786daa27a7c5e94441344b3537d6/17/2022
+        9:40:36 AM\"","location":"global","properties":{"settingId":"1be9ad59-34eb-eae1-ab04-3258a3a41508_195dcb3a-899a-00df-6192","clientId":"clientid","clientSecret":"secret","scopes":"scope1
+        scope2","serviceProviderId":"01340562-8c8f-4892-abd4-90daf0e5face","serviceProviderDisplayName":"Google","parameters":[{"key":"clientId","value":"clientid"},{"key":"clientSecret","value":"secret"},{"key":"scopes","value":"scope1
+        scope2"}],"provisioningState":"Succeeded"},"zones":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '775'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jun 2022 09:40:36 GMT
+      etag:
+      - W/"f4097786daa27a7c5e94441344b3537d6/17/2022 9:40:36 AM"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1191'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot authsetting show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -c -g -n
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/connections/myconnname?api-version=2021-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/connections/myconnname","name":"cli000002/myconnname","type":"Microsoft.BotService/botServices/connections","etag":"W/\"646af453e4e25b49b83c8aa28816242b6/17/2022
+        9:40:38 AM\"","location":"global","tags":{},"properties":{"settingId":"1be9ad59-34eb-eae1-ab04-3258a3a41508_195dcb3a-899a-00df-6192","clientId":"clientid","clientSecret":null,"scopes":"scope1
+        scope2","serviceProviderId":"01340562-8c8f-4892-abd4-90daf0e5face","serviceProviderDisplayName":"Google","parameters":[{"key":"clientId","value":"clientid"},{"key":"clientSecret","value":null},{"key":"scopes","value":"scope1
+        scope2"}],"provisioningState":"Succeeded"},"zones":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '777'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jun 2022 09:40:38 GMT
+      etag:
+      - W/"646af453e4e25b49b83c8aa28816242b6/17/2022 9:40:38 AM"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -329,305 +535,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - bot authsetting list-providers
+      - bot authsetting list
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
       ParameterSetName:
-      - --provider-name
+      - -n -g
       User-Agent:
       - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BotService/listAuthServiceProviders?api-version=2021-05-01-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/connections?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"id":"00ea67de-bfc6-4f45-9ede-083899596b7b","displayName":"Wunderlist","serviceProviderName":"wunderlist","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"01340562-8c8f-4892-abd4-90daf0e5face","displayName":"Google","serviceProviderName":"google","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"05a2de0b-ca79-456d-835f-bebef60a18fd","displayName":"Pinterest","serviceProviderName":"pinterest","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"0ea750dc-3d8f-4093-874d-ab68298299d4","displayName":"appFigures","serviceProviderName":"appFigures","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
-        Key (API Key)","description":"The id used to identify this application with
-        the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
-        Secret (API Secret)","description":"The shared secret used to authenticate
-        this application with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"0f1a8ee8-cb00-4b10-97db-045c404a239f","displayName":"Facebook","serviceProviderName":"facebook","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"26311afb-ebf0-49fa-90a3-a0a0366923f7","displayName":"Skype
-        For Business","serviceProviderName":"SkypeForBusiness","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The client ID of the AAD application with permissions to
-        the Skype tenant.","helpUrl":null,"default":null,"metadata":null},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The client secret of the AAD application with permissions
-        to the Skype tenant.","helpUrl":null,"default":null,"metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URI","description":"The URI for the discovery endpoint. Need an AAD token
-        to access this endpoint.","helpUrl":"https://msdn.microsoft.com/en-us/skype/ucwa/authenticationusingazuread","default":"https://webdir.online.lync.com/","metadata":null},{"name":"LoginUriAAD","type":"string","displayName":"Login
-        URI for AAD","description":"The URI for the AAD login endpoint.","helpUrl":null,"default":"https://login.microsoftonline.com","metadata":null}]}},{"properties":{"id":"29d6ab23-bb51-4e91-a010-d38c1e30d1c4","displayName":"Outlook","serviceProviderName":"outlook","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"307d995f-f1ce-4918-bd3f-037685e9d241","displayName":"SharePoint
-        Online","serviceProviderName":"SharePointOnline","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"GrantType","type":"string","displayName":"Grant
-        Type","description":"Oauth2 grant type to use.","helpUrl":null,"default":"Code","metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.windows.net","metadata":null},{"name":"DiscoveryUri","type":"string","displayName":"Discovery
-        URL","description":"The Sharepoint Online Azure Active Directory discovery
-        URL.","helpUrl":null,"default":"https://api.office.com/discovery/","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Capability","type":"string","displayName":"Capability","description":"Resource
-        for which AccessToken needs to be obtained.","helpUrl":"http://msdn.microsoft.com/en-us/office/office365/howto/discover-service-endpoints","default":"RootSite","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906c","displayName":"Azure
-        Active Directory v2","serviceProviderName":"Aadv2","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenExchangeUrl","type":"string","displayName":"Token
-        Exchange URL","description":"The Azure Active Directory v2 URL to use for
-        Single Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null}]}},{"properties":{"id":"ab4c00b4-516e-44cc-a6f2-2bcf5ed5b158","displayName":"AAD
-        v2 with Certificates (Preview)","serviceProviderName":"Aadv2WithCerts","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientCertificateUrl","type":"string","displayName":"Client
-        Certificate KeyVault Url","description":"Keyvault URL to the certificate used
-        as a secret to authenticate this application to the service provider.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenExchangeUrl","type":"string","displayName":"Token
-        Exchange URL","description":"The Azure Active Directory v2 URL to use for
-        Single Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.microsoftonline.com","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Isx5cRequired","type":"string","displayName":"Is
-        x5c Claim Required (set to true/false)","description":"Is the x5c claim required
-        in token. Required for first party apps.","helpUrl":null,"default":"false","metadata":null}]}},{"properties":{"id":"ef1df3aa-d421-46ee-8e3b-984cb7d83e49","displayName":"FactSet","serviceProviderName":"FactSet","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientCertificateUrl","type":"string","displayName":"Client
-        Certificate KeyVault Url","description":"Keyvault URL to the certificate used
-        as a secret to authenticate this application to the service provider.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"AuthorizationUri","type":"string","displayName":"Authorization
-        Endpoint Url","description":"The factset authorization url.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenUri","type":"string","displayName":"Token
-        Endpoint Url","description":"The factset token url.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"38b67016-73e2-4102-9fad-e348607cc800","displayName":"LinkedIn","serviceProviderName":"linkedin","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"407d4275-4e43-4fc9-b179-a1022492fa23","displayName":"Trello","serviceProviderName":"trello","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
-        Key (API Key)","description":"The id used to identify this application with
-        the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
-        Secret (API Secret)","description":"The shared secret used to authenticate
-        this application with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ApplicationDisplayName","type":"string","displayName":"Application
-        Display Name","description":"The name of the application showed during authorization","helpUrl":null,"default":"Unnamed
-        Application","metadata":null}]}},{"properties":{"id":"42525a7c-c853-4d4e-9032-deaa67f3de8e","displayName":"Sharepoint
-        Server","serviceProviderName":"SharepointServer","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.windows.net","metadata":null},{"name":"ResourceUri","type":"string","displayName":"ResourceUri","description":"The
-        resource URI for AAD.","helpUrl":null,"default":null,"metadata":null},{"name":"TenantId","type":"string","displayName":"TenantId","description":"The
-        AAD tenant ID for this application.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"4b5c96f6-cca7-4048-bfd2-53e850a183f1","displayName":"Generic
-        Oauth 2","serviceProviderName":"oauth2","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"AuthorizationUrl","type":"string","displayName":"Authorization
-        URL","description":"The authorization endpoint URL","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenUrl","type":"string","displayName":"Token
-        URL","description":"The token endpoint URL","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"RefreshUrl","type":"string","displayName":"Refresh
-        URL","description":"The token refresh endpoint URL","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenExchangeUrl","type":"string","displayName":"Token
-        Exchange URL","description":"The Azure Active Directory v2 URL to use for
-        Single Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"4b7816ab-ea29-487a-96a5-1918b5661d8e","displayName":"Slack","serviceProviderName":"slack","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"4f349199-7980-48f0-9b1b-282347f5de2a","displayName":"Zendesk","serviceProviderName":"zendesk","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"SubDomain","type":"string","displayName":"Subdomain","description":"The
-        subdomain name used to identify the Zendesk Site URL","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
-        Secret (API Secret)","description":"The shared secret used to authenticate
-        this application with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"51dd6264-6d45-4e46-b720-5ff7e8c28873","displayName":"Dynamics
-        CRM Online","serviceProviderName":"DynamicsCrmOnline","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"GrantType","type":"string","displayName":"Grant
-        Type","description":"Oauth2 grant type to use.","helpUrl":null,"default":"Code","metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.windows.net","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"ResourceUriAAD","type":"string","displayName":"Resource
-        URL","description":"The Azure Active Directory discovery URL.","helpUrl":null,"default":"https://api.office.com/discovery/","metadata":null},{"name":"DiscoveryUri","type":"string","displayName":"Full
-        Discovery URL","description":"TEST ONLY discovery URL. This isn''t needed
-        for this setting to function.","helpUrl":null,"default":"about:blank","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"5232e24f-b6c6-4920-b09d-d93a520c92e9","displayName":"Azure
-        Active Directory","serviceProviderName":"Aad","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"GrantType","type":"string","displayName":"Grant
-        Type","description":"Oauth2 grant type to use.","helpUrl":null,"default":"Code","metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.windows.net","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"549dcd43-e619-4a19-8bb1-83524a472646","displayName":"Smartsheet","serviceProviderName":"smartsheet","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"58189554-6279-4b11-97c8-e3d8245da5ef","displayName":"Flickr","serviceProviderName":"flickr","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"6587ef92-9050-4699-832a-a263aed32448","displayName":"Office
-        365 (Discovery)","serviceProviderName":"Office365","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"GrantType","type":"string","displayName":"Grant
-        Type","description":"Oauth2 grant type to use.","helpUrl":null,"default":"Code","metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.windows.net","metadata":null},{"name":"DiscoveryUri","type":"string","displayName":"Discovery
-        URL","description":"The Office365 Azure Active Directory discovery URL.","helpUrl":null,"default":"https://api.office.com/discovery/","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Capability","type":"string","displayName":"Capability","description":"Resource
-        for which AccessToken needs to be obtained.","helpUrl":"http://msdn.microsoft.com/en-us/office/office365/howto/discover-service-endpoints","default":"Contacts","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"65d314ec-3b66-4021-b2c9-6d8c2f7148ff","displayName":"OneDrive","serviceProviderName":"onedrive","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"68d0136a-6396-41d8-9dbf-1b2843ed1ff7","displayName":"Basecamp","serviceProviderName":"basecamp","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"6b6010fd-266b-492a-b150-c87b9bad7339","displayName":"Instagram","serviceProviderName":"instagram","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"6b9e493f-950f-4451-85d6-0fc7c0f2c9b1","displayName":"MailChimp","serviceProviderName":"mailchimp","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"719a075e-37f9-4c6b-9633-e6167c12536e","displayName":"Office
-        365","serviceProviderName":"Office365User","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The Active Active Directory client ID","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The Azure Active Directory secret","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"LoginUri","type":"string","displayName":"Login
-        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.windows.net","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
-        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The Azure Active Directory resource URL.","helpUrl":null,"default":"https://graph.microsoft.com","metadata":null}]}},{"properties":{"id":"7be3563f-3072-4846-ad8f-09e5fa685c65","displayName":"Adobe
-        EchoSign","serviceProviderName":"echosign","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"7dda6125-c4c2-4591-96c9-cf7ab657dcf6","displayName":"Live","serviceProviderName":"live","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"8379c6d2-b262-4d4f-b89b-68dc5b5f5482","displayName":"Oauth
-        2 Generic Provider","serviceProviderName":"oauth2generic","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ScopeListDelimiter","type":"string","displayName":"Scope
-        List Delimiter","description":"Character to delimit the scope list","helpUrl":null,"default":"
-        ","metadata":{"constraints":{"required":true}}},{"name":"AuthorizationUrlTemplate","type":"string","displayName":"Authorization
-        URL Template","description":"The authorization endpoint URL. Example: https://login.acme.com/oauth2/authorize","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"AuthorizationUrlQueryStringTemplate","type":"string","displayName":"Authorization
-        URL Query String Template","description":"The authorization endpoint URL query
-        string. Example: ?client_id={ClientId}&response_type=code&redirect_uri={RedirectUrl}&scope={Scopes}&state={State}","helpUrl":null,"default":"?client_id={ClientId}&response_type=code&redirect_uri={RedirectUrl}&scope={Scopes}&state={State}","metadata":{"constraints":{"required":true}}},{"name":"TokenUrlTemplate","type":"string","displayName":"Token
-        URL Template","description":"The token conversion endpoint URL. Example value
-        would be https://api.acme.com/oauth2/token","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenUrlQueryStringTemplate","type":"string","displayName":"Token
-        URL Query String Template","description":"The token conversion endpoint URL
-        query string. Example: ?client_secret={ClientSecret}","helpUrl":null,"default":"","metadata":{"constraints":{"required":true}}},{"name":"TokenBodyTemplate","type":"string","displayName":"Token
-        Body Template","description":"The token conversion body.","helpUrl":null,"default":"code={Code}&grant_type=authorization_code&redirect_uri={RedirectUrl}&client_id={ClientId}&client_secret={ClientSecret}","metadata":{"constraints":{"required":true}}},{"name":"RefreshUrlTemplate","type":"string","displayName":"Refresh
-        URL Template","description":"The token refresh endpoint URL. Example value
-        would be https://api.acme.com/oauth2/token","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"RefreshUrlQueryStringTemplate","type":"string","displayName":"Refresh
-        URL Query String Template","description":"The token refresh endpoint URL query
-        string. Example: ?client_secret={ClientSecret}","helpUrl":null,"default":"","metadata":{"constraints":{"required":true}}},{"name":"RefreshBodyTemplate","type":"string","displayName":"Refresh
-        Body Template","description":"The token refresh body","helpUrl":null,"default":"refresh_token={RefreshToken}&grant_type=refresh_token&client_id={ClientId}&client_secret={ClientSecret}","metadata":{"constraints":{"required":true}}},{"name":"TokenExchangeUrl","type":"string","displayName":"Token
-        Exchange URL","description":"The Azure Active Directory v2 URL to use for
-        Single Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"900b8f4a-9cb3-420d-85df-ba9f8f285c20","displayName":"Spotify","serviceProviderName":"spotify","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"979935d1-226c-4ed0-95c6-f13c0ac7e1c4","displayName":"Tumblr","serviceProviderName":"tumblr","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"99b51571-bd21-4124-abf2-1ef32c90cb07","displayName":"AWeber","serviceProviderName":"AWeber","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
-        Key (API Key)","description":"The id used to identify this application with
-        the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
-        Secret (API Secret)","description":"The shared secret used to authenticate
-        this application with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"a5e55046-6a2e-446e-8d5e-4b61cca91968","displayName":"Marketo","serviceProviderName":"marketo","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"BaseUrl","type":"string","displayName":"BaseUrl","description":"Marketo
-        Instance BaseUrl","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"b7e2a8c4-ce26-4a94-aeeb-f203ed505fa4","displayName":"DropBox","serviceProviderName":"dropbox","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"b8491b1f-e709-4c3d-8339-5ba2182b46ee","displayName":"Box","serviceProviderName":"box","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"bb097393-2a3c-4048-b3c6-1ce9fa90a537","displayName":"Yammer","serviceProviderName":"yammer","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"bb1dc32d-85e0-4607-a511-bc77ddd414b7","displayName":"Quickbooks","serviceProviderName":"intuit","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"bcdbb5a4-d571-473b-9821-0e969a044f7d","displayName":"UserVoice","serviceProviderName":"uservoice","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"SubDomain","type":"string","displayName":"UserVoice
-        site Subdomain name","description":"The subdomain name used to identify the
-        UserVoice Site URL","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientId","type":"string","displayName":"Consumer
-        Key (API Key)","description":"The id used to identify this application with
-        the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
-        Secret (API Secret)","description":"The shared secret used to authenticate
-        this application with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"bf58b8fb-74ea-4a84-8e68-03573ac9be2a","displayName":"Salesforce","serviceProviderName":"salesforce","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"LoginUri","type":"string","displayName":"Login
-        URL to be used","description":null,"helpUrl":null,"default":"https://login.salesforce.com","metadata":null}]}},{"properties":{"id":"c676c4c4-e36b-46b2-9ff0-027a50c4e53f","displayName":"Todoist","serviceProviderName":"todoist","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"d05eaacf-1593-4603-9c6c-d4d8fffa46cb","displayName":"GitHub","serviceProviderName":"github","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"e39b675b-2e60-4c7c-80da-ed69d6fe2dbc","displayName":"DocuSign","serviceProviderName":"docusign","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"LoginUri","type":"string","displayName":"Login
-        URL to be used","description":null,"helpUrl":null,"default":"https://account.docusign.com","metadata":null}]}},{"properties":{"id":"e3b751a6-87f2-42df-8ccb-7bfad739c68e","displayName":"Stripe","serviceProviderName":"stripe","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"ef5d1787-3321-4a0a-b3d2-cdfe73a2f81d","displayName":"Bitly","serviceProviderName":"bitly","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"f2c897ca-64ed-4e5a-9985-00b6e29eb0ef","displayName":"Lithium","serviceProviderName":"lithium","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"LoginUrl","type":"string","displayName":"Community
-        URL to use","description":null,"helpUrl":null,"default":"https://lithium.com","metadata":null},{"name":"ApiUrl","type":"string","displayName":"API
-        URL to use","description":null,"helpUrl":null,"default":"https://api.lithium.com","metadata":null}]}},{"properties":{"id":"fe787ac8-1611-4192-9d8c-4b2c6bb8a533","displayName":"SugarCRM","serviceProviderName":"sugarcrm","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
-        id","description":"The id used to identify this application with the service
-        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
-        secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"InstanceName","type":"string","displayName":"InstanceName","description":"Sugar
-        CRM Site InstanceName","helpUrl":null,"default":null,"metadata":null}]}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/connections/myconnname","name":"cli000002/myconnname","type":"Microsoft.BotService/botServices/connections","etag":"W/\"a0360fd3cf18479c44662ece370274f96/17/2022
+        9:40:40 AM\"","location":"global","tags":{},"properties":{"serviceProviderDisplayName":"Google","id":"1be9ad59-34eb-eae1-ab04-3258a3a41508_195dcb3a-899a-00df-6192","name":"myconnname","serviceProviderId":"01340562-8c8f-4892-abd4-90daf0e5face","provisioningState":"Succeeded"},"zones":[]}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '43002'
+      - '605'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 17 Jun 2022 09:40:20 GMT
+      - Fri, 17 Jun 2022 09:40:39 GMT
       expires:
       - '-1'
       pragma:
@@ -640,8 +569,6 @@ interactions:
       - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
     status:
       code: 200
       message: OK
