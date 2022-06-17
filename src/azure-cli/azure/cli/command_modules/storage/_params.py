@@ -1868,14 +1868,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file download') as c:
         c.register_path_argument()
-        c.argument('file_path', options_list=('--dest',), type=file_type, required=False,
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('destination_path', options_list=('--dest',), type=file_type, required=False,
                    help='Path of the file to write to. The source filename will be used if not specified.',
-                   validator=process_file_download_namespace, completer=FilesCompleter())
-        c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
+                   completer=FilesCompleter())
         c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int)
-        c.argument('start_range', type=int)
-        c.argument('end_range', type=int)
+        c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
+        c.extra('start_range', type=int, help='Start of byte range to use for downloading a section of the file. '
+                                              'If no --end-range is given, all bytes after the --start-range will be '
+                                              'downloaded. The --start-range and --end-range params are inclusive. Ex: '
+                                              '--start-range=0, --end-range=511 will download first 512 bytes of file.')
+        c.extra('end_range', type=int, help='End of byte range to use for downloading a section of the file. If '
+                                            '--end-range is given, --start-range must be provided. The --start-range '
+                                            'and --end-range params are inclusive. Ex: --start-range=0, '
+                                            '--end-range=511 will download first 512 bytes of file.')
+        c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.argument('open_mode', help="Mode to use when opening the file. Note that specifying append only "
+                                  "open_mode prevents parallel download. So, --max-connections must be "
+                                  "set to 1 if this --open-mode is used.")
+        c.extra('validate_content', help="If set to true, validates an MD5 hash for each retrieved portion of the file."
+                                         " This is primarily valuable for detecting bitflips on the wire if using "
+                                         "http instead of https as https (the default) will already validate. "
+                                         "As computing the MD5 takes processing time and more requests will "
+                                         "need to be done due to the reduced chunk size there may be some increase "
+                                         "in latency.")
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()

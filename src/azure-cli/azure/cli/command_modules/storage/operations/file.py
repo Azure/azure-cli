@@ -208,6 +208,36 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
     return list(_upload_action(src, dst) for src, dst in source_files)
 
 
+def download_file(client, destination_path=None, timeout=None, max_connections=2, open_mode='wb', **kwargs):
+    from azure.cli.command_modules.storage.util import glob_files_remotely, mkdir_p
+    destination_folder = os.path.dirname(destination_path) if destination_path else ""
+    if destination_folder and not os.path.exists(destination_folder):
+        mkdir_p(destination_folder)
+
+    if not destination_folder or os.path.isdir(destination_path):
+        file = client.get_file_properties(timeout=timeout)
+        file_name = file.name.split("/")[-1]
+        destination_path = os.path.join(destination_path, file_name) \
+            if destination_path else file_name
+
+    kwargs.pop('progress_callback')
+
+    properties = None
+
+    with open(destination_path, open_mode) as stream:
+        offset = kwargs.pop('start_range', None)
+        end_range = kwargs.pop('end_range', None)
+        length = None
+        if offset and end_range:
+            length = end_range-offset+1
+        download = client.download_file(offset=offset, length=length, timeout=timeout,
+                                        max_concurrency=max_connections, **kwargs)
+        properties = download.properties
+        download_content = download.readall()
+        stream.write(download_content)
+    return client.get_file_properties()
+
+
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
                                 max_connections=1, progress_callback=None, snapshot=None):
     """

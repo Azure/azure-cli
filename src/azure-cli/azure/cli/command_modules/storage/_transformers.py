@@ -489,3 +489,10 @@ def transform_file_show_result(result):
     }
     new_result.update(result)
     return new_result
+
+
+def transform_file_download(result):
+    if result.content_settings and result.content_settings.content_md5:
+            result.content_settings.content_md5 = result.content_settings.content_md5.decode(error='ignore')
+    result = transform_file_show_result(result)
+    return result
