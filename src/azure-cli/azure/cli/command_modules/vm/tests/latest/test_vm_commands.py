@@ -2464,7 +2464,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
                  '--storage-sku os=Premium_LRS 0=PremiumV2_LRS --data-disk-sizes-gb 4 --zone 1 --nsg-rule NONE')
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku PremiumV2_LRS --zone 1')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
-        # self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 4 --sku PremiumV2_LRS')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
