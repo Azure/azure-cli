@@ -99,6 +99,18 @@ def load_command_table(self, _):
         g.custom_command('credential list', 'list_application_credentials')
         g.custom_command('credential delete', 'delete_application_credential')
 
+    # Register federated-credential command group under both app and sp.
+    # We use federated-credential instead of federated-identity-credential or fic, in order to align with
+    # Azure Portal.
+    # It seems sp doesn't work with federatedIdentityCredentials yet.
+    # for item in ['app', 'sp']:
+    for item in ['app']:
+        with self.command_group(f'ad {item} federated-credential',
+                                client_factory=get_graph_client, resource_type=PROFILE_TYPE,
+                                exception_handler=graph_err_handler, is_experimental=True) as g:
+            for command in ['list', 'create', 'show', 'update', 'delete']:
+                g.custom_command(command, f'{item}_federated_credential_{command}')
+
     with self.command_group('ad app owner', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_application_owners')
         g.custom_command('add', 'add_application_owner')
