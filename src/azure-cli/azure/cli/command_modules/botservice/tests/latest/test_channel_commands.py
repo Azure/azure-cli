@@ -20,7 +20,7 @@ class ChannelTests(ScenarioTest):
             'location': location
         })
 
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id} -p {password} -l {location}', checks=[
+        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --app-type MultiTenant --appid {app_id} -p {password} -l {location}', checks=[
             self.check('name', '{botname}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{location}')

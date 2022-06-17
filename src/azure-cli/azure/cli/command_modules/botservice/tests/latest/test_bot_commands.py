@@ -107,7 +107,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant'
-            '--tags key1=value1',
+            ' --tags key1=value1',
             checks=[
                 self.check('name', '{botname}'),
                 self.check('properties.description', '{description}'),
@@ -142,7 +142,7 @@ class BotTests(ScenarioTest):
 
             self.cmd(
                 'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}  --app-type MultiTenant'
-                '--tags key1=value1 -l {location}',
+                ' --tags key1=value1 -l {location}',
                 checks=[
                     self.check('name', '{botname}'),
                     self.check('properties.description', '{description}'),
