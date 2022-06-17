@@ -22,17 +22,17 @@ from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-class CredentialReplacer(RecordingProcessor):
+class RedisCacheCredentialReplacer(RecordingProcessor):
     def process_response(self, response):
         import json
-        fake_data = "****"
-        sensitive_data = "accessKeys"
+        KEY_REPLACEMENT = "replaced-access-key"
+
         if is_text_payload(response) and response["body"]["string"]:
             try:
                 props = json.loads(response["body"]["string"])
-                if sensitive_data in props["properties"]:
-                    del props["properties"][sensitive_data]
-                    props["properties"][fake_data] = fake_data
+                if "accessKeys" in props["properties"]:
+                    props["properties"]["accessKeys"]["primaryKey"] = KEY_REPLACEMENT
+                    props["properties"]["accessKeys"]["secondaryKey"] = KEY_REPLACEMENT
                 response["body"]["string"] = json.dumps(props)
             except (TypeError, KeyError):
                 pass
@@ -2665,7 +2665,7 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super().__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[RedisCacheCredentialReplacer()]
         )
 
     @ResourceGroupPreparer(name_prefix='cli_test_acfr_plr')
