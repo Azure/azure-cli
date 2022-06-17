@@ -5281,13 +5281,11 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
-    @ResourceGroupPreparer(location='CentralUSEUAP')
+    @ResourceGroupPreparer(location='eastus2')
     def test_create_vm_with_community_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
             'vm_with_community_gallery': self.create_random_name('vm_sg', 16),
-            'vm_with_community_gallery_version': self.create_random_name('vm_sgv', 16),
-            'vm_with_community_gallery_version2': self.create_random_name('vm_sgv2', 16),
             'vmss_with_community_gallery_version': self.create_random_name('vmss', 16),
             'gallery': self.create_random_name('gellery', 16),
             'image': self.create_random_name('image', 16),
@@ -5307,27 +5305,24 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
         self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
 
-        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location {location} --gallery-image-version {version}',
+        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} -l eastus2 --gallery-image-version {version}',
             checks=[
-                self.check('location', '{location}'),
                 self.check('name', '{version}'),
                 self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
             ])
 
-        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community -g {rg} --gallery-image-definition {image} --gallery-image-version {version}').get_output_in_json()['id']
-        self.cmd('vm create -g {rg} -n {vm_with_community_gallery_version} --image {community_gallery_image_version} --admin-username gallerytest --generate-ssh-keys --nsg-rule None')
+        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location eastus2 --gallery-image-version {version}').get_output_in_json()['uniqueId']
+        self.cmd('vm create -g {rg} -n {vm_with_community_gallery} --image {community_gallery_image_version} --admin-username gallerytest --generate-ssh-keys --nsg-rule None --accept-term')
 
-        self.cmd('vm show -g {rg} -n {vm_with_community_gallery_version}', checks=[
-            self.check('provisioningState', 'Succeeded'),
+        self.cmd('vm show -g {rg} -n {vm_with_community_gallery}', checks=[
             self.check('storageProfile.imageReference.exactVersion','{version}'),
-            self.check('storageProfile.imageReference.id', '{community_gallery_image_version}')
+            self.check('storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss_with_community_gallery_version} --admin-username gallerytest --generate-ssh-keys --image {community_gallery_image_version} ')
+        self.cmd('vmss create -g {rg} -n {vmss_with_community_gallery_version} --admin-username gallerytest --generate-ssh-keys --image {community_gallery_image_version} --accept-term')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_community_gallery_version}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('virtualMachineProfile.storageProfile.imageReference.id', '{community_gallery_image_version}')
+            self.check('virtualMachineProfile.storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
         ])
 
         # gallery permissions must be reset, or the resource group can't be deleted
