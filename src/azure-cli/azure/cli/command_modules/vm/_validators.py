@@ -1725,9 +1725,9 @@ def process_disk_create_namespace(cmd, namespace):
                 namespace.source_restore_point, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError(usage_error)
+                raise ArgumentUsageError(usage_error)
         except HttpResponseError:
-            raise CLIError(usage_error)
+            raise ArgumentUsageError(usage_error)
 
 
 def process_snapshot_create_namespace(cmd, namespace):
@@ -1740,7 +1740,7 @@ def process_snapshot_create_namespace(cmd, namespace):
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, _, source_info = \
                 _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError(usage_error)
+                raise ArgumentUsageError(usage_error)
             # autodetect copy_start for `az snapshot create`
             if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
                 if not source_info:
@@ -1762,7 +1762,7 @@ def process_snapshot_create_namespace(cmd, namespace):
                 # if the source location differs from target location, then it's copy_start scenario
                 namespace.copy_start = source_info.location != namespace.location
         except HttpResponseError:
-            raise CLIError(usage_error)
+            raise ArgumentUsageError(usage_error)
 
 
 def process_image_create_namespace(cmd, namespace):
