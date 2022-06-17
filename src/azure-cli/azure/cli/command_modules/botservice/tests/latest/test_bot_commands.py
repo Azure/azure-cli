@@ -597,9 +597,9 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
-        except ErrorException:
+        # except ErrorException:
             # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
-            pass
+            # pass
         except AssertionError:
             raise AssertionError('should have thrown an error for an unregistered bot.')
         except Exception as error:
