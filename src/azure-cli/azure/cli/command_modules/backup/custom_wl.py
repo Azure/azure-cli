@@ -859,8 +859,13 @@ def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_grou
         # fetch NodesList for SQLAG
         if protectable_item_type and protectable_item_type.lower() == 'sqlavailabilitygroupcontainer':
             setattr(item.properties, "nodes_list", None)
-            container = protection_containers_client.get(vault_name, resource_group_name, fabric_name, container_name)
-            if container.properties.extended_info:
+            container = None
+            try:
+                container = protection_containers_client.get(vault_name, resource_group_name, fabric_name,
+                                                             container_name)
+            except:  # pylint: disable=bare-except
+                break
+            if container and container.properties.extended_info:
                 item.properties.nodes_list = container.properties.extended_info.nodes_list
 
 
