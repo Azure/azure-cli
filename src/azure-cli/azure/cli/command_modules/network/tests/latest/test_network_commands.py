@@ -4370,18 +4370,26 @@ class NetworkVNetScenarioTest(ScenarioTest):
     def test_network_vnet_subnet_list_available_ips(self, resource_group):
         self.kwargs.update({
             'vnet': 'vnet1',
-            'subnet': 'default',
+            'subnet': 'subnet1',
             'rt': 'Microsoft.Network/virtualNetworks',
             'rg': resource_group
         })
 
-        self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefix 10.3.0.0/16 '
-                 '--subnet-name default --subnet-prefix 10.3.0.0/24', checks=[
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
             self.check('newVNet.provisioningState', 'Succeeded'),
-            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.3.0.0/16')
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
         ])
+        self.kwargs['prefixes'] = '20.0.0.0/16 10.0.0.0/16'
+        self.cmd(
+            'network vnet update --resource-group {rg} --name {vnet} --address-prefixes {prefixes}',
+            checks=[
+                self.check('length(addressSpace.addressPrefixes)', 2)
+            ])
 
-        self.cmd('network vnet subnet list-available-ips -g {rg} --vnet-name {vnet} --name {subnet}', checks=[
+        self.cmd(
+            'network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24 10.0.0.0/24')
+
+        self.cmd('network vnet subnet list-available-ips -g {rg} --name {vnet}', checks=[
             self.check('length(@)', 5)
         ])
 
