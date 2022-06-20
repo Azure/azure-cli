@@ -678,7 +678,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage file', command_type=file_client_sdk,
                             custom_command_type=get_custom_sdk('file', cf_share_file_client)) as g:
-        from ._transformers import transform_file_show_result, transform_file_download
+        from ._transformers import transform_file_show_result
         from ._format import transform_metadata_show
         g.storage_custom_command('list', 'list_share_files', client_factory=cf_share_client,
                                  transform=transform_file_directory_result,
@@ -705,7 +705,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
                                  custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
         g.storage_custom_command('download', 'download_file', exception_handler=file_related_exception_handler,
-                                 transform=transform_file_download)
+                                 transform=transform_file_show_result)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

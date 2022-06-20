@@ -65,7 +65,7 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('status', 'success'))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_main_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)

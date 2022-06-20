@@ -488,11 +488,13 @@ def transform_file_show_result(result):
         }
     }
     new_result.update(result)
+    _decode_bytearray(new_result)
     return new_result
 
 
-def transform_file_download(result):
-    if result.content_settings and result.content_settings.content_md5:
-            result.content_settings.content_md5 = result.content_settings.content_md5.decode(error='ignore')
-    result = transform_file_show_result(result)
-    return result
+def _decode_bytearray(result):
+    for k, v in result.items():
+        if type(v) == bytearray:
+            result[k] = base64.urlsafe_b64encode(v).decode()
+        elif type(v) == dict:
+            _decode_bytearray(v)

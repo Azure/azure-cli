@@ -225,12 +225,12 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
     properties = None
 
     with open(destination_path, open_mode) as stream:
-        offset = kwargs.pop('start_range', None)
+        start_range = kwargs.pop('start_range', None)
         end_range = kwargs.pop('end_range', None)
         length = None
-        if offset and end_range:
-            length = end_range-offset+1
-        download = client.download_file(offset=offset, length=length, timeout=timeout,
+        if start_range is not None and end_range is not None:
+            length = end_range-start_range+1
+        download = client.download_file(offset=start_range, length=length, timeout=timeout,
                                         max_concurrency=max_connections, **kwargs)
         properties = download.properties
         download_content = download.readall()
