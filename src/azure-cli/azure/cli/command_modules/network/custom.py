@@ -8418,6 +8418,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     finally:
         tunnel_server.cleanup()
 
+
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False):
     from azure.cli.core._profile import Profile
     import os
@@ -8427,7 +8428,6 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
         resource_port = 3389
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
-    
     if platform.system() == 'Windows':
         if disable_gateway:
             tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
@@ -8445,7 +8445,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             client = network_client_factory(cmd.cli_ctx).bastion_hosts
             bastion = client.get(resource_group_name, bastion_host_name)
 
-            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name,target_resource_id)
+            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name, target_resource_id)
             headers = {}
             headers['Authorization'] = 'Bearer {}'.format(access_token)
             headers['Accept'] = '*/*'
@@ -8458,7 +8458,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             with open("conn.rdp", "w") as f:
                 f.write(response.text)
             
-            rdpfilepath = os.getcwd()+"/conn.rdp"
+            rdpfilepath = os.getcwd() + "/conn.rdp"
             command = [_get_rdp_path(), rdpfilepath]
             launch_and_wait(command)
     else:
