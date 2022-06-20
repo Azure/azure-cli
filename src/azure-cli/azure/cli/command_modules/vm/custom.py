@@ -4976,12 +4976,14 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             if over_ride or over_ride.lower() != 'null':
                 vm.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
-    
+
     if treat_deployment_as_failure:
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
-            treat_as_failure_boolean_value = True if treat_as_failure.lower() == 'true' else False
-            vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure_boolean_value
+            if treat_as_failure.lower() == 'true':
+                vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = True
+            else:
+                vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = False
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
@@ -5017,12 +5019,14 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
             if over_ride or over_ride.lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
-    
+
     if treat_deployment_as_failure:
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
-            treat_as_failure_boolean_value = True if treat_as_failure.lower() == 'true' else False
-            vmss.virtual_machine_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure_boolean_value
+            if treat_as_failure.lower() == 'true':
+                vmss.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = True
+            else:
+                vmss.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = False
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 

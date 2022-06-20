@@ -1317,9 +1317,9 @@ def load_arguments(self, _):
             c.argument('install_command', help='The path and arguments to install the gallery application.')
             c.argument('remove_command', help='The path and arguments to remove the gallery application.')
             c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version '
-                                              'and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is '
+                                              ' then update operation will invoke remove command on the previous version'
+                                              ' and install command on the current version of the gallery application.')
+            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
                        'going to be replicated to. This property is updatable. Expected value: '
                        'json-string/json-file/@json-file.')
             c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
