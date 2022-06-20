@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 try:
     from urllib.parse import unquote
