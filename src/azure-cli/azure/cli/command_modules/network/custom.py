@@ -8439,7 +8439,6 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             tunnel_server.cleanup()
         else:
             profile = Profile(cli_ctx=cmd.cli_ctx)
-            # Get Access Token to get the RDP file from the bastion
             access_token = profile.get_raw_token()[0][2].get('accessToken')
             logger.debug("Response %s", access_token)
             client = network_client_factory(cmd.cli_ctx).bastion_hosts
