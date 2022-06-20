@@ -189,7 +189,7 @@ def load_volume_groups_arguments(self, account_name_type, pool_name_type):
         c.argument('pool_name', pool_name_type)
         c.argument('volume_group_name', options_list=['--volume-group-name', '--group-name'], id_part='child_name_1',
                    help='The name of the ANF volume group')
-        c.argument('gp_rules', options_list=['--gp-rules', '--global-placement-rules]'], nargs="+",
+        c.argument('gp_rules', options_list=['--gp-rules', '--global-placement-rules'], nargs="+",
                    help='Application specific identifier of deployment rules for the volume group. Space-separated string in `key=value` format')
         c.argument('system_role', arg_type=get_enum_type(['PRIMARY', 'HA', 'DR']))
         c.argument('add_snapshot_capacity', type=int, default=50,

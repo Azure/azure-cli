@@ -286,7 +286,7 @@ class TestRoleMocked(unittest.TestCase):
         key_id_of_existing_cert = 'existing cert'
         name = 'http://mysp'
 
-        def application_patch_mock(id, body):
+        def application_update_mock(id, body):
             patch_invoked[0] = True
             self.assertEqual(id, MOCKED_APP_ID)
             self.assertEqual(2, len(body['keyCredentials']))
@@ -309,14 +309,14 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.tenant = MOCKED_TENANT_ID
         faked_graph_client.application_list.return_value = [MOCKED_APP]
         faked_graph_client.application_get.side_effect = [MOCKED_APP]
-        faked_graph_client.application_patch.side_effect = application_patch_mock
+        faked_graph_client.application_update.side_effect = application_update_mock
 
         # action
         result = reset_application_credential(cmd, faked_graph_client, MOCKED_APP_APP_ID, cert=test_cert, append=True,
                                               display_name=MOCKED_CREDENTIAL_DISPLAY_NAME)
 
         # assert
-        faked_graph_client.application_patch.assert_called_once()
+        faked_graph_client.application_update.assert_called_once()
         assert result == {
             'appId': MOCKED_APP_APP_ID,
             'password': None,
