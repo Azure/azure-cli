@@ -29,7 +29,6 @@ import platform
 import subprocess
 import tempfile
 import requests
-from azure.cli.core._profile import Profile
 
 logger = get_logger(__name__)
 
@@ -8420,6 +8419,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False):
+    from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
 
@@ -8457,8 +8457,8 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
                 raise CLIError('Request to EncodingReservedUnitTypes v2 API endpoint failed.')
             with open("conn.rdp", "w") as f:
                 f.write(response.text)
-                
-            rdpfilepath = os.getcwd() + "/conn.rdp"
+            
+            rdpfilepath = os.getcwd()+"/conn.rdp"
             command = [_get_rdp_path(), rdpfilepath]
             launch_and_wait(command)
     else:
