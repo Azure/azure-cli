@@ -186,6 +186,19 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
+def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, directory_name, file_name):
+    from datetime import timedelta
+
+    t_sas = cmd.get_models('_shared_access_signature#FileSharedAccessSignature',
+                           resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+
+    t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
+                             permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
+
+
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
     from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
@@ -201,7 +214,8 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
 
 def create_short_lived_container_sas_track2(cmd, account_name, account_key, container):
     from datetime import timedelta
-    t_generate_container_sas = cmd.get_models('#generate_container_sas')
+    t_generate_container_sas = cmd.get_models('_shared_access_signature#generate_container_sas',
+                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_container_sas(account_name, container, account_key, permission='r', expiry=expiry,
                                     protocol='https')
