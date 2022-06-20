@@ -8443,7 +8443,6 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             logger.debug("Response %s", access_token)
             client = network_client_factory(cmd.cli_ctx).bastion_hosts
             bastion = client.get(resource_group_name, bastion_host_name)
-
             web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name, target_resource_id)
             headers = {}
             headers['Authorization'] = 'Bearer {}'.format(access_token)
@@ -8451,12 +8450,10 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             headers['Accept-Encoding'] = 'gzip, deflate, br'
             headers['Connection'] = 'keep-alive'
             response = requests.get(web_address, headers=headers)
-
             if not response.ok:
                 raise CLIError('Request to EncodingReservedUnitTypes v2 API endpoint failed.')
             with open("conn.rdp", "w") as f:
                 f.write(response.text)
-            
             rdpfilepath = os.getcwd() + "/conn.rdp"
             command = [_get_rdp_path(), rdpfilepath]
             launch_and_wait(command)
