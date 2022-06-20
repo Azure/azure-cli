@@ -42,7 +42,8 @@ ORDERBY_PARAMS = {
     'time_desc': 'timedesc'
 }
 DEFAULT_PAGINATION = 100
-
+EXPIRE_TS_KEY = 'expiresAfter'
+DELETED_AT_KEY = 'deletedAt'
 BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as"\
                       " 'myregistry.azurecr.io/hello-world' as a positional parameter or"\
                       " provide '-r MyRegistry -n hello-world' argument values."
@@ -303,11 +304,9 @@ def acr_manifest_deleted_list(cmd,
         result_index='manifests')
 
     expire_days = _get_soft_delete_retention_days(cmd, registry_name)
-    expire_ts_key = 'expiresAfter'
-    deleted_at_key = 'deletedAt'
     for result in raw_result:
-        ts_string = result[deleted_at_key]
-        result[expire_ts_key] = _add_day_delta(ts_string, expire_days)
+        ts_string = result[DELETED_AT_KEY]
+        result[EXPIRE_TS_KEY] = _add_day_delta(ts_string, expire_days)
 
     return raw_result
 
@@ -352,11 +351,9 @@ def acr_manifest_deleted_tags_list(cmd,
         raw_result = [x for x in raw_result if x['tag'] == tag]
 
     expire_days = _get_soft_delete_retention_days(cmd, registry_name)
-    deleted_at_key = 'deletedAt'
-    expire_ts_key = 'expiresAfter'
     for result in raw_result:
-        ts_string = result[deleted_at_key]
-        result[expire_ts_key] = _add_day_delta(ts_string, expire_days)
+        ts_string = result[DELETED_AT_KEY]
+        result[EXPIRE_TS_KEY] = _add_day_delta(ts_string, expire_days)
 
     return raw_result
 
