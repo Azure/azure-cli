@@ -159,7 +159,7 @@ AZURE_API_PROFILES = {
             'gallery_image_versions': '2021-10-01',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2021-07-01',
-            'shared_galleries': '2020-09-30',
+            'shared_galleries': '2022-01-03',
             'virtual_machine_scale_sets': '2021-11-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
