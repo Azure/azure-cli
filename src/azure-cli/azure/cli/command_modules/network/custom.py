@@ -8419,7 +8419,6 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     finally:
         tunnel_server.cleanup()
 
-
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False):
     import os
     from ._process_helper import launch_and_wait
