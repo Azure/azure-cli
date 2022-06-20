@@ -147,7 +147,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr config soft-delete') as c:
         c.argument('status', help="Indicates whether soft-delete policy is enabled.", arg_type=get_enum_type(PolicyStatus))
         c.argument('registry_name', options_list=['--registry', '-r'])
-        c.argument('days', type=int, help='The number of days to retain a soft-deleted manifest or tag after which it gets purged (Range: 1 to 90).', default=7)
+        c.argument('days', type=int, help='The number of days to retain a soft-deleted manifest or tag after which it gets purged (Range: 1 to 90). Default is 7.')
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
@@ -201,28 +201,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr manifest update-metadata') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
-    with self.argument_context('acr manifest metadata show') as c:
-        c.positional('manifest_id', arg_type=manifest_id_type)
-
     with self.argument_context('acr manifest list-deleted') as c:
         c.positional('repo_id', arg_type=repo_id_type)
 
     with self.argument_context('acr manifest list-deleted-tags') as c:
         c.positional('perm_repo_id', arg_type=permissive_repo_id_type)
-        c.argument('permissive_repo', help="The name of the repository. May include a tag in the format 'name:tag'", options_list=['--name', '-n'])
+        c.argument('permissive_repo', options_list=['--name', '-n'], help="The name of the repository. May include a tag in the format 'name:tag'")
 
     with self.argument_context('acr manifest restore') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
         c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")
         c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
-        c.argument('manifest_spec', help="The name of the artifact. May include a tag in the format 'name:tag'.", options_list=['--name', '-n'])
-
-
-    with self.argument_context('acr manifest metadata list') as c:
-        c.positional('repo_id', arg_type=repo_id_type)
-
-    with self.argument_context('acr manifest metadata update') as c:
-        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('manifest_spec', options_list=['--name', '-n'], help="The name of the artifact. May include a tag in the format 'name:tag'.")
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
@@ -398,8 +388,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('yes', help='Agree to the license of Helm, and do not prompt for confirmation.')
 
     with self.argument_context('acr network-rule') as c:
-        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-        c.argument('vnet_name', help='Name of a virtual network.')
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.', deprecate_info=c.deprecate(hide=True))
+        c.argument('vnet_name', help='Name of a virtual network.', deprecate_info=c.deprecate(hide=True))
         c.argument('ip_address', help='IPv4 address or CIDR range.')
 
     with self.argument_context('acr check-health') as c:

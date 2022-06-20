@@ -21,7 +21,8 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_show,
     acr_repository_update,
     acr_repository_delete,
-    acr_repository_untag
+    acr_repository_untag,
+    acr_repository_deleted_list
 )
 
 from azure.cli.command_modules.acr.manifest import (
@@ -31,7 +32,10 @@ from azure.cli.command_modules.acr.manifest import (
     acr_manifest_list_referrers,
     acr_manifest_metadata_show,
     acr_manifest_metadata_list,
-    acr_manifest_metadata_update
+    acr_manifest_metadata_update,
+    acr_manifest_deleted_list,
+    acr_manifest_deleted_tags_list,
+    acr_manifest_deleted_restore
 )
 
 from azure.cli.command_modules.acr.helm import (
@@ -98,6 +102,57 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params={
                 'n': 10,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+    @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('requests.request', autospec=True)
+    def test_repository_list_deleted(self, mock_requests_get, mock_get_access_credentials):
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({'repositories': [
+            {
+                "createdAt": "2022-01-20T21:21:08.2268488Z",
+                "deletedAt": "2022-03-15T16:52:38.2146195Z",
+                "repository": "testrepo1"
+            },
+            {
+                "createdAt": "2022-01-21T03:40:28.0279967Z",
+                "deletedAt": "2022-03-15T16:58:07.8598101Z",
+                "repository": "testrepo2"
+            }]}).encode()
+        mock_requests_get.return_value = response
+
+        # List deleted repositories using Basic auth
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+        acr_repository_deleted_list(cmd, 'testregistry')
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/_catalog',
+            headers=get_authorization_header('username', 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+        # List deleted repositories using Bearer auth
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+        acr_repository_deleted_list(cmd, 'testregistry')
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/_catalog',
+            headers=get_authorization_header(EMPTY_GUID, 'password'),
+            params={
+                'n': 100,
                 'orderby': None
             },
             json=None,
@@ -760,6 +815,254 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'orderby': 'timedesc'
             },
             json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+    @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.manifest._get_soft_delete_retention_days', autospec=True)
+    @mock.patch('requests.request', autospec=True)
+    def test_manifest_deleted_list(self, mock_requests_get, mock_get_soft_delete_retention_days, mock_get_access_credentials, mock_get_access_credentials_manifest):
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({'manifests': [
+            {
+                "createdAt": "2022-04-05T22:36:08.6525091Z",
+                "deletedAt": "2022-04-05T22:42:51.354589Z",
+                "digest": "sha256:4edbd2beb5f78b1014028f4fbb99f3237d9561100b6881aabbf5acce2c4f9454"
+            },
+            {
+                "createdAt": "2022-04-06T22:36:08.6525091Z",
+                "deletedAt": "2022-04-07T22:42:51.354589Z",
+                "digest": "sha256:4edbd2beb5f78b1014028f4fbb99f3237d9561100b6881aabbf5acce2c4f5555"
+            }]}).encode()
+
+        mock_requests_get.return_value = response
+        mock_get_soft_delete_retention_days.return_value = 7
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+        mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
+
+        # Show deleted manifests using Basic auth
+        acr_manifest_deleted_list(cmd,
+                                   registry_name='testregistry',
+                                   repository='testrepository')
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_manifests',
+            headers=get_authorization_header('username', 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+        # Show deleted manifests using Bearer auth using fqdn
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+        mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+
+        acr_manifest_deleted_list(cmd,
+                                   repo_id=['testregistry.azurecr.io/testrepository'])
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_manifests',
+            headers=get_authorization_header(EMPTY_GUID, 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+
+    @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.manifest._get_soft_delete_retention_days', autospec=True)
+    @mock.patch('requests.request', autospec=True)
+    def test_manifest_deleted_tags_list(self, mock_requests_get, mock_get_soft_delete_retention_days, mock_get_access_credentials, mock_get_access_credentials_manifest):
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({'manifests': [
+            {
+                "createdAt": "2022-04-05T22:36:08.7343579Z",
+                "deletedAt": "2022-04-05T22:42:51.2753857Z",
+                "digest": "sha256:4edbd2beb5f78b1014028f4fbb99f3237d9561100b6881aabbf5acce2c4f9454",
+                "tag": "testtag1"
+            },
+            {
+                "createdAt": "2022-04-28T23:05:34.3818929Z",
+                "deletedAt": "2022-06-01T16:00:00.6724557Z",
+                "digest": "sha256:a777c9c66ba177ccfea23f2a216ff6721e78a662cd17019488c417135299cd89",
+                "tag": "testtag2"
+            }]}).encode()
+
+        mock_requests_get.return_value = response
+        mock_get_soft_delete_retention_days.return_value = 7
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+        mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
+
+        # Show deleted tags using Basic auth
+        acr_manifest_deleted_tags_list(cmd,
+                                   registry_name='testregistry',
+                                   permissive_repo='testrepository')
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_tags',
+            headers=get_authorization_header('username', 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+        acr_manifest_deleted_tags_list(cmd,
+                                   registry_name='testregistry',
+                                   permissive_repo='testrepository:testtag')
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_tags',
+            headers=get_authorization_header('username', 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+        # Show deleted tags using Bearer auth
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+        mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+
+        acr_manifest_deleted_tags_list(cmd,
+                                   perm_repo_id=['testregistry.azurecr.io/testrepository'])
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_tags',
+            headers=get_authorization_header(EMPTY_GUID, 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+        acr_manifest_deleted_tags_list(cmd,
+                                   perm_repo_id=['testregistry.azurecr.io/testrepository:testtag'])
+        mock_requests_get.assert_called_with(
+            method='get',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_tags',
+            headers=get_authorization_header(EMPTY_GUID, 'password'),
+            params={
+                'n': 100,
+                'orderby': None
+            },
+            json=None,
+            timeout=300,
+            verify=mock.ANY)
+
+
+    @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.manifest._obtain_data_from_registry', autospec=True)
+    @mock.patch('requests.request', autospec=True)
+    def test_manifest_deleted_restore(self, mock_requests_post, mock_obtain_data_from_registry, mock_get_access_credentials, mock_get_access_credentials_manifest):
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({
+                "digest":"sha256:fcd2bfbd511c1ef9dfe6f6d9ec44c6af0f55678163e37d0b52e6021db10b5305",
+                "tag": "testtag"
+            }).encode()
+
+        obtain_data_response = [
+            {
+                "createdAt":"2022-04-06T00:21:19.9943956Z",
+                "deletedAt":"2022-05-16T20:46:45.6738828Z",
+                "tag":"testtag",
+                "digest":"sha256:6246eaf99f069ad0e1f2d1cc7bacece124c212791c6c94bea5e338b2715119e7"
+            },
+            {
+                "createdAt":"2022-04-06T00:21:19.9943956Z",
+                "deletedAt":"2022-05-16T20:46:49.1379897Z",
+                "tag":"testtag",
+                "digest":"sha256:fcd2bfbd511c1ef9dfe6f6d9ec44c6af0f55678163e37d0b52e6021db10b5305"
+            }]
+
+        mock_requests_post.return_value = response
+        mock_obtain_data_from_registry.return_value = obtain_data_response
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+        mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
+
+        # Restore using Basic auth with digest discovery and force
+        acr_manifest_deleted_restore(cmd,
+                                   registry_name='testregistry',
+                                   manifest_spec='testrepository:testtag',
+                                   yes=True,
+                                   force=True)
+        mock_requests_post.assert_called_with(
+            method='post',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_manifests/sha256:fcd2bfbd511c1ef9dfe6f6d9ec44c6af0f55678163e37d0b52e6021db10b5305',
+            headers=get_authorization_header('username', 'password'),
+            params={'force': True},
+            json={'tag': 'testtag'},
+            timeout=300,
+            verify=mock.ANY)
+
+        acr_manifest_deleted_restore(cmd,
+                                   manifest_id=['testregistry.azurecr.io/testrepository:testtag'],
+                                   yes=True,
+                                   force=True)
+        mock_requests_post.assert_called_with(
+            method='post',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_manifests/sha256:fcd2bfbd511c1ef9dfe6f6d9ec44c6af0f55678163e37d0b52e6021db10b5305',
+            headers=get_authorization_header('username', 'password'),
+            params={'force': True},
+            json={'tag': 'testtag'},
+            timeout=300,
+            verify=mock.ANY)
+
+        # Restore using Bearer auth using fqdn
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+        mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
+
+        acr_manifest_deleted_restore(cmd,
+                                   registry_name='testregistry',
+                                   manifest_spec='testrepository:testtag',
+                                   digest='sha256:6246eaf99f069ad0e1f2d1cc7bacece124c212791c6c94bea5e338b2715119e7'
+                                   )
+        mock_requests_post.assert_called_with(
+            method='post',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_manifests/sha256:6246eaf99f069ad0e1f2d1cc7bacece124c212791c6c94bea5e338b2715119e7',
+            headers=get_authorization_header(EMPTY_GUID, 'password'),
+            params={'force': False},
+            json={'tag': 'testtag'},
+            timeout=300,
+            verify=mock.ANY)
+
+        acr_manifest_deleted_restore(cmd,
+                                   manifest_id=['testregistry.azurecr.io/testrepository:testtag'],
+                                   digest='sha256:6246eaf99f069ad0e1f2d1cc7bacece124c212791c6c94bea5e338b2715119e7'
+                                   )
+        mock_requests_post.assert_called_with(
+            method='post',
+            url='https://testregistry.azurecr.io/acr/v1/_deleted/testrepository/_manifests/sha256:6246eaf99f069ad0e1f2d1cc7bacece124c212791c6c94bea5e338b2715119e7',
+            headers=get_authorization_header(EMPTY_GUID, 'password'),
+            params={'force': False},
+            json={'tag': 'testtag'},
             timeout=300,
             verify=mock.ANY)
 

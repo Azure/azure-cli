@@ -145,10 +145,10 @@ def acr_repository_list(cmd,
 
 
 def acr_repository_deleted_list(cmd,
-                        registry_name,
-                        tenant_suffix=None,
-                        username=None,
-                        password=None):
+                                registry_name,
+                                tenant_suffix=None,
+                                username=None,
+                                password=None):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -469,8 +469,8 @@ def _parse_image_name(image, allow_digest=False, default_latest=True):
         # This is probably an image with implicit latest tag
         if default_latest:
             return image, 'latest', None
-        else:
-            return image, None, None
+
+        return image, None, None
 
     if allow_digest:
         raise CLIError("The name of the image to delete may include a tag in the"

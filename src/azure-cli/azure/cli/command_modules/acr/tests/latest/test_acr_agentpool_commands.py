@@ -18,7 +18,7 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
             'rg_loc': 'eastus',
             'sku': 'Premium',
             'vnet_name': 'agentvnets',
-            'subnet_name': 'agentsubnets',
+            'subnet_name': 'agentsubnets'
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),

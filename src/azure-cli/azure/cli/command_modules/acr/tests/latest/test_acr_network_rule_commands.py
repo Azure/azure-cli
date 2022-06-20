@@ -43,7 +43,6 @@ class AcrNetworkRuleCommandsTests(ScenarioTest):
                          self.check('sku.tier', '{sku}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('networkRuleSet.defaultAction', '{deny_action}'),
-                         self.check('networkRuleSet.virtualNetworkRules', []),
                          self.check('networkRuleSet.ipRules', [])])
 
         # Add a VNet rule
@@ -76,8 +75,6 @@ class AcrNetworkRuleCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{registry_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('networkRuleSet.defaultAction', '{allow_action}'),
-                         self.check('networkRuleSet.virtualNetworkRules[0].virtualNetworkResourceId', subnet_id),
-                         self.check('networkRuleSet.virtualNetworkRules[0].action', '{allow_action}'),
                          self.check('networkRuleSet.ipRules[0].ipAddressOrRange', '{ip_address}'),
                          self.check('networkRuleSet.ipRules[0].action', '{allow_action}')])
 

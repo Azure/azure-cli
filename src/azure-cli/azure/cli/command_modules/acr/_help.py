@@ -576,8 +576,6 @@ examples:
     text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
 """
 
-
-
 helps['acr manifest show-metadata'] = """
 type: command
 short-summary: Get the metadata of an artifact in an Azure Container Registry.
@@ -648,30 +646,6 @@ examples:
     text: az acr manifest restore -r MyRegistry -n hello-world:latest
   - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
     text: az acr manifest restore myregistry.azurecr.io/hello-world:latest
-"""
-
-# Deprecated
-helps['acr manifest metadata'] = """
-type: group
-short-summary: Manage artifact manifest metadata in Azure Container Registries.
-"""
-
-# Deprecated
-helps['acr manifest metadata show'] = """
-type: command
-short-summary: Get the metadata of an artifact in an Azure Container Registry.
-"""
-
-# Deprecated
-helps['acr manifest metadata list'] = """
-type: command
-short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
-"""
-
-# Deprecated
-helps['acr manifest metadata update'] = """
-type: command
-short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
 """
 
 helps['acr run'] = """

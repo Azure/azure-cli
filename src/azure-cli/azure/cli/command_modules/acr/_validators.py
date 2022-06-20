@@ -11,7 +11,8 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
                 " as 'myregistry.azurecr.io/hello-world'."
 BAD_PERM_REPO_FQDN = "The positional parameter 'perm_repo_id' must be a fully qualified repository specifier such"\
-                " as 'myregistry.azurecr.io/hello-world'. It may optionally specify a tag such as 'myregistry.azurecr.io/hello-world:latest'."
+                     " as 'myregistry.azurecr.io/hello-world'. It may optionally specify a"\
+                     " tag such as 'myregistry.azurecr.io/hello-world:latest'."
 BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qualified"\
                     " manifest specifier such as 'myregistry.azurecr.io/hello-world:latest' or"\
                     " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
@@ -129,6 +130,7 @@ def validate_repo_id(namespace):
         if '.' not in repo_id or '/' not in repo_id:
             raise InvalidArgumentValueError(BAD_REPO_FQDN)
 
+
 def validate_permissive_repo_id(namespace):
     if namespace.perm_repo_id:
         perm_repo_id = namespace.perm_repo_id[0]
@@ -136,6 +138,7 @@ def validate_permissive_repo_id(namespace):
             raise InvalidArgumentValueError(BAD_PERM_REPO_FQDN)
         if '@' in perm_repo_id:
             raise InvalidArgumentValueError(BAD_PERM_REPO_FQDN)
+
 
 def validate_manifest_id(namespace):
     if namespace.manifest_id:

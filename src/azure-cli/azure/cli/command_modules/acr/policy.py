@@ -5,9 +5,14 @@
 
 from enum import Enum
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import user_confirmation
+from knack.log import get_logger
+
 from ._utils import validate_premium_registry, get_registry_by_name
 
+
 POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries in Premium SKU.'
+logger = get_logger(__name__)
 
 
 # temporary place holder enum for retention type
@@ -91,24 +96,26 @@ def acr_config_retention_update(cmd,
     )
     return updated_policies.policies.retention_policy
 
+
 def acr_config_soft_delete_show(cmd,
-                              registry_name):
+                                registry_name):
     registry, _ = get_registry_by_name(
         cmd.cli_ctx, registry_name, None)
     policies = registry.policies
     soft_delete_policy = policies.soft_delete_policy if policies else None
     return soft_delete_policy
 
+
 def acr_config_soft_delete_update(cmd,
-                                client,
-                                registry_name,
-                                status=None,
-                                days=None):
-    registry, resource_group_name = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+                                  client,
+                                  registry_name,
+                                  status=None,
+                                  days=None,
+                                  yes=False):
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, None)
 
     Policy, SoftDeletePolicy, RegistryUpdateParameters = cmd.get_models(
-        'Policies','SoftDeletePolicy', 'RegistryUpdateParameters')
+        'Policies', 'SoftDeletePolicy', 'RegistryUpdateParameters')
 
     policies = registry.policies
     if policies is None:
@@ -117,9 +124,20 @@ def acr_config_soft_delete_update(cmd,
     policies.soft_delete_policy = policies.soft_delete_policy if policies.soft_delete_policy else SoftDeletePolicy()
 
     if status:
+        if(policies.soft_delete_policy.status == 'enabled' and status == 'disabled'):
+            logger.warning("Disabling soft-delete does not affect purge behavior for previously deleted artifacts."
+                           " Artifacts currently in a soft-deleted state will continue to be purged in accordance"
+                           " with the current soft-delete retention days policy.")
         policies.soft_delete_policy.status = status
 
     if days is not None:
+        if policies.soft_delete_policy.retention_days > days:
+            user_confirmation("Soft-delete purge scheduling is determined by a registry's current soft-delete retention"
+                              " days policy at the time of purge. By reducing the retention days policy, you are"
+                              " changing the scheduled purge date of previously deleted artifacts. In doing so, you may"
+                              " be scheduling some artifacts in a soft-deleted state for immediate purge. Do you wish"
+                              " to proceed?", yes)
+
         policies.soft_delete_policy.retention_days = days
 
     parameters = RegistryUpdateParameters(policies=policies)

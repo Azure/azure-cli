@@ -13,7 +13,8 @@ except ImportError:
 
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, AzureResponseError
+from ._utils import get_registry_by_name
 
 from .repository import (
     _parse_image_name,
@@ -58,14 +59,18 @@ def _get_v2_manifest_path(repository, manifest):
 def _get_referrers_path(repository, manifest):
     return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
 
+
 def _get_deleted_manifest_path(repository):
     return '/acr/v1/_deleted/{}/_manifests'.format(repository)
+
 
 def _get_deleted_tag_path(repository):
     return '/acr/v1/_deleted/{}/_tags'.format(repository)
 
-def _get_restore_deleted_manifest_path(repository, manifest, force):
-    return '/acr/v1/_deleted/{}/_manifests/{}?force={}'.format(repository, manifest, force)
+
+def _get_restore_deleted_manifest_path(repository, manifest):
+    return '/acr/v1/_deleted/{}/_manifests/{}'.format(repository, manifest)
+
 
 def _obtain_manifest_from_registry(login_server,
                                    path,
@@ -143,8 +148,9 @@ def _parse_fqdn(cmd, fqdn, is_manifest=True, allow_digest=True, default_latest=T
             raise InvalidArgumentValueError("The positional parameter 'repo_id'"
                                             " should not include a tag or digest.")
 
-
-        repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=allow_digest, default_latest=default_latest)
+        repository, tag, manifest = _parse_image_name(manifest_spec,
+                                                      allow_digest=allow_digest,
+                                                      default_latest=default_latest)
 
     except IndexError as e:
         if is_manifest:
@@ -163,6 +169,27 @@ def _validate_login_server_suffix(cmd, reg_suffix):
         raise InvalidArgumentValueError(f'Provided registry suffix \'{reg_suffix}\' does not match the configured az'
                                         f' cli acr login server suffix \'{login_server_suffix}\'. Check the'
                                         ' \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
+
+
+def _add_day_delta(ts_string, expire_days):
+    date_string = ts_string.split('T', 1)[0]
+    time_string = ts_string.split('T', 1)[1]
+    date_obj = datetime.strptime(date_string, "%Y-%m-%d")
+    expire_date_obj = date_obj + timedelta(days=expire_days)
+    expire_date_string = expire_date_obj.strftime("%Y-%m-%d")
+    expire_ts_string = expire_date_string + "T" + time_string
+    return expire_ts_string
+
+
+def _get_soft_delete_retention_days(cmd,
+                                    registry_name):
+    registry, _ = get_registry_by_name(
+        cmd.cli_ctx, registry_name, None)
+    policies = registry.policies
+    soft_delete_policy = policies.soft_delete_policy if policies else None
+    if soft_delete_policy is None:
+        raise AzureResponseError(f'Unable to retrieve soft-delete retention day policy for registry {registry_name}')
+    return soft_delete_policy.retention_days
 
 
 def acr_manifest_list(cmd,
@@ -246,13 +273,14 @@ def acr_manifest_metadata_list(cmd,
 
     return raw_result
 
+
 def acr_manifest_deleted_list(cmd,
-                               registry_name=None,
-                               repository=None,
-                               repo_id=None,
-                               tenant_suffix=None,
-                               username=None,
-                               password=None):
+                              registry_name=None,
+                              repository=None,
+                              repo_id=None,
+                              tenant_suffix=None,
+                              username=None,
+                              password=None):
     if (repo_id and repository) or (not repo_id and not (registry_name and repository)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
@@ -275,8 +303,7 @@ def acr_manifest_deleted_list(cmd,
         password=password,
         result_index='manifests')
 
-    #todo get num days til expire
-    expire_days = 7
+    expire_days = _get_soft_delete_retention_days(cmd, registry_name)
     expire_ts_key = 'expiresAfter'
     deleted_at_key = 'deletedAt'
     for result in raw_result:
@@ -285,27 +312,23 @@ def acr_manifest_deleted_list(cmd,
 
     return raw_result
 
-def _add_day_delta(ts_string, expire_days):
-    date_string = ts_string.split('T', 1)[0]
-    time_string = ts_string.split('T', 1)[1]
-    date_obj = datetime.strptime(date_string,"%Y-%m-%d")
-    expire_date_obj = date_obj + timedelta(days=expire_days)
-    expire_date_string = expire_date_obj.strftime("%Y-%m-%d")
-    expire_ts_string = expire_date_string + "T" + time_string
-    return expire_ts_string
 
 def acr_manifest_deleted_tags_list(cmd,
-                               registry_name=None,
-                               permissive_repo=None,
-                               perm_repo_id=None,
-                               tenant_suffix=None,
-                               username=None,
-                               password=None):
+                                   registry_name=None,
+                                   permissive_repo=None,
+                                   perm_repo_id=None,
+                                   tenant_suffix=None,
+                                   username=None,
+                                   password=None):
     if (perm_repo_id and permissive_repo) or (not perm_repo_id and not (registry_name and permissive_repo)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
     if perm_repo_id:
-        registry_name, repository, tag, _ = _parse_fqdn(cmd, perm_repo_id[0], is_manifest=True, allow_digest=False, default_latest=False)
+        registry_name, repository, tag, _ = _parse_fqdn(cmd,
+                                                        perm_repo_id[0],
+                                                        is_manifest=True,
+                                                        allow_digest=False,
+                                                        default_latest=False)
 
     else:
         repository, tag, _ = _parse_image_name(permissive_repo, allow_digest=False, default_latest=False)
@@ -329,7 +352,7 @@ def acr_manifest_deleted_tags_list(cmd,
     if tag:
         raw_result = [x for x in raw_result if x['tag'] == tag]
 
-    expire_days = 7
+    expire_days = _get_soft_delete_retention_days(cmd, registry_name)
     deleted_at_key = 'deletedAt'
     expire_ts_key = 'expiresAfter'
     for result in raw_result:
@@ -338,16 +361,17 @@ def acr_manifest_deleted_tags_list(cmd,
 
     return raw_result
 
+
 def acr_manifest_deleted_restore(cmd,
-                               registry_name=None,
-                               manifest_spec=None,
-                               manifest_id=None,
-                               digest=None,
-                               force=False,
-                               yes = False,
-                               tenant_suffix=None,
-                               username=None,
-                               password=None):
+                                 registry_name=None,
+                                 manifest_spec=None,
+                                 manifest_id=None,
+                                 digest=None,
+                                 force=False,
+                                 yes=False,
+                                 tenant_suffix=None,
+                                 username=None,
+                                 password=None):
     if (manifest_id and manifest_spec) or (not manifest_id and not (registry_name and manifest_spec)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
@@ -366,7 +390,7 @@ def acr_manifest_deleted_restore(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.META_WRITE_META_READ.value)
 
-    post_payload = {"tag":tag}
+    post_payload = {"tag": tag}
 
     if not digest:
         tag_obj_list = _obtain_data_from_registry(
@@ -378,30 +402,33 @@ def acr_manifest_deleted_restore(cmd,
 
         digest_list = [x['digest'] for x in tag_obj_list if x['tag'] == tag]
 
-        if(len(digest_list) == 0):
+        if len(digest_list) == 0:
             raise InvalidArgumentValueError(f'No deleted manifests found for tag: {tag}')
 
         digest = digest_list[-1]
 
-        if(len(digest_list) > 1):
-            user_confirmation("Multiple deleted manifests found for tag: {}. Restoring most recently deleted manifest with digest: {}. Is this okay?".format(tag, digest), yes)
+        if len(digest_list) > 1:
+            user_confirmation("Multiple deleted manifests found for tag: {}. Restoring most recently deleted"
+                              "manifest with digest: {}. Is this okay?".format(tag, digest), yes)
 
-    raw_result, _ = request_data_from_registry('post',
-                               login_server,
-                               _get_restore_deleted_manifest_path(repository, digest, force),
-                               username,
-                               password,
-                               result_index=None,
-                               json_payload=post_payload,
-                               file_payload=None,
-                               params=None,
-                               manifest_headers=False,
-                               raw=False,
-                               retry_times=3,
-                               retry_interval=5,
-                               timeout=300)
+    raw_result, _ = request_data_from_registry(
+        'post',
+        login_server,
+        _get_restore_deleted_manifest_path(repository, digest),
+        username,
+        password,
+        result_index=None,
+        json_payload=post_payload,
+        file_payload=None,
+        params={'force': force},
+        manifest_headers=False,
+        raw=False,
+        retry_times=3,
+        retry_interval=5,
+        timeout=300)
 
     return raw_result
+
 
 def acr_manifest_list_referrers(cmd,
                                 registry_name=None,

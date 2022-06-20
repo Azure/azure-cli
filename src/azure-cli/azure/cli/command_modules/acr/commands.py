@@ -8,7 +8,6 @@ from azure.cli.core.commands import CliCommandType
 from ._format import (
     registry_output_format,
     usage_output_format,
-    policy_output_format,
     credential_output_format,
     webhook_output_format,
     webhook_get_config_output_format,
@@ -44,7 +43,8 @@ from ._client_factory import (
     cf_acr_token_credentials,
     cf_acr_private_endpoint_connections,
     cf_acr_agentpool,
-    cf_acr_connected_registries
+    cf_acr_connected_registries,
+    cf_acr_network_rules
 )
 
 
@@ -69,7 +69,6 @@ def load_command_table(self, _):
 
     acr_policy_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.policy#{}',
-        #table_transformer=policy_output_format,
         client_factory=cf_acr_registries
     )
 
@@ -135,7 +134,7 @@ def load_command_table(self, _):
 
     acr_network_rule_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.network_rule#{}',
-        client_factory=cf_acr_registries
+        client_factory=cf_acr_network_rules
     )
 
     acr_check_health_util = CliCommandType(
@@ -225,19 +224,6 @@ def load_command_table(self, _):
         g.command('list-deleted-tags', 'acr_manifest_deleted_tags_list')
         g.command('restore', 'acr_manifest_deleted_restore')
 
-    def _metadata_deprecate_message(self):
-        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
-        msg += " Use '{}' instead.".format(self.redirect)
-        return msg
-
-    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True,
-                            deprecate_info=self.deprecate(redirect="az acr manifest",
-                                                          message_func=_metadata_deprecate_message,
-                                                          hide=True)) as g:
-        g.show_command('show', 'acr_manifest_metadata_show')
-        g.command('list', 'acr_manifest_metadata_list')
-        g.command('update', 'acr_manifest_metadata_update')
-
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')
         g.command('create', 'acr_webhook_create')
@@ -322,7 +308,6 @@ def load_command_table(self, _):
     with self.command_group('acr config soft-delete', acr_policy_util, is_preview=True) as g:
         g.show_command('show', 'acr_config_soft_delete_show')
         g.command('update', 'acr_config_soft_delete_update')
-
 
     def _helm_deprecate_message(self):
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)

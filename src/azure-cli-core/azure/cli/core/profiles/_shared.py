@@ -185,6 +185,7 @@ AZURE_API_PROFILES = {
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
             'runs': '2019-06-01-preview',
+            'network_rule': '2021-08-01-preview'
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
@@ -292,7 +293,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
-        ResourceType.MGMT_CONTAINERREGISTRY: '2022-02-01-preview',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2021-08-01-preview',
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-11-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
