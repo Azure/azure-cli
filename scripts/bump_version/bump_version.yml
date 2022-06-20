@@ -20,6 +20,8 @@ jobs:
         displayName: "Use Python 3.10"
     - bash: |
         set -ev
+        git config --global user.email "CLIBumpVersionPipeline"
+        git config --global user.name "CLIBumpVersionPipeline"
 
         echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
         echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
@@ -44,6 +46,7 @@ jobs:
 
 - job: RerunTests
   displayName: CLI Bump Version Rerun tests
+  dependsOn: UpdateVersionFiles
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8
@@ -73,6 +76,8 @@ jobs:
         displayName: "Use Python 3.10"
     - bash: |
         set -ev
+        git config --global user.email "CLIBumpVersionPipeline"
+        git config --global user.name "CLIBumpVersionPipeline"
         git checkout -b bump_version_$(Build.BuildId) origin/bump_version_$(Build.BuildId)
       displayName: "Checkout Target Branch"
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
