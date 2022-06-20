@@ -9,6 +9,39 @@ trigger:
     - '*'
 
 jobs:
+- job: UpdateVersionFiles
+  displayName: CLI Bump Version Update Version Files
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+        displayName: "Use Python 3.10"
+    - bash: |
+        set -ev
+
+        echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
+        echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
+
+        if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION) ]]; then
+          echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
+          exit 1
+        fi
+        sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
+        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
+        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
+        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
+
+        if [[ -n $(RESOURCE_TYPE) ]]; then
+          python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
+        fi
+
+        git add .
+        git commit -m "update version"
+        git push --set-upstream origin bump_version_$(Build.BuildId)
+      displayName: "update version"
+
 - job: BumpVersionPython310
   displayName: CLI Bump Version Python310
   timeoutInMinutes: 9999
@@ -40,23 +73,8 @@ jobs:
         displayName: "Use Python 3.10"
     - bash: |
         set -ev
-
-        echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
-        echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
-
-        if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION) ]]; then
-          echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
-          exit 1
-        fi
-        sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
-        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
-        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
-        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
-
-        if [[ -n $(RESOURCE_TYPE) ]]; then
-          python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
-        fi
-      displayName: "update version"
+        git checkout -b bump_version_$(Build.BuildId) origin/bump_version_$(Build.BuildId)
+      displayName: "Checkout Target Branch"
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
@@ -65,5 +83,9 @@ jobs:
         pip show $(PACKAGE)
 
         serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
-        python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules"
-      displayName: "azdev test"
+        python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules" "True"
+      displayName: "Rerun tests"
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: '/home/vsts/work/1/s/failure_summary_*.txt'
+        testRunTitle: 'CLI Bump Version test results of instance $(Instance_idx)'

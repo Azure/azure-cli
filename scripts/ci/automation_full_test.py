@@ -6,8 +6,11 @@
 # --------------------------------------------------------------------------------------------
 
 import logging
+import os
 import subprocess
 import sys
+import time
+import xml.etree.ElementTree as ET
 from azdev.utilities import get_path_table
 
 logger = logging.getLogger(__name__)
@@ -16,11 +19,24 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
-# sys.argv is passed by .azure-pipelines/templates/automation_test.yml in section `Running full test`
-instance_cnt = int(sys.argv[1])
-instance_idx = int(sys.argv[2])
-profile = sys.argv[3]
-serial_modules = sys.argv[4].split()
+# sys.argv is passed by
+# .azure-pipelines/templates/automation_test.yml in section `Running full test`
+# scripts/bump_version/bump_version.yml in `azdev test` step
+# instance_cnt = int(sys.argv[1])
+# instance_idx = int(sys.argv[2])
+# profile = sys.argv[3]
+# serial_modules = sys.argv[4].split()
+# fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
+# azdev_test_result_fp = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results.xml"
+# working_directory = "/home/vsts/work/1/s"
+
+instance_cnt = 8
+instance_idx = 1
+profile = 'latest'
+serial_modules = "appservice botservice cloud network azure-cli-core azure-cli-telemetry".split()
+fix_failure_tests = True
+azdev_test_result_fp = "C:\\Users\\yishiwang\\.azdev\\env_config\\workspace\\azenv\\test_results.xml"
+working_directory = "D:\\workspace\\azure-cli"
 jobs = {
             'acr': 45,
             'acs': 62,
@@ -97,6 +113,102 @@ jobs = {
             'azure-cli-telemetry': 18,
             'azure-cli-testsdk': 20,
         }
+
+
+def git_restore(file_path):
+    if not file_path:
+        return
+    logger.info(f"git restore {file_path}")
+    out = subprocess.Popen(["git", "restore", file_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, err = out.communicate()
+    if stdout:
+        logger.info(stdout)
+    if err:
+        logger.warning(err)
+
+
+def git_push():
+    out = subprocess.Popen(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, _ = out.communicate()
+    if "nothing to commit, working tree clean" in stdout:
+        return
+    try:
+        subprocess.run(["git", "add", "*/command_modules/*"])
+        commit_message = f"rerun tests from instance {instance_idx}"
+        subprocess.run(["git", "commit", "-m", commit_message])
+    except subprocess.CalledProcessError as ex:
+        raise ex
+    retry = 3
+    while retry >= 0:
+        try:
+            subprocess.run(["git", "push"])
+            logger.info("git push all recording files")
+            break
+        except subprocess.CalledProcessError as ex:
+            if retry == 0:
+                raise ex
+            retry -= 1
+            time.sleep(10)
+
+
+def run_azdev(cmd):
+    error_flag = False
+    logger.info(cmd)
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError:
+        error_flag = True
+    return error_flag
+
+
+def get_failed_tests(test_result_fp):
+    tree = ET.parse(test_result_fp)
+    root = tree.getroot()
+    failed_tests = {}
+    for testsuite in root:
+        for testcase in testsuite:
+            # Collect failed tests
+            failures = testcase.findall('failure')
+            if failures:
+                message = failures[0].attrib['message']
+                test_case = testcase.attrib['name']
+                failed_tests[test_case] = {}
+                failed_tests[test_case]['classname'] = testcase.attrib['classname']
+                failed_tests[test_case]['message'] = message
+
+                recording_folder = os.path.join(os.path.dirname(testcase.attrib['file']), 'recordings')
+                if 'src' not in recording_folder:
+                    recording_folder = os.path.join(os.path.join('src', 'azure-cli'), recording_folder)
+                failed_tests[test_case]['record'] = os.path.join(recording_folder, test_case + '.yaml')
+    return failed_tests
+
+
+def process_test(cmd, live_rerun=True):
+    error_flag = run_azdev(cmd)
+    if not error_flag or not live_rerun:
+        return error_flag
+    cmd += ['--lf', '--live']
+    error_flag = run_azdev(cmd)
+    if not error_flag:
+        return error_flag
+    failed_tests = get_failed_tests(azdev_test_result_fp)
+    failure_summary = ''
+    for (test, info) in failed_tests.items():
+        # restore original recording yaml file
+        git_restore(os.path.join(working_directory, info['record']))
+        # store failure results
+        test_class_name = info['classname']
+        test_failure_message = info['message'] if len(info['message']) < 128 else info['message'][0:127]+'...'
+        failure_summary += f"`{test_class_name}` failed in live mode: {test_failure_message}\n"
+
+    # save live run recording changes to git
+    git_push()
+    # save failure_summary to txt file
+    failure_summary_fp = os.path.join(working_directory, f"failure_summary_{instance_idx}.txt")
+    with open(failure_summary_fp, "w") as f:
+        f.write(failure_summary)
+    logger.info(f'Store failure summary to {failure_summary_fp}')
+    return True
 
 
 class AutomaticScheduling(object):
@@ -183,19 +295,11 @@ class AutomaticScheduling(object):
         if serial_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
                   serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            logger.info(cmd)
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError:
-                error_flag = True
+            error_flag = process_test(cmd)
         if parallel_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
                   parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            logger.info(cmd)
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError:
-                error_flag = True
+            error_flag = process_test(cmd)
         return error_flag
 
 
