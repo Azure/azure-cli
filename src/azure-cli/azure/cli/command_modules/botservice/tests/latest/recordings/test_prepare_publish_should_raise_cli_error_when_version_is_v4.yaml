@@ -7,29 +7,25 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - bot prepare-publish
+      - bot delete
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
-      - -g -n --sln-name --proj-name --code-dir
+      - -g -n
       User-Agent:
       - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b2 Python/3.8.10 (Windows-10-10.0.22000-SP0)
-    method: GET
+    method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.BotService/botServices/cli000002''
-        under resource group ''clitest.rg000001'' was not found. For more details
-        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+      string: ''
     headers:
       cache-control:
       - no-cache
-      content-length:
-      - '230'
-      content-type:
-      - application/json; charset=utf-8
       date:
-      - Mon, 20 Jun 2022 03:35:27 GMT
+      - Mon, 20 Jun 2022 03:35:15 GMT
       expires:
       - '-1'
       pragma:
@@ -38,9 +34,9 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14994'
     status:
-      code: 404
-      message: Not Found
+      code: 204
+      message: No Content
 version: 1

@@ -217,8 +217,8 @@ class BotTests(ScenarioTest):
             'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
             checks=[
                 self.check('resourceGroup', '{rg}'),
-                self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('name', '{botname}'),
+                self.check('type', 'Microsoft.BotService/botServices')
             ])
 
         # Talk to bot
@@ -261,8 +261,8 @@ class BotTests(ScenarioTest):
         self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs')
+                     self.check('name', '{botname}'),
+                     self.check('type', 'Microsoft.BotService/botServices')
                  })
 
         # Download the bot source
@@ -312,8 +312,8 @@ class BotTests(ScenarioTest):
         results = self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                            checks={
                                self.check('resourceGroup', '{rg}'),
-                               self.check('id', '{botname}'),
-                               self.check('type', 'abs')
+                               self.check('name', '{botname}'),
+                               self.check('type', 'Microsoft.BotService/botServices')
                            })
 
         bot_name = results.get_output_in_json()['name']
@@ -353,8 +353,8 @@ class BotTests(ScenarioTest):
             'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
             checks={
                 self.check('resourceGroup', '{rg}'),
-                self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('name', '{botname}'),
+                self.check('type', 'Microsoft.BotService/botServices')
             })
 
         results = self.cmd('az bot download -g {rg} -n {botname}', checks={self.exists('downloadPath')})
@@ -392,8 +392,8 @@ class BotTests(ScenarioTest):
         self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks={
                      self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs')
+                     self.check('name', '{botname}'),
+                     self.check('type', 'Microsoft.BotService/botServices')
                  })
 
         # Talk to bot
@@ -446,8 +446,8 @@ class BotTests(ScenarioTest):
         self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs'),
+                     self.check('name', '{botname}'),
+                     self.check('type', 'Microsoft.BotService/botServices'),
                      self.check('endpoint', 'https://{valid_app_name}.azurewebsites.net/api/messages')
                  ])
 

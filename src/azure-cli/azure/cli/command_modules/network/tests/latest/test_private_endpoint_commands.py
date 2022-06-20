@@ -2538,7 +2538,7 @@ class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
-        result = self.cmd('bot create -g {rg} -n {bot_name} -k registration --appid {app_id}').get_output_in_json()
+        result = self.cmd('bot create -g {rg} -n {bot_name} --app-type MultiTenant --appid {app_id}').get_output_in_json()
         self.kwargs['bot_id'] = result['id']
 
         # Add an endpoint that gets auto approved
