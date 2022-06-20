@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from packaging.version import parse
-from typing import Callable, Dict, List, NamedTuple, Union
+from typing import Callable, List, NamedTuple, Union
 
 from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
 from azure.cli.core.extension._index import get_index_extensions
@@ -17,11 +17,13 @@ logger = get_logger(__name__)
 class NoExtensionCandidatesError(Exception):
     pass
 
+
 class _ExtensionFilter(NamedTuple):
     # A function that filters a list of extensions
     filter: Callable[[List[dict]], List[dict]]
     # Message of exception raised if a filter leaves no candidates
     on_empty_results_message: Union[str, Callable[[List[dict]], str]]
+
 
 def _is_not_platform_specific(item):
     parsed_filename = WHEEL_INFO_RE(item['filename'])
@@ -59,6 +61,7 @@ def _is_greater_than_cur_version(cur_version):
                      item_version, cur_version_parsed)
         return False
     return filter_func
+
 
 def _get_latest_version(candidates: List[dict]) -> List[dict]:
     return [max(candidates, key=lambda c: parse(c['metadata']['version']))]
@@ -100,7 +103,8 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         raise NoExtensionCandidatesError(f"No extension found with name '{extension_name}'")
 
     # Helper to curry predicate functions
-    list_filter = lambda f: lambda cs: list(filter(f, cs))
+    def list_filter(f):
+        return lambda cs: list(filter(f, cs))
 
     candidate_filters = [
         _ExtensionFilter(
@@ -119,14 +123,14 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     else:
         candidate_filters += [
             _ExtensionFilter(
-                filter= list_filter(_is_greater_than_cur_version(cur_version)),
+                filter=list_filter(_is_greater_than_cur_version(cur_version)),
                 on_empty_results_message=f"Latest version of '{extension_name}' is already installed."
             )
         ]
 
     candidate_filters += [
         _ExtensionFilter(
-            filter= list_filter(_is_compatible_with_cli_version),
+            filter=list_filter(_is_compatible_with_cli_version),
             on_empty_results_message=_get_version_compatibility_feedback
         ),
         _ExtensionFilter(
