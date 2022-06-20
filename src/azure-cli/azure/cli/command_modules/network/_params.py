@@ -2261,11 +2261,11 @@ def load_arguments(self, _):
                    options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
     with self.argument_context('network bastion ssh') as c:
-            c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
-            c.argument('username', help='User name for SSH connections.', options_list=['--username'])
-            c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
+        c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
+        c.argument('username', help='User name for SSH connections.', options_list=['--username'])
+        c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
     with self.argument_context('network bastion rdp') as c:
-            c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
+        c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
