@@ -852,17 +852,21 @@ def add_permission(client, identifier, api, api_permissions):
     #         id            <- api_permissions
     #         type
 
-    application = show_application(client, identifier)
-
     resource_access_list = []
     for e in api_permissions:
-        access_id, access_type = e.split('=')
+        try:
+            access_id, access_type = e.split('=')
+        except ValueError as ex:
+            from azure.cli.core.azclierror import ArgumentUsageError
+            raise ArgumentUsageError('Usage error: Please provide both permission id and type, such as '
+                                     '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
             "id": access_id,
             "type": access_type
         }
         resource_access_list.append(resource_access)
 
+    application = show_application(client, identifier)
     required_resource_access_list = application['requiredResourceAccess']
     existing_required_resource_access = next((e for e in required_resource_access_list if e['resourceAppId'] == api),
                                              None)
@@ -979,6 +983,34 @@ def list_permission_grants(client, identifier=None, query_filter=None, show_reso
     return result
 
 
+def app_federated_credential_list(client, identifier):
+    object_id = _resolve_application(client, identifier)
+    # This call is too simple, so it's unnecessary to extract a common method for both application and servicePrincipal
+    # and invoke it like
+    # _federated_identity_credential_list(client.application_federated_identity_credential_list, object_id)
+    return client.application_federated_identity_credential_list(object_id)
+
+
+def app_federated_credential_create(client, identifier, parameters):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_create(object_id, parameters)
+
+
+def app_federated_credential_show(client, identifier, credential_id_or_name):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_get(object_id, credential_id_or_name)
+
+
+def app_federated_credential_update(client, identifier, credential_id_or_name, parameters):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_update(object_id, credential_id_or_name, parameters)
+
+
+def app_federated_credential_delete(client, identifier, credential_id_or_name):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_delete(object_id, credential_id_or_name)
+
+
 def create_service_principal(cmd, identifier):
     return _create_service_principal(cmd.cli_ctx, identifier)
 
@@ -1082,6 +1114,31 @@ def list_service_principal_credentials(cmd, identifier, cert=False):
     client = _graph_client_factory(cmd.cli_ctx)
     sp = show_service_principal(client, identifier)
     return _list_credentials(sp, cert)
+
+
+def sp_federated_credential_list(client, identifier):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_list(object_id)
+
+
+def sp_federated_credential_create(client, identifier, parameters):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_create(object_id, parameters)
+
+
+def sp_federated_credential_show(client, identifier, credential_id_or_name):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_get(object_id, credential_id_or_name)
+
+
+def sp_federated_credential_update(client, identifier, credential_id_or_name, parameters):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_update(object_id, credential_id_or_name, parameters)
+
+
+def sp_federated_credential_delete(client, identifier, credential_id_or_name):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_delete(object_id, credential_id_or_name)
 
 
 def _get_app_object_id_from_sp_object_id(client, sp_object_id):
@@ -1944,13 +2001,9 @@ def _resolve_group(client, identifier):
 
 
 def _build_directory_object_json(client, object_id):
-    """Get JSON representation of the id of the directoryObject.
-    The object URL should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
-    """
-    # If object_id is not a GUID, use it as-is.
-    object_url = f'{client.base_url}/directoryObjects/{object_id}'if is_guid(object_id) else object_id
+    """Get JSON representation of the id of the directoryObject."""
     body = {
-        "@odata.id": object_url
+        "@odata.id": client.get_object_url(object_id)
     }
     return body
 

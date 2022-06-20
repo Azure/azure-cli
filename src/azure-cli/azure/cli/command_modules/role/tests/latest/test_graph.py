@@ -12,7 +12,7 @@ import dateutil
 import dateutil.parser
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import MOCKED_TENANT_ID
-from azure.cli.testsdk import ScenarioTest, MSGraphUserReplacer, MOCKED_USER_NAME
+from azure.cli.testsdk import ScenarioTest, MSGraphNameReplacer, MOCKED_USER_NAME
 from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
@@ -40,7 +40,8 @@ TEST_APP_ROLES = '''[
         "description": "Consumer apps have access to the consumer data.",
         "value": "Consumer"
     }
-]'''
+]
+'''
 
 # This test example is from
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#configuring-optional-claims
@@ -68,7 +69,8 @@ TEST_OPTIONAL_CLAIMS = '''{
             "essential": false
         }
     ]
-}'''
+}
+'''
 
 TEST_REQUIRED_RESOURCE_ACCESS = '''[
     {
@@ -93,7 +95,22 @@ TEST_REQUIRED_RESOURCE_ACCESS = '''[
         ],
         "resourceAppId": "00000003-0000-0000-c000-000000000000"
     }
-]'''
+]
+'''
+
+# This test example is from
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-github?tabs=microsoft-graph
+TEST_FEDERATED_IDENTITY_CREDENTIAL = '''{
+    "name": "Testing",
+    "issuer": "https://token.actions.githubusercontent.com/",
+    "subject": "repo:octo-org/octo-repo:environment:Production",
+    "description": "Testing",
+    "audiences": [
+        "api://AzureADTokenExchange"
+    ]
+}
+'''
+
 
 # TODO: https://github.com/Azure/azure-cli/pull/13769 fails to work
 # Cert created with
@@ -183,6 +200,40 @@ class GraphScenarioTestBase(ScenarioTest):
         self.cmd('ad {object_type} credential reset --id {app_id} --end-date "2100-12-31"')
         self.cmd('ad {object_type} credential list --id {app_id}',
                  checks=self.check('[0].endDateTime', '2100-12-31T00:00:00Z'))
+
+    def _test_federated_credential(self, object_type):
+        self.kwargs['object_type'] = object_type
+        self.kwargs['parameters'] = TEST_FEDERATED_IDENTITY_CREDENTIAL
+        self.kwargs['name'] = 'Testing'
+
+        # Create credential
+        result = self.cmd("ad {object_type} federated-credential create --id {app_id} --parameters '{parameters}'",
+                          checks=[self.check('name', '{name}')]).get_output_in_json()
+        self.kwargs['credential_id'] = result['id']
+
+        # List credential
+        self.cmd("ad {object_type} federated-credential list --id {app_id}",
+                 checks=[self.check('length(@)', 1)])
+
+        # Show credential with credential ID
+        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {credential_id}",
+                 checks=[self.check('name', '{name}')])
+        # Show with credential name
+        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {name}",
+                 checks=[self.check('name', '{name}')])
+
+        # Update credential's subject
+        update_subject = "repo:octo-org/octo-repo:environment:Staging"
+        self.kwargs['update_json'] = json.dumps({'subject': update_subject})
+        self.cmd("ad {object_type} federated-credential update --id {app_id} --credential-id {credential_id} "
+                 "--parameters '{update_json}'")
+        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {credential_id}",
+                 checks=self.check('subject', update_subject))
+
+        # Delete credential
+        self.cmd("ad {object_type} federated-credential delete --id {app_id} --credential-id {credential_id}")
+        self.cmd("ad {object_type} federated-credential list --id {app_id}",
+                 checks=[self.check('length(@)', 0)])
 
 
 class ApplicationScenarioTest(GraphScenarioTestBase):
@@ -363,7 +414,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
             'owner': owner,
             'display_name': self.create_random_name('azure-cli-test', 30)
         }
-        self.recording_processors.append(MSGraphUserReplacer(owner, 'example@example.com'))
+        self.recording_processors.append(MSGraphNameReplacer(owner, 'example@example.com'))
 
         self.kwargs['owner_object_id'] = self.cmd('ad user show --id {owner}').get_output_in_json()['id']
         self.kwargs['app_id'] = self.cmd('ad app create --display-name {display_name}').get_output_in_json()['appId']
@@ -522,6 +573,13 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
         self.assertEqual(microsoft_graph_api_object['resourceAccess'],
                          [microsoft_graph_permission1_object, microsoft_graph_permission2_object])
 
+        # Test permission type '=Scope' is missing
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaisesRegex(ArgumentUsageError, 'both permission id and type'):
+            self.cmd('ad app permission add --id {app_id} '
+                     '--api {microsoft_graph_api} '
+                     '--api-permissions {microsoft_graph_permission1}')
+
     @AllowLargeResponse()
     def test_app_permission_grant(self):
         if not self._get_signed_in_user():
@@ -582,6 +640,10 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
 
         self.cmd('ad app permission delete --id {app_id} --api {microsoft_graph_api}')
         self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
+
+    def test_app_federated_credential(self):
+        self._create_app()
+        self._test_federated_credential('app')
 
 
 class ServicePrincipalScenarioTest(GraphScenarioTestBase):
@@ -652,6 +714,11 @@ class ServicePrincipalScenarioTest(GraphScenarioTestBase):
     def test_sp_credential(self):
         self._create_sp()
         self._test_credential('sp')
+
+    @unittest.skip("It seems sp doesn't work with federatedIdentityCredentials yet.")
+    def test_sp_federated_credential(self):
+        self._create_sp()
+        self._test_federated_credential('sp')
 
 
 class UserScenarioTest(GraphScenarioTestBase):
@@ -746,7 +813,7 @@ class GroupScenarioTest(GraphScenarioTestBase):
             'app_name': self.create_random_name(prefix='testgroupapp', length=24)
         }
 
-        self.recording_processors.append(MSGraphUserReplacer('@' + domain, '@example.com'))
+        self.recording_processors.append(MSGraphNameReplacer('@' + domain, '@example.com'))
         try:
             # create group
             group_result = self.cmd(
@@ -870,6 +937,35 @@ class GroupScenarioTest(GraphScenarioTestBase):
             self.clean_resource('{}@{}'.format(self.kwargs['user2'], self.kwargs['domain']), type='user')
             if self.kwargs.get('app_id'):
                 self.clean_resource(self.kwargs['app_id'], type='app')
+
+
+class MiscellaneousScenarioTest(GraphScenarioTestBase):
+    def test_special_characters(self):
+        # Test special characters in object names. Ensure these characters are correctly percent-encoded.
+        # For example, displayName with +(%2B), /(%2F)
+        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
+        prefix = 'azure-cli-test-group+/'
+        mock_name = prefix + '000001'
+        if self.in_recording:
+            display_name = create_random_name(prefix=prefix, length=32)
+            self.recording_processors.append(MSGraphNameReplacer(display_name, mock_name))
+        else:
+            display_name = mock_name
+
+        self.kwargs = {
+            'display_name': display_name,
+            'mail_nick_name': 'deleteme11'
+        }
+        self.cmd('ad group create --display-name {display_name} --mail-nickname {mail_nick_name}',
+                 checks=self.check('displayName', '{display_name}'))
+        self.cmd('ad group show --group {display_name}',
+                 checks=self.check('displayName', '{display_name}'))
+        self.cmd('ad group list --display-name {display_name}',
+                 checks=[self.check('length(@)', 1),
+                         self.check('[0].displayName', '{display_name}')])
+        self.cmd('ad group delete --group {display_name}')
+        self.cmd('ad group list --display-name {display_name}',
+                 checks=self.check('length(@)', 0))
 
 
 def _get_id_from_value(permissions, value):
