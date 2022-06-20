@@ -1328,6 +1328,8 @@ def process_file_batch_source_parameters(cmd, namespace):
         if not namespace.account_name:
             namespace.account_name = identifier.account_name
 
+    namespace.share_name = namespace.source
+
 
 def process_file_download_namespace(namespace):
     get_file_path_validator()(namespace)

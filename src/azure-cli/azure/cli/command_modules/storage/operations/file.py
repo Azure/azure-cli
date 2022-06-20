@@ -244,9 +244,9 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
     Download files from file share to local directory in batch
     """
 
-    from azure.cli.command_modules.storage.util import glob_files_remotely, mkdir_p
+    from azure.cli.command_modules.storage.util import glob_files_remotely_track2, mkdir_p
 
-    source_files = glob_files_remotely(cmd, client, source, pattern, snapshot=snapshot)
+    source_files = glob_files_remotely_track2(client, source, pattern, is_share_client=True)
 
     if dryrun:
         source_files_list = list(source_files)
@@ -267,15 +267,14 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
         destination_dir = os.path.join(destination, pair[0])
         mkdir_p(destination_dir)
 
-        get_file_args = {'share_name': source, 'directory_name': pair[0], 'file_name': pair[1],
-                         'file_path': os.path.join(destination, *pair), 'max_connections': max_connections,
-                         'progress_callback': progress_callback, 'snapshot': snapshot}
-
-        if cmd.supported_api_version(min_api='2016-05-31'):
-            get_file_args['validate_content'] = validate_content
-
-        client.get_file_to_path(**get_file_args)
-        return client.make_file_url(source, *pair)
+        path = os.path.join(*pair)
+        local_path = os.path.join(destination, *pair)
+        file_client = client.get_file_client(path)
+        with open(local_path, 'wb') as stream:
+            download = file_client.download_file(max_concurrency=max_connections, validate_content=validate_content)
+            download_content = download.readall()
+            stream.write(download_content)
+        return file_client.url.replace('%5C', '/')
 
     return list(_download_action(f) for f in source_files)
 

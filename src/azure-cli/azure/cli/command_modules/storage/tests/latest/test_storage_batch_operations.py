@@ -217,7 +217,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location='EastUS2')
     @StorageTestFilesPreparer()
     def test_storage_file_batch_upload_scenarios(self, test_dir, storage_account_info):
         # upload without pattern
