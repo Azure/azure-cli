@@ -18,7 +18,7 @@ from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
-
+from azure.core.exceptions import HttpResponseError
 
 class DirectLineClient(object):
     """Shared methods for the parsed result objects."""
@@ -141,7 +141,7 @@ class BotTests(ScenarioTest):
             })
 
             self.cmd(
-                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}  --app-type MultiTenant'
+                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant'
                 ' --tags key1=value1 -l {location}',
                 checks=[
                     self.check('name', '{botname}'),
@@ -151,16 +151,16 @@ class BotTests(ScenarioTest):
                     self.check('tags.key1', 'value1')
                 ])
 
-            self.cmd('az bot show -g {rg} -n {botname} --app-type MultiTenant', checks=[
+            self.cmd('az bot show -g {rg} -n {botname}', checks=[
                 self.check('name', '{botname}')
             ])
 
-            self.cmd('az bot update --description description2 -g {rg} -n {botname} --app-type MultiTenant', checks=[
+            self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
                 self.check('name', '{botname}'),
                 self.check('properties.description', 'description2')
             ])
 
-            self.cmd('az bot delete -g {rg} -n {botname} --app-type MultiTenant')
+            self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_be_idempotent_and_return_existing_bot_info(self, resource_group):
@@ -224,19 +224,6 @@ class BotTests(ScenarioTest):
         # Talk to bot
         self.__talk_to_bot('hi', 'You sent \'hi\'')
 
-        # Download the bot source
-        self.cmd('az bot download -g {rg} -n {botname}', checks=[
-            self.exists('downloadPath')
-        ])
-        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
-
-        # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
-            self.check('active', True)
-        ])
-        # Clean up the folder
-        shutil.rmtree(dir_path)
-
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
@@ -265,19 +252,6 @@ class BotTests(ScenarioTest):
                      self.check('type', 'Microsoft.BotService/botServices')
                  })
 
-        # Download the bot source
-        self.cmd('az bot download -g {rg} -n {botname}', checks=[
-            self.exists('downloadPath')
-        ])
-        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
-
-        # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
-            self.check('active', True)
-        ])
-        # Clean up the folder
-        shutil.rmtree(dir_path)
-
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
@@ -290,86 +264,6 @@ class BotTests(ScenarioTest):
         })
         self.cmd(
             'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
-
-    @ResourceGroupPreparer(random_name_length=20)
-    @live_only()  # if the path to download already exist the tests fail as by design which makes this not idempotent
-    def test_botservice_download_should_create_appsettings_for_v4_csharp_webapp_echo_bots_no_bot_file(self,
-                                                                                                      resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-        results = self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
-                           checks={
-                               self.check('resourceGroup', '{rg}'),
-                               self.check('name', '{botname}'),
-                               self.check('type', 'Microsoft.BotService/botServices')
-                           })
-
-        bot_name = results.get_output_in_json()['name']
-
-        results = self.cmd('az bot download -g {rg} -n {botname}', checks={self.exists('downloadPath')})
-        results = results.get_output_in_json()
-
-        assert os.path.exists(os.path.join(results['downloadPath'], 'appsettings.json'))
-        assert not os.path.exists(os.path.join(results['downloadPath'], '{0}.bot'.format(bot_name)))
-        with open(os.path.join(results['downloadPath'], 'appsettings.json')) as settings:
-            appsettings = json.load(settings)
-            assert appsettings['MicrosoftAppId']
-            assert appsettings['MicrosoftAppPassword']
-
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-    @ResourceGroupPreparer(random_name_length=20)
-    @live_only()
-    def test_botservice_download_should_create_env_file_for_v4_node_webapp_echo_bots_no_bot_file(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-        self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
-            checks={
-                self.check('resourceGroup', '{rg}'),
-                self.check('name', '{botname}'),
-                self.check('type', 'Microsoft.BotService/botServices')
-            })
-
-        results = self.cmd('az bot download -g {rg} -n {botname}', checks={self.exists('downloadPath')})
-        results = results.get_output_in_json()
-
-        assert os.path.exists(os.path.join(results['downloadPath'], '.env'))
-        with open(os.path.join(results['downloadPath'], '.env')) as settings:
-            env = [env_var.split('=') for env_var in settings.read().split('\n')]
-            env = {env[0][0]: env[0][1], env[1][0]: env[1][0]}
-            assert env['MicrosoftAppId']
-            assert env['MicrosoftAppPassword']
-
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
     @serial_test()
@@ -399,18 +293,6 @@ class BotTests(ScenarioTest):
         # Talk to bot
         self.__talk_to_bot('hi', 'You sent \'hi\'')
 
-        # Download the bot source
-        self.cmd('az bot download -g {rg} -n {botname}', checks=[
-            self.exists('downloadPath')
-        ])
-
-        # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} --keep-node-modules', checks=[
-            self.check('active', True)
-        ])
-        # Clean up the folder
-        shutil.rmtree(dir_path)
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_create_registration_bot_without_endpoint(self, resource_group):
         self.kwargs.update({
@@ -422,136 +304,6 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
         self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_create_v4_webapp_bot_should_succeed_with_ending_hyphen(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli', length=15) + '-'
-        valid_app_name = bot_name[:-1]
-        self.kwargs.update({
-            'valid_app_name': valid_app_name,
-            'botname': bot_name,
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-
-        if os.path.exists(dir_path):
-            # Clean up the folder
-            shutil.rmtree(dir_path)
-
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('name', '{botname}'),
-                     self.check('type', 'Microsoft.BotService/botServices'),
-                     self.check('endpoint', 'https://{valid_app_name}.azurewebsites.net/api/messages')
-                 ])
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_show_on_v4_js_webapp_bot(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs')
-                 })
-
-        self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
-            self.exists('appPassword'),
-            self.check('id', '{botname}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('type', 'abs')
-        ])
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_show_on_v4_csharp_webapp_bot(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs')
-                 })
-
-        self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
-            self.exists('appPassword'),
-            self.check('id', '{botname}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('type', 'abs')
-        ])
-
-    @ResourceGroupPreparer(random_name_length=20)
-    @serial_test()
-    def test_botservice_publish_remove_node_iis_files_if_not_already_local(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-
-        self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{botname}'),
-                     self.check('type', 'abs')
-                 })
-
-        # Download the bot source
-        self.cmd('az bot download -g {rg} -n {botname}', checks=[
-            self.exists('downloadPath')
-        ])
-        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
-        # Remove the IIS for Node.js files and PostDeployScripts folder
-        shutil.rmtree(os.path.join(dir_path, 'PostDeployScripts'))
-        os.remove(os.path.join(dir_path, 'web.config'))
-        os.remove(os.path.join(dir_path, 'iisnode.yml'))
-        # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
-            self.check('active', True)
-        ])
-
-        # Publish should not have left web.config and iisnode.yml files since they did not previously exist in code_dir
-        self.check(os.path.exists(os.path.join(dir_path, 'web.config')), False)
-        self.check(os.path.exists(os.path.join(dir_path, 'iisnode.yml')), False)
-
-        # Clean up the folder
-        shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_prepare_publish_with_registration_bot_should_raise_error(self, resource_group):
@@ -597,9 +349,9 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
-        # except ErrorException:
+        except ResourceNotFoundError:
             # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
-            # pass
+            pass
         except AssertionError:
             raise AssertionError('should have thrown an error for an unregistered bot.')
         except Exception as error:
@@ -753,6 +505,8 @@ class BotTests(ScenarioTest):
             self.cmd(
                 'az bot create -g {rg2} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant')
             raise AssertionError()
+        except HttpResponseError:
+            pass
         except CLIError as cli_error:
             assert cli_error.__str__().startswith('Unable to create bot.\nReason: ')
         except AssertionError:
