@@ -42,8 +42,8 @@ jobs:
         git push --set-upstream origin bump_version_$(Build.BuildId)
       displayName: "update version"
 
-- job: BumpVersionPython310
-  displayName: CLI Bump Version Python310
+- job: RerunTests
+  displayName: CLI Bump Version Rerun tests
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8

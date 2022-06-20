@@ -22,21 +22,13 @@ logger.addHandler(ch)
 # sys.argv is passed by
 # .azure-pipelines/templates/automation_test.yml in section `Running full test`
 # scripts/bump_version/bump_version.yml in `azdev test` step
-# instance_cnt = int(sys.argv[1])
-# instance_idx = int(sys.argv[2])
-# profile = sys.argv[3]
-# serial_modules = sys.argv[4].split()
-# fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
-# azdev_test_result_fp = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results.xml"
-# working_directory = "/home/vsts/work/1/s"
-
-instance_cnt = 8
-instance_idx = 1
-profile = 'latest'
-serial_modules = "appservice botservice cloud network azure-cli-core azure-cli-telemetry".split()
-fix_failure_tests = True
-azdev_test_result_fp = "C:\\Users\\yishiwang\\.azdev\\env_config\\workspace\\azenv\\test_results.xml"
-working_directory = "D:\\workspace\\azure-cli"
+instance_cnt = int(sys.argv[1])
+instance_idx = int(sys.argv[2])
+profile = sys.argv[3]
+serial_modules = sys.argv[4].split()
+fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
+azdev_test_result_fp = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results.xml"
+working_directory = "/home/vsts/work/1/s"
 jobs = {
             'acr': 45,
             'acs': 62,
