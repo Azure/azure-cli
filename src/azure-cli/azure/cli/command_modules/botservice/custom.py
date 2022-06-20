@@ -80,17 +80,6 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
         return existing_bot
     except Exception as e:
         raise e
-    # except ErrorException as e:
-    #     if e.error.error.code == 'ResourceNotFound':
-    #         code = e.error.error.code
-    #         message = e.error.error.message
-
-    #         logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
-    #                      '"%s"', resource_name, resource_group_name, code, message)
-    #         raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
-
-    #     # For other error codes, raise them to the user
-    #     raise e
 
 
 def create(cmd, client, resource_group_name, resource_name, msa_app_id, msa_app_type,
