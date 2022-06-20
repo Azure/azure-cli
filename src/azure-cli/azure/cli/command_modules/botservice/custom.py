@@ -69,7 +69,7 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             f.write(json.dumps(existing))
 
 
-def __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name):
+def __handle_failed_name_check(_, cmd, client, resource_group_name, resource_name):
     # Creates should be idempotent, verify if the bot already exists inside of the provided Resource Group
     logger.debug('Failed name availability check for provided bot name "%s".\n'
                  'Checking if bot exists in Resource Group "%s".', resource_name, resource_group_name)

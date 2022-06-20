@@ -826,7 +826,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         })
 
         self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant'
-                 '-e https://testurl.com/api/messages',
+                 ' -e https://testurl.com/api/messages',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('type', 'Microsoft.BotService/botServices')
@@ -847,7 +847,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{valid_bot_name}'),
-                     self.check('type', 'abs')
+                     self.check('type', 'Microsoft.BotService/botServices')
                  })
 
     @ResourceGroupPreparer(random_name_length=20)
