@@ -2852,8 +2852,10 @@ class AKSContext:
             )
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr:
-                    raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                    logger.warning(
+                        'When using `--network-plugin azure` without the preview feature '
+                        '`--network-plugin-mode overlay` the provided pod CIDR "%s" will be '
+                        'overwritten with the subnet CIDR.', pod_cidr
                     )
             else:
                 if (
@@ -2959,12 +2961,7 @@ class AKSContext:
         # validation
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
-            if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
-                    raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
-                    )
-            else:
+            if not network_plugin:
                 if (
                     pod_cidr or
                     service_cidr or

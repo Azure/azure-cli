@@ -1848,7 +1848,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(name_prefix='cli_file_smb')
     @StorageAccountPreparer(parameter_name='storage_account1', name_prefix='filesmb1', kind='FileStorage',
-                            sku='Premium_LRS', location='centraluseuap')
+                            sku='Premium_LRS', location='centralus')
     @StorageAccountPreparer(parameter_name='storage_account2', name_prefix='filesmb2', kind='StorageV2')
     def test_storage_account_file_smb_multichannel(self, resource_group, storage_account1, storage_account2):
 
@@ -1887,7 +1887,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(name_prefix='cli_file_smb')
-    @StorageAccountPreparer(name_prefix='filesmb', kind='FileStorage', sku='Premium_LRS', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='filesmb', kind='FileStorage', sku='Premium_LRS', location='centralus')
     def test_storage_account_file_secured_smb(self, resource_group, storage_account):
         self.kwargs.update({
             'sa': storage_account,

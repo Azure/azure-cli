@@ -557,23 +557,47 @@ TARGET_RESOURCES_PARAMS = {
 
 
 # The dict defines the targets which supports service endpoint
-TARGET_SUPPORT_SERVICE_ENDPOINT = {
-    RESOURCE.Postgres: True,
-    RESOURCE.Mysql: True,
-    RESOURCE.Sql: True,
-    RESOURCE.StorageBlob: True,
-    RESOURCE.StorageQueue: True,
-    RESOURCE.StorageFile: True,
-    RESOURCE.StorageTable: True,
-    RESOURCE.KeyVault: True,
-    RESOURCE.CosmosSql: True,
-    RESOURCE.CosmosCassandra: True,
-    RESOURCE.CosmosGremlin: True,
-    RESOURCE.CosmosMongo: True,
-    RESOURCE.CosmosTable: True,
-    RESOURCE.ServiceBus: True,
-    RESOURCE.EventHub: True,
-}
+TARGET_SUPPORT_SERVICE_ENDPOINT = [
+    RESOURCE.Postgres,
+    RESOURCE.Mysql,
+    RESOURCE.Sql,
+    RESOURCE.StorageBlob,
+    RESOURCE.StorageQueue,
+    RESOURCE.StorageFile,
+    RESOURCE.StorageTable,
+    RESOURCE.KeyVault,
+    RESOURCE.CosmosSql,
+    RESOURCE.CosmosCassandra,
+    RESOURCE.CosmosGremlin,
+    RESOURCE.CosmosMongo,
+    RESOURCE.CosmosTable,
+    RESOURCE.ServiceBus,
+    RESOURCE.EventHub,
+]
+
+
+TARGET_SUPPORT_PRIVATE_ENDPOINT = [
+    RESOURCE.AppConfig,
+    RESOURCE.CosmosSql,
+    RESOURCE.CosmosCassandra,
+    RESOURCE.CosmosGremlin,
+    RESOURCE.CosmosMongo,
+    RESOURCE.CosmosTable,
+    RESOURCE.Redis,
+    RESOURCE.Postgres,
+    RESOURCE.Mysql,
+    RESOURCE.EventHub,
+    RESOURCE.KeyVault,
+    RESOURCE.SignalR,
+    RESOURCE.WebPubSub,
+    RESOURCE.Sql,
+    RESOURCE.StorageBlob,
+    RESOURCE.StorageQueue,
+    RESOURCE.StorageFile,
+    RESOURCE.StorageTable,
+    RESOURCE.ServiceBus,
+]
+
 
 # The dict defines the parameters used to provide auth info
 AUTH_TYPE_PARAMS = {
@@ -1056,6 +1080,15 @@ SUPPORTED_CLIENT_TYPE = {
         RESOURCE.ServiceBus: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.SignalR: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.WebPubSub: [
+            CLIENT_TYPE.Java,
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Blank
         ],
