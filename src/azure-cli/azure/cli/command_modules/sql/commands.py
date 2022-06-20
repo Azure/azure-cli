@@ -823,7 +823,7 @@ def load_command_table(self, _):
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
         g.custom_command('start', 'managed_db_log_replay_start', supports_no_wait=True)
-        g.command('stop', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('stop', 'managed_db_log_replay_stop', confirmation=True, supports_no_wait=True)
         g.custom_command('complete', 'managed_db_log_replay_complete_restore')
         g.wait_command('wait')
 
