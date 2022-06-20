@@ -6143,6 +6143,99 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_identity_', location='eastus2euap')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2euap', additional_params='--enable-purge-protection')
+    def test_disk_encryption_set_identity(self):
+        self.kwargs.update({
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'des2': self.create_random_name(prefix='des2-', length=20),
+            'des3': self.create_random_name(prefix='des3-', length=20),
+            'disk': self.create_random_name(prefix='disk-', length=20),
+            'vm1': self.create_random_name(prefix='vm1-', length=20),
+            'vm2': self.create_random_name(prefix='vm2-', length=20),
+            'vmss': self.create_random_name(prefix='vmss-', length=20),
+            'identity1': 'identity1',
+            'identity2': 'identity2',
+            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
+        })
+
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+        kid = \
+        self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key'][
+            'kid']
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        identity1_json = self.cmd('identity create -g {rg} -n {identity1}').get_output_in_json()
+        identity2_json = self.cmd('identity create -g {rg} -n {identity2}').get_output_in_json()
+        # identity1_json = self.cmd('identity show -g {rg} -n {identity1}').get_output_in_json()
+        identity1_id = identity1_json['id']
+        identity2_id = identity2_json['id']
+        identity1_principalId = identity1_json['principalId']
+        identity2_principalId = identity2_json['principalId']
+        self.kwargs.update({
+            'identity1_id': identity1_id,
+            'identity1_principalId': identity1_principalId,
+            'identity2_id': identity2_id,
+            'identity2_principalId': identity2_principalId
+        })
+
+        self.cmd(
+            'keyvault set-policy -n {vault} --object-id {identity1_principalId} --key-permissions wrapKey unwrapKey get')
+        self.cmd(
+            'keyvault set-policy -n {vault} --object-id {identity2_principalId} --key-permissions wrapKey unwrapKey get')
+
+        # create disk encryption set with system and user assigned identity
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
+                 '--mi-system-assigned --mi-user-assigned {identity1_id} {identity2_id} --federatedClientId {tenantId} '
+                 '--encryption-type EncryptionAtRestWithCustomerKey', checks=[
+            self.check('', '{tenantId}'),
+            self.check('', 'SystemAssigned, UserAssigned'),
+            self.check('', '{identity1_id}')
+        ])
+
+        # create disk encryption set with user assigned identity
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault} '
+                 '--mi-user-assigned {identity1_id} {identity2_id} --federatedClientId {tenantId} '
+                 '--encryption-type EncryptionAtRestWithCustomerKey', checks=[
+            self.check('', '{tenantId}'),
+            self.check('', 'UserAssigned'),
+            self.check('', '{identity1_id}')
+        ])
+
+        # create disk encryption set with system assigned identity
+        self.cmd('disk-encryption-set create -g {rg} -n {des3} --key-url {kid} --source-vault {vault} '
+                 '--mi-system-assigned --encryption-type EncryptionAtRestWithCustomerKey', checks=[
+            self.check('', 'SystemAssigned')
+        ])
+
+        # update disk encryption set
+        self.cmd('disk-encryption-set update -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
+                 '--federatedClientId None', checks=[
+            self.check('', 'null')
+        ])
+
+        # assign identities in disk encryption set
+        self.cmd('disk-encryption-set identity assign -g {rg} -n {des3} --user-assigned {identity1_id}', checks=[
+            self.check('', 'null')
+        ])
+
+        self.cmd('disk-encryption-set identity show -g {rg} -n {des3}', checks=[
+            self.check('', 'null')
+        ])
+
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des3} --system-assigned', checks=[
+            self.check('', 'null')
+        ])
+
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des3} --user-assigned', checks=[
+            self.check('', 'null')
+        ])
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault1-', name_len=20, key='vault1', parameter_name='key_vault1', location='westcentralus', additional_params='--enable-purge-protection')
     @KeyVaultPreparer(name_prefix='vault2-', name_len=20, key='vault2', parameter_name='key_vault2', location='westcentralus', additional_params='--enable-purge-protection')

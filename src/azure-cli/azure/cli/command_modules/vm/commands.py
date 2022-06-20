@@ -250,16 +250,16 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
+        g.custom_command('identity assign', 'assign_disk_encryption_set_identity', min_api='2022-03-02')
+        g.custom_command('identity remove', 'remove_disk_encryption_set_identity', min_api='2022-03-02')
+        g.custom_show_command('identity show', 'show_disk_encryption_set_identity', min_api='2022-03-02')
+
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
         g.command('delete', 'begin_delete')
         g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
         g.command('list-associated-resources', 'list_associated_resources', min_api='2020-06-30')
-
-    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, min_api='2021-08-01') as g:
-        g.command('assign', 'assign_identity')
-        g.command('remove', 'remove_identity')
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
