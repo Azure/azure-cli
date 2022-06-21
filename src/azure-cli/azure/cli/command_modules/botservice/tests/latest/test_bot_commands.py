@@ -19,6 +19,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioT
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError
+from .exceptions import CliExecutionError
 
 class DirectLineClient(object):
     """Shared methods for the parsed result objects."""
@@ -349,7 +350,7 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
-        except ResourceNotFoundError:
+        except CliExecutionError:
             # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
             pass
         except AssertionError:
