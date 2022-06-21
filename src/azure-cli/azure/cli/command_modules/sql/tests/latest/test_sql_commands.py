@@ -5,6 +5,7 @@
 
 import time
 import os
+import unittest
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, live_only
@@ -32,7 +33,6 @@ from azure.cli.command_modules.sql.custom import (
     ComputeModelType,
     ResourceIdType)
 from datetime import datetime, timedelta
-from time import sleep
 
 # Constants
 server_name_prefix = 'clitestserver'
@@ -88,7 +88,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     target_subnet_name = 'ManagedInstance2'
     target_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, target_vnet_name, target_subnet_name)
     target_subnet_vcores = 4
-    
+
     collation = "Serbian_Cyrillic_100_CS_AS"
 
     licence = 'LicenseIncluded'
@@ -271,7 +271,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('identity.type', 'SystemAssigned'),
                      JMESPathCheck('federatedClientId', federated_client_id_1)])
-        
+
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name_3),
                  checks=[
@@ -296,7 +296,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('federatedClientId', None)])
-                     
+
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
@@ -1122,8 +1122,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
         # Managed instance becomes ready before the operation is completed. For that reason, we should wait
         # for the operation to complete in order to proceed with testing.
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         print('Updating MI...\n')
 
@@ -1183,6 +1182,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         print('Arguments are updated with login and sid data')
 
+        with self.assertRaisesRegexp(SystemExit, "2"):
+            self.cmd('sql server ad-admin create -s {sn} -g {rg}')
+        with self.assertRaisesRegexp(SystemExit, "2"):
+            self.cmd('sql server ad-admin create -s {sn} -g {rg} -u {user}')
+        with self.assertRaisesRegexp(SystemExit, "2"):
+            self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid}')
+
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
                  checks=[
                      self.check('login', '{user}'),
@@ -1192,13 +1198,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                  checks=[
                      self.check('[0].login', '{user}'),
                      self.check('[0].sid', '{oid}')])
-        
+
         self.cmd('sql server ad-admin update -s {sn} -g {rg}'
                  ' -u {user2} -i {oid2}',
                  checks=[
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
-        
+
         self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
@@ -1326,7 +1332,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     # Wait until earliestRestoreDate is in the past. When run live, this will take at least
     # 10 minutes. Unforunately there's no way to speed this up
     while db['earliestRestoreDate'] is None:
-        sleep(60)
+        time.sleep(60)
         db = test.cmd('sql db show -g {} -s {} -n {}'
                       .format(resource_group, server, database_name)).get_output_in_json()
 
@@ -1336,7 +1342,7 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
         print('Waiting until earliest restore date', earliest_restore_date)
 
     while datetime.utcnow() <= earliest_restore_date:
-        sleep(10)  # seconds
+        time.sleep(10)
 
     return db
 
@@ -1453,7 +1459,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
             # Deleted db not found, sleep (if running live) and then poll again.
             if self.is_live:
                 self.assertTrue(datetime.now() < start_time + timeout, 'Deleted db not found before timeout expired.')
-                sleep(10)  # seconds
+                time.sleep(10)  # seconds
 
         deleted_db = deleted_dbs[0]
 
@@ -2740,8 +2746,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('elasticPoolName', self.pool_name)])
 
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         # Move database to second pool by specifying pool name.
         # Also specify service objective just for fun.
@@ -2761,8 +2766,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('elasticPoolName', pool_name2)])
 
-        if self.is_live:
-            sleep(60)
+        time.sleep(60)
 
         # Remove database from pool
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
@@ -2774,8 +2778,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
                      JMESPathCheck('status', 'Online')])
 
-        if self.is_live:
-            sleep(60)
+        time.sleep(60)
 
         # Move database back into pool by specifying pool id.
         # Note that 'elasticPoolName' is populated in transform
@@ -2954,6 +2957,85 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('databaseDtuMin', None),
                      JMESPathCheck('databaseDtuMax', None)])
 
+    @ResourceGroupPreparer(name_prefix='clitest-HSEP', location='eastus2')
+    @SqlServerPreparer(name_prefix='clitest-HSEP', location='eastus2')
+    @AllowLargeResponse()
+    def test_sql_elastic_pools_hyperscale_mgmt(self, resource_group, resource_group_location, server):
+        pool_name = "cliautomationpool1"
+
+        # Create pool with hyperscale edition
+        vcore_edition = 'Hyperscale'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, pool_name, vcore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
+                 .format(resource_group, server, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+
+        # Update only high availability replica count to 2
+        replica_count_updated = 2
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --ha-replicas {}'
+                 .format(resource_group, server, pool_name, replica_count_updated),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count_updated)])
+
+        # Create pool with hyperscale edition and 2 high availability replicas
+        vcore_edition = 'Hyperscale'
+        pool_name = "cliautomationpool2"
+        replica_count = 2
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --ha-replicas {}'
+                 .format(resource_group, server, pool_name, vcore_edition, replica_count),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)])
+
+        # Create a database inside the hyperscale elastic pool.
+        database_name = "cliautomationdb01"
+        self.cmd('sql db create -g {} --server {} --name {} '
+                 '--elastic-pool {}'
+                 .format(resource_group, server, database_name, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)])
+
+        # Remove database from pool
+        db_service_objective = 'HS_Gen5_4'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
+                 .format(resource_group, server, database_name, db_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolId', None),
+                     JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
 
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
@@ -3410,7 +3492,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql db tde set -g {} -s {} -d {} --status Disabled'
                  .format(resource_group, sn, db_name))
 
-        sleep(5)
+        time.sleep(5)
 
         self.cmd('sql db tde show -g {} -s {} -d {}'
                  .format(resource_group, sn, db_name),
@@ -3420,7 +3502,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('sql db tde set -g {} -s {} -d {} --status Enabled'
                  .format(resource_group, sn, db_name))
 
-        sleep(5)
+        time.sleep(5)
 
         # validate encryption is enabled
         self.cmd('sql db tde show -g {} -s {} -d {}'
@@ -3489,7 +3571,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                      JMESPathCheck('serverKeyName', server_key_name),
                      JMESPathCheck('uri', kid)])
                      # JMESPathCheck('autoRotationEnabled', True) - property is removed from backend
-                     
+
 
         # validate encryption protector is akv via show
         self.cmd('sql server tde-key show -g {} -s {}'
@@ -3911,7 +3993,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
                      JMESPathCheck('zoneRedundant', False)])
 
-		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
                  .format(resource_group, server, source_zr_db_name, "Hyperscale", 'Gen5', 2, 'zone', True),
@@ -3999,14 +4081,14 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} '
                  '--partner-database {} --backup-storage-redundancy {} --z'
-                 .format(resource_group_pri, server_name_pri, non_zr_db_name_1, 
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_1,
                          resource_group_sec, server_name_sec, pri_non_zr_true_param_db_name, 'zone'),
                  checks=[
 					 JMESPathCheck('name', pri_non_zr_true_param_db_name),
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
                  .format(resource_group_pri, server_name_pri, zr_db_name_1, "Hyperscale", 'Gen5', 2, 'zone', True),
@@ -4024,7 +4106,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} '
                  '--partner-database {} --z {}'
-                 .format(resource_group_pri, server_name_pri, zr_db_name_1, 
+                 .format(resource_group_pri, server_name_pri, zr_db_name_1,
                          resource_group_sec, server_name_sec, pri_zr_false_param_db_name, False),
                  checks=[
 					 JMESPathCheck('name', pri_zr_false_param_db_name),
@@ -4048,14 +4130,14 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Create secondary vldb replica from non zone redundant primary vldb with no parameters passed in
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == false and backup storage redundancy == geo)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} --partner-database {}'
-                 .format(resource_group_pri, server_name_pri, non_zr_db_name_2, 
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_2,
                          resource_group_sec, server_name_sec, pri_non_zr_no_param_db_name),
                  checks=[
 					 JMESPathCheck('name', pri_non_zr_no_param_db_name),
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
                      JMESPathCheck('zoneRedundant', False)])
 
-		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant'
                  .format(resource_group_pri, server_name_pri, zr_db_name_2, "Hyperscale", 'Gen5', 2, 'zone'),
@@ -4072,7 +4154,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Create secondary vldb replica from zone redundant primary vldb with no parameters passed in
         # Verify created secondary vldb replica has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} --partner-database {}'
-                 .format(resource_group_pri, server_name_pri, zr_db_name_2, 
+                 .format(resource_group_pri, server_name_pri, zr_db_name_2,
                          resource_group_sec, server_name_sec, pri_zr_no_param_db_name),
                  checks=[
 					 JMESPathCheck('name', pri_zr_no_param_db_name),
@@ -4105,7 +4187,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
                      JMESPathCheck('zoneRedundant', False)])
 
-		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone 
+		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone
         # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
                  .format(resource_group, server, source_zr_db_name, "Hyperscale", 'Gen5', 2, 'zone', True),
@@ -4123,7 +4205,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} '
                  '--edition {} --family {} --capacity {} --backup-storage-redundancy {} --z'
-                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(), 
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(),
                          "Hyperscale", 'Gen5', 2, 'zone'),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -4438,6 +4520,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         tls1_2 = "1.2"
         tls1_1 = "1.1"
         user = admin_login
+        service_principal_type = "SystemAssigned"
 
         # test show sql managed instance 1
         subnet = ManagedInstancePreparer.subnet
@@ -4478,8 +4561,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # Managed instance becomes ready before the operation is completed. For that reason, we should wait
         # for the operation to complete in order to proceed with testing.
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
@@ -4570,6 +4652,14 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('subnetId', subnet)])
 
+        # test Service Principal update
+        self.cmd('sql mi update -g {} -n {} --service-principal-type {}'
+            .format(resource_group_1, managed_instance_name_1, service_principal_type),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('servicePrincipal.type', service_principal_type)])
+
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
@@ -4591,8 +4681,8 @@ class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
                 JMESPathCheck('resourceGroup', resource_group_1),
                 JMESPathCheck('currentBackupStorageRedundancy', self.bsr_geo),
                 JMESPathCheck('requestedBackupStorageRedundancy', self.bsr_geo)])
-        if self.is_live:
-            sleep(120)
+
+        time.sleep(120)
 
         bsr_local = "Local"
         # Test update bsr to Local
@@ -4604,8 +4694,7 @@ class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
                 JMESPathCheck('currentBackupStorageRedundancy', bsr_local),
                 JMESPathCheck('requestedBackupStorageRedundancy', bsr_local)])
 
-        if self.is_live:
-            sleep(120)
+        time.sleep(120)
 
         # Test update bsr to Geo
         self.cmd('sql mi update -g {} -n {} --bsr {} --yes'
@@ -4763,6 +4852,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ManagedInstancePreparer(
         identity_type=ResourceIdType.system_assigned.value
     )
@@ -4843,7 +4933,7 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                 self.check('serverKeyType', 'AzureKeyVault'),
                 self.check('serverKeyName', '{server_key_name}'),
                 self.check('uri', '{kid}')])
-                
+
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
                  checks=[
@@ -5833,7 +5923,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
         # Wait for 5 minutes so that first full backup is created
         if self.in_recording or self.is_live:
-            sleep(5 * 60)
+            time.sleep(5 * 60)
 
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
@@ -5873,7 +5963,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             checks=NoneCheck())
 
         if self.in_recording or self.is_live:
-            sleep(10)
+            time.sleep(10)
 
         self.cmd(
             'sql midb log-replay wait -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --exists')
@@ -5884,7 +5974,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             checks=NoneCheck())
 
         if self.in_recording or self.is_live:
-            sleep(60)
+            time.sleep(60)
 
         # Verify status is Online
         self.cmd('sql midb show -g {resource_group} --mi {managed_instance_name} -n {managed_database_name}',
@@ -5906,7 +5996,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         # Wait a minute to start restoring
         if self.in_recording or self.is_live:
-            sleep(60)
+            time.sleep(60)
 
         # Cancel log replay service
         self.cmd(
@@ -5939,7 +6029,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads enable -g {} -s {} --name {} --endpoint {}'
                  .format(resource_group, server, db_name, endpoint))
 
-        sleep(2)
+        time.sleep(2)
 
         # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
@@ -5951,7 +6041,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads disable -g {} -s {} --name {}'
                  .format(resource_group, server, db_name))
 
-        sleep(2)
+        time.sleep(2)
 
         # validate setting through show command
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'

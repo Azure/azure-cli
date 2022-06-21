@@ -46,7 +46,7 @@ from azure.mgmt.media.models import (Priority, AssetContainerPermission, LiveEve
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
-    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='name', help='The name of the Azure Media Services account.', metavar='NAME')
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='name', help='The name of the resource.', metavar='NAME')
     account_name_arg_type = CLIArgumentType(options_list=['--account-name', '-a'], id_part='name', help='The name of the Azure Media Services account.', metavar='ACCOUNT_NAME')
     storage_account_arg_type = CLIArgumentType(options_list=['--storage-account'], validator=validate_storage_account_id, metavar='STORAGE_NAME')
     password_arg_type = CLIArgumentType(options_list=['--password', '-p'], metavar='PASSWORD_NAME')
@@ -202,6 +202,30 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams asset-filter list') as c:
         c.argument('account_name', id_part=None)
+
+    with self.argument_context('ams asset-track') as c:
+        c.argument('account_name', account_name_arg_type)
+        c.argument('asset_name', help='The asset name')
+        c.argument('track_name', help='The name of the track.')
+
+    with self.argument_context('ams asset-track create') as c:
+        c.argument('track_type', help='The type of track. Allowed values: Text.')
+        c.argument('file_name', help='The name of the file.'
+                                     ' Note: this file should already be uploaded to the storage container.', arg_group='Text Track')
+        c.argument('display_name', help='The display name of the text track on a video player.'
+                                        ' In HLS, this maps to the NAME attribute of EXT-X-MEDIA.', arg_group='Text Track')
+        c.argument('language_code', arg_group='Text Track', help='The RFC5646 language code for the text track.')
+        c.argument('player_visibility', arg_group='Text Track', help='When PlayerVisibility is set to "Visible", the text track will be present in the DASH manifest or HLS playlist when requested by a client. When the PlayerVisibility is set to "Hidden", the text will not be available to the client. The default value is "Visible". Possible values include: "Hidden", "Visible".')
+
+    with self.argument_context('ams asset-track list') as c:
+        c.argument('account_name', id_part=None)
+
+    with self.argument_context('ams asset-track update') as c:
+        c.argument('track_type', help='The type of track. Allowed values: Audio, Text, Video.')
+        c.argument('display_name', arg_group='Text Track', help='The display name of the text track on a video player.'
+                   ' In HLS, this maps to the NAME attribute of EXT-X-MEDIA.')
+        c.argument('language_code', arg_group='Text Track', help='The RFC5646 language code for the text track.')
+        c.argument('player_visibility', arg_group='Text Track', help='When PlayerVisibility is set to "Visible", the text track will be present in the DASH manifest or HLS playlist when requested by a client. When the PlayerVisibility is set to "Hidden", the text will not be available to the client. The default value is "Visible". Possible values include: "Hidden", "Visible".')
 
     with self.argument_context('ams job') as c:
         c.argument('account_name', account_name_arg_type)

@@ -36,6 +36,7 @@ from._featuremodels import (map_keyvalue_to_featureflag,
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
+FEATURE_FLAG_PROPERTIES = {'id', 'description', 'enabled', 'conditions'}
 
 
 class FeatureManagementReservedKeywords:
@@ -593,7 +594,7 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
 
 
 def __print_features_preview(old_json, new_json, strict=False):
-    logger.warning('\n---------------- Feature Flags Preview (Beta) -------------')
+    logger.warning('\n---------------- Feature Flags Preview -------------')
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
@@ -645,7 +646,7 @@ def __print_features_preview(old_json, new_json, strict=False):
 
 
 def __print_preview(old_json, new_json, strict=False):
-    logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
+    logger.warning('\n---------------- Key Values Preview ----------------')
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
@@ -699,7 +700,7 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
     obj = {KVSetConstants.KVSETRootElementName: kvset}
     json_string = json.dumps(obj, indent=2, ensure_ascii=False)
     if not yes:
-        logger.warning('\n---------------- KVSet Preview (Beta) ----------------')
+        logger.warning('\n---------------- KVSet Preview ----------------')
         if len(kvset) == 0:
             logger.warning('\nSource configuration is empty. Nothing to export.')
             return
@@ -713,7 +714,7 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
 
 
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
-    logger.warning('\n---------------- Preview (Beta) ----------------')
+    logger.warning('\n---------------- Preview ----------------')
     if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
         logger.warning('\nNo records matching found to be restored. No changes will be made.')
         return False
@@ -1085,7 +1086,7 @@ def __import_kvset_from_file(client, path, strict, yes):
         existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
         kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
 
-        logger.warning('\n---------------- KVSet Preview (Beta) ----------------')
+        logger.warning('\n---------------- KVSet Preview ----------------')
         changes_detected = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
         if not changes_detected:
             logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
@@ -1127,7 +1128,7 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature(kv.key):
         try:
             ff = json.loads(kv.value)
-            if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
+            if FEATURE_FLAG_PROPERTIES == ff.keys():
                 return True
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:

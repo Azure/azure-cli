@@ -11,6 +11,9 @@ from .proxy import Proxy
 LPWSTR = POINTER(WCHAR)
 HINTERNET = LPVOID
 
+# TODO: this file is deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
+
 
 class WinProxy(Proxy):
     INTERNET_PER_CONN_PROXY_SERVER = 2

@@ -61,6 +61,7 @@ from azure.mgmt.sql.models import (
     ServerNetworkAccessFlag,
     ServiceObjectiveName,
     ServerTrustGroup,
+    ServicePrincipal,
     ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
@@ -422,6 +423,20 @@ def _get_tenant_id():
     return sub['tenantId']
 
 
+def _get_service_principal_object_from_type(servicePrincipalType):
+    '''
+    Gets the service principal object from type.
+    '''
+    servicePrincipalResult = None
+
+    if (servicePrincipalType is not None and
+        (servicePrincipalType == ServicePrincipalType.system_assigned.value or
+         servicePrincipalType == ServicePrincipalType.none.value)):
+        servicePrincipalResult = ServicePrincipal(type=servicePrincipalType)
+
+    return servicePrincipalResult
+
+
 def _get_identity_object_from_type(
         assignIdentityIsPresent,
         resourceIdentityType,
@@ -601,6 +616,14 @@ class ResourceIdType(Enum):
     system_assigned = 'SystemAssigned'
     user_assigned = 'UserAssigned'
     system_assigned_user_assigned = 'SystemAssigned,UserAssigned'
+    none = 'None'
+
+
+class ServicePrincipalType(Enum):
+    '''
+    Types of service principal.
+    '''
+    system_assigned = 'SystemAssigned'
     none = 'None'
 
 
@@ -3304,7 +3327,8 @@ def elastic_pool_update(
         tier=None,
         family=None,
         capacity=None,
-        maintenance_configuration_id=None):
+        maintenance_configuration_id=None,
+        high_availability_replica_count=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3342,6 +3366,9 @@ def elastic_pool_update(
     instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
         maintenance_configuration_id)
+
+    if high_availability_replica_count is not None:
+        instance.high_availability_replica_count = high_availability_replica_count
 
     return instance
 
@@ -4248,6 +4275,7 @@ def managed_instance_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        service_principal_type=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4258,6 +4286,7 @@ def managed_instance_create(
     else:
         kwargs['identity'] = _get_identity_object_from_type(False, identity_type, user_assigned_identity_id, None)
 
+    kwargs['service_principal'] = _get_service_principal_object_from_type(service_principal_type)
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
@@ -4364,7 +4393,8 @@ def managed_instance_update(
         identity_type=None,
         user_assigned_identity_id=None,
         virtual_network_subnet_id=None,
-        yes=None):
+        yes=None,
+        service_principal_type=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4375,6 +4405,9 @@ def managed_instance_update(
         identity_type,
         user_assigned_identity_id,
         instance.identity)
+
+    # Assigning Service Principal to instance
+    instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
     instance.administrator_login_password = (

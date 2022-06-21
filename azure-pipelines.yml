@@ -386,15 +386,10 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       echo "== Testing pip install on Python 3.8 =="
+       echo "== Testing pip install on Python 3.9 =="
        docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
-       # echo "== Testing pip install on Python 3.9 =="
-       # docker run \
-       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.10 =="
        docker run \
@@ -412,8 +407,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -433,8 +426,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -457,8 +448,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:
@@ -472,90 +461,6 @@ jobs:
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
-
-- job: AutomationTest
-  displayName: Automation Test (Profile Latest)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: 'latest'
-
-- job: AutomationTest20200901
-  displayName: Automation Test (Profile 2020-09-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2020-09-01-hybrid'
-
-- job: AutomationTest20190301
-  displayName: Automation Test (Profile 2019-03-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2019-03-01-hybrid'
-
-- job: AutomationTest20180301
-  displayName: Automation Test (Profile 2018-03-01)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2018-03-01-hybrid'
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
@@ -705,12 +610,23 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      1.0:
+        image: cblmariner.azurecr.io/base/core
+        tag: 1.0
+      2.0:
+        image: mcr.microsoft.com/cbl-mariner/base/core
+        tag: 2.0
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+    env:
+      IMAGE: $(image)
+      TAG: $(tag)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -721,7 +637,7 @@ jobs:
     displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-mariner
+      ArtifactName: rpm-mariner$(tag)
 
 
 - job: BuildRpmPackageCentOS7
@@ -816,18 +732,12 @@ jobs:
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
-
-  dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       # https://wiki.ubuntu.com/Releases
-      Xenial:
-        # 16.04
-        deb_system: ubuntu
-        distro: xenial
       Bionic:
         # 18.04
         deb_system: ubuntu
@@ -840,12 +750,12 @@ jobs:
         # 21.10
         deb_system: ubuntu
         distro: impish
+      Jammy:
+        # 22.04
+        deb_system: ubuntu
+        distro: jammy
 
       # https://wiki.debian.org/DebianReleases
-      Stretch:
-        # 9
-        deb_system: debian
-        distro: stretch
       Buster:
         # 10
         deb_system: debian
@@ -855,12 +765,6 @@ jobs:
         deb_system: debian
         distro: bullseye
   steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
@@ -883,7 +787,6 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-
   dependsOn:
    - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -892,9 +795,15 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
+      Jammy:
+        deb_system: ubuntu
+        distro: jammy
       Buster:
         deb_system: debian
         distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -964,8 +873,6 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-      Python38:
-        python.version: '3.8'
       Python39:
         python.version: '3.9'
       Python310:

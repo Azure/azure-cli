@@ -22,7 +22,7 @@ class IoTHubTest(ScenarioTest):
     @StorageAccountPreparer()
     @unittest.skip('Need to try with passing SAS key in environment.')  # TODO
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
-        hub = 'iot-hub-for-test-11'
+        hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group
         location = resource_group_location
         containerName = 'iothubcontainer1'
@@ -402,7 +402,7 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         private_endpoint_type = 'Microsoft.Devices/IoTHubs'
-        identity_hub = 'identity-test-hub-cli'
+        identity_hub = self.create_random_name(prefix='identitytesthub', length=32)
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
@@ -518,8 +518,8 @@ class IoTHubTest(ScenarioTest):
                  .format(private_endpoint_type, private_endpoint_name, identity_hub, rg))
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest1'
-        eventHub = 'eventHubiothubfortest'
+        ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest', length=32)
+        eventHub = self.create_random_name(prefix='eventHubiothubfortest', length=32)
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
 
