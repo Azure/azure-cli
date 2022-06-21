@@ -2007,6 +2007,46 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
         identities = [MSI_LOCAL_ID]
 
     return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, setter)
+
+
+# region VirtualMachines Identity
+def _remove_disk_encryption_set_identities(cmd, resource_group_name, name,
+                                           mi_system_assigned, mi_user_assigned, getter, setter):
+    IdentityType = cmd.get_models('DiskEncryptionSetIdentityType', resource_type=ResourceType.MGMT_COMPUTE)
+    remove_system_assigned_identity = mi_system_assigned is not None
+
+    resource = getter(cmd, resource_group_name, name)
+    if resource is None or resource.identity is None:
+        return None
+
+    user_identities_to_remove = []
+    if mi_user_assigned:
+        existing_user_identities = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
+        user_identities_to_remove = {x.lower() for x in mi_user_assigned}
+        non_existing = user_identities_to_remove.difference(existing_user_identities)
+        if non_existing:
+            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+        if not list(existing_user_identities - user_identities_to_remove):  # if all emsis are gone, we need to update the type
+            resource.identity.type = IdentityType.SYSTEM_ASSIGNED
+            if resource.identity.type == IdentityType.USER_ASSIGNED:
+                resource.identity.type = IdentityType.NONE
+            elif resource.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+                resource.identity.type = IdentityType.SYSTEM_ASSIGNED
+
+    resource.identity.user_assigned_identities = None
+    if remove_system_assigned_identity:
+        resource.identity.type = (IdentityType.NONE
+                                  if resource.identity.type == IdentityType.SYSTEM_ASSIGNED
+                                  else IdentityType.USER_ASSIGNED)
+
+    if user_identities_to_remove:
+        if resource.identity.type not in [IdentityType.NONE, IdentityType.SYSTEM_ASSIGNED]:
+            resource.identity.user_assigned_identities = {}
+            for identity in user_identities_to_remove:
+                resource.identity.user_assigned_identities[identity] = None
+
+    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+    return result.identity
 # endregion
 
 
@@ -3312,45 +3352,19 @@ def _build_disk_encryption_set_identities_info(cmd, identities):
 def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned):
     IdentityType = cmd.get_models('DiskEncryptionSetIdentityType', resource_type=ResourceType.MGMT_COMPUTE)
     UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue', resource_type=ResourceType.MGMT_COMPUTE)
+
     identity_types = IdentityType.SYSTEM_ASSIGNED
     user_assigned_identities = None
-    # if mi_system_assigned:
-    #     identity_types = IdentityType.SYSTEM_ASSIGNED
-
     if mi_user_assigned:
         if mi_system_assigned:
             identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
         else:
             identity_types = IdentityType.USER_ASSIGNED
-        #     if parameter.identity.type == IdentityType.SYSTEM_ASSIGNED:
-        #         parameter.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
-        #     else:
-        #         parameter.identity.type = IdentityType.USER_ASSIGNED
-        # else:
-        #     parameter.identity = Identity(type=IdentityType.USER_ASSIGNED)
 
         default_user_identity = UserAssignedIdentitiesValue()
-        # user_assigned_identities = {}
-        # for identity in mi_user_assigned:
-        #     user_assigned_identities[identity] = UserAssignedIdentitiesValue()
         user_assigned_identities = dict.fromkeys(mi_user_assigned, default_user_identity)
 
     return identity_types, user_assigned_identities
-
-
-    # info = {}
-    # identity_types = []
-    # if mi_user_assigned:
-    #     if mi_system_assigned:
-    #         identity_types.append('SystemAssigned')
-    #     identity_types.append('UserAssigned')
-    #     info['userAssignedIdentities'] = {e: UserAssignedIdentitiesValue() for e in mi_user_assigned}
-    # else:
-    #     identity_types.append('SystemAssigned')
-    # identity_types = ', '.join(identity_types)
-    #
-    # info['type'] = identity_types
-    # return info
 
 
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
@@ -4627,37 +4641,24 @@ def create_disk_encryption_set(
         mi_system_assigned=None, mi_user_assigned=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault, IdentityType = cmd.get_models(
-        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault',
-        'DiskEncryptionSetIdentityType')
-    # IdentityType = cmd.get_models('DiskEncryptionSetIdentityType')
+    DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
+        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
 
-    identity_type = IdentityType.SYSTEM_ASSIGNED
+    identity_type = 'SystemAssigned'
     user_assigned_identities = None
     if cmd.supported_api_version(min_api='2022-03-02'):
         identity_type, user_assigned_identities = \
             _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned)
-        # identities = None
-        # from ._vm_utils import MSI_LOCAL_ID
-        # if mi_system_assigned is not None:
-        #     identities = [MSI_LOCAL_ID]
-        # elif mi_user_assigned is not None:
-        #     identities = [mi_user_assigned]
-        #
-        # if identities is not None:
-        #     identity_type, user_assigned_identities = _build_identities_info_from_system_user_assigned(cmd, identities)
-        # assignment.identity = identity
 
-    # from azure.cli.core.profiles import ResourceType
-    # if cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
-    #                              operation_group='disk_encryption_sets', min_api='2021-08-01'):
-    #     identity_info = _build_disk_encryption_set_identities_info(cmd, mi_system_assigned, mi_user_assigned)
-    # else:
-    #     identity_info = {'type': 'SystemAssigned'}
+    # if federatedClientId is not None and federatedClientId.lower() == 'none':
+    #         federatedClientId = 'None'
 
     encryption_set_identity = EncryptionSetIdentity(type=identity_type)
-    if hasattr(encryption_set_identity, 'user_assigned_identities') and user_assigned_identities is not None:
-        setattr(encryption_set_identity, 'user_assigned_identities', user_assigned_identities)
+    if user_assigned_identities is not None:
+        if not hasattr(encryption_set_identity, 'user_assigned_identities'):
+            # TODO need to throw an exception?
+            raise CLIError('')
+        encryption_set_identity.user_assigned_identities = user_assigned_identities
 
     if source_vault is not None:
         if not is_valid_resource_id(source_vault):
@@ -4666,14 +4667,17 @@ def create_disk_encryption_set(
                                        namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
         source_vault = SourceVault(id=source_vault)
 
-    if federatedClientId is not None and federatedClientId.lower() == 'none':
-        federatedClientId = None
-
     key_for_disk_emcryption_set = KeyForDiskEncryptionSet(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
                                             active_key=key_for_disk_emcryption_set, encryption_type=encryption_type,
-                                            rotation_to_latest_key_version_enabled=enable_auto_key_rotation,
-                                            federated_client_id=federatedClientId)
+                                            rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
+
+    if federatedClientId is not None:
+        if not hasattr(disk_encryption_set, 'federated_client_id'):
+            # TODO need to throw an exception?
+            raise CLIError('')
+        disk_encryption_set.federated_client_id = federatedClientId
+
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
 
@@ -4702,8 +4706,6 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
 
     if federatedClientId is not None:
-        if federatedClientId.lower() == 'none':
-            federatedClientId = None
         if not hasattr(instance, 'federated_client_id'):
             # TODO need to throw an exception?
             raise CLIError('')
@@ -4717,25 +4719,43 @@ def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
     DiskEncryptionSetUpdate, EncryptionSetIdentity = cmd.get_models('DiskEncryptionSetUpdate', 'EncryptionSetIdentity')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
-    identity_types, user_assigned_identities = _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned,
-                                                                                                mi_user_assigned)
+    # identity_types, user_assigned_identities = _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned,
+    #                                                                                             mi_user_assigned)
 
     def getter():
         return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
 
-    def setter(disk_encryption_set, identity_types=identity_types, user_assigned_identities=user_assigned_identities):
-        if user_assigned_identities:
+    def setter(disk_encryption_set, mi_system_assigned=mi_system_assigned, mi_user_assigned=mi_user_assigned):
+        if mi_system_assigned or mi_user_assigned:
             if not cmd.supported_api_version(min_api='2022-03-02', resource_type=ResourceType.MGMT_COMPUTE):
                 raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
                                        "You can set the cloud's profile to latest with 'az cloud set --profile latest"
                                        " --name <cloud name>'")
 
+        IdentityType = cmd.get_models('DiskEncryptionSetIdentityType', resource_type=ResourceType.MGMT_COMPUTE)
+        existing_system_identity = False
+        existing_user_identities = set()
+        if disk_encryption_set.identity is not None:
+            existing_system_identity = disk_encryption_set.identity.type in [IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED,
+                                                                             IdentityType.SYSTEM_ASSIGNED]
+            existing_user_identities = {x.lower() for x in
+                                        list((disk_encryption_set.identity.user_assigned_identities or {}).keys())}
+
+        add_system_assigned = mi_system_assigned is True
+        add_user_assigned = {x.lower() for x in (mi_user_assigned or [])}
+
+        updated_system_assigned = existing_system_identity or add_system_assigned
+        updated_user_assigned = list(existing_user_identities | add_user_assigned)
+
+        identity_types, user_assigned_identities = _build_identities_info_from_system_user_assigned(
+            cmd, updated_system_assigned, updated_user_assigned)
+
         encryption_set_identity = EncryptionSetIdentity(type=identity_types,
                                                         user_assigned_identities=user_assigned_identities)
-        disk_encryption_set.identity = encryption_set_identity
+        # disk_encryption_set.identity = encryption_set_identity
 
         disk_encryption_set_update = DiskEncryptionSetUpdate()
-        disk_encryption_set_update.identity = disk_encryption_set.identity
+        disk_encryption_set_update.identity = encryption_set_identity
         return patch_disk_encryption_set(cmd, resource_group_name, disk_encryption_set_name, disk_encryption_set_update)
 
     assign_identity_helper(cmd.cli_ctx, getter, setter)
@@ -4757,14 +4777,9 @@ def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
                                                         disk_encryption_set_update)
 
     # TODO mi_user_assigned size 0 will remove all
-    identities = []
-    if mi_system_assigned is not None:
-        from ._vm_utils import MSI_LOCAL_ID
-        identities = [MSI_LOCAL_ID]
-    if mi_user_assigned is not None:
-        identities.extend(mi_user_assigned)
 
-    return _remove_identities(cmd, resource_group_name, disk_encryption_set_name, identities, getter, setter)
+    return _remove_disk_encryption_set_identities(cmd, resource_group_name, disk_encryption_set_name,
+                                                  mi_system_assigned, mi_user_assigned, getter, setter)
 
 
 def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name):
