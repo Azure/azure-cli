@@ -56,7 +56,7 @@ class Acquire(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.old_managed_server_dns_alias_resource_id = AAZStrArg(
-            options=["--old-id", "--source-alias-id", "--old-managed-server-dns-alias-resource-id"],
+            options=["--source-id", "--source-alias-id", "--old-managed-server-dns-alias-resource-id"],
             arg_group="Parameters",
             help="The resource ID of the managed server DNS alias that will be acquired to point to this managed server instead.",
         )
@@ -81,7 +81,7 @@ class Acquire(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -90,7 +90,7 @@ class Acquire(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
