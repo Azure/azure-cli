@@ -1036,12 +1036,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
                  '--gallery-image-version {version} --virtual-machine {vm_id}')
 
-        public_name = self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
+        self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('length(sharingProfile.communityGalleryInfo.publicNames)', '1')
         ]).get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
-        community_gallery_image_version = '/CommunityGalleries/' + public_name + '/Images/' + self.kwargs['image1'] \
-                                          + '/Versions/' + self.kwargs['version']
+        community_gallery_image_version = self.cmd(
+            'sig image-version show-community --gallery-image-definition {image1} --public-gallery-name {public_name} '
+            '--location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
         self.kwargs.update({'community_gallery_image_version': community_gallery_image_version})
 
         # test creating disk from community gallery image version
