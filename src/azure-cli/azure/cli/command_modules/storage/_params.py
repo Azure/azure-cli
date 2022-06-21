@@ -1885,8 +1885,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
         c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
         c.argument('open_mode', help="Mode to use when opening the file. Note that specifying append only "
-                                "open_mode prevents parallel download. So, --max-connections must be "
-                                "set to 1 if this --open-mode is used.")
+                                     "open_mode prevents parallel download. So, --max-connections must be "
+                                     "set to 1 if this --open-mode is used.")
         c.extra('validate_content', help="If set to true, validates an MD5 hash for each retrieved portion of the file."
                                          " This is primarily valuable for detecting bitflips on the wire if using "
                                          "http instead of https as https (the default) will already validate. "

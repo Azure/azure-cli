@@ -550,11 +550,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('migrate-vlw', 'begin_object_level_worm', supports_no_wait=True, is_preview=True)
 
-    file_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',
-        client_factory=file_data_service_factory,
-        resource_type=ResourceType.DATA_STORAGE)
-
     share_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.fileshare._share_client#ShareClient.{}',
         client_factory=cf_share_client,
