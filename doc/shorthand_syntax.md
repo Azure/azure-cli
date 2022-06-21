@@ -6,6 +6,27 @@ Azure cli shorthand syntax can help cli users to pass complicated argument value
 
 The command lines written in shorthand syntax can run in both _Powershell_ and _Bash_ terminals without any change in must situations.
 
+[1. Shorthand syntax formats](#shorthand-syntax-formats)
+
+[1.1. `Full Value` format](#full-value-format)
+
+[1.2. `Partial Value` format](#partial-value-format)
+
+[1.3. Combine with `Full Value` and `Partial Value`](#combine-with-full-value-and-partial-value)
+
+[1.4. use `??` to show help](#use--to-show-help)
+
+[1.5. Pass a `null` Value](#pass-a-null-value)
+
+[2. Single Quotes String](#single-quotes-string)
+
+[2.1. Pass a string value with space and other special characters](#pass-a-string-value-with-space-and-other-special-characters)
+
+[2.2. Pass a "null" string value](#pass-a-null-string-value)
+
+[2.3. Use `'/` to Pass `'`](#use--to-pass-)
+
+
 # Shorthand syntax formats
 
 ## `Full Value` format
@@ -87,7 +108,7 @@ Json:
 ```json
 {
   "name": "Bill",
-  "homepage": "https://bill.microsft.com/blog",
+  "motto": "One man's bug is another man's lesson.",
   "age": 20,
   "paid": true,
   "emails": [
@@ -97,37 +118,43 @@ Json:
 }
 ```
 
-Because http url has `:` character, so in `Full Value` format, it should be a __Single Quotes String__(introduced below). In order to support both Powershell and Bash, _Single Quotes String_ uses `/` as escape character.
-which means `https://bill.microsft.com/blog` should be `'https:////bill.microsft.com//blog'` in `Full Value` format. It becomes longer than original, which obeys the goal of shorthand syntax.
+The motto property has ` ` character, so in `Full Value` format, it should be a [__Single Quotes String__](#single-quotes-string).
+However in __Single Quotes String__, the `'` should be replaced by `'/`. So in `Full Value`, it should be passed like `'One man'/s bug is another man'/s lesson.'`.
 
 Use `Full Value`:
 ```bash
-az some-command --contact "{name:Bill,homepage:'https:////bill.microsft.com//blog',age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}"
+az some-command --contact "{name:Bill,motto:'One man'/s bug is another man'/s lesson.',age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}"
 ```
 
-However in `Partial Value` format, the url can be parsed as string, and it doesn't need to be a __Single Quotes String__.
+However in `Partial Value` format, the motto can be parsed as string, and it doesn't need to be a __Single Quotes String__.
 
 Use `Partial Value`:
 ```bash
-az some-command --contact homepage="https://bill.microsft.com/blog"
+az some-command --contact motto="One man's bug is another man's lesson."
 ```
 
 Shorthand syntax arguments support to patch `Full Value` by adding `Partial Value` after it.
 
 Use `Full Value` and `Partial Value`:
 ```bash
-az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}" homepage="https://bill.microsft.com/blog"
+az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}" motto="One man's bug is another man's lesson."
+```
+
+You can also patch a new element of list property in `Full Value`. For example you can set the second email address by `Partial Value`:
+```bash
+az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com]}" emails[1]="Bill@outlook.com" motto="One man's bug is another man's lesson."
 ```
 
 There's no limitation to put them after one --contact flag or put them after two --contact flags.
 
 Use `Full Value` and `Partial Value` in two --contact flags:
 ```bash
-az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com,Bill@outlook.com]}" \
---contact homepage="https://bill.microsft.com/blog"
+az some-command --contact "{name:Bill,age:20,paid:true,emails:[Bill@microsoft.com]}" \
+--contact emails[1]="Bill@outlook.com" \
+--contact motto="One man's bug is another man's lesson."
 ```
 
-The __order__ of them is important!!! If you reverse the order, the final data will only be the `Full Value`. 
+The __order__ of them is important!!! If you reverse the order, the final data will only be the `Full Value` without properties defined in `Partial Value`. 
 
 ## use `??` to show help
 
@@ -312,9 +339,11 @@ Pass `Partial Value` format:
 az some-command --contact name="'null'"
 ```
 
-## escape character `/`
+## Use `'/` to Pass `'`
 
-_Single Quotes String_ use `/` as escape character to support add `'` and `/` in _Single Quotes String_.
+The character `'` needs special escape in _Single Quotes String_ in order to distinguish with end of _Single Quotes String_. You can use `'/` to pass `'` in _Single Quotes String_.
+It should be reminded that `/` is a escape character __only__ after `'` in _Single Quotes String_. If `/` is not in _Single Quotes String_ or `/` is not after `'`, `/` is a normal character.
+
 For example if you want to pass "bill's" string into name property in --contact argument:
 
 Json:
@@ -328,15 +357,15 @@ Json:
 
 Pass `Full Value` format:
 ```bash
-az some-command --contact "{name:'bill/'s',age:20,paid:true}"
+az some-command --contact "{name:'bill'/s',age:20,paid:true}"
 ```
 
 Pass `Partial Value` format:
 ```bash
-az some-command --contact name="'bill/'s'"
+az some-command --contact name="'bill'/s'"
 ```
 
-Only in _Single Quotes String_, the `/` character is escape character. If the value is a sample string, `/` is not required.
+If value is not in _Single Quotes String_, you don't need to add escape character after `'`.
 
 Pass `Partial Value` format:
 ```bash

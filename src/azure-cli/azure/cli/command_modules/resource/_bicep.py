@@ -202,7 +202,7 @@ def _get_bicep_installed_version(bicep_executable_path):
 
 
 def _get_bicep_download_url(system, release_tag, target_platform=None):
-    download_url = f"https://github.com/Azure/bicep/releases/download/{release_tag}/{{}}"
+    download_url = f"https://downloads.bicep.azure.com/{release_tag}/{{}}"
 
     if target_platform:
         executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
