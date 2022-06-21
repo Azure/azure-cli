@@ -179,7 +179,8 @@ def process_test(cmd, live_rerun=True):
     error_flag = run_azdev(cmd)
     if not error_flag or not live_rerun:
         return error_flag
-    cmd += ['--lf', '--live']
+    # put `--lf` and `--live` arguments before `--pytest-args`
+    cmd = cmd[:-2] + ['--lf', '--live'] + cmd[-2:]
     error_flag = run_azdev(cmd)
     if not error_flag:
         return error_flag
