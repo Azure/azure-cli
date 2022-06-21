@@ -97,7 +97,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     }
                     if edge_zone is not None:
                         image_info['edge_zone'] = edge_zone
-                    if architecture != image_info['architecture']:
+                    if architecture is not None and architecture != image_info['architecture']:
                         continue
                     all_images.append(image_info)
 
