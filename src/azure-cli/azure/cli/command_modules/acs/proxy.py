@@ -7,6 +7,9 @@ import platform
 import subprocess
 from abc import abstractmethod
 
+# TODO: this file is deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
+
 
 def disable_http_proxy():
     """
