@@ -643,7 +643,7 @@ short-summary: Lists all soft-deleted Api Management services instances availabl
 examples:
   - name: List all soft-deleted services in a subscription.
     text: |
-        az apim deletedservice list  
+        az apim deletedservice list
 """
 
 helps['apim deletedservice purge'] = """
