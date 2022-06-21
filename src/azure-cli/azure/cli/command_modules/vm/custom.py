@@ -5026,9 +5026,9 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
             if treat_as_failure.lower() == 'true':
-                vmss.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = True
+                vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = True
             else:
-                vmss.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = False
+                vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = False
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 
