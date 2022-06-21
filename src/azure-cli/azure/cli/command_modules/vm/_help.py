@@ -771,6 +771,17 @@ examples:
         --resource-group MyResourceGroup --remove recommended.vCpUs.min
 """
 
+helps['sig image-definition list-community'] = """
+type: command
+short-summary: List VM Image definitions in a gallery community (preview).
+long-summary: List VM Image definitions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: List an image definition in a gallery community.
+    text: |
+        az sig image-definition list-community --public-gallery-name publicGalleryName \\
+        --location myLocation
+"""
+
 helps['sig image-version'] = """
 type: group
 short-summary: Manage shared gallery image version with VM
@@ -948,6 +959,17 @@ examples:
         --set publishingProfile.endOfLifeDate=2024-08-02T00:00:00+00:00
 """
 
+helps['sig image-version list-community'] = """
+type: command
+short-summary: List VM Image Versions in a gallery community (preview).
+long-summary: List VM Image Versions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: List an image versions in a gallery community.
+    text: |
+        az sig image-version list-community --public-gallery-name publicGalleryName \\
+        --gallery-image-definition MyImage --location myLocation
+"""
+
 helps['sig image-version wait'] = """
 type: command
 short-summary: wait for image version related operation
@@ -1020,6 +1042,15 @@ examples:
   - name: Reset sharing profile of a gallery.
     text: |
         az sig share reset --resource-group MyResourceGroup --gallery-name MyGallery
+"""
+
+helps['sig share enable-community'] = """
+type: command
+short-summary: Allow to share gallery to the community
+examples:
+  - name: Allow to share gallery to the community
+    text: |
+        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery
 """
 
 helps['sig share wait'] = """
