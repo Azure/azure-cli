@@ -130,6 +130,9 @@ def load_arguments(self, _):
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
     security_type = CLIArgumentType(arg_type=get_enum_type(['TrustedLaunch']), min_api='2020-12-01', help='Specify if the VM is Trusted Launch enabled. See https://docs.microsoft.com/azure/virtual-machines/trusted-launch.')
+    gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
+    gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
+    public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -1139,6 +1142,41 @@ def load_arguments(self, _):
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
 
+    with self.argument_context('sig show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+
+    with self.argument_context('sig image-definition show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+
+    with self.argument_context('sig image-definition list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig image-version show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+        c.argument('gallery_image_version_name', gallery_image_name_version_type)
+
+    with self.argument_context('sig image-version list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig share enable-community') as c:
+        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
+        c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
+        c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
+        c.argument('op_type', default='EnableCommunity', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
@@ -1199,16 +1237,18 @@ def load_arguments(self, _):
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', is_experimental=True,
-                   help='This property allows you to specify the permission of sharing gallery.')
+                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
         c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
                    help='Enable soft-deletion for resources in this gallery, '
                         'allowing them to be recovered within retention time.')
+        c.argument('publisher_uri', help='Community gallery publisher uri.')
+        c.argument('publisher_contact', options_list=['--publisher-email'], help='Community gallery publisher contact email.')
+        c.argument('eula', help='Community gallery publisher eula.')
+        c.argument('public_name_prefix', help='Community gallery public name prefix.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', is_experimental=True,
-                   help='This property allows you to specify the permission of sharing gallery.')
+                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
         c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
                    help='Enable soft-deletion for resources in this gallery, '
                         'allowing them to be recovered within retention time.')
@@ -1306,6 +1346,12 @@ def load_arguments(self, _):
                    help='The name of the gallery Application')
         c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
                    help='The name of the gallery Application Version')
+
+    with self.argument_context('sig gallery-application version create') as c:
+        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
+                                             'If not specified, the package file will be named the same as the Gallery Application name.')
+        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
+                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
 
     for scope in ['create', 'update']:
         with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
