@@ -122,7 +122,7 @@ def git_restore(file_path):
 def git_push():
     out = subprocess.Popen(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    if "nothing to commit, working tree clean" in stdout:
+    if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
         subprocess.run(["git", "add", "*/command_modules/*"])
