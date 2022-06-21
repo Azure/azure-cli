@@ -5426,8 +5426,8 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig gallery-application delete -n {app_name} -r {gallery} -g {rg} -y')
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
 
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='account', length=15)
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='account', length=15)
     def test_gallery_application_version(self, resource_group, resource_group_location, storage_account_info):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -5450,11 +5450,13 @@ class VMGalleryApplication(ScenarioTest):
         ])
         self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
-        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
+        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove --package-file-name package1 --config-file-name config1', checks=[
              self.check('name', '1.0.0'),
              self.check('publishingProfile.manageActions.install', 'install'),
              self.check('publishingProfile.manageActions.remove', 'remove'),
-             self.check('type', 'Microsoft.Compute/galleries/applications/versions')
+             self.check('type', 'Microsoft.Compute/galleries/applications/versions'),
+             self.check('publishingProfile.settings.packageFileName', 'package1'),
+             self.check('publishingProfile.settings.configFileName', 'config1')
         ])
         self.cmd('sig gallery-application version update -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --tags tag=test', checks=[
             self.check('name', '1.0.0'),

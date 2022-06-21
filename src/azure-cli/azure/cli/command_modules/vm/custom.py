@@ -4799,6 +4799,8 @@ def gallery_application_version_create(client,
                                        target_regions=None,
                                        default_file_link=None,
                                        end_of_life_date=None,
+                                       package_file_name=None,
+                                       config_file_name=None,
                                        exclude_from=None,
                                        no_wait=False):
     gallery_application_version = {}
@@ -4823,6 +4825,13 @@ def gallery_application_version_create(client,
         gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
     if end_of_life_date is not None:
         gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    settings = {}
+    if package_file_name is not None:
+        settings['package_file_name'] = package_file_name
+    if config_file_name is not None:
+        settings['config_file_name'] = config_file_name
+    if settings:
+        gallery_application_version['publishing_profile']['settings'] = settings
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        resource_group_name=resource_group_name,
