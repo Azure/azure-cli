@@ -54,7 +54,6 @@ jobs:
           git commit -m "update version"
           git push --set-upstream azclibot bump_version_$(Build.BuildId)
 
-
 - job: RerunTests
   displayName: CLI Bump Version Rerun tests
   dependsOn: UpdateVersionFiles
@@ -115,5 +114,32 @@ jobs:
       displayName: "Rerun tests"
     - task: PublishTestResults@2
       inputs:
-        testResultsFiles: '/home/vsts/work/1/s/failure_summary_*.txt'
+        testResultsFiles: '/home/vsts/work/1/s/test_results_*.xml'
         testRunTitle: 'CLI Bump Version test results of instance $(Instance_idx)'
+
+- job: CreatePR
+  displayName: CLI Bump Version Create PR
+  dependsOn: RerunTests
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - task: AzureCLI@1
+      displayName: 'Create PR'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+
+          pr_title="{Package} Bump version for $(PACKAGE) to $(TARGET_PACKAGE_VERSION)"
+          pr_body="Triggered by CLI Bump Version Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\npackage: $(PACKAGE) $(TARGET_PACKAGE_VERSION)\nresource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)\n\nSee all the test_results.xml in ADO pipeline"
+          pr_head="azclibot:bump_version_$(Build.BuildId)"
+
+          curl \
+          -H "Authorization: token ${GITHUB_TOKEN}" \
+          -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"dev\"}" \
+          https://api.github.com/repos/Azure/azure-cli/pulls

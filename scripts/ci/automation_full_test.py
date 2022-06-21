@@ -27,7 +27,6 @@ instance_idx = int(sys.argv[2])
 profile = sys.argv[3]
 serial_modules = sys.argv[4].split()
 fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
-azdev_test_result_fp = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results.xml"
 working_directory = "/home/vsts/work/1/s"
 jobs = {
             'acr': 45,
@@ -125,15 +124,14 @@ def git_restore(file_path):
         logger.warning(err)
 
 
-def git_push():
+def git_push(message):
     out = subprocess.Popen(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
     if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
         run_git_command(["git", "add", "*/command_modules/*"])
-        commit_message = f"rerun tests from instance {instance_idx}"
-        run_git_command(["git", "commit", "-m", commit_message])
+        run_git_command(["git", "commit", "-m", message])
     except RuntimeError as ex:
         raise ex
     retry = 3
@@ -172,45 +170,30 @@ def get_failed_tests(test_result_fp):
             failures = testcase.findall('failure')
             if failures:
                 logger.info(f"failed testcase attributes: {testcase.attrib}")
-                message = failures[0].attrib['message']
                 test_case = testcase.attrib['name']
-                failed_tests[test_case] = {}
-                failed_tests[test_case]['classname'] = testcase.attrib['classname']
-                failed_tests[test_case]['message'] = message
-
                 recording_folder = os.path.join(os.path.dirname(testcase.attrib['file']), 'recordings')
                 if 'src' not in recording_folder:
                     recording_folder = os.path.join(os.path.join('src', 'azure-cli'), recording_folder)
-                failed_tests[test_case]['record'] = os.path.join(recording_folder, test_case + '.yaml')
+                failed_tests[test_case] = os.path.join(recording_folder, test_case + '.yaml')
     return failed_tests
 
 
-def process_test(cmd, live_rerun=True):
+def process_test(cmd, azdev_test_result_fp, live_rerun=False):
     error_flag = run_azdev(cmd)
     if not error_flag or not live_rerun:
         return error_flag
     # drop the original `--pytest-args` and add new arguments
-    cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
+    cmd = cmd[:-2] + ['--lf', '--live', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1']
     error_flag = run_azdev(cmd)
-    failure_summary = ''
+    # restore original recording yaml file for failed test in live run
     if error_flag:
         failed_tests = get_failed_tests(azdev_test_result_fp)
-        for (test, info) in failed_tests.items():
-            # restore original recording yaml file
-            git_restore(os.path.join(working_directory, info['record']))
-            # store failure results
-            test_class_name = info['classname']
-            test_failure_message = info['message'] if len(info['message']) < 128 else info['message'][0:127]+'...'
-            failure_summary += f"`{test_class_name}` failed in live mode: {test_failure_message}\n"
+        for (test, file) in failed_tests.items():
+            git_restore(os.path.join(working_directory, file))
 
     # save live run recording changes to git
-    git_push()
-    # save failure_summary to txt file
-    if failure_summary:
-        failure_summary_fp = os.path.join(working_directory, f"failure_summary_{instance_idx}.txt")
-        with open(failure_summary_fp, "w") as f:
-            f.write(failure_summary)
-        logger.info(f'Store failure summary to {failure_summary_fp}')
+    commit_message = f"Rerun tests from instance {instance_idx}. Still some tests failed, see {os.path.basename(azdev_test_result_fp)}"
+    git_push(commit_message)
     return False
 
 
@@ -298,11 +281,13 @@ class AutomaticScheduling(object):
         if serial_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
                   serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            error_flag = process_test(cmd)
+            azdev_test_result_fp = os.path.join(working_directory, f"test_results_{instance_idx}.serial.xml")
+            error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         if parallel_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
                   parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            error_flag = process_test(cmd)
+            azdev_test_result_fp = os.path.join(working_directory, f"test_results_{instance_idx}.parallel.xml")
+            error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         return error_flag
 
 
