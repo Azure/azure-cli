@@ -31,7 +31,7 @@ type: command
 short-summary: Register a Resource to the given Recovery Services Vault.
 examples:
   - name: This command allows Azure Backup to convert the 'Resource' to a 'Backup Container' which is then registered to the given Recovery services vault. The Azure Backup service can then discover workloads of the given workload type within this container to be protected later.
-    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload --resource-id MyResourceID
+    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload
 """
 
 helps['backup container re-register'] = """
