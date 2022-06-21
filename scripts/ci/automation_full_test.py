@@ -107,6 +107,12 @@ jobs = {
         }
 
 
+def run_git_command(cmd):
+    out = subprocess.run(cmd)
+    if out.returncode:
+        raise RuntimeError(f"{cmd} failed")
+
+
 def git_restore(file_path):
     if not file_path:
         return
@@ -133,10 +139,13 @@ def git_push():
     retry = 3
     while retry >= 0:
         try:
-            subprocess.run(["git", "push"])
+            run_git_command(["git", "fetch", "azclibot"])
+            run_git_command(["git", "pull"])
+            run_git_command(["git", "push"])
+
             logger.info("git push all recording files")
             break
-        except subprocess.CalledProcessError as ex:
+        except RuntimeError as ex:
             if retry == 0:
                 raise ex
             retry -= 1
