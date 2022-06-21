@@ -19,7 +19,6 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioT
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError
-from .exceptions import CliExecutionError
 
 class DirectLineClient(object):
     """Shared methods for the parsed result objects."""
@@ -305,85 +304,6 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
         self.cmd('az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant')
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_prepare_publish_with_registration_bot_should_raise_error(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=10),
-            'description': 'description1',
-            'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        self.cmd(
-            'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant --tags '
-            'key1=value1',
-            checks=[
-                self.check('name', '{botname}'),
-                self.check('properties.description', '{description}'),
-                self.check('resourceGroup', '{rg}'),
-                self.check('location', 'global'),
-                self.check('tags.key1', 'value1')
-            ])
-
-        self.cmd('az bot show -g {rg} -n {botname}', checks=[
-            self.check('name', '{botname}')
-        ])
-
-        try:
-            self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
-                     '--code-dir .')
-            raise AssertionError('should have thrown an error.')
-        except CLIError:
-            pass
-        except AssertionError:
-            raise AssertionError('should have thrown an error for registration-type bot.')
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_prepare_publish_with_unregistered_bot_name_should_fail(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=10),
-        })
-
-        try:
-            self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name invalid.sln --proj-name invalid.csproj '
-                     '--code-dir .')
-            raise AssertionError('should have thrown an error.')
-        except CliExecutionError:
-            # We are expecting an ErrorException which is thrown from azure.mgmt.botservice SDK.
-            pass
-        except AssertionError:
-            raise AssertionError('should have thrown an error for an unregistered bot.')
-        except Exception as error:
-            raise error
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_prepare_publish_should_raise_cli_error_when_version_is_v4(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'sln_name': 'invalid.sln',
-            'proj_name': 'invalid.csproj',
-            'version': 'v4'
-        })
-
-        # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
-        dir_path = os.path.join('.', self.kwargs.get('botname'))
-        if os.path.exists(dir_path):
-            # Clean up the folder
-            shutil.rmtree(dir_path)
-
-        try:
-            self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name {sln_name} --proj-name {proj_name} -v v4')
-            raise Exception("'az bot prepare-publish' should have failed with a --version argument of 'v4'")
-        except CLIError as cli_error:
-            assert cli_error.__str__() == "'az bot prepare-publish' is only for v3 bots. Please use 'az bot publish' " \
-                                          "to prepare and publish a v4 bot."
-
-        except Exception as error:
-            raise error
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_update_should_update_bot_properties(self, resource_group):
@@ -723,7 +643,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         cmk_url = resultAzKey['key']['kid']
 
         self.cmd(
-            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant --password {pass} --cmk-key-vault-key-url ' + cmk_url,
+            'az bot create -g {rg} -n {botname} --appid {app_id} --app-type MultiTenant  --cmk-key-vault-key-url ' + cmk_url,
             checks={
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
