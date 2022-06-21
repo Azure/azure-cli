@@ -6533,7 +6533,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-09-01-preview'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
@@ -6606,7 +6606,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=021-09-01-preview'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
@@ -6660,7 +6660,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             # check that the DCR was created
             dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=021-09-01-preview'
             self.cmd(get_cmd, checks=[
                 self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
             ])
