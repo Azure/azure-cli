@@ -82,7 +82,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot dps certificate',
                             client_factory=iot_service_provisioning_factory,
                             transform=_dps_certificate_response_transform) as g:
-        g.custom_command('list', 'iot_dps_certificate_list')
+        g.custom_command(
+            'list','iot_dps_certificate_list',
+            table_transformer=(
+                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,"
+                "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
+            )
+        )
         g.custom_show_command('show', 'iot_dps_certificate_get')
         g.custom_command('create', 'iot_dps_certificate_create')
         g.custom_command('delete', 'iot_dps_certificate_delete')
@@ -100,7 +106,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub certificate commands
     with self.command_group('iot hub certificate', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('list', 'iot_hub_certificate_list')
+        g.custom_command(
+            'list', 'iot_hub_certificate_list',
+            table_transformer=(
+                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,"
+                "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
+            )
+        )
         g.custom_show_command('show', 'iot_hub_certificate_get')
         g.custom_command('create', 'iot_hub_certificate_create')
         g.custom_command('delete', 'iot_hub_certificate_delete')
