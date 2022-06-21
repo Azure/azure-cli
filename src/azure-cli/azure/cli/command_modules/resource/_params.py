@@ -677,6 +677,18 @@ def load_arguments(self, _):
     with self.argument_context('bicep upgrade') as c:
         c.argument('target_platform', arg_type=bicep_target_platform_type)
 
+    with self.argument_context('bicep generate-params') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep file to generate the parameters file from in the file system."))
+        c.argument('outdir', arg_type=CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(),
+                                                      help="When set, saves the output at the specified directory."))
+        c.argument('outfile', arg_type=CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(),
+                                                       help="When set, saves the output as the specified file path."))
+        c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
+                                                      help="When set, prints all output to stdout instead of corresponding files."))
+        c.argument('no_restore', arg_type=CLIArgumentType(options_list=['--no-restore'], action='store_true',
+                                                          help="When set, generates the parameters file without restoring external modules."))
+
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
                    help='The name of the resource group.')
