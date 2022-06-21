@@ -211,7 +211,7 @@ def process_test(cmd, live_rerun=True):
         with open(failure_summary_fp, "w") as f:
             f.write(failure_summary)
         logger.info(f'Store failure summary to {failure_summary_fp}')
-    return True
+    return False
 
 
 class AutomaticScheduling(object):
