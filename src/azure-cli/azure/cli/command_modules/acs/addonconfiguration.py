@@ -377,7 +377,8 @@ def ensure_container_insights_for_monitoring(
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
                     if cluster_region not in region_ids:
-                        raise ClientRequestError(f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
+                        raise ClientRequestError(
+                            f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2021-09-01-preview"
             # get existing tags on the container insights extension DCR if the customer added any
@@ -394,7 +395,7 @@ def ensure_container_insights_for_monitoring(
                                 {
                                     "name": "ContainerInsightsExtension",
                                     "streams": [
-                                      "Microsoft-ContainerInsights-Group-Default"
+                                        "Microsoft-ContainerInsights-Group-Default"
                                     ],
                                     "extensionName": "ContainerInsights",
                                 }
