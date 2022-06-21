@@ -3726,6 +3726,7 @@ def show_bicep_cli_version(cmd):
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
 
+
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
     ensure_bicep_installation()
 
