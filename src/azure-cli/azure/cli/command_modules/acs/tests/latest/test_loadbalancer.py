@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 
-from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
+from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterModels
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
+from azure.cli.core.profiles import ResourceType
 
 
 class TestLoadBalancer(unittest.TestCase):
@@ -19,20 +20,19 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ports = 80
         idle_timeout = 3600
 
-        from azure.cli.command_modules.acs.decorator import AKSModels
         # store all the models used by load balancer
-        lb_models = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).lb_models
-        ManagedClusterLoadBalancerProfile = lb_models.get(
-            "ManagedClusterLoadBalancerProfile"
+        load_balancer_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).load_balancer_models
+        ManagedClusterLoadBalancerProfile = (
+            load_balancer_models.ManagedClusterLoadBalancerProfile
         )
-        ManagedClusterLoadBalancerProfileManagedOutboundIPs = lb_models.get(
-            "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+        ManagedClusterLoadBalancerProfileManagedOutboundIPs = (
+            load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs
         )
-        ManagedClusterLoadBalancerProfileOutboundIPs = lb_models.get(
-            "ManagedClusterLoadBalancerProfileOutboundIPs"
+        ManagedClusterLoadBalancerProfileOutboundIPs = (
+            load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPs
         )
-        ManagedClusterLoadBalancerProfileOutboundIPPrefixes = lb_models.get(
-            "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+        ManagedClusterLoadBalancerProfileOutboundIPPrefixes = (
+            load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPPrefixes
         )
 
         profile = ManagedClusterLoadBalancerProfile()
@@ -53,7 +53,7 @@ class TestLoadBalancer(unittest.TestCase):
             outbound_ports,
             idle_timeout,
             profile,
-            lb_models,
+            load_balancer_models,
         )
 
         self.assertEqual(p.managed_outbound_i_ps.count, 5)
