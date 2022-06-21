@@ -97,6 +97,7 @@ jobs:
           git config --global user.email "AzPyCLI@microsoft.com"
           git config --global user.name "Azure CLI Team"
           git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+          git fetch azclibot
 
           git checkout -b bump_version_$(Build.BuildId) azclibot/bump_version_$(Build.BuildId)
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
