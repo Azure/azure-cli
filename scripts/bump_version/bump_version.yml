@@ -18,32 +18,42 @@ jobs:
       inputs:
         versionSpec: '3.10'
         displayName: "Use Python 3.10"
-    - bash: |
-        set -ev
-        git config --global user.email "CLIBumpVersionPipeline"
-        git config --global user.name "CLIBumpVersionPipeline"
-        git checkout -b bump_version_$(Build.BuildId)
+    - task: AzureCLI@1
+      displayName: 'update version'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
 
-        echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
-        echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
 
-        if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION) ]]; then
-          echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
-          exit 1
-        fi
-        sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
-        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
-        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
-        sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
+          git checkout -b bump_version_$(Build.BuildId)
 
-        if [[ -n $(RESOURCE_TYPE) ]]; then
-          python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
-        fi
+          echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
+          echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
 
-        git add .
-        git commit -m "update version"
-        git push --set-upstream origin bump_version_$(Build.BuildId)
-      displayName: "update version"
+          if [[ -z $(PACKAGE) || -z $(TARGET_PACKAGE_VERSION) ]]; then
+            echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
+            exit 1
+          fi
+          sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
+          sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
+          sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
+          sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
+
+          if [[ -n $(RESOURCE_TYPE) ]]; then
+            python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
+          fi
+
+          git add .
+          git commit -m "update version"
+          git push --set-upstream azclibot bump_version_$(Build.BuildId)
+
 
 - job: RerunTests
   displayName: CLI Bump Version Rerun tests
@@ -75,12 +85,20 @@ jobs:
       inputs:
         versionSpec: '3.10'
         displayName: "Use Python 3.10"
-    - bash: |
-        set -ev
-        git config --global user.email "CLIBumpVersionPipeline"
-        git config --global user.name "CLIBumpVersionPipeline"
-        git checkout -b bump_version_$(Build.BuildId) origin/bump_version_$(Build.BuildId)
-      displayName: "Checkout Target Branch"
+    - task: AzureCLI@1
+      displayName: 'Checkout Target Branch'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+
+          git checkout -b bump_version_$(Build.BuildId) azclibot/bump_version_$(Build.BuildId)
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
