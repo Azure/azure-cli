@@ -162,6 +162,7 @@ def get_failed_tests(test_result_fp):
             # Collect failed tests
             failures = testcase.findall('failure')
             if failures:
+                logger.info(f"failed testcase attributes: {testcase.attrib}")
                 message = failures[0].attrib['message']
                 test_case = testcase.attrib['name']
                 failed_tests[test_case] = {}

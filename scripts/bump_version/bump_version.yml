@@ -107,6 +107,9 @@ jobs:
         source env/bin/activate
         pip show $(PACKAGE)
 
+        az login -u $(CLI_LIVE_TEST_ACCOUNT) -p $(CLI_LIVE_TEST_PASSWORD)
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
         serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
         python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules" "True"
       displayName: "Rerun tests"
