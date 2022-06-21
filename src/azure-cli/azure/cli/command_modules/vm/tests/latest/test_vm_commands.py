@@ -88,12 +88,12 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
         assert result.index('7.7') >= 0
 
     @AllowLargeResponse()
-    def test_vm_images_list_thru_services_filtered_by_arch(self):
+    def test_vm_image_list_thru_services_filtered_by_arch(self):
         result = self.cmd("vm image list --publisher Debian --architecture Arm64 -o tsv --all").output
         assert result.index('Arm64') >= 0
 
     @AllowLargeResponse()
-    def test_vm_images_list_thru_services_edge_zone_by_arch(self):
+    def test_vm_image_list_thru_services_edge_zone_by_arch(self):
         result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
         assert result.index('x64') >= 0
 
