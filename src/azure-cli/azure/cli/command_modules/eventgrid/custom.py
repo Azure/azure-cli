@@ -49,7 +49,11 @@ from azure.mgmt.eventgrid.models import (
     DeliveryWithResourceIdentity,
     DeadLetterWithResourceIdentity,
     EventChannelFilter,
-    ExtendedLocation)
+    ExtendedLocation,
+    Partner,
+    PartnerAuthorization,
+    PartnerConfiguration,
+    PartnerConfigurationUpdateParameters)
 
 logger = get_logger(__name__)
 
@@ -967,6 +971,97 @@ def cli_event_channel_create_or_update(
         event_channel_info)
 
 
+def cli_partner_configuration_authorize(
+        client,
+        resource_group_name,
+        partner_registration_immutable_id=None,
+        partner_name=None,
+        authorization_expiration_time_in_utc=None):
+
+    partner_info = _get_partner_info(
+        partner_registration_immutable_id=partner_registration_immutable_id,
+        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc,
+        partner_name=partner_name)
+
+    return client.authorize_partner(
+        resource_group_name,
+        partner_info)
+
+
+def cli_partner_configuration_unauthorize(
+        client,
+        resource_group_name,
+        partner_registration_immutable_id=None,
+        partner_name=None,
+        authorization_expiration_time_in_utc=None):
+
+    partner_info = _get_partner_info(
+        partner_registration_immutable_id=partner_registration_immutable_id,
+        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc,
+        partner_name=partner_name)
+
+    return client.unauthorize_partner(
+        resource_group_name,
+        partner_info)
+
+
+def cli_partner_configuration_list(
+        client,
+        resource_group_name=None,
+        odata_query=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+
+    return client.list_by_subscription(odata_query, DEFAULT_TOP)
+
+
+def cli_partner_configuration_create_or_update(
+        client,
+        resource_group_name,
+        partner_registration_immutable_id=None,
+        partner_name=None,
+        authorization_expiration_time_in_utc=None,
+        default_maximum_expiration_time_in_days=None,
+        location=None,
+        tags=None):
+
+    partner_info = _get_partner_info(
+        partner_registration_immutable_id=partner_registration_immutable_id,
+        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc,
+        partner_name=partner_name)
+
+    # authorized_partners_list is a list of Partners, from _get_partner_info()
+    partner_authorization = PartnerAuthorization(
+        default_maximum_expiration_time_in_days=default_maximum_expiration_time_in_days,
+        authorized_partners_list=list(partner_info))
+
+    # PartnerConfiguration contains PartnerAuthorization
+    partner_configuration_info = PartnerConfiguration(
+        location=location,
+        tags=tags,
+        partner_authorization=partner_authorization)
+
+    return client.begin_create_or_update(
+        resource_group_name,
+        partner_configuration_info)
+
+
+def cli_partner_configuration_update(
+        client,
+        resource_group_name,
+        default_maximum_expiration_time_in_days=None,
+        tags=None):
+
+    partner_configuration_update_params = PartnerConfigurationUpdateParameters(
+        tags=tags,
+        default_maximum_expiration_time_in_days=default_maximum_expiration_time_in_days)
+
+    return client.begin_create_or_update(
+        resource_group_name,
+        partner_configuration_update_params)
+
+
 def cli_partner_topic_list(
         client,
         resource_group_name=None,
@@ -1101,13 +1196,9 @@ def cli_partner_topic_event_subscription_list(   # pylint: disable=too-many-retu
 
 def cli_verified_partner_list(
         client,
-        resource_group_name=None,
         odata_query=None):
 
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name, odata_query, DEFAULT_TOP)
-
-    return client.list_by_subscription(odata_query, DEFAULT_TOP)
+    return client.list(odata_query, DEFAULT_TOP)
 
 
 def cli_system_topic_create_or_update(
@@ -2424,3 +2515,19 @@ def _validate_and_update_destination(endpoint_type, destination, storage_queue_m
         destination,
         storage_queue_msg_ttl,
         delivery_attribute_mapping)
+
+
+def _get_partner_info(
+        partner_registration_immutable_id=None,
+        authorization_expiration_time_in_utc=None,
+        partner_name=None):
+
+    if authorization_expiration_time_in_utc is not None:
+        authorization_expiration_time_in_utc = parse(authorization_expiration_time_in_utc)
+
+    partner_info = Partner(
+        partner_registration_immutable_id=partner_registration_immutable_id,
+        partner_name=partner_name,
+        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc)
+
+    return partner_info

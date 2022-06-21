@@ -6,8 +6,8 @@
 
 def cf_eventgrid(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_EVENTGRID)
+    from azure.mgmt.eventgrid import EventGridManagementClient
+    return get_mgmt_service_client(cli_ctx, EventGridManagementClient)
 
 
 def topics_factory(cli_ctx, _):
@@ -57,6 +57,10 @@ def event_channels_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).event_channels
 
 
+def channels_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).channels
+
+
 def partner_topics_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).partner_topics
 
@@ -65,7 +69,15 @@ def partner_topic_event_subscriptions_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).partner_topic_event_subscriptions
 
 
-def verified_partner_factory(cli_ctx, _):
+def partner_configurations_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_configurations
+
+
+def partner_destinations_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_destinations
+
+
+def verified_partners_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).verified_partners
 
 

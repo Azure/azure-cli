@@ -22,9 +22,12 @@ from ._client_factory import (
     partner_registrations_factory,
     partner_namespaces_factory,
     event_channels_factory,
+    channels_factory,
     partner_topics_factory,
     partner_topic_event_subscriptions_factory,
-    verified_partner_factory
+    partner_configurations_factory,
+    partner_destinations_factory,
+    verified_partners_factory
 )
 
 
@@ -101,6 +104,12 @@ def load_command_table(self, _):
         client_arg_name='self'
     )
 
+    channels_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#ChannelsOperations.{}',
+        client_factory=channels_factory,
+        client_arg_name='self'
+    )
+
     partner_topics_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#PartnerTopicsOperations.{}',
         client_factory=partner_topics_factory,
@@ -113,9 +122,21 @@ def load_command_table(self, _):
         client_arg_name='self'
     )
 
-    verified_partner_mgmt_util = CliCommandType(
+    partner_configurations_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#PartnerConfigurationsOperations.{}',
+        client_factory=partner_configurations_factory,
+        client_arg_name='self'
+    )
+
+    partner_destinations_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#PartnerDestinationsOperations.{}',
+        client_factory=partner_destinations_factory,
+        client_arg_name='self'
+    )
+
+    verified_partners_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#VerifiedPartnersOperations.{}',
-        client_factory=verified_partner_factory,
+        client_factory=verified_partners_factory,
         client_arg_name='self'
     )
 
@@ -203,12 +224,19 @@ def load_command_table(self, _):
         g.custom_command('key regenerate', 'cli_partner_namespace_regenerate_key')
         # g.custom_command('update', 'cli_partner_namespace_update')
 
-    with self.command_group('eventgrid partner namespace event-channel', event_channels_mgmt_util, client_factory=event_channels_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner namespace event-channel', event_channels_mgmt_util, client_factory=event_channels_factory, deprecate_info=self.deprecate(redirect='eventgrid partner namespace channel', hide=False)) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_event_channel_list')
         # g.custom_command('update', 'cli_event_channel_update')
         g.custom_command('create', 'cli_event_channel_create_or_update')
+
+    with self.command_group('eventgrid partner namespace channel', channels_mgmt_util, client_factory=channels_factory, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('list', 'cli_channel_list')
+        g.custom_command('update', 'cli_channel_update')
+        g.custom_command('create', 'cli_channel_create_or_update')
 
     with self.command_group('eventgrid partner topic', partner_topics_mgmt_util, client_factory=partner_topics_factory, is_preview=True) as g:
         g.show_command('show', 'get')
@@ -226,7 +254,24 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_partner_topic_event_subscription_create_or_update')
         g.custom_command('update', 'cli_partner_topic_event_subscription_update')
 
-    with self.command_group('eventgrid partner verified-partner', verified_partner_mgmt_util, client_factory=verified_partner_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner configuration', partner_configurations_mgmt_util, client_factory=partner_configurations_factory, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('authorize', 'cli_partner_configuration_authorize')
+        g.custom_command('unauthorize', 'cli_partner_configuration_unauthorize')
+        g.custom_command('list', 'cli_partner_configuration_list')
+        g.custom_command('create', 'cli_partner_configuration_create_or_update')
+        g.custom_command('update', 'cli_partner_configuration_update')
+
+    with self.command_group('eventgrid partner destination', partner_destinations_mgmt_util, client_factory=partner_destinations_factory, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('activate', 'activate')
+        g.custom_command('list', 'cli_partner_destination_list')
+        g.custom_command('create', 'cli_partner_destination_create_or_update')
+        g.custom_command('update', 'cli_partner_destination_update')
+
+    with self.command_group('eventgrid partner verified-partner', verified_partners_mgmt_util, client_factory=verified_partners_factory, is_preview=True) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_verified_partner_list')
 

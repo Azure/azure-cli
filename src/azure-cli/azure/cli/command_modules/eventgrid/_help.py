@@ -462,6 +462,11 @@ type: group
 short-summary: Manage partner event channels.
 """
 
+helps['eventgrid partner namespace channel'] = """
+type: group
+short-summary: Manage partner channels.
+"""
+
 helps['eventgrid partner namespace event-channel create'] = """
 type: command
 short-summary: Create an event channel under a partner namespace.
@@ -630,6 +635,106 @@ short-summary: Deactivate a partner topic.
 examples:
   - name: Deactivate a specific partner topic.
     text: az eventgrid partner topic deactivate -g rg1 -n partnertopic1
+"""
+
+helps['eventgrid partner verified-partner'] = """
+type: group
+short-summary: Manage verified partners.
+"""
+
+helps['eventgrid partner verified-partner show'] = """
+type: command
+short-summary: Get the details of a verified partner.
+examples:
+  - name: Show the details of a partner verified partner.
+    text: az eventgrid verified-partner show --verified-partner-name verifiedpartner1
+"""
+
+helps['eventgrid partner verified-partner list'] = """
+type: command
+short-summary: List available verified partners.
+examples:
+  - name: List all verified partners in the current tenant.
+    text: az eventgrid partner verified-partner list
+"""
+
+helps['eventgrid partner destination'] = """
+type: group
+short-summary: Manage partner destinations.
+"""
+
+helps['eventgrid partner configuration'] = """
+type: group
+short-summary: Manage partner configurations.
+"""
+
+helps['eventgrid partner configuration create'] = """
+type: command
+short-summary: Create a partner configuration.
+examples:
+  - name: Create a partner configuration based on partner registration immutable ID.
+    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-time 2022-06-14T05:37:51.272Z
+  - name: Create a partner configuration based on partner name.
+    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-time 2022-06-14T05:37:51.272Z
+
+"""
+
+helps['eventgrid partner configuration list'] = """
+type: command
+short-summary: List available partner configurations.
+examples:
+  - name: List all partner configurations in the current Azure subscription.
+    text: az eventgrid partner configuration list
+  - name: List all partner configurations in the current Azure subscription whose name contains the pattern "XYZ"
+    text: az eventgrid partner configuration list --odata-query "Contains(name, 'XYZ')"
+  - name: List all partner configurations in the current Azure subscription except the partner configuration with name "name1"
+    text: az eventgrid partner configuration list --odata-query "NOT (name eq 'name1')"
+  - name: List all partner configurations in a resource group.
+    text: az eventgrid partner configuration list -g rg1
+"""
+
+helps['eventgrid partner configuration delete'] = """
+type: command
+short-summary: Delete a partner configuration.
+examples:
+  - name: Delete a partner configuration.
+    text: az eventgrid partner configuration delete -g rg1
+"""
+
+helps['eventgrid partner configuration show'] = """
+type: command
+short-summary: Get the details of a partner configuration.
+examples:
+  - name: Show the details of a partner configuration.
+    text: az eventgrid partner configuration show -g rg1
+"""
+
+helps['eventgrid partner configuration authorize'] = """
+type: command
+short-summary: Authorize a partner configuration.
+examples:
+  - name: Authorize a partner based on partner registration immutable ID.
+    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-time 2022-06-14T05:37:51.272Z
+  - name: Authorize a partner based on partner name.
+    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-time 2022-06-14T05:37:51.272Z
+"""
+
+helps['eventgrid partner configuration unauthorize'] = """
+type: command
+short-summary: Unauthorize a partner configuration.
+examples:
+  - name: Unauthorize a partner based on partner registration immutable ID.
+    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-time 2022-06-14T05:37:51.272Z
+  - name: Unauthorize a partner based on partner name.
+    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-time 2022-06-14T05:37:51.272Z
+"""
+
+helps['eventgrid partner configuration update'] = """
+type: command
+short-summary: update a partner configuration.
+examples:
+  - name: Update a partner configuration's default maximum expiration time.
+    text: az eventgrid partner configuration update -g rg1 --default-maximum-expiration-time-in-days 5
 """
 
 helps['eventgrid system-topic event-subscription'] = """
