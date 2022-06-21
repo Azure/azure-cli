@@ -180,28 +180,28 @@ def process_test(cmd, live_rerun=True):
     error_flag = run_azdev(cmd)
     if not error_flag or not live_rerun:
         return error_flag
-    # put `--lf` and `--live` arguments before `--pytest-args`
-    cmd = cmd[:-2] + ['--lf', '--live'] + cmd[-2:]
+    # drop the original `--pytest-args` and add new arguments
+    cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '"-o junit_family=xunit1"']
     error_flag = run_azdev(cmd)
-    if not error_flag:
-        return error_flag
-    failed_tests = get_failed_tests(azdev_test_result_fp)
     failure_summary = ''
-    for (test, info) in failed_tests.items():
-        # restore original recording yaml file
-        git_restore(os.path.join(working_directory, info['record']))
-        # store failure results
-        test_class_name = info['classname']
-        test_failure_message = info['message'] if len(info['message']) < 128 else info['message'][0:127]+'...'
-        failure_summary += f"`{test_class_name}` failed in live mode: {test_failure_message}\n"
+    if error_flag:
+        failed_tests = get_failed_tests(azdev_test_result_fp)
+        for (test, info) in failed_tests.items():
+            # restore original recording yaml file
+            git_restore(os.path.join(working_directory, info['record']))
+            # store failure results
+            test_class_name = info['classname']
+            test_failure_message = info['message'] if len(info['message']) < 128 else info['message'][0:127]+'...'
+            failure_summary += f"`{test_class_name}` failed in live mode: {test_failure_message}\n"
 
     # save live run recording changes to git
     git_push()
     # save failure_summary to txt file
-    failure_summary_fp = os.path.join(working_directory, f"failure_summary_{instance_idx}.txt")
-    with open(failure_summary_fp, "w") as f:
-        f.write(failure_summary)
-    logger.info(f'Store failure summary to {failure_summary_fp}')
+    if failure_summary:
+        failure_summary_fp = os.path.join(working_directory, f"failure_summary_{instance_idx}.txt")
+        with open(failure_summary_fp, "w") as f:
+            f.write(failure_summary)
+        logger.info(f'Store failure summary to {failure_summary_fp}')
     return True
 
 
