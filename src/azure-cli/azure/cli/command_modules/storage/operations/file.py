@@ -222,17 +222,14 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
 
     kwargs.pop('progress_callback')
 
-    properties = None
-
     with open(destination_path, open_mode) as stream:
         start_range = kwargs.pop('start_range', None)
         end_range = kwargs.pop('end_range', None)
         length = None
         if start_range is not None and end_range is not None:
-            length = end_range-start_range+1
+            length = end_range - start_range + 1
         download = client.download_file(offset=start_range, length=length, timeout=timeout,
                                         max_concurrency=max_connections, **kwargs)
-        properties = download.properties
         download_content = download.readall()
         stream.write(download_content)
     return client.get_file_properties()
@@ -354,14 +351,13 @@ def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, t
     Delete files from file share in batch
     """
 
-    def delete_action(file_pair):
-        delete_file_args = {'share_name': source, 'directory_name': file_pair[0], 'file_name': file_pair[1],
-                            'timeout': timeout}
+    def delete_action(pair):
+        path = os.path.join(*pair)
+        file_client = client.get_file_client(path)
+        return file_client.delete_file(timeout=timeout)
 
-        return client.delete_file(**delete_file_args)
-
-    from azure.cli.command_modules.storage.util import glob_files_remotely
-    source_files = list(glob_files_remotely(cmd, client, source, pattern))
+    from azure.cli.command_modules.storage.util import glob_files_remotely_track2
+    source_files = list(glob_files_remotely_track2(client, source, pattern, is_share_client=True))
 
     if dryrun:
         logger.warning('delete files from %s', source)

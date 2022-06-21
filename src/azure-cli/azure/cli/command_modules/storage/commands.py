@@ -667,12 +667,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
 
-    with self.command_group('storage file', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
-
-
-        g.storage_custom_command('delete-batch', 'storage_file_delete_batch')
-
     with self.command_group('storage file', command_type=file_client_sdk,
                             custom_command_type=get_custom_sdk('file', cf_share_file_client)) as g:
         from ._transformers import transform_file_show_result
@@ -683,6 +677,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  table_transformer=transform_file_output)
         g.storage_command('delete', 'delete_file', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
+        g.storage_custom_command('delete-batch', 'storage_file_delete_batch', client_factory=cf_share_client)
         g.storage_command('resize', 'resize_file')
         g.storage_custom_command('url', 'create_file_url', transform=transform_url_without_encode,
                                  client_factory=cf_share_client)
@@ -698,7 +693,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('copy start', 'storage_file_copy', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_command('copy cancel', 'abort_copy')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch', client_factory=cf_share_client)
-
         g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler)
         g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
                                  custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
