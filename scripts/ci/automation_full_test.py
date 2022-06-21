@@ -131,16 +131,16 @@ def git_push():
     if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
-        subprocess.run(["git", "add", "*/command_modules/*"])
+        run_git_command(["git", "add", "*/command_modules/*"])
         commit_message = f"rerun tests from instance {instance_idx}"
-        subprocess.run(["git", "commit", "-m", commit_message])
-    except subprocess.CalledProcessError as ex:
+        run_git_command(["git", "commit", "-m", commit_message])
+    except RuntimeError as ex:
         raise ex
     retry = 3
     while retry >= 0:
         try:
             run_git_command(["git", "fetch", "azclibot"])
-            run_git_command(["git", "pull"])
+            run_git_command(["git", "pull", "--rebase"])
             run_git_command(["git", "push"])
 
             logger.info("git push all recording files")
@@ -190,7 +190,7 @@ def process_test(cmd, live_rerun=True):
     if not error_flag or not live_rerun:
         return error_flag
     # drop the original `--pytest-args` and add new arguments
-    cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '"-o junit_family=xunit1"']
+    cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
     error_flag = run_azdev(cmd)
     failure_summary = ''
     if error_flag:
