@@ -58,7 +58,9 @@ class AAZArgAction(Action):
     _str_parser = AAZShortHandSyntaxParser()  # support to parse normal string or short hand syntax string
 
     def __call__(self, parser, namespace, values, option_string=None):
-        if getattr(namespace, self.dest) is None or getattr(namespace, self.dest) == AAZUndefined:
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+            # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
+            # especially the default value of argument.
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:
@@ -277,7 +279,9 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        if getattr(namespace, self.dest) is None or getattr(namespace, self.dest) == AAZUndefined:
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+            # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
+            # especially the default value of argument.
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:

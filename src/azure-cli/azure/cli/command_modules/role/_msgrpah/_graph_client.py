@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+# pylint: disable=line-too-long, redefined-builtin, too-many-public-methods
+
 import json
 
 from azure.cli.core._profile import Profile
@@ -9,8 +12,6 @@ from azure.cli.core.util import send_raw_request
 from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.azclierror import HTTPError
 
-
-# pylint: disable=redefined-builtin, too-many-public-methods
 
 class GraphClient:
     """A lightweight Microsoft Graph API client.
@@ -20,21 +21,25 @@ class GraphClient:
 
     For full documentation, see doc/microsoft_graph_client.md in this repo.
     """
+
+    # API versions
+    V1_0 = 'v1.0'
+    BETA = 'beta'
+
     def __init__(self, cli_ctx):
-        self.cli_ctx = cli_ctx
-        self.tenant = Profile(cli_ctx).get_login_credentials()[2]
-        self.scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
+        self._cli_ctx = cli_ctx
+        self._scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
         # https://graph.microsoft.com/ (AzureCloud)
         # https://microsoftgraph.chinacloudapi.cn (AzureChinaCloud)
-        self.resource = cli_ctx.cloud.endpoints.microsoft_graph_resource_id
+        self._resource = cli_ctx.cloud.endpoints.microsoft_graph_resource_id
 
-        # https://graph.microsoft.com/v1.0
-        # https://microsoftgraph.chinacloudapi.cn/v1.0
-        self.base_url = cli_ctx.cloud.endpoints.microsoft_graph_resource_id.rstrip('/') + '/v1.0'
+        # https://graph.microsoft.com
+        # https://microsoftgraph.chinacloudapi.cn
+        self._endpoint = cli_ctx.cloud.endpoints.microsoft_graph_resource_id.rstrip('/')
 
-    def _send(self, method, url, param=None, body=None):
-        url = self.base_url + url
+    def _send(self, method, url, param=None, body=None, api_version=V1_0):
+        url = f'{self._endpoint}/{api_version}{url}'
 
         if body:
             body = json.dumps(body)
@@ -44,7 +49,8 @@ class GraphClient:
 
         while True:
             try:
-                r = send_raw_request(self.cli_ctx, method, url, resource=self.resource, uri_parameters=param, body=body)
+                r = send_raw_request(self._cli_ctx, method, url, resource=self._resource, uri_parameters=param,
+                                     body=body)
             except HTTPError as ex:
                 raise GraphError(ex.response.json()['error']['message'], ex.response) from ex
             # Other exceptions like AuthenticationError should not be handled here, so we don't catch CLIError
@@ -75,6 +81,11 @@ class GraphClient:
     # id is python built-in name: https://docs.python.org/3/library/functions.html#id
     # filter is python built-in name: https://docs.python.org/3/library/functions.html#filter
 
+    def application_list(self, filter=None):
+        # https://docs.microsoft.com/en-us/graph/api/application-list
+        result = self._send("GET", "/applications" + _filter_to_query(filter))
+        return result
+
     def application_create(self, body):
         # https://docs.microsoft.com/en-us/graph/api/application-post-applications
         result = self._send("POST", "/applications", body=body)
@@ -85,9 +96,13 @@ class GraphClient:
         result = self._send("GET", "/applications/{id}".format(id=id))
         return result
 
-    def application_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/application-list
-        result = self._send("GET", "/applications" + _filter_to_query(filter))
+    def application_update(self, id, body):
+        # https://docs.microsoft.com/en-us/graph/api/application-update
+        # AD Graph SDK uses verb 'patch', instead of 'update':
+        #   azure.graphrbac.operations.applications_operations.ApplicationsOperations.patch
+        # We use 'update' to align with other update operations:
+        #   azure.graphrbac.operations.users_operations.UsersOperations.update
+        result = self._send("PATCH", "/applications/{id}".format(id=id), body=body)
         return result
 
     def application_delete(self, id):
@@ -95,19 +110,14 @@ class GraphClient:
         result = self._send("DELETE", "/applications/{id}".format(id=id))
         return result
 
-    def application_update(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-update
-        result = self._send("PATCH", "/applications/{id}".format(id=id), body=body)
+    def application_owner_list(self, id):
+        # https://docs.microsoft.com/en-us/graph/api/application-list-owners
+        result = self._send("GET", "/applications/{id}/owners".format(id=id))
         return result
 
     def application_owner_add(self, id, body):
         # https://docs.microsoft.com/en-us/graph/api/application-post-owners
         result = self._send("POST", "/applications/{id}/owners/$ref".format(id=id), body=body)
-        return result
-
-    def application_owner_list(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/application-list-owners
-        result = self._send("GET", "/applications/{id}/owners".format(id=id))
         return result
 
     def application_owner_remove(self, id, owner_id):
@@ -126,6 +136,52 @@ class GraphClient:
         result = self._send("POST", "/applications/{id}/removePassword".format(id=id), body=body)
         return result
 
+    def application_federated_identity_credential_list(self, application_id, filter=None):
+        # https://docs.microsoft.com/en-us/graph/api/application-list-federatedidentitycredentials
+        result = self._send(
+            "GET",
+            f"/applications/{application_id}/federatedIdentityCredentials" + _filter_to_query(filter),
+            api_version=GraphClient.BETA)
+        return result
+
+    def application_federated_identity_credential_create(self, application_id, body):
+        # https://docs.microsoft.com/en-us/graph/api/application-post-federatedidentitycredentials
+        result = self._send(
+            "POST",
+            f"/applications/{application_id}/federatedIdentityCredentials",
+            body=body, api_version=GraphClient.BETA)
+        return result
+
+    def application_federated_identity_credential_get(self, application_id, federated_identity_credential_id_or_name):
+        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-get
+        result = self._send(
+            "GET",
+            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
+            api_version=GraphClient.BETA)
+        return result
+
+    def application_federated_identity_credential_update(
+            self, application_id, federated_identity_credential_id_or_name, body):
+        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-update
+        result = self._send(
+            "PATCH",
+            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
+            body=body, api_version=GraphClient.BETA)
+        return result
+
+    def application_federated_identity_credential_delete(self, application_id, federated_identity_credential_id_or_name):
+        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-delete
+        result = self._send(
+            "DELETE",
+            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
+            api_version=GraphClient.BETA)
+        return result
+
+    def service_principal_list(self, filter=None):
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-list
+        result = self._send("GET", "/servicePrincipals" + _filter_to_query(filter))
+        return result
+
     def service_principal_create(self, body):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-post-serviceprincipals
         result = self._send("POST", "/servicePrincipals", body=body)
@@ -136,19 +192,14 @@ class GraphClient:
         result = self._send("GET", "/servicePrincipals/{id}".format(id=id))
         return result
 
-    def service_principal_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-list
-        result = self._send("GET", "/servicePrincipals" + _filter_to_query(filter))
+    def service_principal_update(self, id, body):
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update
+        result = self._send("PATCH", "/servicePrincipals/{id}".format(id=id), body=body)
         return result
 
     def service_principal_delete(self, id):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-delete
         result = self._send("DELETE", "/servicePrincipals/{id}".format(id=id))
-        return result
-
-    def service_principal_update(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update
-        result = self._send("PATCH", "/servicePrincipals/{id}".format(id=id), body=body)
         return result
 
     def service_principal_add_password(self, id, body):
@@ -164,6 +215,47 @@ class GraphClient:
     def service_principal_owner_list(self, id):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-list-owners
         result = self._send("GET", "/servicePrincipals/{id}/owners".format(id=id))
+        return result
+
+    def service_principal_federated_identity_credential_list(self, application_id, filter=None):
+        # https://docs.microsoft.com/en-us/graph/api/application-list-federatedidentitycredentials
+        result = self._send(
+            "GET",
+            f"/servicePrincipals/{application_id}/federatedIdentityCredentials" + _filter_to_query(filter),
+            api_version=GraphClient.BETA)
+        return result
+
+    def service_principal_federated_identity_credential_create(self, application_id, body):
+        # https://docs.microsoft.com/en-us/graph/api/application-post-federatedidentitycredentials
+        result = self._send(
+            "POST",
+            f"/servicePrincipals/{application_id}/federatedIdentityCredentials",
+            body=body, api_version=GraphClient.BETA)
+        return result
+
+    def service_principal_federated_identity_credential_get(self, application_id, federated_identity_credential_id_or_name):
+        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-get
+        result = self._send(
+            "GET",
+            f"/servicePrincipals/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
+            api_version=GraphClient.BETA)
+        return result
+
+    def service_principal_federated_identity_credential_update(
+            self, application_id, federated_identity_credential_id_or_name, body):
+        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-update
+        result = self._send(
+            "PATCH",
+            f"/servicePrincipals/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
+            body=body, api_version=GraphClient.BETA)
+        return result
+
+    def service_principal_federated_identity_credential_delete(self, application_id, federated_identity_credential_id_or_name):
+        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-delete
+        result = self._send(
+            "DELETE",
+            f"/servicePrincipals/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
+            api_version=GraphClient.BETA)
         return result
 
     def owned_objects_list(self):
@@ -191,6 +283,11 @@ class GraphClient:
         result = self._send("POST", "/groups/{id}/getMemberGroups".format(id=id), body=body)
         return result
 
+    def group_list(self, filter=None):
+        # https://docs.microsoft.com/en-us/graph/api/group-list
+        result = self._send("GET", "/groups" + _filter_to_query(filter))
+        return result
+
     def group_create(self, body):
         # https://docs.microsoft.com/en-us/graph/api/group-post-groups
         result = self._send("POST", "/groups", body=body)
@@ -199,11 +296,6 @@ class GraphClient:
     def group_get(self, id):
         # https://docs.microsoft.com/en-us/graph/api/group-get
         result = self._send("GET", "/groups/{id}".format(id=id))
-        return result
-
-    def group_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/group-list
-        result = self._send("GET", "/groups" + _filter_to_query(filter))
         return result
 
     def group_delete(self, id):
@@ -241,6 +333,11 @@ class GraphClient:
         result = self._send("DELETE", "/groups/{id}/members/{member_id}/$ref".format(id=id, member_id=member_id))
         return result
 
+    def user_list(self, filter):
+        # https://docs.microsoft.com/graph/api/user-list
+        result = self._send("GET", "/users" + _filter_to_query(filter))
+        return result
+
     def user_create(self, body):
         # https://docs.microsoft.com/graph/api/user-post-users
         result = self._send("POST", "/users", body=body)
@@ -258,9 +355,9 @@ class GraphClient:
             result = self._send("GET", "/users/{}".format(id_or_upn))
         return result
 
-    def user_list(self, filter):
-        # https://docs.microsoft.com/graph/api/user-list
-        result = self._send("GET", "/users" + _filter_to_query(filter))
+    def user_update(self, id_or_upn, body):
+        # https://docs.microsoft.com/graph/api/user-update
+        result = self._send("PATCH", "/users/{}".format(id_or_upn), body=body)
         return result
 
     def user_delete(self, id_or_upn):
@@ -268,19 +365,9 @@ class GraphClient:
         result = self._send("DELETE", "/users/{}".format(id_or_upn))
         return result
 
-    def user_update(self, id_or_upn, body):
-        # https://docs.microsoft.com/graph/api/user-update
-        result = self._send("PATCH", "/users/{}".format(id_or_upn), body=body)
-        return result
-
     def user_get_member_groups(self, id_or_upn, body):
         # https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
         result = self._send("POST", "/users/{}/getMemberGroups".format(id_or_upn), body=body)
-        return result
-
-    def oauth2_permission_grant_create(self, body):
-        # https://docs.microsoft.com/en-us/graph/api/oauth2permissiongrant-post
-        result = self._send("POST", "/oauth2PermissionGrants", body=body)
         return result
 
     def oauth2_permission_grant_list(self, filter=None):
@@ -288,10 +375,28 @@ class GraphClient:
         result = self._send("GET", "/oauth2PermissionGrants" + _filter_to_query(filter))
         return result
 
+    def oauth2_permission_grant_create(self, body):
+        # https://docs.microsoft.com/en-us/graph/api/oauth2permissiongrant-post
+        result = self._send("POST", "/oauth2PermissionGrants", body=body)
+        return result
+
     def oauth2_permission_grant_delete(self, id):
         # https://docs.microsoft.com/en-us/graph/api/oauth2permissiongrant-delete
         result = self._send("DELETE", "/oAuth2PermissionGrants/{id}".format(id=id))
         return result
+
+    def get_object_url(self, object_id_or_url, api_version=V1_0):
+        """The object URL should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
+        If object_id_or_url is a GUID, convert it to a URL.
+        Otherwise, it may already be a URL, use it as-is.
+        """
+        from azure.cli.core.util import is_guid
+        return f'{self._endpoint}/{api_version}/directoryObjects/{object_id_or_url}' if is_guid(object_id_or_url) \
+            else object_id_or_url
+
+    @property
+    def tenant(self):
+        return Profile(self._cli_ctx).get_login_credentials()[2]
 
 
 def _filter_to_query(filter):
