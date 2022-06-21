@@ -28,6 +28,7 @@ profile = sys.argv[3]
 serial_modules = sys.argv[4].split()
 fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
 working_directory = "/home/vsts/work/1/s"
+azdev_test_result_dir = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env"
 jobs = {
             'acr': 45,
             'acs': 62,
@@ -183,7 +184,7 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False):
     if not error_flag or not live_rerun:
         return error_flag
     # drop the original `--pytest-args` and add new arguments
-    cmd = cmd[:-2] + ['--lf', '--live', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1']
+    cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
     error_flag = run_azdev(cmd)
     # restore original recording yaml file for failed test in live run
     if error_flag:
@@ -279,14 +280,14 @@ class AutomaticScheduling(object):
             else:
                 parallel_tests.append(k)
         if serial_tests:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
-                  serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            azdev_test_result_fp = os.path.join(working_directory, f"test_results_{instance_idx}.serial.xml")
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
             error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         if parallel_tests:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
-                  parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            azdev_test_result_fp = os.path.join(working_directory, f"test_results_{instance_idx}.parallel.xml")
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
             error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         return error_flag
 
