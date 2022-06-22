@@ -181,8 +181,9 @@ class AAZHttpOperation(AAZOperation):
 
         if isinstance(value, AAZBaseValue):
             data = value.to_serialized_data(processor=processor)
-            required = required or \
-                       value._schema._flags.get('required', False) and not value._schema._flags.get('read_only', False)
+            required = required or (
+                    value._schema._flags.get('required', False) and not value._schema._flags.get('read_only', False)
+            )
             if data == AAZUndefined and required:
                 required = True
                 if isinstance(value._schema, AAZObjectType):
@@ -196,13 +197,13 @@ class AAZHttpOperation(AAZOperation):
                     # use an empty list for required list
                     data = []
                 else:
-                    raise ValueError(f"Missing request content")
+                    raise ValueError("Missing request content")
         else:
             data = value
 
         if data == AAZUndefined or data == None:  # noqa: E711, pylint: disable=singleton-comparison
             if required:
-                raise ValueError(f"Missing request content")
+                raise ValueError("Missing request content")
             return None
         return data
 
