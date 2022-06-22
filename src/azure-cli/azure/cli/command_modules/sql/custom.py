@@ -5193,7 +5193,7 @@ def managed_db_log_replay_stop(
         resource_group_name=resource_group_name,
         restore_details_name=RestoreDetailsName.DEFAULT)
     # If type is present, it must be lrsrestore in order to proceed with stop-log-replay
-    if (hasattr(logReplayData, 'type_properties_type') and logReplayData.type_properties_type.lower() != 'lrsrestore'):        
+    if (hasattr(logReplayData, 'type_properties_type') and logReplayData.type_properties_type.lower() != 'lrsrestore'):
         raise CLIError(f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name}'
                       'in the resource group {resource_group_name} was not created with log replay service.')
 
