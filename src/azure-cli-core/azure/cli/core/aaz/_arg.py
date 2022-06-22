@@ -104,6 +104,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
             options_list=[*self._options] if self._options else None,
             required=self._required,
             help=self._help.get('short-summary', None),
+            id_part=self._id_part,
             default=self._default,
         )
         if self._arg_group:
