@@ -315,6 +315,28 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('storageProfile.zoneResilient', None)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm_debian')
+    def test_vm_generalize_debian(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm-generalize'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username debian --image debian --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --nsg-rule NONE')
+        self.cmd('vm stop -g {rg} -n {vm}')
+        # Should be able to generalize the VM after it has been stopped
+        self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
+        vm = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.cmd('vm capture -g {rg} -n {vm} --vhd-name-prefix vmtest')
+
+        # capture to a custom image
+        self.kwargs['image'] = 'myImage'
+        self.cmd('image create -g {rg} -n {image} --source {vm}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_capture_zone_resilient_image(self, resource_group):
 
@@ -376,6 +398,87 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
         self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 --admin-username sdk-test-admin --admin-password testPassword0 --nsg-rule NONE')
+        data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
+        self.kwargs['disk_0_name'] = data_disks[0]['name']
+        self.kwargs['disk_2_name'] = data_disks[2]['name']
+
+        # detach the 0th and 2nd disks leaving disks at lun 1 and 3
+        self.cmd('vm disk detach -n {disk_0_name} --vm-name {vm2} -g {rg}')
+        self.cmd('vm disk detach -n {disk_2_name} --vm-name {vm2} -g {rg}')
+
+        self.cmd('vm show -g {rg} -n {vm2}', checks=self.check("length(storageProfile.dataDisks)", 2))
+
+        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm2}')
+        self.cmd('vm generalize -g {rg} -n {vm2}')
+        self.cmd('image create -g {rg} -n {image2} --source {vm2}')
+
+        self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {newvm1}', checks=[
+            self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
+            self.check('storageProfile.osDisk.createOption', 'FromImage')
+        ])
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
+        ])
+
+        self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {newvm2}', checks=[
+            self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
+            self.check('storageProfile.osDisk.createOption', 'FromImage'),
+            self.check("length(storageProfile.dataDisks)", 2),
+            self.check("storageProfile.dataDisks[0].createOption", 'FromImage'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
+        ])
+
+        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 1 --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n vm3', checks=[
+            self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
+            self.check('storageProfile.osDisk.createOption', 'FromImage'),
+            self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+
+            self.check("length(storageProfile.dataDisks)", 3),
+            self.check("storageProfile.dataDisks[?lun == `0`] | [0].createOption", 'Empty'),
+            self.check("storageProfile.dataDisks[?lun == `1`] | [0].createOption", 'FromImage'),
+            self.check("storageProfile.dataDisks[?lun == `3`] | [0].createOption", 'FromImage'),
+
+            self.check('storageProfile.dataDisks[?lun == `0`] | [0].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+            self.check('storageProfile.dataDisks[?lun == `1`] | [0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType', 'Standard_LRS')
+        ])
+
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `1`] | [0].createOption", 'FromImage'),
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `1`] | [0].managedDisk.storageAccountType", 'Standard_LRS'),
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].createOption", 'FromImage'),
+            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType", 'Standard_LRS')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian')
+    def test_vm_custom_image_debian(self, resource_group):
+        self.kwargs.update({
+            'vm1': 'vm-unmanaged-disk',
+            'vm2': 'vm-managed-disk',
+            'newvm1': 'fromimage1',
+            'newvm2': 'fromimage2',
+            'image1': 'img-from-unmanaged',
+            'image2': 'img-from-managed',
+        })
+
+        self.cmd('vm create -g {rg} -n {vm1} --image debian --use-unmanaged-disk --admin-username sdk-test-admin --admin-password testPassword0 --nsg-rule NONE')
+        # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
+        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')
+        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+
+        self.cmd('vm create -g {rg} -n {vm2} --image debian --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 --admin-username sdk-test-admin --admin-password testPassword0 --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -1339,6 +1442,46 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_debian')
+    def test_vm_extension_debian(self, resource_group):
+
+        user_name = 'foouser1'
+        config_file = _write_config_file(user_name)
+
+        self.kwargs.update({
+            'vm': 'myvm',
+            'pub': 'Microsoft.OSTCExtensions',
+            'ext': 'VMAccessForLinux',
+            'config': config_file,
+            'user': user_name
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image debian --authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
+
+        self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
+                 checks=self.check('length([])', 0))
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update --enable-auto-upgrade false --no-wait')
+        self.cmd('vm extension wait --created -n {ext} -g {rg} --vm-name {vm}')
+        result = self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
+            self.check('*.extensions[0].name', ['VMAccessForLinux']),
+        ]).get_output_in_json()
+        # ensure the minor version is 2+
+        minor_version = int(result['instanceView']['extensions'][0]['typeHandlerVersion'].split('.')[1])
+        self.assertGreater(minor_version, 2)
+
+        result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('enableAutomaticUpgrade', False)
+        ]).get_output_in_json()
+        uuid.UUID(result['forceUpdateTag'])
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext} --instance-view', checks=[
+            self.check('instanceView.name', 'VMAccessForLinux'),
+            self.check('instanceView.statuses[0].displayStatus', 'Provisioning succeeded'),
+        ])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_2')
     def test_vm_extension_instance_name(self, resource_group):
 
@@ -2041,6 +2184,63 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_debian')
+    def test_vmss_extension_debian(self):
+
+        username = 'myadmin'
+        config_file = _write_config_file(username)
+
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
+            'username': username,
+            'config_file': config_file
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image debian --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait')
+        self.cmd('vmss wait --created -n {vmss} -g {rg}')
+
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
+        self.cmd('vmss extension list --vmss-name {vmss} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{net-ext}'),
+            self.check('publisher', '{net-pub}'),
+            self.check('provisionAfterExtensions', None),
+            self.check('enableAutomaticUpgrade', False)
+        ]).get_output_in_json()
+
+        uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.
+
+        # set the customscript extension that depends on the network watcher extension
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {script-ext} --publisher {script-pub} --version 2.0 '
+                 '--provision-after-extensions {net-ext} --settings "{{\\"commandToExecute\\": \\"echo testing\\"}}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {script-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 1),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+        ])
+
+        # set the VMAccess extension that depends on both the network watcher and script extensions.
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {access-ext} --publisher {access-pub} --version 1.5 '
+                 '--provision-after-extensions {net-ext} {script-ext} --protected-settings "{config_file}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {access-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 2),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+            self.check('provisionAfterExtensions[1]', '{script-ext}'),
+        ])
+
+        self.cmd('vmss extension upgrade -g {rg} -n {vmss}')
+
+        # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
     def test_vmss_extension_instance_name(self):
         username = 'myadmin'
@@ -2625,6 +2825,52 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --nsg-rule NONE')
+
+        # check we have no data disk
+        result = self.cmd('vm show -g {rg} -n {vm}',
+                          checks=self.check('length(storageProfile.dataDisks)', 0)).get_output_in_json()
+
+        # get the vhd uri from VM's storage_profile
+        blob_uri = result['storageProfile']['osDisk']['vhd']['uri']
+
+        self.kwargs['vhd_uri'] = blob_uri[0:blob_uri.rindex('/') + 1] + 'd7.vhd'
+
+        # now attach
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} -n {disk} --vhd {vhd_uri} --new --caching ReadWrite --size-gb 8 --lun 1')
+        # check we have a data disk
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 1),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            self.check('storageProfile.dataDisks[0].lun', 1),
+            self.check('storageProfile.dataDisks[0].diskSizeGb', 8),
+            self.check('storageProfile.dataDisks[0].createOption', 'Empty'),
+            self.check('storageProfile.dataDisks[0].vhd.uri', '{vhd_uri}'),
+            self.check('storageProfile.dataDisks[0].name', '{disk}')
+        ])
+
+        # now detach
+        self.cmd('vm unmanaged-disk detach -g {rg} --vm-name {vm} -n {disk}')
+
+        # check we have no data disk
+        self.cmd('vm show -g {rg} -n {vm}',
+                 checks=self.check('length(storageProfile.dataDisks)', 0))
+
+        # now attach to existing
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} -n {disk} --vhd {vhd_uri} --caching ReadOnly', checks=[
+            self.check('storageProfile.dataDisks[0].name', '{disk}'),
+            self.check('storageProfile.dataDisks[0].createOption', 'Attach')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-debian')
+    def test_vm_data_unmanaged_disk_debian(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': 'vm-datadisk-test',
+            'disk': 'd7'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username debian --image debian --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --nsg-rule NONE')
 
         # check we have no data disk
         result = self.cmd('vm show -g {rg} -n {vm}',
@@ -3582,6 +3828,49 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
 
         self.cmd('vmss create -g {rg} -n {flex_vmss} --image UbuntuLTS --orchestration-mode Flexible --admin-username vmtest')
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_vms_debian')
+    def test_vmss_vms_debian(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': self.create_random_name('clitestvmss', 20),
+            'flex_vmss': self.create_random_name('clitestflexvms', 20),
+            'count': 2,
+            'instance_ids': []
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --authentication-type password --admin-username admin123 --admin-password TestTest12#$ --instance-count {count}')
+
+        instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', '{count}'),
+            self.check("length([].name.starts_with(@, '{vmss}'))", self.kwargs['count'])
+        ]).get_output_in_json()
+
+        self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
+        self.kwargs['id'] = self.kwargs['instance_ids'][0]
+
+        self.cmd('vmss show --resource-group {rg} --name {vmss} --instance-id {id}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('instanceId', '{id}')
+        ])
+        result = self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {vmss}').get_output_in_json()
+        self.assertEqual(result['instance 0'].split(':')[1], '50000')
+        self.cmd('vmss restart --resource-group {rg} --name {vmss} --instance-ids *')
+        self._check_vms_power_state('PowerState/running', 'PowerState/starting')
+        self.cmd('vmss stop --resource-group {rg} --name {vmss} --instance-ids *')
+        self._check_vms_power_state('PowerState/stopped')
+        self.cmd('vmss start --resource-group {rg} --name {vmss} --instance-ids *')
+        self._check_vms_power_state('PowerState/running', 'PowerState/starting')
+        self.cmd('vmss deallocate --resource-group {rg} --name {vmss} --instance-ids *')
+        self._check_vms_power_state('PowerState/deallocated')
+        self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
+        self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
+
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image debian --orchestration-mode Flexible --admin-username vmtest')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
