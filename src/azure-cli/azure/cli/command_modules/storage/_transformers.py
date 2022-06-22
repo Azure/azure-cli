@@ -494,7 +494,7 @@ def transform_file_show_result(result):
 
 def _decode_bytearray(result):
     for k, v in result.items():
-        if type(v) == bytearray:
+        if isinstance(v, bytearray):
             result[k] = base64.urlsafe_b64encode(v).decode()
-        elif type(v) == dict:
+        elif isinstance(v, dict):
             _decode_bytearray(v)

@@ -1155,12 +1155,14 @@ def add_progress_callback(cmd, namespace):
 
 def add_progress_callback_v2(cmd, namespace):
     def _update_progress(response):
-        if response.http_response.status_code not in [200, 201]:
+        if response.http_response.status_code not in [200, 201, 206]:
             return
 
         message = getattr(_update_progress, 'message', 'Alive')
         reuse = getattr(_update_progress, 'reuse', False)
         current = response.context['upload_stream_current']
+        if current is None:
+            current = response.context['download_stream_current']
         total = response.context['data_stream_total']
 
         if total:

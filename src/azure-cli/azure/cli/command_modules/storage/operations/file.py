@@ -209,7 +209,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
 
 def download_file(client, destination_path=None, timeout=None, max_connections=2, open_mode='wb', **kwargs):
-    from azure.cli.command_modules.storage.util import glob_files_remotely, mkdir_p
+    from azure.cli.command_modules.storage.util import mkdir_p
     destination_folder = os.path.dirname(destination_path) if destination_path else ""
     if destination_folder and not os.path.exists(destination_folder):
         mkdir_p(destination_folder)
@@ -220,7 +220,7 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
         destination_path = os.path.join(destination_path, file_name) \
             if destination_path else file_name
 
-    kwargs.pop('progress_callback')
+    kwargs['raw_response_hook'] = kwargs.pop("progress_callback", None)
 
     with open(destination_path, open_mode) as stream:
         start_range = kwargs.pop('start_range', None)
@@ -235,8 +235,8 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
     return client.get_file_properties()
 
 
-def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
-                                max_connections=1, progress_callback=None, snapshot=None):
+def storage_file_download_batch(client, source, destination, pattern=None, dryrun=False, validate_content=False,
+                                max_connections=1, progress_callback=None):
     """
     Download files from file share to local directory in batch
     """
@@ -268,7 +268,8 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
         local_path = os.path.join(destination, *pair)
         file_client = client.get_file_client(path)
         with open(local_path, 'wb') as stream:
-            download = file_client.download_file(max_concurrency=max_connections, validate_content=validate_content)
+            download = file_client.download_file(max_concurrency=max_connections, validate_content=validate_content,
+                                                 raw_response_hook=progress_callback)
             download_content = download.readall()
             stream.write(download_content)
         return file_client.url.replace('%5C', '/')
@@ -346,7 +347,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
     raise ValueError('Fail to find source. Neither blob container or file share is specified.')
 
 
-def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, timeout=None):
+def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeout=None):
     """
     Delete files from file share in batch
     """

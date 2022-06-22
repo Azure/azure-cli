@@ -14,7 +14,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
                           add_progress_callback, process_resource_group,
-                          storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
+                          storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
@@ -23,7 +23,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
-                          blob_tier_validator_track2, services_type_v2, resource_type_type_v2)
+                          blob_tier_validator_track2, services_type_v2, resource_type_type_v2, add_progress_callback_v2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -1872,7 +1872,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('destination_path', options_list=('--dest',), type=file_type, required=False,
                 help='Path of the file to write to. The source filename will be used if not specified.',
                 completer=FilesCompleter())
-        c.extra('no_progress', progress_type)
+        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
         c.extra('start_range', type=int, help='Start of byte range to use for downloading a section of the file. '
                                               'If no --end-range is given, all bytes after the --start-range will be '
@@ -1969,7 +1969,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
-        from ._validators import add_progress_callback_v2
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
         c.register_path_argument(default_file_param='local_file_path')
@@ -1991,7 +1990,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage file upload-batch') as c:
-        from ._validators import process_file_upload_batch_parameters, add_progress_callback_v2
+        from ._validators import process_file_upload_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
@@ -2005,7 +2004,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
+        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the snapshot.')
 
     with self.argument_context('storage file delete-batch') as c:
         from ._validators import process_file_batch_source_parameters

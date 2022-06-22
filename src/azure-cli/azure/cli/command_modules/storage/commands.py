@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
-                                                               page_blob_service_factory, file_data_service_factory,
+                                                               page_blob_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
