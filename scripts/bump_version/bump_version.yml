@@ -116,6 +116,7 @@ jobs:
       inputs:
         testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results_*.xml'
         testRunTitle: 'CLI Bump Version test results of instance $(Instance_idx)'
+        mergeTestResults: true
 
 - job: CreatePR
   displayName: CLI Bump Version Create PR
@@ -135,8 +136,8 @@ jobs:
           git config --global user.email "AzPyCLI@microsoft.com"
           git config --global user.name "Azure CLI Team"
 
-          pr_title="{Package} Bump version for $(PACKAGE) to $(TARGET_PACKAGE_VERSION)"
-          pr_body="Triggered by CLI Bump Version Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\npackage: $(PACKAGE) $(TARGET_PACKAGE_VERSION)\nresource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)\n\nSee all the test_results.xml in ADO pipeline"
+          pr_title="{Package} Bump version for `$(PACKAGE)` to `$(TARGET_PACKAGE_VERSION)`"
+          pr_body="Triggered by CLI Bump Version Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\npackage: $(PACKAGE) $(TARGET_PACKAGE_VERSION)\nresource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)\n\nThere may still exist some failed tests, see [details](https://dev.azure.com/azure-sdk/internal/_build/results?buildId=$(Build.BuildId)&view=ms.vss-test-web.build-test-results-tab) in ADO pipeline"
           pr_head="azclibot:bump_version_$(Build.BuildId)"
 
           curl \
