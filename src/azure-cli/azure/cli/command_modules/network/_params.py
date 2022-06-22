@@ -1844,7 +1844,7 @@ def load_arguments(self, _):
     with self.argument_context('network public-ip prefix create') as c:
         c.argument('edge_zone', edge_zone)
         c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
-        c.argument('custom_ip_prefix_name', min_api='2020-06-01', help='The customIpPrefix that this prefix is associated with.')
+        c.argument('custom_ip_prefix_name', min_api='2020-06-01', help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.")
     # endregion
 
     # region RouteFilters
@@ -2259,11 +2259,12 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
                    options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
-    for item in ['ssh', 'rdp']:
-        with self.argument_context('network bastion {}'.format(item)) as c:
-            c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
-            c.argument('username', help='User name for SSH connections.', options_list=['--username'])
-            c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
+    with self.argument_context('network bastion ssh') as c:
+        c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
+        c.argument('username', help='User name for SSH connections.', options_list=['--username'])
+        c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
+    with self.argument_context('network bastion rdp') as c:
+        c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])

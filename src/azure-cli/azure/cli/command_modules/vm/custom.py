@@ -1919,7 +1919,9 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
+                                             resource_type=ResourceType.MGMT_COMPUTE,
+                                             operation_group='virtual_machines')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
@@ -3302,6 +3304,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 resource_group_name, vmss_name, vmss))
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
+            VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+            instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=['*'])
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
+                resource_group_name, vmss_name, instance_ids))
         except Exception as e:
             logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
 
@@ -4212,7 +4218,8 @@ def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, shar
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
+                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
+                         publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
@@ -4222,6 +4229,17 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     if permissions:
         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
         gallery.sharing_profile = SharingProfile(permissions=permissions)
+        if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+            gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                                                  publisher_contact=publisher_contact,
+                                                                                  eula=eula,
+                                                                                  public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
@@ -4874,8 +4892,9 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
                      op_type=None):
     SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
         'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
-    if subscription_ids is None and tenant_ids is None:
-        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    if op_type != 'EnableCommunity':
+        if subscription_ids is None and tenant_ids is None:
+            raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
     groups = []
     if subscription_ids:
         groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
@@ -4976,6 +4995,8 @@ def gallery_application_version_create(client,
                                        target_regions=None,
                                        default_file_link=None,
                                        end_of_life_date=None,
+                                       package_file_name=None,
+                                       config_file_name=None,
                                        exclude_from=None,
                                        no_wait=False):
     gallery_application_version = {}
@@ -5000,6 +5021,13 @@ def gallery_application_version_create(client,
         gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
     if end_of_life_date is not None:
         gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    settings = {}
+    if package_file_name is not None:
+        settings['package_file_name'] = package_file_name
+    if config_file_name is not None:
+        settings['config_file_name'] = config_file_name
+    if settings:
+        gallery_application_version['publishing_profile']['settings'] = settings
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -5295,4 +5323,18 @@ def restore_point_collection_update(client,
                          restore_point_collection_name=restore_point_collection_name,
                          parameters=parameters)
 
+# endRegion
+
+
+# region Community gallery
+def sig_community_image_definition_list(client, location, public_gallery_name, marker=None, show_next_marker=None):
+    generator = client.list(location=location, public_gallery_name=public_gallery_name)
+    return get_page_result(generator, marker, show_next_marker)
+
+
+def sig_community_image_version_list(client, location, public_gallery_name, gallery_image_name, marker=None,
+                                     show_next_marker=None):
+    generator = client.list(location=location, public_gallery_name=public_gallery_name,
+                            gallery_image_name=gallery_image_name)
+    return get_page_result(generator, marker, show_next_marker)
 # endRegion

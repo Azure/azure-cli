@@ -1036,12 +1036,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
                  '--gallery-image-version {version} --virtual-machine {vm_id}')
 
-        public_name = self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
+        self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('length(sharingProfile.communityGalleryInfo.publicNames)', '1')
         ]).get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
-        community_gallery_image_version = '/CommunityGalleries/' + public_name + '/Images/' + self.kwargs['image1'] \
-                                          + '/Versions/' + self.kwargs['version']
+        community_gallery_image_version = self.cmd(
+            'sig image-version show-community --gallery-image-definition {image1} --public-gallery-name {public_name} '
+            '--location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
         self.kwargs.update({'community_gallery_image_version': community_gallery_image_version})
 
         # test creating disk from community gallery image version
@@ -2542,6 +2543,62 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'StandardSSD_LRS'),
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk2', location='eastus2euap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_disk_storage_sku2(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm-storage-sku-test',
+            'disk1': 'd1',
+            'disk2': 'd2',
+            'snapshot1': 's1',
+            'image1': 'i1',
+        })
+
+        self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian '
+                 '--storage-sku os=Premium_LRS 0=PremiumV2_LRS --data-disk-sizes-gb 4 --zone 1 --nsg-rule NONE')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku PremiumV2_LRS --zone 1')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+        ])
+
+        # create a snpashot
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 4 --sku Standard_LRS --tags tag1=s1', checks=[
+            self.check('sku.name', 'Standard_LRS'),
+            self.check('diskSizeGb', 4),
+            self.check('tags.tag1', 's1')
+        ])
+
+        # test that images can be created with different storage skus and os disk caching settings.
+        self.cmd('image create -g {rg} -n {image1} --source {snapshot1} --storage-sku PremiumV2_LRS --os-type linux',
+                 checks=[
+                     self.check('storageProfile.osDisk.storageAccountType', 'PremiumV2_LRS'),
+                 ])
+
+    @unittest.skip('VMSS is not support PremiumV2_LRS yet')
+    @ResourceGroupPreparer(name_prefix='cli-test-stdssdk3', location='eastus2euap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vmss_disk_storage_sku(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-storage-sku-test',
+            'disk1': 'd1',
+            'disk2': 'd2',
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian '
+                 '--storage-sku os=Premium_LRS 0=PremiumV2_LRS --data-disk-sizes-gb 4 --zone 1')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku PremiumV2_LRS --zone 1')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --disk {disk1}')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'PremiumV2_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'PremiumV2_LRS'),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus')
@@ -5317,6 +5374,116 @@ class VMGalleryImage(ScenarioTest):
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
 
+    @ResourceGroupPreparer(location='CentralUSEUAP')
+    def test_community_gallery_operations(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 16),
+            'gallery': self.create_random_name('gellery', 16),
+            'image': self.create_random_name('image', 16),
+            'version': '1.1.2',
+            'captured': 'managedImage1',
+            'location': resource_group_location,
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname')
+        self.cmd('sig share enable-community -r {gallery} -g {rg}')
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username gallerytest --generate-ssh-keys --nsg-rule None')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
+        self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
+
+        self.cmd('sig show-community --location {location} --public-gallery-name {public_name}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{public_name}'),
+            self.check('uniqueId', '/CommunityGalleries/{public_name}')
+        ])
+
+        self.cmd('sig image-definition show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location {location}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{image}'),
+            self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}')
+        ])
+
+        self.cmd('sig image-definition list-community --public-gallery-name {public_name} --location {location}', checks=[
+            self.check('[0].location', '{location}'),
+            self.check('[0].name', '{image}'),
+            self.check('[0].uniqueId', '/CommunityGalleries/{public_name}/Images/{image}')
+        ])
+
+        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location {location} --gallery-image-version {version}', checks=[
+            self.check('location', '{location}'),
+            self.check('name', '{version}'),
+            self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
+        ]).get_output_in_json()['uniqueId']
+
+        self.cmd('sig image-version list-community --gallery-image-definition {image} --public-gallery-name {public_name} '
+                 '--location {location}', checks=[
+            self.check('[0].location', '{location}'),
+            self.check('[0].name', '{version}'),
+            self.check('[0].uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_create_vm_with_community_gallery_image(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 16),
+            'vm_with_community_gallery': self.create_random_name('vm_sg', 16),
+            'vmss_with_community_gallery_version': self.create_random_name('vmss', 16),
+            'gallery': self.create_random_name('gellery', 16),
+            'image': self.create_random_name('image', 16),
+            'version': '1.1.2',
+            'captured': 'managedImage1'
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname')
+        self.cmd('sig share enable-community -r {gallery} -g {rg}')
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username gallerytest --generate-ssh-keys --nsg-rule None')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
+        self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
+
+        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} -l eastus2 --gallery-image-version {version}',
+            checks=[
+                self.check('name', '{version}'),
+                self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
+            ])
+
+        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location eastus2 --gallery-image-version {version}').get_output_in_json()['uniqueId']
+        self.cmd('vm create -g {rg} -n {vm_with_community_gallery} --image {community_gallery_image_version} --admin-username gallerytest --generate-ssh-keys --nsg-rule None --accept-term')
+
+        self.cmd('vm show -g {rg} -n {vm_with_community_gallery}', checks=[
+            self.check('storageProfile.imageReference.exactVersion','{version}'),
+            self.check('storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_with_community_gallery_version} --admin-username gallerytest --generate-ssh-keys --image {community_gallery_image_version} --accept-term')
+
+        self.cmd('vmss show -g {rg} -n {vmss_with_community_gallery_version}', checks=[
+            self.check('virtualMachineProfile.storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
 
 class VMGalleryApplication(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
@@ -5356,8 +5523,8 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig gallery-application delete -n {app_name} -r {gallery} -g {rg} -y')
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
 
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='account', length=15)
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='account', length=15)
     def test_gallery_application_version(self, resource_group, resource_group_location, storage_account_info):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -5380,11 +5547,13 @@ class VMGalleryApplication(ScenarioTest):
         ])
         self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
-        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
+        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove --package-file-name package1 --config-file-name config1', checks=[
              self.check('name', '1.0.0'),
              self.check('publishingProfile.manageActions.install', 'install'),
              self.check('publishingProfile.manageActions.remove', 'remove'),
-             self.check('type', 'Microsoft.Compute/galleries/applications/versions')
+             self.check('type', 'Microsoft.Compute/galleries/applications/versions'),
+             self.check('publishingProfile.settings.packageFileName', 'package1'),
+             self.check('publishingProfile.settings.configFileName', 'config1')
         ])
         self.cmd('sig gallery-application version update -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --tags tag=test', checks=[
             self.check('name', '1.0.0'),
@@ -7372,6 +7541,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
+        self.cmd('vmss list-instances -n {vmss1} -g {rg}', checks=[
+            self.check('[0].resources[0].name', 'GuestAttestation'),
+            self.check('[0].resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation')
+        ])
         self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('identity', None),
@@ -7964,6 +8137,22 @@ class DiskRPTestScenario(ScenarioTest):
         # show snapshot B, check completionPercent
         self.cmd('snapshot show -g {rg2} -n snapb', checks=[
             self.check_pattern('completionPercent', '\d?.\d?')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')
+    def test_snapshot_incremental(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+            'snapshot1': self.create_random_name('snap', 10),
+        })
+
+        self.cmd('disk create -n {disk} -g {rg} --size-gb 10')
+        self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
+            self.check('creationData.createOption', 'Copy')
+        ])
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {snapshot} --incremental true -l eastus2euap', checks=[
+            self.check('creationData.createOption', 'CopyStart')
         ])
 
 
