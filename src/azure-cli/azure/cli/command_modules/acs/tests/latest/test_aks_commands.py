@@ -5301,6 +5301,31 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    def prepare_cli_tools(self, remove_files, ctl_version="latest", ctl_base_url="", login_version="latest", login_base_url=""):
+        ctl_fd, ctl_temp_file = tempfile.mkstemp()
+        login_fd, login_temp_file = tempfile.mkstemp()
+        install_cmd = (
+            f"aks install-cli --client-version={ctl_version} --install-location={ctl_temp_file} "
+            f"--base-src-url={ctl_base_url} --kubelogin-version={login_version} "
+            f"--kubelogin-install-location={login_temp_file} --kubelogin-base-src-url={login_base_url}"
+        )
+
+        # install kubectl & kubelogin
+        try:
+            subprocess.call(["az"] + install_cmd.split(" "))
+            self.assertGreater(os.path.getsize(ctl_temp_file), 0)
+            self.assertGreater(os.path.getsize(login_temp_file), 0)
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
+        finally:
+            os.close(ctl_fd)
+            os.close(login_fd)
+            if remove_files:
+                os.remove(ctl_temp_file)
+                os.remove(login_temp_file)
+                return None, None
+            return ctl_temp_file, login_temp_file
+
     # live only due to dependency `_add_role_assignment` is not mocked
     @live_only()
     @AllowLargeResponse()
@@ -5333,18 +5358,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('servicePrincipalProfile.clientId', sp_name)
         ])
 
-        # install kubectl
-        try:
-            subprocess.call(["az", "aks", "install-cli"])
-        except subprocess.CalledProcessError as err:
-            raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
+        show_cmd = "aks show --resource-group={resource_group} --name={name}"
+        k8s_version = self.cmd(show_cmd).get_output_in_json().get("kubernetesVersion")
 
+        kubectl_path, kubelogin_path = self.prepare_cli_tools(remove_files=False, ctl_version=k8s_version)
         # create test hook file
         hook_file_path = get_test_data_file_path("test_aks_create_attach_acr.hook")
         test_hook_data = {
-            "configs": {
-                "returnOutput": True,
-            }
+            "returnOutput": True,
+            "customKubectlPath": kubectl_path
         }
         with open(hook_file_path, "w") as f:
             json.dump(test_hook_data, f)
@@ -5363,7 +5385,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             finally:
                 os.close(fd)
             # get node name
-            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_cmd = [kubectl_path, "get", "node", "-o", "name", "--kubeconfig", browse_path]
             k_get_node_output = subprocess.check_output(
                 k_get_node_cmd,
                 universal_newlines=True,
@@ -5386,9 +5408,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             )
         # clean up test hook file even if test failed
         finally:
+            # remove test hook
             if os.path.exists(hook_file_path):
-                # delete file
                 os.remove(hook_file_path)
+
+            # remove binaries
+            if os.path.exists(kubectl_path):
+                os.remove(kubectl_path)
+            if os.path.exists(kubelogin_path):
+                os.remove(kubelogin_path)
 
             # delete cluster
             self.cmd(

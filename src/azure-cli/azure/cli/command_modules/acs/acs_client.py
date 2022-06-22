@@ -18,6 +18,9 @@ from scp import SCPClient
 from knack.prompting import prompt_pass
 from knack.util import CLIError
 
+# TODO: this file is deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
+
 
 def _load_key(key_filename):
     pkey = None

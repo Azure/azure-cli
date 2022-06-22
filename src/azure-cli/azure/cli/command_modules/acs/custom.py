@@ -2351,8 +2351,11 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
+    # normailze acr name
     if not acr.endswith(CONST_ACR_DOMAIN_NAME):
         acr = acr + CONST_ACR_DOMAIN_NAME
+
+    # check binary kubectl
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2363,10 +2366,16 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
             cmd, client, resource_group_name, name, admin=False, path=browse_path
         )
 
+        # test hook configs
+        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+        return_output = test_hook_data.get("returnOutput", False)
+        custom_kubectl_path = test_hook_data.get("customKubectlPath", None)
+        kubectl_binary_path = "kubectl" if not custom_kubectl_path else custom_kubectl_path
+
         # Get kubectl minor version
         kubectl_minor_version = -1
         try:
-            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+            cmd = f"{kubectl_binary_path} version -o json --kubeconfig {browse_path}"
             output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
             jsonS, _ = output.communicate()
             kubectl_version = json.loads(jsonS)
@@ -2436,7 +2445,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 
         try:
             cmd = [
-                "kubectl",
+                kubectl_binary_path,
                 "run",
                 "--kubeconfig",
                 browse_path,
@@ -2464,12 +2473,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
             raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
         if output:
             print(output)
-            # only return the output in test case "test_aks_create_attach_acr"
-            test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
-            if test_hook_data:
-                test_configs = test_hook_data.get("configs", None)
-                if test_configs and test_configs.get("returnOutput", False):
-                    return_msg = output
+            if return_output:
+                return_msg = output
         else:
             raise AzureInternalError("Failed to check the ACR.")
     finally:
