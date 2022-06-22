@@ -83,7 +83,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             client_factory=iot_service_provisioning_factory,
                             transform=_dps_certificate_response_transform) as g:
         g.custom_command(
-            'list','iot_dps_certificate_list',
+            'list', 'iot_dps_certificate_list',
             table_transformer=(
                 "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,"
                 "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
