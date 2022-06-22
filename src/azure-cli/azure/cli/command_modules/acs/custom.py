@@ -115,7 +115,10 @@ def get_cmd_test_hook_data(filename):
     test_hook_file_path = os.path.join(curr_dir, 'tests/latest/data', filename)
     if os.path.exists(test_hook_file_path):
         with open(test_hook_file_path, "r") as f:
-            hook_data = json.load(f)
+            try:
+                hook_data = json.load(f)
+            except Exception as ex:
+                logger.warning("failed to load test hook from %s, error: %s", test_hook_file_path, str(ex))
     return hook_data
 
 
@@ -2351,12 +2354,18 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
+    # test hook configs
+    test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+    return_output = test_hook_data.get("returnOutput", False)
+    custom_kubectl_path = test_hook_data.get("customKubectlPath", None)
+    kubectl_binary_path = "kubectl" if not custom_kubectl_path else custom_kubectl_path
+
     # normailze acr name
     if not acr.endswith(CONST_ACR_DOMAIN_NAME):
         acr = acr + CONST_ACR_DOMAIN_NAME
 
     # check binary kubectl
-    if not which("kubectl"):
+    if not which("kubectl") and not custom_kubectl_path:
         raise ValidationError("Can not find kubectl executable in PATH")
 
     return_msg = None
@@ -2365,12 +2374,6 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
         aks_get_credentials(
             cmd, client, resource_group_name, name, admin=False, path=browse_path
         )
-
-        # test hook configs
-        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
-        return_output = test_hook_data.get("returnOutput", False)
-        custom_kubectl_path = test_hook_data.get("customKubectlPath", None)
-        kubectl_binary_path = "kubectl" if not custom_kubectl_path else custom_kubectl_path
 
         # Get kubectl minor version
         kubectl_minor_version = -1
