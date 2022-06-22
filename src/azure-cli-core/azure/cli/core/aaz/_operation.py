@@ -181,11 +181,9 @@ class AAZHttpOperation(AAZOperation):
 
         if isinstance(value, AAZBaseValue):
             data = value.to_serialized_data(processor=processor)
-            required = required or (
-                    value._schema._flags.get('required', False) and not value._schema._flags.get('read_only', False)
-            )
+            flags = value._schema._flags
+            required = required or flags.get('required', False) and not flags.get('read_only', False)
             if data == AAZUndefined and required:
-                required = True
                 if isinstance(value._schema, AAZObjectType):
                     # use an empty dict as data for required object, and process it's properties
                     data = processor(value._schema, {})
@@ -294,7 +292,7 @@ class AAZHttpOperation(AAZOperation):
                 "GET", self.ctx.next_link, {}, self.header_parameters,
                 self.content, self.form_content, None)
 
-        elif self.method in ("GET", ):
+        elif self.method in ("GET",):
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, None)
