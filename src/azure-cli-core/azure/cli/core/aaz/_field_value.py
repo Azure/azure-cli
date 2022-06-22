@@ -116,21 +116,25 @@ class AAZObject(AAZBaseValue):
         return not self == other
 
     def to_serialized_data(self, processor=None):
-        result = {}
-        schemas = [self._schema]
+        if self._data is None:
+            result = None
 
-        disc_schema = self._schema.get_discriminator(self._data)
-        if disc_schema:
-            schemas.append(disc_schema)
+        else:
+            result = {}
+            schemas = [self._schema]
 
-        for schema in schemas:
-            for name, field_schema in schema._fields.items():
-                v = self[name].to_serialized_data(processor=processor)
-                if v == AAZUndefined:
-                    continue
-                if field_schema._serialized_name:   # pylint: disable=protected-access
-                    name = field_schema._serialized_name  # pylint: disable=protected-access
-                result[name] = v
+            disc_schema = self._schema.get_discriminator(self._data)
+            if disc_schema:
+                schemas.append(disc_schema)
+
+            for schema in schemas:
+                for name, field_schema in schema._fields.items():
+                    v = self[name].to_serialized_data(processor=processor)
+                    if v == AAZUndefined:
+                        continue
+                    if field_schema._serialized_name:   # pylint: disable=protected-access
+                        name = field_schema._serialized_name  # pylint: disable=protected-access
+                    result[name] = v
 
         if not result and self._is_patch:
             return AAZUndefined
@@ -219,12 +223,16 @@ class AAZDict(AAZBaseValue):
             yield key, self[key]
 
     def to_serialized_data(self, processor=None):
-        result = {}
-        for key, v in self.items():
-            v = v.to_serialized_data(processor=processor)
-            if v == AAZUndefined:
-                continue
-            result[key] = v
+        if self._data is None:
+            result = None
+        else:
+            result = {}
+            for key, v in self.items():
+                v = v.to_serialized_data(processor=processor)
+                if v == AAZUndefined:
+                    continue
+                result[key] = v
+
         if not result and self._is_patch:
             return AAZUndefined
         if processor:
@@ -336,10 +344,15 @@ class AAZList(AAZBaseValue):
         self._len = 0
 
     def to_serialized_data(self, processor=None):
-        result = []
-        for v in self:
-            v = v.to_serialized_data(processor=processor)
-            result.append(v)
+        if self._data is None:
+            result = None
+        else:
+            result = []
+            for v in self:
+                v = v.to_serialized_data(processor=processor)
+                # AAZUndefined cannot be ignored. if we ignore it, the index of the following value will be changed.
+                result.append(v)
+
         if not result and self._is_patch:
             return AAZUndefined
         if processor:

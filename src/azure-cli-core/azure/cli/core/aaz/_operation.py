@@ -178,6 +178,10 @@ class AAZHttpOperation(AAZOperation):
                         else:
                             raise ValueError(f"Missing a required field in request content: {_name}")
 
+            if isinstance(schema, AAZListType):
+                assert isinstance(result, list)
+                # ignore AAZUndefined element in list result.
+                return [_item for _item in result if _item != AAZUndefined]
             return result
 
         if isinstance(value, AAZBaseValue):

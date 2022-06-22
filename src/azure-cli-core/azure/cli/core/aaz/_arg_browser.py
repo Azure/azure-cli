@@ -33,7 +33,7 @@ class AAZArgBrowser:
         if key.startswith('.'):
             names = key[1:].split('.', maxsplit=1)
             prop_name = names[0]
-            if prop_name not in self._arg_data:
+            if self._arg_data is None or prop_name not in self._arg_data:
                 return None
             sub_value = self._arg_value[prop_name]
             sub_data = self._arg_data[prop_name]
@@ -47,7 +47,9 @@ class AAZArgBrowser:
 
     def get_elements(self):
         """Iter over sub elements of list or dict."""
-        if isinstance(self._arg_data, list):
+        if self._arg_data is None:
+            return
+        elif isinstance(self._arg_data, list):
             for idx, d in enumerate(self._arg_data):
                 # not support to access parent from element args
                 yield idx, AAZArgBrowser(self._arg_value[idx], d, parent=None)
