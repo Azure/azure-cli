@@ -154,8 +154,9 @@ class AAZHttpOperation(AAZOperation):
                 for _schema in [schema, schema.get_discriminator(result)]:
                     if not _schema:
                         continue
-                    for _name, _field_schema in _schema._fields.items():
+                    for _field_name, _field_schema in _schema._fields.items():
                         # verify required and not read only property
+                        _name = _field_schema._serialized_name or _field_name  # prefer using serialized name first
                         if _name in result:
                             continue
                         if _field_schema._flags.get('read_only', False):
