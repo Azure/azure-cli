@@ -2172,13 +2172,13 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_access_control(self):
         self.kwargs.update({
-            'workspace': 'clitestsynapseworkspace',
+            'workspace': 'bigdataqa211210ws',
             'role': 'Synapse Contributor',
             'userPrincipal': 'username@contoso.com',
             'servicePrincipal': 'testsynapsecli',
             'scopeName': 'workspaces/{workspaceName}/bigDataPools/{bigDataPoolName}',
             'itemType': 'bigDataPools',
-            'item': 'testitem'})
+            'item': 'test'})
 
         self.cmd(
             'az synapse role scope list --workspace-name {workspace} ',
