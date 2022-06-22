@@ -1005,6 +1005,103 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('maxShares', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_create_disk_from_diff_gallery_image_version_', location='westus')
+    def test_create_disk_from_diff_gallery_image_version(self):
+        self.kwargs.update({
+            'location': 'westus',
+            'vm': 'vm1',
+            'gallery1': self.create_random_name('gallery1', 16),
+            'gallery2': self.create_random_name('gallery2', 16),
+            'image1': 'image1',
+            'image2': 'image2',
+            'version': '1.1.2',
+            'disk1': 'disk1',
+            'disk2': 'disk2',
+            'disk3': 'disk3',
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
+            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
+        })
+
+        self.kwargs['vm_id'] = \
+            self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 10 --admin-username clitest1 '
+                     '--generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
+        time.sleep(70)
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery1} --permissions community --publisher-uri publisher1 '
+                 '--publisher-email test@microsoft.com --eula eula1 --public-name-prefix name1')
+        self.cmd('sig share enable-community -g {rg} -r {gallery1}')
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery1} --gallery-image-definition {image1} '
+                 '--gallery-image-version {version} --virtual-machine {vm_id}')
+
+        self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('length(sharingProfile.communityGalleryInfo.publicNames)', '1')
+        ]).get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
+        community_gallery_image_version = self.cmd(
+            'sig image-version show-community --gallery-image-definition {image1} --public-gallery-name {public_name} '
+            '--location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
+        self.kwargs.update({'community_gallery_image_version': community_gallery_image_version})
+
+        # test creating disk from community gallery image version
+        self.cmd('disk create -g {rg} -n {disk1} --gallery-image-reference {community_gallery_image_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('creationData.galleryImageReference.communityGalleryImageId', '{community_gallery_image_version}')
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery1} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery2} --permissions groups')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+
+        compute_gallery_image_version = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
+            '--gallery-image-version {version} --virtual-machine {vm_id}',
+            checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+        self.kwargs.update({'compute_gallery_image_version': compute_gallery_image_version})
+
+        # test creating disk from compute gallery image version
+        self.cmd('disk create -g {rg} -n {disk2} --gallery-image-reference {compute_gallery_image_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('creationData.galleryImageReference.id', '{compute_gallery_image_version}')
+        ])
+
+        unique_name = self.cmd('sig show --gallery-name {gallery2} --resource-group {rg} --select Permissions') \
+            .get_output_in_json()['identifier']['uniqueName']
+        self.kwargs.update({'unique_name': unique_name})
+
+        self.cmd('sig share add --gallery-name {gallery2} -g {rg} --subscription-ids {subId} --tenant-ids {tenantId}')
+        shared_gallery_image_version = \
+            self.cmd('sig image-version show-shared --gallery-image-definition {image2} --gallery-unique-name '
+                     '{unique_name} --location {location} --gallery-image-version {version}') \
+                .get_output_in_json()['uniqueId']
+        self.kwargs.update({'shared_gallery_image_version': shared_gallery_image_version})
+
+        # test creating disk from invalid gallery image version
+        self.kwargs.update({'invalid_gallery_image_version': shared_gallery_image_version.replace('SharedGalleries', 'Shared')})
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('disk create -g {rg} -n {disk3} --gallery-image-reference {invalid_gallery_image_version}')
+
+        # test creating disk from shared gallery image version
+        self.cmd('disk create -g {rg} -n {disk3} --gallery-image-reference {shared_gallery_image_version}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('creationData.galleryImageReference.sharedGalleryImageId', '{shared_gallery_image_version}')
+        ])
+
+        # gallery permissions must be reset, or the resource group can't be deleted
+        self.cmd('sig share reset --gallery-name {gallery2} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery2} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
