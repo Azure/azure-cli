@@ -85,7 +85,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command(
             'list', 'iot_dps_certificate_list',
             table_transformer=(
-                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,"
+                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,Expiry:properties.expiry,"
                 "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
             )
         )
@@ -109,7 +109,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command(
             'list', 'iot_hub_certificate_list',
             table_transformer=(
-                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,"
+                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,Expiry:properties.expiry,"
                 "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
             )
         )
