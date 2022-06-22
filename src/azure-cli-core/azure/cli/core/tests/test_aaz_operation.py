@@ -21,16 +21,16 @@ class TestAAZHttpOperation(unittest.TestCase):
         self.assertEqual(data, {"properties": {}})
 
         schema.properties.prop1 = AAZListType(flags={"required": True})
-        schema.properties.prop2 = AAZDictType(flags={"required": True})
+        schema.properties.prop2 = AAZDictType(flags={"required": True}, serialized_name='property2')
 
         schema.properties.prop3 = AAZObjectType()
         schema.properties.prop4 = AAZObjectType(flags={"required": True, "read_only": True})
-        schema.properties.prop5 = AAZDictType(flags={"required": True, "read_only": True})
+        schema.properties.prop5 = AAZDictType(flags={"required": True, "read_only": True}, serialized_name='Prop5')
         schema.properties.prop6 = AAZListType(flags={"required": True, "read_only": True})
 
         v = schema._ValueCls(schema=schema, data=schema.process_data(None))
         data = AAZHttpOperation.serialize_content(v)
-        self.assertEqual(data, {"properties": {'prop1': [], "prop2": {}}})
+        self.assertEqual(data, {"properties": {'prop1': [], "property2": {}}})
 
         # test required Case 2
         schema = AAZObjectType(flags={"required": True})
@@ -38,7 +38,7 @@ class TestAAZHttpOperation(unittest.TestCase):
         schema.properties.prop1 = AAZListType(flags={"required": True})
         schema.properties.prop2 = AAZDictType(flags={"required": True})
         schema.properties.prop3 = AAZObjectType()
-        schema.properties.prop3.sub1 = AAZIntType()
+        schema.properties.prop3.sub1 = AAZIntType(serialized_name="subProperty1")
         schema.properties.prop4 = AAZStrType(flags={"required": True, "read_only": True})
 
         v = schema._ValueCls(schema=schema, data=schema.process_data(None))
@@ -49,7 +49,7 @@ class TestAAZHttpOperation(unittest.TestCase):
         v.properties.prop3.sub1 = 6
         self.assertTrue(v._is_patch)
         data = AAZHttpOperation.serialize_content(v)
-        self.assertEqual(data, {'properties': {'prop3': {'sub1': 6}, 'prop1': [], 'prop2': {}}})
+        self.assertEqual(data, {'properties': {'prop3': {'subProperty1': 6}, 'prop1': [], 'prop2': {}}})
 
         schema.properties.prop3.sub2 = AAZStrType(flags={"required": True})
         v = schema._ValueCls(schema=schema, data=schema.process_data(None))
