@@ -5001,7 +5001,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  '--name {subnet2} '
                  '--disable-private-link-service-network-policies true', checks=[
                      self.check('addressPrefix', '10.0.2.0/24'),
-                     self.check('privateEndpointNetworkPolicies', 'Enabled'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
                  ])
 

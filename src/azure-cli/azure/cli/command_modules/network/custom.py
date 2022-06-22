@@ -7119,7 +7119,7 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
     if delegations:
         subnet.delegations = delegations
 
-    if disable_private_endpoint_network_policies is True:
+    if disable_private_endpoint_network_policies is None or disable_private_endpoint_network_policies is True:
         subnet.private_endpoint_network_policies = "Disabled"
     if disable_private_endpoint_network_policies is False:
         subnet.private_endpoint_network_policies = "Enabled"
