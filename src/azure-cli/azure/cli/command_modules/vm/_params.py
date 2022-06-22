@@ -1459,10 +1459,9 @@ def load_arguments(self, _):
                    arg_group='Managed Identity', arg_type=get_three_state_flag(),
                    help='Provide this flag to use system assigned identity for disk encryption set. '
                         'Check out help for more examples')
-        c.argument('mi_user_assigned', options_list=['--user-assigned'], arg_group='Managed Identity', nargs='+',
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], arg_group='Managed Identity', nargs='*',
                    help='User Assigned Identity ids to be used for disk encryption set. '
                         'Check out help for more examples')
-
     # endregion
 
     # region DiskAccess

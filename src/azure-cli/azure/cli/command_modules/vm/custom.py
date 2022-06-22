@@ -2022,14 +2022,14 @@ def _remove_disk_encryption_set_identities(cmd, resource_group_name, name,
         return None
 
     user_identities_to_remove = []
-    if mi_user_assigned:
+    if mi_user_assigned is not None:
         existing_user_identities = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
-        user_identities_to_remove = {x.lower() for x in mi_user_assigned}
+        user_identities_to_remove = {x.lower() for x in mi_user_assigned} \
+            if len(mi_user_assigned) > 0 else existing_user_identities
         non_existing = user_identities_to_remove.difference(existing_user_identities)
         if non_existing:
             raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
-        if not list(existing_user_identities - user_identities_to_remove):  # if all emsis are gone, we need to update the type
-            resource.identity.type = IdentityType.SYSTEM_ASSIGNED
+        if not list(existing_user_identities - user_identities_to_remove):
             if resource.identity.type == IdentityType.USER_ASSIGNED:
                 resource.identity.type = IdentityType.NONE
             elif resource.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
@@ -4737,8 +4737,6 @@ def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
     DiskEncryptionSetUpdate, EncryptionSetIdentity = cmd.get_models('DiskEncryptionSetUpdate', 'EncryptionSetIdentity')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
-    # identity_types, user_assigned_identities = _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned,
-    #                                                                                             mi_user_assigned)
 
     def getter():
         return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
@@ -4770,7 +4768,6 @@ def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
 
         encryption_set_identity = EncryptionSetIdentity(type=identity_types,
                                                         user_assigned_identities=user_assigned_identities)
-        # disk_encryption_set.identity = encryption_set_identity
 
         disk_encryption_set_update = DiskEncryptionSetUpdate()
         disk_encryption_set_update.identity = encryption_set_identity
@@ -4793,8 +4790,6 @@ def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
         disk_encryption_set_update = DiskEncryptionSetUpdate(identity=disk_encryption_set.identity)
         return client.disk_encryption_sets.begin_update(resource_group_name, disk_encryption_set_name,
                                                         disk_encryption_set_update)
-
-    # TODO mi_user_assigned size 0 will remove all
 
     return _remove_disk_encryption_set_identities(cmd, resource_group_name, disk_encryption_set_name,
                                                   mi_system_assigned, mi_user_assigned, getter, setter)
