@@ -3046,7 +3046,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           no_wait=False,
                           aks_custom_headers=None,
                           snapshot_id=None):
-    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
+    AgentPoolUpgradeSettings = cmd.get_models(
+        "AgentPoolUpgradeSettings",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
@@ -3071,8 +3075,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       snapshot_id)
 
     # load model CreationData
-    from azure.cli.command_modules.acs.decorator import AKSModels
-    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    CreationData = cmd.get_models(
+        "CreationData",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
 
     creationData = None
     if snapshot_id:
@@ -3177,9 +3184,16 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
         location = rg_location
 
     # load model CreationData, Snapshot
-    from azure.cli.command_modules.acs.decorator import AKSModels
-    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
-    Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
+    CreationData = cmd.get_models(
+        "CreationData",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    Snapshot = cmd.get_models(
+        "Snapshot",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
 
     creationData = CreationData(
         source_resource_id=nodepool_id
