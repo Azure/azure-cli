@@ -148,7 +148,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-09-01',
         ResourceType.MGMT_NETWORK: '2021-08-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-02', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-01', {
             'resource_skus': '2019-04-01',
             'disks': '2022-03-02',
             'disk_encryption_sets': '2022-03-02',

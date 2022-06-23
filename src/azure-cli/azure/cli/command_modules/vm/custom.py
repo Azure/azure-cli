@@ -4664,18 +4664,15 @@ def create_disk_encryption_set(
 
     identity_type = 'SystemAssigned'
     user_assigned_identities = None
-    if cmd.supported_api_version(min_api='2022-03-02'):
+    if cmd.supported_api_version(min_api='2022-03-02', resource_type=ResourceType.MGMT_COMPUTE,
+                                 operation_group='disk_encryption_sets'):
         identity_type, user_assigned_identities = \
             _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned)
-
-    # if federatedClientId is not None and federatedClientId.lower() == 'none':
-    #         federatedClientId = 'None'
 
     encryption_set_identity = EncryptionSetIdentity(type=identity_type)
     if user_assigned_identities is not None:
         if not hasattr(encryption_set_identity, 'user_assigned_identities'):
-            # TODO need to throw an exception?
-            raise CLIError('')
+            raise CLIError('User assigned identities in disk encryption set is not supported')
         encryption_set_identity.user_assigned_identities = user_assigned_identities
 
     if source_vault is not None:
@@ -4692,8 +4689,7 @@ def create_disk_encryption_set(
 
     if federatedClientId is not None:
         if not hasattr(disk_encryption_set, 'federated_client_id'):
-            # TODO need to throw an exception?
-            raise CLIError('')
+            raise CLIError('Multi-tenant application client id in disk encryption set is not supported')
         disk_encryption_set.federated_client_id = federatedClientId
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
@@ -4725,8 +4721,7 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
 
     if federatedClientId is not None:
         if not hasattr(instance, 'federated_client_id'):
-            # TODO need to throw an exception?
-            raise CLIError('')
+            raise CLIError('Multi-tenant application client id in disk encryption set is not supported')
         instance.federated_client_id = federatedClientId
 
     return instance
@@ -4742,12 +4737,6 @@ def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
         return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
 
     def setter(disk_encryption_set, mi_system_assigned=mi_system_assigned, mi_user_assigned=mi_user_assigned):
-        if mi_system_assigned or mi_user_assigned:
-            if not cmd.supported_api_version(min_api='2022-03-02', resource_type=ResourceType.MGMT_COMPUTE):
-                raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
-                                       "You can set the cloud's profile to latest with 'az cloud set --profile latest"
-                                       " --name <cloud name>'")
-
         IdentityType = cmd.get_models('DiskEncryptionSetIdentityType', resource_type=ResourceType.MGMT_COMPUTE)
         existing_system_identity = False
         existing_user_identities = set()
