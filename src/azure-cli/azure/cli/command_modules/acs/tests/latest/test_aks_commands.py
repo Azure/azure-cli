@@ -5366,7 +5366,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         hook_file_path = get_test_data_file_path("test_aks_create_attach_acr.hook")
         test_hook_data = {
             "returnOutput": True,
-            "customKubectlPath": kubectl_path
+            "customKubectlPath": kubectl_path,
+            "sleepTime": "10",
         }
         with open(hook_file_path, "w") as f:
             json.dump(test_hook_data, f)

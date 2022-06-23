@@ -110,7 +110,7 @@ logger = get_logger(__name__)
 
 
 def get_cmd_test_hook_data(filename):
-    hook_data = None
+    hook_data = {}
     curr_dir = os.path.dirname(os.path.realpath(__file__))
     test_hook_file_path = os.path.join(curr_dir, 'tests/latest/data', filename)
     if os.path.exists(test_hook_file_path):
@@ -2358,6 +2358,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
     test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
     return_output = test_hook_data.get("returnOutput", False)
     custom_kubectl_path = test_hook_data.get("customKubectlPath", None)
+    sleep_time = test_hook_data.get("sleepTime", 0)
     kubectl_binary_path = "kubectl" if not custom_kubectl_path else custom_kubectl_path
 
     # normailze acr name
@@ -2445,6 +2446,10 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                 }
             }
             overrides["spec"]["affinity"] = affinity
+        # fix test
+        if sleep_time:
+            overrides["spec"]["containers"][0]["command"] = ["/bin/sh", "-c"]
+            overrides["spec"]["containers"][0]["args"] = [f"sleep {sleep_time}; /canipull -v6 {acr}"]
 
         try:
             cmd = [
@@ -2473,13 +2478,13 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                 stderr=subprocess.STDOUT,
             )
         except subprocess.CalledProcessError as err:
-            raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
+            raise AzureInternalError(f"failed to check ACR '{acr}', error details: {err.output}")
         if output:
             print(output)
             if return_output:
                 return_msg = output
         else:
-            raise AzureInternalError("Failed to check the ACR.")
+            raise AzureInternalError(f"failed to check the ACR '{acr}', no command output, please retry the command")
     finally:
         os.close(fd)
     return return_msg
