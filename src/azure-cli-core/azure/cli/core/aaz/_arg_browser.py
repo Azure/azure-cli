@@ -12,7 +12,7 @@ class AAZArgBrowser:
     @classmethod
     def create(cls, arg):
         assert isinstance(arg, AAZBaseValue)
-        return cls(arg_value=arg, arg_data=arg.to_serialized_data())
+        return cls(arg_value=arg, arg_data=arg.to_serialized_data(keep_undefined_in_list=True))
 
     def __init__(self, arg_value, arg_data, parent=None):
         assert isinstance(arg_value, AAZBaseValue)

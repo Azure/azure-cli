@@ -128,7 +128,7 @@ class TestAAZContentBuilder(unittest.TestCase):
                 }
             }
         })
-        arg_data = arg_value.to_serialized_data()
+        arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
         schema = AAZObjectType()
         _value = AAZObjectType._ValueCls(
             schema=schema,
@@ -391,7 +391,8 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         _builder = AAZContentBuilder(
             values=[_value],
-            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_value.to_serialized_data())]
+            args=[AAZArgBrowser(
+                arg_value=arg_value, arg_data=arg_value.to_serialized_data(keep_undefined_in_list=True))]
         )
 
         _builder.set_prop('name', AAZStrType, '.name')
@@ -557,7 +558,6 @@ class TestAAZContentBuilder(unittest.TestCase):
         from azure.cli.core.aaz._content_builder import AAZContentBuilder
         from azure.cli.core.aaz._arg_browser import AAZArgBrowser
         from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZUndefined
-        from azure.cli.core.aaz._operation import AAZHttpOperation
 
         _value = self._define_instance_value()
 
@@ -583,7 +583,10 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         _builder = AAZContentBuilder(
             values=[_value],
-            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_value.to_serialized_data())]
+            args=[AAZArgBrowser(
+                arg_value=arg_value,
+                arg_data=arg_value.to_serialized_data(keep_undefined_in_list=True))
+            ]
         )
 
         _builder.set_prop('name', AAZStrType, '.name')
@@ -684,7 +687,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
-        self.assertEqual(_value.to_serialized_data()['properties']['adds'], [
+        self.assertEqual(_value.to_serialized_data(keep_undefined_in_list=True)['properties']['adds'], [
             AAZUndefined,
             [{'name': '0'}, {'name': '1'}, {'name': '2'}],
             [{'name': '2'}, {'name': '3'}],
@@ -692,7 +695,7 @@ class TestAAZContentBuilder(unittest.TestCase):
             AAZUndefined,
         ])
 
-        self.assertEqual(AAZHttpOperation.serialize_content(_value)['properties']['adds'], [
+        self.assertEqual(_value.to_serialized_data()['properties']['adds'], [
             [{'name': '0'}, {'name': '1'}, {'name': '2'}],
             [{'name': '2'}, {'name': '3'}],
         ])
@@ -717,7 +720,7 @@ class TestAAZContentBuilder(unittest.TestCase):
             'b': {'b1': {'name': '3'}}
         })
 
-        self.assertEqual(AAZHttpOperation.serialize_content(_value), {
+        self.assertEqual(_value.to_serialized_data(), {
             'hideObj': None, 'hideTags': None, 'hidePermissions': None,
             'properties': {
                 'subnets': [None, {'name': 'net2'}],
@@ -768,7 +771,7 @@ class TestAAZContentBuilder(unittest.TestCase):
                 }
             ]
         })
-        arg_data = arg_value.to_serialized_data()
+        arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
         schema = AAZObjectType()
         _value = AAZObjectType._ValueCls(
             schema=schema,
