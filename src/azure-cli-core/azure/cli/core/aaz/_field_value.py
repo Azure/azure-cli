@@ -46,7 +46,7 @@ class AAZSimpleValue(AAZBaseValue):
             other = other._data
         return self._data >= other
 
-    def to_serialized_data(self, processor=None):
+    def to_serialized_data(self, processor=None, **kwargs):
         result = self._data
         if processor:
             result = processor(self._schema, result)
@@ -115,22 +115,26 @@ class AAZObject(AAZBaseValue):
     def __ne__(self, other):
         return not self == other
 
-    def to_serialized_data(self, processor=None):
-        result = {}
-        schemas = [self._schema]
+    def to_serialized_data(self, processor=None, **kwargs):
+        if self._data is None:
+            result = None
 
-        disc_schema = self._schema.get_discriminator(self._data)
-        if disc_schema:
-            schemas.append(disc_schema)
+        else:
+            result = {}
+            schemas = [self._schema]
 
-        for schema in schemas:
-            for name, field_schema in schema._fields.items():
-                v = self[name].to_serialized_data(processor=processor)
-                if v == AAZUndefined:
-                    continue
-                if field_schema._serialized_name:   # pylint: disable=protected-access
-                    name = field_schema._serialized_name  # pylint: disable=protected-access
-                result[name] = v
+            disc_schema = self._schema.get_discriminator(self._data)
+            if disc_schema:
+                schemas.append(disc_schema)
+
+            for schema in schemas:
+                for name, field_schema in schema._fields.items():
+                    v = self[name].to_serialized_data(processor=processor, **kwargs)
+                    if v == AAZUndefined:
+                        continue
+                    if field_schema._serialized_name:   # pylint: disable=protected-access
+                        name = field_schema._serialized_name  # pylint: disable=protected-access
+                    result[name] = v
 
         if not result and self._is_patch:
             return AAZUndefined
@@ -218,13 +222,17 @@ class AAZDict(AAZBaseValue):
         for key in self._data:
             yield key, self[key]
 
-    def to_serialized_data(self, processor=None):
-        result = {}
-        for key, v in self.items():
-            v = v.to_serialized_data(processor=processor)
-            if v == AAZUndefined:
-                continue
-            result[key] = v
+    def to_serialized_data(self, processor=None, **kwargs):
+        if self._data is None:
+            result = None
+        else:
+            result = {}
+            for key, v in self.items():
+                v = v.to_serialized_data(processor=processor, **kwargs)
+                if v == AAZUndefined:
+                    continue
+                result[key] = v
+
         if not result and self._is_patch:
             return AAZUndefined
         if processor:
@@ -335,11 +343,26 @@ class AAZList(AAZBaseValue):
         self._data.clear()
         self._len = 0
 
-    def to_serialized_data(self, processor=None):
-        result = []
-        for v in self:
-            v = v.to_serialized_data(processor=processor)
-            result.append(v)
+    def to_serialized_data(self, processor=None, keep_undefined_in_list=False,  # pylint: disable=arguments-differ
+                           **kwargs):
+        if self._data is None:
+            result = None
+        else:
+            result = []
+            has_valid = False
+            for v in self:
+                v = v.to_serialized_data(
+                    processor=processor, keep_undefined_in_list=keep_undefined_in_list, **kwargs)
+                if v == AAZUndefined and not keep_undefined_in_list:
+                    # When AAZUndefined is ignore it, the index of the following value will be changed.
+                    continue
+                if v != AAZUndefined:
+                    has_valid = True
+                result.append(v)
+            if not has_valid:
+                # when elements are all undefined, the result will be empty.
+                result = []
+
         if not result and self._is_patch:
             return AAZUndefined
         if processor:
