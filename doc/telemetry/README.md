@@ -1,9 +1,9 @@
-Telemetry Documentation
-=======================
+#Telemetry Documentation
 
 > Two types of telemetry are used to monitor and analyze execution of Azure CLI commands. One called ARM telemetry is recorded basing on HTTP traffic by ARM, and another is client side telemetry sent by Azure CLI.
 
-### ARM Telemetry
+## ARM Telemetry
+
 ARM telemetry tracks all HTTP requests and responses through ARM endpoint. As far as we know, below cases don't have ARM telemetry record.
 - Command doesn't create request successfully, for instance, parameter cannot pass validation, request or payload cannot be constructed.
 - Command calls data plane service API.
@@ -13,7 +13,8 @@ ARM telemetry tracks all HTTP requests and responses through ARM endpoint. As fa
 Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/armprod/databases/ARMProd
 
 
-### CLI Client Telemetry
+## CLI Client Telemetry
+
 Client side telemetry is sent at the end of Azure CLI command execution. It covers all commands, no matter if it has http requests or just has local operations.
 Sanitized data is stored in Kusto cluster which is managed by DevDiv Data team.
 
@@ -21,6 +22,7 @@ Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/ddazureclien
 
 All Azure CLI data is stored in a large json named `Properties` in table `RawEventsAzCli`. Some properties are flatten, some are not. Here are some useful fields:
 > The telemetry has different schema pre Azure CLI 2.0.28. All the fields explained below are for new schema, in other words, CLI version > 2.0.28.
+
 - `EventName`: `azurecli/command` or `azurecli/fault` or `azurecli/extension`
     - `azurecli/command` means this is common event record with general `Properties` field.
     - `azurecli/fault` means this is additional event record with extra exception info in `Properties` field.
@@ -42,7 +44,7 @@ All Azure CLI data is stored in a large json named `Properties` in table `RawEve
 - `ShellType`: cmd/bash/ksh/zsh/cloud-shell/... Note: may not be accurate.
 - `MacAddressHash`: SHA256 hashed MAC address
 - `MachineId`: GUID coming from the first 128bit of MacAddressHash
-- `UserId`: CLI installation id. Each CLI client installed locally will have a GUID as installation id.
+- `UserId`: CLI installation id. Each CLI client installed locally will have a GUID as installation id. It's stored in $homeFolder/.azure/azureProfile.json
 - `SessionId`: SHA256 hashed result of CLI installation id, parent process (terminal session) creation time and parent process (terminal session) id. Note: may not be accurate.
 - `RawCommand`: CLI command name
 - `Params`: CLI command arguments (without argument value)
@@ -68,13 +70,15 @@ All Azure CLI data is stored in a large json named `Properties` in table `RawEve
     - `context.default.azurecli.error_type`: It logs the exception class name.
     - `context.default.azurecli.exception_name`: A supplementation for `context.default.azurecli.error_type`
 
-### Accessing Client Telemetry
-To ensure you have a smooth experience using our Data Tools and Data, you have to take the required trainings and join a security group.
+## Accessing Client Telemetry
 
+Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli
+
+To ensure you have a smooth experience using our Data Tools and Data, you have to take the required trainings and join a security group.
 Please follow instruction [Accessing DevDiv Data](https://devdiv.visualstudio.com/DevDiv/_wiki/wikis/DevDiv.wiki/9768/Accessing-DevDiv-Data) to get access permission.
 
 
-### Doc Sections
+## Doc Sections
 
 - [Kusto Examples](kusto_examples.md) - Samples for kusto query
 
