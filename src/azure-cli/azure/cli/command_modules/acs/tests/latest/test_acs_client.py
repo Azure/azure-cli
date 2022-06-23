@@ -3,13 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: skip-file
 import unittest
 from unittest import mock
 
 from azure.cli.command_modules.acs.acs_client import ACSClient
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 class AcsClientTest(unittest.TestCase):
     def test_create_acs_client(self):
         a = ACSClient()

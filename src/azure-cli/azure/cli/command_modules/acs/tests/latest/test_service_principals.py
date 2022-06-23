@@ -9,6 +9,8 @@ from unittest import mock
 from azure.cli.command_modules.acs.custom import _build_service_principal
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 class AcsServicePrincipalTest(unittest.TestCase):
     def test_build_service_principal(self):
         app_id = '27497b5e-7ea6-4ff2-a883-b3db4e08d937'

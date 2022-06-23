@@ -1490,7 +1490,6 @@ class WebappSSLCertTest(ScenarioTest):
 
 
 class WebappSSLImportCertTest(ScenarioTest):
-    @unittest.skip("Flaky test")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
     def test_webapp_ssl_import(self, resource_group, key_vault):
@@ -1523,7 +1522,6 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), cert_thumbprint)
         ])
 
-    @unittest.skip("Flaky test")
     @ResourceGroupPreparer(parameter_name='kv_resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_ssl_import_crossrg(self, resource_group, kv_resource_group):
