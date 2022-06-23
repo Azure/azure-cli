@@ -21,8 +21,8 @@ except ImportError:
 
 shorthand_help_messages = {
     "show-help": 'Try `??` to show more.',
-    "short-summery": 'Shorthand syntax supported.',
-    "long-summery": 'See https://github.com/Azure/azure-cli/tree/dev/doc/shorthand_syntax.md '
+    "short-summary": 'Shorthand syntax supported.',
+    "long-summary": 'See https://github.com/Azure/azure-cli/tree/dev/doc/shorthand_syntax.md '
                     'for more about shorthand syntax.'
 }
 
@@ -92,11 +92,11 @@ class AAZShowHelp(BaseException):
         else:
             _print_indent(f"{key}{FIRST_LINE_PREFIX}{schema_type}", indent=1)
 
-        short_summary = cls._build_short_summery(schema)
+        short_summary = cls._build_short_summary(schema)
         if short_summary:
             _print_indent(short_summary, indent=2)
 
-        long_summary = cls._build_long_summery(schema)
+        long_summary = cls._build_long_summary(schema)
         if long_summary:
             _print_indent(long_summary, indent=2)
 
@@ -112,7 +112,7 @@ class AAZShowHelp(BaseException):
             prop_tags = cls._build_schema_tags(prop_schema)
             prop_name = ' '.join(prop_schema._options)
 
-            prop_short_summary = cls._build_short_summery(prop_schema, is_prop=True)
+            prop_short_summary = cls._build_short_summary(prop_schema, is_prop=True)
 
             prop_group_name = prop_schema._arg_group or ""
             header_len = len(prop_name) + len(prop_tags) + (1 if prop_tags else 0)
@@ -149,7 +149,7 @@ class AAZShowHelp(BaseException):
         return tags
 
     @staticmethod
-    def _build_short_summery(schema, is_prop=False):
+    def _build_short_summary(schema, is_prop=False):
         from ._arg import AAZSimpleTypeArg, AAZCompoundTypeArg
         short_summary = schema._help.get("short-summary", "")
 
@@ -167,7 +167,7 @@ class AAZShowHelp(BaseException):
         return short_summary
 
     @staticmethod
-    def _build_long_summery(schema):
+    def _build_long_summary(schema):
         from ._arg import AAZCompoundTypeArg
         lines = []
         long_summary = schema._help.get("long-summary", "")
@@ -175,7 +175,7 @@ class AAZShowHelp(BaseException):
             lines.append(long_summary)
 
         if isinstance(schema, AAZCompoundTypeArg):
-            lines.append(shorthand_help_messages['long-summery'])
+            lines.append(shorthand_help_messages['long-summary'])
 
         if schema._is_preview:
             preview = status_tag_messages['preview'].format("This argument")

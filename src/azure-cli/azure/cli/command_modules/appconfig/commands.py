@@ -58,11 +58,11 @@ def load_command_table(self, _):
         g.command('delete', 'delete_configstore')
         g.command('update', 'update_configstore')
         g.command('list', 'list_configstore')
-        g.command('list-deleted', 'list_deleted_configstore', is_preview=True, table_transformer=deleted_configstore_output_format)
-        g.command('recover', 'recover_deleted_configstore', is_preview=True)
-        g.command('purge', 'purge_deleted_configstore', is_preview=True)
+        g.command('list-deleted', 'list_deleted_configstore', table_transformer=deleted_configstore_output_format)
+        g.command('recover', 'recover_deleted_configstore')
+        g.command('purge', 'purge_deleted_configstore')
         g.show_command('show', 'show_configstore')
-        g.show_command('show-deleted', 'show_deleted_configstore', is_preview=True, table_transformer=deleted_configstore_output_format)
+        g.show_command('show-deleted', 'show_deleted_configstore', table_transformer=deleted_configstore_output_format)
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
@@ -106,8 +106,7 @@ def load_command_table(self, _):
     with self.command_group('appconfig feature filter',
                             custom_command_type=get_custom_sdk('feature',
                                                                cf_configstore_operations,
-                                                               featurefilter_entry_format),
-                            is_preview=True) as g:
+                                                               featurefilter_entry_format)) as g:
         g.custom_command('add', 'add_filter')
         g.custom_command('delete', 'delete_filter')
         g.custom_show_command('show', 'show_filter')
