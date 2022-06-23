@@ -26,6 +26,8 @@ jobs:
         python.version: '3.9'
       Python310:
         python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -46,6 +48,8 @@ jobs:
         python.version: '3.9'
       Python310:
         python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -66,6 +70,8 @@ jobs:
         python.version: '3.9'
       Python310:
         python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -167,6 +173,39 @@ jobs:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
         pythonVersion: '3.10'
+        profile: 'latest'
+        instance_cnt: '8'
+        instance_idx: '$(Instance_idx)'
+        fullTest: true
+
+- job: AutomationFullTestPython311ProfileLatest
+  displayName: Automation Full Test Python311 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.11'
         profile: 'latest'
         instance_cnt: '8'
         instance_idx: '$(Instance_idx)'
