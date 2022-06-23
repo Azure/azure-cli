@@ -5960,7 +5960,20 @@ class SqlManagedInstanceDnsAliasScenarioTest(ScenarioTest):
                          JMESPathCheck('azureDnsRecord', None)])
 
         #Check if alias has been created successfully using show command
-        self.cmd('sql mi dns-alias show -g {rg} --dns-alias-name {dns_alias_name} --mi-name {managed_instance_name1}',
+        dnsAlias = self.cmd('sql mi dns-alias show -g {rg} --dns-alias-name {dns_alias_name} --mi-name {managed_instance_name1}',
+                     checks=[
+                         JMESPathCheck('name', dnsAliasName),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dnsAliases'),
+                         JMESPathCheck('azureDnsRecord', None)]).get_output_in_json()
+
+        sourceDnsAliasId = dnsAlias['id']
+        self.kwargs.update({
+            'source_dns_alias_id': sourceDnsAliasId
+        })
+
+        #Use show command with --ids parameter
+        self.cmd('sql mi dns-alias show --ids {source_dns_alias_id}',
                      checks=[
                          JMESPathCheck('name', dnsAliasName),
                          JMESPathCheck('resourceGroup', rg),
@@ -5968,24 +5981,26 @@ class SqlManagedInstanceDnsAliasScenarioTest(ScenarioTest):
                          JMESPathCheck('azureDnsRecord', None)])
 
         #Update dns alias
-        dnsAlias = self.cmd('sql mi dns-alias update -g {rg} --dns-alias-name {dns_alias_name} --mi-name {managed_instance_name1} --dns-record',
+        self.cmd('sql mi dns-alias update -g {rg} --dns-alias-name {dns_alias_name} --mi-name {managed_instance_name1} --dns-record',
                      checks=[
                          JMESPathCheck('name', dnsAliasName),
                          JMESPathCheck('resourceGroup', rg),
                          JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dnsAliases'),
-                         JMESPathCheckExists('azureDnsRecord')]).get_output_in_json()
+                         JMESPathCheckExists('azureDnsRecord')])
 
-        sourceDnsAliasId = dnsAlias['id']
-        self.kwargs.update({
-            'source_dns_alias_id': sourceDnsAliasId
-        })
+        #Update dns alias using resource id. Since we are not passing --dns-record, it should be reset to none.
+        self.cmd('sql mi dns-alias update --ids {source_dns_alias_id}',
+                     checks=[
+                         JMESPathCheck('name', dnsAliasName),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dnsAliases'),
+                         JMESPathCheck('azureDnsRecord', None)])
 
         #Acquire dns alias from managed_instance_1 on managed_instance_2
         self.cmd('sql mi dns-alias acquire -g {rg} --mi-name {managed_instance_name2} --source-alias-id {source_dns_alias_id}',
                      checks=[
                          JMESPathCheck('name', dnsAliasName),
-                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dnsAliases'),
-                         JMESPathCheckExists('azureDnsRecord')])
+                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dnsAliases')])
 
         #Check if the alias has been moved to the new instance using list command
         dnsAliases = self.cmd('sql mi dns-alias list -g {rg} --mi-name {managed_instance_name2}',
@@ -5996,7 +6011,7 @@ class SqlManagedInstanceDnsAliasScenarioTest(ScenarioTest):
 
         newDnsAliasId = dnsAlias['id']
         #Expect that the alias now contains new id
-        assert contains(newDnsAliasId, dnsAliasName)
+        assert contains(newDnsAliasId, managed_instance_2)
 
         #Delete DNS alias
         self.cmd('sql mi dns-alias delete -g {rg} --mi-name {managed_instance_name2} --dns-alias-name {dns_alias_name} --yes')
