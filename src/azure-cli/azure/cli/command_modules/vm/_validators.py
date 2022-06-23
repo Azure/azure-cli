@@ -1746,6 +1746,7 @@ def process_disk_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
