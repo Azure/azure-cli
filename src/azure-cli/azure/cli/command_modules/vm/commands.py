@@ -29,7 +29,8 @@ from azure.cli.command_modules.vm._format import (
     get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
-    process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
+    process_disk_create_namespace, process_snapshot_create_namespace,
+    process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace)
@@ -254,7 +255,7 @@ def load_command_table(self, _):
         client_factory=cf_community_gallery_image_version)
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
-        g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
+        g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_create_namespace)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('grant-access', 'grant_disk_access')
         g.custom_command('list', 'list_managed_disks', table_transformer='[].' + transform_disk_show_table_output)
@@ -308,7 +309,7 @@ def load_command_table(self, _):
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
-        g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)
+        g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
         g.command('delete', 'begin_delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
         g.custom_command('list', 'list_snapshots')
