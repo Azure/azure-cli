@@ -927,7 +927,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.kwargs['disk_restore_point_id'] = disk_restore_point_id
         
         # create disk from restore point
-        self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku {disk_sku} --size-gb {disk_size2} --source {disk_restore_point_id}')
+        self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku {disk_sku} --size-gb {disk_size2} --source {disk_restore_point_id}',
+                 checks=[
+                     self.check('sku.name', 'Premium_LRS'),
+                     self.check('diskSizeGb', 2),
+                     self.check('creationData.createOption', 'Restore'),
+                     self.check('creationData.sourceResourceId', '{disk_restore_point_id}')
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):
