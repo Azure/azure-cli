@@ -4254,6 +4254,7 @@ class VMSSILBTest(ScenarioTest):
 class VMSSLoadBalancerWithSku(ScenarioTest):
 
     @unittest.skip('Can\'t test due to no qualified subscription')
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
     def test_vmss_lb_sku(self, resource_group):
 
@@ -6111,6 +6112,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
     def test_dedicated_host_e2e(self, resource_group, resource_group_location):
