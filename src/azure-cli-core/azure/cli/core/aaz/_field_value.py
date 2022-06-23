@@ -343,7 +343,8 @@ class AAZList(AAZBaseValue):
         self._data.clear()
         self._len = 0
 
-    def to_serialized_data(self, processor=None, keep_undefined_in_list=False, **kwargs):
+    def to_serialized_data(
+            self, processor=None, keep_undefined_in_list=False, **kwargs):  # pylint: disable=arguments-differ
         if self._data is None:
             result = None
         else:

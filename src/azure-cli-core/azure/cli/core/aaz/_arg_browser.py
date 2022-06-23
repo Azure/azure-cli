@@ -48,8 +48,10 @@ class AAZArgBrowser:
     def get_elements(self):
         """Iter over sub elements of list or dict."""
         if self._arg_data is None:
+            # stop iteration
             return
-        elif isinstance(self._arg_data, list):
+
+        if isinstance(self._arg_data, list):
             for idx, d in enumerate(self._arg_data):
                 # not support to access parent from element args
                 yield idx, AAZArgBrowser(self._arg_value[idx], d, parent=None)
