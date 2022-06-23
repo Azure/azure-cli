@@ -13,7 +13,7 @@ from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError
 from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
 from ._content_builder import AAZContentBuilder
-from ._field_type import AAZSimpleType
+from ._field_type import AAZSimpleType, AAZObjectType, AAZDictType, AAZListType
 
 try:
     from urllib import quote  # type: ignore
@@ -141,20 +141,70 @@ class AAZHttpOperation(AAZOperation):
 
     @staticmethod
     def serialize_content(value, required=False):
+
         def processor(schema, result):
             if schema._flags.get('read_only', False):
                 # ignore read_only fields when serialize content
                 return AAZUndefined
+            if result == AAZUndefined or result is None:
+                return result
+
+            if isinstance(schema, AAZObjectType):
+                assert isinstance(result, dict)
+                for _schema in [schema, schema.get_discriminator(result)]:
+                    if not _schema:
+                        continue
+                    for _field_name, _field_schema in _schema._fields.items():
+                        # verify required and not read only property
+                        _name = _field_schema._serialized_name or _field_name  # prefer using serialized name first
+                        if _name in result:
+                            continue
+                        if _field_schema._flags.get('read_only', False):
+                            continue
+                        if not _field_schema._flags.get('required', False):
+                            continue
+
+                        if isinstance(_field_schema, AAZObjectType):
+                            # use an empty dict as data for required object property, and process it's sub properties
+                            _field_result = processor(_field_schema, {})
+                            assert _field_result != AAZUndefined
+                            result[_name] = _field_result
+                        elif isinstance(_field_schema, AAZDictType):
+                            # use an empty dict for required dict property
+                            result[_name] = {}
+                        elif isinstance(_field_schema, AAZListType):
+                            # use an empty dict for required list property
+                            result[_name] = []
+                        else:
+                            raise ValueError(f"Missing a required field in request content: {_name}")
+
             return result
 
         if isinstance(value, AAZBaseValue):
-            value = value.to_serialized_data(processor=processor)
+            data = value.to_serialized_data(processor=processor)
+            flags = value._schema._flags
+            required = required or flags.get('required', False) and not flags.get('read_only', False)
+            if data == AAZUndefined and required:
+                if isinstance(value._schema, AAZObjectType):
+                    # use an empty dict as data for required object, and process it's properties
+                    data = processor(value._schema, {})
+                    assert data != AAZUndefined
+                elif isinstance(value._schema, AAZDictType):
+                    # use an empty dict for required dict
+                    data = {}
+                elif isinstance(value._schema, AAZListType):
+                    # use an empty list for required list
+                    data = []
+                else:
+                    raise ValueError("Missing request content")
+        else:
+            data = value
 
-        if value == AAZUndefined or value == None:  # noqa: E711, pylint: disable=singleton-comparison
+        if data == AAZUndefined or data == None:  # noqa: E711, pylint: disable=singleton-comparison
             if required:
-                raise ValueError("content is required.")
+                raise ValueError("Missing request content")
             return None
-        return value
+        return data
 
     @staticmethod
     def deserialize_http_content(session):
@@ -187,7 +237,7 @@ class AAZHttpOperation(AAZOperation):
                     data=schema.process_data(None)
                 )
         else:
-            assert isinstance(value, AAZBaseValue)
+            assert isinstance(value, AAZBaseValue), f"Unknown value type: {type(value)}"
 
         builder = AAZContentBuilder(
             values=[value],
@@ -243,7 +293,7 @@ class AAZHttpOperation(AAZOperation):
                 "GET", self.ctx.next_link, {}, self.header_parameters,
                 self.content, self.form_content, None)
 
-        elif self.method in ("GET", ):
+        elif self.method in ("GET",):
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, None)
