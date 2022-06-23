@@ -575,9 +575,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.os_type = community_gallery_image_info.os_type
 
     if getattr(namespace, 'security_type', None):
-        if namespace.security_type.lower() == 'confidentialvm' and namespace.os_disk_security_encryption_type is None:
-            raise ArgumentUsageError('usage error: --os-disk-security-encryption-type is required'
-                                     ' when --security-type is specified as ConfidentialVM')
+        if getattr(namespace, 'os_disk_security_encryption_type', None):
+            if namespace.security_type.lower() == 'confidentialvm' and \
+                    namespace.os_disk_security_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-disk-security-encryption-type is required'
+                                         ' when --security-type is specified as ConfidentialVM')
+            if namespace.os_disk_security_encryption_type != 'DiskWithVMGuestState' and \
+                    namespace.os_disk_secure_vm_disk_encryption_set is not None:
+                raise ArgumentUsageError(
+                    'usage error: The --os-disk-secure-vm-disk-encryption-set can only be passed in '
+                    'when --os-disk-security-encryption-type is DiskWithVMGuestState')
         confidential_vm_sku = ['standard_dc2as_v5', 'standard_dc4as_v5', 'standard_dc8as_v5', 'standard_dc16as_v5',
                                'standard_dc32as_v5', 'standard_dc48as_v5', 'standard_dc64as_v5', 'standard_dc96as_v5',
                                'standard_dc2ads_v5', 'standard_dc4ads_v5', 'standard_dc8ads_v5', 'standard_dc16ads_v5',
