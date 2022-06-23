@@ -198,11 +198,11 @@ class AAZCompoundTypeArg(AAZBaseArg):
     def to_cmd_arg(self, name):
         from ._help import shorthand_help_messages
         arg = super().to_cmd_arg(name)
-        short_summery = arg.type.settings.get('help', None) or ''
-        if short_summery:
-            short_summery += '  '
-        short_summery += shorthand_help_messages['show-help'] + '  ' + shorthand_help_messages['short-summery']
-        arg.help = short_summery
+        short_summary = arg.type.settings.get('help', None) or ''
+        if short_summary:
+            short_summary += '  '
+        short_summary += shorthand_help_messages['show-help'] + '  ' + shorthand_help_messages['short-summary']
+        arg.help = short_summary
         return arg
 
 
