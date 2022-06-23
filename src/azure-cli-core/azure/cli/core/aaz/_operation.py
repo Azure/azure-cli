@@ -96,7 +96,7 @@ class AAZHttpOperation(AAZOperation):
 
         if isinstance(value, list):
             value = [process_element(v)
-                     for v in value]
+                     for v in value if v != AAZUndefined]
             # Determines the format of the array. Possible formats are:
             #   csv - comma separated values 'foo,bar'
             #   ssv - space separated values 'foo bar'
@@ -133,7 +133,7 @@ class AAZHttpOperation(AAZOperation):
             return e
 
         if isinstance(value, list):
-            value = [process_element(v) for v in value]
+            value = [process_element(v) for v in value if v != AAZUndefined]
         else:
             value = process_element(value)
         value = str(value)
@@ -221,7 +221,7 @@ class AAZHttpOperation(AAZOperation):
         """ Create a Content Builder
         """
         assert isinstance(arg_value, AAZBaseValue)
-        arg_data = arg_value.to_serialized_data()
+        arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
         if value is None:
             assert issubclass(typ, AAZBaseType)
             schema = typ(**typ_kwargs) if typ_kwargs else typ()
@@ -335,7 +335,7 @@ class AAZJsonInstanceUpdateOperation(AAZOperation):
         """ Create a Content Builder
         """
         assert isinstance(arg_value, AAZBaseValue)
-        arg_data = arg_value.to_serialized_data()
+        arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
         if value is None:
             assert issubclass(typ, AAZBaseType)
             schema = typ(**typ_kwargs) if typ_kwargs else typ()

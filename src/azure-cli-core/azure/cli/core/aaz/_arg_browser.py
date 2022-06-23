@@ -12,7 +12,7 @@ class AAZArgBrowser:
     @classmethod
     def create(cls, arg):
         assert isinstance(arg, AAZBaseValue)
-        return cls(arg_value=arg, arg_data=arg.to_serialized_data())
+        return cls(arg_value=arg, arg_data=arg.to_serialized_data(keep_undefined_in_list=True))
 
     def __init__(self, arg_value, arg_data, parent=None):
         assert isinstance(arg_value, AAZBaseValue)
@@ -33,7 +33,7 @@ class AAZArgBrowser:
         if key.startswith('.'):
             names = key[1:].split('.', maxsplit=1)
             prop_name = names[0]
-            if prop_name not in self._arg_data:
+            if self._arg_data is None or prop_name not in self._arg_data:
                 return None
             sub_value = self._arg_value[prop_name]
             sub_data = self._arg_data[prop_name]
@@ -47,6 +47,10 @@ class AAZArgBrowser:
 
     def get_elements(self):
         """Iter over sub elements of list or dict."""
+        if self._arg_data is None:
+            # stop iteration
+            return
+
         if isinstance(self._arg_data, list):
             for idx, d in enumerate(self._arg_data):
                 # not support to access parent from element args

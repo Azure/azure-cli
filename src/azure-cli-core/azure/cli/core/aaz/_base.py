@@ -21,7 +21,7 @@ class AAZBaseValue:
             self._is_patch = False
 
     @abc.abstractmethod
-    def to_serialized_data(self, processor=None):
+    def to_serialized_data(self, processor=None, **kwargs):
         """ serialize value into python build-in type """
         raise NotImplementedError()
 
