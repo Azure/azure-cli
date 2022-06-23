@@ -10,6 +10,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.core.util import sdk_no_wait
+import json 
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -24,6 +25,8 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
+    ClientEncryptionIncludedPath,
+    ClientEncryptionPolicy,
     ResourceIdentityType,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
@@ -516,11 +519,12 @@ def _populate_sql_container_definition(sql_container_resource,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
     if all(arg is None for arg in
-           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy, analytical_storage_ttl]):
+           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, client_encryption_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
@@ -538,7 +542,11 @@ def _populate_sql_container_definition(sql_container_resource,
         sql_container_resource.indexing_policy = indexing_policy
 
     if unique_key_policy is not None:
-        sql_container_resource.unique_key_policy = unique_key_policy
+        sql_container_resource.unique_key_policy = unique_key_policy    
+    
+    if client_encryption_policy is not None:
+        _validate_and_populate_client_encryption_policy(sql_container_resource,
+                                                    client_encryption_policy)
 
     if conflict_resolution_policy is not None:
         sql_container_resource.conflict_resolution_policy = conflict_resolution_policy
@@ -548,6 +556,93 @@ def _populate_sql_container_definition(sql_container_resource,
 
     return True
 
+def _validate_and_populate_client_encryption_policy(sql_container_resource,
+                                                    client_encryption_policy):
+    if client_encryption_policy is not None:
+        from azure.cli.core.util import get_file_json, shell_safe_json_parse
+        data = shell_safe_json_parse(json.dumps(client_encryption_policy))        
+        
+        if "includedPaths" in data:
+                includedpaths = data['includedPaths']
+        else:
+            raise CLIError(None, f"includedPaths missing in Client Encryption Policy. Please verify your Client Encryption Policy JSON string")
+
+        if "policyFormatVersion" in data:
+                policyFormatVersion = data['policyFormatVersion']
+        else:
+            raise CLIError(None, f"policyFormatVersion missing in Client Encryption Policy. Please verify your Client Encryption Policy JSON string")
+
+        if(policyFormatVersion < 1 or policyFormatVersion > 2):
+            raise CLIError(None, f"Invalid policyFormatVersion used in Client Encryption Policy. Please verify your Client Encryption Policy JSON string. Supported version are 1 and 2.")
+
+
+        listofIncludedPaths = []        
+        for includedpath in includedpaths:            
+            if "encryptionType" in includedpath:
+                encryptionType = includedpath['encryptionType']
+            else:
+                raise CLIError(None, f"encryptionType missing in includedPaths. Please verify your Client Encryption Policy JSON string")
+
+            if(encryptionType == ""):
+                raise CLIError(None, f"Invalid encryptionType included in Client Encryption Policy. encryptionType cannot be null or empty.")
+
+            if(encryptionType != "Deterministic" and encryptionType != "Randomized"):
+                raise CLIError(None, f"Invalid Encryption Type {encryptionType} used. Supported types are Deterministic or Randomized")
+
+            if "path" in includedpath:
+                path = includedpath['path']
+            else:
+                raise CLIError(None, f"path missing in includedPaths. Please verify your Client Encryption Policy JSON string")
+
+            if(path == ""):
+                raise CLIError(None, f"Invalid path included in Client Encryption Policy. Path cannot be null or empty.")
+
+            if(path[0] != "/" or path[-1] == "/"):
+                raise CLIError(None, 'Invalid path included in Client Encryption Policy. Only top level paths supported. Paths should begin with /. ')
+
+            if(path[1:] == "id"):
+                if(policyFormatVersion < 2):
+                    raise CLIError(None, f"id path which is part of Client Encryption policy is configured with invalid policyFormatVersion: {policyFormatVersion}. Please use policyFormatVersion 2.")
+
+                if(encryptionType != "Deterministic"):
+                    raise CLIError(None, f"id path is part of Client Encryption policy with invalid encryption type: {encryptionType}. Only deterministic encryption type is supported.")
+
+            if "clientEncryptionKeyId" in includedpath:
+                clientEncryptionKeyId = includedpath['clientEncryptionKeyId']
+            else:
+                raise CLIError(None, f"clientEncryptionKeyId missing in includedPaths. Please verify your Client Encryption Policy JSON string")
+
+            if(clientEncryptionKeyId == ""):
+                raise CLIError(None, f"Invalid clientEncryptionKeyId included in Client Encryption Policy. clientEncryptionKeyId cannot be null or empty.")
+
+            # for each partition key path verify if its part of client encryption policy or if its stop level path is part of client encryption policy
+            # eg: pk path is /a/b/c and /a is part of client encryption policy
+            for pkpath in sql_container_resource.partition_key.paths:
+                if(path[1:] == pkpath.split('/')[1]) and (encryptionType != "Deterministic"):
+                    if(policyFormatVersion < 2):
+                        raise CLIError(None, f"Partition key path:{pkpath} which is part of Client Encryption policy is configured with invalid policyFormatVersion: {policyFormatVersion}. Please use policyFormatVersion 2.")
+
+                    if(encryptionType != "Deterministic"):
+                        raise CLIError(None, 'Partition key path:{pkpath} is part of Client Encryption policy with invalid encryption type. Only deterministic encryption type is supported.')
+            
+            if "encryptionAlgorithm" in includedpath:
+                encryptionAlgorithm = includedpath['encryptionAlgorithm']
+            else:
+                raise CLIError(None, f"encryptionAlgorithm missing in includedPaths. Please verify your Client Encryption Policy JSON string")
+
+            if(encryptionAlgorithm == ""):
+                raise CLIError(None, f"Invalid encryptionAlgorithm included in Client Encryption Policy. encryptionAlgorithm cannot be null or empty.")
+
+            if(encryptionAlgorithm != "AEAD_AES_256_CBC_HMAC_SHA256"):
+                raise CLIError(None, f"Invalid encryptionAlgorithm included in Client Encryption Policy. encryptionAlgorithm should be 'AEAD_AES_256_CBC_HMAC_SHA256'")
+
+            clientEncryptionIncludedPathObj = ClientEncryptionIncludedPath(path = path, client_encryption_key_id = clientEncryptionKeyId , encryption_type = encryptionType, encryption_algorithm = encryptionAlgorithm)
+            listofIncludedPaths.append(clientEncryptionIncludedPathObj)          
+         
+        clientEncryptionPolicyObj = ClientEncryptionPolicy(included_paths = listofIncludedPaths, policy_format_version = policyFormatVersion)
+
+        # looks good set the client encryption policy object.
+        sql_container_resource.client_encryption_policy = clientEncryptionPolicyObj
 
 def cli_cosmosdb_sql_container_create(client,
                                       resource_group_name,
@@ -558,6 +653,7 @@ def cli_cosmosdb_sql_container_create(client,
                                       partition_key_version=None,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
+                                      client_encryption_policy=None,
                                       throughput=None,
                                       max_throughput=None,
                                       unique_key_policy=None,
@@ -571,9 +667,12 @@ def cli_cosmosdb_sql_container_create(client,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl)
+
+    #print("Container ====== " + str(sql_container_resource))
 
     options = _get_options(throughput, max_throughput)
 
@@ -606,6 +705,7 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container_resource.default_ttl = sql_container.resource.default_ttl
     sql_container_resource.unique_key_policy = sql_container.resource.unique_key_policy
     sql_container_resource.conflict_resolution_policy = sql_container.resource.conflict_resolution_policy
+    sql_container_resource.client_encryption_policy = sql_container.resource.client_encryption_policy
 
     if _populate_sql_container_definition(sql_container_resource,
                                           None,
@@ -1959,7 +2059,8 @@ def cli_cosmosdb_collection_delete(client, database_id, collection_id):
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
                                     default_ttl=None,
-                                    indexing_policy=None):
+                                    indexing_policy=None,
+                                    client_encryption_policy=None):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
         return False
 
@@ -1977,6 +2078,11 @@ def _populate_collection_definition(collection,
     if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy
 
+    print("_populate_collection_definition: filling client encryption policy")
+
+    if client_encryption_policy is not None:
+        collection['clientEncryptionPolicy'] = client_encryption_policy
+
     return True
 
 
@@ -1986,7 +2092,8 @@ def cli_cosmosdb_collection_create(client,
                                    throughput=None,
                                    partition_key_path=None,
                                    default_ttl=None,
-                                   indexing_policy=DEFAULT_INDEXING_POLICY):
+                                   indexing_policy=DEFAULT_INDEXING_POLICY,
+                                   client_encryption_policy=None):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
 
@@ -1997,8 +2104,10 @@ def cli_cosmosdb_collection_create(client,
     _populate_collection_definition(collection,
                                     partition_key_path,
                                     default_ttl,
-                                    indexing_policy)
+                                    indexing_policy,
+                                    client_encryption_policy)
 
+    #print("cli_cosmosdb_collection_create: filling client encryption policy ================  =======" + str(collection))
     created_collection = client.CreateContainer(_get_database_link(database_id), collection,
                                                 options)
     offer = _find_offer(client, created_collection['_self'])
