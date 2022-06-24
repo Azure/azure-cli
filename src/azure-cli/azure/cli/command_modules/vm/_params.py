@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-lines
+# pylint: disable=line-too-long, too-many-lines, option_length_too_long
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
