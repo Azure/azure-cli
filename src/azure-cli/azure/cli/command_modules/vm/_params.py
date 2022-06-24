@@ -141,7 +141,7 @@ def load_arguments(self, _):
 
     for scope in ['disk', 'snapshot']:
         with self.argument_context(scope) as c:
-            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
+            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot', 'source_restore_point')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
@@ -184,7 +184,8 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
         c.argument('image_reference', help='ID or URN (publisher:offer:sku:version) of the image from which to create a disk')
         c.argument('image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
-        c.argument('gallery_image_reference', help='ID of the Compute Gallery image version from which to create a disk')
+        c.argument('gallery_image_reference', help='ID of the Compute, Shared or Community Gallery image version from which to create a disk. For details about valid format, please refer to the help sample')
+        c.ignore('gallery_image_reference_type')
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
