@@ -52,7 +52,7 @@ class TestClusterScenarios(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-    @record_only()
+    # @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
         new_key_version = '903ca0dc34b44f0789e35488eaffc9f5'
@@ -65,10 +65,8 @@ class TestClusterScenarios(ScenarioTest):
         })
 
         self.cmd("monitor log-analytics cluster update -g {rg} -n {cluster_name} --key-name {key_name} "
-                 "--key-vault-uri {key_vault_uri} --key-version {key_version} --no-wait",
+                 "--key-vault-uri {key_vault_uri} --key-version {key_version}",
                  checks=[])
-
-        self.cmd("monitor log-analytics cluster wait -g {rg} -n {cluster_name} --updated", checks=[])
 
         self.cmd("monitor log-analytics cluster show -g {rg} -n {cluster_name}", checks=[
             self.check('provisioningState', 'Succeeded'),

@@ -7,62 +7,6 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - monitor log-analytics cluster wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --updated
-      User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-mgmt-loganalytics/13.0.0b4 Python/3.8.10 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster?api-version=2021-06-01
-  response:
-    body:
-      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":"903ca0dc34b44f0789e35488eaffc9f5"},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
-        24 Jun 2022 12:24:26 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
-        24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
-    headers:
-      access-control-allow-origin:
-      - '*'
-      api-supported-versions:
-      - 2020-08-01, 2020-10-01, 2021-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '1028'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jun 2022 12:32:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-context:
-      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
       - monitor log-analytics cluster update
       Connection:
       - keep-alive
@@ -74,8 +18,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":"903ca0dc34b44f0789e35488eaffc9f5"},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
-        24 Jun 2022 12:24:26 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
+      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":""},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
+        24 Jun 2022 12:32:28 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
         24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
     headers:
       access-control-allow-origin:
@@ -85,11 +29,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1028'
+      - '996'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:32:22 GMT
+      - Fri, 24 Jun 2022 13:36:19 GMT
       expires:
       - '-1'
       pragma:
@@ -131,29 +75,79 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n --key-name --key-vault-uri --key-version --no-wait
+      - -g -n --key-name --key-vault-uri --key-version
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":"903ca0dc34b44f0789e35488eaffc9f5"},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
-        24 Jun 2022 12:32:23 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
-        24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
+      string: ''
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
       - 2020-08-01, 2020-10-01, 2021-06-01
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1028'
+      - '0'
+      date:
+      - Fri, 24 Jun 2022 13:36:24 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster/operationresults/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2021-06-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:32:28 GMT
+      - Fri, 24 Jun 2022 13:36:44 GMT
       expires:
       - '-1'
       pragma:
@@ -170,8 +164,694 @@ interactions:
       - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:37:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:37:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:38:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:38:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:39:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:39:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:40:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:40:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"InProgress","startTime":"2022-06-24T13:36:24.7368805Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '283'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:41:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4?api-version=2015-11-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/75e1e32b-65ba-4e73-a70f-46cedd3633a4","name":"75e1e32b-65ba-4e73-a70f-46cedd3633a4","status":"Succeeded","startTime":"2022-06-24T13:36:24.7368805Z","endTime":"2022-06-24T13:41:24.8392076Z","properties":{}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '339'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:41:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster?api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":"903ca0dc34b44f0789e35488eaffc9f5"},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
+        24 Jun 2022 13:36:24 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
+        24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2020-08-01, 2020-10-01, 2021-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1028'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:41:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster?api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":"903ca0dc34b44f0789e35488eaffc9f5"},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
+        24 Jun 2022 13:36:24 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
+        24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2020-08-01, 2020-10-01, 2021-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1028'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:41:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --key-name --key-vault-uri --key-version
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster?api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":"903ca0dc34b44f0789e35488eaffc9f5"},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
+        24 Jun 2022 13:36:24 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
+        24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2020-08-01, 2020-10-01, 2021-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1028'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Jun 2022 13:41:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
       x-powered-by:
       - ASP.NET
     status:
@@ -211,17 +891,17 @@ interactions:
       api-supported-versions:
       - 2020-08-01, 2020-10-01, 2021-06-01
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 24 Jun 2022 12:32:28 GMT
+      - Fri, 24 Jun 2022 13:41:56 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster/operationresults/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster/operationresults/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2021-06-01
       pragma:
       - no-cache
       request-context:
@@ -255,10 +935,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -269,7 +949,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:32:48 GMT
+      - Fri, 24 Jun 2022 13:42:16 GMT
       expires:
       - '-1'
       pragma:
@@ -307,10 +987,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -321,7 +1001,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:33:19 GMT
+      - Fri, 24 Jun 2022 13:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -359,10 +1039,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -373,7 +1053,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:33:49 GMT
+      - Fri, 24 Jun 2022 13:43:19 GMT
       expires:
       - '-1'
       pragma:
@@ -411,10 +1091,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -425,7 +1105,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:34:20 GMT
+      - Fri, 24 Jun 2022 13:43:49 GMT
       expires:
       - '-1'
       pragma:
@@ -463,10 +1143,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -477,7 +1157,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:34:50 GMT
+      - Fri, 24 Jun 2022 13:44:19 GMT
       expires:
       - '-1'
       pragma:
@@ -515,10 +1195,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -529,7 +1209,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:35:20 GMT
+      - Fri, 24 Jun 2022 13:44:49 GMT
       expires:
       - '-1'
       pragma:
@@ -567,10 +1247,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -581,7 +1261,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:35:50 GMT
+      - Fri, 24 Jun 2022 13:45:20 GMT
       expires:
       - '-1'
       pragma:
@@ -619,10 +1299,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -633,7 +1313,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:36:21 GMT
+      - Fri, 24 Jun 2022 13:45:50 GMT
       expires:
       - '-1'
       pragma:
@@ -671,10 +1351,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -685,7 +1365,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:36:51 GMT
+      - Fri, 24 Jun 2022 13:46:21 GMT
       expires:
       - '-1'
       pragma:
@@ -723,10 +1403,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"InProgress","startTime":"2022-06-24T12:32:28.7375538Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"InProgress","startTime":"2022-06-24T13:41:55.5299449Z"}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -737,7 +1417,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:37:22 GMT
+      - Fri, 24 Jun 2022 13:46:52 GMT
       expires:
       - '-1'
       pragma:
@@ -775,10 +1455,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991?api-version=2015-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/cf21c2f1-f7c3-4220-947a-6d43aacf02cb","name":"cf21c2f1-f7c3-4220-947a-6d43aacf02cb","status":"Succeeded","startTime":"2022-06-24T12:32:28.7375538Z","endTime":"2022-06-24T12:37:29.9897884Z","properties":{}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westus/operationstatuses/fa8aa699-bfd0-47d2-a52b-8a4833837991","name":"fa8aa699-bfd0-47d2-a52b-8a4833837991","status":"Succeeded","startTime":"2022-06-24T13:41:55.5299449Z","endTime":"2022-06-24T13:46:56.6162654Z","properties":{}}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -789,7 +1469,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:37:53 GMT
+      - Fri, 24 Jun 2022 13:47:23 GMT
       expires:
       - '-1'
       pragma:
@@ -831,7 +1511,7 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"CapacityReservation","capacity":500},"identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"9f3c5636-ecde-4c2a-8e8f-31096d4f74ca"},"properties":{"keyVaultProperties":{"keyVaultUri":"https://azure-cli-test-scus.vault.azure.net/","keyName":"log-analytics-cluster","keyVersion":""},"provisioningState":"Succeeded","clusterId":"81060ffb-a14a-469e-a897-3cc3754cfe8c","billingType":"Cluster","lastModifiedDate":"Fri,
-        24 Jun 2022 12:32:28 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
+        24 Jun 2022 13:41:55 GMT","createdDate":"Fri, 24 Jun 2022 10:49:07 GMT","isDoubleEncryptionEnabled":true,"isAvailabilityZonesEnabled":false,"capacityReservationProperties":{"lastSkuUpdate":"Fri,
         24 Jun 2022 10:49:07 GMT","minCapacity":500},"associatedWorkspaces":[]},"location":"westus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-scus/providers/Microsoft.OperationalInsights/clusters/test-cluster","name":"test-cluster","type":"Microsoft.OperationalInsights/clusters"}'
     headers:
       access-control-allow-origin:
@@ -845,7 +1525,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 12:37:53 GMT
+      - Fri, 24 Jun 2022 13:47:24 GMT
       expires:
       - '-1'
       pragma:

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.util import sdk_no_wait
-from azure.mgmt.loganalytics.models import Cluster, ClusterSku, KeyVaultProperties, Identity, ClusterPatch
+from azure.mgmt.loganalytics.models import Cluster, ClusterSku, Identity
 
 
 def create_log_analytics_cluster(client, resource_group_name, cluster_name, sku_capacity,
