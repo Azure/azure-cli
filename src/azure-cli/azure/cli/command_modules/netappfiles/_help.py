@@ -1083,6 +1083,11 @@ examples:
 """
 
 
+helps['netappfiles volume backup'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume Backup Resources.
+"""
+
 helps['netappfiles volume backup create'] = """
 type: command
 short-summary: Create specified ANF volume backup.
