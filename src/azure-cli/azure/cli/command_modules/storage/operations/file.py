@@ -240,7 +240,7 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     Download files from file share to local directory in batch
     """
 
-    from azure.cli.command_modules.storage.util import glob_files_remotely_track2, mkdir_p
+    from azure.cli.command_modules.storage.util import glob_files_remotely_track2
 
     source_files = glob_files_remotely_track2(client, source, pattern, is_share_client=True)
 
@@ -260,7 +260,6 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
         return []
 
     def _download_action(pair):
-        destination_dir = os.path.join(destination, pair[0])
         path = os.path.join(*pair)
         local_path = os.path.join(destination, *pair)
         file_client = client.get_file_client(path)
