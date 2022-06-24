@@ -22,6 +22,7 @@ from azure.mgmt.botservice.models import (
     ConnectionSettingProperties,
     ConnectionSettingParameter,
     Sku)
+from azure.core.exceptions import HttpResponseError
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -69,7 +70,7 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             f.write(json.dumps(existing))
 
 
-def __handle_failed_name_check(_, cmd, client, resource_group_name, resource_name):
+def __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name):
     # Creates should be idempotent, verify if the bot already exists inside of the provided Resource Group
     logger.debug('Failed name availability check for provided bot name "%s".\n'
                  'Checking if bot exists in Resource Group "%s".', resource_name, resource_group_name)
@@ -78,7 +79,16 @@ def __handle_failed_name_check(_, cmd, client, resource_group_name, resource_nam
         existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
         logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
         return existing_bot
-    except Exception as e:
+    except HttpResponseError as e:
+        if e.error.code == 'ResourceNotFound':
+            code = e.error.code
+            message = e.error.message
+
+            logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
+                         '"%s"', resource_name, resource_group_name, code, message)
+            raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
+
+        # For other error codes, raise them to the user
         raise e
 
 
