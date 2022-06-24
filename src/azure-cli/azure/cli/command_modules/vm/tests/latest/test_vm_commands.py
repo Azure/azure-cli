@@ -5595,7 +5595,7 @@ class VMGalleryImage(ScenarioTest):
             checks=self.check('name', self.kwargs['version']))
 
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
     def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
@@ -5691,7 +5691,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig delete -g {rg} -r {gallery_name}')
 
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
     def test_replication_mode(self, resource_group):
         self.kwargs.update({
             'sig_name': self.create_random_name('sig_', 10),
