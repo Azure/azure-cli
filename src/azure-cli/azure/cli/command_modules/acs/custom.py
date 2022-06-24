@@ -109,6 +109,7 @@ logger = get_logger(__name__)
 # pylint: disable=unused-argument
 
 
+# pylint: disable=broad-except
 def get_cmd_test_hook_data(filename):
     hook_data = {}
     curr_dir = os.path.dirname(os.path.realpath(__file__))
