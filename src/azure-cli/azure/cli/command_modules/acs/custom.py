@@ -2161,10 +2161,10 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
         kubeconfig_path = os.environ["KUBECONFIG"].split(":")[0]
         if kubeconfig_path:
-            logger.info(f"The default path '{path}' is replaced by '{kubeconfig_path}' defined in KUBECONFIG.")
+            logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
             path = kubeconfig_path
         else:
-            logger.warning(f"Invalid path '{kubeconfig_path}' defined in KUBECONFIG.")
+            logger.warning("Invalid path '%s' defined in KUBECONFIG.", kubeconfig_path)
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
