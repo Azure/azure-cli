@@ -281,7 +281,7 @@ interactions:
       ''/frontendIPConfigurations/'', ''loadBalancerFrontEnd'')]"}, "protocol": "tcp",
       "frontendPortRangeStart": "50000", "frontendPortRangeEnd": "50119", "backendPort":
       22}}]}}, {"type": "Microsoft.Compute/virtualMachineScaleSets", "name": "vmss-spot1",
-      "location": "NorthEurope", "tags": {}, "apiVersion": "2021-11-01", "dependsOn":
+      "location": "NorthEurope", "tags": {}, "apiVersion": "2022-03-01", "dependsOn":
       ["Microsoft.Network/virtualNetworks/vmss-spot1VNET", "Microsoft.Network/loadBalancers/vmss-spot1LB"],
       "properties": {"overprovision": true, "upgradePolicy": {"mode": "manual", "rollingUpgradePolicy":
       {}}, "spotRestorePolicy": {"enabled": true, "restoreTimeout": "PT1H"}, "singlePlacementGroup":
@@ -537,7 +537,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss-spot1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1\",\r\n
@@ -643,7 +643,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss-spot1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1\",\r\n
@@ -683,7 +683,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/15f46bb4-17cc-471c-803b-77400026de47?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/7f4bcb63-7f85-4e19-9060-1c9ee122aaa7?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2022-03-01
       cache-control:
       - no-cache
       content-length:
@@ -730,9 +730,159 @@ interactions:
       ParameterSetName:
       - -g -n --enable-spot-restore --spot-restore-timeout
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/15f46bb4-17cc-471c-803b-77400026de47?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/7f4bcb63-7f85-4e19-9060-1c9ee122aaa7?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2022-03-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2022-05-18T10:27:19.219179+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"7f4bcb63-7f85-4e19-9060-1c9ee122aaa7\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '133'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 18 May 2022 10:27:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14997,Microsoft.Compute/GetOperation30Min;29997
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-spot-restore --spot-restore-timeout
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/7f4bcb63-7f85-4e19-9060-1c9ee122aaa7?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2022-03-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2022-05-18T10:27:19.219179+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"7f4bcb63-7f85-4e19-9060-1c9ee122aaa7\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '133'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 18 May 2022 10:28:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-spot-restore --spot-restore-timeout
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/7f4bcb63-7f85-4e19-9060-1c9ee122aaa7?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2022-03-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2022-05-18T10:27:19.219179+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"7f4bcb63-7f85-4e19-9060-1c9ee122aaa7\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '133'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 18 May 2022 10:28:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14995,Microsoft.Compute/GetOperation30Min;29995
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-spot-restore --spot-restore-timeout
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/northeurope/operations/7f4bcb63-7f85-4e19-9060-1c9ee122aaa7?p=5c3e95df-a2c2-4d04-b8ed-9542a645fa77&api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-06-23T05:31:33.9081859+00:00\",\r\n  \"endTime\":
@@ -783,7 +933,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss-spot1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_spot_restore000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss-spot1\",\r\n

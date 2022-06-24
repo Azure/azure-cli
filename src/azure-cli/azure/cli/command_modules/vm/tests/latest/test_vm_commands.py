@@ -8184,6 +8184,21 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             self.check('applicationProfile.galleryApplications[1].configurationReference', '{config}')
         ])
 
+        # wrong length of treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure false')
+
+        # non boolean value in treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure only accepts a list of "true" or "false" values'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure hello world')
+        
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure true false', checks=[
+            self.check('applicationProfile.galleryApplications[0].treatFailureAsDeploymentFailure', True),
+            self.check('applicationProfile.galleryApplications[1].treatFailureAsDeploymentFailure', False)
+        ])
+
         self.cmd('vm application list -g {rg} -n {vm}')
 
     # Need prepare app versions
@@ -8268,6 +8283,21 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].configurationReference', 'null'),
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].configurationReference', '{config}')
+        ])
+
+        # wrong length of treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure false')
+
+        # non boolean value in treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure only accepts a list of "true" or "false" values'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure hello world')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure true false', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].treatFailureAsDeploymentFailure', True),
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].treatFailureAsDeploymentFailure', False)
         ])
 
         self.cmd('vmss application list -g {rg} --name {vmss}')
