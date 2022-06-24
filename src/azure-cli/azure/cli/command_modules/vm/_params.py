@@ -930,6 +930,7 @@ def load_arguments(self, _):
                        help='Space-separated application configuration overrides for each application version ids. '
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
+            c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
@@ -1363,9 +1364,9 @@ def load_arguments(self, _):
             c.argument('install_command', help='The path and arguments to install the gallery application.')
             c.argument('remove_command', help='The path and arguments to remove the gallery application.')
             c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version '
-                                              'and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is '
+                                              ' then update operation will invoke remove command on the previous version'
+                                              ' and install command on the current version of the gallery application.')
+            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
                        'going to be replicated to. This property is updatable. Expected value: '
                        'json-string/json-file/@json-file.')
             c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
