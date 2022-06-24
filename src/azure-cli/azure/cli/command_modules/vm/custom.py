@@ -2008,7 +2008,8 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None, architecture=None):  # pylint: disable=redefined-builtin
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None, 
+                   architecture=None):  # pylint: disable=redefined-builtin
     load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
@@ -2016,7 +2017,8 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
             logger.warning("You are retrieving all the images from server which could take more than a minute. "
                            "To shorten the wait, provide '--publisher', '--offer' , '--sku' or '--edge-zone'."
                            " Partial name search is supported.")
-        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone, architecture)
+        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone, 
+                                               architecture)
     else:
         all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku, architecture)
         logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')

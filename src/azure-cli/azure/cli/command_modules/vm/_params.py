@@ -112,7 +112,7 @@ def load_arguments(self, _):
         min_api='2020-12-01',
         is_preview=True
     )
-    
+
     architecture_type = CLIArgumentType(
         help='The name of architecture. ',
         arg_type=get_enum_type(["x64", "Arm64"])

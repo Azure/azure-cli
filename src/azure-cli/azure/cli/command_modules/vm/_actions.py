@@ -165,7 +165,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
 
         all_images = [i for i in all_images if (_matched(publisher, i['publisher']) and
                                                 _matched(offer, i['offer']) and
-                                                _matched(sku, i['sku']) and 
+                                                _matched(sku, i['sku']) and
                                                 _matched(architecture, i['architecture']))]
         return all_images
     except KeyError:
