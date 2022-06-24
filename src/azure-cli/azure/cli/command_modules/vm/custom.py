@@ -2024,6 +2024,8 @@ def _remove_disk_encryption_set_identities(cmd, resource_group_name, name,
     user_identities_to_remove = []
     if mi_user_assigned is not None:
         existing_user_identities = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
+        # all user assigned identities will be removed if the length of mi_user_assigned is 0,
+        # otherwise the specified identity
         user_identities_to_remove = {x.lower() for x in mi_user_assigned} \
             if len(mi_user_assigned) > 0 else existing_user_identities
         non_existing = user_identities_to_remove.difference(existing_user_identities)
@@ -3328,31 +3330,6 @@ def _build_identities_info(identities):
     if external_identities:
         info['userAssignedIdentities'] = {e: {} for e in external_identities}
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
-
-
-def _build_disk_encryption_set_identities_info(cmd, identities):
-    from ._vm_utils import MSI_LOCAL_ID
-    identities = identities or []
-    DiskEncryptionSetIdentityType = cmd.get_models('DiskEncryptionSetIdentityType')
-    EncryptionSetIdentity = cmd.get_models('EncryptionSetIdentity')
-    # identity_type = DiskEncryptionSetIdentityType.none
-    # if not identities or MSI_LOCAL_ID in identities:
-    #     pass
-    identity_type = DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED
-    userAssignedIdentity = None
-    user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
-    if user_assigned_identities:
-        # msiId = _get_resource_id(cmd.cli_ctx, user_assigned_identities[0], resourceGroupName,
-        #                          'userAssignedIdentities', 'Microsoft.ManagedIdentity')
-        if MSI_LOCAL_ID in identities:
-            identity_type = DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
-        else:
-            identity_type = DiskEncryptionSetIdentityType.USER_ASSIGNED
-        UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
-        userAssignedIdentity = dict.fromkeys(user_assigned_identities, UserAssignedIdentitiesValue())
-        return EncryptionSetIdentity(type=identity_type, user_assigned_identities=userAssignedIdentity)
-
-    return identity_type, userAssignedIdentity
 
 
 def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned):

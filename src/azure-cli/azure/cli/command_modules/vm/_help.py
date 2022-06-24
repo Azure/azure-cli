@@ -222,6 +222,8 @@ examples:
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned
   - name: Create a disk encryption set with a user assigned identity.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-user-assigned myAssignedId
+  - name: Create a disk encryption set with system assigned identity and a user assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned --mi-user-assigned myAssignedId
   - name: Create a disk encryption set with multi-tenant application client id to access key vault in a different tenant.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --federatedClientId myFederatedClientId
   - name: Create a disk encryption set that supports double encryption.
@@ -284,6 +286,9 @@ examples:
   - name: Add a user assigned managed identity to an existing disk encryption set.
     text: >
         az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Add system assigned identity and a user assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned --user-assigned MyAssignedId
 """
 
 helps['disk-encryption-set identity remove'] = """
