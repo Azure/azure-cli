@@ -123,6 +123,7 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
     with self.command_group('netappfiles account ad', netappfiles_accounts_sdk) as g:
         g.generic_update_command('add',
@@ -148,6 +149,7 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
                          exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
 
 def load_account_backup_command_groups(self, netappfiles_account_backups_sdk):
@@ -155,6 +157,7 @@ def load_account_backup_command_groups(self, netappfiles_account_backups_sdk):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
 
 
 def load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk):
@@ -174,6 +177,7 @@ def load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#BackupPolicy',
                          exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
 
 def load_pools_command_groups(self, netappfiles_pools_sdk):
@@ -193,6 +197,7 @@ def load_pools_command_groups(self, netappfiles_pools_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#CapacityPoolPatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
 
 def load_volumes_command_groups(self, netappfiles_volumes_sdk):
@@ -226,6 +231,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.command('relocate', 'begin_relocate', supports_no_wait=True)
         g.command('finalize-relocation', 'begin_finalize_relocation', supports_no_wait=True)
         g.command('revert-relocation', 'begin_revert_relocation', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
         g.generic_update_command('add',
@@ -246,6 +252,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#VolumePatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
     with self.command_group('netappfiles volume replication', netappfiles_volumes_sdk) as g:
         g.custom_command('approve', 'authorize_replication',
@@ -263,6 +270,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.command('status', 'replication_status')
         g.command('re-initialize', 'begin_re_initialize_replication', supports_no_wait=True)
         g.command('list', 'list_replications')
+        g.wait_command('wait')
 
 
 def load_backups_command_groups(self, netappfiles_backups_sdk):
@@ -284,6 +292,7 @@ def load_backups_command_groups(self, netappfiles_backups_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#Backup',
                          exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
 
 def load_snapshots_command_groups(self, netappfiles_snapshots_sdk):
@@ -302,6 +311,7 @@ def load_snapshots_command_groups(self, netappfiles_snapshots_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#SnapshotRestoreFiles',
                          exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
 
 def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_sdk):
@@ -319,6 +329,7 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
                          client_factory=snapshot_policies_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
                          exception_handler=netappfiles_exception_handler)
+        g.wait_command('wait')
 
 
 def load_vaults_command_groups(self, netappfiles_vaults_sdk):
@@ -343,6 +354,7 @@ def load_subvolumes_command_groups(self, netappfiles_subvolumes_sdk):
                                  doc_string_source='azure.mgmt.netapp.models#SubvolumePatchRequest',
                                  exception_handler=netappfiles_exception_handler)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('netappfiles subvolume metadata', netappfiles_subvolumes_sdk) as g:
         g.show_command('show', 'begin_get_metadata')
@@ -358,3 +370,4 @@ def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
                          doc_string_source='azure.mgmt.netapp.models#VolumeGroupDetails',
                          exception_handler=netappfiles_exception_handler)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')

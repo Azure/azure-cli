@@ -158,6 +158,11 @@ examples:
         az netappfiles account ad remove -g mygroup --name myname --active-directory 13641da9-c0e9-4b97-84fc-4f8014a93848
 """
 
+helps['netappfiles account ad wait'] = """
+type: command
+short-summary: Wait for a account ad operation.
+"""
+
 helps['netappfiles account create'] = """
 type: command
 short-summary: Create a new Azure NetApp Files (ANF) account. Note that active directories are added using the subgroup commands.
@@ -223,6 +228,11 @@ examples:
         az netappfiles account update -g mygroup --name myname --tags testtag2=mytagb
 """
 
+helps['netappfiles account wait'] = """
+type: command
+short-summary: Wait for a account operation.
+"""
+
 helps['netappfiles account backup'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Account Backup Resources.
@@ -266,6 +276,11 @@ examples:
   - name: Get a list of all ANF account backup
     text: >
         az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackupname
+"""
+
+helps['netappfiles account backup wait'] = """
+type: command
+short-summary: Wait for a account backup operation.
 """
 
 
@@ -362,6 +377,11 @@ examples:
         az netappfiles account backup-policy update -g mygroup --account-name myaccountname --backup-policy-name mybackuppolicyname -l westus2 --daily-backups 1 --enabled false
 """
 
+helps['netappfiles account backup-policy wait'] = """
+type: command
+short-summary: Wait for a account backup-policy operation.
+"""
+
 
 helps['netappfiles pool'] = """
 type: group
@@ -453,6 +473,12 @@ examples:
     text: >
         az netappfiles pool update -g mygroup --account-name myaccname --name mypoolname --tags mytag1=abcd mytag2=efgh
 """
+
+helps['netappfiles pool wait'] = """
+type: command
+short-summary: Wait for a pool operation.
+"""
+
 
 helps['netappfiles snapshot'] = """
 type: group
@@ -550,6 +576,12 @@ examples:
     text: >
         az netappfiles snapshot restore-files -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname --file-paths myfilepaths
 """
+
+helps['netappfiles snapshot wait'] = """
+type: command
+short-summary: Wait for a snapshot operation.
+"""
+
 
 helps['netappfiles volume'] = """
 type: group
@@ -707,6 +739,12 @@ examples:
         az netappfiles volume revert -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --snapshot-id 9760acf5-4638-11e7-9bdb-020073ca3333
 """
 
+helps['netappfiles volume wait'] = """
+type: command
+short-summary: Wait for a volume operation.
+"""
+
+
 helps['netappfiles volume replication'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Volume replication operations.
@@ -821,6 +859,12 @@ examples:
         az netappfiles volume replication list -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
+helps['netappfiles volume replication wait'] = """
+type: command
+short-summary: Wait for a volume replication operation.
+"""
+
+
 helps['netappfiles volume export-policy'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Volume export policies.
@@ -905,6 +949,12 @@ examples:
     text: >
         az netappfiles volume export-policy remove -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --rule-index 4
 """
+
+helps['netappfiles volume export-policy wait'] = """
+type: command
+short-summary: Wait for a volume export-policy operation.
+"""
+
 
 helps['netappfiles volume list'] = """
 type: command
@@ -1002,7 +1052,7 @@ short-summary: Reset CIFS password from an Azure NetApp Files (ANF) volume
 examples:
   - name: Reset the CIFS password from volume
     text: >
-        az netappfiles volume reset-cifs-pw -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+        az netappfiles volume reset-cifs-pw -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
 helps['netappfiles volume relocate'] = """
@@ -1011,7 +1061,7 @@ short-summary: Relocates an Azure NetApp Files (ANF) volume to a new stamp
 examples:
   - name: Relocates volume to a new stamp
     text: >
-        az netappfiles volume relocate -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+        az netappfiles volume relocate -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
 helps['netappfiles volume finalize-relocation'] = """
@@ -1020,7 +1070,7 @@ short-summary: Finalizes the relocation of the Azure NetApp Files (ANF) volume a
 examples:
   - name: Finalizes the relocation of the volume and cleans up the old volume
     text: >
-        az netappfiles volume finalize-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+        az netappfiles volume finalize-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
 helps['netappfiles volume revert-relocation'] = """
@@ -1029,14 +1079,9 @@ short-summary: Reverts the Azure NetApp Files (ANF) volume relocation process, c
 examples:
   - name: Reverts the volume relocation process, cleans up the new volume and starts using the former-existing volume
     text: >
-        az netappfiles volume revert-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+        az netappfiles volume revert-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
-
-helps['netappfiles volume backup'] = """
-type: group
-short-summary: Manage Azure NetApp Files (ANF) Volume Backup Resources.
-"""
 
 helps['netappfiles volume backup create'] = """
 type: command
@@ -1144,6 +1189,11 @@ examples:
   - name: Update an ANF backup
     text: >
         az netappfiles volume backup update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+"""
+
+helps['netappfiles volume backup wait'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume Backup Resources.
 """
 
 
@@ -1292,6 +1342,12 @@ examples:
         az netappfiles snapshot policy update -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --daily-snapshots 1 --enabled false
 """
 
+helps['netappfiles snapshot policy wait'] = """
+type: command
+short-summary: Wait for a snapshot policy operation.
+"""
+
+
 helps['netappfiles vault'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Vault Resources.
@@ -1412,6 +1468,11 @@ examples:
         az netappfiles subvolume delete -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
 """
 
+helps['netappfiles subvolume wait'] = """
+type: command
+short-summary: Wait for a subvolume operation.
+"""
+
 helps['netappfiles subvolume metadata'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Subvolume Metadata Resources.
@@ -1434,6 +1495,7 @@ examples:
     text: >
         az netappfiles subvolume metadata show -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
 """
+
 
 helps['netappfiles volume-group'] = """
 type: group
@@ -1500,4 +1562,9 @@ examples:
   - name: Create ANF volume group
     text: >
         az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --ppg myppg --sap-sid mysapsid
+"""
+
+helps['netappfiles volume-group wait'] = """
+type: command
+short-summary: Wait for a volume group to be created.
 """
