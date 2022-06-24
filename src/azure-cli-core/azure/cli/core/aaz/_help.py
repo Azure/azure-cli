@@ -160,9 +160,9 @@ class AAZShowHelp(BaseException):
                     short_summary += '  '
                 short_summary += 'Allowed values: {}.'.format(', '.join(sorted([str(x) for x in choices])))
         elif isinstance(schema, AAZCompoundTypeArg):
-            if short_summary:
-                short_summary += '  '
             if is_prop:
+                if short_summary:
+                    short_summary += '  '
                 short_summary += shorthand_help_messages['show-help']
         return short_summary
 
