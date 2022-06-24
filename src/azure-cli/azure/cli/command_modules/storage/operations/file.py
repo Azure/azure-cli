@@ -230,8 +230,7 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
             length = end_range - start_range + 1
         download = client.download_file(offset=start_range, length=length, timeout=timeout,
                                         max_concurrency=max_connections, **kwargs)
-        download_content = download.readall()
-        stream.write(download_content)
+        download.readinto(stream)
     return client.get_file_properties()
 
 
@@ -262,16 +261,13 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
 
     def _download_action(pair):
         destination_dir = os.path.join(destination, pair[0])
-        mkdir_p(destination_dir)
-
         path = os.path.join(*pair)
         local_path = os.path.join(destination, *pair)
         file_client = client.get_file_client(path)
-        with open(local_path, 'wb') as stream:
-            download = file_client.download_file(max_concurrency=max_connections, validate_content=validate_content,
-                                                 raw_response_hook=progress_callback)
-            download_content = download.readall()
-            stream.write(download_content)
+
+        download_file(file_client, destination_path=local_path, max_connections=max_connections,
+                      progress_callback=progress_callback, validate_content=validate_content)
+
         return file_client.url.replace('%5C', '/')
 
     return list(_download_action(f) for f in source_files)
