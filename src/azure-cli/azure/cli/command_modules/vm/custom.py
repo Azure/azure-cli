@@ -378,16 +378,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         if security_type.lower().startswith('confidentialvm_') and hyper_v_generation.lower() != 'v2':
             raise ArgumentUsageError('usage error: --security-type should be ConfidentialVM_* ONLY if --hyper-v-generation is set to V2')
 
-    if secure_vm_disk_encryption_set is not None:
-        if security_type is None or not security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
-            raise ArgumentUsageError('usage error: --securevm-disk-encryption-set is mandatory and required only when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+    if secure_vm_disk_encryption_set:
+        if not security_type or security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
+            raise ArgumentUsageError('usage error: --securevm-disk-encryption-set can only be specified only when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
         if not is_valid_resource_id(secure_vm_disk_encryption_set):
             secure_vm_disk_encryption_set = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                 namespace='Microsoft.Compute', type='diskEncryptionSets', name=secure_vm_disk_encryption_set)
-    else:
-        if security_type is not None and security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
-            raise ArgumentUsageError('usage error: --securevm-disk-encryption-set is mandatory and required only when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+    elif security_type and security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
+        raise ArgumentUsageError('usage error: --securevm-disk-encryption-set is mandatory when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
 
     encryption = None
     if disk_encryption_set or encryption_type:

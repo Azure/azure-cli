@@ -6916,7 +6916,8 @@ class DiskEncryptionSetTest(ScenarioTest):
             'disk1': self.create_random_name(prefix='d1-', length=20),
             'disk2': self.create_random_name(prefix='d2-', length=20),
             'vm': self.create_random_name(prefix='vm1-', length=20),
-            'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\')
+            'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\'),
+            'image': 'MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest'
         })
 
         self.cmd('keyvault create --name {vault} -g {rg} --sku Premium --enable-purge-protection true')
@@ -6952,14 +6953,26 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des_pattern': '.*/{}$'.format(self.kwargs['des']),
         })
 
+        # test raise error if specified --security-type with 'ConfidentialVM_*' value but not --hyper-v-generation with 'V2'
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --secure-vm-disk-encryption-set {des} --image-reference "{image}"')
+
+        # test raise error if only specified --secure-vm-disk-encryption-set but not --secure-type
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"')
+
+        # test raise error if specified 'ConfidentialVM_DiskEncryptedWithCustomerKey' for --secure-type but didn't specify --secure-vm-disk-encryption-set
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --image-reference "{image}"')
+        
         # create disk with des name
-        self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest"', checks=[
+        self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
             self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
         # create disk with des id
-        self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest"', checks=[
+        self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
             self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
