@@ -1192,8 +1192,8 @@ examples:
 """
 
 helps['netappfiles volume backup wait'] = """
-type: group
-short-summary: Manage Azure NetApp Files (ANF) Volume Backup Resources.
+type: command
+short-summary: Wait for a volume backup operation.
 """
 
 
