@@ -212,7 +212,7 @@ def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, i
         replication_role = instance.replication_role if replication_role is None else replication_role
         high_availability = instance.high_availability.mode if high_availability is None else high_availability
     # if replica, cannot be disabled
-    if replication_role != 'None' and auto_grow.lower() == 'disabled':
+    if replication_role != None and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for replica server cannot be disabled.")
     # if ha, cannot be disabled
     if high_availability in ['Enabled', 'ZoneRedundant'] and auto_grow.lower() == 'disabled':
