@@ -661,7 +661,9 @@ parameters:
   - name: --network-features
     short-summary: Basic network, or Standard features available to the volume. Possible values are Basic and Standard. Default value is Basic.
   - name: --enable-subvolumes
-    short-summary:  Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
+    short-summary: Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
+  - name: --zones
+    short-summary: Availability Zone
 examples:
   - name: Create an ANF volume
     text: >
@@ -808,6 +810,15 @@ examples:
   - name: Get the replication status for the volume. Returns whether the replication is healthy, the replication schedule and the mirror state (whether replication is suspened/broken or synced/mirrored)
     text: >
         az netappfiles volume replication status -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+"""
+
+helps['netappfiles volume replication list'] = """
+type: command
+short-summary: List replication for ANF volume
+examples:
+  - name: List all replications for a specified volume
+    text: >
+        az netappfiles volume replication list -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
 helps['netappfiles volume export-policy'] = """
@@ -984,6 +995,43 @@ examples:
     text: >
         az netappfiles volume pool-change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --new-pool-resource-id mynewresourceid
 """
+
+helps['netappfiles volume reset-cifs-pw'] = """
+type: command
+short-summary: Reset CIFS password from an Azure NetApp Files (ANF) volume
+examples:
+  - name: Reset the CIFS password from volume
+    text: >
+        az netappfiles volume reset-cifs-pw -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+"""
+
+helps['netappfiles volume relocate'] = """
+type: command
+short-summary: Relocates an Azure NetApp Files (ANF) volume to a new stamp
+examples:
+  - name: Relocates volume to a new stamp
+    text: >
+        az netappfiles volume relocate -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+"""
+
+helps['netappfiles volume finalize-relocation'] = """
+type: command
+short-summary: Finalizes the relocation of the Azure NetApp Files (ANF) volume and cleans up the old volume
+examples:
+  - name: Finalizes the relocation of the volume and cleans up the old volume
+    text: >
+        az netappfiles volume finalize-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+"""
+
+helps['netappfiles volume revert-relocation'] = """
+type: command
+short-summary: Reverts the Azure NetApp Files (ANF) volume relocation process, cleans up the new volume and starts using the former-existing volume
+examples:
+  - name: Reverts the volume relocation process, cleans up the new volume and starts using the former-existing volume
+    text: >
+        az netappfiles volume revert-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname 
+"""
+
 
 helps['netappfiles volume backup'] = """
 type: group
@@ -1452,9 +1500,4 @@ examples:
   - name: Create ANF volume group
     text: >
         az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --ppg myppg --sap-sid mysapsid
-"""
-
-helps['netappfiles volume-group wait'] = """
-type: command
-short-summary: Wait for a volume group to be created.
 """

@@ -3,11 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+import unittest
 
 LOCATION = "southcentralusstage"
 VNET_LOCATION = "southcentralus"
 
 
+@unittest.skip("Service has been hardened and we need to check if this is testable")
 class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
     def create_volume(self, volume_only=False):
         if not volume_only:
