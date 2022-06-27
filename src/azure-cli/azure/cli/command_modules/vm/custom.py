@@ -2030,7 +2030,9 @@ def _remove_disk_encryption_set_identities(cmd, resource_group_name, name,
             if len(mi_user_assigned) > 0 else existing_user_identities
         non_existing = user_identities_to_remove.difference(existing_user_identities)
         if non_existing:
-            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("'{}' are not associated with '{}', please provide existing user managed "
+                                            "identities in {}".format(','.join(non_existing), name, name))
         if not list(existing_user_identities - user_identities_to_remove):
             if resource.identity.type == IdentityType.USER_ASSIGNED:
                 resource.identity.type = IdentityType.NONE
@@ -4648,8 +4650,6 @@ def create_disk_encryption_set(
 
     encryption_set_identity = EncryptionSetIdentity(type=identity_type)
     if user_assigned_identities is not None:
-        if not hasattr(encryption_set_identity, 'user_assigned_identities'):
-            raise CLIError('User assigned identities in disk encryption set is not supported')
         encryption_set_identity.user_assigned_identities = user_assigned_identities
 
     if source_vault is not None:
@@ -4665,8 +4665,6 @@ def create_disk_encryption_set(
                                             rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
 
     if federatedClientId is not None:
-        if not hasattr(disk_encryption_set, 'federated_client_id'):
-            raise CLIError('Multi-tenant application client id in disk encryption set is not supported')
         disk_encryption_set.federated_client_id = federatedClientId
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
@@ -4697,8 +4695,6 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
 
     if federatedClientId is not None:
-        if not hasattr(instance, 'federated_client_id'):
-            raise CLIError('Multi-tenant application client id in disk encryption set is not supported')
         instance.federated_client_id = federatedClientId
 
     return instance
