@@ -8,6 +8,7 @@ from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, A
     AAZInvalidFieldError
 
 # pylint: disable=protected-access, too-few-public-methods, isinstance-second-argument-not-valid-type
+# pylint: disable=too-many-instance-attributes
 
 
 # build in types
