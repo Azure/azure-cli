@@ -162,6 +162,123 @@ class BotTests(ScenarioTest):
             self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_registration_bot_create_singletenant_type(self, resource_group):
+        locations = ['global', 'westus', 'westeurope']
+        for location in locations:
+            self.kwargs.update({
+                'botname': self.create_random_name(prefix='cli', length=10),
+                'description': 'description1',
+                'endpoint': 'https://www.google.com/api/messages',
+                'location': location,
+                'app_id': str(uuid.uuid4()),
+                'app_type': 'SingleTenant',
+                'tenant_id': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
+            })
+
+            self.cmd(
+                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type {app_type}'
+                ' --tenant-id {tenant_id} --tags key1=value1 -l {location}',
+                checks=[
+                    self.check('name', '{botname}'),
+                    self.check('properties.description', '{description}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('location', '{location}'),
+                    self.check('properties.msaAppTenantId', '{tenant_id}'),
+                    self.check('properties.msaAppType', '{app_type}'),
+                    self.check('tags.key1', 'value1')
+                ])
+
+            self.cmd('az bot show -g {rg} -n {botname}', checks=[
+                self.check('name', '{botname}')
+            ])
+
+            self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', 'description2')
+            ])
+
+            self.cmd('az bot delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_registration_bot_create_multitenant_type(self, resource_group):
+        locations = ['global', 'westus', 'westeurope']
+        for location in locations:
+            self.kwargs.update({
+                'botname': self.create_random_name(prefix='cli', length=10),
+                'description': 'description1',
+                'endpoint': 'https://www.google.com/api/messages',
+                'location': location,
+                'app_id': str(uuid.uuid4()),
+                'app_type': 'MultiTenant'
+            })
+
+            self.cmd(
+                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type {app_type}'
+                ' --tags key1=value1 -l {location}',
+                checks=[
+                    self.check('name', '{botname}'),
+                    self.check('properties.description', '{description}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('location', '{location}'),
+                    self.check('properties.msaAppType', '{app_type}'),
+                    self.check('tags.key1', 'value1')
+                ])
+
+            self.cmd('az bot show -g {rg} -n {botname}', checks=[
+                self.check('name', '{botname}')
+            ])
+
+            self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', 'description2')
+            ])
+
+            self.cmd('az bot delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_registration_bot_create_userassignedmsi_type(self, resource_group):
+        locations = ['global', 'westus', 'westeurope']
+        for location in locations:
+            self.kwargs.update({
+                'botname': self.create_random_name(prefix='cli', length=10),
+                'description': 'description1',
+                'endpoint': 'https://www.google.com/api/messages',
+                'location': location,
+                'app_id': str(uuid.uuid4()),
+                'app_type': 'UserAssignedMSI',
+                'tenant_id': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a',
+                'msi': 'botCreateCliTestMsi'
+            })
+            msi_result = self.cmd('identity create -g {rg} -n {msi} --tags tag1=d1', checks=[
+                self.check('name', '{msi}')]).get_output_in_json()
+            self.kwargs['fullQualifiedMsi'] = msi_result['id']
+
+            self.cmd(
+                'az bot create -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type {app_type}'
+                ' --tenant-id {tenant_id} --msi-resource-id {fullQualifiedMsi} --tags key1=value1 -l {location}',
+                checks=[
+                    self.check('name', '{botname}'),
+                    self.check('properties.description', '{description}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('location', '{location}'),
+                    self.check('properties.msaAppTenantId', '{tenant_id}'),
+                    self.check('properties.msaAppType', '{app_type}'),
+                    self.check('properties.msaAppMsiResourceId', '{fullQualifiedMsi}'),
+                    self.check('tags.key1', 'value1')
+                ])
+
+            self.cmd('az bot show -g {rg} -n {botname}', checks=[
+                self.check('name', '{botname}')
+            ])
+
+            self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', 'description2')
+            ])
+
+            self.cmd('az bot delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_be_idempotent_and_return_existing_bot_info(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
