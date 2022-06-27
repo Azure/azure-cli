@@ -31,7 +31,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     :param replica_count: Number of replicas in the search service.
     :param public_network_access: Public accessibility to the search service;
                                   allowed values are "enabled" or "disabled".
-    :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, separated by comma or semicolon;
+    :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma or semicolon;
                      these IP rules are applicable only when --public-network-access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
     :param hosting_mode: The hosting mode; possible values include: "default", "highDensity";
