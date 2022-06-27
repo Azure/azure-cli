@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.azclierror import AzCLIError, AzureResponseError
+import azure.cli.core.azclierror
 
 def bot_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
@@ -14,7 +14,7 @@ def bot_exception_handler(ex):
             ex.error.code,
             ex.error.message
         )
-        raise AzureResponseError(message)
+        raise azure.cli.core.azclierror.AzureResponseError(message)
     if isinstance(ex, CloudError) and ex.status_code == 404:
         return None
     if isinstance(ex, ClientRequestError):
@@ -25,4 +25,4 @@ def bot_exception_handler(ex):
     message = 'Unknown error during execution. Please file an issue on {0}'.format(
         'https://github.com/microsoft/botframework-sdk'
     )
-    raise AzCLIError(message)
+    raise azure.cli.core.azclierror.AzCLIError(message)
