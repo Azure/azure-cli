@@ -2032,7 +2032,7 @@ def _remove_disk_encryption_set_identities(cmd, resource_group_name, name,
         if non_existing:
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError("'{}' are not associated with '{}', please provide existing user managed "
-                                            "identities in {}".format(','.join(non_existing), name, name))
+                                            "identities".format(','.join(non_existing), name))
         if not list(existing_user_identities - user_identities_to_remove):
             if resource.identity.type == IdentityType.USER_ASSIGNED:
                 resource.identity.type = IdentityType.NONE
