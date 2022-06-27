@@ -2008,7 +2008,8 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False,  # pylint: disable=redefined-builtin
+                   edge_zone=None, architecture=None):
     load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
@@ -2016,9 +2017,10 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
             logger.warning("You are retrieving all the images from server which could take more than a minute. "
                            "To shorten the wait, provide '--publisher', '--offer' , '--sku' or '--edge-zone'."
                            " Partial name search is supported.")
-        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
+        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone,
+                                               architecture)
     else:
-        all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
+        all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku, architecture)
         logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')
 
     if edge_zone is not None:
@@ -2805,7 +2807,8 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                          identity_role_id=None, identity_scope=None):
     VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
         'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
-    IdentityUserAssignedIdentitiesValue = cmd.get_models('VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue')
+    IdentityUserAssignedIdentitiesValue = cmd.get_models(
+        'VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue') or cmd.get_models('UserAssignedIdentitiesValue')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -4981,7 +4984,7 @@ def list_capacity_reservation(client, resource_group_name, capacity_reservation_
                                                      capacity_reservation_group_name=capacity_reservation_group_name)
 
 
-def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -5003,6 +5006,13 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             if over_ride or over_ride.lower() != 'null':
                 vm.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
+
+    if treat_deployment_as_failure:
+        index = 0
+        for treat_as_failure in treat_deployment_as_failure:
+            vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
+                (treat_as_failure.lower() == 'true')
+            index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
 
@@ -5015,7 +5025,7 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
     return vm.application_profile
 
 
-def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -5036,6 +5046,12 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for over_ride in application_configuration_overrides:
             if over_ride or over_ride.lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
+            index += 1
+
+    if treat_deployment_as_failure:
+        index = 0
+        for treat_as_failure in treat_deployment_as_failure:
+            vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 

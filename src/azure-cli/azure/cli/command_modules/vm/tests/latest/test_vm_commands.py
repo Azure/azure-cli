@@ -55,6 +55,13 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['publisher'], 'Canonical')
         self.assertTrue(result[0]['sku'].endswith('LTS'))
 
+    def test_vm_image_list_by_alias_and_filtered_by_arch(self):
+        result = self.cmd('vm image list --offer ubuntu --architecture x64').get_output_in_json()
+        self.assertTrue(len(result) >= 1)
+        self.assertEqual(result[0]['publisher'], 'Canonical')
+        self.assertTrue(result[0]['sku'].endswith('LTS'))
+        self.assertEqual(result[0]['architecture'], 'x64')
+
 
 class VMUsageScenarioTest(ScenarioTest):
 
@@ -79,6 +86,16 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
     def test_vm_images_list_thru_services_edge_zone(self):
         result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
         assert result.index('7.7') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_image_list_thru_services_filtered_by_arch(self):
+        result = self.cmd("vm image list --publisher Debian --architecture Arm64 -o tsv --all").output
+        assert result.index('Arm64') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_image_list_thru_services_edge_zone_by_arch(self):
+        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
+        assert result.index('x64') >= 0
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -4237,6 +4254,7 @@ class VMSSILBTest(ScenarioTest):
 class VMSSLoadBalancerWithSku(ScenarioTest):
 
     @unittest.skip('Can\'t test due to no qualified subscription')
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
     def test_vmss_lb_sku(self, resource_group):
 
@@ -5577,7 +5595,7 @@ class VMGalleryImage(ScenarioTest):
             checks=self.check('name', self.kwargs['version']))
 
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
     def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
@@ -5673,7 +5691,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig delete -g {rg} -r {gallery_name}')
 
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
     def test_replication_mode(self, resource_group):
         self.kwargs.update({
             'sig_name': self.create_random_name('sig_', 10),
@@ -6094,6 +6112,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
     def test_dedicated_host_e2e(self, resource_group, resource_group_location):
@@ -8165,6 +8184,21 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             self.check('applicationProfile.galleryApplications[1].configurationReference', '{config}')
         ])
 
+        # wrong length of treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure false')
+
+        # non boolean value in treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure only accepts a list of "true" or "false" values'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure hello world')
+        
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure true false', checks=[
+            self.check('applicationProfile.galleryApplications[0].treatFailureAsDeploymentFailure', True),
+            self.check('applicationProfile.galleryApplications[1].treatFailureAsDeploymentFailure', False)
+        ])
+
         self.cmd('vm application list -g {rg} -n {vm}')
 
     # Need prepare app versions
@@ -8249,6 +8283,21 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].configurationReference', 'null'),
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].configurationReference', '{config}')
+        ])
+
+        # wrong length of treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure false')
+
+        # non boolean value in treat-deployment-as-failure
+        message = 'usage error: --treat-deployment-as-failure only accepts a list of "true" or "false" values'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure hello world')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure true false', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].treatFailureAsDeploymentFailure', True),
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].treatFailureAsDeploymentFailure', False)
         ])
 
         self.cmd('vmss application list -g {rg} --name {vmss}')
