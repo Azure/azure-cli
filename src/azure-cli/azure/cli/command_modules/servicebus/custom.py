@@ -618,6 +618,7 @@ def return_valid_duration(update_value, current_value=None):
     from datetime import timedelta
     from isodate import parse_duration
     from isodate import Duration
+    from knack.util import CLIError
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         value_toreturn = update_value
