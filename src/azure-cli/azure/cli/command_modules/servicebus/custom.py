@@ -625,7 +625,10 @@ def return_valid_duration(update_value, current_value=None):
         return current_value
 
     if iso8601pattern.match(value_toreturn):
-        time_duration = parse_duration(value_toreturn)
+        try:
+            time_duration = parse_duration(value_toreturn)
+        except:
+            raise CLIError("Unable to parse duration string %r" % value_toreturn)
 
         if isinstance(time_duration, timedelta):
             if time_duration <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
