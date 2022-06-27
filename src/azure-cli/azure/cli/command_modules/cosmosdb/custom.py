@@ -684,8 +684,6 @@ def cli_cosmosdb_sql_container_create(client,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl)
 
-    #print("Container ====== " + str(sql_container_resource))
-
     options = _get_options(throughput, max_throughput)
 
     sql_container_create_update_resource = SqlContainerCreateUpdateParameters(
@@ -2091,8 +2089,6 @@ def _populate_collection_definition(collection,
     if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy
 
-    print("_populate_collection_definition: filling client encryption policy")
-
     if client_encryption_policy is not None:
         collection['clientEncryptionPolicy'] = client_encryption_policy
 
@@ -2120,7 +2116,6 @@ def cli_cosmosdb_collection_create(client,
                                     indexing_policy,
                                     client_encryption_policy)
 
-    #print("cli_cosmosdb_collection_create: filling client encryption policy ================  =======" + str(collection))
     created_collection = client.CreateContainer(_get_database_link(database_id), collection,
                                                 options)
     offer = _find_offer(client, created_collection['_self'])
