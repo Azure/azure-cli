@@ -203,6 +203,17 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
       artifactName: msi
 
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.8'
+    inputs:
+      versionSpec: 3.8
+
+  - bash: pip install --upgrade pip wheel --user
+    displayName: "Install pip and wheel"
+
+  - bash: ./scripts/ci/build.sh
+    displayName: "Build test sdk and fulltest packages"
+
   - task: PowerShell@2
     displayName: Install and Load CLI
     inputs:
@@ -245,6 +256,10 @@ jobs:
         # Test bundled pip with extension installation
         az extension add -n rdbms-connect
         az self-test
+
+        # Full package tests
+        # Uncomment after fixing test failures
+        # .\build_scripts\windows\scripts\setup_msi_test.ps1
 
         Get-Content .\install_logs.txt
 
