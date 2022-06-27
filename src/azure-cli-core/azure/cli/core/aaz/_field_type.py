@@ -8,6 +8,7 @@ from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, A
     AAZInvalidFieldError
 
 # pylint: disable=protected-access, too-few-public-methods, isinstance-second-argument-not-valid-type
+# pylint: disable=too-many-instance-attributes
 
 
 # build in types
@@ -218,11 +219,11 @@ class AAZObjectType(AAZBaseType):
         if isinstance(data, AAZObject):
             data = data._data
         assert isinstance(data, dict)
-        if self._discriminator_field_name not in data:
-            return None
-
-        field_data = data[self._discriminator_field_name]  # get discriminator field data
-        return self._discriminators.get(field_data, None)
+        for key, field_data in data.items():
+            name = self.get_attr_name(key)
+            if name == self._discriminator_field_name:
+                return self._discriminators.get(field_data, None)
+        return None
 
 
 class AAZDictType(AAZBaseType):

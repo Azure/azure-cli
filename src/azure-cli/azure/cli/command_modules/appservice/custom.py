@@ -2764,8 +2764,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
-    from azure.cli.command_modules.role._client_factory import _graph_client_factory
-    from azure.graphrbac.models import GraphErrorException
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
+    graph_client = graph_client_factory(cmd.cli_ctx)
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription = get_subscription_id(cmd.cli_ctx)
     # Cannot check if key vault is in another subscription
@@ -2776,15 +2776,14 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
-    graph_sp_client = _graph_client_factory(cmd.cli_ctx).service_principals
     for policy in vault.properties.access_policies:
         try:
-            sp = graph_sp_client.get(policy.object_id)
-            if sp.app_id == AZURE_PUBLIC_WEBSITES_APP_ID or sp.app_id == AZURE_GOV_WEBSITES_APP_ID:
+            sp = graph_client.service_principal_get(policy.object_id)
+            if sp['appId'] == AZURE_PUBLIC_WEBSITES_APP_ID or sp['appId'] == AZURE_GOV_WEBSITES_APP_ID:
                 for perm in policy.permissions.secrets:
                     if perm == "Get":
                         return True
-        except GraphErrorException:
+        except GraphError:
             pass  # Lookup will fail for non service principals (users, groups, etc.)
     return False
 

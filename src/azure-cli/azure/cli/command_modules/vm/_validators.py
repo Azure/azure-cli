@@ -1305,6 +1305,14 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
         raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
                                  ' --application-version-ids')
+    if namespace.treat_deployment_as_failure:
+        if len(namespace.application_version_ids) != len(namespace.treat_deployment_as_failure):
+            raise ArgumentUsageError('usage error: --treat-deployment-as-failure should have the same number of items'
+                                     ' as --application-version-ids')
+        for boolean_value_in_string in namespace.treat_deployment_as_failure:
+            if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
+                raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or'
+                                         ' "false" values')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1713,17 +1721,65 @@ def validate_vmss_disk(cmd, namespace):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
-def process_disk_or_snapshot_create_namespace(cmd, namespace):
+def _validate_gallery_image_reference(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None \
+                  and cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
+                                                operation_group='disks', min_api='2022-03-02')
+    if not is_validate:
+        return
+
+    from azure.cli.command_modules.vm._image_builder import GalleryImageReferenceType
+    from ._vm_utils import is_compute_gallery_image_id, is_community_gallery_image_id, \
+        is_shared_gallery_image_id
+
+    gallery_image_reference = namespace.gallery_image_reference
+    if is_compute_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMPUTE.backend_key
+        return
+    if is_community_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMMUNITY.backend_key
+        return
+    if is_shared_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.SHARED.backend_key
+        return
+
+    from azure.cli.core.parser import InvalidArgumentValueError
+    raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
+                                    'compute, shared or community gallery image version. For details about valid '
+                                    'format, please refer to the help sample'.format(gallery_image_reference))
+
+
+def process_disk_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
+    if namespace.source:
+        usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
+                      '--source VHD_BLOB_URI [--source-storage-account-id ID]'
+        try:
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
+                namespace.source_restore_point, _ = _figure_out_storage_source(
+                    cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            if not namespace.source_blob_uri and namespace.source_storage_account_id:
+                raise ArgumentUsageError(usage_error)
+        except HttpResponseError:
+            raise ArgumentUsageError(usage_error)
+
+
+def process_snapshot_create_namespace(cmd, namespace):
+    from azure.core.exceptions import HttpResponseError
+    validate_tags(namespace)
+    validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, source_info = \
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, _, source_info = \
                 _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError(usage_error)
+                raise ArgumentUsageError(usage_error)
             # autodetect copy_start for `az snapshot create`
             if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
                 if not source_info:
@@ -1743,9 +1799,10 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                 if not namespace.location:
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
-                namespace.copy_start = source_info.location != namespace.location
+                if namespace.incremental:
+                    namespace.copy_start = source_info.location != namespace.location
         except HttpResponseError:
-            raise CLIError(usage_error)
+            raise ArgumentUsageError(usage_error)
 
 
 def process_image_create_namespace(cmd, namespace):
@@ -1773,13 +1830,13 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot, _ = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -1797,12 +1854,15 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_disk = None
     source_snapshot = None
     source_info = None
+    source_restore_point = None
     if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
     elif '/snapshots/' in source.lower():
         source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
     else:
         source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
         if is_snapshot:
@@ -1810,7 +1870,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         else:
             source_disk = source_info.id
 
-    return (source_blob_uri, source_disk, source_snapshot, source_info)
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
 
 def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
