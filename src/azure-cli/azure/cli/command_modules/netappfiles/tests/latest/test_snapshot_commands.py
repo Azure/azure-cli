@@ -46,7 +46,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                             "--subnet %s %s" % (account_name, pool_name, volume_name1, LOCATION, VOLUME_DEFAULT,
                                                 file_path, vnet_name, subnet_name, tag)).get_output_in_json()
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_snapshots(self):
         # create volume
@@ -73,7 +72,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 0
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_create_volume_from_snapshot(self):
         # create volume
@@ -102,7 +100,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                              snapshot_id=snapshot["snapshotId"], volume_only=volume_only)
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_revert_volume_from_snapshot(self):
         # create volume
@@ -131,7 +128,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 1
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_list_snapshots(self):
         # create volume
@@ -153,7 +149,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 2
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_get_snapshot(self):
         # create volume

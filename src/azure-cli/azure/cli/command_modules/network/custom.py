@@ -28,6 +28,7 @@ import time
 import platform
 import subprocess
 import tempfile
+import requests
 
 logger = get_logger(__name__)
 
@@ -1565,10 +1566,9 @@ def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_n
         'ApplicationGatewaySslPolicy', 'ApplicationGatewaySslPolicyType')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    policy_type = None
     if policy_name:
         policy_type = ApplicationGatewaySslPolicyType.predefined.value
-    elif cipher_suites or min_protocol_version:
+    elif policy_type is None and (cipher_suites or min_protocol_version):
         policy_type = ApplicationGatewaySslPolicyType.custom.value
     ag.ssl_policy = ApplicationGatewaySslPolicy(
         policy_name=policy_name,
@@ -6562,18 +6562,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None):
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    if not allocation_method:
-        allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
 
     public_ip_args = {
         'location': location,
@@ -6583,14 +6573,48 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'ip_address': ip_address,
         'dns_settings': None
     }
+
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        if is_valid_resource_id(public_ip_prefix):
+            public_ip_prefix_id = public_ip_prefix
+            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
+        else:
+            public_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIPPrefixes',
+                name=public_ip_prefix
+            )
+            public_ip_prefix_name = public_ip_prefix
+        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
+
+        # reuse prefix information
+        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
+        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
+        version = pip_obj.public_ip_address_version
+        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
+        zone = pip_obj.zones
+
+    if sku is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
+    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
+    if not allocation_method:
+        if sku and sku.lower() == 'standard':
+            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
+        else:
+            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
+
     if cmd.supported_api_version(min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
     if cmd.supported_api_version(min_api='2017-06-01'):
         public_ip_args['zones'] = zone
     if cmd.supported_api_version(min_api='2017-11-01'):
         public_ip_args['ip_tags'] = ip_tags
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix)
 
     if sku:
         public_ip_args['sku'] = {'name': sku}
@@ -6645,7 +6669,7 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
                             version=None, location=None, tags=None, zone=None, edge_zone=None,
                             custom_ip_prefix_name=None):
-    PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
+    PublicIPPrefix, PublicIPPrefixSku, SubResource = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku', 'SubResource')
     prefix = PublicIPPrefix(
         location=location,
         prefix_length=prefix_length,
@@ -6658,11 +6682,18 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
         prefix.public_ip_address_version = version if version is not None else 'ipv4'
 
     if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
-        cip_client = network_client_factory(cmd.cli_ctx).custom_ip_prefixes
-        try:
-            prefix.custom_ip_prefix = cip_client.get(resource_group_name, custom_ip_prefix_name)
-        except ResourceNotFoundError:
-            raise ResourceNotFoundError('Custom ip prefix {} doesn\'t exist.'.format(custom_ip_prefix_name))
+        # support cross-subscription
+        if is_valid_resource_id(custom_ip_prefix_name):
+            custom_ip_prefix_id = custom_ip_prefix_name
+        else:
+            custom_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='customIPPrefixes',
+                name=custom_ip_prefix_name
+            )
+        prefix.custom_ip_prefix = SubResource(id=custom_ip_prefix_id)
 
     if edge_zone:
         prefix.extended_location = _edge_zone_model(cmd, edge_zone)
@@ -7829,7 +7860,8 @@ def create_virtual_hub(cmd, client,
 
     SubResource = cmd.get_models('SubResource')
 
-    VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
+    VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
+                                                                     'PublicIPAddress')
 
     hub = VirtualHub(tags=tags, location=location,
                      virtual_wan=None,
@@ -7839,7 +7871,7 @@ def create_virtual_hub(cmd, client,
 
     ip_config = HubIpConfiguration(
         subnet=SubResource(id=hosted_subnet),
-        public_ip_address=SubResource(id=public_ip_address),
+        public_ip_address=PublicIPAddress(id=public_ip_address)
     )
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
@@ -8418,23 +8450,44 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 
-def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False):
+    from azure.cli.core._profile import Profile
+    import os
+    from ._process_helper import launch_and_wait
+
     if not resource_port:
         resource_port = 3389
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
-
     if platform.system() == 'Windows':
-        tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
-        t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
-        t.daemon = True
-        t.start()
-        command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
-        logger.debug("Running rdp command %s", ' '.join(command))
-
-        from ._process_helper import launch_and_wait
-        launch_and_wait(command)
-        tunnel_server.cleanup()
+        if disable_gateway:
+            tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+            t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+            t.daemon = True
+            t.start()
+            command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
+            launch_and_wait(command)
+            tunnel_server.cleanup()
+        else:
+            profile = Profile(cli_ctx=cmd.cli_ctx)
+            access_token = profile.get_raw_token()[0][2].get('accessToken')
+            logger.debug("Response %s", access_token)
+            client = network_client_factory(cmd.cli_ctx).bastion_hosts
+            bastion = client.get(resource_group_name, bastion_host_name)
+            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name, target_resource_id)
+            headers = {}
+            headers['Authorization'] = 'Bearer {}'.format(access_token)
+            headers['Accept'] = '*/*'
+            headers['Accept-Encoding'] = 'gzip, deflate, br'
+            headers['Connection'] = 'keep-alive'
+            response = requests.get(web_address, headers=headers)
+            if not response.ok:
+                raise CLIError('Request to EncodingReservedUnitTypes v2 API endpoint failed.')
+            with open("conn.rdp", "w") as f:
+                f.write(response.text)
+            rdpfilepath = os.getcwd() + "/conn.rdp"
+            command = [_get_rdp_path(), rdpfilepath]
+            launch_and_wait(command)
     else:
         raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
@@ -8466,7 +8519,6 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
     logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
     logger.warning('Ctrl + C to close')
-
     import signal
     # handle closing the tunnel with an active session still connected
     signal.signal(signal.SIGINT, lambda signum, frame: tunnel_close_handler(tunnel_server))

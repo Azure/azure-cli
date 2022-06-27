@@ -96,11 +96,12 @@ class StorageArgumentContext(AzArgumentContext):
                        'properties listed below is set, then that property will be cleared.',
                        arg_type=get_three_state_flag())
 
-    def register_path_argument(self, default_file_param=None, options_list=None):
+    def register_path_argument(self, default_file_param=None, options_list=None, fileshare=False):
         from ._validators import get_file_path_validator
         from .completers import file_path_completer
 
-        path_help = 'The path to the file within the file share.'
+        path_partial = '/directory' if fileshare else ''
+        path_help = f'The path to the file{path_partial} within the file share.'
         if default_file_param:
             path_help = '{} If the file name is omitted, the source file name will be used.'.format(path_help)
         self.extra('path', options_list=options_list or ('--path', '-p'),

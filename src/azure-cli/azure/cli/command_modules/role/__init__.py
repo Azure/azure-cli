@@ -21,12 +21,6 @@ class RoleCommandsLoader(AzCommandsLoader):
                                                  custom_command_type=role_custom)
 
     def load_command_table(self, args):
-        if args and args[0] in ('role', 'ad'):
-            from knack.log import get_logger
-            logger = get_logger(__name__)
-            logger.warning("This command or command group has been migrated to Microsoft Graph API. "
-                           "Please carefully review all breaking changes introduced during this migration: "
-                           "https://docs.microsoft.com/cli/azure/microsoft-graph-migration")
         from azure.cli.command_modules.role.commands import load_command_table
         load_command_table(self, args)
         return self.command_table

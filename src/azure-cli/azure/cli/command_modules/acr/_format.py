@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from datetime import datetime
 from knack.log import get_logger
 
 
@@ -521,3 +522,7 @@ def _get_duration(start_time, finish_time):
     except ValueError:
         logger.debug("Unable to get duration with start_time '%s' and finish_time '%s'", start_time, finish_time)
         return ' '
+
+
+def add_timestamp(message):
+    return "{} {}".format(datetime.utcnow(), message)
