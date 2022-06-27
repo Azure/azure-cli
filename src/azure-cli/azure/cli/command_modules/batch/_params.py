@@ -73,7 +73,7 @@ def load_arguments(self, _):
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
                                                      'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
         c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
-        c.argument('userassigned_identity_id', help="The managed User identity fully qualified resource Id. Must be in conjunction with identity_type=UserAssigned")
+        c.argument('userassigned_identity_id', options_list=('--user-id',), help="The managed User identity fully qualified resource Id. Must be in conjunction with identity_type=UserAssigned")
         c.ignore('keyvault_url')
 
     with self.argument_context('batch account set') as c:
@@ -83,7 +83,7 @@ def load_arguments(self, _):
         c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
         c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
-        c.argument('userassigned_identity_id', help="The managed User identity fully qualified resource Id. Must be in conjunction with identity_type=UserAssigned")
+        c.argument('userassigned_identity_id', options_list=('--user-id',), help="The managed User identity fully qualified resource Id. Must be in conjunction with identity_type=UserAssigned")
 
     with self.argument_context('batch account network-profile show') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.', required=False)
