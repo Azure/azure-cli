@@ -163,6 +163,42 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    def test_batch_network_profile_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
+        pe_name = self.create_random_name(prefix='clibatchtestpe', length=24)
+
+        _, package_file_name = tempfile.mkstemp()
+
+        
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': storage_account,
+            'loc': 'eastus',
+            'acc': account_name,
+            'app': 'testapp',
+            'app_p': '1.0',
+            'app_f': package_file_name,
+            'vnetname': vnet_name,
+            'pename': pe_name
+        })
+
+        # test create account with default set
+        batchaccount = self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n} --public-network-access Enabled').assert_with_checks([
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')]).get_output_in_json()
+        
+        self.kwargs['accountId'] = batchaccount['id']
+
+        # create private endpoint
+        output = self.cmd('batch account network-profile network-rule add -n {acc} -g {rg} --profile BatchAccount --ip-address 1.2.3.6').assert_with_checks([
+            self.check('accountAccess.defaultAction', 'Allow'),
+            self.check('accountAccess.ipRules[0].value', '1.2.3.6')]).get_output_in_json()
+       
+
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
     def test_batch_application_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 

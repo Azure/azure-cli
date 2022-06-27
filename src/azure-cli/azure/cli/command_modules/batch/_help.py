@@ -74,6 +74,42 @@ short-summary: List an account's outbound network dependencies.
 long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://docs.microsoft.com/azure/batch/batch-virtual-network."
 """
 
+helps['batch account network-profile'] = """
+type: group
+short-summary: Manage Batch account Network profiles.
+"""
+
+helps['batch account network-profile show'] = """
+type: command
+short-summary: Get information about the Network profile for Batch account.
+"""
+
+helps['batch account network-profile set'] = """
+type: command
+short-summary: Sets the Network profile for Batch account.
+"""
+
+helps['batch account network-profile network-rule'] = """
+type: group
+short-summary: Manage Batch account Network rules in Network Profile.
+"""
+
+helps['batch account network-profile network-rule list'] = """
+type: command
+short-summary: Lists the Network rules from a Network Profile.
+"""
+
+helps['batch account network-profile network-rule add'] = """
+type: command
+short-summary: Adds a Network rule from a Network Profile.
+"""
+
+helps['batch account network-profile network-rule delete'] = """
+type: command
+short-summary: Deletes a Network rule from a Network Profile.
+"""
+
+
 helps['batch application'] = """
 type: group
 short-summary: Manage Batch applications.

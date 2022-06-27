@@ -62,6 +62,15 @@ def load_command_table(self, _):
         g.custom_command('keys renew', 'renew_accounts_keys', table_transformer=account_keys_renew_table_format)
         g.command('outbound-endpoints', 'list_outbound_network_dependencies_endpoints')
 
+    with self.command_group('batch account network-profile', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
+        g.custom_show_command('show', 'get_network_profile')
+        g.custom_command('set', 'update_network_profile')
+
+    with self.command_group('batch account network-profile network-rule', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
+        g.custom_show_command('list', 'list_network_rules')
+        g.custom_command('add', 'add_network_rule')
+        g.custom_command('delete', 'delete_network_rule')
+
     with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
         g.show_command('show', 'get')

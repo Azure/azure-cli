@@ -16,7 +16,9 @@ from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountU
                                      AutoStorageBaseProperties, ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
                                      KeyVaultProperties, BatchAccountIdentity,
-                                     BatchAccountRegenerateKeyParameters)
+                                     BatchAccountRegenerateKeyParameters, PublicNetworkAccessType, BatchAccount,
+                                     NetworkProfile, EndpointAccessProfile, IPRule, EndpointAccessDefaultAction,
+                                     ResourceIdentityType, UserAssignedIdentities)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
@@ -77,10 +79,20 @@ def get_account(cmd, client, resource_group_name=None, account_name=None):
 def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
-                   encryption_key_source=None, encryption_key_identifier=None, identity_type=None):
+                   encryption_key_source=None, encryption_key_identifier=None, identity_type=None,
+                   userassigned_identity_id=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
-    identity = BatchAccountIdentity(type=identity_type) if identity_type else None
+
+    identity = None
+    if identity_type and identity_type == ResourceIdentityType.SYSTEM_ASSIGNED:
+        identity = BatchAccountIdentity(type=identity_type)
+
+    if userassigned_identity_id and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
+        useridentity = UserAssignedIdentities()
+        my_dict = {userassigned_identity_id: useridentity}
+        identity = BatchAccountIdentity(type=identity_type, user_assigned_identities=my_dict)
+
     if (encryption_key_source and
             encryption_key_source.lower() == "microsoft.keyvault" and not encryption_key_identifier):
         raise ValueError("The --encryption-key-identifier property is required when "
@@ -106,8 +118,9 @@ def create_account(client,
 
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,
-                   tags=None, storage_account=None, encryption_key_source=None,
-                   encryption_key_identifier=None, identity_type=None):
+                   tags=None, storage_account=None, encryption_key_source=None, public_network_access=None,
+                   encryption_key_identifier=None, identity_type=None, userassigned_identity_id=None):
+
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
     if (encryption_key_source and
@@ -120,12 +133,23 @@ def update_account(client, resource_group_name, account_name,
     encryption = EncryptionProperties(
         key_source=encryption_key_source,
         encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
-    identity = BatchAccountIdentity(type=identity_type) if identity_type else None
+
+    identity = None
+    if identity_type and identity_type == ResourceIdentityType.SYSTEM_ASSIGNED:
+        identity = BatchAccountIdentity(type=identity_type)
+
+    if userassigned_identity_id and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
+        useridentity = UserAssignedIdentities()
+        my_dict = {userassigned_identity_id: useridentity}
+        identity = BatchAccountIdentity(type=identity_type, user_assigned_identities=my_dict)
+
     parameters = BatchAccountUpdateParameters(
         tags=tags,
         encryption=encryption,
         identity=identity,
+        public_network_access=public_network_access,
         auto_storage=properties)
+
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          parameters=parameters)
@@ -173,10 +197,128 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
 
 
 def renew_accounts_keys(client, resource_group_name, account_name, key_name=None):
+
     parameters = BatchAccountRegenerateKeyParameters(key_name=key_name)
 
     return client.regenerate_key(resource_group_name=resource_group_name,
                                  account_name=account_name, parameters=parameters)
+
+
+def get_network_profile(cmd, client, resource_group_name=None, account_name=None):
+
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    return batch_account.network_profile
+
+
+def update_network_profile(cmd, client, resource_group_name, account_name,
+                           profile=None, default_action=None):
+
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    # we want to use the existing network_profile if it exists
+    networkprofile = batch_account.network_profile
+    if networkprofile is None:
+        networkprofile = NetworkProfile()
+
+    if profile.lower() == "batchaccount":
+        if networkprofile.account_access is None:
+            networkprofile.account_access = EndpointAccessProfile(default_action=default_action)
+
+        networkprofile.account_access.default_action = default_action
+
+    if profile.lower() == "nodemanagement":
+        if networkprofile.node_management_access is None:
+            networkprofile.node_management_access = EndpointAccessProfile(default_action=default_action)
+
+        networkprofile.node_management_access.default_action = default_action
+
+    parameters = BatchAccountUpdateParameters(network_profile=networkprofile)
+
+    return client.update(resource_group_name=resource_group_name,
+                         account_name=account_name,
+                         parameters=parameters)
+
+
+def list_network_rules(cmd, client, resource_group_name, account_name):
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    return batch_account.network_profile
+
+
+def add_network_rule(cmd, client, resource_group_name, account_name, profile=None, ip_address=None):
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    # we want to use the existing network_profile if it exists, else build one up
+    networkprofile = batch_account.network_profile
+    if networkprofile is None:
+        networkprofile = NetworkProfile()
+
+    if profile.lower() == "batchaccount":
+        if networkprofile.account_access is None:
+            networkprofile.account_access = EndpointAccessProfile(
+                default_action=EndpointAccessDefaultAction.ALLOW)
+        if networkprofile.account_access.ip_rules is None:
+            networkprofile.account_access.ip_rules = []
+        networkprofile.account_access.ip_rules.append(IPRule(value=ip_address))
+
+    if profile.lower() == "nodemanagement":
+        if networkprofile.node_management_access is None:
+            networkprofile.node_management_access = EndpointAccessProfile(
+                default_action=EndpointAccessDefaultAction.ALLOW)
+        if networkprofile.node_management_access.ip_rules is None:
+            networkprofile.node_management_access.ip_rules = []
+        networkprofile.node_management_access.ip_rules.append(IPRule(value=ip_address))
+
+    # Not sure if i want to enable public_network_access as part of this
+    parameters = BatchAccountUpdateParameters(public_network_access=PublicNetworkAccessType.ENABLED,
+                                              network_profile=networkprofile)
+
+    client.update(resource_group_name=resource_group_name,
+                  account_name=account_name,
+                  parameters=parameters)
+
+    return list_network_rules(cmd, client, resource_group_name, account_name)
+
+
+def delete_network_rule(cmd, client, resource_group_name, account_name, profile=None, ip_address=None):
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    # we want to use the existing network_profile if it exists, else build one up
+    networkprofile = batch_account.network_profile
+    if networkprofile is None:
+        networkprofile = NetworkProfile()
+
+    if profile.lower() == "batchaccount":
+        if networkprofile.account_access is None:
+            networkprofile.account_access = EndpointAccessProfile(
+                default_action=EndpointAccessDefaultAction.ALLOW)
+        if networkprofile.account_access.ip_rules is None:
+            networkprofile.account_access.ip_rules = []
+
+        for iprule in networkprofile.account_access.ip_rules:
+            if iprule.value == ip_address:
+                networkprofile.account_access.ip_rules.remove(iprule)
+
+    if profile.lower() == "nodemanagement":
+        if networkprofile.node_management_access is None:
+            networkprofile.node_management_access = EndpointAccessProfile(
+                default_action=EndpointAccessDefaultAction.ALLOW)
+        if networkprofile.node_management_access.ip_rules is None:
+            networkprofile.node_management_access.ip_rules = []
+        for iprule in networkprofile.node_management_access.ip_rules:
+            if iprule.value == ip_address:
+                networkprofile.node_management_access.ip_rules.remove(iprule)
+
+    # Not sure if i want to enable public_network_access as part of this
+    parameters = BatchAccountUpdateParameters(public_network_access=PublicNetworkAccessType.ENABLED,
+                                              network_profile=networkprofile)
+
+    client.update(resource_group_name=resource_group_name,
+                  account_name=account_name,
+                  parameters=parameters)
+
+    return list_network_rules(cmd, client, resource_group_name, account_name)
 
 
 @transfer_doc(Application)
