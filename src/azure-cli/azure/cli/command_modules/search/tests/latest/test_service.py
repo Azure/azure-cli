@@ -38,7 +38,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
-        
+
         self.kwargs.update({
             'sku_name': 'standard3',
             'name': self.create_random_name(prefix='test', length=24),
