@@ -380,7 +380,7 @@ def ensure_container_insights_for_monitoring(
                         raise ClientRequestError(
                             f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{dcr_resource_id}?api-version=2021-09-01-preview"
+                f"{dcr_resource_id}?api-version=2021-04-01"
             # get existing tags on the container insights extension DCR if the customer added any
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
@@ -444,7 +444,7 @@ def ensure_container_insights_for_monitoring(
                 }
             )
             association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2021-04-01"
             for _ in range(3):
                 try:
                     send_raw_request(
