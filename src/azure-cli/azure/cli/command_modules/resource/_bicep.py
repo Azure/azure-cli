@@ -211,7 +211,7 @@ def _get_bicep_download_url(system, release_tag, target_platform=None):
     if system == "Windows":
         return download_url.format("bicep-win-x64.exe")
     if system == "Linux":
-        if os.path.exists("/lib/ld-musl-x86_64.so.1"):
+        if os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6"):
             return download_url.format("bicep-linux-musl-x64")
         return download_url.format("bicep-linux-x64")
     if system == "Darwin":
