@@ -1756,7 +1756,7 @@ def process_disk_create_namespace(cmd, namespace):
     validate_edge_zone(cmd, namespace)
     _validate_gallery_image_reference(cmd, namespace)
     _validate_security_data_uri(namespace)
-    _validate_upload_type(namespace)
+    _validate_upload_type(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
@@ -1783,11 +1783,16 @@ def _validate_security_data_uri(namespace):
             "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
 
 
-def _validate_upload_type(namespace):
+def _validate_upload_type(cmd, namespace):
     if not namespace.upload_type and namespace.for_upload:
         namespace.upload_type = 'Upload'
 
     if namespace.upload_type == 'UploadWithSecurityData':
+
+        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+            raise ArgumentUsageError(
+                "'UploadWithSecurityData' is not supported in the current profile. "
+                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
 
         if not namespace.security_type:
             return RequiredArgumentMissingError(

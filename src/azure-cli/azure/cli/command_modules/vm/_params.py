@@ -198,7 +198,7 @@ def load_arguments(self, _):
     with self.argument_context('disk create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         c.argument('security_data_uri', min_api='2022-03-02', help='Please specify the blob URI of VHD to be imported into VM guest state')
         c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
-                   deprecate_info=c.deprecate(redirect='--upload-type', hide=True),
+                   deprecate_info=c.deprecate(target='--for-upload', redirect='--upload-type Upload', hide=True),
                    help='Create the disk for uploading blobs. Replaced by "--upload-type Upload"')
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for uploading scenario. 'Upload' is for Standard disk only uploading. 'UploadWithSecurityData' is for OS Disk uploading along with VM Guest State. ")
