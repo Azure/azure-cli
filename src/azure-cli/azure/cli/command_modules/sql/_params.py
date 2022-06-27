@@ -936,7 +936,9 @@ def load_arguments(self, _):
         c.argument('audit_actions_and_groups',
                    options_list=['--actions'],
                    arg_group=policy_arg_group,
-                   help='List of actions and action groups to audit. These are space seperated values. Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
+                   help='List of actions and action groups to audit.'
+                   'These are space seperated values.'
+                   'Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
                    nargs='+')
 
         c.argument('retention_days',
@@ -1568,7 +1570,9 @@ def load_arguments(self, _):
         c.argument('audit_actions_and_groups',
                    options_list=['--actions'],
                    arg_group=policy_arg_group,
-                   help='List of actions and action groups to audit. These are space seperated values. Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
+                   help='List of actions and action groups to audit.'
+                   'These are space seperated values.'
+                   'Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
                    nargs='+')
 
         c.argument('retention_days',
