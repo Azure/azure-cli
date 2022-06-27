@@ -5,6 +5,7 @@
 
 import azure.cli.core.azclierror
 
+
 def bot_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
     from msrestazure.azure_exceptions import CloudError
