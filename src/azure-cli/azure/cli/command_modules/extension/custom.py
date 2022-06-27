@@ -12,10 +12,11 @@ logger = get_logger(__name__)
 
 
 def add_extension_cmd(cmd, source=None, extension_name=None, index_url=None, yes=None,
-                      pip_extra_index_urls=None, pip_proxy=None, system=None, version=None, upgrade=None):
+                      pip_extra_index_urls=None, install_extras=None, pip_proxy=None, system=None,
+                      version=None, upgrade=None):
     return add_extension(cli_ctx=cmd.cli_ctx, source=source, extension_name=extension_name, index_url=index_url,
-                         yes=yes, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system,
-                         version=version, upgrade=upgrade)
+                         yes=yes, pip_extra_index_urls=pip_extra_index_urls, install_extras=install_extras,
+                         pip_proxy=pip_proxy, system=system, version=version, upgrade=upgrade)
 
 
 def remove_extension_cmd(extension_name):
@@ -30,9 +31,11 @@ def show_extension_cmd(extension_name):
     return show_extension(extension_name)
 
 
-def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, install_extras=None,
+                         pip_proxy=None):
     return update_extension(cli_ctx=cmd.cli_ctx, extension_name=extension_name, index_url=index_url,
-                            pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
+                            pip_extra_index_urls=pip_extra_index_urls, install_extras=install_extras,
+                            pip_proxy=pip_proxy)
 
 
 def list_available_extensions_cmd(cmd, index_url=None, show_details=False):

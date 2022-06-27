@@ -64,6 +64,8 @@ class ExtensionCommandsLoader(AzCommandsLoader):
                        arg_group='Experimental Pip')
             c.argument('pip_extra_index_urls', options_list=['--pip-extra-index-urls'], nargs='+',
                        help='Space-separated list of extra URLs of package indexes to use. This should point to a repository compliant with PEP 503 (the simple repository API) or a local directory laid out in the same format.', arg_group='Experimental Pip')
+            c.argument('install_extras', options_list=['--install-extras'], nargs='+',
+                       help='Space-separated list of extras to install as defined by the extension setup. Each value should be a keyword defined in the extension metadata extras. Use `az extension list-available -d --query {extension_name}` to see the extension metadata extras.', arg_group='Experimental Pip')
             c.ignore('_subscription')  # hide global subscription param
             c.argument('system', action='store_true')
 
