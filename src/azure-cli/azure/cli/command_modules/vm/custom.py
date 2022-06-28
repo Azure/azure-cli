@@ -377,7 +377,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if security_type:
         if security_type.lower().startswith('confidentialvm_') and hyper_v_generation.lower() != 'v2':
-            raise ArgumentUsageError('usage error: --security-type should be ConfidentialVM_* ONLY if --hyper-v-generation is set to V2')
+            raise ArgumentUsageError('usage error: --security-type should be ConfidentialVM_* only if --hyper-v-generation is set to V2')
 
     if secure_vm_disk_encryption_set:
         if not security_type or security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
