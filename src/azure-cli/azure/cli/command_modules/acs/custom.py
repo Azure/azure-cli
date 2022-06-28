@@ -3135,6 +3135,7 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
         instance,
     )
 
+
 def aks_agentpool_start(cmd,   # pylint: disable=unused-argument
                         client,
                         resource_group_name,
@@ -3157,13 +3158,14 @@ def aks_agentpool_start(cmd,   # pylint: disable=unused-argument
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
 
+
 def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
-                        client,
-                        resource_group_name,
-                        cluster_name,
-                        nodepool_name,
-                        aks_custom_headers=None,
-                        no_wait=False):
+                       client,
+                       resource_group_name,
+                       cluster_name,
+                       nodepool_name,
+                       aks_custom_headers=None,
+                       no_wait=False):
     agentpool_exists = False
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -3178,6 +3180,7 @@ def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
     power_state = PowerState(code="Stopped")
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
+
 
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
