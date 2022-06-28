@@ -54,11 +54,14 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     if partition_count > 0:
         _search.partition_count = partition_count
     if (public_network_access.lower() not in ["enabled", "disabled"]):
-        raise UnrecognizedArgumentError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+        raise UnrecognizedArgumentError(
+            "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
     if (hosting_mode not in ["default", "highDensity"]):
-        raise UnrecognizedArgumentError("SearchService.HostingMode: only [""default"", ""highDensity""] are allowed")
+        raise UnrecognizedArgumentError(
+            "SearchService.HostingMode: only [""default"", ""highDensity""] are allowed")
     if (hosting_mode == "highDensity" and sku.lower() != "standard3"):
-        raise UnrecognizedArgumentError("SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
+        raise UnrecognizedArgumentError(
+            "SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
     _search.public_network_access = public_network_access
     _search.hosting_mode = hosting_mode
 
@@ -102,7 +105,8 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
         instance.partition_count = partition_count
     if public_network_access:
         if (public_network_access.lower() not in ["enabled", "disabled"]):
-            raise UnrecognizedArgumentError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+            raise UnrecognizedArgumentError(
+                "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
         instance.public_network_access = public_network_access
     if ip_rules:
         _ip_rules = []
