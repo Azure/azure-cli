@@ -6,7 +6,7 @@
 import os
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
 
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
                 " as 'MyRegistry.azurecr.io/hello-world'."
@@ -144,4 +144,4 @@ def validate_repository(namespace):
 
 def validate_docker_file_path(docker_file_path):
     if not os.path.isfile(docker_file_path):
-        raise CLIError("Unable to find '{}'.".format(docker_file_path))
+        raise FileOperationError("Unable to find '{}'.".format(docker_file_path))
