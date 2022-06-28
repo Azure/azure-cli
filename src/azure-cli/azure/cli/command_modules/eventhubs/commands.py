@@ -167,6 +167,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
         g.show_command('list', 'get_network_rule_set')
         g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
+        g.custom_command('update', 'cli_networkrule_update')
 
 # Identity Region
     with self.command_group('eventhubs namespace identity', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:

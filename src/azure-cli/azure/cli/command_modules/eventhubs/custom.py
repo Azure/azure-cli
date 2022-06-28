@@ -341,6 +341,22 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
+def cli_networkrule_update(cmd, client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None
+                           , default_action=None):
+    networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if trusted_service_access_enabled is not None:
+        networkruleset.trusted_service_access_enabled = trusted_service_access_enabled
+
+    if public_network_access:
+        networkruleset.public_network_access = public_network_access
+
+    if default_action:
+        networkruleset.default_action = default_action
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, networkruleset)
+
+
 def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -582,7 +598,7 @@ def cli_appgroup_create(cmd, client, resource_group_name, namespace_name, applic
     return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
 
 
-def cli_appgroup_update(cmd, client, resource_group_name, namespace_name, application_group_name, is_enabled=None):
+def cli_appgroup_update(client, resource_group_name, namespace_name, application_group_name, is_enabled=None):
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
 
     if is_enabled is not None:
@@ -591,13 +607,13 @@ def cli_appgroup_update(cmd, client, resource_group_name, namespace_name, applic
     return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
 
 
-def cli_add_appgroup_policy(cmd, client, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
+def cli_add_appgroup_policy(client, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
     appGroup.policies.extend(throttling_policy_config)
     return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
 
 
-def cli_remove_appgroup_policy(cmd, client, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
+def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
     from azure.cli.core import CLIError
 
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)

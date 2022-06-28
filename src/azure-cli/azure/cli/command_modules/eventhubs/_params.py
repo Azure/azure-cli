@@ -204,6 +204,15 @@ def load_arguments_eh(self, _):
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
             c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
 
+    with self.argument_context('eventhubs namespace network-rule update', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
+        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
+        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
+        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'],
+                   arg_type=get_enum_type(['Allow', 'Deny']),
+                   help='Default Action for Network Rule Set.')
+
     with self.argument_context('eventhubs namespace network-rule add', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
@@ -280,9 +289,8 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace application-group create') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('application_group_name', arg_type=name_type, id_part=None, help='Name of Application Group')
-        c.argument('throttling_policy_config', action=ConstructPolicy, nargs='+', help='List of Throttling Policy Objects')
-        c.argument('client_app_group_identifier', help='The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)')
+        c.argument('client_app_group_identifier', options_list=['--client-app-group-identifier', '--client-app-group-id'], help='The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)')
 
-    for scope in ['eventhubs namespace application-group application-group-policy add', 'eventhubs namespace application-group application-group-policy remove']:
+    for scope in ['eventhubs namespace application-group application-group-policy add', 'eventhubs namespace application-group application-group-policy remove', 'eventhubs namespace application-group create']:
         with self.argument_context(scope) as c:
-            c.argument('throttling_policy_config', action=ConstructPolicy, nargs='+', help='List of Throttling Policy Objects')
+            c.argument('throttling_policy_config', action=ConstructPolicy, options_list=['--throttling-policy-config', '--throttling-policy', '--policy-config'], nargs='+', help='List of Throttling Policy Objects')

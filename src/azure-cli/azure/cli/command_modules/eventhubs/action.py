@@ -66,7 +66,7 @@ class ConstructPolicy(argparse._AppendAction):
                 name = v
 
             elif k == 'rate-limit-threshold':
-                if(v.isdigit() == False):
+                if v.isdigit() is False:
                     raise CLIError('rate-limit-threshold should be an integer')
                 rate_limit_threshold = int(v)
 

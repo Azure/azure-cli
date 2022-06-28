@@ -707,7 +707,7 @@ short-summary: Updates an application group in an EventHub namespace
 examples:
   - name: Updates an application group myAppGroup for eventhub namespace mynamespace.
     text: |
-        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --is-enabled false
+        az eventhubs namespace application-group update --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --is-enabled false
 """
 
 helps['eventhubs namespace application-group show'] = """
