@@ -1599,7 +1599,6 @@ class CosmosDBTests(ScenarioTest):
         assert list(default_id_acct["identity"]["userAssignedIdentities"])[0] == id1
         assert default_id_acct["defaultIdentity"] == "UserAssignedIdentity=" + id1
 
-    @unittest.skip('Failing with azure-mgmt-cosmosdb==7.0.0b6')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
         acc_name = self.create_random_name(prefix='cli', length=15)
