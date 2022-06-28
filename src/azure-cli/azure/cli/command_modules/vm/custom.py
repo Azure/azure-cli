@@ -185,8 +185,10 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
     grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
-                                        duration_in_seconds=duration_in_seconds,
-                                        secure_vm_guest_state_sas=secure_vm_guest_state_sas)
+                                        duration_in_seconds=duration_in_seconds)
+    if secure_vm_guest_state_sas:
+        grant_access_data.secure_vm_guest_state_sas = secure_vm_guest_state_sas
+
     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
 
@@ -445,7 +447,7 @@ def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, 
     if cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
         compute_client = _compute_client_factory(cmd.cli_ctx)
         disk_info = compute_client.disks.get(resource_group_name, disk_name)
-        DiskCreateOption = cmd.get_models('DiskCreateOption', operation_group='virtual_machines')
+        DiskCreateOption = cmd.get_models('DiskCreateOption', operation_group='disks')
         if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
             secure_vm_guest_state_sas = True
 
