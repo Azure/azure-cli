@@ -618,7 +618,7 @@ def return_valid_duration(update_value, current_value=None):
     from datetime import timedelta
     from isodate import parse_duration
     from isodate import Duration
-    from knack.util import CLIError
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         value_toreturn = update_value
@@ -629,7 +629,7 @@ def return_valid_duration(update_value, current_value=None):
         try:
             time_duration = parse_duration(value_toreturn)
         except:
-            raise CLIError("Unable to parse duration string %r" % value_toreturn)
+            raise raise InvalidArgumentValueError("Unable to parse provided ISO 8601 format duration %r" % value_toreturn)
 
         if isinstance(time_duration, timedelta):
             if time_duration <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
