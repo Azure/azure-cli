@@ -2475,5 +2475,33 @@ class TunnelProxyTest(unittest.TestCase):
         self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_NONE')
 
 
+class WebappSlotTest(ScenarioTest):
+    @live_only()  # Uses storage account keys, so must be live_only to not fail credscan
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_slot_create_from_configuration_source(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
+        storage_account = self.create_random_name(prefix='storage', length=24)
+        container = self.create_random_name(prefix='container', length=24)
+        store_id = "store"
+        store_type = "AzureBlob"
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1 --is-linux')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_name} --plan {plan} --runtime "python|3.9"')
+        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --location {LINUX_ASP_LOCATION_WEBAPP}')
+        self.cmd(f"storage container create -n {container} -g {resource_group} --account-name {storage_account}")
+        key = self.cmd(f"storage account keys list -n {storage_account}").get_output_in_json()[0]["value"]
+        self.cmd(f'webapp config storage-account add -g {resource_group} -n {webapp_name} -k {key} -a {storage_account} -i {store_id} --sn {container} -t {store_type}')
+
+        self.cmd(f'webapp deployment slot create -g {resource_group} -n {webapp_name} -s "slot" --configuration-source {webapp_name}')
+
+        self.cmd(f'webapp show -g {resource_group} -n {webapp_name} -s "slot"', checks=[
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.accessKey", None),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.accountName", storage_account),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.state", "Ok"),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.type", store_type),
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
