@@ -374,7 +374,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 'usage error: --size-gb or --upload-size-bytes required to create an empty disk')
         if upload_type:
             raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create a disk for uploading')
+                'usage error: --size-gb or --upload-size-bytes required to create a disk for upload')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         disk_encryption_set = resource_id(
@@ -439,8 +439,16 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
 
 
-def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
-                      secure_vm_guest_state_sas=None):
+def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None):
+
+    secure_vm_guest_state_sas = None
+    if cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+        compute_client = _compute_client_factory(cmd.cli_ctx)
+        disk_info = compute_client.disks.get(resource_group_name, disk_name)
+        DiskCreateOption = cmd.get_models('DiskCreateOption', operation_group='virtual_machines')
+        if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+            secure_vm_guest_state_sas = True
+
     return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
                          access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
 
@@ -592,7 +600,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
-                    public_network_access=None, accelerated_network=None, architecture=None, ):
+                    public_network_access=None, accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
