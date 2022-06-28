@@ -69,7 +69,7 @@ def load_command_table(self, _):
     with self.command_group('batch account network-profile network-rule', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_show_command('list', 'list_network_rules')
         g.custom_command('add', 'add_network_rule')
-        g.custom_command('delete', 'delete_network_rule')
+        g.custom_command('delete', 'delete_network_rule', confirmation=True)
 
     with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
