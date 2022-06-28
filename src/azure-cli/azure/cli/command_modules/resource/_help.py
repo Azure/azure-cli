@@ -2130,7 +2130,7 @@ type: command
 examples:
   - name: Display all resource types for the network resource provider.
     text: >
-        az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
+        az provider list --query "[?namespace=='Microsoft.Network'].resourceTypes[].resourceType"
 """
 
 helps['provider permission'] = """
