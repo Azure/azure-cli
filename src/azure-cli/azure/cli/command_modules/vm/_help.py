@@ -225,7 +225,7 @@ examples:
   - name: Create a disk encryption set with system assigned identity and a user assigned identity.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned --mi-user-assigned myAssignedId
   - name: Create a disk encryption set with multi-tenant application client id to access key vault in a different tenant.
-    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --federatedClientId myFederatedClientId
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --federated-client-id myFederatedClientId
   - name: Create a disk encryption set that supports double encryption.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys
 """
@@ -265,10 +265,10 @@ examples:
     crafted: true
   - name: Update multi-tenant application client id of a disk encryption set.
     text: |
-        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federatedClientId myFederatedClientId
+        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federated-client-id myFederatedClientId
   - name: Clear multi-tenant application client id of a disk encryption set.
     text: |
-        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federatedClientId None
+        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federated-client-id None
 """
 
 helps['disk-encryption-set identity'] = """

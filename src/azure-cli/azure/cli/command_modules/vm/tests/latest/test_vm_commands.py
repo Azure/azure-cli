@@ -6648,7 +6648,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         # create disk encryption set with system and user assigned identity
         des1_principalId = \
             self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
-                     '--mi-system-assigned --mi-user-assigned {identity1_id} --federatedClientId {federated_client_id} '
+                     '--mi-system-assigned --mi-user-assigned {identity1_id} --federated-client-id {federated_client_id} '
                      '--encryption-type EncryptionAtRestWithCustomerKey', checks=[
                 self.check('federatedClientId', '{federated_client_id}'),
                 self.check('identity.type', 'SystemAssigned, UserAssigned'),
@@ -6657,7 +6657,7 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         # create disk encryption set with user assigned identity
         self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault} '
-                 '--mi-user-assigned {identity1_id} --federatedClientId {federated_client_id} '
+                 '--mi-user-assigned {identity1_id} --federated-client-id {federated_client_id} '
                  '--encryption-type EncryptionAtRestWithCustomerKey', checks=[
             self.check('federatedClientId', '{federated_client_id}'),
             self.check('identity.type', 'UserAssigned'),
@@ -6682,15 +6682,15 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd(
             'keyvault set-policy -n {vault} --object-id {des3_principalId} --key-permissions wrapKey unwrapKey get')
 
-        # clear federatedClientId of disk encryption set
+        # clear federated client id of disk encryption set
         self.cmd('disk-encryption-set update -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
-                 '--federatedClientId None', checks=[
+                 '--federated-client-id None', checks=[
             self.check('federatedClientId', 'None')
         ])
 
-        # update federatedClientId of disk encryption set
+        # update federated client id of disk encryption set
         self.cmd('disk-encryption-set update -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
-                 '--federatedClientId {federated_client_id}', checks=[
+                 '--federated-client-id {federated_client_id}', checks=[
             self.check('federatedClientId', '{federated_client_id}')
         ])
 
@@ -6708,6 +6708,13 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         # remove all user assigned identities from an existing disk encryption set
         self.cmd('disk-encryption-set identity remove -g {rg} -n {des2} --user-assigned')
+        self.cmd('disk-encryption-set show -g {rg} -n {des2}', checks=[
+            self.check('identity', 'None')
+        ])
+
+        # assign neither system nor user assigned identity (the value of --user-assigned is none)
+        # to an existing disk encryption set
+        self.cmd('disk-encryption-set identity assign -g {rg} -n {des2} --user-assigned')
         self.cmd('disk-encryption-set show -g {rg} -n {des2}', checks=[
             self.check('identity', 'None')
         ])

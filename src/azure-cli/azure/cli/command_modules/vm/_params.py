@@ -1445,7 +1445,7 @@ def load_arguments(self, _):
 
     with self.argument_context('disk-encryption-set create', operation_group='disk_encryption_sets',
                                min_api='2022-03-02') as c:
-        c.argument('federatedClientId', help='The federated client id used in cross tenant scenario.')
+        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
         c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
                    help='Provide this flag to use system assigned identity. Check out help for more examples')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
@@ -1454,7 +1454,7 @@ def load_arguments(self, _):
 
     with self.argument_context('disk-encryption-set update', operation_group='disk_encryption_sets',
                                min_api='2022-03-02') as c:
-        c.argument('federatedClientId', help='The federated client id used in cross tenant scenario.')
+        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
 
     with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets',
                                min_api='2022-03-02') as c:
