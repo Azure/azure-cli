@@ -4200,7 +4200,8 @@ class NetworkVNetScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
             self.check('newVNet.provisioningState', 'Succeeded'),
-            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16'),
+            self.check('newVNet.subnets[0].privateEndpointNetworkPolicies', 'Disabled')
         ])
         self.cmd('network vnet check-ip-address -g {rg} -n {vnet} --ip-address 10.0.0.50',
                  checks=self.check('available', True))
