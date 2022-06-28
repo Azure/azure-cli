@@ -2605,6 +2605,26 @@ helps['staticwebapp functions show'] = """
       text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
 """
 
+helps['staticwebapp enterprise-edge'] = """
+    type: group
+    short-summary: Manage the Azure Front Door CDN for static webapps. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge enable'] = """
+    type: command
+    short-summary: Enable the Azure Front Door CDN for a static webapp. Enabling enterprise-grade edge requires re-registration for the Azure Front Door Microsoft.CDN resource provider. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge disable'] = """
+    type: command
+    short-summary: Disable the Azure Front Door CDN for a static webapp. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge show'] = """
+    type: command
+    short-summary: Show the status (Enabled, Disabled, Enabling, Disabling) of the Azure Front Door CDN for a webapp. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
 helps['webapp deploy'] = """
     type: command
     short-summary: Deploys a provided artifact to Azure Web Apps.
