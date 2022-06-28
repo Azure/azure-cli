@@ -20,7 +20,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
 
         # create backup policy using long parameter names and validate result
         backup_policy_name = self.create_random_name(prefix='cli-ba-pol-', length=16)
-        daily_backups_to_keep = 1
+        daily_backups_to_keep = 2
         weekly_backups_to_keep = 2
         monthly_backups_to_keep = 3
         enabled = True
@@ -83,7 +83,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                            self.create_random_name(prefix='cli', length=16)]
         for backup_policy_name in backup_policies:
             self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
-                     "--daily-backups 1 --enabled true" % (account_name, backup_policy_name, LOCATION))
+                     "--daily-backups 2 --enabled true" % (account_name, backup_policy_name, LOCATION))
 
         # validate that both backup policies exist
         backup_policy_list = self.cmd("az netappfiles account backup-policy list -g {rg} -a '%s'" %
@@ -109,19 +109,19 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         # create backup policy
         backup_policy_name = self.create_random_name(prefix='cli-ba-pol-', length=16)
         self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
-                 "--daily-backups 1 --enabled true" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
+                 "--daily-backups 2 --enabled true" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
 
         # get backup policy by name and validate
         backup_policy = self.cmd("az netappfiles account backup-policy show -g {rg} -a %s --backup-policy-name %s" %
                                  (account_name, backup_policy_name)).get_output_in_json()
         assert backup_policy['name'] == account_name + '/' + backup_policy_name
-        assert backup_policy['dailyBackupsToKeep'] == 1
+        assert backup_policy['dailyBackupsToKeep'] == 2
 
         # get backup policy by resource id and validate
         backup_policy_from_id = self.cmd("az netappfiles account backup-policy show --ids %s" %
                                          backup_policy['id']).get_output_in_json()
         assert backup_policy_from_id['name'] == account_name + '/' + backup_policy_name
-        assert backup_policy['dailyBackupsToKeep'] == 1
+        assert backup_policy['dailyBackupsToKeep'] == 2
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_update_backup_policy(self):
@@ -131,7 +131,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
 
         # create backup policy
         backup_policy_name = self.create_random_name(prefix='cli-ba-pol-', length=16)
-        daily_backups_to_keep = 1
+        daily_backups_to_keep = 2
         weekly_backups_to_keep = 2
         monthly_backups_to_keep = 3
         enabled = True

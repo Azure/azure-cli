@@ -119,6 +119,11 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
         c.argument('remote_volume_resource_id', options_list=['--remote-volume-resource-id', '-d'], help='The id of the destination replication volume')
 
+    with self.argument_context('netappfiles volume replication list') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
+
     with self.argument_context('netappfiles volume replication suspend') as c:
         c.argument('force_break_replication', options_list=['--force', '--force-break-replication', '-f'], arg_type=get_three_state_flag())
 

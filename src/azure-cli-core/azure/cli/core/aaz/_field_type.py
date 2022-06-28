@@ -8,6 +8,7 @@ from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, A
     AAZInvalidFieldError
 
 # pylint: disable=protected-access, too-few-public-methods, isinstance-second-argument-not-valid-type
+# pylint: disable=too-many-instance-attributes
 
 
 # build in types
@@ -28,7 +29,12 @@ class AAZSimpleType(AAZBaseType):
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
+            if data._is_patch:
+                # return value patch
+                return AAZValuePatch.build(self)
+
             data = data._data
+
         assert self.DataType is not None and isinstance(data, self.DataType), \
             f'Expect {self.DataType}, got {data} ({type(data)}'
         return data
@@ -56,7 +62,12 @@ class AAZFloatType(AAZSimpleType):
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
+            if data._is_patch:
+                # return value patch
+                return AAZValuePatch.build(self)
+
             data = data._data
+
         if isinstance(data, int):
             # transform int to float
             if float(data) != data:
@@ -153,11 +164,14 @@ class AAZObjectType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
-        result = {}
+        if isinstance(data, AAZObject) and data._is_patch:
+            # use value patch
+            result = AAZValuePatch.build(self)
+        else:
+            result = {}
         value = AAZObject(schema=self, data=result)
 
         if isinstance(data, AAZObject):
-
             if self._discriminator_field_name:
                 # assign discriminator field first
                 for key in data._data.keys():
@@ -218,11 +232,11 @@ class AAZObjectType(AAZBaseType):
         if isinstance(data, AAZObject):
             data = data._data
         assert isinstance(data, dict)
-        if self._discriminator_field_name not in data:
-            return None
-
-        field_data = data[self._discriminator_field_name]  # get discriminator field data
-        return self._discriminators.get(field_data, None)
+        for key, field_data in data.items():
+            name = self.get_attr_name(key)
+            if name == self._discriminator_field_name:
+                return self._discriminators.get(field_data, None)
+        return None
 
 
 class AAZDictType(AAZBaseType):
@@ -261,8 +275,13 @@ class AAZDictType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
-        result = {}
+        if isinstance(data, AAZDict) and data._is_patch:
+            # use value patch
+            result = AAZValuePatch.build(self)
+        else:
+            result = {}
         value = AAZDict(schema=self, data=result)
+
         if isinstance(data, AAZDict):
             for key in data._data.keys():
                 value[key] = data[key]
@@ -309,7 +328,11 @@ class AAZListType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
-        result = {}
+        if isinstance(data, AAZList) and data._is_patch:
+            # use value patch
+            result = AAZValuePatch.build(self)
+        else:
+            result = {}
         value = AAZList(schema=self, data=result)
 
         if isinstance(data, AAZList):

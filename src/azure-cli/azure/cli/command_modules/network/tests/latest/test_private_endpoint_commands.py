@@ -16,9 +16,27 @@ from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
+class RedisCacheCredentialReplacer(RecordingProcessor):
+    def process_response(self, response):
+        import json
+        KEY_REPLACEMENT = "replaced-access-key"
+
+        if is_text_payload(response) and response["body"]["string"]:
+            try:
+                props = json.loads(response["body"]["string"])
+                if "accessKeys" in props["properties"]:
+                    props["properties"]["accessKeys"]["primaryKey"] = KEY_REPLACEMENT
+                    props["properties"]["accessKeys"]["secondaryKey"] = KEY_REPLACEMENT
+                response["body"]["string"] = json.dumps(props)
+            except (TypeError, KeyError):
+                pass
+        return response
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
@@ -2644,6 +2662,12 @@ class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
+    def __init__(self, method_name):
+        super().__init__(
+            method_name,
+            recording_processors=[RedisCacheCredentialReplacer()]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_acfr_plr')
     def test_private_link_resource_acfr(self, resource_group):
         self.kwargs.update({
@@ -2653,7 +2677,7 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Basic --vm-size c0')
 
         self.cmd('network private-link-resource list --name {cache_name} -g {rg} --type Microsoft.Cache/Redis' , checks=[
-            self.check('length(@)', 1)]) #####
+            self.check('length(@)', 1)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_acfr_pe')
     def test_private_endpoint_connection_acfr(self,resource_group):
