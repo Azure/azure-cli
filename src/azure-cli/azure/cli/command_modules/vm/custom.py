@@ -187,7 +187,7 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
     grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
                                         duration_in_seconds=duration_in_seconds)
     if secure_vm_guest_state_sas:
-        grant_access_data.secure_vm_guest_state_sas = secure_vm_guest_state_sas
+        grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
 
     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
