@@ -607,7 +607,7 @@ def _validate_and_populate_client_encryption_policy(sql_container_resource, clie
             if path == "":
                 raise CLIError(None, "Invalid path included in Client Encryption Policy. Path cannot be null or empty.")
 
-            if(path[0] != "/" or path[-1] == "/"):
+            if(path[0] != "/" or path.rfind('/') != 0):
                 raise CLIError(None, 'Invalid path included in Client Encryption Policy. Only top level paths supported. Paths should begin with /. ')
 
             if path[1:] == "id":
