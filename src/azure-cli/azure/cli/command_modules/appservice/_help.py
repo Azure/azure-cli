@@ -1441,15 +1441,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime using '|' delimiter. (not recommended for powershell; use the ":" delimiter instead)
-    text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
-  - name: Create a web app with a Java 11 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|12LTS" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -2015,10 +2012,7 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter (not recommended for powershell; use the ":" delimiter instead)
-    text: >
-        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
-  - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime
     text: >
         az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
