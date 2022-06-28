@@ -80,7 +80,7 @@ def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
                    encryption_key_source=None, encryption_key_identifier=None, identity_type=None,
-                   userassigned_identity_id=None):
+                   mi_user_assigned=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
 
@@ -88,9 +88,9 @@ def create_account(client,
     if identity_type and identity_type == ResourceIdentityType.SYSTEM_ASSIGNED:
         identity = BatchAccountIdentity(type=identity_type)
 
-    if userassigned_identity_id and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
+    if mi_user_assigned and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
         useridentity = UserAssignedIdentities()
-        my_dict = {userassigned_identity_id: useridentity}
+        my_dict = {mi_user_assigned: useridentity}
         identity = BatchAccountIdentity(type=identity_type, user_assigned_identities=my_dict)
 
     if (encryption_key_source and
@@ -119,7 +119,7 @@ def create_account(client,
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None, encryption_key_source=None, public_network_access=None,
-                   encryption_key_identifier=None, identity_type=None, userassigned_identity_id=None):
+                   encryption_key_identifier=None, identity_type=None, mi_user_assigned=None):
 
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -138,9 +138,9 @@ def update_account(client, resource_group_name, account_name,
     if identity_type and identity_type == ResourceIdentityType.SYSTEM_ASSIGNED:
         identity = BatchAccountIdentity(type=identity_type)
 
-    if userassigned_identity_id and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
+    if mi_user_assigned and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
         useridentity = UserAssignedIdentities()
-        my_dict = {userassigned_identity_id: useridentity}
+        my_dict = {mi_user_assigned: useridentity}
         identity = BatchAccountIdentity(type=identity_type, user_assigned_identities=my_dict)
 
     parameters = BatchAccountUpdateParameters(

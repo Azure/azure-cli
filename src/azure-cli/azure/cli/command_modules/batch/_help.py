@@ -86,7 +86,7 @@ short-summary: Get information about the Network profile for Batch account.
 
 helps['batch account network-profile set'] = """
 type: command
-short-summary: Sets the Network profile for Batch account.
+short-summary: Set the Network profile for Batch account.
 """
 
 helps['batch account network-profile network-rule'] = """
@@ -96,17 +96,17 @@ short-summary: Manage Batch account Network rules in Network Profile.
 
 helps['batch account network-profile network-rule list'] = """
 type: command
-short-summary: Lists the Network rules from a Network Profile.
+short-summary: List the Network rules from a Network Profile.
 """
 
 helps['batch account network-profile network-rule add'] = """
 type: command
-short-summary: Adds a Network rule from a Network Profile.
+short-summary: Add a Network rule from a Network Profile.
 """
 
 helps['batch account network-profile network-rule delete'] = """
 type: command
-short-summary: Deletes a Network rule from a Network Profile.
+short-summary: Delete a Network rule from a Network Profile.
 """
 
 
