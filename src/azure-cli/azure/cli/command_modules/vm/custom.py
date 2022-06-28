@@ -287,7 +287,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         size_gb=None, sku='Premium_LRS', os_type=None,
                         source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
-                        source_blob_uri=None, source_disk=None, source_snapshot=None,
+                        source_blob_uri=None, source_disk=None, source_snapshot=None, source_restore_point=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
                         disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
                         encryption_type=None, disk_encryption_set=None, max_shares=None,
@@ -297,7 +297,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
-                        data_access_auth_mode=None):
+                        data_access_auth_mode=None, gallery_image_reference_type=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -309,6 +309,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+    elif source_restore_point:
+        option = DiskCreateOption.restore
     elif for_upload:
         option = DiskCreateOption.upload
     elif image_reference or gallery_image_reference:
@@ -347,13 +349,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             image_reference['lun'] = image_reference_lun
 
     if gallery_image_reference is not None:
-        gallery_image_reference = {'id': gallery_image_reference}
+        key = gallery_image_reference_type if gallery_image_reference_type else 'id'
+        gallery_image_reference = {key: gallery_image_reference}
         if gallery_image_reference_lun is not None:
             gallery_image_reference['lun'] = gallery_image_reference_lun
 
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=image_reference, gallery_image_reference=gallery_image_reference,
-                                 source_resource_id=source_disk or source_snapshot,
+                                 source_resource_id=source_disk or source_snapshot or source_restore_point,
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes,
                                  logical_sector_size=logical_sector_size)
@@ -1911,7 +1914,9 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
+                                             resource_type=ResourceType.MGMT_COMPUTE,
+                                             operation_group='virtual_machines')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
@@ -2003,7 +2008,8 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
 
 # region VirtualMachines Images
-def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False, edge_zone=None):  # pylint: disable=redefined-builtin
+def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sku=None, all=False,  # pylint: disable=redefined-builtin
+                   edge_zone=None, architecture=None):
     load_thru_services = all or edge_zone is not None
 
     if load_thru_services:
@@ -2011,9 +2017,10 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
             logger.warning("You are retrieving all the images from server which could take more than a minute. "
                            "To shorten the wait, provide '--publisher', '--offer' , '--sku' or '--edge-zone'."
                            " Partial name search is supported.")
-        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone)
+        all_images = load_images_thru_services(cmd.cli_ctx, publisher_name, offer, sku, image_location, edge_zone,
+                                               architecture)
     else:
-        all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku)
+        all_images = load_images_from_aliases_doc(cmd.cli_ctx, publisher_name, offer, sku, architecture)
         logger.warning('You are viewing an offline list of images, use --all to retrieve an up-to-date list')
 
     if edge_zone is not None:
@@ -2800,7 +2807,8 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                          identity_role_id=None, identity_scope=None):
     VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
         'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
-    IdentityUserAssignedIdentitiesValue = cmd.get_models('VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue')
+    IdentityUserAssignedIdentitiesValue = cmd.get_models(
+        'VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue') or cmd.get_models('UserAssignedIdentitiesValue')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -3254,6 +3262,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 resource_group_name, vmss_name, vmss))
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
+            VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+            instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=['*'])
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
+                resource_group_name, vmss_name, instance_ids))
         except Exception as e:
             logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
 
@@ -4121,7 +4133,8 @@ def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, shar
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
+                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
+                         publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
@@ -4131,6 +4144,17 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     if permissions:
         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
         gallery.sharing_profile = SharingProfile(permissions=permissions)
+        if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+            gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                                                  publisher_contact=publisher_contact,
+                                                                                  eula=eula,
+                                                                                  public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
@@ -4678,8 +4702,9 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
                      op_type=None):
     SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
         'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
-    if subscription_ids is None and tenant_ids is None:
-        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    if op_type != 'EnableCommunity':
+        if subscription_ids is None and tenant_ids is None:
+            raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
     groups = []
     if subscription_ids:
         groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
@@ -4780,6 +4805,8 @@ def gallery_application_version_create(client,
                                        target_regions=None,
                                        default_file_link=None,
                                        end_of_life_date=None,
+                                       package_file_name=None,
+                                       config_file_name=None,
                                        exclude_from=None,
                                        no_wait=False):
     gallery_application_version = {}
@@ -4804,6 +4831,13 @@ def gallery_application_version_create(client,
         gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
     if end_of_life_date is not None:
         gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    settings = {}
+    if package_file_name is not None:
+        settings['package_file_name'] = package_file_name
+    if config_file_name is not None:
+        settings['config_file_name'] = config_file_name
+    if settings:
+        gallery_application_version['publishing_profile']['settings'] = settings
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -4950,7 +4984,7 @@ def list_capacity_reservation(client, resource_group_name, capacity_reservation_
                                                      capacity_reservation_group_name=capacity_reservation_group_name)
 
 
-def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -4972,6 +5006,13 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             if over_ride or over_ride.lower() != 'null':
                 vm.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
+
+    if treat_deployment_as_failure:
+        index = 0
+        for treat_as_failure in treat_deployment_as_failure:
+            vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
+                (treat_as_failure.lower() == 'true')
+            index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
 
@@ -4984,7 +5025,7 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
     return vm.application_profile
 
 
-def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -5005,6 +5046,12 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for over_ride in application_configuration_overrides:
             if over_ride or over_ride.lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
+            index += 1
+
+    if treat_deployment_as_failure:
+        index = 0
+        for treat_as_failure in treat_deployment_as_failure:
+            vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 
@@ -5099,4 +5146,18 @@ def restore_point_collection_update(client,
                          restore_point_collection_name=restore_point_collection_name,
                          parameters=parameters)
 
+# endRegion
+
+
+# region Community gallery
+def sig_community_image_definition_list(client, location, public_gallery_name, marker=None, show_next_marker=None):
+    generator = client.list(location=location, public_gallery_name=public_gallery_name)
+    return get_page_result(generator, marker, show_next_marker)
+
+
+def sig_community_image_version_list(client, location, public_gallery_name, gallery_image_name, marker=None,
+                                     show_next_marker=None):
+    generator = client.list(location=location, public_gallery_name=public_gallery_name,
+                            gallery_image_name=gallery_image_name)
+    return get_page_result(generator, marker, show_next_marker)
 # endRegion

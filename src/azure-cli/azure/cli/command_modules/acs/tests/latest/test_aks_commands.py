@@ -6533,14 +6533,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
 
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
@@ -6606,14 +6606,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
 
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
@@ -6660,7 +6660,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             # check that the DCR was created
             dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
             self.cmd(get_cmd, checks=[
                 self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
             ])
@@ -6717,7 +6717,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # use custom feature so it does not require subscription to regiter the feature
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                     '--kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
@@ -6729,7 +6729,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool add
         nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
-                       '--name=nodepool2 --node-count=1 --kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                       '--name=nodepool2 --node-count=1 --kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                        '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview'
         self.cmd(nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6744,7 +6744,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        kubernetes_version = "1.20.7"
+        kubernetes_version = "1.23.5"
 
         self.kwargs.update({
             'resource_group': resource_group,

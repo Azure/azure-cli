@@ -374,20 +374,28 @@ def _configure_db_dw_params(arg_ctx):
     creation_arg_group = 'Creation'
 
     arg_ctx.argument('collation',
-                     arg_group=creation_arg_group)
+                     arg_group=creation_arg_group,
+                     help='The collation of the database.')
 
     arg_ctx.argument('catalog_collation',
                      arg_group=creation_arg_group,
-                     arg_type=get_enum_type(CatalogCollationType))
+                     arg_type=get_enum_type(CatalogCollationType),
+                     help='Collation of the metadata catalog.')
 
     # WideWorldImportersStd and WideWorldImportersFull cannot be successfully created.
     # AdventureWorksLT is the only sample name that is actually supported.
     arg_ctx.argument('sample_name',
                      arg_group=creation_arg_group,
-                     arg_type=get_enum_type([SampleName.adventure_works_lt]))
+                     arg_type=get_enum_type([SampleName.adventure_works_lt]),
+                     help='The name of the sample schema to apply when creating this'
+                     'database.')
 
     arg_ctx.argument('license_type',
-                     arg_type=get_enum_type(DatabaseLicenseType))
+                     arg_type=get_enum_type(DatabaseLicenseType),
+                     help='The license type to apply for this database.'
+                     '``LicenseIncluded`` if you need a license, or ``BasePrice``'
+                     'if you have a license and are eligible for the Azure Hybrid'
+                     'Benefit.')
 
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
@@ -739,17 +747,27 @@ def load_arguments(self, _):
             ])
 
         c.argument('administrator_login',
-                   options_list=['--admin-user', '-u'])
+                   options_list=['--admin-user', '-u'],
+                   help='Required. Administrator login name.')
 
         c.argument('administrator_login_password',
-                   options_list=['--admin-password', '-p'])
+                   options_list=['--admin-password', '-p'],
+                   help='Required. Administrator login password.')
 
         c.argument('authentication_type',
                    options_list=['--auth-type', '-a'],
-                   arg_type=get_enum_type(AuthenticationType))
+                   arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type.')
+
+        c.argument('storage_key',
+                   help='Required. Storage key.')
 
         c.argument('storage_key_type',
-                   arg_type=get_enum_type(StorageKeyType))
+                   arg_type=get_enum_type(StorageKeyType),
+                   help='Required. Storage key type.')
+
+        c.argument('storage_uri',
+                   help='Required. Storage Uri.')
 
     with self.argument_context('sql db import') as c:
         # Create args that will be used to build up the ImportExistingDatabaseDefinition object
@@ -763,17 +781,27 @@ def load_arguments(self, _):
         ])
 
         c.argument('administrator_login',
-                   options_list=['--admin-user', '-u'])
+                   options_list=['--admin-user', '-u'],
+                   help='Required. Administrator login name.')
 
         c.argument('administrator_login_password',
-                   options_list=['--admin-password', '-p'])
+                   options_list=['--admin-password', '-p'],
+                   help='Required. Administrator login password.')
 
         c.argument('authentication_type',
                    options_list=['--auth-type', '-a'],
-                   arg_type=get_enum_type(AuthenticationType))
+                   arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type.')
+
+        c.argument('storage_key',
+                   help='Required. Storage key.')
 
         c.argument('storage_key_type',
-                   arg_type=get_enum_type(StorageKeyType))
+                   arg_type=get_enum_type(StorageKeyType),
+                   help='Required. Storage key type.')
+
+        c.argument('storage_uri',
+                   help='Required. Storage Uri.')
 
         # The parameter name '--name' is used for 'database_name', so we need to give a different name
         # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
@@ -908,7 +936,9 @@ def load_arguments(self, _):
         c.argument('audit_actions_and_groups',
                    options_list=['--actions'],
                    arg_group=policy_arg_group,
-                   help='List of actions and action groups to audit.',
+                   help='List of actions and action groups to audit.'
+                   'These are space seperated values.'
+                   'Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
                    nargs='+')
 
         c.argument('retention_days',
@@ -1174,7 +1204,8 @@ def load_arguments(self, _):
                    options_list=['--max-size', '--storage'])
 
         c.argument('license_type',
-                   arg_type=get_enum_type(ElasticPoolLicenseType))
+                   arg_type=get_enum_type(ElasticPoolLicenseType),
+                   help='The license type to apply for this elastic pool.')
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
@@ -1196,6 +1227,9 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    arg_type=maintenance_configuration_id_param_type)
 
+        c.argument('high_availability_replica_count',
+                   arg_type=read_replicas_param_type)
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1207,6 +1241,7 @@ def load_arguments(self, _):
                 'tags',
                 'zone_redundant',
                 'maintenance_configuration_id',
+                'high_availability_replica_count',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
@@ -1371,10 +1406,14 @@ def load_arguments(self, _):
                    options_list=['--name', '-n'])
 
         c.argument('administrator_login',
-                   options_list=['--admin-user', '-u'])
+                   options_list=['--admin-user', '-u'],
+                   help='Administrator username for the server. Once'
+                   'created it cannot be changed.')
 
         c.argument('administrator_login_password',
-                   options_list=['--admin-password', '-p'])
+                   options_list=['--admin-password', '-p'],
+                   help='The administrator login password (required for'
+                   'server creation).')
 
         c.argument('assign_identity',
                    options_list=['--assign_identity', '-i'],
@@ -1531,7 +1570,9 @@ def load_arguments(self, _):
         c.argument('audit_actions_and_groups',
                    options_list=['--actions'],
                    arg_group=policy_arg_group,
-                   help='List of actions and action groups to audit.',
+                   help='List of actions and action groups to audit.'
+                   'These are space seperated values.'
+                   'Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
                    nargs='+')
 
         c.argument('retention_days',
@@ -1899,11 +1940,16 @@ def load_arguments(self, _):
 
         c.argument('administrator_login',
                    options_list=['--admin-user', '-u'],
-                   required=False)
+                   required=False,
+                   help='Administrator username for the managed instance. Can'
+                   'only be specified when the managed instance is being'
+                   'created (and is required for creation).')
 
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'],
-                   required=False)
+                   required=False,
+                   help='The administrator login password (required for'
+                   'managed instance creation).')
 
         c.extra('vnet_name',
                 options_list=['--vnet-name'],
@@ -1964,7 +2010,9 @@ def load_arguments(self, _):
             ])
 
         c.argument('administrator_login_password',
-                   options_list=['--admin-password', '-p'])
+                   options_list=['--admin-password', '-p'],
+                   help='The administrator login password (required for'
+                   'managed instance creation).')
 
         c.argument('assign_identity',
                    options_list=['--assign-identity', '-i'],

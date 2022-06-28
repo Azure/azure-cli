@@ -1,6 +1,11 @@
 ---
 # exclusions for the vm module
 
+vmss application set:
+    parameters:
+        treat_deployment_as_failure:
+            rule_exclusions:
+                - option_length_too_long
 vmss create:
     parameters:
         upgrade_policy_mode:
@@ -55,6 +60,11 @@ vmss encryption enable:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
+vm application set:
+    parameters:
+        treat_deployment_as_failure:
+            rule_exclusions:
+                - option_length_too_long
 vm create:
     parameters:
         public_ip_address_allocation:
