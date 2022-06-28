@@ -6930,7 +6930,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         })
 
         self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --encryption-type ConfidentialVmEncryptedWithCustomerKey', checks=[
-            # self.check
+            self.check('encryptionType', 'ConfidentialVmEncryptedWithCustomerKey')
         ])
         des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
         des_sp_id = des_show_output['identity']['principalId']
