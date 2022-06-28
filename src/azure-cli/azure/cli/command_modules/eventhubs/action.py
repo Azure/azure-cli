@@ -71,13 +71,13 @@ class ConstructPolicy(argparse._AppendAction):
                 rate_limit_threshold = int(v)
 
             elif k == 'metric-id':
-                if v.lower()==INCOMING_MESSAGES.lower():
+                if v.lower() == INCOMING_MESSAGES.lower():
                     metric_id = INCOMING_MESSAGES
-                elif v.lower()==INCOMING_BYTES.lower():
+                elif v.lower() == INCOMING_BYTES.lower():
                     metric_id = INCOMING_BYTES
-                elif v.lower()==OUTGOING_MESSAGES.lower():
+                elif v.lower() == OUTGOING_MESSAGES.lower():
                     metric_id = OUTGOING_MESSAGES
-                elif v.lower()==OUTGOING_BYTES.lower():
+                elif v.lower() == OUTGOING_BYTES.lower():
                     metric_id = OUTGOING_BYTES
                 else:
                     raise CLIError('Only allowed values for metric_id are: {0}, {1}, {2}, {3}'.format(INCOMING_MESSAGES, INCOMING_BYTES, OUTGOING_MESSAGES, OUTGOING_BYTES))
