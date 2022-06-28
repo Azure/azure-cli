@@ -583,7 +583,7 @@ examples:
   - name: Create a kubernetes cluster with custom tags
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
   - name: Create a kubernetes cluster with custom headers
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd
   - name: Create a kubernetes cluster with FIPS-enabled OS
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
   - name: Create a kubernetes cluster with enabling Windows gmsa and with setting DNS server in the vnet used by the cluster.
