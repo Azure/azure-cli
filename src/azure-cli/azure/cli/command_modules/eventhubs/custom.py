@@ -607,6 +607,6 @@ def cli_remove_appgroup_policy(cmd, client, resource_group_name, namespace_name,
             if policy_object in appGroup.policies:
                 appGroup.policies.remove(policy_object)
             else:
-                raise CLIError('The following policy was not found: Name: '+policy_object.name+', RateLimitThreshold: '+str(policy_object.rate_limit_threshold)+', MetricId: '+policy_object.metric_id)
+                raise CLIError('The following policy was not found: Name: ' + policy_object.name + ', RateLimitThreshold: ' + str(policy_object.rate_limit_threshold) + ', MetricId: '+policy_object.metric_id)
 
     return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
