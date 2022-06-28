@@ -18,7 +18,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -247,7 +247,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace encryption', resource_type=ResourceType.MGMT_EVENTHUB) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
-    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
+    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace encryption remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
 
@@ -265,3 +265,24 @@ def load_arguments_eh(self, _):
             c.argument('schema_type', options_list=['--schema-type'], arg_type=get_enum_type(['Avro']), help='Type of Schema')
             c.argument('tags', options_list=['--group-properties'], arg_type=tags_type,
                        help='Type of Schema')
+
+# Application Group
+    with self.argument_context('eventhubs namespace application-group') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], arg_type=namespace_name_arg_type, help='Name of Namespace')
+        c.argument('application_group_name', arg_type=name_type, id_part='child_name_1', help='Name of Application Group')
+
+    for scope in ['eventhubs namespace application-group create', 'eventhubs namespace application-group update']:
+        with self.argument_context(scope) as c:
+            c.argument('is_enabled', arg_type=get_three_state_flag(),
+                       help='Determines if Application Group is allowed to create connection with namespace or not. '
+                            'Once the isEnabled is set to false, all the existing connections of application group gets dropped and no new connections will be allowed')
+
+    with self.argument_context('eventhubs namespace application-group create') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+        c.argument('application_group_name', arg_type=name_type, id_part=None, help='Name of Application Group')
+        c.argument('throttling_policy_config', action=ConstructPolicy, nargs='+', help='List of Throttling Policy Objects')
+        c.argument('client_app_group_identifier', help='The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)')
+
+    for scope in ['eventhubs namespace application-group application-group-policy add', 'eventhubs namespace application-group application-group-policy remove']:
+        with self.argument_context(scope) as c:
+            c.argument('throttling_policy_config', action=ConstructPolicy, nargs='+', help='List of Throttling Policy Objects')

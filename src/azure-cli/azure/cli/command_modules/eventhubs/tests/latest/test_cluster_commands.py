@@ -20,9 +20,9 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_eh_cluster(self):
         self.kwargs.update({
-            'loc1': 'southcentralus',
-            'loc': 'eastus',
-            'rg': 'rgehcluster-cli-test',
+            'loc1': 'westcentralus',
+            'loc': 'southcentralus',
+            'rg': self.create_random_name(prefix='rg-cluster-', length=20),
             'clustername': self.create_random_name(prefix='eventhubs-clus1-', length=20),
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'tags': {'tag1=value1'},

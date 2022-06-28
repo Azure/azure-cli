@@ -18,7 +18,8 @@ def load_command_table(self, _):
                                                                      cluster_mgmt_client_factory,
                                                                      private_endpoint_connections_mgmt_client_factory,
                                                                      private_link_mgmt_client_factory,
-                                                                     schema_registry_mgmt_client_factory)
+                                                                     schema_registry_mgmt_client_factory,
+                                                                     application_group_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
@@ -57,6 +58,12 @@ def load_command_table(self, _):
 
     eh_schema_registry_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#SchemaRegistryOperations.{}',
+        client_factory=schema_registry_mgmt_client_factory,
+        resource_type=ResourceType.MGMT_EVENTHUB
+    )
+
+    eh_application_group_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventhub.operations#ApplicationGroupOperations.{}',
         client_factory=schema_registry_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB
     )
@@ -177,3 +184,15 @@ def load_command_table(self, _):
         g.command('list', 'list_by_namespace')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
+
+# ApplicationGroup Region
+    with self.command_group('eventhubs namespace application-group', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
+        g.custom_command('create', 'cli_appgroup_create')
+        g.custom_command('update', 'cli_appgroup_update')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
+        g.command('list', 'list_by_namespace')
+
+    with self.command_group('eventhubs namespace application-group application-group-policy', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
+        g.custom_command('add', 'cli_add_appgroup_policy')
+        g.custom_command('remove', 'cli_remove_appgroup_policy')
