@@ -629,7 +629,7 @@ def return_valid_duration(update_value, current_value=None):
         try:
             time_duration = parse_duration(value_toreturn)
         except:
-            raise raise InvalidArgumentValueError("Unable to parse provided ISO 8601 format duration %r" % value_toreturn)
+            raise InvalidArgumentValueError("Unable to parse provided ISO 8601 format duration %r" % value_toreturn)
 
         if isinstance(time_duration, timedelta):
             if time_duration <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
