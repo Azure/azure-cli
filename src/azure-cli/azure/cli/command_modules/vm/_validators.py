@@ -1763,7 +1763,7 @@ def process_disk_create_namespace(cmd, namespace):
 
 
 def _validate_secure_vm_disk_encryption_set(namespace):
-    if not 'secure_vm_disk_encryption_set' in namespace:
+    if 'secure_vm_disk_encryption_set' not in namespace:
         return
 
     if namespace.secure_vm_disk_encryption_set:
