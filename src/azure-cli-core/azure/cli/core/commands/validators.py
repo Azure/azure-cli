@@ -10,6 +10,7 @@ import random
 from azure.cli.core.profiles import ResourceType
 
 from knack.log import get_logger
+from knack.util import CLIError
 from knack.validators import DefaultStr, DefaultInt  # pylint: disable=unused-import
 
 logger = get_logger(__name__)
@@ -33,6 +34,19 @@ class IterateValue(list):
     Typical use is to allow multiple ID parameter to a show command etc.
     """
     pass  # pylint: disable=unnecessary-pass
+
+
+class ValidateResourceGroupName(argparse.Action):
+    """Action used to validate that resource group name is not empty.
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        non_empty_msg = "usage error: {} can't be an empty string. Either omit it or provide a non-empty string."
+
+        if not values:
+            raise CLIError(non_empty_msg.format(option_string))
+
+        setattr(namespace, self.dest, values)
 
 
 def validate_tags(ns):
@@ -100,8 +114,6 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
     included_forbidden = [x for x in forbidden if getattr(namespace, x) and
                           not hasattr(getattr(namespace, x), 'is_default')]
     if missing_required or included_forbidden:
-        from knack.util import CLIError
-
         def _dest_to_option(dest):
             try:
                 return dest_to_options[dest]
