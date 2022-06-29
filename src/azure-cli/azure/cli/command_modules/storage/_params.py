@@ -685,7 +685,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_account_permissions))
         c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
-        c.ignore('auth_mode')
 
     or_policy_type = CLIArgumentType(
         options_list=['--policy', '-p'],

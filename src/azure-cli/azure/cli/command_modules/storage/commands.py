@@ -142,7 +142,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                      resource_type=ResourceType.DATA_STORAGE_BLOB)
     with self.command_group('storage account', resource_type=ResourceType.DATA_STORAGE_BLOB,
                             custom_command_type=account_blob_service_custom_sdk) as g:
-        g.storage_custom_command_oauth('generate-sas', 'generate_sas')
+        g.storage_custom_command('generate-sas', 'generate_sas')
 
     blob_inventory_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#BlobInventoryPoliciesOperations.{}',
