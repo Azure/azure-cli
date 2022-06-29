@@ -361,7 +361,7 @@ def _validate_included_paths_in_cep(partition_key_path, includedPaths, policyFor
 
 def _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, encryptionType):
     """ for each partition key path verify if its part of client encryption policy
-    or if its stop level path is part of client encryption policy
+    or if its top level path is part of client encryption policy
     eg: pk path is /a/b/c and /a is part of client encryption policy """
     for pkPath in partition_key_path:
         if path[1:] == pkPath.split('/')[1]:
