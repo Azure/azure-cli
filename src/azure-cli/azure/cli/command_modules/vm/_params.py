@@ -950,7 +950,7 @@ def load_arguments(self, _):
             c.argument('edge_zone', edge_zone_type)
             c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
             c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable the default behavior of installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
-            c.argument('os_disk_security_encryption_type', arg_type=get_enum_type(self.get_models('SecurityEncryptionTypes')), min_api='2021-11-01', help='Specify the encryption type  of the os managed disk.')
+            c.argument('os_disk_security_encryption_type', arg_type=get_enum_type(self.get_models('SecurityEncryptionTypes')), min_api='2021-11-01', help='Specify the encryption type of the OS managed disk.')
             c.argument('os_disk_secure_vm_disk_encryption_set', min_api='2021-11-01', help='Specify the customer managed disk encryption set resource Id or name for the managed disk that is used for Customer Managed Key encrypted ConfidentialVM OS Disk and VMGuest blob.')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
