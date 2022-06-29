@@ -698,7 +698,7 @@ type: group
 short-summary: Manages Application Groups for premium eventhubs namespace.
 """
 
-helps['eventhubs namespace application-group application-group-policy'] = """
+helps['eventhubs namespace application-group policy'] = """
 type: group
 short-summary: Append or Remove application group policies.
 """
@@ -739,20 +739,20 @@ examples:
         az eventhubs namespace application-group list --namespace-name mynamespace -g MyResourceGroup
 """
 
-helps['eventhubs namespace application-group application-group-policy add'] = """
+helps['eventhubs namespace application-group policy add'] = """
 type: command
 short-summary: Appends an application group policy to the existing policy. This cmdlet can be used to append one or more throttling policies.
 examples:
   - name: Append 2 throttling policies to an application group. Maximum allowed throttling policies is 4.
     text: |
-        az eventhubs namespace application-group application-group-policy add --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+        az eventhubs namespace application-group policy add --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
 """
 
-helps['eventhubs namespace application-group application-group-policy remove'] = """
+helps['eventhubs namespace application-group policy remove'] = """
 type: command
 short-summary: Removes an application group policy from the existing policies. This cmdlet can be used to remove one or more throttling policies.
 examples:
   - name: Removes a throttling policy from an applicatin group myAppGroup.
     text: |
-        az eventhubs namespace application-group application-group-policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
+        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
 """

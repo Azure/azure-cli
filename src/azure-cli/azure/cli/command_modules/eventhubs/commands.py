@@ -194,6 +194,6 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.command('list', 'list_by_namespace')
 
-    with self.command_group('eventhubs namespace application-group application-group-policy', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace application-group policy', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_add_appgroup_policy')
         g.custom_command('remove', 'cli_remove_appgroup_policy')
