@@ -15,13 +15,10 @@ class AcrTaskCommandsTests(ScenarioTest):
             'registry_name': self.create_random_name('clireg', 20),
             'task_name': 'testTask',
             'task_no_context': 'contextlessTask',
-            'task_local_context': 'localContextTask',
             'rg_loc': 'westus',
             'sku': 'Standard',
             'no_context': '/dev/null',
             'context': 'https://github.com/SteveLasker/node-helloworld',
-            'task_yaml': 'src/azure-cli/azure/cli/command_modules/acr/tests/latest/docker_context/task.yaml',
-            'local_context': 'src/azure-cli/azure/cli/command_modules/acr/tests/latest/docker_context/',
             'file': 'Dockerfile',
             'image': 'testtask:v1',
             'existing_image': 'bash',
@@ -64,29 +61,12 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('status', 'Enabled'),
                          self.check('timeout', 3600),
                          self.check('step.type', 'EncodedTask')])
-
-        # Create a local context docker build task.
-        self.cmd('acr task create -n {task_local_context} -r {registry_name} --context {no_context} --file {task_yaml}',
-                 checks=[self.check('name', '{task_local_context}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('platform.os', 'linux'),
-                         self.check('agentConfiguration.cpu', 2),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('status', 'Enabled'),
-                         self.check('timeout', 3600),
-                         self.check('step.type', 'EncodedTask')])
-
         # list tasks
         self.cmd('acr task list -r {registry_name}',
                  checks=[self.check('[0].name', '{task_name}')])
 
         # trigger a run for the contextless task
         response = self.cmd('acr task run -n {task_no_context} -r {registry_name} --no-logs',
-                            checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
-                                    self.check('status', 'Succeeded')]).get_output_in_json()
-
-        # trigger a run for the local context task
-        response = self.cmd('acr task run -n {task_local_context} -r {registry_name} --context {local_context}',
                             checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                                     self.check('status', 'Succeeded')]).get_output_in_json()
 
