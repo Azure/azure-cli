@@ -32,6 +32,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_kusto_pool
     from ._client_factory import cf_kusto_script
     from ._client_factory import cf_kusto_scripts
+    from ._client_factory import cf_synapse_link_connection
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -208,8 +209,8 @@ def load_command_table(self, _):
     )
 
     synapse_link_connection_sdk = CliCommandType(
-        operations_tmpl='azure.synapse.artifacts.operations#linkconnectionOperations.{}',
-        client_factory=None,
+        operations_tmpl='azure.synapse.artifacts.operations#LinkConnectionOperations.{}',
+        client_factory=cf_synapse_link_connection,
     )
 
     # Management Plane Commands --Workspace
@@ -583,16 +584,17 @@ def load_command_table(self, _):
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')
 
-    with self.command_group('synapse link-connection', synapse_link_connection_sdk,
-                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
-        g.custom_command('list', 'list_link_connection')
-        g.custom_show_command('show', 'get_link_connection')
-        g.custom_command('delete', 'delete_link_connection')
+    with self.command_group('synapse link-connection', command_type=synapse_link_connection_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None),
+                            client_factory=cf_synapse_link_connection) as g:
+        g.command('list', 'list_link_connections_by_workspace')
+        g.show_command('show', 'get_link_connection')
+        g.command('delete', 'delete_link_connection')
         g.custom_command('create', 'create_or_update_link_connection')
         g.custom_command('update', 'create_or_update_link_connection')
-        g.custom_command('get-status', 'get_link_connection_status')
-        g.custom_command('start ', 'start_link_connection')
-        g.custom_command('stop', 'stop_link_connection')
+        g.command('get-status', 'get_detailed_status')
+        g.command('start ', 'start')
+        g.command('stop', 'stop')
         g.custom_command('list-link-tables', 'synapse_list_link_table')
         g.custom_command('edit-link-tables', 'synapse_edit_link_table')
         g.custom_command('get-link-tables-status', 'synapse_get_link_tables_status')
