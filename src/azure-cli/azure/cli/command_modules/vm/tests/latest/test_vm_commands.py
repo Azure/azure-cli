@@ -7065,7 +7065,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -g {rg} -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
