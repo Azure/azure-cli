@@ -1763,6 +1763,9 @@ def process_disk_create_namespace(cmd, namespace):
 
 
 def _validate_secure_vm_disk_encryption_set(namespace):
+    if not 'secure_vm_disk_encryption_set' in namespace:
+        return
+
     if namespace.secure_vm_disk_encryption_set:
         if not namespace.security_type or \
                 namespace.security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
