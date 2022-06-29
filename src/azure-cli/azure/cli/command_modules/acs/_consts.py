@@ -127,7 +127,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.5-alpha"
 CONST_ACR_DOMAIN_NAME = ".azurecr.io"
 
 
