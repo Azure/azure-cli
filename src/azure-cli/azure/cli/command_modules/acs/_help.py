@@ -583,7 +583,7 @@ examples:
   - name: Create a kubernetes cluster with custom tags
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
   - name: Create a kubernetes cluster with custom headers
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd
   - name: Create a kubernetes cluster with FIPS-enabled OS
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
   - name: Create a kubernetes cluster with enabling Windows gmsa and with setting DNS server in the vnet used by the cluster.
@@ -1171,6 +1171,36 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+"""
+
+helps['aks nodepool stop'] = """
+    type: command
+    short-summary: Stop running agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Stop agent pool in the managed cluster
+          text: az aks nodepool stop --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
+"""
+
+helps['aks nodepool start'] = """
+    type: command
+    short-summary: Start stopped agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Start agent pool in the managed cluster
+          text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
 helps['aks remove-dev-spaces'] = """

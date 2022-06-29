@@ -364,9 +364,12 @@ def set_language(src_dir, html=False):
     return lang_details.get('language')
 
 
-def detect_os_form_src(src_dir, html=False):
-    lang_details = get_lang_from_content(src_dir, html)
-    language = lang_details.get('language')
+def detect_os_from_src(src_dir, html=False, runtime=None):
+    from .custom import _StackRuntimeHelper
+    if runtime:
+        language = runtime.split(_StackRuntimeHelper.DEFAULT_DELIMETER)[0]
+    else:
+        language = get_lang_from_content(src_dir, html).get('language')
     return "Linux" if language is not None and language.lower() == NODE_RUNTIME_NAME \
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
 

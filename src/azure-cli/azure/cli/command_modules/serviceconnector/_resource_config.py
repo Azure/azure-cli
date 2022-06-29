@@ -557,23 +557,47 @@ TARGET_RESOURCES_PARAMS = {
 
 
 # The dict defines the targets which supports service endpoint
-TARGET_SUPPORT_SERVICE_ENDPOINT = {
-    RESOURCE.Postgres: True,
-    RESOURCE.Mysql: True,
-    RESOURCE.Sql: True,
-    RESOURCE.StorageBlob: True,
-    RESOURCE.StorageQueue: True,
-    RESOURCE.StorageFile: True,
-    RESOURCE.StorageTable: True,
-    RESOURCE.KeyVault: True,
-    RESOURCE.CosmosSql: True,
-    RESOURCE.CosmosCassandra: True,
-    RESOURCE.CosmosGremlin: True,
-    RESOURCE.CosmosMongo: True,
-    RESOURCE.CosmosTable: True,
-    RESOURCE.ServiceBus: True,
-    RESOURCE.EventHub: True,
-}
+TARGET_SUPPORT_SERVICE_ENDPOINT = [
+    RESOURCE.Postgres,
+    RESOURCE.Mysql,
+    RESOURCE.Sql,
+    RESOURCE.StorageBlob,
+    RESOURCE.StorageQueue,
+    RESOURCE.StorageFile,
+    RESOURCE.StorageTable,
+    RESOURCE.KeyVault,
+    RESOURCE.CosmosSql,
+    RESOURCE.CosmosCassandra,
+    RESOURCE.CosmosGremlin,
+    RESOURCE.CosmosMongo,
+    RESOURCE.CosmosTable,
+    RESOURCE.ServiceBus,
+    RESOURCE.EventHub,
+]
+
+
+TARGET_SUPPORT_PRIVATE_ENDPOINT = [
+    RESOURCE.AppConfig,
+    RESOURCE.CosmosSql,
+    RESOURCE.CosmosCassandra,
+    RESOURCE.CosmosGremlin,
+    RESOURCE.CosmosMongo,
+    RESOURCE.CosmosTable,
+    RESOURCE.Redis,
+    RESOURCE.Postgres,
+    RESOURCE.Mysql,
+    RESOURCE.EventHub,
+    RESOURCE.KeyVault,
+    RESOURCE.SignalR,
+    RESOURCE.WebPubSub,
+    RESOURCE.Sql,
+    RESOURCE.StorageBlob,
+    RESOURCE.StorageQueue,
+    RESOURCE.StorageFile,
+    RESOURCE.StorageTable,
+    RESOURCE.ServiceBus,
+]
+
 
 # The dict defines the parameters used to provide auth info
 AUTH_TYPE_PARAMS = {
@@ -941,132 +965,10 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ]
-    },
-    RESOURCE.SpringCloud: {
-        RESOURCE.Postgres: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.PostgresFlexible: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Mysql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.MysqlFlexible: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Sql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Redis: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.RedisEnterprise: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosCassandra: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosGremlin: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosMongo: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosTable: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosSql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageBlob: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageQueue: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageFile: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageTable: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.KeyVault: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.AppConfig: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.EventHub: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.ServiceBus: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.ConfluentKafka: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ]
     }
 }
-SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud]
+
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

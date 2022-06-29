@@ -56,12 +56,18 @@ examples:
   - name: Create a disk from image.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180
-  - name: Create a disk from the OS Disk of a gallery image version
+  - name: Create a disk from the OS Disk of a compute gallery image version
     text: >
         az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
-  - name: Create a disk from the OS Disk of the latest version in a gallery image
+  - name: Create a disk from the OS Disk of the latest version in a compute gallery image
     text: >
         az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
+  - name: Create a disk from the OS Disk of a shared gallery image version
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /SharedGalleries/sharedGalleryUniqueName/Images/imageName/Versions/1.0.0
+  - name: Create a disk from the OS Disk of a community gallery image version
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /CommunityGalleries/communityGalleryPublicGalleryName/Images/imageName/Versions/1.0.0
   - name: Create a disk from the Data Disk of a gallery image
     text: >
         az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0 --gallery-image-reference-lun 0
@@ -771,6 +777,17 @@ examples:
         --resource-group MyResourceGroup --remove recommended.vCpUs.min
 """
 
+helps['sig image-definition list-community'] = """
+type: command
+short-summary: List VM Image definitions in a gallery community (preview).
+long-summary: List VM Image definitions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: List an image definition in a gallery community.
+    text: |
+        az sig image-definition list-community --public-gallery-name publicGalleryName \\
+        --location myLocation
+"""
+
 helps['sig image-version'] = """
 type: group
 short-summary: Manage shared gallery image version with VM
@@ -786,7 +803,7 @@ examples:
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
-        --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
   - name: Add a new image version from a managed image
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
@@ -798,7 +815,7 @@ examples:
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
-        --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/galleries/MyGallery/images/MyImageDefinition/versions/1.0.0
+        --image-version /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/galleries/MyGallery/images/MyImageDefinition/versions/1.0.0
   - name: Add a new image version from a managed disk
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
@@ -866,7 +883,7 @@ examples:
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
-        --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --target-regions westus=2=standard eastus \\
         --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 \\
         EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2
@@ -875,21 +892,21 @@ examples:
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
-        --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --no-wait
   - name: Add a new image version but remove it from consideration as latest version in its image definition
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
-        --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --exclude-from-latest true
   - name: Add a new image version and set its end-of-life date. The image version can still be used to create a virtual machine after its end-of-life date.
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
-        --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --end-of-life-date 2024-08-02T00:00:00+00:00
 """
 
@@ -946,6 +963,17 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set publishingProfile.endOfLifeDate=2024-08-02T00:00:00+00:00
+"""
+
+helps['sig image-version list-community'] = """
+type: command
+short-summary: List VM Image Versions in a gallery community (preview).
+long-summary: List VM Image Versions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: List an image versions in a gallery community.
+    text: |
+        az sig image-version list-community --public-gallery-name publicGalleryName \\
+        --gallery-image-definition MyImage --location myLocation
 """
 
 helps['sig image-version wait'] = """
@@ -1020,6 +1048,15 @@ examples:
   - name: Reset sharing profile of a gallery.
     text: |
         az sig share reset --resource-group MyResourceGroup --gallery-name MyGallery
+"""
+
+helps['sig share enable-community'] = """
+type: command
+short-summary: Allow to share gallery to the community
+examples:
+  - name: Allow to share gallery to the community
+    text: |
+        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery
 """
 
 helps['sig share wait'] = """
@@ -1672,7 +1709,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
+    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -2030,12 +2067,12 @@ examples:
 
 helps['vm application'] = """
 type: group
-short-summary: Manage appliations for VM
+short-summary: Manage applications for VM
 """
 
 helps['vm application set'] = """
 type: command
-short-summary: Set appliations for VM.
+short-summary: Set applications for VM.
 examples:
   - name: Set applications for vm
     text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \

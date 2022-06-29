@@ -60,7 +60,8 @@ class TestVMImage(unittest.TestCase):
         cli_ctx.cloud = mock_cloud
         images = load_images_from_aliases_doc(cli_ctx)
         self.assertEqual(images[0], {'urnAlias': 'CentOS', 'publisher': 'OpenLogic',
-                                     'offer': 'CentOS', 'sku': '7.5', 'version': 'latest'})
+                                     'offer': 'CentOS', 'sku': '7.5', 'version': 'latest',
+                                     'architecture': 'x64'})
 
 
 if __name__ == '__main__':
