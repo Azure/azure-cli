@@ -341,8 +341,8 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
-def cli_networkrule_update(cmd, client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None
-                           , default_action=None):
+def cli_networkrule_update(cmd, client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
+                           default_action=None):
     networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
     if trusted_service_access_enabled is not None:
@@ -623,6 +623,6 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
             if policy_object in appGroup.policies:
                 appGroup.policies.remove(policy_object)
             else:
-                raise CLIError('The following policy was not found: Name: ' + policy_object.name + ', RateLimitThreshold: ' + str(policy_object.rate_limit_threshold) + ', MetricId: '+policy_object.metric_id)
+                raise CLIError('The following policy was not found: Name: ' + policy_object.name + ', RateLimitThreshold: ' + str(policy_object.rate_limit_threshold) + ', MetricId: ' + policy_object.metric_id)
 
     return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)

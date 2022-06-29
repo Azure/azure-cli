@@ -402,6 +402,14 @@ examples:
     text: az eventhubs namespace network-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
+helps['eventhubs namespace network-rule update'] = """
+type: command
+short-summary: Updates network rule properties of the given Namespace.
+examples:
+  - name: Updates network rule properties of the given Namespace, can be used to update public network access, trusted service and default action.
+     text: az eventhubs namespace network-rule update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access
+"""
+
 helps['eventhubs namespace network-rule remove'] = """
 type: command
 short-summary: Remove network rule for a namespace

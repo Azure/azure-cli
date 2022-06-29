@@ -280,6 +280,11 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], arg_type=namespace_name_arg_type, help='Name of Namespace')
         c.argument('application_group_name', arg_type=name_type, id_part='child_name_1', help='Name of Application Group')
 
+    for scope in ['eventhubs namespace application-group create', 'eventhubs namespace application-group list']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+            c.argument('application_group_name', arg_type=name_type, id_part=None, help='Name of Application Group')
+
     for scope in ['eventhubs namespace application-group create', 'eventhubs namespace application-group update']:
         with self.argument_context(scope) as c:
             c.argument('is_enabled', arg_type=get_three_state_flag(),
@@ -287,8 +292,6 @@ def load_arguments_eh(self, _):
                             'Once the isEnabled is set to false, all the existing connections of application group gets dropped and no new connections will be allowed')
 
     with self.argument_context('eventhubs namespace application-group create') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('application_group_name', arg_type=name_type, id_part=None, help='Name of Application Group')
         c.argument('client_app_group_identifier', options_list=['--client-app-group-identifier', '--client-app-group-id'], help='The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)')
 
     for scope in ['eventhubs namespace application-group application-group-policy add', 'eventhubs namespace application-group application-group-policy remove', 'eventhubs namespace application-group create']:
