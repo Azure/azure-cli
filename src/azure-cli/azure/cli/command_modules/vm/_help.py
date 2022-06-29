@@ -735,8 +735,8 @@ examples:
 
 helps['sig image-definition list-shared'] = """
 type: command
-short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant (preview).
-long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
+long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
 examples:
   - name: List an image definition in a gallery shared directly to your subscription in the given location.
     text: |
@@ -750,8 +750,8 @@ examples:
 
 helps['sig image-definition show-shared'] = """
 type: command
-short-summary: Get a shared gallery image (preview).
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: Get a shared gallery image
+long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant
 examples:
   - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -779,8 +779,8 @@ examples:
 
 helps['sig image-definition list-community'] = """
 type: command
-short-summary: List VM Image definitions in a gallery community (preview).
-long-summary: List VM Image definitions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image definitions in a gallery community
+long-summary: List VM Image definitions in a gallery community
 examples:
   - name: List an image definition in a gallery community.
     text: |
@@ -912,8 +912,8 @@ examples:
 
 helps['sig image-version list-shared'] = """
 type: command
-short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant (preview).
-long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
+long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
 examples:
   - name: List image versions in a gallery shared directly to your subscription in the given location and image definition.
     text: |
@@ -927,8 +927,8 @@ examples:
 
 helps['sig image-version show-shared'] = """
 type: command
-short-summary: Get an image version in a gallery shared directly to your subscription or tenant (preview).
-long-summary: Get an image version in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: Get an image version in a gallery shared directly to your subscription or tenant
+long-summary: Get an image version in a gallery shared directly to your subscription or tenant
 examples:
   - name: Get an image version in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -967,8 +967,8 @@ examples:
 
 helps['sig image-version list-community'] = """
 type: command
-short-summary: List VM Image Versions in a gallery community (preview).
-long-summary: List VM Image Versions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image Versions in a gallery community
+long-summary: List VM Image Versions in a gallery community
 examples:
   - name: List an image versions in a gallery community.
     text: |
@@ -995,15 +995,28 @@ examples:
 
 helps['sig list-shared'] = """
 type: command
-short-summary: List all galleries shared directly to your subscription or tenant (preview).
-long-summary: List all galleries shared directly to your subscription or tenant (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List all shared galleries shared directly to your subscription or tenant
+long-summary: List all shared galleries shared directly to your subscription or tenant
 examples:
-  - name: List galleries shared directly to your subscription in a given location
+  - name: List shared galleries shared directly to your subscription in a given location
     text: |
         az sig list-shared --location myLocation
-  - name: List galleries shared directly to your tenant in a given location
+  - name: List shared galleries shared directly to your tenant in a given location
     text: |
         az sig list-shared --location myLocation --shared-to tenant
+"""
+
+helps['sig list-community'] = """
+type: command
+short-summary: List all community galleries shared directly to your subscription or tenant
+long-summary: List all community galleries shared directly to your subscription or tenant
+examples:
+  - name: List community galleries shared directly to your subscription in a given location
+    text: |
+        az sig list-community --location myLocation
+  - name: List paging community galleries shared directly to your tenant in a given location according to next marker
+    text: |
+        az sig list-community --location myLocation --marker nextMarker
 """
 
 helps['sig list'] = """
@@ -1070,8 +1083,8 @@ examples:
 
 helps['sig show-shared'] = """
 type: command
-short-summary: Get a gallery that has been shared directly to your subscription or tenant (preview).
-long-summary: Get a gallery that has been shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: Get a gallery that has been shared directly to your subscription or tenant
+long-summary: Get a gallery that has been shared directly to your subscription or tenant
 examples:
   - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
     text: |
@@ -1506,10 +1519,10 @@ examples:
   - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image centos --count 3
-  - name: Create a VM from shared gallery image (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VM from shared gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-  - name: Create a VM from community gallery image (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
@@ -2883,10 +2896,10 @@ examples:
   - name: Create a VMSS that supports SpotRestore.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
-  - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VMSS from shared gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-  - name: Create a VMSS from community gallery image (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VMSS from community gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).

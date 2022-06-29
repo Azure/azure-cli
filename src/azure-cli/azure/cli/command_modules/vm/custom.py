@@ -5150,6 +5150,67 @@ def restore_point_collection_update(client,
 
 
 # region Community gallery
+def sig_community_gallery_list(cmd, location=None, marker=None, show_next_marker=None):
+    from ._arg_client import ARGClient, QueryBody
+
+    query_table = 'communitygalleryresources'
+    query_type = 'microsoft.compute/locations/communitygalleries'
+
+    query = "{}| where type == '{}' ".format(query_table, query_type)
+    if location:
+        # Since the location data in table "communitygalleryresources" is in lowercase
+        # For accurate matching, we also need to convert the location in the query statement to lowercase
+        query = query + "| where location == '{}' ".format(location.lower())
+    query_body = QueryBody(query)
+
+    item_count_per_page = 30
+    query_body.options = {
+        "$top": item_count_per_page
+    }
+
+    if marker:
+        query_body.options['$skipToken'] = marker
+
+    query_result = ARGClient(cmd.cli_ctx).send(query_body)
+    result = _transform_community_gallery_list_output(query_result)
+
+    continuation_token = query_result.get('$skipToken')
+
+    if show_next_marker:
+        next_marker = {"nextMarker": continuation_token}
+        result.append(next_marker)
+    else:
+        if continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(continuation_token)
+
+    return result
+
+
+def _transform_community_gallery_list_output(result):
+
+    result_data = result.get('data')
+    if not result_data:
+        return []
+
+    output = []
+    for data_item in result_data:
+        from collections import OrderedDict
+        output_item = OrderedDict()
+        output_item['id'] = data_item.get('id')
+        output_item['location'] = data_item.get('location')
+        output_item['name'] = data_item.get('name')
+
+        properties = data_item.get('properties')
+        if properties:
+            output_item['communityMetadata'] = properties.get('communityMetadata', {})
+            output_item['uniqueId'] = properties.get('identifier', {}).get('uniqueId')
+
+        output.append(output_item)
+
+    return output
+
+
 def sig_community_image_definition_list(client, location, public_gallery_name, marker=None, show_next_marker=None):
     generator = client.list(location=location, public_gallery_name=public_gallery_name)
     return get_page_result(generator, marker, show_next_marker)

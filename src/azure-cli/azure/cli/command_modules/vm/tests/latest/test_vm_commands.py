@@ -5729,7 +5729,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
 
-    @ResourceGroupPreparer(location='CentralUSEUAP')
+    @ResourceGroupPreparer(name_prefix='cli_test_community_gallery_operations_', location='CentralUSEUAP')
     def test_community_gallery_operations(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
@@ -5756,6 +5756,10 @@ class VMGalleryImage(ScenarioTest):
             self.check('location', '{location}'),
             self.check('name', '{public_name}'),
             self.check('uniqueId', '/CommunityGalleries/{public_name}')
+        ])
+
+        self.cmd('sig list-community --location {location}', checks=[
+            self.check('[0].location', '{location}', case_sensitive=False)
         ])
 
         self.cmd('sig image-definition show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location {location}', checks=[
