@@ -2776,6 +2776,22 @@ type: command
 short-summary: List out all available versions of Bicep CLI.
 """
 
+helps['bicep generate-params'] = """
+type: command
+short-summary: Generate parameters file for a Bicep file.
+examples:
+  - name: Generate parameters file for a Bicep file.
+    text: az bicep generate-params --file {bicep_file}
+  - name: Generate parameters file for a Bicep file and print all output to stdout.
+    text: az bicep generate-params --file {bicep_file} --stdout
+  - name: Generate parameters file for a Bicep file and save the result to the specified directory.
+    text: az bicep generate-params --file {bicep_file} --outdir {out_dir}
+  - name: Generate parameters file for a Bicep file and save the result to the specified file.
+    text: az bicep generate-params --file {bicep_file} --outfile {out_file}
+  - name: Generate parameters file for a Bicep file without restoring external modules.
+    text: az bicep generate-params --file {bicep_file} --no-restore
+"""
+
 helps['resourcemanagement'] = """
 type: group
 short-summary: resourcemanagement CLI command group.
