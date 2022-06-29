@@ -6695,28 +6695,27 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
         # remove user assigned identity from an existing disk encryption set
-        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --user-assigned {identity1_id}', checks=[
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --user-assigned {identity1_id} --yes', checks=[
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', 'None')
         ])
 
         # remove system assigned identity from an existing disk encryption set
-        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --system-assigned')
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --system-assigned --yes')
         self.cmd('disk-encryption-set show -g {rg} -n {des1}', checks=[
             self.check('identity', 'None')
         ])
 
         # remove all user assigned identities from an existing disk encryption set
-        self.cmd('disk-encryption-set identity remove -g {rg} -n {des2} --user-assigned')
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des2} --user-assigned --yes')
         self.cmd('disk-encryption-set show -g {rg} -n {des2}', checks=[
             self.check('identity', 'None')
         ])
 
         # assign neither system nor user assigned identity (the value of --user-assigned is none)
         # to an existing disk encryption set
-        self.cmd('disk-encryption-set identity assign -g {rg} -n {des2} --user-assigned')
-        self.cmd('disk-encryption-set show -g {rg} -n {des2}', checks=[
-            self.check('identity', 'None')
+        self.cmd('disk-encryption-set identity assign -g {rg} -n {des2} --user-assigned', checks=[
+            self.check('type', 'SystemAssigned')
         ])
 
         # assign user assigned identity to an existing disk encryption set
@@ -6732,7 +6731,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
         # remove system assigned identity from an existing disk encryption set
-        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --system-assigned', checks=[
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --system-assigned --yes', checks=[
             self.check('type', 'UserAssigned'),
             self.check('length(userAssignedIdentities)', 1)
         ])

@@ -273,7 +273,7 @@ def load_command_table(self, _):
 
     with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
         g.custom_command('assign', 'assign_disk_encryption_set_identity')
-        g.custom_command('remove', 'remove_disk_encryption_set_identity')
+        g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:

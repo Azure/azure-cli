@@ -3334,12 +3334,12 @@ def _build_identities_info(identities):
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
-def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned, default_type=None):
+def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned):
     IdentityType, UserAssignedIdentitiesValue = cmd.get_models('DiskEncryptionSetIdentityType',
                                                                'UserAssignedIdentitiesValue',
                                                                operation_group='disk_encryption_sets')
 
-    identity_types = default_type if default_type else IdentityType.NONE
+    identity_types = IdentityType.SYSTEM_ASSIGNED
     user_assigned_identities = None
     if mi_user_assigned:
         if mi_system_assigned:
@@ -4643,7 +4643,7 @@ def create_disk_encryption_set(
         'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
 
     identity_type, user_assigned_identities = \
-        _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned, 'SystemAssigned')
+        _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned)
 
     encryption_set_identity = EncryptionSetIdentity(type=identity_type)
     if user_assigned_identities is not None:
@@ -4733,8 +4733,7 @@ def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
         disk_encryption_set_update.identity = encryption_set_identity
         return patch_disk_encryption_set(cmd, resource_group_name, disk_encryption_set_name, disk_encryption_set_update)
 
-    assign_identity_helper(cmd.cli_ctx, getter, setter)
-    disk_encryption_set = client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
+    disk_encryption_set = assign_identity_helper(cmd.cli_ctx, getter, setter)
     return disk_encryption_set.identity
 
 
