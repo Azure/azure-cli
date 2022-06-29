@@ -10,7 +10,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.core.util import sdk_no_wait
-import json
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -25,8 +24,6 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
-    ClientEncryptionIncludedPath,
-    ClientEncryptionPolicy,
     ResourceIdentityType,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
@@ -545,7 +542,7 @@ def _populate_sql_container_definition(sql_container_resource,
         sql_container_resource.unique_key_policy = unique_key_policy
 
     if client_encryption_policy is not None:
-        _validate_and_populate_client_encryption_policy(sql_container_resource, client_encryption_policy)
+        sql_container_resource.client_encryption_policy = client_encryption_policy
 
     if conflict_resolution_policy is not None:
         sql_container_resource.conflict_resolution_policy = conflict_resolution_policy
@@ -554,109 +551,6 @@ def _populate_sql_container_definition(sql_container_resource,
         sql_container_resource.analytical_storage_ttl = analytical_storage_ttl
 
     return True
-
-
-def _validate_and_populate_client_encryption_policy(sql_container_resource, client_encryption_policy):
-    if client_encryption_policy is not None:
-        from azure.cli.core.util import shell_safe_json_parse
-        data = shell_safe_json_parse(json.dumps(client_encryption_policy))
-
-        if "includedPaths" in data:
-            includedPaths = data['includedPaths']
-        else:
-            raise CLIError(None, "includedPaths missing in Client Encryption Policy. Please verify your Client Encryption Policy JSON string")
-
-        if includedPaths == "":
-            raise CLIError(None, "includedPaths missing in Client Encryption Policy. includedPaths cannot be null or empty.")
-
-        if "policyFormatVersion" in data:
-            policyFormatVersion = data['policyFormatVersion']
-        else:
-            raise CLIError(None, "policyFormatVersion missing in Client Encryption Policy. Please verify your Client Encryption Policy JSON string")
-
-        if not isinstance(policyFormatVersion, int):
-            raise CLIError(None, "Invalid policyFormatVersion format in Client Encryption Policy. policyFormatVersion is an integer type. Supported version are 1 and 2.")
-
-        if(policyFormatVersion < 1 or policyFormatVersion > 2):
-            raise CLIError(None, "Invalid policyFormatVersion used in Client Encryption Policy. Please verify your Client Encryption Policy JSON string. Supported version are 1 and 2.")
-
-        listOfIncludedPaths = []
-        listOfPaths = []
-        for includedPath in includedPaths:
-            if "encryptionType" in includedPath:
-                encryptionType = includedPath['encryptionType']
-            else:
-                raise CLIError(None, "encryptionType missing in includedPaths. Please verify your Client Encryption Policy JSON string")
-
-            if encryptionType == "":
-                raise CLIError(None, "Invalid encryptionType included in Client Encryption Policy. encryptionType cannot be null or empty.")
-
-            if(encryptionType != "Deterministic" and encryptionType != "Randomized"):
-                raise CLIError(None, f"Invalid Encryption Type {encryptionType} used. Supported types are Deterministic or Randomized")
-
-            if "path" in includedPath:
-                path = includedPath['path']
-            else:
-                raise CLIError(None, "path missing in includedPaths. Please verify your Client Encryption Policy JSON string")
-
-            if path in listOfPaths:
-                raise CLIError(None, f"Duplicate path:{path} found in Client Encryption Policy")
-
-            listOfPaths.append(path)
-
-            if path == "":
-                raise CLIError(None, "Invalid path included in Client Encryption Policy. Path cannot be null or empty.")
-
-            if(path[0] != "/" or path.rfind('/') != 0):
-                raise CLIError(None, 'Invalid path included in Client Encryption Policy. Only top level paths supported. Paths should begin with /. ')
-
-            if path[1:] == "id":
-                if policyFormatVersion < 2:
-                    raise CLIError(None, f"id path which is part of Client Encryption policy is configured with invalid policyFormatVersion: {policyFormatVersion}. Please use policyFormatVersion 2.")
-
-                if encryptionType != "Deterministic":
-                    raise CLIError(None, f"id path is part of Client Encryption policy with invalid encryption type: {encryptionType}. Only deterministic encryption type is supported.")
-
-            if "clientEncryptionKeyId" in includedPath:
-                clientEncryptionKeyId = includedPath['clientEncryptionKeyId']
-            else:
-                raise CLIError(None, "clientEncryptionKeyId missing in includedPaths. Please verify your Client Encryption Policy JSON string")
-
-            if clientEncryptionKeyId == "":
-                raise CLIError(None, "Invalid clientEncryptionKeyId included in Client Encryption Policy. clientEncryptionKeyId cannot be null or empty.")
-
-            # for each partition key path verify if its part of client encryption policy or if its stop level path is part of client encryption policy
-            # eg: pk path is /a/b/c and /a is part of client encryption policy
-            for pkPath in sql_container_resource.partition_key.paths:
-                if(path[1:] == pkPath.split('/')[1]) and (encryptionType != "Deterministic"):
-                    if policyFormatVersion < 2:
-                        raise CLIError(None, f"Partition key path:{pkPath} which is part of Client Encryption policy is configured with invalid policyFormatVersion: {policyFormatVersion}. Please use policyFormatVersion 2.")
-
-                    if encryptionType != "Deterministic":
-                        raise CLIError(None, f"Partition key path:{pkPath} is part of Client Encryption policy with invalid encryption type. Only deterministic encryption type is supported.")
-
-            if "encryptionAlgorithm" in includedPath:
-                encryptionAlgorithm = includedPath['encryptionAlgorithm']
-            else:
-                raise CLIError(None, "encryptionAlgorithm missing in includedPaths. Please verify your Client Encryption Policy JSON string")
-
-            if encryptionAlgorithm == "":
-                raise CLIError(None, "Invalid encryptionAlgorithm included in Client Encryption Policy. encryptionAlgorithm cannot be null or empty.")
-
-            if encryptionAlgorithm != "AEAD_AES_256_CBC_HMAC_SHA256":
-                raise CLIError(None, "Invalid encryptionAlgorithm included in Client Encryption Policy. encryptionAlgorithm should be 'AEAD_AES_256_CBC_HMAC_SHA256'")
-
-            clientEncryptionIncludedPathObj = ClientEncryptionIncludedPath(path=path,
-                                                                           client_encryption_key_id=clientEncryptionKeyId,
-                                                                           encryption_type=encryptionType,
-                                                                           encryption_algorithm=encryptionAlgorithm)
-            listOfIncludedPaths.append(clientEncryptionIncludedPathObj)
-
-        clientEncryptionPolicyObj = ClientEncryptionPolicy(included_paths=listOfIncludedPaths,
-                                                           policy_format_version=policyFormatVersion)
-
-        # looks good set the client encryption policy object.
-        sql_container_resource.client_encryption_policy = clientEncryptionPolicyObj
 
 
 def cli_cosmosdb_sql_container_create(client,
