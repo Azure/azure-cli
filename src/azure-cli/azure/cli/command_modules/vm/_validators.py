@@ -1747,6 +1747,8 @@ def process_disk_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     _validate_gallery_image_reference(cmd, namespace)
+    _validate_secure_vm_disk_encryption_set(namespace)
+    _validate_hyper_v_generation(namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
@@ -1758,6 +1760,25 @@ def process_disk_create_namespace(cmd, namespace):
                 raise ArgumentUsageError(usage_error)
         except HttpResponseError:
             raise ArgumentUsageError(usage_error)
+
+
+def _validate_secure_vm_disk_encryption_set(namespace):
+    if namespace.secure_vm_disk_encryption_set:
+        if not namespace.security_type or \
+                namespace.security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
+            raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set can only be specified only '
+                                     'when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+    elif namespace.security_type and namespace.security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
+        raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set is mandatory when '
+                                 '--security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+
+def _validate_hyper_v_generation(namespace):
+    if namespace.security_type and (not namespace.hyper_v_generation or namespace.hyper_v_generation == 'V1'):
+        logger.warning(
+            'Enabling security features by using parameter "--security-type" requires UEFI support with Generation 2 '
+            'VMs, please set the parameter "--hyper-v-generation" to "V2" for enabling Generation 2 VM support.')
 
 
 def process_snapshot_create_namespace(cmd, namespace):

@@ -6953,10 +6953,6 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des_pattern': '.*/{}$'.format(self.kwargs['des']),
         })
 
-        # test raise error if specified --security-type with 'ConfidentialVM_*' value but not --hyper-v-generation with 'V2'
-        with self.assertRaises(ArgumentUsageError):
-            self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --secure-vm-disk-encryption-set {des} --image-reference "{image}"')
-
         # test raise error if only specified --secure-vm-disk-encryption-set but not --secure-type
         with self.assertRaises(ArgumentUsageError):
             self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"')
