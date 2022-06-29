@@ -574,6 +574,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 "the os type of this image should be {}".format(community_gallery_image_info.os_type))
         namespace.os_type = community_gallery_image_info.os_type
 
+    if namespace.security_type == 'ConfidentialVM' and not namespace.os_disk_security_encryption_type:
+        raise RequiredArgumentMissingError('usage error: "--os-disk-security-encryption-type" is required '
+                                           'when "--security-type" is specified as "ConfidentialVM"')
+
+    if namespace.os_disk_secure_vm_disk_encryption_set and \
+            namespace.os_disk_security_encryption_type != 'DiskWithVMGuestState':
+        raise ArgumentUsageError(
+            'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
+            'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
