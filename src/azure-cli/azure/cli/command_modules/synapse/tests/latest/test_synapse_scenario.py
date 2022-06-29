@@ -2807,7 +2807,7 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
         self.kwargs.update({
-            'name': 'AzureDataLakeStoragePE',
+            'name': 'AzureDataLakeStoragePE1',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
 
         # create a workspace
