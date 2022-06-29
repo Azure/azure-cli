@@ -341,7 +341,7 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
-def cli_networkrule_update(cmd, client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
+def cli_networkrule_update(client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
                            default_action=None):
     networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 

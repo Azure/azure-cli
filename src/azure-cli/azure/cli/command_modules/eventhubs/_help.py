@@ -407,7 +407,7 @@ type: command
 short-summary: Updates network rule properties of the given Namespace.
 examples:
   - name: Updates network rule properties of the given Namespace, can be used to update public network access, trusted service and default action.
-    text: az eventhubs namespace network-rule update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access
+    text: az eventhubs namespace network-rule update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled
 """
 
 helps['eventhubs namespace network-rule remove'] = """
@@ -698,15 +698,18 @@ type: group
 short-summary: Manages Application Groups for premium eventhubs namespace.
 """
 
+helps['eventhubs namespace application-group application-group-policy'] = """
+type: group
+short-summary: Append or Remove application group policies.
+"""
+
 helps['eventhubs namespace application-group create'] = """
 type: command
 short-summary: Creates an application group for an EventHub namespace
 examples:
   - name: Create an application group myAppGroup for eventhub namespace mynamespace with 2 throttling policies. Maximum allowed throttling policies is 4.
     text: |
-        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup |
-        --throttling-policy-config name=policy1 metric-id=IncomingMessages rate-limit-threshold=10000 |
-        --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --client-app-group-identifier SASKeyName=keyname --throttling-policy-config name=policy1 metric-id=IncomingMessages rate-limit-threshold=10000 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
 """
 
 helps['eventhubs namespace application-group update'] = """
@@ -742,9 +745,7 @@ short-summary: Appends an application group policy to the existing policy. This 
 examples:
   - name: Append 2 throttling policies to an application group. Maximum allowed throttling policies is 4.
     text: |
-        az eventhubs namespace application-group application-group-policy add --namespace-name mynamespace -g MyResourceGroup --name myAppGroup |
-        --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500 |
-        --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+        az eventhubs namespace application-group application-group-policy add --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
 """
 
 helps['eventhubs namespace application-group application-group-policy remove'] = """
@@ -753,6 +754,5 @@ short-summary: Removes an application group policy from the existing policies. T
 examples:
   - name: Removes a throttling policy from an applicatin group myAppGroup.
     text: |
-        az eventhubs namespace application-group application-group-policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup |
-        --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
+        az eventhubs namespace application-group application-group-policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
 """
