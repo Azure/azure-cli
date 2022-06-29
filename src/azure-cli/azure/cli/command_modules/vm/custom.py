@@ -283,7 +283,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 
 
 # region Disks (Managed)
-def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
                         size_gb=None, sku='Premium_LRS', os_type=None,
                         source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
@@ -297,7 +297,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
-                        data_access_auth_mode=None, gallery_image_reference_type=None):
+                        data_access_auth_mode=None, gallery_image_reference_type=None,
+                        secure_vm_disk_encryption_set=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -374,6 +375,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
+    if secure_vm_disk_encryption_set is not None and not is_valid_resource_id(secure_vm_disk_encryption_set):
+        secure_vm_disk_encryption_set = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=secure_vm_disk_encryption_set)
+
     encryption = None
     if disk_encryption_set or encryption_type:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
@@ -406,8 +412,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.bursting_enabled = enable_bursting
     if edge_zone is not None:
         disk.extended_location = edge_zone
-    if security_type is not None:
+    if security_type:
         disk.security_profile = {'securityType': security_type}
+        if secure_vm_disk_encryption_set:
+            disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
     if support_hibernation is not None:
         disk.supports_hibernation = support_hibernation
     if public_network_access is not None:

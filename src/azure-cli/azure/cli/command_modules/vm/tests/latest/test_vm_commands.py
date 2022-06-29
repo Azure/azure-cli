@@ -6925,6 +6925,73 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss1} --image centos --os-disk-encryption-set {des1} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_confidential_disk_encryption_set_', location='westus')
+    @AllowLargeResponse(size_kb=99999)
+    def test_confidential_disk_encryption_set(self, resource_group):
+        self.kwargs.update({
+            'vault': self.create_random_name(prefix='vault-', length=20),
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des': self.create_random_name(prefix='des-', length=20),
+            'disk1': self.create_random_name(prefix='d1-', length=20),
+            'disk2': self.create_random_name(prefix='d2-', length=20),
+            'vm': self.create_random_name(prefix='vm1-', length=20),
+            'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\'),
+            'image': 'MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest'
+        })
+
+        self.cmd('keyvault create --name {vault} -g {rg} --sku Premium --enable-purge-protection true')
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create --vault-name {vault} --name {key} --ops wrapKey unwrapKey --kty RSA-HSM --size 3072 --exportable true --policy "{policy_path}"').get_output_in_json()['key']['kid']
+        
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --encryption-type ConfidentialVmEncryptedWithCustomerKey', checks=[
+            self.check('encryptionType', 'ConfidentialVmEncryptedWithCustomerKey')
+        ])
+        des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
+        des_sp_id = des_show_output['identity']['principalId']
+        des_id = des_show_output['id']
+        self.kwargs.update({
+            'des_sp_id': des_sp_id,
+            'des_id': des_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        time.sleep(15)
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault_id}')
+
+        time.sleep(15)
+
+        self.kwargs.update({
+            'des_pattern': '.*/{}$'.format(self.kwargs['des']),
+        })
+
+        # test raise error if only specified --secure-vm-disk-encryption-set but not --secure-type
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"')
+
+        # test raise error if specified 'ConfidentialVM_DiskEncryptedWithCustomerKey' for --secure-type but didn't specify --secure-vm-disk-encryption-set
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --image-reference "{image}"')
+        
+        # create disk with des name
+        self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
+            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
+        ])
+
+        # create disk with des id
+        self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
+            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
+        ])
+
 
 class DiskAccessTest(ScenarioTest):
 
