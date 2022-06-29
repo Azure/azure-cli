@@ -1320,7 +1320,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
@@ -1329,7 +1329,8 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'testsynapseworkspace',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c',
-            'storage-type': 'GRS'
+            'storage-type': 'GRS',
+            'collation':'SQL_Latin1_General_CP1_CS_AS'
         })
 
         # create a workspace
@@ -1343,12 +1344,13 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type} --collation {collation}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
                 self.check('status', 'Online'),
-                self.check('storageAccountType', 'GRS')
+                self.check('storageAccountType', 'GRS'),
+                self.check('collation', self.kwargs['collation'])
             ]).get_output_in_json()
 
         self.kwargs['pool-id'] = sql_pool['id']
