@@ -57,7 +57,7 @@ class AAZObject(AAZBaseValue):
 
     def __init__(self, schema, data):
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
     def __getitem__(self, key):
         attr_schema, name = self._get_attr_schema_and_name(key)
@@ -116,9 +116,10 @@ class AAZObject(AAZBaseValue):
         return not self == other
 
     def to_serialized_data(self, processor=None, **kwargs):
-        if self._data is None:
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
             result = None
-
         else:
             result = {}
             schemas = [self._schema]
@@ -137,7 +138,7 @@ class AAZObject(AAZBaseValue):
                     result[name] = v
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
 
         if processor:
             result = processor(self._schema, result)
@@ -162,7 +163,7 @@ class AAZDict(AAZBaseValue):
         from ._field_type import AAZDictType
         assert isinstance(schema, AAZDictType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
     def __getitem__(self, key) -> AAZBaseValue:
         item_schema = self._schema.Element
@@ -223,7 +224,9 @@ class AAZDict(AAZBaseValue):
             yield key, self[key]
 
     def to_serialized_data(self, processor=None, **kwargs):
-        if self._data is None:
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
             result = None
         else:
             result = {}
@@ -234,7 +237,8 @@ class AAZDict(AAZBaseValue):
                 result[key] = v
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result
@@ -246,7 +250,7 @@ class AAZList(AAZBaseValue):
         from ._field_type import AAZListType
         assert isinstance(schema, AAZListType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None  # the key is the idx
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined  # the key is the idx
         self._len = 0
         if self._data is not None:
             for idx in self._data:
@@ -345,7 +349,9 @@ class AAZList(AAZBaseValue):
 
     def to_serialized_data(self, processor=None, keep_undefined_in_list=False,  # pylint: disable=arguments-differ
                            **kwargs):
-        if self._data is None:
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
             result = None
         else:
             result = []
@@ -364,7 +370,8 @@ class AAZList(AAZBaseValue):
                 result = []
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result
