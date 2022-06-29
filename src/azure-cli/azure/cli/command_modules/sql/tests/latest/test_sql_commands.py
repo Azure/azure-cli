@@ -5164,6 +5164,18 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  .format(resource_group_1, managed_instance_name_1),
                  checks=[JMESPathCheck('length(@)', 2)])
 
+        self.cmd('sql midb update -g {} --managed-instance {} -n {} --tags {}'
+                 .format(resource_group_1, managed_instance_name_1, database_name, "bar=foo"),
+                 checks=[JMESPathCheck('tags', "{'bar': 'foo'}")])
+
+        # test merge managed database tags
+        tag3 = "tagName3=tagValue3"
+        self.cmd('sql midb update -g {} --managed-instance {} -n {} --set tags.{}'
+                 .format(resource_group_1, managed_instance_name_1, database_name, tag3),
+                 checks=[
+                     JMESPathCheck('tags',
+                                   "{'bar': 'foo', 'tagName3': 'tagValue3'}")])
+
         # Show by group/managed_instance/database-name
         self.cmd('sql midb show -g {} --managed-instance {} -n {}'
                  .format(resource_group_1, managed_instance_name_1, database_name),

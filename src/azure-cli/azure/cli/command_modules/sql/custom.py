@@ -4689,25 +4689,13 @@ def managed_db_create(
 
 
 def managed_db_update(
-        cmd,
-        client,
-        database_name,
-        managed_instance_name,
-        resource_group_name,
-        **kwargs):
+        instance,
+        tags=None):
 
-    # Determine managed instance location
-    kwargs['location'] = _get_managed_instance_location(
-        cmd.cli_ctx,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+    if tags is not None:
+        instance.tags = tags
 
-    # Create
-    return client.begin_update(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name,
-        parameters=kwargs)
+    return instance
 
 
 def managed_db_restore(

@@ -765,7 +765,10 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_databases_operations) as g:
 
         g.custom_command('create', 'managed_db_create', supports_no_wait=True)
-        g.custom_command('update', 'managed_db_update', supports_no_wait=True)
+        g.generic_update_command('update',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='managed_db_update',
+                                 supports_no_wait=True)
         g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
