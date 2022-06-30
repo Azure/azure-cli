@@ -102,6 +102,16 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('group exists -n testrg',
                  checks=self.check('@', False))        
 
+    def test_resource_group_empty_string_arg(self):
+        expected_msg = "{} can't be an empty string"
+        with self.assertRaisesRegex(CLIError, expected_msg.format("-n")):
+            self.cmd('group create -n "" -l westus')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("-g")):
+            self.cmd('group exists -g ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--name")):
+            self.cmd('group show --name ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--resource-group")):
+            self.cmd('group delete --resource-group ""')
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 
