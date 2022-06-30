@@ -7965,11 +7965,34 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.securityType', 'TrustedLaunch')
         ])
 
+    @unittest.skip('vhd is not supported')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_os_disk_secure_import', location='southcentralus')
+    def test_vm_trusted_launch_os_disk_secure_import(self):
+        self.kwargs.update({
+            'disk': 'seccuredisk',
+            'vm': self.create_random_name('vm', 10),
+        })
+        self.cmd('vm create -g {rg} -n {vm} --admin-username azrureuser --image ubuntults'
+                 ' --admin-password testPassword01! --use-unmanaged-disk --authentication-type password  --nsg-rule NONE')#
+
+        blob_uri = self.cmd('vm show -g {rg} -n {vm}', checks=self.check('length(storageProfile.dataDisks)', 0)).get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+        self.kwargs.update({
+            'blob_uri': blob_uri,
+            'vhd_uri': blob_uri[0:blob_uri.rindex('/') + 1] + 'seccuredisk.vhd'
+        })
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} -n {disk} --vhd {vhd_uri} --new --caching ReadWrite')
+        self.cmd('disk create -n {disk} -g {rg} --hyper-v-generation v2 --security-type TrustedLaunch --source {vhd_uri}'
+                 ' --sku standard_lrs --security-data-uri {blob_uri}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('creationData.securityDataUri', '{blob_uri}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_os_disk_secure_upload', location='southcentralus')
     def test_vm_trusted_launch_os_disk_secure_upload(self):
         self.kwargs.update({
             'disk': self.create_random_name('disk', 10),
-            'snapshot': self.create_random_name('snap', 10)
+            'disk1': self.create_random_name('disk1', 10),
+            'disk2': self.create_random_name('disk2', 10)
         })
         self.cmd('disk create -n {disk} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
@@ -7979,6 +8002,23 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.exists('accessSas'),
             self.exists('securityDataAccessSas')
         ])
+
+        self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('creationData.createOption', 'UploadPreparedSecure')
+        ])
+        self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
+            self.exists('accessSas'),
+            self.exists('securityDataAccessSas')
+        ])
+
+        self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
+            self.check('creationData.createOption', 'Upload'),
+        ])
+        self.cmd('disk grant-access -n {disk2} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
+            self.exists('accessSas'),
+        ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):
