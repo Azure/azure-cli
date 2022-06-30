@@ -1100,3 +1100,38 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
         c.argument('output_folder', type=str, help='The name of the output folder')
         c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
+
+    # synapse link connections
+    with self.argument_context('synapse link-connection list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    for scope in ['show', 'delete', 'get-status', 'start', 'stop']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection list-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection edit-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('definition_file', arg_type=definition_file_arg_type, options_list=['--file', '-f'], type=shell_safe_json_parse,
+                   help='The Edit link-tables file path, The file format can be viewed using --help.')
+
+    with self.argument_context('synapse link-connection get-link-tables-status') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('max_segment_count', help='Max segment count to query table status.')
+        c.argument('continuation_token', help='Continuation token to query table status.')
+    with self.argument_context('synapse link-connection update-landing-zone-credential') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('sas_token', help='Value of secure string.')
