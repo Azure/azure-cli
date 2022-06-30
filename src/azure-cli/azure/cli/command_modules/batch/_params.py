@@ -46,10 +46,12 @@ class NetworkProfile(Enum):
     BatchAccount = "BatchAccount"
     NodeManagement = "NodeManagement"
 
+
 profile_param_type = CLIArgumentType(
-    help="Network profile to set.", 
+    help="Network profile to set.",
     arg_type=get_enum_type(NetworkProfile))
-        
+
+
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
     batch_name_type = CLIArgumentType(
