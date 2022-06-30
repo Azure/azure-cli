@@ -132,6 +132,8 @@ def load_command_table(self, _):
         g.custom_command('delete', 'aks_agentpool_delete', supports_no_wait=True)
         g.custom_show_command('show', 'aks_agentpool_show', table_transformer=aks_agentpool_show_table_format)
         g.custom_command('list', 'aks_agentpool_list', table_transformer=aks_agentpool_list_table_format)
+        g.custom_command('stop', 'aks_agentpool_stop', supports_no_wait=True)
+        g.custom_command('start', 'aks_agentpool_start', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('aks command', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:

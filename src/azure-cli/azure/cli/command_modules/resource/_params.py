@@ -97,6 +97,12 @@ def load_arguments(self, _):
     ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], completer=FilesCompleter(), type=file_type,
                                                    help="A path to a uiFormDefinition file in the file system")
 
+    bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
+    bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
+    bicep_no_restore_type = CLIArgumentType(options_list=['--no-restore'], action='store_true')
+    bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
+    bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
+    bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
                                                      ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
@@ -641,32 +647,22 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('bicep build') as c:
-        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                    type=file_type, help="The path to the Bicep file to build in the file system."))
-        c.argument('outdir', arg_type=CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(),
-                                                      help="When set, saves the output at the specified directory."))
-        c.argument('outfile', arg_type=CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(),
-                                                       help="When set, saves the output as the specified file path."))
-        c.argument('stdout', arg_type=CLIArgumentType(options_list=['--stdout'], action='store_true',
-                                                      help="When set, prints all output to stdout instead of corresponding files."))
-        c.argument('no_restore', arg_type=CLIArgumentType(options_list=['--no-restore'], action='store_true',
-                                                          help="When set, builds the bicep file without restoring external modules."))
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
 
     with self.argument_context('bicep decompile') as c:
-        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                    type=file_type, help="The path to the ARM template to decompile in the file system."))
-        c.argument('force', arg_type=CLIArgumentType(options_list=['--force'], action='store_true',
-                                                     help="Allows overwriting the output file if it exists."))
+        c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
+        c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the output file if it exists.")
 
     with self.argument_context('bicep restore') as c:
-        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                    type=file_type, help="The path to the Bicep file to restore external modules for."))
-        c.argument('force', arg_type=CLIArgumentType(options_list=['--force'], action='store_true',
-                                                     help="Allows overwriting the cached external modules."))
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to restore external modules for.")
+        c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the cached external modules.")
 
     with self.argument_context('bicep publish') as c:
-        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
-                                                    type=file_type, help="The path to the Bicep module file to publish in the file system."))
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to publish in the file system.")
         c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
                                                       help="The target location where the Bicep module will be published."))
 
@@ -676,6 +672,13 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep upgrade') as c:
         c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('bicep generate-params') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to generate the parameters file from in the file system.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
 
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
