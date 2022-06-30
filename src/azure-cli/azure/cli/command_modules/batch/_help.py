@@ -82,11 +82,19 @@ short-summary: Manage Batch account Network profiles.
 helps['batch account network-profile show'] = """
 type: command
 short-summary: Get information about the Network profile for Batch account.
+examples:
+  - name: Show the network-profile for both BatchAccount and NodeManagement
+    text: >
+        az batch account network-profile show  -g MyResourceGroup -n MyBatchAccount
 """
 
 helps['batch account network-profile set'] = """
 type: command
 short-summary: Set the Network profile for Batch account.
+examples:
+  - name: Set the BatchAccount network-profile to the Allow
+    text: >
+        az batch account network-profile set -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --default-action Allow
 """
 
 helps['batch account network-profile network-rule'] = """
@@ -97,16 +105,28 @@ short-summary: Manage Batch account Network rules in Network Profile.
 helps['batch account network-profile network-rule list'] = """
 type: command
 short-summary: List the Network rules from a Network Profile.
+examples:
+  - name: List the Batch Accounts network profile
+    text: >
+        az batch account network-profile network-rule list -g MyResourceGroup -n MyBatchAccount
 """
 
 helps['batch account network-profile network-rule add'] = """
 type: command
 short-summary: Add a Network rule from a Network Profile.
+examples:
+  - name: Add ip address to BatchAccount network rule
+    text: >
+        az batch account network-profile network-rule add -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --ip-address 1.2.3.4
 """
 
 helps['batch account network-profile network-rule delete'] = """
 type: command
 short-summary: Delete a Network rule from a Network Profile.
+examples:
+  - name: Delete ip address from BatchAccount network rule
+    text: >
+        az batch account network-profile network-rule delete -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --ip-address 1.2.3.4
 """
 
 

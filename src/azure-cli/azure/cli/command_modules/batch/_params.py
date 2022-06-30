@@ -12,6 +12,7 @@ from azure.mgmt.batch.models import (
     AccountKeyType,
     KeySource,
     PublicNetworkAccessType,
+    ResourceIdentityType,
     EndpointAccessDefaultAction)
 from azure.batch.models import ComputeNodeDeallocationOption
 
@@ -82,7 +83,7 @@ def load_arguments(self, _):
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
                                                      'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
-        c.argument('identity_type', deprecate_info=c.deprecate(hide=True))
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
         c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
         c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
         c.ignore('keyvault_url')
@@ -93,7 +94,7 @@ def load_arguments(self, _):
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
         c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
-        c.argument('identity_type', deprecate_info=c.deprecate(hide=True))
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
         c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
         c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
 
