@@ -227,6 +227,14 @@ short-summary: Create a disk encryption set.
 examples:
   - name: Create a disk encryption set.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+  - name: Create a disk encryption set with a system assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned
+  - name: Create a disk encryption set with a user assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-user-assigned myAssignedId
+  - name: Create a disk encryption set with system assigned identity and a user assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned --mi-user-assigned myAssignedId
+  - name: Create a disk encryption set with multi-tenant application client id to access key vault in a different tenant.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --federated-client-id myFederatedClientId
   - name: Create a disk encryption set that supports double encryption.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys
 """
@@ -264,6 +272,56 @@ examples:
     text: |
         az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault
     crafted: true
+  - name: Update multi-tenant application client id of a disk encryption set.
+    text: |
+        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federated-client-id myFederatedClientId
+  - name: Clear multi-tenant application client id of a disk encryption set.
+    text: |
+        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federated-client-id None
+"""
+
+helps['disk-encryption-set identity'] = """
+type: group
+short-summary: Manage identities of a disk encryption set.
+"""
+
+helps['disk-encryption-set identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing disk encryption set.
+examples:
+  - name: Add a system assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned
+  - name: Add a user assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Add system assigned identity and a user assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned --user-assigned MyAssignedId
+"""
+
+helps['disk-encryption-set identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing disk encryption set.
+examples:
+  - name: Remove a system assigned managed identity from an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned
+  - name: Remove a user assigned managed identity from an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['disk-encryption-set identity show'] = """
+type: command
+short-summary: Display managed identities of a disk encryption set.
+examples:
+  - name: Display managed identities of a disk encryption set.
+    text: |
+        az disk-encryption-set identity show --name MyDiskEncryptionSet --resource-group MyResourceGroup
 """
 
 helps['image'] = """

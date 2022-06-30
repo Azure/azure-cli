@@ -1757,6 +1757,8 @@ def process_disk_create_namespace(cmd, namespace):
     _validate_gallery_image_reference(cmd, namespace)
     _validate_security_data_uri(namespace)
     _validate_upload_type(cmd, namespace)
+    _validate_secure_vm_disk_encryption_set(namespace)
+    _validate_hyper_v_generation(namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
@@ -1801,6 +1803,28 @@ def _validate_upload_type(cmd, namespace):
         if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
             return ArgumentUsageError(
                 "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
+
+
+def _validate_secure_vm_disk_encryption_set(namespace):
+    if 'secure_vm_disk_encryption_set' not in namespace:
+        return
+
+    if namespace.secure_vm_disk_encryption_set:
+        if not namespace.security_type or \
+                namespace.security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
+            raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set can only be specified only '
+                                     'when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+    elif namespace.security_type and namespace.security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
+        raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set is mandatory when '
+                                 '--security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+
+def _validate_hyper_v_generation(namespace):
+    if namespace.security_type and (not namespace.hyper_v_generation or namespace.hyper_v_generation == 'V1'):
+        logger.warning(
+            'Enabling security features by using parameter "--security-type" requires UEFI support with Generation 2 '
+            'VMs, please set the parameter "--hyper-v-generation" to "V2" for enabling Generation 2 VM support.')
 
 
 def process_snapshot_create_namespace(cmd, namespace):

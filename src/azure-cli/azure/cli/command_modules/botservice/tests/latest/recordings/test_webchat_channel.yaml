@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"name": "cli000002", "type": "bot"}'
+    body: '{"name": "cli000002", "type": "azurebot"}'
     headers:
       Accept:
       - application/json
@@ -11,18 +11,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '36'
+      - '41'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -k -g -n -e --appid -p -l
+      - -g -n -e --app-type --appid -l
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2020-06-02
+    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
   response:
     body:
       string: '{"valid":true,"message":"","absCode":null}'
@@ -34,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:29:12 GMT
+      - Fri, 24 Jun 2022 09:09:10 GMT
       expires:
       - '-1'
       pragma:
@@ -48,14 +45,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
-      - '1198'
+      - '1197'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "sku": {"name": "F0"}, "kind": "bot", "properties":
+    body: '{"location": "global", "sku": {"name": "F0"}, "kind": "azurebot", "properties":
       {"displayName": "cli000002", "endpoint": "https://www.google.com/api/messages",
-      "msaAppId": "dab541d1-eed7-4c7a-8979-113ab1efcc8a", "isCmekEnabled": false}}'
+      "msaAppType": "MultiTenant", "msaAppId": "15c06c16-ee69-44b6-b31a-749c8847c35d",
+      "isCmekEnabled": false, "publicNetworkAccess": "Enabled", "isStreamingSupported":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -66,32 +65,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '231'
+      - '330'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -k -g -n -e --appid -p -l
+      - -g -n -e --app-type --appid -l
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"8d029e6b-0000-0800-0000-6245d6da0000\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.scratch.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"dab541d1-eed7-4c7a-8979-113ab1efcc8a","msaAppTenantId":null,"msaAppType":null,"msaAppMSIResourceId":null,"developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"publicNetworkAccess":null,"disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ab005822-0000-1800-0000-62b57f3a0000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"15c06c16-ee69-44b6-b31a-749c8847c35d","msaAppTenantId":null,"msaAppType":"MultiTenant","msaAppMSIResourceId":null,"developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1338'
+      - '1349'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:29:14 GMT
+      - Fri, 24 Jun 2022 09:09:14 GMT
       etag:
-      - '"8d029e6b-0000-0800-0000-6245d6da0000"'
+      - '"ab005822-0000-1800-0000-62b57f3a0000"'
       expires:
       - '-1'
       pragma:
@@ -101,7 +97,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1193'
     status:
       code: 201
       message: Created
@@ -119,18 +115,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel","name":"cli000002/WebChatChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"ee92f8eba5b6cd109b0e6094ac10269f3/31/2022
-        4:29:16 PM\"","location":"global","properties":{"properties":{"webChatEmbedCode":null,"sites":[{"siteId":"lRyt6G5yg9s","siteName":"Default
-        Site","key":null,"key2":null,"isEnabled":true,"isWebchatPreviewEnabled":true,"isDetailedLoggingEnabled":true,"isNoStorageEnabled":null,"isEndpointParametersEnabled":null,"isWebChatSpeechEnabled":null,"isBlockUserUploadEnabled":false,"appId":null,"tenantId":null,"isTokenEnabled":false}]},"etag":"W/\"ee92f8eba5b6cd109b0e6094ac10269f3/31/2022
-        4:29:16 PM\"","channelName":"WebChatChannel","location":"global","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel","name":"cli000002/WebChatChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"eb76ba6e2241733ce0963c8f2967044f6/24/2022
+        9:09:16 AM\"","location":"global","properties":{"properties":{"webChatEmbedCode":null,"sites":[{"siteId":"qEt-mCna2E8","siteName":"Default
+        Site","key":null,"key2":null,"isEnabled":true,"isWebchatPreviewEnabled":true,"isDetailedLoggingEnabled":null,"isNoStorageEnabled":null,"isEndpointParametersEnabled":null,"isWebChatSpeechEnabled":null,"isBlockUserUploadEnabled":false,"appId":null,"tenantId":null,"isTokenEnabled":false}]},"etag":"W/\"eb76ba6e2241733ce0963c8f2967044f6/24/2022
+        9:09:16 AM\"","channelName":"WebChatChannel","location":"global","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -139,9 +132,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:29:15 GMT
+      - Fri, 24 Jun 2022 09:09:16 GMT
       etag:
-      - W/"ee92f8eba5b6cd109b0e6094ac10269f3/31/2022 4:29:16 PM"
+      - W/"eb76ba6e2241733ce0963c8f2967044f6/24/2022 9:09:16 AM"
       expires:
       - '-1'
       pragma:
@@ -173,31 +166,28 @@ interactions:
       ParameterSetName:
       - -g -n --with-secrets
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel/listChannelWithKeys?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel/listChannelWithKeys?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"resource":{"properties":{"sites":[{"siteId":"lRyt6G5yg9s","siteName":"Default
-        Site","key":"lRyt6G5yg9s.GLUuWfxmePD1c5VpT3WVYOGmLIrYRtgieKu_1mHFgLU","key2":"lRyt6G5yg9s.ZMiT83Mqb0icsXFc_Rl_L8NzkLEDLLe8uFHh-GcRxgE","isEnabled":true,"isWebchatPreviewEnabled":true,"isDetailedLoggingEnabled":true,"isBlockUserUploadEnabled":false,"isTokenEnabled":false}]},"etag":"W/\"dfa0a739d0cd913857fffa068274b8be3/31/2022
-        4:29:17 PM\"","channelName":"WebChatChannel","location":"global"},"setting":{"extensionKey1":"","extensionKey2":"","sites":[{"siteId":"lRyt6G5yg9s","siteName":"Default
-        Site","key":"lRyt6G5yg9s.GLUuWfxmePD1c5VpT3WVYOGmLIrYRtgieKu_1mHFgLU","key2":"lRyt6G5yg9s.ZMiT83Mqb0icsXFc_Rl_L8NzkLEDLLe8uFHh-GcRxgE","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isWebchatPreviewEnabled":true,"isDetailedLoggingEnabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"isTokenEnabled":false,"eTag":"\"92017841-0000-0800-0000-6245d6db0000\""}],"channelId":"webchat","channelDisplayName":"Web
-        Chat","botId":"cli000002","botIconUrl":"https://docs.scratch.botframework.com/static/devportal/client/images/bot-framework-default.png","isEnabled":true,"disableLocalAuth":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel","location":"global","properties":{"properties":{"webChatEmbedCode":null,"sites":[{"siteId":"lRyt6G5yg9s","siteName":"Default
-        Site","key":"lRyt6G5yg9s.GLUuWfxmePD1c5VpT3WVYOGmLIrYRtgieKu_1mHFgLU","key2":"lRyt6G5yg9s.ZMiT83Mqb0icsXFc_Rl_L8NzkLEDLLe8uFHh-GcRxgE","isEnabled":true,"isWebchatPreviewEnabled":true,"isDetailedLoggingEnabled":true,"isNoStorageEnabled":null,"isEndpointParametersEnabled":null,"isWebChatSpeechEnabled":null,"isBlockUserUploadEnabled":false,"appId":null,"tenantId":null,"isTokenEnabled":false}]},"etag":"W/\"dfa0a739d0cd913857fffa068274b8be3/31/2022
-        4:29:17 PM\"","channelName":"WebChatChannel","location":"global"},"provisioningState":"Accepted","entityTag":"W/\"dfa0a739d0cd913857fffa068274b8be3/31/2022
-        4:29:17 PM\"","changedTime":"0001-01-01T00:00:00Z","zones":[]}'
+      string: '{"resource":{"properties":{"sites":[{"siteId":"qEt-mCna2E8","siteName":"Default
+        Site","key":"qEt-mCna2E8.ik7HOUpTY-t0voboMHE0hQCpP-jqGd9Jl6Slvu6EEGc","key2":"qEt-mCna2E8.s4P8HP4r2JvVO0u-bfkcQEAJcuGxfnTXDfv0pdR2YPE","isEnabled":true,"isWebchatPreviewEnabled":true,"isBlockUserUploadEnabled":false,"isTokenEnabled":false}]},"etag":"W/\"9ace906a9bc91df2e272c6b6ba8717d06/24/2022
+        9:09:17 AM\"","channelName":"WebChatChannel","location":"global"},"setting":{"extensionKey1":"","extensionKey2":"","sites":[{"siteId":"qEt-mCna2E8","siteName":"Default
+        Site","key":"qEt-mCna2E8.ik7HOUpTY-t0voboMHE0hQCpP-jqGd9Jl6Slvu6EEGc","key2":"qEt-mCna2E8.s4P8HP4r2JvVO0u-bfkcQEAJcuGxfnTXDfv0pdR2YPE","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isWebchatPreviewEnabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"isTokenEnabled":false,"eTag":"\"5a093521-0000-0200-0000-62b57f3a0000\""}],"channelId":"webchat","channelDisplayName":"Web
+        Chat","botId":"cli000002","botIconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","isEnabled":true,"publicNetworkAccess":"Enabled","disableLocalAuth":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/WebChatChannel","location":"global","properties":{"properties":{"webChatEmbedCode":null,"sites":[{"siteId":"qEt-mCna2E8","siteName":"Default
+        Site","key":"qEt-mCna2E8.ik7HOUpTY-t0voboMHE0hQCpP-jqGd9Jl6Slvu6EEGc","key2":"qEt-mCna2E8.s4P8HP4r2JvVO0u-bfkcQEAJcuGxfnTXDfv0pdR2YPE","isEnabled":true,"isWebchatPreviewEnabled":true,"isDetailedLoggingEnabled":null,"isNoStorageEnabled":null,"isEndpointParametersEnabled":null,"isWebChatSpeechEnabled":null,"isBlockUserUploadEnabled":false,"appId":null,"tenantId":null,"isTokenEnabled":false}]},"etag":"W/\"9ace906a9bc91df2e272c6b6ba8717d06/24/2022
+        9:09:17 AM\"","channelName":"WebChatChannel","location":"global"},"provisioningState":"Accepted","entityTag":"W/\"9ace906a9bc91df2e272c6b6ba8717d06/24/2022
+        9:09:17 AM\"","changedTime":"0001-01-01T00:00:00Z","zones":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2151'
+      - '2111'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:29:17 GMT
+      - Fri, 24 Jun 2022 09:09:16 GMT
       expires:
       - '-1'
       pragma:
@@ -211,7 +201,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -231,12 +221,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
       string: ''
@@ -246,7 +233,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 31 Mar 2022 16:29:20 GMT
+      - Fri, 24 Jun 2022 09:09:24 GMT
       expires:
       - '-1'
       pragma:
@@ -256,7 +243,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14997'
     status:
       code: 200
       message: OK
