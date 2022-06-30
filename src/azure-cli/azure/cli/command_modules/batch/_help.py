@@ -85,7 +85,7 @@ short-summary: Get information about the Network profile for Batch account.
 examples:
   - name: Show the network-profile for both BatchAccount and NodeManagement
     text: >
-        az batch account network-profile show  -g MyResourceGroup -n MyBatchAccount
+        az batch account network-profile show -g MyResourceGroup -n MyBatchAccount
 """
 
 helps['batch account network-profile set'] = """
