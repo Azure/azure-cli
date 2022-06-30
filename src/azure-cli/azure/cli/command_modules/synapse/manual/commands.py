@@ -32,6 +32,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_kusto_pool
     from ._client_factory import cf_kusto_script
     from ._client_factory import cf_kusto_scripts
+    from ._client_factory import cf_synapse_client_azure_ad_only_authentications_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -577,3 +578,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'synapse_kusto_script_list', client_factory=cf_kusto_scripts)
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')
+
+    with self.command_group('synapse ad-only-authentications', command_type=synapse_sqlpool_sdk,
+                            custom_command_type=get_custom_sdk('adonlyauthentications', cf_synapse_client_azure_ad_only_authentications_factory),
+                            client_factory=cf_synapse_client_azure_ad_only_authentications_factory) as g:
+        g.custom_command('create', 'synapse_create_adonly_auth', supports_no_wait=True)
+        g.custom_command('update', 'synapse_create_adonly_auth', supports_no_wait=True)
+        g.command('list', 'list')
+        g.show_command('show','get')
+        g.wait_command('wait')
