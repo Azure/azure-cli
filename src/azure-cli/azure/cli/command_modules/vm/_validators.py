@@ -1784,6 +1784,10 @@ def _validate_security_data_uri(namespace):
         return ArgumentUsageError(
             "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
 
+    if not namespace.source:
+        return RequiredArgumentMissingError(
+            'Please specify --source when using the --security-data-uri parameter')
+
 
 def _validate_upload_type(cmd, namespace):
     if not namespace.upload_type and namespace.for_upload:

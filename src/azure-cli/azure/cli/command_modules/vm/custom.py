@@ -311,14 +311,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    if source_blob_uri:
+    if security_data_uri:
+        option = DiskCreateOption.import_secure
+    elif source_blob_uri:
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
     elif source_restore_point:
         option = DiskCreateOption.restore
-    elif security_data_uri:
-        option = DiskCreateOption.import_secure
     elif upload_type == 'Upload':
         option = DiskCreateOption.upload
     elif upload_type == 'UploadWithSecurityData':
