@@ -109,6 +109,9 @@ examples:
     text: |
         az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyManagedDisk --resource-group MyResourceGroup
     crafted: true
+  - name: Grant a resource read access to a disk to generate access SAS and security data access SAS
+    text: |
+        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyDisk --resource-group MyResourceGroup --secure-vm-guest-state-sas
 """
 
 helps['disk list'] = """

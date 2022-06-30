@@ -2331,3 +2331,12 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def validate_secure_vm_guest_state_sas(cmd, namespace):
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
+    DiskCreateOption = cmd.get_models('DiskCreateOption')
+
+    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+        namespace.secure_vm_guest_state_sas = True

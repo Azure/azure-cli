@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
-    validate_vm_name_for_monitor_metrics)
+    validate_vm_name_for_monitor_metrics, validate_secure_vm_guest_state_sas)
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
@@ -165,6 +165,13 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
             c.argument('secure_vm_disk_encryption_set', min_api='2021-08-01', help='Name or ID of disk encryption set created with ConfidentialVmEncryptedWithCustomerKey encryption type.')
+    # endregion
+
+    # region Disks
+    with self.argument_context('disk grant-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
+        c.argument('secure_vm_guest_state_sas', options_list=['--secure-vm-guest-state-sas', '-s'], min_api='2022-03-02',
+                   action='store_true', validator=validate_secure_vm_guest_state_sas,
+                   help="Get SAS on managed disk with VM guest state. It will be used by default when the create option of disk is 'secureOSUpload'")
     # endregion
 
     # region Disks

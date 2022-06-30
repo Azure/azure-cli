@@ -451,15 +451,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
 
 
-def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None):
-
-    secure_vm_guest_state_sas = None
-    if cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
-        compute_client = _compute_client_factory(cmd.cli_ctx)
-        disk_info = compute_client.disks.get(resource_group_name, disk_name)
-        DiskCreateOption = cmd.get_models('DiskCreateOption', operation_group='disks')
-        if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
-            secure_vm_guest_state_sas = True
+def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
+                      secure_vm_guest_state_sas=None):
 
     return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
                          access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
