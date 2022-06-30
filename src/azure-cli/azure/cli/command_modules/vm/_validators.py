@@ -1773,7 +1773,7 @@ def process_disk_create_namespace(cmd, namespace):
 
 
 def _validate_security_data_uri(namespace):
-    if not namespace.security_data_uri:
+    if 'security_data_uri' not in namespace or not namespace.security_data_uri:
         return
 
     if not namespace.security_type:
@@ -1790,6 +1790,9 @@ def _validate_security_data_uri(namespace):
 
 
 def _validate_upload_type(cmd, namespace):
+    if 'upload_type' not in namespace:
+        return
+
     if not namespace.upload_type and namespace.for_upload:
         namespace.upload_type = 'Upload'
 
