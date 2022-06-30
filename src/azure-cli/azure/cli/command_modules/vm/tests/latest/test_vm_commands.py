@@ -7010,7 +7010,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'kid': kid
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} --encryption-type ConfidentialVmEncryptedWithCustomerKey')
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} --encryption-type confidentialvmencryptedwithcustomerkey')
         des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
         des1_sp_id = des1_show_output['identity']['principalId']
         des1_id = des1_show_output['id']
@@ -7026,7 +7026,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
 
-        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2as_v5 --security-type Confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type DiskwithVMGuestState --os-disk-secure-vm-disk-encryption-set {des1}')
+        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2as_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type diskwithvmgueststate --os-disk-secure-vm-disk-encryption-set {des1}')
         self.cmd('vm show -n {vm1} -g {rg}', checks=[
             self.check('storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'DiskWithVMGuestState'),
             self.check('storageProfile.osDisk.managedDisk.securityProfile.diskEncryptionSet.id', '{des1_id}')
