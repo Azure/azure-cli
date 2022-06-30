@@ -78,6 +78,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('resource', options_list=['--resource'], help='Azure resource endpoints in AAD v1.0.')
             c.argument('scopes', options_list=['--scope'], nargs='*', help='Space-separated AAD scopes in AAD v2.0. Default to Azure Resource Manager.')
             c.argument('tenant', options_list=['--tenant', '-t'], help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
+            c.argument('show_claims', help='Show the decoded claims of the access token.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
