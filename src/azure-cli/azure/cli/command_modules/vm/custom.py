@@ -317,6 +317,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.copy
     elif source_restore_point:
         option = DiskCreateOption.restore
+    elif security_data_uri:
+        option = DiskCreateOption.import_secure
     elif upload_type == 'Upload':
         option = DiskCreateOption.upload
     elif upload_type == 'UploadWithSecurityData':
