@@ -141,7 +141,7 @@ def load_arguments(self, _):
 
     for scope in ['disk', 'snapshot']:
         with self.argument_context(scope) as c:
-            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
+            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot', 'source_restore_point')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
@@ -166,6 +166,7 @@ def load_arguments(self, _):
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
             c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
+            c.argument('secure_vm_disk_encryption_set', min_api='2021-08-01', help='Name or ID of disk encryption set created with ConfidentialVmEncryptedWithCustomerKey encryption type.')
     # endregion
 
     # region Disks
@@ -184,7 +185,8 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
         c.argument('image_reference', help='ID or URN (publisher:offer:sku:version) of the image from which to create a disk')
         c.argument('image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
-        c.argument('gallery_image_reference', help='ID of the Compute Gallery image version from which to create a disk')
+        c.argument('gallery_image_reference', help='ID of the Compute, Shared or Community Gallery image version from which to create a disk. For details about valid format, please refer to the help sample')
+        c.ignore('gallery_image_reference_type')
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
@@ -520,6 +522,7 @@ def load_arguments(self, _):
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
         c.argument('edge_zone', edge_zone_type)
+        c.argument('architecture', help='The name of architecture. ', arg_type=get_enum_type(["x64", "Arm64"]))
 
     with self.argument_context('vm image list-offers') as c:
         c.argument('edge_zone', edge_zone_type)
@@ -929,6 +932,7 @@ def load_arguments(self, _):
                        help='Space-separated application configuration overrides for each application version ids. '
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
+            c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
@@ -1349,6 +1353,12 @@ def load_arguments(self, _):
         c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
                    help='The name of the gallery Application Version')
 
+    with self.argument_context('sig gallery-application version create') as c:
+        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
+                                             'If not specified, the package file will be named the same as the Gallery Application name.')
+        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
+                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
+
     for scope in ['create', 'update']:
         with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
@@ -1358,9 +1368,9 @@ def load_arguments(self, _):
             c.argument('install_command', help='The path and arguments to install the gallery application.')
             c.argument('remove_command', help='The path and arguments to remove the gallery application.')
             c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version '
-                                              'and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is '
+                                              ' then update operation will invoke remove command on the previous version'
+                                              ' and install command on the current version of the gallery application.')
+            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
                        'going to be replicated to. This property is updatable. Expected value: '
                        'json-string/json-file/@json-file.')
             c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
@@ -1431,7 +1441,7 @@ def load_arguments(self, _):
         c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
         c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
         c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys', 'ConfidentialVmEncryptedWithCustomerKey']),
-                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed.')
+                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed. ConfidentialVmEncryptedWithCustomerKey: An additional encryption type accepted for confidential VM. Disk is encrypted at rest with Customer managed key.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
         c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',

@@ -377,9 +377,10 @@ def ensure_container_insights_for_monitoring(
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
                     if cluster_region not in region_ids:
-                        raise ClientRequestError(f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
+                        raise ClientRequestError(
+                            f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{dcr_resource_id}?api-version=2019-11-01-preview"
+                f"{dcr_resource_id}?api-version=2021-04-01"
             # get existing tags on the container insights extension DCR if the customer added any
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
@@ -394,18 +395,7 @@ def ensure_container_insights_for_monitoring(
                                 {
                                     "name": "ContainerInsightsExtension",
                                     "streams": [
-                                            "Microsoft-Perf",
-                                            "Microsoft-ContainerInventory",
-                                            "Microsoft-ContainerLog",
-                                            "Microsoft-ContainerLogV2",
-                                            "Microsoft-ContainerNodeInventory",
-                                            "Microsoft-KubeEvents",
-                                            "Microsoft-KubeMonAgentEvents",
-                                            "Microsoft-KubeNodeInventory",
-                                            "Microsoft-KubePodInventory",
-                                            "Microsoft-KubePVInventory",
-                                            "Microsoft-KubeServices",
-                                            "Microsoft-InsightsMetrics",
+                                        "Microsoft-ContainerInsights-Group-Default"
                                     ],
                                     "extensionName": "ContainerInsights",
                                 }
@@ -414,18 +404,7 @@ def ensure_container_insights_for_monitoring(
                         "dataFlows": [
                             {
                                 "streams": [
-                                    "Microsoft-Perf",
-                                    "Microsoft-ContainerInventory",
-                                    "Microsoft-ContainerLog",
-                                    "Microsoft-ContainerLogV2",
-                                    "Microsoft-ContainerNodeInventory",
-                                    "Microsoft-KubeEvents",
-                                    "Microsoft-KubeMonAgentEvents",
-                                    "Microsoft-KubeNodeInventory",
-                                    "Microsoft-KubePodInventory",
-                                    "Microsoft-KubePVInventory",
-                                    "Microsoft-KubeServices",
-                                    "Microsoft-InsightsMetrics",
+                                    "Microsoft-ContainerInsights-Group-Default"
                                 ],
                                 "destinations": ["la-workspace"],
                             }
@@ -465,7 +444,7 @@ def ensure_container_insights_for_monitoring(
                 }
             )
             association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2021-04-01"
             for _ in range(3):
                 try:
                     send_raw_request(

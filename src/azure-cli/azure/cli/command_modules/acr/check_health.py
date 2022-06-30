@@ -11,6 +11,7 @@ from ._docker_utils import _get_aad_token
 from .helm import get_helm_command
 from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
+from ._format import add_timestamp
 
 logger = get_logger(__name__)
 
@@ -229,7 +230,9 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     from azure.cli.core.util import should_disable_connection_verify
 
     try:
-        challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+        request_url = 'https://' + login_server + '/v2/'
+        logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
+        challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
     except SSLError:
         from ._errors import CONNECTIVITY_SSL_ERROR
         _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
