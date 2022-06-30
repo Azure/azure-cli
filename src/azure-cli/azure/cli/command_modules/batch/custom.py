@@ -79,19 +79,19 @@ def get_account(cmd, client, resource_group_name=None, account_name=None):
 def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
-                   encryption_key_source=None, encryption_key_identifier=None, identity_type=None,
-                   mi_user_assigned=None):
+                   encryption_key_source=None, encryption_key_identifier=None,
+                   mi_user_assigned=None, mi_system_assigned=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
 
     identity = None
-    if identity_type and identity_type == ResourceIdentityType.SYSTEM_ASSIGNED:
-        identity = BatchAccountIdentity(type=identity_type)
+    if mi_system_assigned:
+        identity = BatchAccountIdentity(type=ResourceIdentityType.SYSTEM_ASSIGNED)
 
-    if mi_user_assigned and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
+    if mi_user_assigned:
         useridentity = UserAssignedIdentities()
         my_dict = {mi_user_assigned: useridentity}
-        identity = BatchAccountIdentity(type=identity_type, user_assigned_identities=my_dict)
+        identity = BatchAccountIdentity(type=ResourceIdentityType.USER_ASSIGNED, user_assigned_identities=my_dict)
 
     if (encryption_key_source and
             encryption_key_source.lower() == "microsoft.keyvault" and not encryption_key_identifier):
@@ -119,7 +119,7 @@ def create_account(client,
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None, encryption_key_source=None, public_network_access=None,
-                   encryption_key_identifier=None, identity_type=None, mi_user_assigned=None):
+                   encryption_key_identifier=None, mi_user_assigned=None, mi_system_assigned=None):
 
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -135,13 +135,13 @@ def update_account(client, resource_group_name, account_name,
         encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
 
     identity = None
-    if identity_type and identity_type == ResourceIdentityType.SYSTEM_ASSIGNED:
-        identity = BatchAccountIdentity(type=identity_type)
+    if mi_system_assigned:
+        identity = BatchAccountIdentity(type=ResourceIdentityType.SYSTEM_ASSIGNED)
 
-    if mi_user_assigned and identity_type and identity_type == ResourceIdentityType.USER_ASSIGNED:
+    if mi_user_assigned:
         useridentity = UserAssignedIdentities()
         my_dict = {mi_user_assigned: useridentity}
-        identity = BatchAccountIdentity(type=identity_type, user_assigned_identities=my_dict)
+        identity = BatchAccountIdentity(type=ResourceIdentityType.USER_ASSIGNED, user_assigned_identities=my_dict)
 
     parameters = BatchAccountUpdateParameters(
         tags=tags,
@@ -211,7 +211,7 @@ def get_network_profile(cmd, client, resource_group_name=None, account_name=None
     return batch_account.network_profile
 
 
-def update_network_profile(cmd, client, resource_group_name, account_name,
+def update_network_profile(cmd, client, resource_group_name=None, account_name=None,
                            profile=None, default_action=None):
 
     batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
@@ -240,13 +240,13 @@ def update_network_profile(cmd, client, resource_group_name, account_name,
                          parameters=parameters)
 
 
-def list_network_rules(cmd, client, resource_group_name, account_name):
+def list_network_rules(cmd, client, resource_group_name=None, account_name=None):
     batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
 
     return batch_account.network_profile
 
 
-def add_network_rule(cmd, client, resource_group_name, account_name, profile=None, ip_address=None):
+def add_network_rule(cmd, client, resource_group_name=None, account_name=None, profile=None, ip_address=None):
     batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
 
     # we want to use the existing network_profile if it exists, else build one up
@@ -281,7 +281,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, profile=Non
     return list_network_rules(cmd, client, resource_group_name, account_name)
 
 
-def delete_network_rule(cmd, client, resource_group_name, account_name, profile=None, ip_address=None):
+def delete_network_rule(cmd, client, resource_group_name=None, account_name=None, profile=None, ip_address=None):
     batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
 
     # we want to use the existing network_profile if it exists, else build one up
