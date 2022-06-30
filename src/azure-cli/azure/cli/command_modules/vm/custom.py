@@ -179,12 +179,16 @@ def _get_sku_object(cmd, sku):
     return sku
 
 
-def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level):
+def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
+                  secure_vm_guest_state_sas=None):
     AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
-    grant_access_data = GrantAccessData(
-        access=access_level or AccessLevel.read, duration_in_seconds=duration_in_seconds)
+    grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
+                                        duration_in_seconds=duration_in_seconds)
+    if secure_vm_guest_state_sas:
+        grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
+
     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
 
@@ -297,8 +301,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
-                        data_access_auth_mode=None, gallery_image_reference_type=None,
-                        secure_vm_disk_encryption_set=None):
+                        data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
+                        upload_type=None, secure_vm_disk_encryption_set=None):
+
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -312,8 +317,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.copy
     elif source_restore_point:
         option = DiskCreateOption.restore
-    elif for_upload:
+    elif upload_type == 'Upload':
         option = DiskCreateOption.upload
+    elif upload_type == 'UploadWithSecurityData':
+        option = DiskCreateOption.upload_prepared_secure
     elif image_reference or gallery_image_reference:
         option = DiskCreateOption.from_image
     else:
@@ -326,8 +333,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             subscription=subscription_id, resource_group=resource_group_name,
             namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_name)
 
-    if upload_size_bytes is not None and for_upload is not True:
-        raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
+    if upload_size_bytes is not None and not upload_type:
+        raise RequiredArgumentMissingError(
+            'usage error: --upload-size-bytes should be used together with --upload-type')
 
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
@@ -360,10 +368,16 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  source_resource_id=source_disk or source_snapshot or source_restore_point,
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes,
-                                 logical_sector_size=logical_sector_size)
+                                 logical_sector_size=logical_sector_size,
+                                 security_data_uri=security_data_uri)
 
-    if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
-        raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
+    if size_gb is None and upload_size_bytes is None:
+        if option == DiskCreateOption.empty:
+            raise RequiredArgumentMissingError(
+                'usage error: --size-gb or --upload-size-bytes required to create an empty disk')
+        if upload_type:
+            raise RequiredArgumentMissingError(
+                'usage error: --size-gb or --upload-size-bytes required to create a disk for upload')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         disk_encryption_set = resource_id(
@@ -436,8 +450,17 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None):
+
+    secure_vm_guest_state_sas = None
+    if cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+        compute_client = _compute_client_factory(cmd.cli_ctx)
+        disk_info = compute_client.disks.get(resource_group_name, disk_name)
+        DiskCreateOption = cmd.get_models('DiskCreateOption', operation_group='disks')
+        if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+            secure_vm_guest_state_sas = True
+
     return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
-                         access_level=access_level)
+                         access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
 
 
 def list_managed_disks(cmd, resource_group_name=None):

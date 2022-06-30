@@ -1755,6 +1755,8 @@ def process_disk_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     _validate_gallery_image_reference(cmd, namespace)
+    _validate_security_data_uri(namespace)
+    _validate_upload_type(cmd, namespace)
     _validate_secure_vm_disk_encryption_set(namespace)
     _validate_hyper_v_generation(namespace)
     if namespace.source:
@@ -1768,6 +1770,39 @@ def process_disk_create_namespace(cmd, namespace):
                 raise ArgumentUsageError(usage_error)
         except HttpResponseError:
             raise ArgumentUsageError(usage_error)
+
+
+def _validate_security_data_uri(namespace):
+    if not namespace.security_data_uri:
+        return
+
+    if not namespace.security_type:
+        return RequiredArgumentMissingError(
+            'Please specify --security-type when using the --security-data-uri parameter')
+
+    if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+        return ArgumentUsageError(
+            "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
+
+
+def _validate_upload_type(cmd, namespace):
+    if not namespace.upload_type and namespace.for_upload:
+        namespace.upload_type = 'Upload'
+
+    if namespace.upload_type == 'UploadWithSecurityData':
+
+        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+            raise ArgumentUsageError(
+                "'UploadWithSecurityData' is not supported in the current profile. "
+                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
+
+        if not namespace.security_type:
+            return RequiredArgumentMissingError(
+                "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
+
+        if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+            return ArgumentUsageError(
+                "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
 
 
 def _validate_secure_vm_disk_encryption_set(namespace):

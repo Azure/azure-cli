@@ -7941,11 +7941,43 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
-    # @unittest.skip('Service does not work')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_trusted_launch_', location='southcentralus')
     def test_disk_trusted_launch(self):
-        self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
+
+        self.kwargs.update({
+            'disk': 'disk1',
+            'snapshot': 'snapshot1'
+        })
+
+        self.kwargs['disk_id'] = self.cmd('disk create -g {rg} -n {disk} --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch')
+        ]).get_output_in_json()['id']
+
+        self.cmd('disk show -g {rg} -n {disk}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+        self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk_id}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+        self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_os_disk_secure_upload', location='southcentralus')
+    def test_vm_trusted_launch_os_disk_secure_upload(self):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10)
+        })
+        self.cmd('disk create -n {disk} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('creationData.createOption', 'UploadPreparedSecure'),
+        ])
+        self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
+            self.exists('accessSas'),
+            self.exists('securityDataAccessSas')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
