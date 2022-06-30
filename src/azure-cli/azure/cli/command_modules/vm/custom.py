@@ -807,7 +807,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
-              v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False):
+              v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
+              os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -837,6 +838,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_disk_encryption_set = resource_id(
             subscription=subscription_id, resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_encryption_set)
+    if os_disk_secure_vm_disk_encryption_set is not None and\
+            not is_valid_resource_id(os_disk_secure_vm_disk_encryption_set):
+        os_disk_secure_vm_disk_encryption_set = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_secure_vm_disk_encryption_set)
 
     if data_disk_encryption_sets is None:
         data_disk_encryption_sets = []
@@ -1026,7 +1032,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
-        enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core)
+        enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
+        os_disk_security_encryption_type=os_disk_security_encryption_type,
+        os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2948,7 +2956,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False):
+                v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
+                os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -2986,6 +2995,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             os_disk_encryption_set = resource_id(
                 subscription=subscription_id, resource_group=resource_group_name,
                 namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_encryption_set)
+        if os_disk_secure_vm_disk_encryption_set is not None and\
+                not is_valid_resource_id(os_disk_secure_vm_disk_encryption_set):
+            os_disk_secure_vm_disk_encryption_set = resource_id(
+                subscription=subscription_id, resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_secure_vm_disk_encryption_set)
 
         if data_disk_encryption_sets is None:
             data_disk_encryption_sets = []
@@ -3224,7 +3238,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
             enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
-            v_cpus_per_core=v_cpus_per_core)
+            v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
+            os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
