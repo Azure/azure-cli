@@ -1146,41 +1146,6 @@ def load_arguments(self, _):
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
 
-    with self.argument_context('sig show-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-
-    with self.argument_context('sig image-definition show-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-        c.argument('gallery_image_name', gallery_image_name_type)
-
-    with self.argument_context('sig image-definition list-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
-    with self.argument_context('sig image-version show-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-        c.argument('gallery_image_name', gallery_image_name_type)
-        c.argument('gallery_image_version_name', gallery_image_name_version_type)
-
-    with self.argument_context('sig image-version list-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-        c.argument('gallery_image_name', gallery_image_name_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
-    with self.argument_context('sig share enable-community') as c:
-        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
-        c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
-        c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
-        c.argument('op_type', default='EnableCommunity', deprecate_info=c.deprecate(hide=True),
-                   help='distinguish add operation and remove operation')
-
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
@@ -1323,6 +1288,47 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+
+    with self.argument_context('sig show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+
+    with self.argument_context('sig list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig image-definition show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+
+    with self.argument_context('sig image-definition list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig image-version show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+        c.argument('gallery_image_version_name', gallery_image_name_version_type)
+
+    with self.argument_context('sig image-version list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig share enable-community') as c:
+        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
+        c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
+        c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
+        c.argument('op_type', default='EnableCommunity', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
     # endregion
 
     # region Gallery applications
