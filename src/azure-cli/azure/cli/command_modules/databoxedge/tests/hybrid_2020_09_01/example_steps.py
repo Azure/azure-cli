@@ -51,8 +51,7 @@ def step_device_list(test, rg, checks=None):
 def step_device_list2(test, rg, checks=None):
     if checks is None:
         checks = []
-    test.cmd('az databoxedge device list '
-             '-g ""',
+    test.cmd('az databoxedge device list',
              checks=checks)
 
 
