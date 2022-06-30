@@ -247,7 +247,7 @@ az some-command --contact name=Bill address=null
 
 ### `null` value in update commands
 
-In update commands `null` value is usually used to unset properties.
+In update commands `null` value is usually used to unset properties of a object or remove elements of an array or a dict.
 For example if there already exists an resource with following contact property
 
 contact
@@ -278,6 +278,11 @@ contact
 By using `null` value in update command, _address_ property of resource's _contact_ can be unset:
 ```bash
 az some-update-command --contact address=null
+```
+
+By using `null` value in update command, the first element of resource's _emails_ can be removed:
+```bash
+az some-update-command --emails [0]=null
 ```
 
 # Single Quotes String
