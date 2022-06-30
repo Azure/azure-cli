@@ -1777,15 +1777,15 @@ def _validate_security_data_uri(namespace):
         return
 
     if not namespace.security_type:
-        return RequiredArgumentMissingError(
+        raise RequiredArgumentMissingError(
             'Please specify --security-type when using the --security-data-uri parameter')
 
     if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
-        return ArgumentUsageError(
+        raise ArgumentUsageError(
             "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
 
     if not namespace.source:
-        return RequiredArgumentMissingError(
+        raise RequiredArgumentMissingError(
             'Please specify --source when using the --security-data-uri parameter')
 
 
@@ -1801,11 +1801,11 @@ def _validate_upload_type(cmd, namespace):
                 "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
 
         if not namespace.security_type:
-            return RequiredArgumentMissingError(
+            raise RequiredArgumentMissingError(
                 "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
 
         if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
-            return ArgumentUsageError(
+            raise ArgumentUsageError(
                 "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
 
 
