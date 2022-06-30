@@ -503,7 +503,7 @@ def load_arguments(self, _):
         c.argument('resource_ids', nargs='+', options_list='--resource-ids')
 
     with self.argument_context('group create') as c:
-        c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
+        c.argument('rg_name', resource_group_name_type, options_list=['--name', '--resource-group', '-n', '-g'],
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='resource_group_name', actions=[LocalContextAction.SET], scopes=[ALL]))
