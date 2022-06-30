@@ -2147,12 +2147,23 @@ def load_arguments(self, _):
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'collation',
+                'tags',
             ])
+
+        c.argument('tags', arg_type=tags_type)
 
         c.argument('collation',
                    required=False,
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
+
+    with self.argument_context('sql midb update') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'tags',
+            ])
+
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
