@@ -58,7 +58,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.common import AzureException
-    from azure.core.exceptions import AzureError
+    from azure.core.exceptions import AzureError, ServiceRequestError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
@@ -79,7 +79,11 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.InvalidArgumentValueError(error_msg)
         az_error.set_recommendation(QUERY_REFERENCE)
 
-    elif isinstance(ex, SSLError):
+    # SSLError is raised when making HTTP requests with 'requests' lib behind a proxy that intercepts HTTPS traffic.
+    # - SSLError is raised when directly calling 'requests' lib, such as MSAL or `az rest`
+    # - azure.core.exceptions.ServiceRequestError is raised when indirectly calling 'requests' lib with azure.core,
+    #   which wraps the original SSLError
+    elif isinstance(ex, SSLError) or isinstance(ex, ServiceRequestError) and isinstance(ex.inner_exception, SSLError):
         az_error = azclierror.AzureConnectionError(error_msg)
         az_error.set_recommendation(SSLERROR_TEMPLATE)
 
@@ -887,7 +891,12 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # try to figure out the correct content type
     if body:
         try:
-            _ = shell_safe_json_parse(body)
+            body_object = shell_safe_json_parse(body)
+            # Make sure Unicode characters are escaped as ASCII by utilizing the default ensure_ascii=True kwarg
+            # of json.dumps, since http.client by default encodes the body as latin-1:
+            # https://github.com/python/cpython/blob/3.10/Lib/http/client.py#L164
+            # https://github.com/python/cpython/blob/3.10/Lib/http/client.py#L1324-L1327
+            body = json.dumps(body_object)
             if 'Content-Type' not in headers:
                 headers['Content-Type'] = 'application/json'
         except Exception:  # pylint: disable=broad-except

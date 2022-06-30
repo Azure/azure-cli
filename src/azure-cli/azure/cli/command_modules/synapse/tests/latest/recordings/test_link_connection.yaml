@@ -1,0 +1,405 @@
+interactions:
+- request:
+    body: '{"properties": {"sourceDatabase": {"linkedService": {"type": "LinkedServiceReference",
+      "referenceName": "AzureSqlDatabase1"}, "typeProperties": {"resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1",
+      "principalId": "fdf7f09c-68ef-4e13-98df-f0e92f8d976e"}}, "targetDatabase": {"linkedService":
+      {"type": "LinkedServiceReference", "referenceName": "xiaoyuxingtestne-WorkspaceDefaultSqlServer",
+      "parameters": {"DBName": "v2"}}}, "compute": {"coreCount": 16, "computeType":
+      "General"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '573'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnectionfortest\",\n
+        \ \"name\": \"linkconnectionfortest\",\n  \"type\": \"Microsoft.Synapse/workspaces/linkconnections\",\n
+        \ \"properties\": {\n    \"sourceDatabase\": {\n      \"linkedService\": {\n
+        \       \"type\": \"LinkedServiceReference\",\n        \"referenceName\":
+        \"AzureSqlDatabase1\"\n      },\n      \"typeProperties\": {\n        \"resourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1\",\n
+        \       \"principalId\": \"fdf7f09c-68ef-4e13-98df-f0e92f8d976e\"\n      }\n
+        \   },\n    \"targetDatabase\": {\n      \"linkedService\": {\n        \"type\":
+        \"LinkedServiceReference\",\n        \"referenceName\": \"xiaoyuxingtestne-WorkspaceDefaultSqlServer\",\n
+        \       \"parameters\": {\n          \"DBName\": \"v2\"\n        }\n      }\n
+        \   },\n    \"compute\": {\n      \"coreCount\": 16,\n      \"computeType\":
+        \"General\"\n    },\n    \"id\": \"847200c2-3b12-4c58-bee5-2e6b8a1aa943\",\n
+        \   \"linkTables\": [\n      {\n        \"id\": \"887e9d4df0fa4afaaad0d7a2c7f42d88\",\n
+        \       \"source\": {\n          \"tableName\": \"weather_history_300000_rows\",\n
+        \         \"schemaName\": \"dbo\"\n        },\n        \"target\": {\n          \"tableName\":
+        \"weather_history_300000_rows\",\n          \"schemaName\": \"dbo\",\n          \"distributionOptions\":
+        {\n            \"type\": \"Round_RoBin\"\n          }\n        }\n      }\n
+        \   ]\n  },\n  \"etag\": \"5500b314-0000-0c00-0000-62a98b090000\"\n}"
+    headers:
+      content-length:
+      - '1521'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:32:25 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnectionfortest\",\n
+        \ \"name\": \"linkconnectionfortest\",\n  \"type\": \"Microsoft.Synapse/workspaces/linkconnections\",\n
+        \ \"properties\": {\n    \"sourceDatabase\": {\n      \"linkedService\": {\n
+        \       \"type\": \"LinkedServiceReference\",\n        \"referenceName\":
+        \"AzureSqlDatabase1\"\n      },\n      \"typeProperties\": {\n        \"resourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1\",\n
+        \       \"principalId\": \"fdf7f09c-68ef-4e13-98df-f0e92f8d976e\"\n      }\n
+        \   },\n    \"targetDatabase\": {\n      \"linkedService\": {\n        \"type\":
+        \"LinkedServiceReference\",\n        \"referenceName\": \"xiaoyuxingtestne-WorkspaceDefaultSqlServer\",\n
+        \       \"parameters\": {\n          \"DBName\": \"v2\"\n        }\n      }\n
+        \   },\n    \"compute\": {\n      \"coreCount\": 16,\n      \"computeType\":
+        \"General\"\n    },\n    \"id\": \"847200c2-3b12-4c58-bee5-2e6b8a1aa943\"\n
+        \ },\n  \"etag\": \"5500b314-0000-0c00-0000-62a98b090000\"\n}"
+    headers:
+      content-length:
+      - '1117'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:42:27 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections?api-version=2021-12-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnectionlongrun","name":"linkconnectionlongrun","type":"Microsoft.Synapse/workspaces/linkconnections","etag":"5f019574-0000-0c00-0000-628f360e0000","properties":{"sourceDatabase":{"typeProperties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1","principalId":"fdf7f09c-68ef-4e13-98df-f0e92f8d976e"},"linkedService":{"referenceName":"brs1","type":"LinkedServiceReference"}},"targetDatabase":{"typeProperties":{"crossTableTransaction":false,"dropExistingTargetTableOnStart":true},"linkedService":{"referenceName":"xiaoyuxingtestne-WorkspaceDefaultSqlServer","type":"LinkedServiceReference","parameters":{"DBName":"v2"}}},"compute":{"coreCount":8,"computeType":"General"},"id":"a8b9b154-713f-4a0a-82df-ba586d543441"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnection1","name":"linkconnection1","type":"Microsoft.Synapse/workspaces/linkconnections","etag":"68017f73-0000-0c00-0000-629048720000","properties":{"sourceDatabase":{"typeProperties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1","principalId":"fdf7f09c-68ef-4e13-98df-f0e92f8d976e"},"linkedService":{"referenceName":"AzureSqlDatabase3","type":"LinkedServiceReference"}},"targetDatabase":{"typeProperties":{"crossTableTransaction":false,"dropExistingTargetTableOnStart":true},"linkedService":{"referenceName":"xiaoyuxingtestne-WorkspaceDefaultSqlServer","type":"LinkedServiceReference","parameters":{"DBName":"v2"}}},"compute":{"coreCount":8,"computeType":"General"},"id":"f79f7cbf-165d-41c1-ac8b-c1d65e12fba3"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnection2","name":"linkconnection2","type":"Microsoft.Synapse/workspaces/linkconnections","etag":"e301c8ac-0000-0c00-0000-629f09170000","properties":{"sourceDatabase":{"typeProperties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1","principalId":"fdf7f09c-68ef-4e13-98df-f0e92f8d976e"},"linkedService":{"referenceName":"AzureSqlDatabase4","type":"LinkedServiceReference"}},"targetDatabase":{"typeProperties":{"crossTableTransaction":false,"dropExistingTargetTableOnStart":true},"linkedService":{"referenceName":"xiaoyuxingtestne-WorkspaceDefaultSqlServer","type":"LinkedServiceReference","parameters":{"DBName":"v2"}}},"compute":{"coreCount":8,"computeType":"General"},"id":"6085cf0a-cfe4-456a-bee0-5ac401d20734"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnection3","name":"linkconnection3","type":"Microsoft.Synapse/workspaces/linkconnections","etag":"2d00cb8e-0000-0c00-0000-62a6ce260000","properties":{"sourceDatabase":{"typeProperties":{},"linkedService":{"referenceName":"SqlServer2","type":"LinkedServiceReference"}},"targetDatabase":{"typeProperties":{"crossTableTransaction":false},"linkedService":{"referenceName":"xiaoyuxingtestne-WorkspaceDefaultSqlServer","type":"LinkedServiceReference","parameters":{"DBName":"v2"}}},"compute":{"coreCount":8,"computeType":"General"},"id":"3a274cd2-5e06-41a5-a752-dd03b8520a45","landingZone":{"fileSystem":"test","folderPath":"","linkedService":{"referenceName":"xiaoyuxingtestne-WorkspaceDefaultStorage","type":"LinkedServiceReference"},"sasToken":{"type":"SecureString","value":"**********"}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.Synapse/workspaces/xiaoyuxingtestne/linkconnections/linkconnectionfortest","name":"linkconnectionfortest","type":"Microsoft.Synapse/workspaces/linkconnections","etag":"5500b314-0000-0c00-0000-62a98b090000","properties":{"sourceDatabase":{"linkedService":{"type":"LinkedServiceReference","referenceName":"AzureSqlDatabase1"},"typeProperties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1","principalId":"fdf7f09c-68ef-4e13-98df-f0e92f8d976e"}},"targetDatabase":{"linkedService":{"type":"LinkedServiceReference","referenceName":"xiaoyuxingtestne-WorkspaceDefaultSqlServer","parameters":{"DBName":"v2"}}},"compute":{"coreCount":16,"computeType":"General"},"id":"847200c2-3b12-4c58-bee5-2e6b8a1aa943"}}]}'
+    headers:
+      content-length:
+      - '4796'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:42:29 GMT
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"linkTables": [{"id": "887e9d4df0fa4afaaad0d7a2c7f42d88", "source": {"tableName":
+      "weather_history_300000_rows", "schemaName": "dbo"}, "target": {"tableName":
+      "weather_history_300000_rows", "schemaName": "dbo", "distributionOptions": {"type":
+      "Round_RoBin"}}, "operationType": "add"}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '286'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest/edittables?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.DataFactory/factories/xiaoyuxingtestne/linkconnections/linkconnectionfortest\",\n
+        \ \"name\": \"linkconnectionfortest\",\n  \"type\": \"Microsoft.DataFactory/factories/linkconnections\",\n
+        \ \"properties\": {\n    \"sourceDatabase\": {\n      \"linkedService\": {\n
+        \       \"type\": \"LinkedServiceReference\",\n        \"referenceName\":
+        \"AzureSqlDatabase1\"\n      },\n      \"typeProperties\": {\n        \"resourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CDC_DEVINT_BRS/providers/Microsoft.Sql/servers/adfcdctestbrs-1\",\n
+        \       \"principalId\": \"fdf7f09c-68ef-4e13-98df-f0e92f8d976e\"\n      }\n
+        \   },\n    \"targetDatabase\": {\n      \"linkedService\": {\n        \"type\":
+        \"LinkedServiceReference\",\n        \"referenceName\": \"xiaoyuxingtestne-WorkspaceDefaultSqlServer\",\n
+        \       \"parameters\": {\n          \"DBName\": \"v2\"\n        }\n      }\n
+        \   },\n    \"compute\": {\n      \"coreCount\": 16,\n      \"computeType\":
+        \"General\"\n    },\n    \"id\": \"847200c2-3b12-4c58-bee5-2e6b8a1aa943\",\n
+        \   \"linkTables\": [\n      {\n        \"id\": \"887e9d4df0fa4afaaad0d7a2c7f42d88\",\n
+        \       \"source\": {\n          \"tableName\": \"weather_history_300000_rows\",\n
+        \         \"schemaName\": \"dbo\"\n        },\n        \"target\": {\n          \"tableName\":
+        \"weather_history_300000_rows\",\n          \"schemaName\": \"dbo\",\n          \"distributionOptions\":
+        {\n            \"type\": \"Round_RoBin\"\n          }\n        }\n      }\n
+        \   ]\n  },\n  \"etag\": \"55004b55-0000-0c00-0000-62a98d670000\"\n}"
+    headers:
+      content-length:
+      - '1527'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:42:30 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest/start?api-version=2021-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 15 Jun 2022 07:52:34 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest/detailedstatus?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\n  \"name\": \"linkconnectionfortest\",\n  \"id\": \"847200c2-3b12-4c58-bee5-2e6b8a1aa943\",\n
+        \ \"startTime\": \"2022-06-15T07:52:32.883249Z\",\n  \"status\": \"Starting\",\n
+        \ \"continuousRunId\": \"5cc69c6a-a9a7-4dff-b86f-1eadf1bb60d6\",\n  \"isPartiallyFailed\":
+        false,\n  \"etag\": \"5500d494-0000-0c00-0000-62a98fc20000\"\n}"
+    headers:
+      content-length:
+      - '296'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:52:37 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest/stop?api-version=2021-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 15 Jun 2022 07:52:40 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest/detailedstatus?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\n  \"name\": \"linkconnectionfortest\",\n  \"id\": \"847200c2-3b12-4c58-bee5-2e6b8a1aa943\",\n
+        \ \"startTime\": \"2022-06-15T07:52:32.883249Z\",\n  \"stopTime\": \"2022-06-15T07:52:40.0214963Z\",\n
+        \ \"status\": \"Stopping\",\n  \"isPartiallyFailed\": false,\n  \"etag\":
+        \"55006a95-0000-0c00-0000-62a98fc80000\"\n}"
+    headers:
+      content-length:
+      - '281'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:52:41 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest/linktables?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"887e9d4df0fa4afaaad0d7a2c7f42d88\",\n
+        \     \"source\": {\n        \"tableName\": \"weather_history_300000_rows\",\n
+        \       \"schemaName\": \"dbo\"\n      },\n      \"target\": {\n        \"tableName\":
+        \"weather_history_300000_rows\",\n        \"schemaName\": \"dbo\",\n        \"distributionOptions\":
+        {\n          \"type\": \"Round_RoBin\"\n        }\n      }\n    }\n  ]\n}"
+    headers:
+      content-length:
+      - '369'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jun 2022 07:52:43 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest?api-version=2021-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 15 Jun 2022 07:57:45 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-synapse-artifacts/0.13.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://xiaoyuxingtestne.dev.azuresynapse.net/linkconnections/linkconnectionfortest?api-version=2021-12-01-preview
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The document could not be retrieved because
+        it does not exist.","target":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xiaoyuxing/providers/Microsoft.DataFactory/factories/xiaoyuxingtestne/linkconnections/linkconnectionfortest","details":null,"error":null}'
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Wed, 15 Jun 2022 07:57:46 GMT
+      server:
+      - Kestrel Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+    status:
+      code: 404
+      message: Not Found
+version: 1
