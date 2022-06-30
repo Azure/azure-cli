@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import datetime
 import json
 
 from azure.cli.command_modules.acs._client_factory import cf_resource_groups, cf_resources
