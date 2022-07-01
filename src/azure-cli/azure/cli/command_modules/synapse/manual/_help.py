@@ -2272,3 +2272,43 @@ examples:
           --name testsqlscriptname \\
           --file 'path/test.sql'
 """
+
+helps['synapse ad-only-auth'] = """
+type: group
+short-summary: Manage Azure Active Directly only Authentication settings for this Synapse workspace.
+"""
+
+helps['synapse ad-only-auth get'] = """
+type: command
+short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get a specific Azure Active Directly only Authentication property.
+    text: |-
+        az synapse ad-only-auth get --workspace-name testsynapseworkspace \\
+          -g testrg
+"""
+
+helps['synapse ad-only-auth enable'] = """
+type: command
+short-summary: Enable Azure Active Directly only Authentication for this Synapse workspace.
+examples:
+  - name: Enable Azure Active Directly only Authentication for this Synapse workspace.
+    text: |-
+        az synapse ad-only-auth enable --workspace-name testsynapseworkspace \\
+          -g testresourcegroup
+"""
+
+helps['synapse ad-only-auth disable'] = """
+type: command
+short-summary: Disable Azure Active Directly only Authentication for this Synapse workspace.
+examples:
+  - name: Disable Azure Active Directly only Authentication for this Synapse workspace.
+    text: |-
+        az synapse ad-only-auth disable --workspace-name testsynapseworkspace \\
+          -g testresourcegroup
+"""
+
+helps['synapse ad-only-auth wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a Azure ad-only-auth is met.
+"""

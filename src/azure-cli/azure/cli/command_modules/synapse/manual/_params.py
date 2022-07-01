@@ -1101,10 +1101,7 @@ def load_arguments(self, _):
         c.argument('output_folder', type=str, help='The name of the output folder')
         c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
 
-    for scope in ['create', 'update']:
-        with self.argument_context('synapse ad-only-authentications ') as c:
+    for scope in ['enable', 'disable']:
+        with self.argument_context('synapse ad-only-auth ') as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
             c.argument('resource_group_name', resource_group_name_type)
-            c.argument('azure_ad_only_authentication_name', arg_type=name_type, help='The name of the azure ad only authentication.') 
-            c.argument('azure_ad_only_authentication_name', arg_type=get_three_state_flag(),
-                       help='A boolean value that indicates if Azure Active Directory (Azure AD) only authentication are enabled.')

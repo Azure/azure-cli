@@ -208,6 +208,10 @@ def load_command_table(self, _):
         client_factory=cf_kusto_script,
     )
 
+    synapse_adonlyauthentications_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#AzureADOnlyAuthenticationsOperations.{}',
+        client_factory=cf_synapse_client_azure_ad_only_authentications_factory,
+    )
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -579,11 +583,10 @@ def load_command_table(self, _):
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')
 
-    with self.command_group('synapse ad-only-authentications', command_type=synapse_sqlpool_sdk,
+    with self.command_group('synapse ad-only-auth', command_type=synapse_adonlyauthentications_sdk,
                             custom_command_type=get_custom_sdk('adonlyauthentications', cf_synapse_client_azure_ad_only_authentications_factory),
                             client_factory=cf_synapse_client_azure_ad_only_authentications_factory) as g:
-        g.custom_command('create', 'synapse_create_adonly_auth', supports_no_wait=True)
-        g.custom_command('update', 'synapse_create_adonly_auth', supports_no_wait=True)
-        g.command('list', 'list')
-        g.show_command('show','get')
-        g.wait_command('wait')
+        g.custom_command('enable', 'synapse_enable_adonly_auth', supports_no_wait=True)
+        g.custom_command('disable', 'synapse_disable_adonly_auth', supports_no_wait=True)
+        g.command('get', 'list')
+        g.wait_command('wait', 'list')
