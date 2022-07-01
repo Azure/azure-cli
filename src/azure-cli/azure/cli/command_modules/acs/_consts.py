@@ -72,7 +72,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
-CONST_NETWORK_PLUGIN_AZURE = "azure"
+CONST_NETWORK_PLUGIN_AZURE = "azure"1
 
 # consts for addons
 # http application routing
@@ -127,7 +127,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.5-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.5-alpha1"
 CONST_ACR_DOMAIN_NAME = ".azurecr.io"
 
 
