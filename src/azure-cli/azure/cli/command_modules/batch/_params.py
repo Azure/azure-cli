@@ -21,6 +21,7 @@ from azure.cli.core.commands.parameters import (
     get_location_type,
     resource_group_name_type,
     get_resource_name_completion_list,
+    get_three_state_flag,
     file_type,
     get_enum_type)
 
@@ -101,7 +102,7 @@ def load_arguments(self, _):
     with self.argument_context('batch account identity assign') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
-        c.argument('mi_system_assigned', options_list=['--system-assigned'],
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], arg_type=get_three_state_flag(),
                    arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
                    'Check out help for more examples')
         c.argument('mi_user_assigned', options_list=['--user-assigned'],
@@ -111,7 +112,7 @@ def load_arguments(self, _):
     with self.argument_context('batch account identity remove') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
-        c.argument('mi_system_assigned', options_list=['--system-assigned'],
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], arg_type=get_three_state_flag(),
                    arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
                    'Check out help for more examples')
         c.argument('mi_user_assigned', options_list=['--user-assigned'],
