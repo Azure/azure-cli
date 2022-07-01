@@ -119,7 +119,7 @@ Release History
 
 **Monitor**
 
-* Add new command group: `az monitor log-analytics query-pack` (#22986)
+* `az monitor log-analytics query-pack`: Add query pack commands. (#22986)
 * `az monitor log-analytics update`: Support empty string for `--key-version` (#22986)
 
 **NetAppFiles**
