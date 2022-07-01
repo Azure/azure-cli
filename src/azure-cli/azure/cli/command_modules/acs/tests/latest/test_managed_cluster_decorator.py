@@ -69,7 +69,6 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
-from knack.util import CLIError
 
 
 class AKSManagedClusterModelsTestCase(unittest.TestCase):
@@ -1697,6 +1696,21 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_2.get_network_plugin()
+
+        # custom
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                    "network_plugin": "azure"
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # overwrite warning
+        self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
