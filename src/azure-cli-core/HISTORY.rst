@@ -5,7 +5,7 @@ Release History
 
 2.38.0
 ++++++
-* shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)
+* Shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)
 
 2.37.0
 ++++++
