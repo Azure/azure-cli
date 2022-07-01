@@ -22,16 +22,16 @@ Release History
 * `az aks get-credentials`: Fix permission prompt when saving config file to symlink (#22800)
 * `az aks command invoke`: Add support for `--no-wait` (#22813)
 * `az aks get-credentials`: Fix the command error when KUBECONFIG is empty (#23000)
-* `aks nodepool stop/start`: Add nodepool stop/start bindings (#23055)
+* `az aks nodepool stop/start`: Add nodepool stop/start bindings (#23055)
 
 **APIM**
 
-* Update Experimental Flag of API Management command module to get out of experimental state (#22971)
+* `az apim`: Update experimental flag to get out of experimental state (#22971)
 * `az apim deletedservice`: Add command group to support managing soft-deleted azure API Management services (#22716)
 
 **App Config**
 
-* `az appconfig`: GA features - soft-delete, feature-filter, strict-import and, disable-local-auth (#22792)
+* `az appconfig`: GA features - soft-delete, feature-filter, strict-import and disable-local-auth (#22792)
 
 **App Service**
 
@@ -64,7 +64,7 @@ Release History
 
 **Cognitive Services**
 
-* `az cognitiveservices account deployment create` now supports standard scale type (#22827)
+* `az cognitiveservices account deployment create`: Support standard scale type (#22827)
 
 **Compute**
 
@@ -115,7 +115,7 @@ Release History
 **Key Vault**
 
 * `az keyvault role assignment`: Fix `'dict' object has no attribute 'object_id'` error (#22652)
-* Fix #16390: `az keyvault set-policy`: Allow clear permissions (#23059)
+* Fix #16390: `az keyvault set-policy`: Allow clearing permissions (#23059)
 
 **Monitor**
 
@@ -132,7 +132,7 @@ Release History
 * `az netappfiles snapshot policy update`: Change `--location` to an optional parameter (#22787)
 * `az netappfiles backup create`: Change `--location` to an optional parameter (#22787)
 * `az netappfiles backup-policy create`: Change `--location` to an optional parameter (#22787)
-* Fix: Typo in option global-placement-rules (#22915)
+* `az netappfiles volume-group create --help`: Fix typo in option global-placement-rules (#22915)
 * `az netappfiles volume create`: Add optional parameter `--zones` (#23008)
 * `az netappfiles volume replication list`: Add operation to list volume replications (#23008)
 * `az netappfiles volume reset-cifs-pw`: Add operation to reset CIFS password (#23008)
@@ -144,8 +144,8 @@ Release History
 
 * [BREAKING CHANGE] `az network vnet subnet create`: Disable `PrivateEndpointNetworkPolicies` by default (#22962)
 * `az network application-gateway ssl-policy`: Support new SSL policy `CustomV2` (#22571)
-* Enable Private link support for provider Microsoft.Authorization/resourceManagementPrivateLinks (#22688)
-* Fix #22097: `az network dns zone import` cannot import zone files starting with space (#22674)
+* `az network private-endpoint-connection`: Enable Private link support for provider Microsoft.Authorization/resourceManagementPrivateLinks (#22688)
+* Fix #22097: `az network dns zone import`: Fix importing zone files starting with space (#22674)
 * `az network public-ip prefix create`: Support cross-subscription association for Custom IP Prefix (#22646)
 * `az network public-ip create`: Reuse prefix info when creating Public IP (#22698)
 
@@ -191,7 +191,7 @@ Release History
 
 * [BREAKING CHANGE] `az storage share close-handle`: Remove `--marker` which is not supported by sdk (#22603)
 * [BREAKING CHANGE] `az storage share snapshot`: Now only returns version, etag and last_modified info instead of all share properties (#22585)
-* `az storage account generate-sas`: Fix output sas has random order for `srt` segment (#22609)
+* `az storage account generate-sas`: Fix output sas random ordering for `srt` segment (#22609)
 * Fix #22563: `az storage blob upload`: Fix storage blob upload to a through pipe encode error (#22611)
 * Fix #20452: `az storage container policy create\update\list\show\delete`: Add new permissions, currently support `racwdxyltmei` (#21917)
 * Fix #22679: `az storage account file-service-properties update`: Fix `AttributeError: 'NoneType' object has no attribute 'smb'` (#22691)
