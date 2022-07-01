@@ -80,6 +80,15 @@ examples:
   - name: Create a disk and associate it with a disk access resource.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
+  - name: Create a disk from the blob URI for VM guest state VHD.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --security-data-uri GuestStateDiskVhdUri --security-type TrustedLaunch --hyper-v-generation V2
+  - name: Create a standard disk for uploading blobs.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --upload-type Upload
+  - name: Create an OS disk for uploading along with VM guest state.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
 """
 
 helps['disk delete'] = """
@@ -100,6 +109,9 @@ examples:
     text: |
         az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyManagedDisk --resource-group MyResourceGroup
     crafted: true
+  - name: Grant a resource read access to a disk to generate access SAS and security data access SAS
+    text: |
+        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyDisk --resource-group MyResourceGroup --secure-vm-guest-state-sas
 """
 
 helps['disk list'] = """
