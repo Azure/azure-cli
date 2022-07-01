@@ -15,7 +15,7 @@ from ._field_value import AAZObject
 
 class AAZCommandCtx:
 
-    def __init__(self, cli_ctx, schema, command_args):
+    def __init__(self, cli_ctx, schema, command_args, no_wait_arg=None):
         self._cli_ctx = cli_ctx
         self._profile = Profile(cli_ctx=cli_ctx)
         self._subscription_id = None
@@ -31,8 +31,10 @@ class AAZCommandCtx:
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
-
-        self.next_link = AAZUndefined  # support paging
+        # support no wait
+        self.lro_no_wait = command_args.get(no_wait_arg, False) if no_wait_arg else False
+        # support paging
+        self.next_link = AAZUndefined
 
     def format_args(self):
         # TODO: apply format for argument values
