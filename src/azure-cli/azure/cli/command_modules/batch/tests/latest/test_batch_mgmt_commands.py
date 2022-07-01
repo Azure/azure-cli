@@ -196,6 +196,66 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
             self.check('accountAccess.defaultAction', 'Allow'),
             self.check('accountAccess.ipRules[0].value', '1.2.3.6')]).get_output_in_json()
        
+    
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    def test_batch_managed_identity_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
+        pe_name = self.create_random_name(prefix='clibatchtestpe', length=24)
+
+        _, package_file_name = tempfile.mkstemp()
+
+        
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': storage_account,
+            'loc': 'eastus',
+            'acc': account_name,
+            'app': 'testapp',
+            'app_p': '1.0',
+            'app_f': package_file_name,
+            'vnetname': vnet_name,
+            'pename': pe_name,
+            'identity1': 'identity1',
+            'identity2': 'identity2',
+        })
+
+        identity1_json = self. cmd('identity create -g {rg} -n {identity1}'). get_output_in_json()
+        identity2_json = self. cmd('identity create -g {rg} -n {identity2}'). get_output_in_json()
+        identity1_id = identity1_json['id']
+        identity2_id = identity2_json['id']
+        identity1_principalId = identity1_json['principalId']
+        identity2_principalId = identity2_json['principalId']
+        self. kwargs. update({
+            'identity1_id': identity1_id,
+            'identity1_principalId': identity1_principalId,
+            'identity2_id': identity2_id,
+            'identity2_principalId': identity2_principalId
+        })
+
+        # test create account with managed identity
+        batchaccount = self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n} --mi-user-assigned {identity1_id}').assert_with_checks([
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('identity.type', 'UserAssigned'),
+            self. check('length(identity.userAssignedIdentities)', 1)]).get_output_in_json()
+        
+        # display the managed identity
+        self. cmd('batch account identity show -g {rg} -n {acc}', checks=[
+        self.check('type', 'UserAssigned')])
+
+        # delete the managed identity
+        self. cmd('batch account identity remove -g {rg} -n {acc} --user-assigned {identity1_id} --yes', checks=[
+        self. check('type', 'None'),
+        self. check('userAssignedIdentities', 'None')])
+
+        # create a managed identity to an existing accountS
+        self. cmd('batch account identity assign -g {rg} -n {acc} --user-assigned {identity2_id}', checks=[
+        self. check('type', 'UserAssigned'),
+        self. check('length(userAssignedIdentities)', 1)])
+       
 
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')

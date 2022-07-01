@@ -155,6 +155,48 @@ def update_account(client, resource_group_name, account_name,
                          parameters=parameters)
 
 
+def assign_batch_identity(cmd, client, resource_group_name, account_name, mi_system_assigned=None,
+                          mi_user_assigned=None):
+    update_account(client=client, resource_group_name=resource_group_name, account_name=account_name,
+                   mi_system_assigned=mi_system_assigned, mi_user_assigned=mi_user_assigned)
+    return show_batch_identity(cmd=cmd, client=client, resource_group_name=resource_group_name,
+                               account_name=account_name)
+
+
+def remove_batch_identity(cmd, client, resource_group_name, account_name, mi_system_assigned=None,
+                          mi_user_assigned=None):
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    if batch_account is None or batch_account.identity is None:
+        return None
+
+    if mi_system_assigned:
+        batch_account.identity.type = (ResourceIdentityType.NONE
+                                       if batch_account.identity.type == ResourceIdentityType.SYSTEM_ASSIGNED
+                                       else ResourceIdentityType.USER_ASSIGNED)
+    # batch only supports 1 managed user id
+    if mi_user_assigned and batch_account.identity.user_assigned_identities:
+        keyslist = list(batch_account.identity.user_assigned_identities.keys())
+        if keyslist and mi_user_assigned == keyslist[0]:
+            batch_account.identity.user_assigned_identities = None
+            batch_account.identity.type = (ResourceIdentityType.NONE
+                                           if batch_account.identity.type == ResourceIdentityType.USER_ASSIGNED
+                                           else ResourceIdentityType.SYSTEM_ASSIGNED)
+
+    parameters = BatchAccountUpdateParameters(identity=batch_account.identity)
+
+    client.update(resource_group_name=resource_group_name, account_name=account_name, parameters=parameters)
+
+    return show_batch_identity(cmd=cmd, client=client, resource_group_name=resource_group_name,
+                               account_name=account_name)
+
+
+def show_batch_identity(cmd, client, resource_group_name, account_name):
+    batch_account: BatchAccount = get_account(cmd, client, resource_group_name, account_name)
+
+    return batch_account.identity
+
+
 # pylint: disable=inconsistent-return-statements
 def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False, show=False):
     account = client.get(resource_group_name=resource_group_name,

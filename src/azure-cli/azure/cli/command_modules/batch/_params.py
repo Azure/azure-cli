@@ -98,6 +98,30 @@ def load_arguments(self, _):
         c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
         c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
 
+    with self.argument_context('batch account identity assign') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('mi_system_assigned', options_list=['--system-assigned'],
+                   arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
+                   'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'],
+                   arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
+                   'Check out help for more examples')
+
+    with self.argument_context('batch account identity remove') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('mi_system_assigned', options_list=['--system-assigned'],
+                   arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
+                   'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'],
+                   arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
+                   'Check out help for more examples')
+
+    with self.argument_context('batch account identity show') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
     with self.argument_context('batch account network-profile show') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
