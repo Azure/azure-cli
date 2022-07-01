@@ -72,7 +72,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
-CONST_NETWORK_PLUGIN_AZURE = "azure"1
+CONST_NETWORK_PLUGIN_AZURE = "azure"
 
 # consts for addons
 # http application routing
