@@ -4342,16 +4342,11 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.subnet_role_assignment_exists",
             return_value=False,
-        ), patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
-            return_value=False,
         ):
-            # fail on user does not confirm
-            with self.assertRaises(DecoratorEarlyExitException):
-                dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
+            dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
         self.assertEqual(
             dec_3.context.get_intermediate("need_post_creation_vnet_permission_granting"),
-            None,
+            True,
         )
 
         # custom value
