@@ -517,7 +517,9 @@ def validate_credential_format(namespace):
 
 def validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace):
     if namespace.disable_secret_rotation and namespace.enable_secret_rotation:
-        raise MutuallyExclusiveArgumentError('Providing both --disable-secret-rotation and --enable-secret-rotation flags is invalid')
+        raise MutuallyExclusiveArgumentError(
+            "Providing both --disable-secret-rotation and --enable-secret-rotation flags is invalid"
+        )
 
 
 def validate_defender_config_parameter(namespace):

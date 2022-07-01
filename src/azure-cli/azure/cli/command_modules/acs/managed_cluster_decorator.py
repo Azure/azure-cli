@@ -5479,7 +5479,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 "Addon azure-keyvault-secrets-provider is not enabled. "
                 "Please use command 'az aks enable-addons' to enable it."
             )
-        elif azure_keyvault_secrets_provider_addon_profile.config is None:
+        if azure_keyvault_secrets_provider_addon_profile.config is None:
             # backfill to default
             azure_keyvault_secrets_provider_addon_profile.config = {
                 CONST_SECRET_ROTATION_ENABLED: "false",
