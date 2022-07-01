@@ -60,7 +60,7 @@ Release History
 
 **Bot Service**
 
-* [BREAKING CHANGE] `az bot create` change: Remove `--kind`, `--password`, `--lang` arguments. Add `--app-type`, `--tenant-id`, `--msi-resource-id` arguments (#22902)
+* [BREAKING CHANGE] `az bot create`: Remove `--kind`, `--password`, `--lang` arguments. Add `--app-type`, `--tenant-id`, `--msi-resource-id` arguments (#22902)
 
 **Cognitive Services**
 
