@@ -44,7 +44,7 @@ class CredentialAdaptor:
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
 
     def signed_session(self, session=None):
-        logger.debug("CredentialAdaptor.get_token")
+        logger.debug("CredentialAdaptor.signed_session")
         session = session or requests.Session()
         token, external_tenant_tokens = self._get_token()
         header = "{} {}".format('Bearer', token.token)

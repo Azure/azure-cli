@@ -46,6 +46,7 @@ from azure.cli.command_modules.acs._client_factory import (
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_ACR_DOMAIN_NAME,
     CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_CANIPULL_IMAGE,
     CONST_CONFCOM_ADDON_NAME,
@@ -97,16 +98,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
-from azure.graphrbac.models import (
-    ApplicationCreateParameters,
-    ApplicationUpdateParameters,
-    GetObjectsParameters,
-    KeyCredential,
-    PasswordCredential,
-    RequiredResourceAccess,
-    ResourceAccess,
-    ServicePrincipalCreateParameters,
-)
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
@@ -128,6 +119,8 @@ def get_cmd_test_hook_data(filename):
     return hook_data
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs browse / acs kubernetes browse / acs dcos browse / acs kubernetes get-credentials
 def _get_acs_info(cli_ctx, name, resource_group_name):
     """
@@ -142,6 +135,8 @@ def _get_acs_info(cli_ctx, name, resource_group_name):
     return container_services.get(resource_group_name, name)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs browse
 def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ssh_key_file=None):
     """
@@ -161,6 +156,8 @@ def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ss
         cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs browse
 def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file):
     from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -177,6 +174,8 @@ def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disab
         'Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs kubernetes browse
 def k8s_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
     """
@@ -188,6 +187,8 @@ def k8s_browse(cmd, client, name, resource_group_name, disable_browser=False, ss
     _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs kubernetes browse
 def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     if not which('kubectl'):
@@ -206,6 +207,8 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs dcos browse
 def dcos_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
     """
@@ -224,6 +227,8 @@ def dcos_browse(cmd, client, name, resource_group_name, disable_browser=False, s
     _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs dcos browse
 def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
     if not os.path.isfile(ssh_key_file):
@@ -266,6 +271,8 @@ def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
         proxy.disable_http_proxy()
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs dcos browse
 def _rand_str(n):
     """
@@ -275,6 +282,8 @@ def _rand_str(n):
     return ''.join(random.SystemRandom().choice(choices) for _ in range(n))
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs dcos browse
 def _get_host_name(acs_info):
     """
@@ -292,6 +301,8 @@ def _get_host_name(acs_info):
     return acs_info.master_profile.fqdn
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs dcos browse
 def _get_username(acs_info):
     """
@@ -305,6 +316,8 @@ def _get_username(acs_info):
     return None
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs dcos install-cli
 def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
     """
@@ -338,6 +351,8 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
             'Connection error while attempting to download client ({})'.format(err))
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _get_default_dns_prefix(name, resource_group_name, subscription_id):
     # Use subscription id to provide uniqueness and prevent DNS name clashes
@@ -349,6 +364,8 @@ def _get_default_dns_prefix(name, resource_group_name, subscription_id):
     return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _generate_windows_profile(windows, admin_username, admin_password):
     if windows:
@@ -364,6 +381,8 @@ def _generate_windows_profile(windows, admin_username, admin_password):
     return None
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _generate_master_pool_profile(api_version, master_profile, master_count, dns_name_prefix,
                                   master_vm_size, master_osdisk_size, master_vnet_subnet_id,
@@ -391,6 +410,8 @@ def _generate_master_pool_profile(api_version, master_profile, master_count, dns
     return master_pool_profile
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _generate_agent_pool_profiles(api_version, agent_profiles, agent_count, dns_name_prefix,
                                   agent_vm_size, os_type, agent_osdisk_size, agent_vnet_subnet_id,
@@ -428,6 +449,8 @@ def _generate_agent_pool_profiles(api_version, agent_profiles, agent_count, dns_
     return agent_pool_profiles
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _update_dict(dict1, dict2):
     cp = dict1.copy()
@@ -435,6 +458,8 @@ def _update_dict(dict1, dict2):
     return cp
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _generate_outputs(name, orchestrator_type, admin_username):
     # define outputs
@@ -461,6 +486,8 @@ def _generate_outputs(name, orchestrator_type, admin_username):
     return outputs
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _generate_properties(api_version, orchestrator_type, orchestrator_version, master_pool_profile,
                          agent_pool_profiles, ssh_key_value, admin_username, windows_profile):
@@ -489,6 +516,8 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     return properties
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 # pylint: disable=too-many-locals
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
@@ -687,6 +716,8 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     raise retry_exception
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
@@ -715,6 +746,8 @@ def _invoke_deployment(cmd, resource_group_name, deployment_name, template, para
     return sdk_no_wait(no_wait, smc.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _ensure_service_principal(cli_ctx,
                               service_principal=None,
@@ -755,6 +788,8 @@ def _ensure_service_principal(cli_ctx,
     }
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create / osa command
 def _create_client_secret():
     # Add a special character to satisfy AAD SP secret requirements
@@ -764,6 +799,8 @@ def _create_client_secret():
     return client_secret
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     # use get_progress_controller
@@ -795,12 +832,14 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     return service_principal, aad_session_key
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None, required_resource_accesses=None):
-    from azure.graphrbac.models import GraphErrorException
+    from azure.graphrbac.models import ApplicationCreateParameters, GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -823,9 +862,12 @@ def create_application(client, display_name, homepage, identifier_uris,
         raise
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
+    from azure.graphrbac.models import KeyCredential, PasswordCredential
     if password and key_value:
         raise CLIError(
             'specify either --password or --key-value, but not both.')
@@ -855,8 +897,11 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     return (password_creds, key_creds)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=None):
+    from azure.graphrbac.models import ServicePrincipalCreateParameters
     if rbac_client is None:
         rbac_client = get_graph_rbac_management_client(cli_ctx)
 
@@ -878,6 +923,8 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
@@ -909,6 +956,8 @@ def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_princip
     return True
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def create_role_assignment(cmd, role, assignee, is_service_principal, resource_group_name=None, scope=None):
     return _create_role_assignment(cmd,
@@ -916,6 +965,8 @@ def create_role_assignment(cmd, role, assignee, is_service_principal, resource_g
                                    scope, resolve_assignee=is_service_principal)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _create_role_assignment(cmd, role, assignee,
                             resource_group_name=None, scope=None, resolve_assignee=True):
@@ -974,6 +1025,8 @@ def _create_role_assignment(cmd, role, assignee,
     return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _build_role_scope(resource_group_name, scope, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
@@ -988,6 +1041,8 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
     return scope
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _resolve_role_id(role, scope, definitions_client):
     role_id = None
@@ -1009,6 +1064,8 @@ def _resolve_role_id(role, scope, definitions_client):
     return role_id
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _resolve_object_id(cli_ctx, assignee):
     client = get_graph_rbac_management_client(cli_ctx)
@@ -1030,13 +1087,18 @@ def _resolve_object_id(cli_ctx, assignee):
     return result[0].object_id
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs create
 def _get_object_stubs(graph_client, assignees):
+    from azure.graphrbac.models import GetObjectsParameters
     params = GetObjectsParameters(include_directory_object_references=True,
                                   object_ids=assignees)
     return list(graph_client.objects.get_objects_by_object_ids(params))
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs kubernetes get-credentials
 def k8s_get_credentials(cmd, client, name, resource_group_name,
                         path=os.path.join(os.path.expanduser(
@@ -1058,6 +1120,8 @@ def k8s_get_credentials(cmd, client, name, resource_group_name,
         name, acs_info, path, ssh_key_file, overwrite_existing)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs kubernetes browse/get-credentials
 def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_existing):
     if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
@@ -1092,6 +1156,8 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
                 'The credentials have been saved to %s', path_candidate)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs kubernetes browse/get-credentials
 def _mkdir_p(path):
     # http://stackoverflow.com/a/600612
@@ -1104,6 +1170,8 @@ def _mkdir_p(path):
             raise
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs list
 def list_container_services(cmd, client, resource_group_name=None):
     ''' List Container Services. '''
@@ -1112,6 +1180,8 @@ def list_container_services(cmd, client, resource_group_name=None):
     return list(svc_list)
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs list-locations
 def list_acs_locations(cmd, client):
     return {
@@ -1120,6 +1190,8 @@ def list_acs_locations(cmd, client):
     }
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 # legacy: acs scale
 def update_acs(cmd, client, resource_group_name, container_service_name, new_agent_count):
     from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -1398,102 +1470,112 @@ def wait_then_open_async(url):
 
 
 # pylint: disable=too-many-locals
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
-               location=None,
-               kubernetes_version='',
-               admin_username="azureuser",
-               generate_ssh_keys=False,  # pylint: disable=unused-argument
-               no_ssh_key=False,
-               edge_zone=None,
-               node_osdisk_diskencryptionset_id=None,
-               disable_local_accounts=False,
-               disable_rbac=None,
-               tags=None,
-               pod_cidr=None,
-               service_cidr=None,
-               dns_service_ip=None,
-               docker_bridge_address=None,
-               load_balancer_sku=None,
-               load_balancer_managed_outbound_ip_count=None,
-               load_balancer_outbound_ips=None,
-               load_balancer_outbound_ip_prefixes=None,
-               load_balancer_outbound_ports=None,
-               load_balancer_idle_timeout=None,
-               nat_gateway_managed_outbound_ip_count=None,
-               nat_gateway_idle_timeout=None,
-               outbound_type=None,
-               network_plugin=None,
-               network_policy=None,
-               auto_upgrade_channel=None,
-               cluster_autoscaler_profile=None,
-               uptime_sla=False,
-               dns_name_prefix=None,
-               fqdn_subdomain=None,
-               api_server_authorized_ip_ranges=None,
-               enable_private_cluster=False,
-               private_dns_zone=None,
-               disable_public_fqdn=False,
-               service_principal=None,
-               client_secret=None,
-               enable_managed_identity=True,
-               assign_identity=None,
-               assign_kubelet_identity=None,
-               enable_aad=False,
-               enable_azure_rbac=False,
-               aad_admin_group_object_ids=None,
-               aad_client_app_id=None,
-               aad_server_app_id=None,
-               aad_server_app_secret=None,
-               aad_tenant_id=None,
-               windows_admin_username=None,
-               windows_admin_password=None,
-               enable_ahub=False,
-               enable_windows_gmsa=False,
-               gmsa_dns_server=None,
-               gmsa_root_domain_name=None,
-               attach_acr=None,
-               skip_subnet_role_assignment=False,
-               enable_addons=None,
-               workspace_resource_id=None,
-               enable_msi_auth_for_monitoring=False,
-               aci_subnet_name=None,
-               appgw_name=None,
-               appgw_subnet_cidr=None,
-               appgw_id=None,
-               appgw_subnet_id=None,
-               appgw_watch_namespace=None,
-               enable_sgxquotehelper=False,
-               enable_secret_rotation=False,
-               rotation_poll_interval=None,
-               nodepool_name="nodepool1",
-               node_vm_size=None,
-               os_sku=None,
-               snapshot_id=None,
-               vnet_subnet_id=None,
-               pod_subnet_id=None,
-               enable_node_public_ip=False,
-               node_public_ip_prefix_id=None,
-               enable_cluster_autoscaler=False,
-               min_count=None,
-               max_count=None,
-               node_count=3,
-               nodepool_tags=None,
-               nodepool_labels=None,
-               node_osdisk_type=None,
-               node_osdisk_size=0,
-               vm_set_type=None,
-               zones=None,
-               ppg=None,
-               max_pods=0,
-               enable_encryption_at_host=False,
-               enable_ultra_ssd=False,
-               enable_fips_image=False,
-               kubelet_config=None,
-               linux_os_config=None,
-               no_wait=False,
-               yes=False,
-               aks_custom_headers=None,
-               ):
+def aks_create(
+    cmd,
+    client,
+    resource_group_name,
+    name,
+    ssh_key_value,
+    location=None,
+    kubernetes_version="",
+    tags=None,
+    dns_name_prefix=None,
+    node_osdisk_diskencryptionset_id=None,
+    disable_local_accounts=False,
+    disable_rbac=None,
+    edge_zone=None,
+    admin_username="azureuser",
+    generate_ssh_keys=False,
+    no_ssh_key=False,
+    pod_cidr=None,
+    service_cidr=None,
+    dns_service_ip=None,
+    docker_bridge_address=None,
+    load_balancer_sku=None,
+    load_balancer_managed_outbound_ip_count=None,
+    load_balancer_outbound_ips=None,
+    load_balancer_outbound_ip_prefixes=None,
+    load_balancer_outbound_ports=None,
+    load_balancer_idle_timeout=None,
+    nat_gateway_managed_outbound_ip_count=None,
+    nat_gateway_idle_timeout=None,
+    outbound_type=None,
+    network_plugin=None,
+    network_policy=None,
+    auto_upgrade_channel=None,
+    cluster_autoscaler_profile=None,
+    uptime_sla=False,
+    fqdn_subdomain=None,
+    api_server_authorized_ip_ranges=None,
+    enable_private_cluster=False,
+    private_dns_zone=None,
+    disable_public_fqdn=False,
+    service_principal=None,
+    client_secret=None,
+    enable_managed_identity=True,
+    assign_identity=None,
+    assign_kubelet_identity=None,
+    enable_aad=False,
+    enable_azure_rbac=False,
+    aad_admin_group_object_ids=None,
+    aad_client_app_id=None,
+    aad_server_app_id=None,
+    aad_server_app_secret=None,
+    aad_tenant_id=None,
+    windows_admin_username=None,
+    windows_admin_password=None,
+    enable_ahub=False,
+    enable_windows_gmsa=False,
+    gmsa_dns_server=None,
+    gmsa_root_domain_name=None,
+    attach_acr=None,
+    skip_subnet_role_assignment=False,
+    node_resource_group=None,
+    enable_defender=False,
+    defender_config=None,
+    # addons
+    enable_addons=None,
+    workspace_resource_id=None,
+    enable_msi_auth_for_monitoring=False,
+    aci_subnet_name=None,
+    appgw_name=None,
+    appgw_subnet_cidr=None,
+    appgw_id=None,
+    appgw_subnet_id=None,
+    appgw_watch_namespace=None,
+    enable_sgxquotehelper=False,
+    enable_secret_rotation=False,
+    rotation_poll_interval=None,
+    # nodepool paramerters
+    nodepool_name="nodepool1",
+    node_vm_size=None,
+    os_sku=None,
+    snapshot_id=None,
+    vnet_subnet_id=None,
+    pod_subnet_id=None,
+    enable_node_public_ip=False,
+    node_public_ip_prefix_id=None,
+    enable_cluster_autoscaler=False,
+    min_count=None,
+    max_count=None,
+    node_count=3,
+    nodepool_tags=None,
+    nodepool_labels=None,
+    node_osdisk_type=None,
+    node_osdisk_size=0,
+    vm_set_type=None,
+    zones=None,
+    ppg=None,
+    max_pods=0,
+    enable_encryption_at_host=False,
+    enable_ultra_ssd=False,
+    enable_fips_image=False,
+    kubelet_config=None,
+    linux_os_config=None,
+    no_wait=False,
+    yes=False,
+    aks_custom_headers=None,
+):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -1515,50 +1597,62 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,
     return aks_create_decorator.create_mc(mc)
 
 
-def aks_update(cmd, client, resource_group_name, name,
-               disable_local_accounts=False,
-               enable_local_accounts=False,
-               tags=None,
-               load_balancer_managed_outbound_ip_count=None,
-               load_balancer_outbound_ips=None,
-               load_balancer_outbound_ip_prefixes=None,
-               load_balancer_outbound_ports=None,
-               load_balancer_idle_timeout=None,
-               nat_gateway_managed_outbound_ip_count=None,
-               nat_gateway_idle_timeout=None,
-               auto_upgrade_channel=None,
-               cluster_autoscaler_profile=None,
-               uptime_sla=False,
-               no_uptime_sla=False,
-               api_server_authorized_ip_ranges=None,
-               enable_public_fqdn=False,
-               disable_public_fqdn=False,
-               enable_managed_identity=False,
-               assign_identity=None,
-               enable_aad=False,
-               enable_azure_rbac=False,
-               disable_azure_rbac=False,
-               aad_tenant_id=None,
-               aad_admin_group_object_ids=None,
-               windows_admin_password=None,
-               enable_ahub=False,
-               disable_ahub=False,
-               enable_windows_gmsa=False,
-               gmsa_dns_server=None,
-               gmsa_root_domain_name=None,
-               attach_acr=None,
-               detach_acr=None,
-               enable_secret_rotation=False,
-               disable_secret_rotation=False,
-               rotation_poll_interval=None,
-               enable_cluster_autoscaler=False,
-               disable_cluster_autoscaler=False,
-               update_cluster_autoscaler=False,
-               min_count=None, max_count=None,
-               nodepool_labels=None,
-               no_wait=False,
-               yes=False,
-               aks_custom_headers=None):
+def aks_update(
+    cmd,
+    client,
+    resource_group_name,
+    name,
+    tags=None,
+    disable_local_accounts=False,
+    enable_local_accounts=False,
+    load_balancer_managed_outbound_ip_count=None,
+    load_balancer_outbound_ips=None,
+    load_balancer_outbound_ip_prefixes=None,
+    load_balancer_outbound_ports=None,
+    load_balancer_idle_timeout=None,
+    nat_gateway_managed_outbound_ip_count=None,
+    nat_gateway_idle_timeout=None,
+    auto_upgrade_channel=None,
+    cluster_autoscaler_profile=None,
+    uptime_sla=False,
+    no_uptime_sla=False,
+    api_server_authorized_ip_ranges=None,
+    enable_public_fqdn=False,
+    disable_public_fqdn=False,
+    enable_managed_identity=False,
+    assign_identity=None,
+    assign_kubelet_identity=None,
+    enable_aad=False,
+    enable_azure_rbac=False,
+    disable_azure_rbac=False,
+    aad_tenant_id=None,
+    aad_admin_group_object_ids=None,
+    windows_admin_password=None,
+    enable_ahub=False,
+    disable_ahub=False,
+    enable_windows_gmsa=False,
+    gmsa_dns_server=None,
+    gmsa_root_domain_name=None,
+    attach_acr=None,
+    detach_acr=None,
+    enable_defender=False,
+    disable_defender=False,
+    defender_config=None,
+    # addons
+    enable_secret_rotation=False,
+    disable_secret_rotation=False,
+    rotation_poll_interval=None,
+    # nodepool paramerters
+    enable_cluster_autoscaler=False,
+    disable_cluster_autoscaler=False,
+    update_cluster_autoscaler=False,
+    min_count=None,
+    max_count=None,
+    nodepool_labels=None,
+    no_wait=False,
+    yes=False,
+    aks_custom_headers=None,
+):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -2065,7 +2159,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # in which case we ignore the KUBECONFIG variable
     # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        path = os.environ["KUBECONFIG"].split(":")[0]
+        kubeconfig_path = os.environ["KUBECONFIG"].split(":")[0]
+        if kubeconfig_path:
+            logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
+            path = kubeconfig_path
+        else:
+            logger.warning("Invalid path '%s' defined in KUBECONFIG.", kubeconfig_path)
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -2081,6 +2180,13 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 def _handle_merge(existing, addition, key, replace):
     if not addition.get(key, False):
         return
+    if key not in existing:
+        raise FileOperationError(
+            "No such key '{}' in existing config, please confirm whether it is a valid config file. "
+            "May back up this config file, delete it and retry the command.".format(
+                key
+            )
+        )
     if not existing.get(key):
         existing[key] = addition[key]
         return
@@ -2152,12 +2258,14 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
         existing['current-context'] = addition['current-context']
 
     # check that ~/.kube/config is only read- and writable by its owner
-    if platform.system() != 'Windows':
-        existing_file_perms = "{:o}".format(
-            stat.S_IMODE(os.lstat(existing_file).st_mode))
-        if not existing_file_perms.endswith('600'):
-            logger.warning('%s has permissions "%s".\nIt should be readable and writable only by its owner.',
-                           existing_file, existing_file_perms)
+    if platform.system() != "Windows" and not os.path.islink(existing_file):
+        existing_file_perms = "{:o}".format(stat.S_IMODE(os.lstat(existing_file).st_mode))
+        if not existing_file_perms.endswith("600"):
+            logger.warning(
+                '%s has permissions "%s".\nIt should be readable and writable only by its owner.',
+                existing_file,
+                existing_file_perms,
+            )
 
     with open(existing_file, 'w+') as stream:
         yaml.safe_dump(existing, stream, default_flow_style=False)
@@ -2247,7 +2355,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                        name, parameters)
 
 
-def aks_check_acr(cmd, client, resource_group_name, name, acr):
+def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
+    if not acr.endswith(CONST_ACR_DOMAIN_NAME):
+        acr = acr + CONST_ACR_DOMAIN_NAME
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2296,7 +2406,6 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                         "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
-                        "tty": True,
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
@@ -2314,6 +2423,21 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                 "nodeSelector": {"kubernetes.io/os": "linux"},
             }
         }
+        if node_name is not None:
+            affinity = {
+                "nodeAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": {
+                        "nodeSelectorTerms": [
+                            {
+                                "matchExpressions": [
+                                    {"key": "kubernetes.io/hostname", "operator": "In", "values": [node_name]}
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+            overrides["spec"]["affinity"] = affinity
 
         try:
             cmd = [
@@ -2548,7 +2672,7 @@ def aks_get_versions(cmd, client, location):
     return client.list_orchestrators(location, resource_type='managedClusters')
 
 
-def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
+def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
     colorama.init()
 
     mc = client.get(resource_group_name, name)
@@ -2567,19 +2691,47 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
-    commandResultFuture = client.begin_run_command(
-        resource_group_name, name, request_payload, polling_interval=5, retry_total=0)
-
-    return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
+    command_result_poller = sdk_no_wait(
+        no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0
+    )
+    if no_wait:
+        # pylint: disable=protected-access
+        command_result_polling_url = command_result_poller.polling_method()._initial_response.http_response.headers[
+            "location"
+        ]
+        command_id_regex = re.compile(r"commandResults\/(\w*)\?")
+        command_id = command_id_regex.findall(command_result_polling_url)[0]
+        _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
+        return
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     if not command_id:
         raise ValidationError('CommandID cannot be empty.')
 
-    commandResult = client.get_command_result(
-        resource_group_name, name, command_id)
+    commandResult = client.get_command_result(resource_group_name, name, command_id)
+    if commandResult is None:
+        _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
+        return
     return _print_command_result(cmd.cli_ctx, commandResult)
+
+
+def _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id):
+    # pylint: disable=unused-argument
+    def command_result_direct_response_handler(pipeline_response, *args, **kwargs):
+        deserialized_data = pipeline_response.context.get("deserialized_data", {})
+        if deserialized_data:
+            provisioning_state = deserialized_data.get("properties", {}).get("provisioningState", None)
+            started_at = deserialized_data.get("properties", {}).get("startedAt", None)
+            print(f"command id: {command_id}, started at: {started_at}, status: {provisioning_state}")
+            print(
+                f"Please use command \"az aks command result -g {resource_group_name} -n {name} -i {command_id}\" "
+                "to get the future execution result"
+            )
+        else:
+            print(f"failed to fetch command result for command id: {command_id}")
+    client.get_command_result(resource_group_name, name, command_id, cls=command_result_direct_response_handler)
 
 
 def _print_command_result(cli_ctx, commandResult):
@@ -2608,8 +2760,8 @@ def _print_command_result(cli_ctx, commandResult):
         return
 
     # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
-    return None
+    print(f"{colorama.Fore.BLUE}command is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    return
 
 
 def _get_command_context(command_files):
@@ -2780,41 +2932,47 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     return True
 
 
-def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_name,
-                      kubernetes_version=None,
-                      node_vm_size=None,
-                      os_type=None,
-                      os_sku=None,
-                      snapshot_id=None,
-                      vnet_subnet_id=None,
-                      pod_subnet_id=None,
-                      enable_node_public_ip=False,
-                      node_public_ip_prefix_id=None,
-                      enable_cluster_autoscaler=False,
-                      min_count=None,
-                      max_count=None,
-                      node_count=3,
-                      priority=CONST_SCALE_SET_PRIORITY_REGULAR,
-                      eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
-                      spot_max_price=float('nan'),
-                      labels=None,
-                      tags=None,
-                      node_taints=None,
-                      node_osdisk_type=None,
-                      node_osdisk_size=0,
-                      max_surge=None,
-                      mode=CONST_NODEPOOL_MODE_USER,
-                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
-                      max_pods=0,
-                      zones=None,
-                      ppg=None,
-                      enable_encryption_at_host=False,
-                      enable_ultra_ssd=False,
-                      enable_fips_image=False,
-                      kubelet_config=None,
-                      linux_os_config=None,
-                      no_wait=False,
-                      aks_custom_headers=None):
+def aks_agentpool_add(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    nodepool_name,
+    kubernetes_version=None,
+    node_vm_size=None,
+    os_type=None,
+    os_sku=None,
+    snapshot_id=None,
+    vnet_subnet_id=None,
+    pod_subnet_id=None,
+    enable_node_public_ip=False,
+    node_public_ip_prefix_id=None,
+    enable_cluster_autoscaler=False,
+    min_count=None,
+    max_count=None,
+    node_count=3,
+    priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+    eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
+    spot_max_price=float("nan"),
+    labels=None,
+    tags=None,
+    node_taints=None,
+    node_osdisk_type=None,
+    node_osdisk_size=0,
+    max_surge=None,
+    mode=CONST_NODEPOOL_MODE_USER,
+    scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
+    max_pods=0,
+    zones=None,
+    ppg=None,
+    enable_encryption_at_host=False,
+    enable_ultra_ssd=False,
+    enable_fips_image=False,
+    kubelet_config=None,
+    linux_os_config=None,
+    no_wait=False,
+    aks_custom_headers=None,
+):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -2838,20 +2996,26 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     return aks_agentpool_add_decorator.add_agentpool(agentpool)
 
 
-def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
-                         enable_cluster_autoscaler=False,
-                         disable_cluster_autoscaler=False,
-                         update_cluster_autoscaler=False,
-                         min_count=None,
-                         max_count=None,
-                         labels=None,
-                         tags=None,
-                         node_taints=None,
-                         max_surge=None,
-                         mode=None,
-                         scale_down_mode=None,
-                         no_wait=False,
-                         aks_custom_headers=None):
+def aks_agentpool_update(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    nodepool_name,
+    enable_cluster_autoscaler=False,
+    disable_cluster_autoscaler=False,
+    update_cluster_autoscaler=False,
+    min_count=None,
+    max_count=None,
+    labels=None,
+    tags=None,
+    node_taints=None,
+    max_surge=None,
+    mode=None,
+    scale_down_mode=None,
+    no_wait=False,
+    aks_custom_headers=None,
+):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -2887,7 +3051,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           no_wait=False,
                           aks_custom_headers=None,
                           snapshot_id=None):
-    AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
+    AgentPoolUpgradeSettings = cmd.get_models(
+        "AgentPoolUpgradeSettings",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
@@ -2912,8 +3080,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       snapshot_id)
 
     # load model CreationData
-    from azure.cli.command_modules.acs.decorator import AKSModels
-    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    CreationData = cmd.get_models(
+        "CreationData",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
 
     creationData = None
     if snapshot_id:
@@ -2977,6 +3148,52 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
     )
 
 
+def aks_agentpool_start(cmd,   # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        cluster_name,
+                        nodepool_name,
+                        aks_custom_headers=None,
+                        no_wait=False):
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+    if not agentpool_exists:
+        raise InvalidArgumentValueError(
+            "Node pool {} doesnt exist, use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    PowerState = cmd.get_models('PowerState', operation_group='agent_pools')
+    power_state = PowerState(code="Running")
+    instance.power_state = power_state
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
+
+
+def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
+                       client,
+                       resource_group_name,
+                       cluster_name,
+                       nodepool_name,
+                       aks_custom_headers=None,
+                       no_wait=False):
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+    if not agentpool_exists:
+        raise InvalidArgumentValueError(
+            "Node pool {} doesnt exist, use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    PowerState = cmd.get_models('PowerState', operation_group='agent_pools')
+    power_state = PowerState(code="Stopped")
+    instance.power_state = power_state
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
+
+
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
                          no_wait=False):
@@ -3018,9 +3235,16 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
         location = rg_location
 
     # load model CreationData, Snapshot
-    from azure.cli.command_modules.acs.decorator import AKSModels
-    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
-    Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
+    CreationData = cmd.get_models(
+        "CreationData",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    Snapshot = cmd.get_models(
+        "Snapshot",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
 
     creationData = CreationData(
         source_resource_id=nodepool_id
@@ -3068,355 +3292,6 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
-
-
-# legacy: osa command
-def _ensure_osa_aad(cmd,
-                    cli_ctx,
-                    aad_client_app_id=None,
-                    aad_client_app_secret=None,
-                    aad_tenant_id=None,
-                    identifier=None,
-                    name=None, create=False,
-                    customer_admin_group_id=None):
-    OpenShiftManagedClusterAADIdentityProvider = cmd.get_models('OpenShiftManagedClusterAADIdentityProvider',
-                                                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                                operation_group='open_shift_managed_clusters')
-    rbac_client = get_graph_rbac_management_client(cli_ctx)
-    if create:
-        # This reply_url is temporary set since Azure need one to create the AAD.
-        app_id_name = 'https://{}'.format(name)
-        if not aad_client_app_secret:
-            aad_client_app_secret = _create_client_secret()
-
-        # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
-        resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
-                                         additional_properties=None, type="Scope")
-        # Read directory permissions on Windows Azure Active Directory API
-        directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
-                                          additional_properties=None, type="Role")
-
-        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
-                                                         additional_properties=None,
-                                                         resource_app_id="00000002-0000-0000-c000-000000000000")
-
-        list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
-                                                               .format(app_id_name)))
-        if list_aad_filtered:
-            aad_client_app_id = list_aad_filtered[0].app_id
-            # Updating reply_url with the correct FQDN information returned by the RP
-            reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(
-                identifier)
-            update_application(client=rbac_client.applications,
-                               object_id=list_aad_filtered[0].object_id,
-                               display_name=name,
-                               identifier_uris=[app_id_name],
-                               reply_urls=[reply_url],
-                               homepage=app_id_name,
-                               password=aad_client_app_secret,
-                               required_resource_accesses=[required_osa_aad_access])
-            logger.info('Updated AAD: %s', aad_client_app_id)
-        else:
-            result, _aad_session_key = create_application(client=rbac_client.applications,
-                                                          display_name=name,
-                                                          identifier_uris=[
-                                                              app_id_name],
-                                                          homepage=app_id_name,
-                                                          password=aad_client_app_secret,
-                                                          required_resource_accesses=[required_osa_aad_access])
-            aad_client_app_id = result.app_id
-            logger.info('Created an AAD: %s', aad_client_app_id)
-        # Get the TenantID
-        if aad_tenant_id is None:
-            profile = Profile(cli_ctx=cli_ctx)
-            _, _, aad_tenant_id = profile.get_login_credentials()
-    return OpenShiftManagedClusterAADIdentityProvider(
-        client_id=aad_client_app_id,
-        secret=aad_client_app_secret,
-        tenant_id=aad_tenant_id,
-        kind='AADIdentityProvider',
-        customer_admin_group_id=customer_admin_group_id)
-
-
-# legacy: osa command
-def update_application(client, object_id, display_name, homepage, identifier_uris,
-                       available_to_other_tenants=False, password=None, reply_urls=None,
-                       key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None, required_resource_accesses=None):
-    from azure.graphrbac.models import GraphErrorException
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
-    try:
-        if key_creds:
-            client.update_key_credentials(object_id, key_creds)
-        if password_creds:
-            client.update_password_credentials(object_id, password_creds)
-        if reply_urls:
-            client.patch(object_id, ApplicationUpdateParameters(
-                reply_urls=reply_urls))
-        return
-    except GraphErrorException as ex:
-        if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
-            raise CLIError("Directory permission is needed for the current user to register the application. "
-                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
-        raise
-
-
-# legacy: osa command
-def _format_workspace_id(workspace_id):
-    workspace_id = workspace_id.strip()
-    if not workspace_id.startswith('/'):
-        workspace_id = '/' + workspace_id
-    if workspace_id.endswith('/'):
-        workspace_id = workspace_id.rstrip('/')
-    return workspace_id
-
-
-# legacy: osa command
-def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
-                     location=None,
-                     compute_vm_size="Standard_D4s_v3",
-                     compute_count=3,
-                     aad_client_app_id=None,
-                     aad_client_app_secret=None,
-                     aad_tenant_id=None,
-                     vnet_prefix="10.0.0.0/8",
-                     subnet_prefix="10.0.0.0/24",
-                     vnet_peer=None,
-                     tags=None,
-                     no_wait=False,
-                     workspace_id=None,
-                     customer_admin_group_id=None):
-    OpenShiftManagedClusterAgentPoolProfile = cmd.get_models('OpenShiftManagedClusterAgentPoolProfile',
-                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                             operation_group='open_shift_managed_clusters')
-    OpenShiftAgentPoolProfileRole = cmd.get_models('OpenShiftAgentPoolProfileRole',
-                                                   resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                   operation_group='open_shift_managed_clusters')
-    OpenShiftManagedClusterIdentityProvider = cmd.get_models('OpenShiftManagedClusterIdentityProvider',
-                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                             operation_group='open_shift_managed_clusters')
-    OpenShiftManagedCluster = cmd.get_models('OpenShiftManagedCluster',
-                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                             operation_group='open_shift_managed_clusters')
-    OpenShiftRouterProfile = cmd.get_models('OpenShiftRouterProfile',
-                                            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                            operation_group='open_shift_managed_clusters')
-    NetworkProfile = cmd.get_models('NetworkProfile',
-                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                    operation_group='open_shift_managed_clusters')
-    OpenShiftManagedClusterAuthProfile = cmd.get_models('OpenShiftManagedClusterAuthProfile',
-                                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                        operation_group='open_shift_managed_clusters')
-    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='open_shift_managed_clusters')
-    logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    if location is None:
-        location = get_rg_location(cmd.cli_ctx, resource_group_name)
-    agent_pool_profiles = []
-    agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
-        name='compute',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(compute_count),
-        vm_size=compute_vm_size,
-        os_type="Linux",
-        role=OpenShiftAgentPoolProfileRole.compute,
-        subnet_cidr=subnet_prefix
-    )
-
-    agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
-        name='infra',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(3),
-        vm_size="Standard_D4s_v3",
-        os_type="Linux",
-        role=OpenShiftAgentPoolProfileRole.infra,
-        subnet_cidr=subnet_prefix
-    )
-
-    agent_pool_profiles.append(agent_node_pool_profile)
-    agent_pool_profiles.append(agent_infra_pool_profile)
-
-    agent_master_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
-        name='master',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(3),
-        vm_size="Standard_D4s_v3",
-        os_type="Linux",
-        subnet_cidr=subnet_prefix
-    )
-    identity_providers = []
-
-    create_aad = False
-
-    # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
-    try:
-        client.get(resource_group_name, name)
-    except CloudError:
-        # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
-        if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
-            create_aad = True
-
-    osa_aad_identity = _ensure_osa_aad(cmd,
-                                       cmd.cli_ctx,
-                                       aad_client_app_id=aad_client_app_id,
-                                       aad_client_app_secret=aad_client_app_secret,
-                                       aad_tenant_id=aad_tenant_id, identifier=None,
-                                       name=name, create=create_aad,
-                                       customer_admin_group_id=customer_admin_group_id)
-    identity_providers.append(
-        OpenShiftManagedClusterIdentityProvider(
-            name='Azure AD',
-            provider=osa_aad_identity
-        )
-    )
-    auth_profile = OpenShiftManagedClusterAuthProfile(
-        identity_providers=identity_providers)
-
-    default_router_profile = OpenShiftRouterProfile(name='default')
-
-    if vnet_peer is not None:
-        from msrestazure.tools import is_valid_resource_id, resource_id
-        if not is_valid_resource_id(vnet_peer):
-            vnet_peer = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='virtualNetwork',
-                name=vnet_peer
-            )
-    if workspace_id is not None:
-        workspace_id = _format_workspace_id(workspace_id)
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(
-            enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
-    else:
-        monitor_profile = None
-
-    network_profile = NetworkProfile(
-        vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
-    osamc = OpenShiftManagedCluster(
-        location=location, tags=tags,
-        open_shift_version="v3.11",
-        network_profile=network_profile,
-        auth_profile=auth_profile,
-        agent_pool_profiles=agent_pool_profiles,
-        master_pool_profile=agent_master_pool_profile,
-        router_profiles=[default_router_profile],
-        monitor_profile=monitor_profile)
-
-    try:
-        # long_running_operation_timeout=300
-        result = sdk_no_wait(no_wait, client.begin_create_or_update,
-                             resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
-        result = LongRunningOperation(cmd.cli_ctx)(result)
-        instance = client.get(resource_group_name, name)
-        _ensure_osa_aad(cmd,
-                        cmd.cli_ctx,
-                        aad_client_app_id=osa_aad_identity.client_id,
-                        aad_client_app_secret=osa_aad_identity.secret,
-                        aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
-                        name=name, create=create_aad)
-    except CloudError as ex:
-        if "The resource type could not be found in the namespace 'Microsoft.ContainerService" in ex.message:
-            raise CLIError(
-                'Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
-        if "No registered resource provider found for location" in ex.message:
-            raise CLIError(
-                'Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
-        raise ex
-
-
-# legacy: osa command
-def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    instance = client.get(resource_group_name, name)
-    # TODO: change this approach when we support multiple agent pools.
-    idx = 0
-    for i in range(len(instance.agent_pool_profiles)):
-        if instance.agent_pool_profiles[i].name.lower() == "compute":
-            idx = i
-            break
-
-    instance.agent_pool_profiles[idx].count = int(
-        compute_count)  # pylint: disable=no-member
-
-    # null out the AAD profile and add manually the masterAP name because otherwise validation complains
-    instance.master_pool_profile.name = "master"
-    instance.auth_profile = None
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
-
-
-# legacy: osa command
-def openshift_show(cmd, client, resource_group_name, name):
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    mc = client.get(resource_group_name, name)
-    return _remove_osa_nulls([mc])[0]
-
-
-# legacy: osa command
-def osa_list(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        managed_clusters = client.list_by_resource_group(resource_group_name)
-    else:
-        managed_clusters = client.list()
-    return _remove_osa_nulls(list(managed_clusters))
-
-
-# legacy: osa command
-def _remove_osa_nulls(managed_clusters):
-    """
-    Remove some often-empty fields from a list of OpenShift ManagedClusters, so the JSON representation
-    doesn't contain distracting null fields.
-
-    This works around a quirk of the SDK for python behavior. These fields are not sent
-    by the server, but get recreated by the CLI's own "to_dict" serialization.
-    """
-    attrs = ['tags', 'plan', 'type', 'id']
-    ap_master_attrs = ['name', 'os_type']
-    net_attrs = ['peer_vnet_id']
-    for managed_cluster in managed_clusters:
-        for attr in attrs:
-            if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
-                delattr(managed_cluster, attr)
-        for attr in ap_master_attrs:
-            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
-                delattr(managed_cluster.master_pool_profile, attr)
-        for attr in net_attrs:
-            if getattr(managed_cluster.network_profile, attr, None) is None:
-                delattr(managed_cluster.network_profile, attr)
-    return managed_clusters
-
-
-# legacy: osa command
-def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
-    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='open_shift_managed_clusters')
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    instance = client.get(resource_group_name, name)
-    workspace_id = _format_workspace_id(workspace_id)
-    monitor_profile = OpenShiftManagedClusterMonitorProfile(
-        enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
-    instance.monitor_profile = monitor_profile
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
-
-
-# legacy: osa command
-def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
-    OpenShiftManagedClusterMonitorProfile = cmd.get_models('OpenShiftManagedClusterMonitorProfile',
-                                                           resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                           operation_group='open_shift_managed_clusters')
-    logger.warning('The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters.  See http://aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
-
-    instance = client.get(resource_group_name, name)
-    monitor_profile = OpenShiftManagedClusterMonitorProfile(
-        enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
-    instance.monitor_profile = monitor_profile
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 # TODO: remove in cli June release

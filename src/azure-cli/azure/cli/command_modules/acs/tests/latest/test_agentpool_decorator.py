@@ -156,30 +156,37 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.cmd, AKSAgentPoolParamDict({}), self.models, DecoratorMode.CREATE, self.agentpool_decorator_mode
         )
         # default
-        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(3, False, None, None, DecoratorMode.CREATE)
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(3, False, None, None, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.CREATE)
 
         # custom value
-        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 1, 10, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.CREATE)
 
         # fail on min_count/max_count not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, None, None, DecoratorMode.CREATE)
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, None, None, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.CREATE)
 
         # fail on min_count > max_count
         with self.assertRaises(InvalidArgumentValueError):
-            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 3, 1, DecoratorMode.CREATE)
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 3, 1, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.CREATE)
 
         # fail on node_count < min_count in create mode
         with self.assertRaises(InvalidArgumentValueError):
-            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.CREATE)
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 7, 10, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.CREATE)
 
         # skip node_count check in update mode
-        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
-        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(None, True, 7, 10, DecoratorMode.UPDATE)
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, True, 7, 10, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.UPDATE)
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(None, True, 7, 10, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.UPDATE)
 
         # fail on enable_cluster_autoscaler not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, False, 3, None, DecoratorMode.UPDATE)
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(5, False, 3, None, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.UPDATE)
+
+        # min_count set to 0 for user node pools
+        ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(0, True, 0, 1, CONST_NODEPOOL_MODE_USER, DecoratorMode.CREATE)
+
+        # fail on min_count < 1 for system node pools
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSAgentPoolContext__validate_counts_in_autoscaler(1, True, 0, 1, CONST_NODEPOOL_MODE_SYSTEM, DecoratorMode.CREATE)
 
     def common_get_resource_group_name(self):
         # default

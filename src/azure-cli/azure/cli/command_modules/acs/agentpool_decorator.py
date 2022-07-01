@@ -172,6 +172,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         enable_cluster_autoscaler,
         min_count,
         max_count,
+        mode,
         decorator_mode,
     ) -> None:
         """Helper function to check the validity of serveral count-related parameters in autoscaler.
@@ -200,6 +201,11 @@ class AKSAgentPoolContext(BaseAKSContext):
                 if node_count < min_count or node_count > max_count:
                     raise InvalidArgumentValueError(
                         "node-count is not in the range of min-count and max-count"
+                    )
+            if mode == CONST_NODEPOOL_MODE_SYSTEM:
+                if min_count < 1:
+                    raise InvalidArgumentValueError(
+                        "Value of min-count should be greater than or equal to 1 for System node pools"
                     )
         else:
             if min_count is not None or max_count is not None:
@@ -636,6 +642,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             enable_cluster_autoscaler,
             min_count,
             max_count,
+            mode=self.get_mode(),
             decorator_mode=DecoratorMode.CREATE,
         )
         return node_count, enable_cluster_autoscaler, min_count, max_count
@@ -701,6 +708,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
             max_count,
+            mode=self.get_mode(),
             decorator_mode=DecoratorMode.UPDATE,
         )
 

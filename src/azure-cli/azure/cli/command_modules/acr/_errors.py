@@ -5,6 +5,8 @@
 
 # pylint: disable=line-too-long
 
+from ._format import add_timestamp
+
 
 class ErrorClass:
     error_title = ""
@@ -16,9 +18,9 @@ class ErrorClass:
 
     def get_error_message(self, additional_message=None):
         if additional_message:
-            return "An error occurred: {}\n{}\n{}".format(self.error_title, self.error_message, additional_message)
+            return add_timestamp("An error occurred: {}\n{}\n{}".format(self.error_title, self.error_message, additional_message))
 
-        return "An error occurred: {}\n{}".format(self.error_title, self.error_message)
+        return add_timestamp("An error occurred: {}\n{}".format(self.error_title, self.error_message))
 
     def set_error_message(self, message):
         return ErrorClass(self.error_title, message)

@@ -117,26 +117,21 @@ def multi_service_properties_factory(cli_ctx, kwargs):
     """Create multiple data services properties instance based on the services option"""
     from .services_wrapper import ServiceProperties
 
-    t_base_blob_service, t_file_service, t_queue_service, = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                                                    'blob.baseblobservice#BaseBlobService',
-                                                                    'file#FileService', 'queue#QueueService')
-
-    t_table_service = get_table_data_type(cli_ctx, 'table', 'TableService')
-
-    account_name = kwargs.pop('account_name', None)
-    account_key = kwargs.pop('account_key', None)
-    connection_string = kwargs.pop('connection_string', None)
-    sas_token = kwargs.pop('sas_token', None)
     services = kwargs.pop('services', [])
 
-    def get_creator(name, service_type):
-        return lambda: ServiceProperties(cli_ctx, name, service_type, account_name, account_key, connection_string,
-                                         sas_token)
+    def create_service(service):
+        service_to_param = {'b': ['blob', cf_blob_service], 'f': ['file', cf_share_service],
+                            'q': ['queue', cf_queue_service],
+                            't': ['table', cf_table_service]}
+        name, client = service_to_param[service]
+        return ServiceProperties(cli_ctx, name, client(cli_ctx, ori_kwargs.copy()))
 
-    creators = {'b': get_creator('blob', t_base_blob_service), 'f': get_creator('file', t_file_service),
-                'q': get_creator('queue', t_queue_service), 't': get_creator('table', t_table_service)}
+    ori_kwargs = kwargs.copy()
 
-    return [creators[s]() for s in services]
+    for i in ['connection_string', 'account_name', 'account_key', 'sas_token', 'account_url', 'token_credential']:
+        kwargs.pop(i, None)
+
+    return [create_service(s) for s in services]
 
 
 def cf_sa(cli_ctx, _):
@@ -407,4 +402,5 @@ def cf_share_directory_client(cli_ctx, kwargs):
 
 
 def cf_share_file_client(cli_ctx, kwargs):
-    return cf_share_client(cli_ctx, kwargs).get_file_client(file_path=kwargs.pop('file_path'))
+    return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_name')).\
+        get_file_client(file_name=kwargs.pop('file_name'))

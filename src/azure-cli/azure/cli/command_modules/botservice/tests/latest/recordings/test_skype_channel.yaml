@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"name": "cli000002", "type": "bot"}'
+    body: '{"name": "cli000002", "type": "azurebot"}'
     headers:
       Accept:
       - application/json
@@ -11,18 +11,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '36'
+      - '41'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -k -g -n -e --appid -p -l
+      - -g -n -e --app-type --appid -l
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2020-06-02
+    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
   response:
     body:
       string: '{"valid":true,"message":"","absCode":null}'
@@ -34,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:28:22 GMT
+      - Fri, 24 Jun 2022 09:08:33 GMT
       expires:
       - '-1'
       pragma:
@@ -48,14 +45,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
-      - '1198'
+      - '1197'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "sku": {"name": "F0"}, "kind": "bot", "properties":
+    body: '{"location": "global", "sku": {"name": "F0"}, "kind": "azurebot", "properties":
       {"displayName": "cli000002", "endpoint": "https://www.google.com/api/messages",
-      "msaAppId": "4df28011-9f6e-4af0-919d-f8f69443f891", "isCmekEnabled": false}}'
+      "msaAppType": "MultiTenant", "msaAppId": "1811a8bd-1b41-43c3-a6bc-9a68835e2b22",
+      "isCmekEnabled": false, "publicNetworkAccess": "Enabled", "isStreamingSupported":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -66,32 +65,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '231'
+      - '330'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -k -g -n -e --appid -p -l
+      - -g -n -e --app-type --appid -l
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"8d02695a-0000-0800-0000-6245d6a90000\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.scratch.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"4df28011-9f6e-4af0-919d-f8f69443f891","msaAppTenantId":null,"msaAppType":null,"msaAppMSIResourceId":null,"developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"publicNetworkAccess":null,"disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ba00c359-0000-1800-0000-62b57f170000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"1811a8bd-1b41-43c3-a6bc-9a68835e2b22","msaAppTenantId":null,"msaAppType":"MultiTenant","msaAppMSIResourceId":null,"developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1338'
+      - '1349'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:28:26 GMT
+      - Fri, 24 Jun 2022 09:08:39 GMT
       etag:
-      - '"8d02695a-0000-0800-0000-6245d6a90000"'
+      - '"ba00c359-0000-1800-0000-62b57f170000"'
       expires:
       - '-1'
       pragma:
@@ -101,14 +97,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1197'
     status:
       code: 201
       message: Created
 - request:
-    body: '{"location": "global", "properties": {"channelName": "SkypeChannel", "properties":
-      {"enableMessaging": true, "enableMediaCards": true, "enableVideo": true, "enableCalling":
-      true, "callingWebHook": "https://www.google.com", "isEnabled": true}}}'
+    body: '{"location": "global", "properties": {"channelName": "SkypeChannel", "location":
+      "global", "properties": {"enableMessaging": true, "enableMediaCards": true,
+      "enableVideo": true, "enableCalling": true, "callingWebHook": "https://www.google.com",
+      "isEnabled": true}}}'
     headers:
       Accept:
       - application/json
@@ -119,24 +116,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '243'
+      - '265'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --enable-calling --enable-media-cards --enable-messaging --enable-video
         --calling-web-hook
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel","name":"cli000002/SkypeChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"5a230b53a1ed5a180e67f03a9222190c3/31/2022
-        4:28:30 PM\"","location":"global","properties":{"properties":{"enableMessaging":true,"enableMediaCards":true,"enableVideo":true,"enableCalling":true,"enableScreenSharing":false,"incomingCallRoute":null,"enableGroups":false,"groupsMode":null,"callingWebHook":"https://www.google.com","isEnabled":true},"etag":"W/\"5a230b53a1ed5a180e67f03a9222190c3/31/2022
-        4:28:30 PM\"","channelName":"SkypeChannel","location":"global","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel","name":"cli000002/SkypeChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"d6d47134feeeec58650ac0bdf57f6f706/24/2022
+        9:08:48 AM\"","location":"global","properties":{"properties":{"enableMessaging":true,"enableMediaCards":true,"enableVideo":true,"enableCalling":true,"enableScreenSharing":false,"incomingCallRoute":null,"enableGroups":false,"groupsMode":null,"callingWebHook":"https://www.google.com","isEnabled":true},"etag":"W/\"d6d47134feeeec58650ac0bdf57f6f706/24/2022
+        9:08:48 AM\"","channelName":"SkypeChannel","location":"global","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -145,9 +139,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:28:30 GMT
+      - Fri, 24 Jun 2022 09:08:48 GMT
       etag:
-      - W/"5a230b53a1ed5a180e67f03a9222190c3/31/2022 4:28:30 PM"
+      - W/"d6d47134feeeec58650ac0bdf57f6f706/24/2022 9:08:48 AM"
       expires:
       - '-1'
       pragma:
@@ -161,7 +155,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1192'
     status:
       code: 200
       message: OK
@@ -179,17 +173,14 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel","name":"cli000002/SkypeChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"583b703677c77cffb8cf50802b7a505b3/31/2022
-        4:28:31 PM\"","location":"global","properties":{"properties":{"enableMessaging":true,"enableMediaCards":true,"enableVideo":false,"enableCalling":true,"enableScreenSharing":false,"incomingCallRoute":null,"enableGroups":false,"groupsMode":null,"callingWebHook":"https://www.google.com/","isEnabled":true},"etag":"W/\"583b703677c77cffb8cf50802b7a505b3/31/2022
-        4:28:31 PM\"","channelName":"SkypeChannel","location":"global","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel","name":"cli000002/SkypeChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"2beca1c0446d136033401f5f598bd9c36/24/2022
+        9:08:49 AM\"","location":"global","properties":{"properties":{"enableMessaging":true,"enableMediaCards":true,"enableVideo":false,"enableCalling":true,"enableScreenSharing":false,"incomingCallRoute":null,"enableGroups":false,"groupsMode":null,"callingWebHook":"https://www.google.com/","isEnabled":true},"etag":"W/\"2beca1c0446d136033401f5f598bd9c36/24/2022
+        9:08:49 AM\"","channelName":"SkypeChannel","location":"global","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -198,9 +189,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:28:31 GMT
+      - Fri, 24 Jun 2022 09:08:49 GMT
       etag:
-      - W/"583b703677c77cffb8cf50802b7a505b3/31/2022 4:28:31 PM"
+      - W/"2beca1c0446d136033401f5f598bd9c36/24/2022 9:08:49 AM"
       expires:
       - '-1'
       pragma:
@@ -232,16 +223,13 @@ interactions:
       ParameterSetName:
       - -g -n --with-secrets
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel/listChannelWithKeys?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel/listChannelWithKeys?api-version=2021-05-01-preview
   response:
     body:
-      string: "{\"resource\":{\"properties\":{\"enableMessaging\":true,\"enableMediaCards\":true,\"enableVideo\":false,\"enableCalling\":true,\"enableScreenSharing\":false,\"enableGroups\":false,\"callingWebHook\":\"https://www.google.com/\",\"isEnabled\":true},\"etag\":\"W/\\\"583b703677c77cffb8cf50802b7a505b3/31/2022
-        4:28:33 PM\\\"\",\"channelName\":\"SkypeChannel\",\"location\":\"global\"},\"setting\":{\"enableMessaging\":true,\"enableMediaCards\":true,\"enableCalling\":true,\"enableVideo\":false,\"enableScreenSharing\":false,\"callingWebhook\":\"https://www.google.com/\",\"enableGroups\":false,\"botName\":\"cli000002\",\"description\":\"\",\"category\":\"None\",\"publisherName\":\"\",\"botLanguage\":[],\"markets\":[],\"showInDirectory\":true,\"publishState\":\"Preview\",\"submitted\":false,\"botLanguageList\":[{\"disabled\":false,\"selected\":false,\"text\":\"English
+      string: "{\"resource\":{\"properties\":{\"enableMessaging\":true,\"enableMediaCards\":true,\"enableVideo\":false,\"enableCalling\":true,\"enableScreenSharing\":false,\"enableGroups\":false,\"callingWebHook\":\"https://www.google.com/\",\"isEnabled\":true},\"etag\":\"W/\\\"2beca1c0446d136033401f5f598bd9c36/24/2022
+        9:08:50 AM\\\"\",\"channelName\":\"SkypeChannel\",\"location\":\"global\"},\"setting\":{\"enableMessaging\":true,\"enableMediaCards\":true,\"enableCalling\":true,\"enableVideo\":false,\"enableScreenSharing\":false,\"callingWebhook\":\"https://www.google.com/\",\"enableGroups\":false,\"botName\":\"cli000002\",\"description\":\"\",\"category\":\"None\",\"publisherName\":\"\",\"botLanguage\":[],\"markets\":[],\"showInDirectory\":true,\"publishState\":\"Preview\",\"submitted\":false,\"botLanguageList\":[{\"disabled\":false,\"selected\":false,\"text\":\"English
         (United States)\",\"value\":\"EN-US\"},{\"disabled\":false,\"selected\":false,\"text\":\"English
         (United Kingdom)\",\"value\":\"EN-GB\"},{\"disabled\":false,\"selected\":false,\"text\":\"Russian\",\"value\":\"RU\"},{\"disabled\":false,\"selected\":false,\"text\":\"Portuguese
         (Brazil)\",\"value\":\"PT-BR\"},{\"disabled\":false,\"selected\":false,\"text\":\"Spanish
@@ -331,18 +319,18 @@ interactions:
         Nam\",\"value\":\"VN\"},{\"disabled\":false,\"selected\":false,\"text\":\"Virgin
         Islands, British\",\"value\":\"VG\"},{\"disabled\":false,\"selected\":false,\"text\":\"Virgin
         Islands, U.S.\",\"value\":\"VI\"},{\"disabled\":false,\"selected\":false,\"text\":\"Wallis
-        and Futuna\",\"value\":\"WF\"},{\"disabled\":false,\"selected\":false,\"text\":\"Yemen\",\"value\":\"YE\"},{\"disabled\":false,\"selected\":false,\"text\":\"Zambia\",\"value\":\"ZM\"},{\"disabled\":false,\"selected\":false,\"text\":\"Zimbabwe\",\"value\":\"ZW\"}],\"channelId\":\"skype\",\"botId\":\"cli000002\",\"botIconUrl\":\"https://docs.scratch.botframework.com/static/devportal/client/images/bot-framework-default.png\",\"isEnabled\":true,\"hasConfiguration\":true,\"disableLocalAuth\":false},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel\",\"location\":\"global\",\"properties\":{\"properties\":{\"enableMessaging\":true,\"enableMediaCards\":true,\"enableVideo\":false,\"enableCalling\":true,\"enableScreenSharing\":false,\"incomingCallRoute\":null,\"enableGroups\":false,\"groupsMode\":null,\"callingWebHook\":\"https://www.google.com/\",\"isEnabled\":true},\"etag\":\"W/\\\"583b703677c77cffb8cf50802b7a505b3/31/2022
-        4:28:33 PM\\\"\",\"channelName\":\"SkypeChannel\",\"location\":\"global\"},\"provisioningState\":\"Accepted\",\"entityTag\":\"W/\\\"583b703677c77cffb8cf50802b7a505b3/31/2022
-        4:28:33 PM\\\"\",\"changedTime\":\"0001-01-01T00:00:00Z\",\"zones\":[]}"
+        and Futuna\",\"value\":\"WF\"},{\"disabled\":false,\"selected\":false,\"text\":\"Yemen\",\"value\":\"YE\"},{\"disabled\":false,\"selected\":false,\"text\":\"Zambia\",\"value\":\"ZM\"},{\"disabled\":false,\"selected\":false,\"text\":\"Zimbabwe\",\"value\":\"ZW\"}],\"channelId\":\"skype\",\"botId\":\"cli000002\",\"botIconUrl\":\"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png\",\"isEnabled\":true,\"hasConfiguration\":true,\"disableLocalAuth\":false},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel\",\"location\":\"global\",\"properties\":{\"properties\":{\"enableMessaging\":true,\"enableMediaCards\":true,\"enableVideo\":false,\"enableCalling\":true,\"enableScreenSharing\":false,\"incomingCallRoute\":null,\"enableGroups\":false,\"groupsMode\":null,\"callingWebHook\":\"https://www.google.com/\",\"isEnabled\":true},\"etag\":\"W/\\\"2beca1c0446d136033401f5f598bd9c36/24/2022
+        9:08:50 AM\\\"\",\"channelName\":\"SkypeChannel\",\"location\":\"global\"},\"provisioningState\":\"Accepted\",\"entityTag\":\"W/\\\"2beca1c0446d136033401f5f598bd9c36/24/2022
+        9:08:50 AM\\\"\",\"changedTime\":\"0001-01-01T00:00:00Z\",\"zones\":[]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '21740'
+      - '21732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 31 Mar 2022 16:28:33 GMT
+      - Fri, 24 Jun 2022 09:08:50 GMT
       expires:
       - '-1'
       pragma:
@@ -356,7 +344,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -376,12 +364,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/SkypeChannel?api-version=2021-05-01-preview
   response:
     body:
       string: ''
@@ -391,7 +376,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 31 Mar 2022 16:28:34 GMT
+      - Fri, 24 Jun 2022 09:08:54 GMT
       expires:
       - '-1'
       pragma:
@@ -401,7 +386,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14998'
     status:
       code: 200
       message: OK
@@ -421,12 +406,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.9.12 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-botservice/0.3.0 Azure-SDK-For-Python AZURECLI/2.34.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2020-06-02
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
       string: ''
@@ -436,7 +418,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 31 Mar 2022 16:28:39 GMT
+      - Fri, 24 Jun 2022 09:09:04 GMT
       expires:
       - '-1'
       pragma:
@@ -446,7 +428,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14992'
     status:
       code: 200
       message: OK

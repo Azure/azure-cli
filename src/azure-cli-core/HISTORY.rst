@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.37.0
+++++++
+* Codegen v2 support (#20967)
+* Support getting SSH certificate inside Cloud Shell (#22162)
+
 2.36.0
 ++++++
 * Minor fixes

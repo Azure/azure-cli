@@ -12,27 +12,36 @@ from knack.util import CLIError
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
+
 class SBNamespaceCRUDScenarioTest(ScenarioTest):
     from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
+            'namespacename1': self.create_random_name(prefix='sb-nscli', length=20),
             'namespacename2': self.create_random_name(prefix='sb-nscli2', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
-            'tier': 'Standard',
+            'skupremium': 'Premium',
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
             'defaultauthorizationrule': 'RootManageSharedAccessKey',
             'accessrights': 'Send',
             'accessrights1': 'Listen',
             'primary': 'PrimaryKey',
-            'secondary': 'SecondaryKey'
+            'secondary': 'SecondaryKey',
+            'istrue': 'True',
+            'location': 'eastus2'
         })
+
+        # Create Namespace
+        getresponse = self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacename1} --location {location}  --tags {tags} --sku {skupremium} --zone-redundant {istrue}').get_output_in_json()
+        self.assertEqual(getresponse['sku']['name'], self.kwargs['skupremium'])
+        self.assertTrue(getresponse['zoneRedundant'])
 
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',

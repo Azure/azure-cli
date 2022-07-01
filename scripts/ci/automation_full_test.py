@@ -182,7 +182,7 @@ class AutomaticScheduling(object):
                 parallel_tests.append(k)
         if serial_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
-                  serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+                  serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd, check=True)
@@ -190,7 +190,7 @@ class AutomaticScheduling(object):
                 error_flag = True
         if parallel_tests:
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
-                  parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=0"']
+                  parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
             logger.info(cmd)
             try:
                 subprocess.run(cmd, check=True)
