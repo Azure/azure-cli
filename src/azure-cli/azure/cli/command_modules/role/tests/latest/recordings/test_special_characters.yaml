@@ -1,0 +1,369 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --display-name --mail-nickname
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/groups?$filter=displayName%20eq%20%27azure-cli-test-group%2B%2F000001%27%20and%20mailNickname%20eq%20%27deleteme11%27
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups","value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '81'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:43 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 7cc946f1-b303-42d1-8727-0d77d632d1cc
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF000018C7"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"displayName": "azure-cli-test-group+/000001", "mailNickname": "deleteme11",
+      "mailEnabled": false, "securityEnabled": true}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '124'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --display-name --mail-nickname
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: POST
+    uri: https://graph.microsoft.com/v1.0/groups
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups/$entity","id":"795b1624-5b39-4705-bfea-48a52592e18f","deletedDateTime":null,"classification":null,"createdDateTime":"2022-06-10T03:13:45Z","creationOptions":[],"description":null,"displayName":"azure-cli-test-group+/000001","expirationDateTime":null,"groupTypes":[],"isAssignableToRole":null,"mail":null,"mailEnabled":false,"mailNickname":"deleteme11","membershipRule":null,"membershipRuleProcessingState":null,"onPremisesDomainName":null,"onPremisesLastSyncDateTime":null,"onPremisesNetBiosName":null,"onPremisesSamAccountName":null,"onPremisesSecurityIdentifier":null,"onPremisesSyncEnabled":null,"preferredDataLocation":null,"preferredLanguage":null,"proxyAddresses":[],"renewedDateTime":"2022-06-10T03:13:45Z","resourceBehaviorOptions":[],"resourceProvisioningOptions":[],"securityEnabled":true,"securityIdentifier":"S-1-12-1-2036012580-1191533369-2773019327-2413924901","theme":null,"visibility":null,"onPremisesProvisioningErrors":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1009'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:45 GMT
+      location:
+      - https://graph.microsoft.com/v2/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/795b1624-5b39-4705-bfea-48a52592e18f/Microsoft.DirectoryServices.Group
+      odata-version:
+      - '4.0'
+      request-id:
+      - 93d57688-c0a6-4ecc-aad5-887984907899
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF000023FD"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --group
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/groups?$filter=displayName%20eq%20%27azure-cli-test-group%2B%2F000001%27
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups","value":[{"id":"795b1624-5b39-4705-bfea-48a52592e18f","deletedDateTime":null,"classification":null,"createdDateTime":"2022-06-10T03:13:45Z","creationOptions":[],"description":null,"displayName":"azure-cli-test-group+/000001","expirationDateTime":null,"groupTypes":[],"isAssignableToRole":null,"mail":null,"mailEnabled":false,"mailNickname":"deleteme11","membershipRule":null,"membershipRuleProcessingState":null,"onPremisesDomainName":null,"onPremisesLastSyncDateTime":null,"onPremisesNetBiosName":null,"onPremisesSamAccountName":null,"onPremisesSecurityIdentifier":null,"onPremisesSyncEnabled":null,"preferredDataLocation":null,"preferredLanguage":null,"proxyAddresses":[],"renewedDateTime":"2022-06-10T03:13:45Z","resourceBehaviorOptions":[],"resourceProvisioningOptions":[],"securityEnabled":true,"securityIdentifier":"S-1-12-1-2036012580-1191533369-2773019327-2413924901","theme":null,"visibility":null,"onPremisesProvisioningErrors":[]}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1013'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:46 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 4b5ce3c2-8888-4a19-b5dc-5c637030744a
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF00000BCC"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --group
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/groups/795b1624-5b39-4705-bfea-48a52592e18f
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups/$entity","id":"795b1624-5b39-4705-bfea-48a52592e18f","deletedDateTime":null,"classification":null,"createdDateTime":"2022-06-10T03:13:45Z","creationOptions":[],"description":null,"displayName":"azure-cli-test-group+/000001","expirationDateTime":null,"groupTypes":[],"isAssignableToRole":null,"mail":null,"mailEnabled":false,"mailNickname":"deleteme11","membershipRule":null,"membershipRuleProcessingState":null,"onPremisesDomainName":null,"onPremisesLastSyncDateTime":null,"onPremisesNetBiosName":null,"onPremisesSamAccountName":null,"onPremisesSecurityIdentifier":null,"onPremisesSyncEnabled":null,"preferredDataLocation":null,"preferredLanguage":null,"proxyAddresses":[],"renewedDateTime":"2022-06-10T03:13:45Z","resourceBehaviorOptions":[],"resourceProvisioningOptions":[],"securityEnabled":true,"securityIdentifier":"S-1-12-1-2036012580-1191533369-2773019327-2413924901","theme":null,"visibility":null,"onPremisesProvisioningErrors":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1009'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:47 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 82309287-35c3-4ab2-963e-0f6f4b79b6d6
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF00001642"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --display-name
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/groups?$filter=startswith%28displayName%2C%27azure-cli-test-group%2B%2F000001%27%29
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups","value":[{"id":"795b1624-5b39-4705-bfea-48a52592e18f","deletedDateTime":null,"classification":null,"createdDateTime":"2022-06-10T03:13:45Z","creationOptions":[],"description":null,"displayName":"azure-cli-test-group+/000001","expirationDateTime":null,"groupTypes":[],"isAssignableToRole":null,"mail":null,"mailEnabled":false,"mailNickname":"deleteme11","membershipRule":null,"membershipRuleProcessingState":null,"onPremisesDomainName":null,"onPremisesLastSyncDateTime":null,"onPremisesNetBiosName":null,"onPremisesSamAccountName":null,"onPremisesSecurityIdentifier":null,"onPremisesSyncEnabled":null,"preferredDataLocation":null,"preferredLanguage":null,"proxyAddresses":[],"renewedDateTime":"2022-06-10T03:13:45Z","resourceBehaviorOptions":[],"resourceProvisioningOptions":[],"securityEnabled":true,"securityIdentifier":"S-1-12-1-2036012580-1191533369-2773019327-2413924901","theme":null,"visibility":null,"onPremisesProvisioningErrors":[]}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1013'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:48 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 09b9fd42-f9f1-4981-9d05-aa2a72875683
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF00001E1E"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --group
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/groups?$filter=displayName%20eq%20%27azure-cli-test-group%2B%2F000001%27
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups","value":[{"id":"795b1624-5b39-4705-bfea-48a52592e18f","deletedDateTime":null,"classification":null,"createdDateTime":"2022-06-10T03:13:45Z","creationOptions":[],"description":null,"displayName":"azure-cli-test-group+/000001","expirationDateTime":null,"groupTypes":[],"isAssignableToRole":null,"mail":null,"mailEnabled":false,"mailNickname":"deleteme11","membershipRule":null,"membershipRuleProcessingState":null,"onPremisesDomainName":null,"onPremisesLastSyncDateTime":null,"onPremisesNetBiosName":null,"onPremisesSamAccountName":null,"onPremisesSecurityIdentifier":null,"onPremisesSyncEnabled":null,"preferredDataLocation":null,"preferredLanguage":null,"proxyAddresses":[],"renewedDateTime":"2022-06-10T03:13:45Z","resourceBehaviorOptions":[],"resourceProvisioningOptions":[],"securityEnabled":true,"securityIdentifier":"S-1-12-1-2036012580-1191533369-2773019327-2413924901","theme":null,"visibility":null,"onPremisesProvisioningErrors":[]}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1013'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:49 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 7b393c81-62e7-4640-8677-e13625417e0c
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF00001643"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --group
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: DELETE
+    uri: https://graph.microsoft.com/v1.0/groups/795b1624-5b39-4705-bfea-48a52592e18f
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 10 Jun 2022 03:13:51 GMT
+      request-id:
+      - 025f2140-3b2b-4c3a-a025-28cc508ab089
+      strict-transport-security:
+      - max-age=31536000
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF000023FA"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --display-name
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.22000-SP0) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/groups?$filter=startswith%28displayName%2C%27azure-cli-test-group%2B%2F000001%27%29
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#groups","value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '81'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 03:13:52 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - c26c2963-89a3-4557-aa18-eb5a608be6fb
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF000022D6"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

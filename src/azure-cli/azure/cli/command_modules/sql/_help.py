@@ -520,6 +520,8 @@ examples:
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Standard -c 100
   - name: Create an elastic pool with GeneralPurpose edition, Gen4 hardware and 1 vcore.
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
+  - name: Create an elastic pool with Hyperscale edition, Gen5 hardware, 4 vcore and 2 high availability replicas.
+    text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 4 --ha-replicas 2
 """
 
 helps['sql elastic-pool list-editions'] = """
@@ -557,6 +559,8 @@ examples:
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z
   - name: Update elastic pool with zone redundancy explicitly disabled
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
+  - name: Update elastic pool with 2 high availability replicas
+    text: az sql elastic-pool update -g mygroup -s myserver -n mypool --ha-replicas 2
 """
 
 helps['sql failover-group'] = """
@@ -918,6 +922,14 @@ short-summary: Create a managed database.
 examples:
   - name: Create a managed database with specified collation
     text: az sql midb create -g mygroup --mi myinstance -n mymanageddb --collation Latin1_General_100_CS_AS_SC
+"""
+
+helps['sql midb update'] = """
+type: command
+short-summary: Update a managed database.
+examples:
+  - name: Update a managed database with specified tags
+    text: az sql midb update -g mygroup --mi myinstance -n mymanageddb --tags tag1="value1"
 """
 
 helps['sql midb delete'] = """

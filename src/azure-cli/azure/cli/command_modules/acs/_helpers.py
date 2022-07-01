@@ -98,6 +98,16 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
     return False
 
 
+def check_is_managed_aad_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether managed aad is enabled.
+
+    :return: bool
+    """
+    if mc and mc.aad_profile is not None and mc.aad_profile.managed:
+        return True
+    return False
+
+
 # pylint: disable=too-many-return-statements
 def map_azure_error_to_cli_error(azure_error):
     error_message = getattr(azure_error, "message", str(azure_error))
