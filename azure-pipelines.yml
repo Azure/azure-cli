@@ -628,34 +628,7 @@ jobs:
       ArtifactName: rpm-mariner$(tag)
 
 
-- job: BuildRpmPackageCentOS7
-  displayName: Build Rpm Package CentOS 7
-  # Uncomment this line to disable this job on Pull Requests
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-  - task: Bash@3
-    displayName: 'Build Rpm Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline.sh
-    env:
-      IMAGE: centos7
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      # Should be 'rpm-centos7', but we keep 'yum' for backward compatibility
-      ArtifactName: yum
-
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
-# We use a separate job for Red Hat UBI 8 instead of strategy.matrix so that TestRpmPackage can start right after
-# BuildRpmPackageCentOS7 finishes.
 - job: BuildRpmPackageUbi8
   displayName: Build Rpm Package Red Hat Universal Base Image 8
   # Do not run this job for Pull Requests due to the slowness
@@ -684,7 +657,7 @@ jobs:
 - job: TestRpmPackage
   displayName: Test Rpm Package
   timeoutInMinutes: 120
-  dependsOn: BuildRpmPackageCentOS7
+  dependsOn: BuildRpmPackageUbi8
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
@@ -700,19 +673,19 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: yum
+      artifactName: rpm-ubi8
 
 
   - bash: |
        set -ex
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-       RPM_NAME=azure-cli-$CLI_VERSION-1.el7.x86_64.rpm
+       RPM_NAME=azure-cli-$CLI_VERSION-1.el8.x86_64.rpm
        RPM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/rpm/$RPM_NAME
 
-       echo "== Test rpm package on CentOS =="
+       echo "== Test rpm package on Red Hat UBI 8 =="
       
-       IMAGE=centos:centos7
+       IMAGE=registry.access.redhat.com/ubi8/ubi:8.4
        docker pull $IMAGE
        docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
 
