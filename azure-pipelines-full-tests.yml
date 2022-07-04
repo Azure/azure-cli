@@ -20,8 +20,6 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
@@ -40,8 +38,6 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
@@ -60,8 +56,6 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
@@ -71,39 +65,6 @@ jobs:
       parameters:
         pythonVersion: '$(python.version)'
         profile: '2018-03-01-hybrid'
-        fullTest: true
-
-- job: AutomationFullTestPython36ProfileLatest
-  displayName: Automation Full Test Python36 Profile Latest
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 8
-    matrix:
-      instance1:
-        Instance_idx: 1
-      instance2:
-        Instance_idx: 2
-      instance3:
-        Instance_idx: 3
-      instance4:
-        Instance_idx: 4
-      instance5:
-        Instance_idx: 5
-      instance6:
-        Instance_idx: 6
-      instance7:
-        Instance_idx: 7
-      instance8:
-        Instance_idx: 8
-  pool:
-    vmImage: 'ubuntu-20.04'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.6'
-        profile: 'latest'
-        instance_cnt: '8'
-        instance_idx: '$(Instance_idx)'
         fullTest: true
 
 - job: AutomationFullTestPython39ProfileLatest
