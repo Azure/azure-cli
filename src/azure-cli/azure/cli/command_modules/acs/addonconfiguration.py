@@ -460,58 +460,6 @@ def ensure_container_insights_for_monitoring(
                 raise error
 
 
-def _invoke_deployment(
-    cmd,
-    resource_group_name,
-    deployment_name,
-    template,
-    parameters,
-    validate,
-    no_wait,
-    subscription_id=None,
-):
-    DeploymentProperties = cmd.get_models(
-        "DeploymentProperties",
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-    )
-    properties = DeploymentProperties(
-        template=template, parameters=parameters, mode="incremental"
-    )
-    smc = get_mgmt_service_client(
-        cmd.cli_ctx,
-        ResourceType.MGMT_RESOURCE_RESOURCES,
-        subscription_id=subscription_id,
-    ).deployments
-    if validate:
-        logger.info("==== BEGIN TEMPLATE ====")
-        logger.info(json.dumps(template, indent=2))
-        logger.info("==== END TEMPLATE ====")
-
-    Deployment = cmd.get_models(
-        "Deployment", resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
-    )
-    deployment = Deployment(properties=properties)
-
-    if validate:
-        if cmd.supported_api_version(
-            min_api="2019-10-01",
-            resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-        ):
-            validation_poller = smc.begin_validate(
-                resource_group_name, deployment_name, deployment
-            )
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return smc.validate(resource_group_name, deployment_name, deployment)
-
-    return sdk_no_wait(
-        no_wait,
-        smc.begin_create_or_update,
-        resource_group_name,
-        deployment_name,
-        deployment,
-    )
-
-
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     service_principal_msi_id = None
     is_useAADAuth = False
