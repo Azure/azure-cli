@@ -1645,7 +1645,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"', checks=[
             self.check('id', fully_qualified_role_def_id),
             self.check('roleName', 'roleName'),
-            self.check('typePropertiesType', '1'),
+            self.check('typePropertiesType', 'CustomRole'),
             self.check('assignableScopes[0]', assignable_scope),
             self.check('length(permissions)', 1)
         ])
@@ -1659,7 +1659,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"', checks=[
             self.check('id', fully_qualified_role_def_id),
             self.check('roleName', 'roleName2'),
-            self.check('typePropertiesType', '1'),
+            self.check('typePropertiesType', 'CustomRole'),
             self.check('assignableScopes[0]', assignable_scope),
             self.check('length(permissions)', 2)
         ])
@@ -1667,7 +1667,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body2}"', checks=[
             self.check('id', fully_qualified_role_def_id2),
             self.check('roleName', 'roleName3'),
-            self.check('typePropertiesType', '1'),
+            self.check('typePropertiesType', 'CustomRole'),
             self.check('assignableScopes[0]', assignable_scope),
             self.check('length(permissions)', 3)
         ])

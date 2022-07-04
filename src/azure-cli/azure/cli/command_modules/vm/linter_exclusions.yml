@@ -35,6 +35,12 @@ vmss create:
         disable_integrity_monitoring:
             rule_exclusions:
             - option_length_too_long
+        os_disk_security_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        os_disk_secure_vm_disk_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
 vmss update:
     parameters:
         enable_cross_zone_upgrade:
@@ -71,6 +77,12 @@ vm create:
             rule_exclusions:
             - missing_parameter_help
         disable_integrity_monitoring:
+            rule_exclusions:
+                - option_length_too_long
+        os_disk_security_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        os_disk_secure_vm_disk_encryption_set:
             rule_exclusions:
                 - option_length_too_long
 vm unmanaged-disk attach:

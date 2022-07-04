@@ -20,7 +20,7 @@ class IoTHubTest(ScenarioTest):
             method_name, recording_processors=[KeyReplacer()]
         )
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):

@@ -5729,7 +5729,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
 
-    @ResourceGroupPreparer(location='CentralUSEUAP')
+    @ResourceGroupPreparer(name_prefix='cli_test_community_gallery_operations_', location='CentralUSEUAP')
     def test_community_gallery_operations(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
@@ -5756,6 +5756,10 @@ class VMGalleryImage(ScenarioTest):
             self.check('location', '{location}'),
             self.check('name', '{public_name}'),
             self.check('uniqueId', '/CommunityGalleries/{public_name}')
+        ])
+
+        self.cmd('sig list-community --location {location}', checks=[
+            self.check('[0].location', '{location}', case_sensitive=False)
         ])
 
         self.cmd('sig image-definition show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location {location}', checks=[
@@ -6668,6 +6672,150 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_identity_', location='eastus2euap')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2euap',
+                      additional_params='--enable-purge-protection')
+    def test_disk_encryption_set_identity(self, resource_group, key_vault):
+        self.kwargs.update({
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'des2': self.create_random_name(prefix='des2-', length=20),
+            'des3': self.create_random_name(prefix='des3-', length=20),
+            'identity1': 'identity1',
+            'identity2': 'identity2',
+            'appDisplayName': self.create_random_name(prefix='test-des-app-', length=20)
+        })
+
+        federated_client_id = self.cmd('ad app create --display-name {appDisplayName}').get_output_in_json()['appId']
+
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software') \
+            .get_output_in_json()['key']['kid']
+
+        self.kwargs.update({
+            'federated_client_id': federated_client_id,
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        identity1_json = self.cmd('identity create -g {rg} -n {identity1}').get_output_in_json()
+        identity2_json = self.cmd('identity create -g {rg} -n {identity2}').get_output_in_json()
+        identity1_id = identity1_json['id']
+        identity2_id = identity2_json['id']
+        identity1_principalId = identity1_json['principalId']
+        identity2_principalId = identity2_json['principalId']
+        self.kwargs.update({
+            'identity1_id': identity1_id,
+            'identity1_principalId': identity1_principalId,
+            'identity2_id': identity2_id,
+            'identity2_principalId': identity2_principalId
+        })
+
+        self.cmd(
+            'keyvault set-policy -n {vault} --object-id {identity1_principalId} --key-permissions wrapKey unwrapKey get')
+        self.cmd(
+            'keyvault set-policy -n {vault} --object-id {identity2_principalId} --key-permissions wrapKey unwrapKey get')
+
+        # create disk encryption set with system and user assigned identity
+        des1_principalId = \
+            self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
+                     '--mi-system-assigned --mi-user-assigned {identity1_id} --federated-client-id {federated_client_id} '
+                     '--encryption-type EncryptionAtRestWithCustomerKey', checks=[
+                self.check('federatedClientId', '{federated_client_id}'),
+                self.check('identity.type', 'SystemAssigned, UserAssigned'),
+                self.check('length(identity.userAssignedIdentities)', 1)
+            ]).get_output_in_json()['identity']['principalId']
+
+        # create disk encryption set with user assigned identity
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault} '
+                 '--mi-user-assigned {identity1_id} --federated-client-id {federated_client_id} '
+                 '--encryption-type EncryptionAtRestWithCustomerKey', checks=[
+            self.check('federatedClientId', '{federated_client_id}'),
+            self.check('identity.type', 'UserAssigned'),
+            self.check('length(identity.userAssignedIdentities)', 1)
+        ])
+
+        # create disk encryption set with system assigned identity
+        des3_principalId = \
+            self.cmd('disk-encryption-set create -g {rg} -n {des3} --key-url {kid} --source-vault {vault} '
+                     '--mi-system-assigned --encryption-type EncryptionAtRestWithCustomerKey', checks=[
+                self.check('identity.type', 'SystemAssigned'),
+                self.check('identity.userAssignedIdentities', 'None')
+            ]).get_output_in_json()['identity']['principalId']
+
+        self.kwargs.update({
+            'des1_principalId': des1_principalId,
+            'des3_principalId': des3_principalId
+        })
+
+        self.cmd(
+            'keyvault set-policy -n {vault} --object-id {des1_principalId} --key-permissions wrapKey unwrapKey get')
+        self.cmd(
+            'keyvault set-policy -n {vault} --object-id {des3_principalId} --key-permissions wrapKey unwrapKey get')
+
+        # clear federated client id of disk encryption set
+        self.cmd('disk-encryption-set update -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
+                 '--federated-client-id None', checks=[
+            self.check('federatedClientId', 'None')
+        ])
+
+        # update federated client id of disk encryption set
+        self.cmd('disk-encryption-set update -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
+                 '--federated-client-id {federated_client_id}', checks=[
+            self.check('federatedClientId', '{federated_client_id}')
+        ])
+
+        # remove user assigned identity from an existing disk encryption set
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --user-assigned {identity1_id} --yes', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', 'None')
+        ])
+
+        # remove system assigned identity from an existing disk encryption set
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --system-assigned --yes')
+        self.cmd('disk-encryption-set show -g {rg} -n {des1}', checks=[
+            self.check('identity', 'None')
+        ])
+
+        # remove all user assigned identities from an existing disk encryption set
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des2} --user-assigned --yes')
+        self.cmd('disk-encryption-set show -g {rg} -n {des2}', checks=[
+            self.check('identity', 'None')
+        ])
+
+        # assign neither system nor user assigned identity (the value of --user-assigned is none)
+        # to an existing disk encryption set
+        self.cmd('disk-encryption-set identity assign -g {rg} -n {des2} --user-assigned', checks=[
+            self.check('type', 'SystemAssigned')
+        ])
+
+        # assign user assigned identity to an existing disk encryption set
+        self.cmd('disk-encryption-set identity assign -g {rg} -n {des1} --user-assigned {identity1_id}', checks=[
+            self.check('type', 'UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        # assign system assigned identity to an existing disk encryption set
+        self.cmd('disk-encryption-set identity assign -g {rg} -n {des1} --system-assigned', checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        # remove system assigned identity from an existing disk encryption set
+        self.cmd('disk-encryption-set identity remove -g {rg} -n {des1} --system-assigned --yes', checks=[
+            self.check('type', 'UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        # show managed identities of an existing disk encryption set
+        self.cmd('disk-encryption-set identity show -g {rg} -n {des1}', checks=[
+            self.check('type', 'UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        # delete the application
+        self.cmd('ad app delete --id {federated_client_id}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault1-', name_len=20, key='vault1', parameter_name='key_vault1', location='westcentralus', additional_params='--enable-purge-protection')
     @KeyVaultPreparer(name_prefix='vault2-', name_len=20, key='vault2', parameter_name='key_vault2', location='westcentralus', additional_params='--enable-purge-protection')
@@ -6924,6 +7072,181 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm1} --image centos --os-disk-encryption-set {des1} --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
 
         self.cmd('vmss create -g {rg} -n {vmss1} --image centos --os-disk-encryption-set {des1} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_confidential_disk_encryption_set_', location='westus')
+    @AllowLargeResponse(size_kb=99999)
+    def test_confidential_disk_encryption_set(self, resource_group):
+        self.kwargs.update({
+            'vault': self.create_random_name(prefix='vault-', length=20),
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des': self.create_random_name(prefix='des-', length=20),
+            'disk1': self.create_random_name(prefix='d1-', length=20),
+            'disk2': self.create_random_name(prefix='d2-', length=20),
+            'vm': self.create_random_name(prefix='vm1-', length=20),
+            'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\'),
+            'image': 'MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest'
+        })
+
+        self.cmd('keyvault create --name {vault} -g {rg} --sku Premium --enable-purge-protection true')
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create --vault-name {vault} --name {key} --ops wrapKey unwrapKey --kty RSA-HSM --size 3072 --exportable true --policy "{policy_path}"').get_output_in_json()['key']['kid']
+        
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --encryption-type ConfidentialVmEncryptedWithCustomerKey', checks=[
+            self.check('encryptionType', 'ConfidentialVmEncryptedWithCustomerKey')
+        ])
+        des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
+        des_sp_id = des_show_output['identity']['principalId']
+        des_id = des_show_output['id']
+        self.kwargs.update({
+            'des_sp_id': des_sp_id,
+            'des_id': des_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        time.sleep(15)
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault_id}')
+
+        time.sleep(15)
+
+        self.kwargs.update({
+            'des_pattern': '.*/{}$'.format(self.kwargs['des']),
+        })
+
+        # test raise error if only specified --secure-vm-disk-encryption-set but not --secure-type
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"')
+
+        # test raise error if specified 'ConfidentialVM_DiskEncryptedWithCustomerKey' for --secure-type but didn't specify --secure-vm-disk-encryption-set
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('disk create -g {rg} -n {disk1} --hyper-v-generation V2 --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --image-reference "{image}"')
+        
+        # create disk with des name
+        self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
+            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
+        ])
+
+        # create disk with des id
+        self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
+            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
+        ])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_os_disk_security_encryption', location='CentralUSEUAP')
+    def test_os_disk_security_encryption(self, resource_group):
+        self.kwargs.update({
+            'vault': self.create_random_name(prefix='vault', length=15),
+            'key': self.create_random_name(prefix='key', length=15),
+            'des1': self.create_random_name(prefix='des1', length=15),
+            'vm1': self.create_random_name(prefix='vm1', length=15),
+            'vmss1': self.create_random_name(prefix='vmss', length=15)
+        })
+
+        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} --encryption-type confidentialvmencryptedwithcustomerkey')
+        des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
+        des1_sp_id = des1_show_output['identity']['principalId']
+        des1_id = des1_show_output['id']
+        self.kwargs.update({
+            'des1_sp_id': des1_sp_id,
+            'des1_id': des1_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        time.sleep(15)
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
+
+        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2as_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type diskwithvmgueststate --os-disk-secure-vm-disk-encryption-set {des1}')
+        self.cmd('vm show -n {vm1} -g {rg}', checks=[
+            self.check('storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'DiskWithVMGuestState'),
+            self.check('storageProfile.osDisk.managedDisk.securityProfile.diskEncryptionSet.id', '{des1_id}')
+        ])
+        message = 'usage error: "--os-disk-security-encryption-type" is required when "--security-type" is specified as "ConfidentialVM"'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm create -n vmer1 -g {rg} --size Standard_DC2as_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true')
+
+        message = 'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm create -n vmer2 -g {rg} --size Standard_DC2as_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly --os-disk-secure-vm-disk-encryption-set {des1}')
+
+    @unittest.skip('"Virtual Machines Scale Sets do not allow setting managedDisk.securityProfile.diskEncryptionSet.')
+    @ResourceGroupPreparer(name_prefix='cli_test_os_disk_security_encryption_vmss', location='CentralUSEUAP')
+    def test_os_disk_security_encryption_vmss(self, resource_group):
+        self.kwargs.update({
+            'vault': self.create_random_name(prefix='vault', length=15),
+            'key': self.create_random_name(prefix='key', length=15),
+            'des1': self.create_random_name(prefix='des1', length=15),
+            'vm': self.create_random_name(prefix='vm', length=15),
+            'vmss1': self.create_random_name(prefix='vmss', length=15),
+            'gallery': self.create_random_name(prefix='gallery', length=15),
+            'image': self.create_random_name(prefix='image', length=15),
+            'captured': self.create_random_name(prefix='capture', length=15),
+            'version': '1.1.1',
+            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
+            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+        })
+
+        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} --encryption-type ConfidentialVmEncryptedWithCustomerKey')
+        des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
+        des1_sp_id = des1_show_output['identity']['principalId']
+        des1_id = des1_show_output['id']
+        self.kwargs.update({
+            'des1_sp_id': des1_sp_id,
+            'des1_id': des1_id
+        })
+
+        self.cmd('keyvault set-policy -g {rg} -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        time.sleep(15)
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups ')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1 --hyper-v-generation V2')
+        self.cmd('vm create -g {rg} -n {vm} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --data-disk-sizes-gb 10 --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        self.cmd('image create -g {rg} -n {captured} --source {vm} --hyper-v-generation V2')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
+        self.kwargs['unique_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['identifier']['uniqueName']
+
+        self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} --tenant-ids {tenantId}')
+
+        self.kwargs['shared_gallery_image_version'] = self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} --location CentralUSEUAP --gallery-image-version {version}').get_output_in_json()[
+            'uniqueId']
+
+        self.cmd('vmss create -n {vmss1} -g {rg} --vm-sku Standard_DC2as_v5 --security-type Confidentialvm --image {shared_gallery_image_version} --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type DiskwithVMGuestState --os-disk-secure-vm-disk-encryption-set {des1}')
+        self.cmd('vmss show -n {vmss1} -g {rg}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'DiskWithVMGuestState'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
+        ])
 
 
 class DiskAccessTest(ScenarioTest):
@@ -7730,12 +8053,102 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
-    # @unittest.skip('Service does not work')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_trusted_launch_', location='southcentralus')
     def test_disk_trusted_launch(self):
-        self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
+
+        self.kwargs.update({
+            'disk': 'disk1',
+            'snapshot': 'snapshot1'
+        })
+
+        self.kwargs['disk_id'] = self.cmd('disk create -g {rg} -n {disk} --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ]).get_output_in_json()['id']
+
+        self.cmd('disk show -g {rg} -n {disk}', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch')
         ])
+
+        self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk_id}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+        self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+    @unittest.skip('vhd is not supported')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_os_disk_secure_import', location='southcentralus')
+    def test_vm_trusted_launch_os_disk_secure_import(self):
+        self.kwargs.update({
+            'disk': 'seccuredisk',
+            'vm': self.create_random_name('vm', 10),
+        })
+        self.cmd('vm create -g {rg} -n {vm} --admin-username azrureuser --image MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest --security-type ConfidentialVM'
+                 ' --admin-password testPassword01! --use-unmanaged-disk --authentication-type password  --nsg-rule NONE')
+
+        blob_uri = self.cmd('vm show -g {rg} -n {vm}', checks=self.check('length(storageProfile.dataDisks)', 0)).get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+        self.kwargs.update({
+            'blob_uri': blob_uri,
+            'vhd_uri': blob_uri[0:blob_uri.rindex('/') + 1] + 'seccuredisk.vhd'
+        })
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} -n {disk} --vhd {vhd_uri} --new --caching ReadWrite')
+        self.cmd('disk create -n {disk} -g {rg} --hyper-v-generation v2 --security-type TrustedLaunch --source {vhd_uri} --sku standard_lrs --security-data-uri {blob_uri}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('creationData.securityDataUri', '{blob_uri}')
+        ])
+
+        message = 'Please specify --security-type when using the --security-data-uri parameter'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('disk create -n {disk} -g {rg} --hyper-v-generation v2 --source {vhd_uri} --sku standard_lrs --security-data-uri {blob_uri}')
+
+        message = "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter"
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('disk create -n {disk} -g {rg} --hyper-v-generation v1 --source {vhd_uri} --security-type TrustedLaunch --sku standard_lrs --security-data-uri {blob_uri}')
+
+        message = 'Please specify --source when using the --security-data-uri parameter'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('disk create -n {disk} -g {rg} --hyper-v-generation v2  --security-type TrustedLaunch --sku standard_lrs --security-data-uri {blob_uri}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_os_disk_secure_upload', location='southcentralus')
+    def test_vm_trusted_launch_os_disk_secure_upload(self):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'disk1': self.create_random_name('disk1', 10),
+            'disk2': self.create_random_name('disk2', 10)
+        })
+        self.cmd('disk create -n {disk} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('creationData.createOption', 'UploadPreparedSecure'),
+        ])
+        self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
+            self.exists('accessSas'),
+            self.exists('securityDataAccessSas')
+        ])
+
+        self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('creationData.createOption', 'UploadPreparedSecure')
+        ])
+        self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
+            self.exists('accessSas'),
+            self.exists('securityDataAccessSas')
+        ])
+
+        self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
+            self.check('creationData.createOption', 'Upload'),
+        ])
+        self.cmd('disk grant-access -n {disk2} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
+            self.exists('accessSas'),
+        ])
+
+        message = "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'"
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs')
+
+        message = "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'"
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v1 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):

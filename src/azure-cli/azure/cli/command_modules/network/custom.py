@@ -6998,6 +6998,7 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
             vnet.subnets = [Subnet(name=subnet_name,
                                    address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
                                    address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
+                                   private_endpoint_network_policies='Disabled',
                                    network_security_group=NetworkSecurityGroup(id=network_security_group)
                                    if network_security_group else None)]
         else:
@@ -7119,7 +7120,7 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
     if delegations:
         subnet.delegations = delegations
 
-    if disable_private_endpoint_network_policies is True:
+    if disable_private_endpoint_network_policies is None or disable_private_endpoint_network_policies is True:
         subnet.private_endpoint_network_policies = "Disabled"
     if disable_private_endpoint_network_policies is False:
         subnet.private_endpoint_network_policies = "Enabled"
