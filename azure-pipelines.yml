@@ -375,12 +375,6 @@ jobs:
        CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
        PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
 
-
-       echo "== Testing pip install on Python 3.6 =="
-       docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.6 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
        echo "== Testing pip install on Python 3.7 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
@@ -405,8 +399,6 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
@@ -424,8 +416,6 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
@@ -446,8 +436,6 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
@@ -871,8 +859,6 @@ jobs:
   displayName: "PerformanceCheck"
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
       Python39:
         python.version: '3.9'
       Python310:
