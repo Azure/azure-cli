@@ -4379,17 +4379,11 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('newVNet.provisioningState', 'Succeeded'),
             self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
         ])
-        self.kwargs['prefixes'] = '20.0.0.0/16 10.0.0.0/16'
-        self.cmd(
-            'network vnet update --resource-group {rg} --name {vnet} --address-prefixes {prefixes}',
-            checks=[
-                self.check('length(addressSpace.addressPrefixes)', 2)
-            ])
 
         self.cmd(
-            'network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24 10.0.0.0/24')
+            'network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 10.0.1.0/24')
 
-        self.cmd('network vnet subnet list-available-ips -g {rg} --name {vnet}', checks=[
+        self.cmd('network vnet subnet list-available-ips -g {rg} --vnet-name {vnet} --name {subnet}', checks=[
             self.check('length(@)', 5)
         ])
 

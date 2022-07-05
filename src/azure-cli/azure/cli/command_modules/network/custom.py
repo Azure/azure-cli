@@ -7267,9 +7267,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
     subnet = client.subnets.get(resource_group_name=resource_group_name,
                                 virtual_network_name=virtual_network_name,
                                 subnet_name=subnet_name)
-    if subnet.address_prefixes is not None:
-        start_ip = subnet.address_prefixes[0].split('/')[0]
-    else:
+    if subnet.address_prefix is not None:
         start_ip = subnet.address_prefix.split('/')[0]
     available_ips = client.virtual_networks.check_ip_address_availability(resource_group_name=resource_group_name,
                                                                           virtual_network_name=virtual_network_name,
