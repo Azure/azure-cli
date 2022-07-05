@@ -2206,3 +2206,8 @@ def validate_blob_arguments(namespace):
     if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
         raise RequiredArgumentMissingError(
             "Please specify --blob-url or combination of blob name, container name and storage account arguments.")
+
+
+def encode_deleted_path(namespace):
+    from urllib.parse import quote
+    namespace.deleted_path_name = quote(namespace.deleted_path_name)
