@@ -1999,23 +1999,23 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         ctx_3.set_intermediate("subscription_id", "test_subscription_id")
-        cf_resource_groups = Mock(check_existence=Mock(return_value=False))
+        get_resource_groups_client = Mock(check_existence=Mock(return_value=False))
         result = Mock(id="test_workspace_resource_id")
         async_poller = Mock(result=Mock(return_value=result), done=Mock(return_value=True))
-        cf_resources = Mock(begin_create_or_update_by_id=Mock(return_value=async_poller))
+        get_resources_client = Mock(begin_create_or_update_by_id=Mock(return_value=async_poller))
         with patch(
             "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            return_value=cf_resource_groups,
+            "azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client",
+            return_value=get_resource_groups_client,
         ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            return_value=cf_resources,
+            "azure.cli.command_modules.acs.addonconfiguration.get_resources_client",
+            return_value=get_resources_client,
         ):
             self.assertEqual(ctx_3.get_workspace_resource_id(), "/test_workspace_resource_id")
-        cf_resource_groups.check_existence.assert_called_once_with("DefaultResourceGroup-EUS")
-        cf_resource_groups.create_or_update.assert_called_once_with("DefaultResourceGroup-EUS", {"location": "eastus"})
+        get_resource_groups_client.check_existence.assert_called_once_with("DefaultResourceGroup-EUS")
+        get_resource_groups_client.create_or_update.assert_called_once_with("DefaultResourceGroup-EUS", {"location": "eastus"})
         default_workspace_resource_id = (
             "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}".format(
                 "test_subscription_id",
@@ -2024,7 +2024,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             )
         )
         # the return values are func_name, args and kwargs
-        _, args, _ = cf_resources.begin_create_or_update_by_id.mock_calls[0]
+        _, args, _ = get_resources_client.begin_create_or_update_by_id.mock_calls[0]
         # not interested in mocking generic_resource, so we only check the first two args
         self.assertEqual(args[:2], (default_workspace_resource_id, "2015-11-01-preview"))
 

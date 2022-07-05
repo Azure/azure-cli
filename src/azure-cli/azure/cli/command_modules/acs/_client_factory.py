@@ -9,9 +9,14 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.msi import ManagedServiceIdentityClient
 from knack.util import CLIError
 
+# Note: cf_xxx, as the client_factory option value of a command group at command declaration, it should ignore
+# parameters other than cli_ctx; get_xxx_client is used as the client of other services in the command implementation,
+# and usually accepts subscription_id as a parameter to reconfigure the subscription when sending the request
 
-def get_container_service_client(cli_ctx, **_):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE)
+
+# container service clients
+def get_container_service_client(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, subscription_id=subscription_id)
 
 
 def cf_container_services(cli_ctx, *_):
@@ -30,21 +35,26 @@ def cf_snapshots(cli_ctx, *_):
     return get_container_service_client(cli_ctx).snapshots
 
 
-def cf_compute_service(cli_ctx, *_):
+def get_snapshots_client(cli_ctx, subscription_id=None):
+    return get_container_service_client(cli_ctx, subscription_id=subscription_id).snapshots
+
+
+# dependent clients
+def get_compute_client(cli_ctx, *_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 
 
-def cf_resource_groups(cli_ctx, subscription_id=None):
+def get_resource_groups_client(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                    subscription_id=subscription_id).resource_groups
 
 
-def cf_resources(cli_ctx, subscription_id=None):
+def get_resources_client(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                    subscription_id=subscription_id).resources
 
 
-def cf_container_registry_service(cli_ctx, subscription_id=None):
+def get_container_registry_client(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY,
                                    subscription_id=subscription_id)
 
@@ -62,7 +72,7 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
-def cf_graph_client(cli_ctx):
+def get_graph_client(cli_ctx):
     from azure.cli.command_modules.role import graph_client_factory
     return graph_client_factory(cli_ctx)
 
