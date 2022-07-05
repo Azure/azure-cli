@@ -5929,7 +5929,7 @@ helps['network vnet subnet list-available-ips'] = """
 type: command
 short-summary: List some available ips in the subnet.
 examples:
-  - name: List some available ips in the subnet. 
+  - name: List some available ips in the subnet.
     text: |
         az network vnet subnet list-available-ips --resource-group MyResourceGroup --vnet-name MyVNet -n MySubnet
 """
