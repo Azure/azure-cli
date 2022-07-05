@@ -41,6 +41,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_priority, validate_snapshot_id, validate_snapshot_name,
     validate_spot_max_price, validate_ssh_key, validate_taints,
     validate_vm_set_type, validate_vnet_subnet_id,
+    validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_defender_disable_and_enable_parameters, validate_defender_config_parameter)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -355,7 +356,7 @@ def load_arguments(self, _):
         c.argument('defender_config', validator=validate_defender_config_parameter)
         # addons
         c.argument('enable_secret_rotation', action='store_true')
-        c.argument('disable_secret_rotation', action='store_true')
+        c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)
         c.argument('rotation_poll_interval')
         # nodepool paramerters
         c.argument('enable_cluster_autoscaler', options_list=[
