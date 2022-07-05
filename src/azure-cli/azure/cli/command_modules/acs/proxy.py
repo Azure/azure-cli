@@ -39,7 +39,7 @@ def _get_proxy_instance():
     if os_platform == 'Darwin':
         return MacProxy()
     if os_platform == 'Windows':
-        from .win_proxy import WinProxy
+        from azure.cli.command_modules.acs.win_proxy import WinProxy
         return WinProxy()
     if os_platform == 'Linux':
         return LinuxProxy()

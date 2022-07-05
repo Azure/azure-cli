@@ -5,7 +5,7 @@
 import datetime
 import json
 
-from azure.cli.command_modules.acs._client_factory import cf_resource_groups, cf_resources
+from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
 from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_ADDON_NAME,
     CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
@@ -186,8 +186,8 @@ def ensure_default_log_analytics_workspace_for_monitoring(
             default_workspace_name,
         )
     )
-    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    resource_groups = get_resource_groups_client(cmd.cli_ctx, subscription_id)
+    resources = get_resources_client(cmd.cli_ctx, subscription_id)
 
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
@@ -309,7 +309,7 @@ def ensure_container_insights_for_monitoring(
 
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
     if not remove_monitoring:
-        resources = cf_resources(cmd.cli_ctx, subscription_id)
+        resources = get_resources_client(cmd.cli_ctx, subscription_id)
         try:
             resource = resources.get_by_id(
                 workspace_resource_id, "2015-11-01-preview"
@@ -561,7 +561,7 @@ def _is_container_insights_solution_exists(cmd, workspace_resource_id):
         "subscription"], parsed["resource_group"], parsed["name"]
     solution_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationsManagement/solutions/ContainerInsights({2})".format(
         subscription_id, resource_group, workspace_name)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    resources = get_resources_client(cmd.cli_ctx, subscription_id)
     for retry_count in range(0, _MAX_RETRY_TIMES):
         try:
             resources.get_by_id(solution_resource_id, '2015-11-01-preview')
