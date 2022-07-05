@@ -3,6 +3,205 @@
 Release History
 ===============
 
+2.38.0
+++++++
+
+**ACR**
+
+* `az acr`: Show replication region endpoint status in table output (#22542)
+* `az acr task run`: Add Dockerfile to source upload if context is local directory (#22802)
+
+**AD**
+
+* `az ad app/sp update`: Support generic update `--set` on root level (#22798)
+* Support special characters in object names (#22739)
+* `az ad app federated-credential`: Support federated identity credentials (#22727)
+
+**AKS**
+
+* `az aks get-credentials`: Fix permission prompt when saving config file to symlink (#22800)
+* `az aks command invoke`: Add support for `--no-wait` (#22813)
+* `az aks get-credentials`: Fix the command error when KUBECONFIG is empty (#23000)
+* `az aks nodepool stop/start`: Add nodepool stop/start bindings (#23055)
+
+**APIM**
+
+* `az apim`: Update experimental flag to get out of experimental state (#22971)
+* `az apim deletedservice`: Add command group to support managing soft-deleted azure API Management services (#22716)
+
+**App Config**
+
+* `az appconfig`: GA features - soft-delete, feature-filter, strict-import and disable-local-auth (#22792)
+
+**App Service**
+
+* [BREAKING CHANGE] `az webapp up`: Remove premium container SKUs (PC2, PC3, PC4) (#22820)
+* [BREAKING CHANGE] `az appservice plan create/update`: Remove premium container SKUs (PC2, PC3, PC4) (#22820)
+* [BREAKING CHANGE] `az functionapp plan create`: Remove premium container SKUs (PC2, PC3, PC4) (#22820)
+* Fix #22722: `az webapp config ssl import` fixes to support new GraphAPI for SP queries (#22819)
+* `az webapp up`: Fix bug where runtime is detected even when `--runtime` is provided (#22592)
+* `az staticwebapp enterprise-edge`: Move command group from extension to official CLI (#22818)
+* `az appservice plan create`: Allow creating Hyper-V App Service Plans hosted on App Service Environments (#22820)
+* `az webapp/functionapp deployment slot create`: Allow using `--configuration-source` for apps with storage accounts added (#22820)
+* `az webapp up`: Fix bug when deploying to an App Service Environment (ASE) where the ASE is incorrectly categorized as an internal load balancing (ILB) ASE and fails validation (#22820)
+* Fix #20901: `az functionapp update`: Update `--slot` logic to work correctly (#22745)
+
+**ARM**
+
+* Fix #22621: `az bicep build`: `--stdout` does not work (#22685)
+* Fix #22930: `az bicep generate-params`: Add support for bicep generate-params command (#22951)
+* `az deployment`: Fix the error message of ARM deployment to the correct JSON format (#22847)
+
+**Backup**
+
+* `az backup restore restore-disks`: Add Cross Subscription Restore for IaasVM ALR (#22653)
+* `az backup protection enable-for-vm`: Add a linux specific example (#22805)
+* `az backup protectable-item list`: SQLAG container fetch failure bug fix (#22918)
+
+**Bot Service**
+
+* [BREAKING CHANGE] `az bot create`: Remove `--kind`, `--password`, `--lang` arguments. Add `--app-type`, `--tenant-id`, `--msi-resource-id` arguments (#22902)
+
+**Cognitive Services**
+
+* `az cognitiveservices account deployment create`: Support standard scale type (#22827)
+
+**Compute**
+
+* `az disk create`: Fix the issue that specifying encryption type as `EncryptionAtRestWithPlatformKey` does not take effect when creating a disk (#22484)
+* `az disk update`: Fix the `(InvalidParameter) Resource xxx encrypted with platform key has disk encryption set id specified` error when updating the encryption type to platform managed keys (#22484)
+* `az sig image-version create`: Add new parameters `--virtual-machine` and `--image-version` to support creating image version from different source (#22645)
+* `az vm`: Support a new disk storage SKU Premiumv2_LRS (#22851)
+* `az sig show-community`: Add new command to support listing image versions in community gallery (#21480)
+* `az sig image-definition show-community`: Add new command to support getting an image in a gallery community (#21480)
+* `az sig image-definition list-community`: Add new command to support listing VM Image definitions in a gallery community (#21480)
+* `az sig image-version show-community`: Add new command to support getting an image version in a gallery community (#21480)
+* `az sig image-version list-community`: Add new command to support listing VM image versions in a gallery community (#21480)
+* `az sig share enable-community`: Add new command to support sharing gallery to community (#21480)
+* `az sig gallery-application version`: Add new parameter `--package-file-name` to specify the downloaded package file on the VM (#22857)
+* `az sig gallery-application version`: Add new parameter `--config-file-name` to specify the downloaded config file on the VM (#22857)
+* `az disk create`: Add support for `--gallery-image-reference` to allow creating disk from shared gallery image version or community gallery image version (#22756)
+* `az disk create`: Add support for `--source` to allow creating a disk from disk restore point (#22898)
+* `az vm/vmss application set`: Add new parameter `--treat-deployment-as-failure` to treat any failure in the gallery application version as deployment failure (#22858)
+* `az vm image list`: Add parameter `--architecture` to filter image with its architecture (#23001)
+* `az disk-encryption-set create`: The `--encryption-type` parameter supports new value `ConfidentialVmEncryptedWithCustomerKey` for confidential VM (#22780)
+* `az disk create`: The `--security-type` parameter supports new value `ConfidentialVM_DiskEncryptedWithCustomerKey` for confidential VM (#22780)
+* `az disk create`: Add new parameter `--secure-vm-disk-encryption-set` to provide ID or name of disk encryption set created with `ConfidentialVmEncryptedWithCustomerKey` encryption type (#22780)
+* `az disk-encryption-set create/update`: Add new parameter `--federated-client-id` to access key vault in a different tenant (#22966)
+* `az disk-encryption-set create`: Add new parameters `--mi-system-assigned` and `--mi-user-assigned` to support assigning system and user assigned identities during disk encryption set creation (#22966)
+* `az disk-encryption-set identity`: Add new command groups with parameters `--system-assigned` and `--user-assigned` to support managing system and user assigned identities on existing disk encryption set (#22966)
+* `sig list-community`: Add new command to support listing community gallery (#22979)
+* `sig list-community`: GA shared/community image gallery related feature (#22979)
+* `az vm/vmss create`: The `--security-type` parameter supports new value `ConfidentialVM` for Confidential VM (#22650)
+* `az vm/vmss create`: Add new parameter `--os-disk-security-encryption-type` to support setting the encryption type of the OS managed disk for Confidential VM (#22650)
+* `az vm/vmss create`: Add new parameter `--os-disk-secure-vm-disk-encryption-set` to allows users to provide ID or name for disk encryption set created with `ConfidentialVmEncryptedWithCustomerKey` encryption type (#22650)
+* `az disk create`: Add new parameter `--security-data-uri` to specify the blob URI of VHD to be imported into VM guest state (#23026)
+* `az disk create`: Add new parameter `--upload-type` to extend and replace `--for-upload` which supports standard disk only upload and OS Disk upload along with VM guest state (#23026)
+* `az disk grant-access`: Add new parameter `--secure-vm-guest-state-sas` to support getting security data access SAS on managed disk with VM guest state (#23026)
+
+**Cosmos DB**
+
+* `az cosmosdb sql container create`: Add support to create containers with client encryption policy (#22975)
+
+**Event Hubs**
+
+* `az eventhubs namespace application-group`: New command group to support management operations on EventHubs application groups (#23045)
+* `az eventhubs namespace network-rule update`: New command to update Network Rule Sets (#23045)
+
+**IoT**
+
+* `az iot hub/dps certificate list`: Add table transform to certificate list commands (#22958)
+
+**Key Vault**
+
+* `az keyvault role assignment`: Fix `'dict' object has no attribute 'object_id'` error (#22652)
+* Fix #16390: `az keyvault set-policy`: Allow clearing permissions (#23059)
+
+**Monitor**
+
+* `az monitor log-analytics query-pack`: Add query pack commands. (#22986)
+* `az monitor log-analytics update`: Support empty string for `--key-version` (#22986)
+
+**NetAppFiles**
+
+* `az netappfiles account create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles pool create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles volume create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles snapshot create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles snapshot policy create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles snapshot policy update`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles backup create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles backup-policy create`: Change `--location` to an optional parameter (#22787)
+* `az netappfiles volume-group create --help`: Fix typo in option global-placement-rules (#22915)
+* `az netappfiles volume create`: Add optional parameter `--zones` (#23008)
+* `az netappfiles volume replication list`: Add operation to list volume replications (#23008)
+* `az netappfiles volume reset-cifs-pw`: Add operation to reset CIFS password (#23008)
+* `az netappfiles volume relocate`: Add operation to relocate volume to a new stamp (#23008)
+* `az netappfiles volume finalize-relocation`: Add operation to finalize volume relocation (#23008)
+* `az netappfiles volume revert-relocation`: Add operation to revert volume relocation (#23008)
+
+**Network**
+
+* [BREAKING CHANGE] `az network vnet subnet create`: Disable `PrivateEndpointNetworkPolicies` by default (#22962)
+* `az network application-gateway ssl-policy`: Support new SSL policy `CustomV2` (#22571)
+* `az network private-endpoint-connection`: Enable Private link support for provider Microsoft.Authorization/resourceManagementPrivateLinks (#22688)
+* Fix #22097: `az network dns zone import`: Fix importing zone files starting with space (#22674)
+* `az network public-ip prefix create`: Support cross-subscription association for Custom IP Prefix (#22646)
+* `az network public-ip create`: Reuse prefix info when creating Public IP (#22698)
+
+**Packaging**
+
+* Use Python 3.9 in RHEL 8's RPM (#22606)
+
+**RDBMS**
+
+* Fix #22926: `az mysql server create/update`: Update default value for mysql storage size (#22999)
+
+**REST**
+
+* `az rest`: Support Unicode characters in JSON request body (#23005)
+
+**Search**
+
+* `az search service create`: Add `--hosting-mode` argument to support S3HD SKU (#22596)
+
+**Security**
+
+* `az security atp cosmosdb`: Add CLI support for ATP settings (Defender) on Cosmos DB (#22570)
+
+**Service Connector**
+
+* `az webapp connection create`: Add `--private-endpoint` to support private endpoint connection (#22759)
+* `az spring connection create`: Remove client-type limitation (#23006)
+
+**Service Fabric**
+
+* `az sf managed-cluster create`: Fix tag parsing for cluster command (#22752)
+
+**SQL**
+
+* `az sql elastic-pool create`: Add support for HighAvailabilityReplica count for HS Elastic pools (#22213)
+* `az sql midb update`: Add update command (#22790)
+
+**SQL VM**
+
+* `az sql vm update`: Add configuration options for SQL Assessment pre-requisites (#22672)
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage share close-handle`: Remove `--marker` which is not supported by sdk (#22603)
+* [BREAKING CHANGE] `az storage share snapshot`: Now only returns version, etag and last_modified info instead of all share properties (#22585)
+* `az storage account generate-sas`: Fix output sas random ordering for `srt` segment (#22609)
+* Fix #22563: `az storage blob upload`: Fix storage blob upload to a through pipe encode error (#22611)
+* Fix #20452: `az storage container policy create\update\list\show\delete`: Add new permissions, currently support `racwdxyltmei` (#21917)
+* Fix #22679: `az storage account file-service-properties update`: Fix `AttributeError: 'NoneType' object has no attribute 'smb'` (#22691)
+* Fix #22845: `az storage account genarete-sas`: Fix the flag `--auth-mode login` cause AttributeError (#22854)
+
+**Synapse**
+
+* `az synapse sql create`: Add parameter `--collation` (#22874)
+* `az synapse link-connection`: New command group to support synapse link connections (#22876)
+
 2.37.0
 ++++++
 
