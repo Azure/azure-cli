@@ -10,7 +10,7 @@ trigger:
 pr:
   branches:
     include:
-      - '*'
+    - '*'
 
 jobs:
 - job: AutomationTest20200901
@@ -25,11 +25,11 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2020-09-01-hybrid'
-        fullTest: true
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      profile: '2020-09-01-hybrid'
+      fullTest: true
 
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
@@ -43,11 +43,11 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2019-03-01-hybrid'
-        fullTest: true
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      profile: '2019-03-01-hybrid'
+      fullTest: true
 
 - job: AutomationTest20180301
   displayName: Automation Test (Profile 2018-03-01)
@@ -61,11 +61,11 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2018-03-01-hybrid'
-        fullTest: true
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      profile: '2018-03-01-hybrid'
+      fullTest: true
 
 - job: AutomationFullTestPython39ProfileLatest
   displayName: Automation Full Test Python39 Profile Latest
@@ -92,13 +92,13 @@ jobs:
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.9'
-        profile: 'latest'
-        instance_cnt: '8'
-        instance_idx: '$(Instance_idx)'
-        fullTest: true
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '3.9'
+      profile: 'latest'
+      instance_cnt: '8'
+      instance_idx: '$(Instance_idx)'
+      fullTest: true
 
 - job: AutomationFullTestPython310ProfileLatest
   displayName: Automation Full Test Python310 Profile Latest
@@ -125,10 +125,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '3.10'
-        profile: 'latest'
-        instance_cnt: '8'
-        instance_idx: '$(Instance_idx)'
-        fullTest: true
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '3.10'
+      profile: 'latest'
+      instance_cnt: '8'
+      instance_idx: '$(Instance_idx)'
+      fullTest: true
