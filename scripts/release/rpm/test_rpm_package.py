@@ -7,10 +7,10 @@ import os
 import sys
 import subprocess
 
-root_dir = '/usr/lib64/az/lib/python3.6/site-packages/azure/cli/command_modules'
+root_dir = '/usr/lib64/az/lib/python3.9/site-packages/azure/cli/command_modules'
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
-pytest_base_cmd = 'PYTHONPATH=/usr/lib64/az/lib/python3.6/site-packages python3 -m pytest -x -v --boxed -p no:warnings --log-level=WARN'
+pytest_base_cmd = 'PYTHONPATH=/usr/lib64/az/lib/python3.9/site-packages python3 -m pytest -x -v --boxed -p no:warnings --log-level=WARN'
 pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
 serial_test_modules = ['botservice', 'network', 'cloud', 'appservice']
 
