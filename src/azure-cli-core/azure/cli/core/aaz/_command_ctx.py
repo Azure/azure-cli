@@ -40,7 +40,7 @@ class AAZCommandCtx:
         self._aux_tenants = set()
 
     def format_args(self):
-        self.args.schema._fmt(ctx=self, value=self.args)
+        self.args._schema._fmt(ctx=self, value=self.args)
 
     def get_login_credential(self):
         credential, _, _ = self._profile.get_login_credentials(
