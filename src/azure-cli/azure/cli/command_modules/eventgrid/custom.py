@@ -6,6 +6,7 @@
 # pylint: disable=too-many-lines
 
 import re
+from tkinter import EventType
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
@@ -999,7 +1000,7 @@ def cli_channel_create_or_update(
         partner_namespace_name,
         channel_name,
         channel_type,
-        partner_topic_source,
+        partner_topic_source=None,
         message_for_activation=None,
         partner_topic_name=None,
         partner_destination_name=None,
@@ -1030,19 +1031,14 @@ def cli_channel_create_or_update(
             azure_subscription_id=subscription_id,
             resource_group_name=resource_group_name,
             name=partner_destination_name,
-            endpoint_service_context=endpoint_service_context,
-            # resource_move_change_history=None
-        )
+            endpoint_service_context=endpoint_service_context)
 
     channel_info = Channel(
         channel_type=channel_type,
         partner_topic_info=partner_topic_info,
         partner_destination_info=partner_destination_info,
         message_for_activation=message_for_activation,
-        # provisioning_state=None,
-        # readiness_state=None,
-        expiration_time_if_not_activated_utc=activation_expiration_date
-    )
+        expiration_time_if_not_activated_utc=activation_expiration_date)
 
     return client.create_or_update(
         resource_group_name,
@@ -1057,20 +1053,20 @@ def cli_channel_update(
         partner_namespace_name,
         channel_name,
         channel_type,
-        partner_destination_endpoint_type=None,
         activation_expiration_date=None,
-        event_type_info=None):
-        # inline event info for PartnerTopicInfo
-        # endpoint type for PartnerDestinationInfo
+        event_type_kind=None,
+        inline_event_type=None):
 
     partner_update_topic_info = None
     partner_update_destination_info = None
     if channel_type == ChannelType.PARTNER_TOPIC:
+        event_type_info = EventTypeInfo(
+            inline_event_types=inline_event_type,
+            event_definition_kind=event_type_kind)
         partner_update_topic_info = PartnerUpdateTopicInfo(
             event_type_info=event_type_info)
     elif channel_type == ChannelType.PARTNER_DESTINATION:
-        partner_update_destination_info = PartnerUpdateDestinationInfo(
-            endpoint_type=partner_destination_endpoint_type)
+        partner_update_destination_info = PartnerUpdateDestinationInfo()
 
     channel_update_parameters = ChannelUpdateParameters(
         expiration_time_if_not_activated_utc=activation_expiration_date,
@@ -1099,6 +1095,7 @@ def cli_partner_destination_create_or_update(
         client,
         resource_group_name,
         partner_destination_name,
+        location,
         partner_registration_immutable_id=None,
         endpoint_service_context=None,
         expiration_time_if_not_activated_utc=None,
@@ -1107,6 +1104,7 @@ def cli_partner_destination_create_or_update(
         tags=None):
 
     partner_destination = PartnerDestination(
+        location=location,
         tags=tags,
         partner_registration_immutable_id=partner_registration_immutable_id,
         endpoint_service_context=endpoint_service_context,
@@ -1188,7 +1186,6 @@ def cli_partner_configuration_create_or_update(
         location=None,
         tags=None):
 
-    # authorized_partner is a list of Partners, from _get_partner_info()
     partner_authorization = PartnerAuthorization(
         default_maximum_expiration_time_in_days=default_maximum_expiration_time_in_days,
         authorized_partners_list=authorized_partner)

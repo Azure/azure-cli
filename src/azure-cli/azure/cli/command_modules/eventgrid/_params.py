@@ -229,6 +229,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('event_channel_name', arg_type=event_channel_name_type)
         c.argument('channel_name', arg_type=channel_name_type)
         c.argument('channel_type', arg_type=get_enum_type(['PartnerTopic', 'PartnerDestination']), help="The type of the event channel which represents the  direction flow of events.")
+        c.argument('endpoint_base_url', help="Endpoint Base URL of the partner destination.")
+        c.argument('endpoint_service_context', help="Endpoint context associated with this partner destination.")
+        c.argument('message_for_activation', help="Context or helpful message that can be used during the approval process.")
         c.argument('partner_topic_name', arg_type=partner_topic_name_type)
         c.argument('partner_destination_name', arg_type=partner_destination_name_type)
         c.argument('authorized_subscription_ids', arg_type=authorized_subscription_ids_type)
@@ -362,7 +365,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid partner namespace channel') as c:
-        c.argument('event_type_kind', arg_type=get_enum_type(['inline'], default=None), is_preview=True)
+        c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
+        c.argument('event_type_kind', arg_type=get_enum_type(['inline'], default=None), is_preview=True, help="The kind of event type used.")
+        c.argument('activation_expiration_date', help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') after which the channel and corresponding partner topic would expire and get auto deleted. If this time is not specified, the expiration date is set to seven days by default.")
 
     with self.argument_context('eventgrid partner namespace event-channel') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, id_part='name')

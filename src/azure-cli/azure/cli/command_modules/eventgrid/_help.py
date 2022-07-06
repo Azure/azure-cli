@@ -677,7 +677,55 @@ type: command
 short-summary: Create a partner destination.
 examples:
   - name: Create a partner destination.
-    text: az eventgrid partner destination activate -g rg1 --partner-destination-name destination1
+    text: az eventgrid partner destination create --location westus2 -g rg1 --partner-destination-name destination1
+  - name: Create a partner destination with an activation message and expiration time.
+    text: |
+        az eventgrid partner destination create --location westus2 -g rg1 \\
+            --partner-destination-name destination1 \\
+            --expiration-time-if-not-activated-utc 2022-06-14T05:37:51.272Z \\
+            --message-for-activation "This is an activation message"
+
+"""
+
+helps['eventgrid partner destination delete'] = """
+type: command
+short-summary: Delete a partner destination.
+examples:
+  - name: Delete a partner destination.
+    text: az eventgrid partner destination delete -g rg1 --partner-destination-name destination1
+
+"""
+
+helps['eventgrid partner destination list'] = """
+type: command
+short-summary: List available partner destinations.
+examples:
+  - name: List all partner destinations in the current Azure subscription.
+    text: az eventgrid partner destination list
+  - name: List all partner destinations in the current Azure subscription whose name contains the pattern "XYZ"
+    text: az eventgrid partner destination list --odata-query "Contains(name, 'XYZ')"
+  - name: List all partner destinations in the current Azure subscription except the partner destination with name "name1"
+    text: az eventgrid partner destination list --odata-query "NOT (name eq 'name1')"
+  - name: List all partner destinations in a resource group.
+    text: az eventgrid partner destination list -g rg1
+
+"""
+
+helps['eventgrid partner destination show'] = """
+type: command
+short-summary: Get the details of a partner destination.
+examples:
+  - name: Show the details of a partner destination.
+    text: az eventgrid partner destination show -g rg1 --partner-destination-name destinationname1
+
+"""
+
+helps['eventgrid partner destination update'] = """
+type: command
+short-summary: Update the details of a partner destination.
+examples:
+  - name: Update the tags of a partner destination.
+    text: az eventgrid partner destination update -g rg1 --partner-destination-name destinationname1 --tags Dept=IT
 
 """
 
@@ -689,11 +737,28 @@ short-summary: Manage partner configurations.
 helps['eventgrid partner configuration create'] = """
 type: command
 short-summary: Create a partner configuration.
+parameters:
+  - name: --authorized-partner
+    short-summary: Add authorized partner information. Multiple authorized partners can be specified by using more than one `--authorized-partner` argument.
+    long-summary: |
+      Usage:                     --authorized-partner [partner-name=<name>] \\
+                                        [partner-registration-immutable-id=<id>] \\
+                                        [expiration-time=<timestamp>]
+      Partner Name:              --authorized-partner partner-name=somename \\
+                                        expiration-time=2022-06-14T05:37:51.272Z
+      Partner Registration ID:   --authorized-partner \\
+                                        partner-registration-immutable-id=795c9f2f-6d2d-42ff-a570-42fd3043192c \\
+                                        expiration-time=2022-06-14T05:37:51.272Z
+      Both Name and ID:          --authorized-partner partner-name=somename \\
+                                        partner-registration-immutable-id=795c9f2f-6d2d-42ff-a570-42fd3043192c \\
+                                        expiration-time=2022-06-14T05:37:51.272Z
 examples:
-  - name: Create a partner configuration based on partner registration immutable ID.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-time 2022-06-14T05:37:51.272Z
-  - name: Create a partner configuration based on partner name.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-time 2022-06-14T05:37:51.272Z
+  - name: Create a partner configuration with multiple authorized partners.
+    text: |
+        az eventgrid partner configuration create -g rg1 \\
+            --authorized-partner partner-name=somepartner1 \\
+            --authorized-partner partner-name=somepartner2 \\
+            --default-maximum-expiration-time-in-days 5
 
 """
 
@@ -749,7 +814,7 @@ examples:
 
 helps['eventgrid partner configuration update'] = """
 type: command
-short-summary: update a partner configuration.
+short-summary: Update a partner configuration.
 examples:
   - name: Update a partner configuration's default maximum expiration time.
     text: az eventgrid partner configuration update -g rg1 --default-maximum-expiration-time-in-days 5
@@ -767,31 +832,84 @@ parameters:
   - name: --inline-event-type
     short-summary: Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
     long-summary: |
-      Usage:                     --inline-event-type KEY [description=<description>] [documentation-url=<url>] [data-schema-url=<url>]
-      Event Type:                --inline-event-type event1 description=My inline event type.
-      Event with URL:            --inline-event-type event1 documentation-url=https://www.microsoft.com
+      Usage:       --inline-event-type KEY [description=<description>] [documentation-url=<url>] \\
+                     [data-schema-url=<url>]
+      Example:     --inline-event-type event1 \\
+                     description="My inline event type." \\
+                     documentation-url=https://www.microsoft.com \\
+                     data-schema-url=https://www.microsoft.com
+examples:
+  - name: Create a new channel of type PartnerDestination with inline event types.
+    text: |
+        az eventgrid partner namespace channel create -g rg1 --channel-name channel1 \\
+          --channel-type PartnerDestination --partner-namespace-name namespace1 \\
+          --partner-destination-name destination1 \\
+          --inline-event-type eventkey1 description="My event type." \\
+          --inline event type eventkey2 description="My second event type."
+  - name: Create a new channel of type PartnerTopic.
+    text: |
+        az eventgrid partner namespace channel create -g rg1 --channel-name channel1 \\
+          --channel-type PartnerTopic --partner-namespace-name namespace1 \\
+          --partner-topic-name topic1 \\
+          --partner-topic-source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname
 
 """
 
-helps['eventgrid partner channel create'] = """
+helps['eventgrid partner namespace channel list'] = """
 type: command
-short-summary: Create a new channel for a partner namespace.
-parameters:
-  - name: --authorized-partner
-    short-summary: Add authorized partner information. Multiple authorized partners can be specified by using more than one `--authorized-partner` argument.
-    long-summary: |
-      Usage:                     --authorized-partner [partner-name=<name>] \\
-                                        [partner-registration-immutable-id=<id>] \\
-                                        [expiration-time=<timestamp>]
-      Partner Name:              --authorized-partner partner-name=somename \\
-                                        expiration-time=2022-06-14T05:37:51.272Z
-      Partner Registration ID:   --authorized-partner \\
-                                        partner-registration-immutable-id=795c9f2f-6d2d-42ff-a570-42fd3043192c \\
-                                        expiration-time=2022-06-14T05:37:51.272Z
-      Both Name and ID:          --authorized-partner partner-name=somename \\
-                                        partner-registration-immutable-id=795c9f2f-6d2d-42ff-a570-42fd3043192c \\
-                                        expiration-time=2022-06-14T05:37:51.272Z
+short-summary: List available partner channels.
+examples:
+  - name: List all channels in a specific partner namespace.
+    text: az eventgrid partner namespace channel list -g rg1 --partner-namespace-name partnernamespace1
+  - name: List all channel under a partner namespace whose name contains the pattern "XYZ"
+    text: az eventgrid partner namespace channel list -g rg1 --partner-namespace-name partnernamespace1  --odata-query "Contains(name, 'XYZ')"
+"""
 
+helps['eventgrid partner namespace channel delete'] = """
+type: command
+short-summary: Delete a partner namespace.
+examples:
+  - name: Delete a specific partner namespace.
+    text: az eventgrid partner namespace channel delete -g rg1 --partner-namespace-name partnernamespace1 --channel-name channelname1
+"""
+
+helps['eventgrid partner namespace channel show'] = """
+type: command
+short-summary: Get the details of a channel under a partner namespace.
+examples:
+  - name: Show the details of a channel.
+    text: az eventgrid partner namespace channel show -g rg1 --partner-namespace-name partnernamespace1 --channel-name channelname1
+  - name: Show the details of a channel based on resource ID.
+    text: az eventgrid partner namespace channel show --ids /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/partnenamespaces/partnernamespace1/channels/channelName1
+"""
+
+helps['eventgrid partner namespace channel update'] = """
+type: command
+short-summary: Update the details of a channel under a partner namespace.
+parameters:
+  - name: --inline-event-type
+    short-summary: Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
+    long-summary: |
+      Usage:       --inline-event-type KEY [description=<description>] [documentation-url=<url>] \\
+                     [data-schema-url=<url>]
+      Example:     --inline-event-type event1 \\
+                     description="My inline event type." \\
+                     documentation-url=https://www.microsoft.com \\
+                     data-schema-url=https://www.microsoft.com
+examples:
+  - name: Update the expiration time of a channel.
+    text: |
+        az eventgrid partner namespace channel update -g rg1 \\
+          --partner-namespace-name partnernamespace1 \\
+          --channel-name channelname1 --channel-type PartnerDestination \\
+          --activation-expiration-date 2022-06-14T05:37:51.272Z \\
+
+  - name: Update the inline events of a channel.
+    text: |
+        az eventgrid partner namespace channel update -g rg1 \\
+          --partner-namespace-name partnernamespace1 \\
+          --channel-name channelname1 --channel-type ParnterTopic \\
+          --event-type-kind inline --inline-event-type eventtype1 documentation-url=https://www.microsoft.com
 """
 
 helps['eventgrid system-topic event-subscription create'] = """
