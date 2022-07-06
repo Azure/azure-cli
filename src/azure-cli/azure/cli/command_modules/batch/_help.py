@@ -103,7 +103,7 @@ examples:
         az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned MyAssignedId
   - name: Remove all user assigned managed identities from an existing batch account.
     text: >
-        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned MyAssignedId
 """
 
 helps['batch account identity show'] = """
