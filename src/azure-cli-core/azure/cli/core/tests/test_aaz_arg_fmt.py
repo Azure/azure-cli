@@ -561,7 +561,7 @@ class TestAAZArgResourceFmt(ScenarioTest):
         schema.vnets = AAZListArg()
         schema.vnets.Element = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{rg_name}/providers/Microsoft.Network/virtualNetworks/{}"
-        ))
+        ), nullable=True)
 
         schema.vm = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(
             template="/subscriptions/{}/resourceGroups/{rg_name}/providers/Microsoft.Compute/virtualMachines/{}"
@@ -578,6 +578,7 @@ class TestAAZArgResourceFmt(ScenarioTest):
                 "vnet1",
                 f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/vnet2",
                 f"/subscRiptions/{sub_id}/reSourcegroupS/{resource_group}/providers/microsoFT.network/Virtualnetworks/vnet3",
+                None,
             ],
         })
         self.assertEqual(args.to_serialized_data(), {
@@ -591,6 +592,7 @@ class TestAAZArgResourceFmt(ScenarioTest):
                 f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/vnet1",
                 f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/vnet2",
                 f"/subscRiptions/{sub_id}/reSourcegroupS/{resource_group}/providers/microsoFT.network/Virtualnetworks/vnet3",
+                None,
             ]
         })
 
@@ -620,6 +622,18 @@ class TestAAZArgResourceFmt(ScenarioTest):
                 "vm": "test-vm"
             })
 
+    def test_subscription_id_arg_format(self):
+        from azure.cli.core.aaz import AAZSubscriptionIdArg, AAZSubscriptionIdArgFormat
+        from azure.cli.core._profile import Profile
 
+        sub = Profile(cli_ctx=self.cli_ctx).get_subscription()
 
+        schema = AAZArgumentsSchema()
+        schema.sub = AAZSubscriptionIdArg()
 
+        args = self.format_arg(schema, {
+            "sub": sub['name'],
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "sub": sub['id'],
+        })
