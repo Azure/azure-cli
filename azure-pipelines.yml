@@ -627,14 +627,27 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: rpm-mariner$(tag)
 
-
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
-- job: BuildRpmPackageUbi8
-  displayName: Build Rpm Package Red Hat Universal Base Image 8
+- job: BuildRpmPackages
+  displayName: Build Rpm Packages
   # Do not run this job for Pull Requests due to the slowness
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      ubi8:
+        image: ubi8
+        tag: 8.4
+        artifact: rpm-ubi8
+      Fedora35:
+        image: fedora
+        tag: 35
+        artifact: rpm-fedora35
+      Fedora36:
+        image: fedora
+        tag: 36
+        artifact: rpm-fedora36
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
@@ -642,7 +655,8 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
     env:
-      IMAGE: ubi8
+      IMAGE: $(image)
+      TAG: $(tag)
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
     inputs:
@@ -651,16 +665,39 @@ jobs:
     displayName: 'Publish Artifact: rpm'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-ubi8
+      ArtifactName: $(artifact)
 
 
 - job: TestRpmPackage
   displayName: Test Rpm Package
   timeoutInMinutes: 120
-  dependsOn: BuildRpmPackageUbi8
+  dependsOn: BuildRpmPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      ubi8:
+        artifact: rpm-ubi8
+        distro: el8
+        image: registry.access.redhat.com/ubi8/ubi:8.4
+        python_package: python39
+        python_cmd: python3.9
+        pip_cmd: pip3.9
+      Fedora35:
+        artifact: rpm-fedora35
+        distro: fc35
+        image: fedora:35
+        python_package: python3
+        python_cmd: python3
+        pip_cmd: pip3
+      Fedora36:
+        artifact: rpm-fedora36
+        distro: fc36
+        image: fedora:36
+        python_package: python3
+        python_cmd: python3
+        pip_cmd: pip3
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -673,21 +710,19 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: rpm-ubi8
+      artifactName: $(artifact)
 
 
   - bash: |
       set -ex
       
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=azure-cli-$CLI_VERSION-1.el8.x86_64.rpm
+      RPM_NAME=azure-cli-$CLI_VERSION-1.${DISTRO}.x86_64.rpm
       RPM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/rpm/$RPM_NAME
       
-      echo "== Test rpm package on Red Hat UBI 8 =="
-      
-      IMAGE=registry.access.redhat.com/ubi8/ubi:8.4
+      echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
+      docker run --rm -e RPM_NAME=$RPM_NAME -e PYTHON_PACKAGE=${PYTHON_PACKAGE} -e PYTHON_CMD=${PYTHON_CMD} -e PIP_CMD=${PIP_CMD} -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
 
     displayName: 'Test Rpm Package'
 
