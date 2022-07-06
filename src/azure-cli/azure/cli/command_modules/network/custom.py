@@ -2205,10 +2205,10 @@ def create_asg(cmd, client, resource_group_name, application_security_group_name
     return client.begin_create_or_update(resource_group_name, application_security_group_name, asg)
 
 
-def update_asg(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
+# def update_asg(instance, tags=None):
+#     if tags is not None:
+#         instance.tags = tags
+#     return instance
 # endregion
 
 

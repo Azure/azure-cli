@@ -1808,41 +1808,6 @@ examples:
     text: az network asg create -g MyResourceGroup -n MyAsg --tags MyWebApp, CostCenter=Marketing
 """
 
-helps['network asg delete'] = """
-type: command
-short-summary: Delete an application security group.
-examples:
-  - name: Delete an application security group.
-    text: az network asg delete -g MyResourceGroup -n MyAsg
-"""
-
-helps['network asg list'] = """
-type: command
-short-summary: List all application security groups in a subscription.
-examples:
-  - name: List all application security groups in a subscription.
-    text: az network asg list
-"""
-
-helps['network asg show'] = """
-type: command
-short-summary: Get details of an application security group.
-examples:
-  - name: Get details of an application security group.
-    text: az network asg show -g MyResourceGroup -n MyAsg
-"""
-
-helps['network asg update'] = """
-type: command
-short-summary: Update an application security group.
-long-summary: >
-    This command can only be used to update the tags for an application security group.
-    Name and resource group are immutable and cannot be updated.
-examples:
-  - name: Update an application security group with a modified tag value.
-    text: az network asg update -g MyResourceGroup -n MyAsg --set tags.CostCenter=MyBusinessGroup
-"""
-
 helps['network ddos-protection'] = """
 type: group
 short-summary: Manage DDoS Protection Plans.
