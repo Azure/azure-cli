@@ -52,3 +52,309 @@ class TestAAZArgFmt(unittest.TestCase):
 
         args = self.format_arg(schema, {"str1": "abcd"})
         self.assertEqual(args.str1, "abcd")
+
+    def test_int_fmt(self):
+        from azure.cli.core.aaz import AAZIntArg, AAZIntArgFormat
+
+        schema = AAZArgumentsSchema()
+        schema.int1 = AAZIntArg(
+            fmt=AAZIntArgFormat(
+                multiple_of=10,
+                maximum=30,
+                minimum=20,
+            )
+        )
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"int1": 10})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"int1": 25})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"int1": 40})
+
+        args = self.format_arg(schema, {"int1": 20})
+        self.assertEqual(args.int1, 20)
+
+        args = self.format_arg(schema, {"int1": 30})
+        self.assertEqual(args.int1, 30)
+
+    def test_float_fmt(self):
+        from azure.cli.core.aaz import AAZFloatArg, AAZFloatArgFormat
+
+        schema = AAZArgumentsSchema()
+        schema.flt1 = AAZFloatArg(
+            fmt=AAZFloatArgFormat(
+                multiple_of=1.1,
+                maximum=33,
+                minimum=22,
+                exclusive_maximum=True,
+                exclusive_minimum=True,
+            )
+        )
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 1.1})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 22})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 33})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 23})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 23.099})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 31.901})
+
+        args = self.format_arg(schema, {"flt1": 23.1})
+        self.assertEqual(args.flt1, 23.1)
+
+        args = self.format_arg(schema, {"flt1": 31.9})
+        self.assertEqual(args.flt1, 31.9)
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 22.0000000001})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {"flt1": 32.9999999999})
+
+        schema = AAZArgumentsSchema()
+        schema.flt1 = AAZFloatArg(
+            fmt=AAZFloatArgFormat(
+                multiple_of=1.1,
+                maximum=33,
+                minimum=22,
+                exclusive_maximum=False,
+                exclusive_minimum=False,
+            )
+        )
+        args = self.format_arg(schema, {"flt1": 22.0000000001})
+        self.assertEqual(args.flt1, 22)
+
+        args = self.format_arg(schema, {"flt1": 32.9999999999})
+        self.assertEqual(args.flt1, 33)
+
+    def test_bool_fmt(self):
+        from azure.cli.core.aaz import AAZBoolArg, AAZBoolArgFormat
+
+        schema = AAZArgumentsSchema()
+        schema.bool = AAZBoolArg(fmt=AAZBoolArgFormat(reverse=True))
+
+        args = self.format_arg(schema, {"bool": True})
+        self.assertEqual(args.bool, False)
+
+        args = self.format_arg(schema, {"bool": False})
+        self.assertEqual(args.bool, True)
+
+    def test_object_fmt(self):
+        from azure.cli.core.aaz import AAZObjectArgFormat, AAZStrArgFormat, AAZBoolArgFormat, AAZIntArgFormat
+        from azure.cli.core.aaz import AAZObjectArg, AAZStrArg, AAZBoolArg, AAZIntArg
+
+        schema = AAZArgumentsSchema()
+        schema.properties = AAZObjectArg(fmt=AAZObjectArgFormat(
+            max_properties=3,
+            min_properties=2,
+        ))
+        schema.properties.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+        schema.properties.enabled = AAZBoolArg(fmt=AAZBoolArgFormat(reverse=True))
+        schema.properties.count = AAZIntArg(fmt=AAZIntArgFormat(minimum=0))
+        schema.properties.vnet = AAZObjectArg()
+        schema.properties.vnet.name = AAZStrArg()
+        schema.properties.vnet.name2 = AAZStrArg()
+
+        args = self.format_arg(schema, {
+            "properties": {
+                "name": "abcd",
+                "enabled": True,
+                "count": 100
+            }
+        })
+        self.assertEqual(args.properties.to_serialized_data(), {
+            "name": "abcd",
+            "enabled": False,
+            "count": 100
+        })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "properties": {
+                    "name": "abcd",
+                }
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "properties": {
+                    "name": "abcd",
+                    "enabled": False,
+                    "count": 100,
+                    "vnet": {
+                        "name": "test",
+                    }
+                }
+            })
+
+        schema = AAZArgumentsSchema()
+        schema.properties = AAZObjectArg()
+        schema.properties.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+        schema.properties.enabled = AAZBoolArg(fmt=AAZBoolArgFormat(reverse=True))
+        schema.properties.count = AAZIntArg(fmt=AAZIntArgFormat(minimum=0))
+        schema.properties.vnet = AAZObjectArg()
+        schema.properties.vnet.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+
+        args = self.format_arg(schema, {
+            "properties": {}
+        })
+        self.assertEqual(args.properties.to_serialized_data(), {})
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "properties": {
+                    "name": "a1234",
+                }
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "properties": {
+                    "count": -10,
+                }
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "properties": {
+                    "vnet": {
+                        "name": "test11",
+                    }
+                }
+            })
+
+    def test_dict_fmt(self):
+        from azure.cli.core.aaz import AAZObjectArgFormat, AAZDictArgFormat, AAZStrArgFormat, AAZIntArgFormat
+        from azure.cli.core.aaz import AAZObjectArg, AAZDictArg, AAZStrArg, AAZIntArg
+
+        schema = AAZArgumentsSchema()
+        schema.tags = AAZDictArg(fmt=AAZDictArgFormat(max_properties=3, min_properties=2))
+        schema.tags.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z0-9]+'))
+        schema.actions = AAZDictArg()
+        schema.actions.Element = AAZObjectArg()
+        schema.actions.Element.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+        schema.actions.Element.name2 = AAZStrArg()
+
+        args = self.format_arg(schema, {
+            "tags": {
+                "flag1": "v1",
+                "flag2": "v2",
+            },
+            "actions": {
+                "a": {
+                    "name": "abc"
+                },
+                "b": {
+                    "name": "c"
+                }
+            }
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": {
+                "flag1": "v1",
+                "flag2": "v2",
+            },
+            "actions": {
+                "a": {
+                    "name": "abc"
+                },
+                "b": {
+                    "name": "c"
+                }
+            }
+        })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "tags": {
+                    "flag1": "v1",
+                },
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "tags": {
+                    "flag1": "v1",
+                    "flag2": "v2",
+                    "flag3": "v3",
+                    "flag4": "v4",
+                },
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "actions": {
+                    "a": {
+                        "name": "abc11"
+                    },
+                },
+            })
+
+    def test_list_fmt(self):
+        from azure.cli.core.aaz import AAZObjectArgFormat, AAZListArgFormat, AAZStrArgFormat, AAZIntArgFormat
+        from azure.cli.core.aaz import AAZObjectArg, AAZListArg, AAZStrArg, AAZIntArg
+
+        schema = AAZArgumentsSchema()
+        schema.tags = AAZListArg(fmt=AAZListArgFormat(unique=True, max_length=3, min_length=2))
+        schema.tags.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z0-9]+'))
+        schema.actions = AAZListArg()
+        schema.actions.Element = AAZObjectArg()
+        schema.actions.Element.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+
+        args = self.format_arg(schema, {
+            "tags": ['v1', 'v2'],
+            "actions": [
+                {
+                    "name": "abc"
+                },
+                {
+                    "name": "c"
+                }
+            ]
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": ['v1', 'v2'],
+            "actions": [
+                {
+                    "name": "abc"
+                },
+                {
+                    "name": "c"
+                }
+            ]
+        })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "tags": ['v1',],
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "tags": ['v1', 'v2', 'v3', 'v4'],
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "tags": ['v1', 'v2', 'v2'],
+            })
+
+        args = self.format_arg(schema, {
+            "tags": ['v1', 'v2'],
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": ['v1', 'v2'],
+        })

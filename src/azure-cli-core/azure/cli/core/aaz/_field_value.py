@@ -252,7 +252,7 @@ class AAZList(AAZBaseValue):
         super().__init__(schema, data)
         assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined  # the key is the idx
         self._len = 0
-        if self._data is not None:
+        if self._data is not None and self._data != AAZUndefined:
             for idx in self._data:
                 if idx + 1 > self._len:
                     self._len = idx + 1

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import abc
 import re
+import math
 
 from knack.log import get_logger
 
@@ -87,12 +88,14 @@ class AAZIntArgFormat(AAZBaseArgFormat):
 
 class AAZFloatArgFormat(AAZBaseArgFormat):
 
-    def __init__(self, multiple_of=None, maximum=None, exclusive_maximum=None, minimum=None, exclusive_minimum=None):
+    def __init__(self, multiple_of=None, maximum=None, exclusive_maximum=None, minimum=None, exclusive_minimum=None,
+                 rel_tol=1e-09):
         self._multiple_of = multiple_of
         self._maximum = maximum
         self._minimum = minimum
         self._exclusive_maximum = exclusive_maximum
         self._exclusive_minimum = exclusive_minimum
+        self._rel_tol = rel_tol
 
     def __call__(self, ctx, value):
         assert isinstance(value, AAZSimpleValue)
@@ -101,28 +104,39 @@ class AAZFloatArgFormat(AAZBaseArgFormat):
             return value
 
         assert isinstance(data, float)
-        if self._multiple_of is not None and data % self._multiple_of != 0:
-            raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' is not multiple of {self._multiple_of}")
+
+        if self._multiple_of is not None:
+            q = int(data / self._multiple_of)
+            if not math.isclose(data, q * self._multiple_of, rel_tol=self._rel_tol) and \
+                    not math.isclose(data, (q + 1) * self._multiple_of, rel_tol=self._rel_tol):
+                raise AAZInvalidArgValueError(
+                    f"FormatError: '{data}' is not multiple of {self._multiple_of}")
 
         if self._minimum is not None:
+            if math.isclose(data, self._minimum, rel_tol=self._rel_tol):
+                data = self._minimum
+
             if self._exclusive_minimum:
                 if data <= self._minimum:
                     raise AAZInvalidArgValueError(
-                        f"FormatError: '{data}' is not greater than {self._maximum}")
+                        f"FormatError: '{data}' is not greater than {self._minimum}")
             elif data < self._minimum:
                 raise AAZInvalidArgValueError(
                     f"FormatError: '{data}' is less than {self._minimum}")
 
         if self._maximum is not None:
+            if math.isclose(data, self._maximum, rel_tol=self._rel_tol):
+                data = self._maximum
+
             if self._exclusive_maximum:
                 if data >= self._maximum:
                     raise AAZInvalidArgValueError(
-                        f"FormatError: '{data}' is not less than {self._minimum}")
+                        f"FormatError: '{data}' is not less than {self._maximum}")
             elif data > self._maximum:
                 raise AAZInvalidArgValueError(
                     f"FormatError: '{data}' is greater than {self._maximum}")
 
+        value._data = data
         return value
 
 
@@ -159,6 +173,8 @@ class AAZObjectArgFormat(AAZBaseArgFormat):
 
         assert isinstance(data, dict)
 
+        # Because _fields of object schema is OrderedDict
+        # aaz-dev should register arguments in order of their interdependence.
         for field_name, field_schema in value._schema._fields.items():
             if not field_schema._fmt:
                 continue
@@ -183,7 +199,7 @@ class AAZObjectArgFormat(AAZBaseArgFormat):
         if value._is_patch:
             return value
 
-        if self._min_properties and len(data) > self._min_properties:
+        if self._min_properties and len(data) < self._min_properties:
             raise AAZInvalidArgValueError(
                 f"FormatError: object length is less than {self._min_properties}")
 
@@ -220,7 +236,7 @@ class AAZDictArgFormat(AAZBaseArgFormat):
         if value._is_patch:
             return value
 
-        if self._min_properties and len(value) > self._min_properties:
+        if self._min_properties and len(value) < self._min_properties:
             raise AAZInvalidArgValueError(
                 f"FormatError: dict length is less than {self._min_properties}")
 
