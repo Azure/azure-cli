@@ -553,8 +553,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/_oras/artifacts/referrers',
             headers=get_authorization_header('username', 'password'),
-            params=
-            {
+            params={
                 'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
                 'artifactType': None
             },
@@ -570,8 +569,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/_oras/artifacts/referrers',
             headers=get_authorization_header('username', 'password'),
-            params=
-            {
+            params={
                 'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
                 'artifactType': None
             },
@@ -589,7 +587,8 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params={
                 'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-                'artifactType': 'sbom/example'},
+                'artifactType': 'sbom/example'
+            },
             json=None,
             timeout=300,
             verify=mock.ANY)
