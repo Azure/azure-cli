@@ -10,7 +10,7 @@ trigger:
 pr:
   branches:
     include:
-      - '*'
+    - '*'
 
 jobs:
 - job: CheckPullRequest
@@ -20,17 +20,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
-    - bash: |
-        echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
-        title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
-        echo $title
-        body=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.body')
-        echo $body
-        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
-          echo "Hotfix PR should target release branch."
-          exit 1
-        fi
-        python scripts/ci/check_pull_request.py "$title" "$body"
+  - bash: |
+      echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
+      title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+      echo $title
+      body=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.body')
+      echo $body
+      if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
+        echo "Hotfix PR should target release branch."
+        exit 1
+      fi
+      python scripts/ci/check_pull_request.py "$title" "$body"
 
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
@@ -39,30 +39,30 @@ jobs:
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
-    - bash: |
-        echo "Reject pull request directly to master branch"
-        exit 1
+  - bash: |
+      echo "Reject pull request directly to master branch"
+      exit 1
 
 - job: CredScan
   displayName: "Credential Scan"
   pool:
     vmImage: "windows-2019"
   steps:
-    - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-      displayName: 'Run Credential Scanner'
-      inputs:
-        toolMajorVersion: V2
-        suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-        toolVersionV2: '2.1.17'
-    - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
-      displayName: 'Post Analysis'
-      inputs:
-        AllTools: false
-        BinSkim: false
-        CredScan: true
-        RoslynAnalyzers: false
-        TSLint: false
-        ToolLogsNotFoundAction: 'Standard'
+  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
+    displayName: 'Run Credential Scanner'
+    inputs:
+      toolMajorVersion: V2
+      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+      toolVersionV2: '2.1.17'
+  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
+    displayName: 'Post Analysis'
+    inputs:
+      AllTools: false
+      BinSkim: false
+      CredScan: true
+      RoslynAnalyzers: false
+      TSLint: false
+      ToolLogsNotFoundAction: 'Standard'
 
 - job: ExtractMetadata
   displayName: Extract Metadata
@@ -166,10 +166,10 @@ jobs:
 
 
   - script: |
-       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
-       set
-
-       build_scripts/windows/scripts/build.cmd
+      set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+      set
+      
+      build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
@@ -217,7 +217,7 @@ jobs:
         }
         # The following are executed by elevated PowerShell
         az --version
-
+        
         $InstallArgs = @(
           "/i"
           "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\Microsoft Azure CLI.msi`""
@@ -245,7 +245,7 @@ jobs:
         # Test bundled pip with extension installation
         az extension add -n rdbms-connect
         az self-test
-
+        
         Get-Content .\install_logs.txt
 
 - job: BuildDockerImage
@@ -297,16 +297,16 @@ jobs:
 
 
   - bash: |
-       set -exv
-
-       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-       IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-       TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
-
-       echo "== Test docker image =="
-
-       docker load < $TAR_FILE
-       docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+      set -exv
+      
+      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+      IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+      TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+      
+      echo "== Test docker image =="
+      
+      docker load < $TAR_FILE
+      docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
 
 - job: BuildPythonWheel
@@ -366,29 +366,29 @@ jobs:
 
 
   - bash: |
-       #!/usr/bin/env bash
-
-       # Verify the pip wheels
-
-       set -ex
-
-       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-       PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
-
-       echo "== Testing pip install on Python 3.7 =="
-       docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
-       echo "== Testing pip install on Python 3.9 =="
-       docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-
-       echo "== Testing pip install on Python 3.10 =="
-       docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+      #!/usr/bin/env bash
+      
+      # Verify the pip wheels
+      
+      set -ex
+      
+      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+      PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
+      
+      echo "== Testing pip install on Python 3.7 =="
+      docker run \
+        --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
+        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+      
+      echo "== Testing pip install on Python 3.9 =="
+      docker run \
+        --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+      
+      echo "== Testing pip install on Python 3.10 =="
+      docker run \
+        --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
+        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
@@ -404,10 +404,10 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        module: 'azure-cli-core'
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      module: 'azure-cli-core'
 
 - job: TestTelemetry
   displayName: Unit Test for Telemetry
@@ -421,10 +421,10 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        module: 'azure-cli-telemetry'
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      module: 'azure-cli-telemetry'
 
 - job: IntegrationTestAgainstProfiles
   displayName: Integration Test against Profiles
@@ -441,14 +441,14 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python $(python.version)'
-      inputs:
-        versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip wheel
-      displayName: 'Install pip and wheel'
-    - bash: ./scripts/ci/test_profile_integration.sh
-      displayName: 'Run Integration Test against Profiles'
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
+  - bash: pip install --upgrade pip wheel
+    displayName: 'Install pip and wheel'
+  - bash: ./scripts/ci/test_profile_integration.sh
+    displayName: 'Run Integration Test against Profiles'
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
@@ -462,14 +462,14 @@ jobs:
       Python310:
         python.version: '3.10'
   steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python $(python.version)'
-      inputs:
-        versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip wheel
-      displayName: 'Install pip and wheel'
-    - bash: ./scripts/ci/test_extensions.sh
-      displayName: 'Load extensions'
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
+  - bash: pip install --upgrade pip wheel
+    displayName: 'Install pip and wheel'
+  - bash: ./scripts/ci/test_extensions.sh
+    displayName: 'Load extensions'
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
@@ -486,32 +486,32 @@ jobs:
       artifactName: metadata
 
   - bash: |
-       #!/bin/bash
-
-       root=$(cd $(dirname $0); pwd)
-
-       set -evx
-
-       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-       HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
-
-       docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-       src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
-
-       echo "Generating formula in docker container ... "
-       docker run -v $docker_files:/mnt/scripts \
-                  -v $src_files:/mnt/src \
-                  -e CLI_VERSION=$CLI_VERSION \
-                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
-                  --name azurecli \
-                  python:3.10 \
-                  /mnt/scripts/run.sh
-
-       # clean up
-       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-
-       docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
-       docker rm --force azurecli
+      #!/bin/bash
+      
+      root=$(cd $(dirname $0); pwd)
+      
+      set -evx
+      
+      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
+      
+      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
+      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
+      
+      echo "Generating formula in docker container ... "
+      docker run -v $docker_files:/mnt/scripts \
+                 -v $src_files:/mnt/src \
+                 -e CLI_VERSION=$CLI_VERSION \
+                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
+                 --name azurecli \
+                 python:3.10 \
+                 /mnt/scripts/run.sh
+      
+      # clean up
+      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
+      
+      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
+      docker rm --force azurecli
     displayName: 'Build homebrew formula'
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
@@ -549,16 +549,16 @@ jobs:
 
   - bash: |
       set -ev
-
+      
       echo == Remove pre-installed azure-cli ==
       brew uninstall azure-cli
-
+      
       echo == Install azure-cli.rb formula ==
       brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
-
+      
       echo == Az Version ==
       az --version
-
+      
       echo == Run Self-Test ==
       az self-test
 
@@ -677,17 +677,17 @@ jobs:
 
 
   - bash: |
-       set -ex
-
-       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-       RPM_NAME=azure-cli-$CLI_VERSION-1.el8.x86_64.rpm
-       RPM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/rpm/$RPM_NAME
-
-       echo "== Test rpm package on Red Hat UBI 8 =="
+      set -ex
       
-       IMAGE=registry.access.redhat.com/ubi8/ubi:8.4
-       docker pull $IMAGE
-       docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
+      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+      RPM_NAME=azure-cli-$CLI_VERSION-1.el8.x86_64.rpm
+      RPM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/rpm/$RPM_NAME
+      
+      echo "== Test rpm package on Red Hat UBI 8 =="
+      
+      IMAGE=registry.access.redhat.com/ubi8/ubi:8.4
+      docker pull $IMAGE
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
 
     displayName: 'Test Rpm Package'
 
@@ -749,7 +749,7 @@ jobs:
 - job: TestDebPackages
   displayName: Test Deb Packages
   dependsOn:
-   - BuildDebPackages
+  - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
@@ -884,11 +884,11 @@ jobs:
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 3.10'
-      inputs:
-        versionSpec: 3.10
-    - bash: pip install --upgrade pip wheel
-      displayName: "Install pip and wheel"
-    - bash: ./scripts/ci/test_ref_doc.sh
-      displayName: "Verify Sphinx Document Generator"
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - bash: pip install --upgrade pip wheel
+    displayName: "Install pip and wheel"
+  - bash: ./scripts/ci/test_ref_doc.sh
+    displayName: "Verify Sphinx Document Generator"
