@@ -1385,6 +1385,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters',
                                  custom_func_name='update_subnet')
         g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
+        g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
     # endregion
 
     # region VirtualNetworkGateways
