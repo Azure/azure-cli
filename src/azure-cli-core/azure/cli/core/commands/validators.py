@@ -10,6 +10,7 @@ import random
 from azure.cli.core.profiles import ResourceType
 
 from knack.log import get_logger
+from knack.util import CLIError
 from knack.validators import DefaultStr, DefaultInt  # pylint: disable=unused-import
 
 logger = get_logger(__name__)
@@ -84,12 +85,26 @@ def get_default_location_from_resource_group(cmd, namespace):
 def validate_file_or_dict(string):
     import os
     string = os.path.expanduser(string)
-    if os.path.exists(string):
-        from azure.cli.core.util import get_file_json
-        return get_file_json(string)
+    try:
+        if os.path.exists(string):
+            from azure.cli.core.util import get_file_json
+            # Failure point 1: 'string' is a valid file path, but the file contains invalid JSON string
+            # ex has no recommendation
+            return get_file_json(string)
 
-    from azure.cli.core.util import shell_safe_json_parse
-    return shell_safe_json_parse(string)
+        from azure.cli.core.util import shell_safe_json_parse
+        # Failure point 2:
+        # - 'string' is a non-existing file path
+        # - 'string' is an invalid JSON string
+        # ex has recommendations for shell interpretation
+        return shell_safe_json_parse(string)
+    except CLIError as ex:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        new_ex = InvalidArgumentValueError(ex, recommendation="Please provide a valid JSON file path or JSON string.")
+        # Preserve the recommendation
+        if hasattr(ex, "recommendations"):
+            new_ex.set_recommendation(ex.recommendations)
+        raise new_ex from ex
 
 
 def validate_parameter_set(namespace, required, forbidden, dest_to_options=None, description=None):

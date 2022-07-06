@@ -523,7 +523,8 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     try:
         return shell_safe_json_parse(content, preserve_order)
     except CLIError as ex:
-        raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
+        # Reading file bypasses shell interpretation, so we discard the recommendation for shell quoting.
+        raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -563,12 +564,13 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
         except Exception as ex:
             logger.debug(ex)  # log the exception which could be a python dict parsing error.
 
-            # Echo the JSON received by CLI
-            msg = "Failed to parse JSON: {}\nError detail: {}".format(json_or_dict_string, json_ex)
+            # Echo the string received by CLI. Because the user may intend to provide a file path, we don't decisively
+            # say it is a JSON string.
+            msg = "Failed to parse string as JSON:\n{}\nError detail: {}".format(json_or_dict_string, json_ex)
 
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
-            recommendation = "The JSON may have been parsed by the shell. See " \
+            recommendation = "The provided JSON string may have been parsed by the shell. See " \
                              "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
 
             # Recommendation especially for PowerShell
