@@ -22,6 +22,8 @@ from .event_channel_filter import EventChannelAddFilter
 from .inbound_ip_rules import AddInboundIpRule
 from .delivery_attribute_mapping import AddDeliveryAttributeMapping
 from .user_assigned import AddUserAssignedIdentities
+from .authorized_partner import AddAuthorizedPartner
+from .inline_event_type import AddInlineEventType
 
 included_event_types_type = CLIArgumentType(
     help="A space-separated list of event types (e.g., Microsoft.Storage.BlobCreated and Microsoft.Storage.BlobDeleted). In order to subscribe to all default event types, do not specify any value for this argument. For event grid topics, event types are customer defined. For Azure events, e.g., Storage Accounts, IoT Hub, etc., you can query their event types using this CLI command 'az eventgrid topic-type list-event-types'.",
@@ -226,6 +228,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type)
         c.argument('event_channel_name', arg_type=event_channel_name_type)
         c.argument('channel_name', arg_type=channel_name_type)
+        c.argument('channel_type', arg_type=get_enum_type(['PartnerTopic', 'PartnerDestination']), help="The type of the event channel which represents the  direction flow of events.")
         c.argument('partner_topic_name', arg_type=partner_topic_name_type)
         c.argument('partner_destination_name', arg_type=partner_destination_name_type)
         c.argument('authorized_subscription_ids', arg_type=authorized_subscription_ids_type)
@@ -251,6 +254,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                    is_preview=True,
                    help='Add user assigned identities when identityType is user or mixed. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--mi-user-assigned` argument',
                    options_list=['--mi-user-assigned'])
+        c.argument('inline_event_type',
+                   action=AddInlineEventType,
+                   nargs='+',
+                   is_preview=True,
+                   help='Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument',)
 
     with self.argument_context('eventgrid topic') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic.', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
@@ -353,6 +361,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid partner namespace list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
+    with self.argument_context('eventgrid partner namespace channel') as c:
+        c.argument('event_type_kind', arg_type=get_enum_type(['inline'], default=None), is_preview=True)
+
     with self.argument_context('eventgrid partner namespace event-channel') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, id_part='name')
         c.argument('event_channel_name', arg_type=event_channel_name_type, options_list=['--name', '-n'], id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaes/eventchannels'))
@@ -375,7 +386,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid partner configuration') as c:
-        c.argument('provisioning_state', arg_type=odata_query_type, id_part=None)
+        c.argument('authorized_partner',
+                   action=AddAuthorizedPartner,
+                   nargs='+',
+                   is_preview=True,
+                   help='Add authorized partner information. Multiple authorized partners can be specified by using more than one `--authorized-partner` argument',
+                   options_list=['--authorized-partner'])
 
     with self.argument_context('eventgrid event-subscription') as c:
         c.argument('event_subscription_name', arg_type=name_type, help='Name of the event subscription.')

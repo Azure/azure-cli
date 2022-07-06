@@ -663,6 +663,24 @@ type: group
 short-summary: Manage partner destinations.
 """
 
+helps['eventgrid partner destination activate'] = """
+type: command
+short-summary: Activate a partner destination.
+examples:
+  - name: Activate a partner destination.
+    text: az eventgrid partner destination activate -g rg1 --partner-destination-name destination1
+
+"""
+
+helps['eventgrid partner destination create'] = """
+type: command
+short-summary: Create a partner destination.
+examples:
+  - name: Create a partner destination.
+    text: az eventgrid partner destination activate -g rg1 --partner-destination-name destination1
+
+"""
+
 helps['eventgrid partner configuration'] = """
 type: group
 short-summary: Manage partner configurations.
@@ -740,6 +758,40 @@ examples:
 helps['eventgrid system-topic event-subscription'] = """
 type: group
 short-summary: Manage event subscriptions of system topic.
+"""
+
+helps['eventgrid partner namespace channel create'] = """
+type: command
+short-summary: Create a new channel for a partner namespace.
+parameters:
+  - name: --inline-event-type
+    short-summary: Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
+    long-summary: |
+      Usage:                     --inline-event-type KEY [description=<description>] [documentation-url=<url>] [data-schema-url=<url>]
+      Event Type:                --inline-event-type event1 description=My inline event type.
+      Event with URL:            --inline-event-type event1 documentation-url=https://www.microsoft.com
+
+"""
+
+helps['eventgrid partner channel create'] = """
+type: command
+short-summary: Create a new channel for a partner namespace.
+parameters:
+  - name: --authorized-partner
+    short-summary: Add authorized partner information. Multiple authorized partners can be specified by using more than one `--authorized-partner` argument.
+    long-summary: |
+      Usage:                     --authorized-partner [partner-name=<name>] \\
+                                        [partner-registration-immutable-id=<id>] \\
+                                        [expiration-time=<timestamp>]
+      Partner Name:              --authorized-partner partner-name=somename \\
+                                        expiration-time=2022-06-14T05:37:51.272Z
+      Partner Registration ID:   --authorized-partner \\
+                                        partner-registration-immutable-id=795c9f2f-6d2d-42ff-a570-42fd3043192c \\
+                                        expiration-time=2022-06-14T05:37:51.272Z
+      Both Name and ID:          --authorized-partner partner-name=somename \\
+                                        partner-registration-immutable-id=795c9f2f-6d2d-42ff-a570-42fd3043192c \\
+                                        expiration-time=2022-06-14T05:37:51.272Z
+
 """
 
 helps['eventgrid system-topic event-subscription create'] = """

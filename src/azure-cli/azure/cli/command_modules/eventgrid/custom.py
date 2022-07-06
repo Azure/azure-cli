@@ -41,6 +41,7 @@ from azure.mgmt.eventgrid.models import (
     PartnerNamespaceRegenerateKeyRequest,
     EventChannel,
     PartnerTopic,
+    PartnerTopicInfo,
     EventChannelSource,
     EventChannelDestination,
     SystemTopic,
@@ -53,7 +54,18 @@ from azure.mgmt.eventgrid.models import (
     Partner,
     PartnerAuthorization,
     PartnerConfiguration,
-    PartnerConfigurationUpdateParameters)
+    PartnerConfigurationUpdateParameters,
+    PartnerDestinationUpdateParameters,
+    PartnerDestinationInfo,
+    PartnerDestination,
+    Channel,
+    ChannelType,
+    ChannelUpdateParameters,
+    PartnerDestinationUpdateParameters,
+    PartnerUpdateTopicInfo,
+    PartnerUpdateDestinationInfo,
+    EventTypeInfo,
+    InlineEventProperties)
 
 logger = get_logger(__name__)
 
@@ -971,6 +983,158 @@ def cli_event_channel_create_or_update(
         event_channel_info)
 
 
+def cli_channel_list(
+        client,
+        resource_group_name,
+        partner_namespace_name,
+        odata_query=None):
+
+    return client.list_by_partner_namespace(resource_group_name, partner_namespace_name, odata_query, DEFAULT_TOP)
+
+
+def cli_channel_create_or_update(
+        cmd,
+        client,
+        resource_group_name,
+        partner_namespace_name,
+        channel_name,
+        channel_type,
+        partner_topic_source,
+        message_for_activation=None,
+        partner_topic_name=None,
+        partner_destination_name=None,
+        endpoint_service_context=None,
+        inline_event_type=None,
+        event_type_kind=None,
+        activation_expiration_date=None):
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    partner_topic_info = None
+    partner_destination_info = None
+    if channel_type == ChannelType.PARTNER_TOPIC:
+        # Create event type info
+        event_type_info = EventTypeInfo(
+            kind=event_type_kind,
+            inline_event_types=inline_event_type)
+
+        partner_topic_info = PartnerTopicInfo(
+            azure_subscription_id=subscription_id,
+            resource_group_name=resource_group_name,
+            name=partner_topic_name,
+            event_type_info=event_type_info,
+            source=partner_topic_source)
+    elif channel_type == ChannelType.PARTNER_DESTINATION:
+        partner_destination_info = PartnerDestinationInfo(
+            azure_subscription_id=subscription_id,
+            resource_group_name=resource_group_name,
+            name=partner_destination_name,
+            endpoint_service_context=endpoint_service_context,
+            # resource_move_change_history=None
+        )
+
+    channel_info = Channel(
+        channel_type=channel_type,
+        partner_topic_info=partner_topic_info,
+        partner_destination_info=partner_destination_info,
+        message_for_activation=message_for_activation,
+        # provisioning_state=None,
+        # readiness_state=None,
+        expiration_time_if_not_activated_utc=activation_expiration_date
+    )
+
+    return client.create_or_update(
+        resource_group_name,
+        partner_namespace_name,
+        channel_name,
+        channel_info)
+
+
+def cli_channel_update(
+        client,
+        resource_group_name,
+        partner_namespace_name,
+        channel_name,
+        channel_type,
+        partner_destination_endpoint_type=None,
+        activation_expiration_date=None,
+        event_type_info=None):
+        # inline event info for PartnerTopicInfo
+        # endpoint type for PartnerDestinationInfo
+
+    partner_update_topic_info = None
+    partner_update_destination_info = None
+    if channel_type == ChannelType.PARTNER_TOPIC:
+        partner_update_topic_info = PartnerUpdateTopicInfo(
+            event_type_info=event_type_info)
+    elif channel_type == ChannelType.PARTNER_DESTINATION:
+        partner_update_destination_info = PartnerUpdateDestinationInfo(
+            endpoint_type=partner_destination_endpoint_type)
+
+    channel_update_parameters = ChannelUpdateParameters(
+        expiration_time_if_not_activated_utc=activation_expiration_date,
+        partner_destination_info=partner_update_destination_info,
+        partner_topic_info=partner_update_topic_info)
+
+    return client.update(
+        resource_group_name,
+        partner_namespace_name,
+        channel_name,
+        channel_update_parameters)
+
+
+def cli_partner_destination_list(
+        client,
+        resource_group_name=None,
+        odata_query=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+
+    return client.list_by_subscription(odata_query, DEFAULT_TOP)
+
+
+def cli_partner_destination_create_or_update(
+        client,
+        resource_group_name,
+        partner_destination_name,
+        partner_registration_immutable_id=None,
+        endpoint_service_context=None,
+        expiration_time_if_not_activated_utc=None,
+        endpoint_base_url=None,
+        message_for_activation=None,
+        tags=None):
+
+    partner_destination = PartnerDestination(
+        tags=tags,
+        partner_registration_immutable_id=partner_registration_immutable_id,
+        endpoint_service_context=endpoint_service_context,
+        expiration_time_if_not_activated_utc=expiration_time_if_not_activated_utc,
+        endpoint_base_url=endpoint_base_url,
+        message_for_activation=message_for_activation)
+
+    return client.create_or_update(
+        resource_group_name,
+        partner_destination_name,
+        partner_destination)
+
+
+def cli_partner_destination_update(
+        client,
+        resource_group_name,
+        partner_destination_name,
+        tags=None):
+
+    partner_destination_update_params = PartnerDestinationUpdateParameters(
+        tags=tags)
+
+    return client.update(
+        resource_group_name,
+        partner_destination_name,
+        partner_destination_update_params)
+
+
 def cli_partner_configuration_authorize(
         client,
         resource_group_name,
@@ -1019,22 +1183,15 @@ def cli_partner_configuration_list(
 def cli_partner_configuration_create_or_update(
         client,
         resource_group_name,
-        partner_registration_immutable_id=None,
-        partner_name=None,
-        authorization_expiration_time_in_utc=None,
+        authorized_partner=None,
         default_maximum_expiration_time_in_days=None,
         location=None,
         tags=None):
 
-    partner_info = _get_partner_info(
-        partner_registration_immutable_id=partner_registration_immutable_id,
-        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc,
-        partner_name=partner_name)
-
-    # authorized_partners_list is a list of Partners, from _get_partner_info()
+    # authorized_partner is a list of Partners, from _get_partner_info()
     partner_authorization = PartnerAuthorization(
         default_maximum_expiration_time_in_days=default_maximum_expiration_time_in_days,
-        authorized_partners_list=list(partner_info))
+        authorized_partners_list=authorized_partner)
 
     # PartnerConfiguration contains PartnerAuthorization
     partner_configuration_info = PartnerConfiguration(

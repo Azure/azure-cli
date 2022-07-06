@@ -266,7 +266,7 @@ def load_command_table(self, _):
     with self.command_group('eventgrid partner destination', partner_destinations_mgmt_util, client_factory=partner_destinations_factory, is_preview=True) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('activate', 'activate')
+        g.command('activate', 'activate')
         g.custom_command('list', 'cli_partner_destination_list')
         g.custom_command('create', 'cli_partner_destination_create_or_update')
         g.custom_command('update', 'cli_partner_destination_update')
