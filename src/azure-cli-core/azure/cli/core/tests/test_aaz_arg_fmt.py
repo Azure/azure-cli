@@ -10,6 +10,7 @@ from azure.cli.core import azclierror
 from azure.cli.core.aaz import exceptions as aazerror
 from azure.cli.core.aaz._command_ctx import AAZCommandCtx
 from azure.cli.core.aaz import AAZArgumentsSchema
+
 from azure.cli.core.mock import DummyCli
 
 
@@ -32,7 +33,8 @@ class TestAAZArgFmt(unittest.TestCase):
                 pattern="[a-z]+",
                 max_length=8,
                 min_length=2,
-            )
+            ),
+            nullable=True
         )
 
         with self.assertRaises(aazerror.AAZInvalidArgValueError):
@@ -53,6 +55,9 @@ class TestAAZArgFmt(unittest.TestCase):
         args = self.format_arg(schema, {"str1": "abcd"})
         self.assertEqual(args.str1, "abcd")
 
+        args = self.format_arg(schema, {"str1": None})
+        self.assertEqual(args.str1, None)
+
     def test_int_fmt(self):
         from azure.cli.core.aaz import AAZIntArg, AAZIntArgFormat
 
@@ -62,7 +67,8 @@ class TestAAZArgFmt(unittest.TestCase):
                 multiple_of=10,
                 maximum=30,
                 minimum=20,
-            )
+            ),
+            nullable=True
         )
 
         with self.assertRaises(aazerror.AAZInvalidArgValueError):
@@ -79,6 +85,9 @@ class TestAAZArgFmt(unittest.TestCase):
 
         args = self.format_arg(schema, {"int1": 30})
         self.assertEqual(args.int1, 30)
+
+        args = self.format_arg(schema, {"int1": None})
+        self.assertEqual(args.int1, None)
 
     def test_float_fmt(self):
         from azure.cli.core.aaz import AAZFloatArg, AAZFloatArgFormat
@@ -132,7 +141,8 @@ class TestAAZArgFmt(unittest.TestCase):
                 minimum=22,
                 exclusive_maximum=False,
                 exclusive_minimum=False,
-            )
+            ),
+            nullable=True
         )
         args = self.format_arg(schema, {"flt1": 22.0000000001})
         self.assertEqual(args.flt1, 22)
@@ -140,11 +150,17 @@ class TestAAZArgFmt(unittest.TestCase):
         args = self.format_arg(schema, {"flt1": 32.9999999999})
         self.assertEqual(args.flt1, 33)
 
+        args = self.format_arg(schema, {"flt1": None})
+        self.assertEqual(args.flt1, None)
+
     def test_bool_fmt(self):
         from azure.cli.core.aaz import AAZBoolArg, AAZBoolArgFormat
 
         schema = AAZArgumentsSchema()
-        schema.bool = AAZBoolArg(fmt=AAZBoolArgFormat(reverse=True))
+        schema.bool = AAZBoolArg(
+            fmt=AAZBoolArgFormat(reverse=True),
+            nullable=True,
+        )
 
         args = self.format_arg(schema, {"bool": True})
         self.assertEqual(args.bool, False)
@@ -152,9 +168,14 @@ class TestAAZArgFmt(unittest.TestCase):
         args = self.format_arg(schema, {"bool": False})
         self.assertEqual(args.bool, True)
 
+        args = self.format_arg(schema, {"bool": None})
+        self.assertEqual(args.bool, None)
+
     def test_object_fmt(self):
-        from azure.cli.core.aaz import AAZObjectArgFormat, AAZStrArgFormat, AAZBoolArgFormat, AAZIntArgFormat
-        from azure.cli.core.aaz import AAZObjectArg, AAZStrArg, AAZBoolArg, AAZIntArg
+        from azure.cli.core.aaz import AAZObjectArgFormat, AAZStrArgFormat, AAZBoolArgFormat, AAZIntArgFormat, \
+            AAZDictArgFormat, AAZListArgFormat, AAZFloatArgFormat
+        from azure.cli.core.aaz import AAZObjectArg, AAZStrArg, AAZBoolArg, AAZIntArg, AAZDictArg, AAZListArg, \
+            AAZFloatArg
 
         schema = AAZArgumentsSchema()
         schema.properties = AAZObjectArg(fmt=AAZObjectArgFormat(
@@ -201,12 +222,22 @@ class TestAAZArgFmt(unittest.TestCase):
             })
 
         schema = AAZArgumentsSchema()
-        schema.properties = AAZObjectArg()
+        schema.properties = AAZObjectArg(nullable=True)
         schema.properties.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
         schema.properties.enabled = AAZBoolArg(fmt=AAZBoolArgFormat(reverse=True))
         schema.properties.count = AAZIntArg(fmt=AAZIntArgFormat(minimum=0))
-        schema.properties.vnet = AAZObjectArg()
+        schema.properties.vnet = AAZObjectArg(nullable=True)
         schema.properties.vnet.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+
+        schema.properties.tags = AAZDictArg(fmt=AAZDictArgFormat())
+        schema.properties.tags.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+        schema.properties.actions = AAZListArg(fmt=AAZListArgFormat())
+        schema.properties.actions.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
+        schema.properties.sub = AAZObjectArg(fmt=AAZObjectArgFormat())
+        schema.properties.name2 = AAZStrArg(fmt=AAZStrArgFormat())
+        schema.properties.int2 = AAZIntArg(fmt=AAZIntArgFormat())
+        schema.properties.bool2 = AAZBoolArg(fmt=AAZBoolArgFormat())
+        schema.properties.float2 = AAZFloatArg(fmt=AAZFloatArgFormat())
 
         args = self.format_arg(schema, {
             "properties": {}
@@ -236,17 +267,31 @@ class TestAAZArgFmt(unittest.TestCase):
                 }
             })
 
+        args = self.format_arg(schema, {"properties": None})
+        self.assertEqual(args.properties, None)
+
+        args = self.format_arg(schema, {
+            "properties": {
+                "vnet": None
+            }
+        })
+        self.assertEqual(args, {
+            "properties": {
+                "vnet": None
+            }
+        })
+
     def test_dict_fmt(self):
         from azure.cli.core.aaz import AAZObjectArgFormat, AAZDictArgFormat, AAZStrArgFormat, AAZIntArgFormat
         from azure.cli.core.aaz import AAZObjectArg, AAZDictArg, AAZStrArg, AAZIntArg
 
         schema = AAZArgumentsSchema()
-        schema.tags = AAZDictArg(fmt=AAZDictArgFormat(max_properties=3, min_properties=2))
+        schema.tags = AAZDictArg(fmt=AAZDictArgFormat(max_properties=3, min_properties=2), nullable=True)
         schema.tags.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z0-9]+'))
         schema.actions = AAZDictArg()
-        schema.actions.Element = AAZObjectArg()
+        schema.actions.Element = AAZObjectArg(nullable=True)
         schema.actions.Element.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
-        schema.actions.Element.name2 = AAZStrArg()
+        schema.actions.Element.name2 = AAZStrArg(nullable=True)
 
         args = self.format_arg(schema, {
             "tags": {
@@ -303,14 +348,41 @@ class TestAAZArgFmt(unittest.TestCase):
                 },
             })
 
+        args = self.format_arg(schema, {
+            "tags": None,
+            "actions": {
+                "a": {
+                    "name": "abc"
+                },
+                "b": {
+                    "name": "c",
+                    "name2": None,
+                },
+                "c": None
+            }
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": None,
+            "actions": {
+                "a": {
+                    "name": "abc"
+                },
+                "b": {
+                    "name": "c",
+                    "name2": None,
+                },
+                "c": None
+            }
+        })
+
     def test_list_fmt(self):
         from azure.cli.core.aaz import AAZObjectArgFormat, AAZListArgFormat, AAZStrArgFormat, AAZIntArgFormat
         from azure.cli.core.aaz import AAZObjectArg, AAZListArg, AAZStrArg, AAZIntArg
 
         schema = AAZArgumentsSchema()
         schema.tags = AAZListArg(fmt=AAZListArgFormat(unique=True, max_length=3, min_length=2))
-        schema.tags.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z0-9]+'))
-        schema.actions = AAZListArg()
+        schema.tags.Element = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z0-9]+'), nullable=True)
+        schema.actions = AAZListArg(nullable=True)
         schema.actions.Element = AAZObjectArg()
         schema.actions.Element.name = AAZStrArg(fmt=AAZStrArgFormat(pattern='[a-z]+'))
 
@@ -358,3 +430,13 @@ class TestAAZArgFmt(unittest.TestCase):
         self.assertEqual(args.to_serialized_data(), {
             "tags": ['v1', 'v2'],
         })
+
+        args = self.format_arg(schema, {
+            "tags": ['v1', 'v2', None],
+            "actions": None,
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": ['v1', 'v2', None],
+            "actions": None,
+        })
+

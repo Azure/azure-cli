@@ -24,7 +24,7 @@ class AAZSimpleType(AAZBaseType):
         super().__init__(*args, **kwargs)
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -57,7 +57,7 @@ class AAZFloatType(AAZSimpleType):
     DataType = float
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -163,7 +163,7 @@ class AAZObjectType(AAZBaseType):
         return None
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -274,7 +274,7 @@ class AAZDictType(AAZBaseType):
         return self.Element
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -327,7 +327,7 @@ class AAZListType(AAZBaseType):
         return self.Element
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)

@@ -35,9 +35,6 @@ class AAZStrArgFormat(AAZBaseArgFormat):
             self._compiled_pattern = None
 
     def __call__(self, ctx, value):
-        if value == AAZUndefined:
-            return value
-
         assert isinstance(value, AAZSimpleValue)
         data = value._data
         if data == AAZUndefined or data is None or value._is_patch:
@@ -65,9 +62,6 @@ class AAZIntArgFormat(AAZBaseArgFormat):
         self._minimum = minimum
 
     def __call__(self, ctx, value):
-        if value == AAZUndefined:
-            return value
-
         assert isinstance(value, AAZSimpleValue)
         data = value._data
         if data == AAZUndefined or data is None or value._is_patch:
