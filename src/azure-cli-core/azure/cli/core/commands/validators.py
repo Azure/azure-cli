@@ -115,8 +115,6 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
     included_forbidden = [x for x in forbidden if getattr(namespace, x) and
                           not hasattr(getattr(namespace, x), 'is_default')]
     if missing_required or included_forbidden:
-        from knack.util import CLIError
-
         def _dest_to_option(dest):
             try:
                 return dest_to_options[dest]
