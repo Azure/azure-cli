@@ -797,9 +797,9 @@ type: command
 short-summary: Authorize a partner configuration.
 examples:
   - name: Authorize a partner based on partner registration immutable ID.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-time 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-date 2022-06-14T05:37:51.272Z
   - name: Authorize a partner based on partner name.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-time 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-date 2022-06-14T05:37:51.272Z
 """
 
 helps['eventgrid partner configuration unauthorize'] = """
@@ -807,9 +807,9 @@ type: command
 short-summary: Unauthorize a partner configuration.
 examples:
   - name: Unauthorize a partner based on partner registration immutable ID.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-time 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-date 2022-06-14T05:37:51.272Z
   - name: Unauthorize a partner based on partner name.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-time 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-date 2022-06-14T05:37:51.272Z
 """
 
 helps['eventgrid partner configuration update'] = """

@@ -1098,7 +1098,7 @@ def cli_partner_destination_create_or_update(
         location,
         partner_registration_immutable_id=None,
         endpoint_service_context=None,
-        expiration_time_if_not_activated_utc=None,
+        activation_expiration_date=None,
         endpoint_base_url=None,
         message_for_activation=None,
         tags=None):
@@ -1108,7 +1108,7 @@ def cli_partner_destination_create_or_update(
         tags=tags,
         partner_registration_immutable_id=partner_registration_immutable_id,
         endpoint_service_context=endpoint_service_context,
-        expiration_time_if_not_activated_utc=expiration_time_if_not_activated_utc,
+        expiration_time_if_not_activated_utc=activation_expiration_date,
         endpoint_base_url=endpoint_base_url,
         message_for_activation=message_for_activation)
 
@@ -1138,11 +1138,11 @@ def cli_partner_configuration_authorize(
         resource_group_name,
         partner_registration_immutable_id=None,
         partner_name=None,
-        authorization_expiration_time_in_utc=None):
+        authorization_expiration_date=None):
 
     partner_info = _get_partner_info(
         partner_registration_immutable_id=partner_registration_immutable_id,
-        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc,
+        authorization_expiration_date=authorization_expiration_date,
         partner_name=partner_name)
 
     return client.authorize_partner(
@@ -1155,11 +1155,11 @@ def cli_partner_configuration_unauthorize(
         resource_group_name,
         partner_registration_immutable_id=None,
         partner_name=None,
-        authorization_expiration_time_in_utc=None):
+        authorization_expiration_date=None):
 
     partner_info = _get_partner_info(
         partner_registration_immutable_id=partner_registration_immutable_id,
-        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc,
+        authorization_expiration_date=authorization_expiration_date,
         partner_name=partner_name)
 
     return client.unauthorize_partner(
@@ -2673,15 +2673,15 @@ def _validate_and_update_destination(endpoint_type, destination, storage_queue_m
 
 def _get_partner_info(
         partner_registration_immutable_id=None,
-        authorization_expiration_time_in_utc=None,
+        authorization_expiration_date=None,
         partner_name=None):
 
-    if authorization_expiration_time_in_utc is not None:
-        authorization_expiration_time_in_utc = parse(authorization_expiration_time_in_utc)
+    if authorization_expiration_date is not None:
+        authorization_expiration_date = parse(authorization_expiration_date)
 
     partner_info = Partner(
         partner_registration_immutable_id=partner_registration_immutable_id,
         partner_name=partner_name,
-        authorization_expiration_time_in_utc=authorization_expiration_time_in_utc)
+        authorization_expiration_time_in_utc=authorization_expiration_date)
 
     return partner_info

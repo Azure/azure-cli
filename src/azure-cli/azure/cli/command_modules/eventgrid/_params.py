@@ -237,7 +237,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('authorized_subscription_ids', arg_type=authorized_subscription_ids_type)
         c.argument('partner_name', help="Official name of the partner.")
         c.argument('partner_registration_immutable_id', help="The immutable ID of the corresponding partner registration.")
-        c.argument('authorization_expiration_time_in_utc', help="Expiration time of the partner authorization. If this timer expires, any request from this partner to create, update or delete resources in subscriber's context will fail. If specified, the allowed values are between 1 to the value of defaultMaximumExpirationTimeInDays specified in PartnerConfiguration. If not specified, the default value will be the value of defaultMaximumExpirationTimeInDays specified in PartnerConfiguration or 7 if this value is not specified.")
+        c.argument('authorization_expiration_date', help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') which is the expiration time of the partner authorization. If this timer expires, any request from this partner to create, update or delete resources in subscriber's context will fail. If specified, the allowed values are between 1 to the value of defaultMaximumExpirationTimeInDays specified in PartnerConfiguration. If not specified, the default value will be the value of defaultMaximumExpirationTimeInDays specified in PartnerConfiguration or 7 if this value is not specified.")
         c.argument('default_maximum_expiration_time_in_days', help="Time used to validate the authorization expiration time for each authorized partner. If DefaultMaximumExpirationTimeInDays is not specified, the default is 7 days. Otherwise, allowed values are between 1 and 365 days.")
         c.argument('display_name', help="Display name for the partner topic type.")
         c.argument('resource_type_name', help="Name of the partner topic resource type. This name should be unique among all partner topic types names.")
@@ -350,6 +350,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid partner registration list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
+
+    with self.argument_context('eventgrid partner destination') as c:
+        c.argument('activation_expiration_date', help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') which is the expiration time of the partner destination. If this timer expires and the partner destination was never activated, the partner destination and corresponding channel are deleted.")
 
     with self.argument_context('eventgrid partner namespace') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, options_list=['--name', '-n'], id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
