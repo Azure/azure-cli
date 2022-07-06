@@ -10,11 +10,11 @@ from azure.cli.core import azclierror
 from azure.cli.core.aaz import exceptions as aazerror
 from azure.cli.core.aaz._command_ctx import AAZCommandCtx
 from azure.cli.core.aaz import AAZArgumentsSchema
-
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.core.mock import DummyCli
 
 
-class TestAAZArgFmt(unittest.TestCase):
+class TestAAZArgBaseFmt(unittest.TestCase):
 
     @staticmethod
     def format_arg(schema, data):
@@ -439,4 +439,106 @@ class TestAAZArgFmt(unittest.TestCase):
             "tags": ['v1', 'v2', None],
             "actions": None,
         })
+
+class TestAAZArgResourceFmt(ScenarioTest):
+
+    def format_arg(self, schema, data):
+        ctx = AAZCommandCtx(
+            cli_ctx=self.cli_ctx, schema=schema,
+            command_args=data
+        )
+        ctx.format_args()
+        return ctx.args
+
+    @ResourceGroupPreparer(name_prefix='test_resource_location_arg_fmt', location="eastus2")
+    def test_resource_location_arg_fmt(self, resource_group):
+        from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZStrArg
+
+        schema = AAZArgumentsSchema()
+        schema.rg_name = AAZResourceGroupNameArg()
+        schema.location = AAZResourceLocationArg(
+            fmt=AAZResourceLocationArgFormat(resource_group_arg='rg_name'),
+            nullable=True
+        )
+        schema.name = AAZStrArg()
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": "eastus2"
+        })
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "location": "westus"
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": "westus"
+        })
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "location": "North Central US"
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": "northcentralus"
+        })
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "location": None
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": None
+        })
+
+        args = self.format_arg(schema, {
+            "name": "test"
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "name": "test"
+        })
+
+        schema = AAZArgumentsSchema()
+        schema.rg_name = AAZResourceGroupNameArg()
+        schema.location = AAZResourceLocationArg()
+        schema.name = AAZStrArg()
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "name": "test"
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "name": "test"
+        })
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "location": "eastus",
+            "name": "test"
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": "eastus",
+            "name": "test"
+        })
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "location": "South Africa North",
+            "name": "test"
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": "southafricanorth",
+            "name": "test"
+        })
+
+
 
