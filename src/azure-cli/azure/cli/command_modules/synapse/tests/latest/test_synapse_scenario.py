@@ -2229,7 +2229,7 @@ class SynapseScenarioTests(ScenarioTest):
         # create role assignment
         role_assignment_create = self.cmd(
             'az synapse role assignment create --workspace-name {workspace} --role "{role}" '
-            '--assignee  {servicePrincipal}',
+            '--assignee  {servicePrincipal} --assignment-id 0550e787-7841-4669-9ac8-a8176e900002',
             checks=[
                 self.check('roleDefinitionId', self.kwargs['roleId'])
             ]).get_output_in_json()
@@ -2240,7 +2240,8 @@ class SynapseScenarioTests(ScenarioTest):
         # create role assignment at scope
         self.cmd(
             'az synapse role assignment create --workspace-name {workspace} --role "{role}" '
-            '--assignee  {servicePrincipal} --item-type {itemType} --item {item}',
+            '--assignee  {servicePrincipal} --item-type {itemType} --item {item} '
+            '--assignment-id 0333e787-7841-4669-9ac8-a8176e900002',
             checks=[
                 self.check('roleDefinitionId', self.kwargs['roleId']),
                 self.check('scope', 'workspaces/{workspace}/{itemType}/{item}')
