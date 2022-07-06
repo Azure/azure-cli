@@ -399,7 +399,7 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
                     f"FormatError: resource id should be in '{self._template}' format."
                 )
             for data_segment, segment in zip(data_segments, self._segments):
-                if not segment.startswith('{') and data_segment.lower() == segment.lower():
+                if not segment.startswith('{') and data_segment.lower() != segment.lower():
                     raise AAZInvalidArgValueError(
                         f"FormatError: resource id should be in '{self._template}' format."
                     )

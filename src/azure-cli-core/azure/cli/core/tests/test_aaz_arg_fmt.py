@@ -540,5 +540,86 @@ class TestAAZArgResourceFmt(ScenarioTest):
             "name": "test"
         })
 
+    @ResourceGroupPreparer(name_prefix='test_resource_id_arg_fmt', location="eastus2")
+    def test_resource_id_arg_fmt(self, resource_group):
+        from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZResourceIdArg, AAZStrArg, \
+            AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZObjectArg, AAZListArg
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        sub_id = get_subscription_id(cli_ctx=self.cli_ctx)
+
+        schema = AAZArgumentsSchema()
+        schema.rg_name = AAZResourceGroupNameArg()
+        schema.location = AAZResourceLocationArg(
+            fmt=AAZResourceLocationArgFormat(resource_group_arg='rg_name'),
+        )
+        schema.vnet_name = AAZStrArg()
+        schema.subnet = AAZObjectArg()
+        schema.subnet.id = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{rg_name}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/locations/{location}/subnets/{}"
+        ))
+
+        schema.vnets = AAZListArg()
+        schema.vnets.Element = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{rg_name}/providers/Microsoft.Network/virtualNetworks/{}"
+        ))
+
+        schema.vm = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(
+            template="/subscriptions/{}/resourceGroups/{rg_name}/providers/Microsoft.Compute/virtualMachines/{}"
+        ))
+
+        args = self.format_arg(schema, {
+            "rg_name": resource_group,
+            "name": "test",
+            "vnet_name": "test-vnet",
+            "subnet": {
+                "id": "test-subnet"
+            },
+            "vnets": [
+                "vnet1",
+                f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/vnet2",
+                f"/subscRiptions/{sub_id}/reSourcegroupS/{resource_group}/providers/microsoFT.network/Virtualnetworks/vnet3",
+            ],
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "rg_name": resource_group,
+            "location": "eastus2",
+            "vnet_name": "test-vnet",
+            "subnet": {
+                "id": f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/test-vnet/locations/eastus2/subnets/test-subnet"
+            },
+            "vnets": [
+                f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/vnet1",
+                f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/vnet2",
+                f"/subscRiptions/{sub_id}/reSourcegroupS/{resource_group}/providers/microsoFT.network/Virtualnetworks/vnet3",
+            ]
+        })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "rg_name": resource_group,
+                "name": "test",
+                "vnet_name": "test-vnet",
+                "subnet": {
+                    "id": f"/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/test-vnet/subnets/test-subnet"
+                }
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "rg_name": resource_group,
+                "name": "test",
+                "subnet": {
+                    "id": "test-subnet"
+                }
+            })
+
+        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+            self.format_arg(schema, {
+                "rg_name": resource_group,
+                "name": "test",
+                "vm": "test-vm"
+            })
+
+
 
 
