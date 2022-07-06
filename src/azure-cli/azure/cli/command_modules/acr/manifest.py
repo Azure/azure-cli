@@ -32,6 +32,9 @@ from ._validators import (
     BAD_REPO_FQDN
 )
 
+from ._constants import (
+    REF_KEY
+)
 logger = get_logger(__name__)
 
 ORDERBY_PARAMS = {
@@ -39,7 +42,6 @@ ORDERBY_PARAMS = {
     'time_desc': 'timedesc'
 }
 DEFAULT_PAGINATION = 100
-REF_KEY = "referrers"
 BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as"\
                       " 'MyRegistry.azurecr.io/hello-world' as a positional parameter or"\
                       " provide '-r MyRegistry -n hello-world' argument values."
@@ -51,8 +53,10 @@ BAD_ARGS_ERROR_MANIFEST = "You must provide either a fully qualified manifest sp
 def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
+
 def _get_referrers_path(repository):
     return '/v2/{}/_oras/artifacts/referrers'.format(repository)
+
 
 def _obtain_manifest_from_registry(login_server,
                                    path,

@@ -551,9 +551,13 @@ class AcrMockCommandsTests(unittest.TestCase):
                                     manifest_spec='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/oras/artifacts/v1/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7/referrers',
+            url='https://testregistry.azurecr.io/v2/testrepository/_oras/artifacts/referrers',
             headers=get_authorization_header('username', 'password'),
-            params={'artifactType': None},
+            params=
+            {
+                'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                'artifactType': None
+            },
             json=None,
             timeout=300,
             verify=mock.ANY)
@@ -564,9 +568,13 @@ class AcrMockCommandsTests(unittest.TestCase):
                                     manifest_spec='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/oras/artifacts/v1/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7/referrers',
+            url='https://testregistry.azurecr.io/v2/testrepository/_oras/artifacts/referrers',
             headers=get_authorization_header('username', 'password'),
-            params={'artifactType': None},
+            params=
+            {
+                'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                'artifactType': None
+            },
             json=None,
             timeout=300,
             verify=mock.ANY)
@@ -577,9 +585,11 @@ class AcrMockCommandsTests(unittest.TestCase):
                                     artifact_type='sbom/example')
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/oras/artifacts/v1/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7/referrers',
+            url='https://testregistry.azurecr.io/v2/testrepository/_oras/artifacts/referrers',
             headers=get_authorization_header('username', 'password'),
-            params={'artifactType': 'sbom/example'},
+            params={
+                'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                'artifactType': 'sbom/example'},
             json=None,
             timeout=300,
             verify=mock.ANY)
