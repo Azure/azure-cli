@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias update",
 )
 class Update(AAZCommand):
-    """Creates a managed server DNS alias.
+    """Creates a managed instance DNS alias.
     """
 
     _aaz_info = {

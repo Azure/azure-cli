@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias acquire",
 )
 class Acquire(AAZCommand):
-    """Acquires managed server DNS alias from another managed server.
+    """Acquires a managed instance DNS alias from another managed instance.
     """
 
     _aaz_info = {

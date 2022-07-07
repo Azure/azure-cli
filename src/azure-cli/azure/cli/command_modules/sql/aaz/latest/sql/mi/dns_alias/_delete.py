@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Deletes the managed server DNS alias with the given name.
+    """Deletes a managed instance DNS alias with the given name.
     """
 
     _aaz_info = {

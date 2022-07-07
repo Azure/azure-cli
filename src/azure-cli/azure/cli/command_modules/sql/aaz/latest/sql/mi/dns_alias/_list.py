@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias list",
 )
 class List(AAZCommand):
-    """Gets a list of managed server DNS aliases for a managed server.
+    """Gets a list of managed instance DNS aliases for a managed instance.
     """
 
     _aaz_info = {

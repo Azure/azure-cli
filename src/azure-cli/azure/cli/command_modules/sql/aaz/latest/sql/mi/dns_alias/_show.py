@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias show",
 )
 class Show(AAZCommand):
-    """Gets a server DNS alias.
+    """Gets a managed instance DNS alias.
     """
 
     _aaz_info = {
