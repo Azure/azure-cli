@@ -61,7 +61,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.core.exceptions import AzureError, ServiceRequestError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
-    from msal_extensions.persistence import PersistenceError
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -140,19 +139,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     elif isinstance(ex, KeyboardInterrupt):
         error_msg = 'Keyboard interrupt is captured.'
         az_error = azclierror.ManualInterrupt(error_msg)
-
-    elif isinstance(ex, PersistenceError):
-        # errno is already in strerror. str(ex) gives duplicated errno.
-        az_error = azclierror.CLIInternalError(ex.strerror)
-        if ex.errno == 0:
-            az_error.set_recommendation(
-                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20278")
-        elif ex.errno == -2146893813:
-            az_error.set_recommendation(
-                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20231")
-        elif ex.errno == -2146892987:
-            az_error.set_recommendation(
-                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/21010")
 
     else:
         error_msg = "The command failed with an unexpected error. Here is the traceback:"

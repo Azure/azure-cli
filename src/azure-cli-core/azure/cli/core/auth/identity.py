@@ -17,7 +17,7 @@ from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICA
     _USE_CERT_SN_ISSUER
 from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
-from .util import check_result
+from .util import check_result, msal_exceptions_handler
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -103,7 +103,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         The instance is lazily created.
         """
         if not self._msal_app_instance:
-            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
+            try:
+                self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
+            except Exception as ex:
+                msal_exceptions_handler(ex)
         return self._msal_app_instance
 
     def _load_msal_token_cache(self):
@@ -138,10 +141,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
-        result = self._msal_app.acquire_token_interactive(
-            scopes, prompt='select_account', port=8400 if self._is_adfs else None,
-            success_template=success_template, error_template=error_template, **kwargs)
-        return check_result(result)
+        try:
+            result = self._msal_app.acquire_token_interactive(
+                scopes, prompt='select_account', port=8400 if self._is_adfs else None,
+                success_template=success_template, error_template=error_template, **kwargs)
+        except Exception as ex:
+            msal_exceptions_handler(ex)
+        else:
+            return check_result(result)
 
     def login_with_device_code(self, scopes, **kwargs):
         flow = self._msal_app.initiate_device_flow(scopes, **kwargs)
@@ -153,8 +160,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return check_result(result)
 
     def login_with_username_password(self, username, password, scopes, **kwargs):
-        result = self._msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
-        return check_result(result)
+        try:
+            result = self._msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
+        except Exception as ex:
+            msal_exceptions_handler(ex)
+        else:
+            return check_result(result)
 
     def login_with_service_principal(self, client_id, credential, scopes):
         """
@@ -200,7 +211,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        return UserCredential(self.client_id, username, **self._msal_app_kwargs)
+        try:
+            return UserCredential(self.client_id, username, **self._msal_app_kwargs)
+        except Exception as ex:
+            msal_exceptions_handler(ex)
 
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)

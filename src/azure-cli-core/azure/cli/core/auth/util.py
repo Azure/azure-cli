@@ -177,3 +177,36 @@ def read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def msal_exceptions_handler(ex):
+    # This exception handler is implemented according to the discussion at
+    # https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/482
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    import traceback
+    logger.debug(traceback.format_exc())
+
+    from azure.cli.core.azclierror import AuthenticationError
+    from msal_extensions.persistence import PersistenceError
+    msg = str(ex)
+    if 'Unable to find wstrust endpoint from MEX.' in msg:
+        # To tigger this error, run: az login --username testuser@outlook.com --password testpass
+        raise AuthenticationError(msg, recommendation='Please run `az login` launch auth code flow.') from ex
+    elif 'Unable to get authority configuration' in msg:
+        # To tigger this error, run: az login --tenant 54826b22-38d6-4fb2-bad9-b7b93a3e0000
+        raise AuthenticationError(msg) from ex
+    elif isinstance(ex, PersistenceError):
+        # errno is already in strerror. str(ex) gives duplicated errno.
+        az_error = AuthenticationError(ex.strerror)
+        if ex.errno == 0:
+            az_error.set_recommendation(
+                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20278")
+        elif ex.errno == -2146893813:
+            az_error.set_recommendation(
+                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20231")
+        elif ex.errno == -2146892987:
+            az_error.set_recommendation(
+                "Please report to us via Github: https://github.com/Azure/azure-cli/issues/21010")
+        raise az_error
+    raise ex
