@@ -64,6 +64,7 @@ class AAZInvalidValueError(ValueError):
 class AAZInvalidArgValueError(ValueError):
 
     def __init__(self, msg, indexes=None):
+        super().__init__()
         self.msg = msg
         self.indexes = indexes or []
 
@@ -75,5 +76,4 @@ class AAZInvalidArgValueError(ValueError):
                     idx += '.'
                 idx += i
             return f"Argument Value Error: {idx}: {self.msg}"
-        else:
-            return f"Argument Value Error: {self.msg}"
+        return f"Argument Value Error: {self.msg}"

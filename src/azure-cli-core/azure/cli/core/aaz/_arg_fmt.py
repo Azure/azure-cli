@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long, too-few-public-methods
+
 import abc
 import re
 import math
@@ -334,7 +336,7 @@ class AAZResourceLocationArgFormat(AAZBaseArgFormat):
 
         location = get_resource_group_location(ctx, rg_name)
         if location != AAZUndefined:
-            logger.debug(f"using location '{location}' from resource group '{rg_name}'")
+            logger.debug("using location '%s' from resource group '%s'",location, rg_name)
 
         return location
 
@@ -383,7 +385,7 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
                         if arg_data == AAZUndefined or arg_data is None:
                             raise AAZInvalidArgValueError(
                                 f"FormatError: Failed to construct resource id: argument '{arg_name}' is not defined")
-                        elif not isinstance(arg_data, str):
+                        if not isinstance(arg_data, str):
                             raise AAZInvalidArgValueError(
                                 f"FormatError: Failed to construct resource id: argument '{arg_name}' is not string")
 
@@ -466,5 +468,5 @@ class AAZSubscriptionIdArgFormat(AAZBaseArgFormat):
             ctx.update_aux_subscriptions(sub_id)
             value._data = sub_id
         else:
-            logger.warning(f"Subscription '{value._data}' not recognized.")
+            logger.warning("Subscription '%s' not recognized.", value._data)
         return value

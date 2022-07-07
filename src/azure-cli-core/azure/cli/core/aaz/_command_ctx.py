@@ -107,8 +107,8 @@ class AAZCommandCtx:
 
 
 def get_subscription_locations(ctx: AAZCommandCtx):
-    from azure.cli.core.commands.parameters import get_subscription_locations
-    return get_subscription_locations(ctx._cli_ctx)
+    from azure.cli.core.commands.parameters import get_subscription_locations as _get_subscription_locations
+    return _get_subscription_locations(ctx._cli_ctx)
 
 
 def get_resource_group_location(ctx: AAZCommandCtx, rg_name: str):
@@ -122,4 +122,3 @@ def get_resource_group_location(ctx: AAZCommandCtx, rg_name: str):
     except ResourceNotFoundError:
         return AAZUndefined
     return rg.location
-
