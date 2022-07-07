@@ -11,7 +11,7 @@ python_version = os.listdir('/usr/lib64/az/lib/')[0]
 root_dir = f'/usr/lib64/az/lib/{python_version}/site-packages/azure/cli/command_modules'
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
-pytest_base_cmd = f'PYTHONPATH=/usr/lib64/az/lib/{python_version}/site-packages python3 -m pytest -x -v --boxed -p no:warnings --log-level=WARN'
+pytest_base_cmd = f'PYTHONPATH=/usr/lib64/az/lib/{python_version}/site-packages python -m pytest -x -v --boxed -p no:warnings --log-level=WARN'
 pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
 serial_test_modules = ['botservice', 'network', 'cloud', 'appservice']
 
