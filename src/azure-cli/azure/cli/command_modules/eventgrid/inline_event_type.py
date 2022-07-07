@@ -13,12 +13,14 @@ DESCRIPTION = "description"
 DOCUMENTATION_URL = "documentation-url"
 DATA_SCHEMA_URL = "data-schema-url"
 
+
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
 class AddInlineEventType(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         valuesLen = len(values)
-        usage_error_msg = "usage error: --inline-event-type KEY [description=<description>] [documentation-url=<url>] [data-schema-url=<url>]"
+        usage_error_msg = ("usage error: --inline-event-type KEY [description=<description>] "
+                           "[documentation-url=<url>] [data-schema-url=<url>]")
         if valuesLen < 1 or valuesLen > 4:
             raise CLIError(usage_error_msg)
 

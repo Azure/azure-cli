@@ -6,7 +6,6 @@
 # pylint: disable=too-many-lines
 
 import re
-from tkinter import EventType
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
@@ -62,11 +61,9 @@ from azure.mgmt.eventgrid.models import (
     Channel,
     ChannelType,
     ChannelUpdateParameters,
-    PartnerDestinationUpdateParameters,
     PartnerUpdateTopicInfo,
     PartnerUpdateDestinationInfo,
-    EventTypeInfo,
-    InlineEventProperties)
+    EventTypeInfo)
 
 logger = get_logger(__name__)
 
@@ -228,6 +225,7 @@ def cli_topic_regenerate_key(
         topic_name=topic_name,
         regenerate_key_request=regenerate_key_request
     )
+
 
 def cli_topic_event_subscription_create_or_update(    # pylint: disable=too-many-locals
         client,

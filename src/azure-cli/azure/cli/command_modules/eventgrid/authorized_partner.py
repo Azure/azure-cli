@@ -14,12 +14,14 @@ PARTNER_NAME = "partner-name"
 PARTNER_ID = "partner-registration-immutable-id"
 EXPIRATION_TIME = "expiration-time"
 
+
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
 class AddAuthorizedPartner(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         valuesLen = len(values)
-        usage_error_msg = "usage error: --authorized-partner [partner-name=<name>] [partner-registration-immutable-id=<id>] [expiration-time=<timestamp>]"
+        usage_error_msg = ("usage error: --authorized-partner [partner-name=<name>] "
+                           "[partner-registration-immutable-id=<id>] [expiration-time=<timestamp>]")
         if valuesLen < 1 or valuesLen > 3:
             raise CLIError(usage_error_msg)
 
