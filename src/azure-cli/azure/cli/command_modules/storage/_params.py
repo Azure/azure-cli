@@ -2286,6 +2286,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help="File system name.", required=True)
             c.extra('timeout', timeout_type)
 
+    with self.argument_context('storage fs undelete-path') as c:
+        from ._validators import encode_deleted_path
+        c.argument('deleted_path_name', validator=encode_deleted_path)
+
     with self.argument_context('storage fs list-deleted-path') as c:
         c.argument('path_prefix', help='Filter the results to return only paths under the specified path.')
         c.argument('num_results', type=int, help='Specify the maximum number to return.')
