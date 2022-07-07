@@ -1932,7 +1932,12 @@ def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_n
 
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
 def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name,
-                                   match_variables, operator, match_values, negation_condition=None, transforms=None):
+                                   match_variables, operator, match_values=None, negation_condition=None, transforms=None):
+    if operator.lower() == "any" and match_values is not None:
+        raise ArgumentUsageError("Any operator does not require --match-values.")
+    if operator.lower() != "any" and match_values is None:
+        raise ArgumentUsageError("Non-any operator requires --match-values.")
+
     MatchCondition = cmd.get_models('MatchCondition')
     waf_policy = client.get(resource_group_name, policy_name)
     custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
