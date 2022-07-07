@@ -20,7 +20,7 @@ class TestAAZResourceArgFmt(ScenarioTest):
         return ctx.args
 
     @ResourceGroupPreparer(name_prefix='test_resource_location_arg_fmt', location="eastus2")
-    def test_resource_location_arg_fmt(self, resource_group):
+    def test_aaz_resource_location_arg_fmt(self, resource_group):
         from azure.cli.core.aaz._arg import AAZArgumentsSchema
         from azure.cli.core.aaz.exceptions import AAZInvalidArgValueError
         from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZStrArg
@@ -112,12 +112,16 @@ class TestAAZResourceArgFmt(ScenarioTest):
         })
 
     @ResourceGroupPreparer(name_prefix='test_resource_id_arg_fmt', location="eastus2")
-    def test_resource_id_arg_fmt(self, resource_group):
+    def test_aaz_resource_id_arg_fmt(self, resource_group):
         from azure.cli.core.aaz._arg import AAZArgumentsSchema
         from azure.cli.core.aaz.exceptions import AAZInvalidArgValueError
         from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZResourceIdArg, AAZStrArg, \
-            AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZObjectArg, AAZListArg
+            AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZObjectArg, AAZListArg, AAZSubscriptionIdArg, \
+            AAZSubscriptionIdArgFormat
         from azure.cli.core.commands.client_factory import get_subscription_id
+        from azure.cli.core._profile import Profile
+
+        # Test AAZResourceIdArg
         sub_id = get_subscription_id(cli_ctx=self.cli_ctx)
 
         schema = AAZArgumentsSchema()
@@ -195,12 +199,15 @@ class TestAAZResourceArgFmt(ScenarioTest):
                 "vm": "test-vm"
             })
 
-    def test_subscription_id_arg_format(self, resource_group):
+    @ResourceGroupPreparer(name_prefix="test_subscription_id_arg_format")
+    def test_aaz_subscription_id_arg_format(self, resource_group):
         from azure.cli.core.aaz._arg import AAZArgumentsSchema
         from azure.cli.core.aaz import AAZSubscriptionIdArg, AAZSubscriptionIdArgFormat
         from azure.cli.core._profile import Profile
 
-        sub = Profile(cli_ctx=self.cli_ctx).load_cached_subscriptions()[0]
+        self.cmd(f"az group show -n {resource_group}")
+
+        sub = Profile(cli_ctx=self.cli_ctx).get_subscription()
 
         schema = AAZArgumentsSchema()
         schema.sub = AAZSubscriptionIdArg()
