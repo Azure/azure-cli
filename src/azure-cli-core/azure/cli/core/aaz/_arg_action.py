@@ -375,7 +375,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
 
 
-class AAZGenericUpdateAction(Action):
+class AAZGenericUpdateAction(Action):  # pylint: disable=too-few-public-methods
     DEST = '_generic_update_args'
 
     def __call__(self, parser, namespace, values, option_string=None):

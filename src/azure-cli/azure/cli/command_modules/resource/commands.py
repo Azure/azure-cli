@@ -545,6 +545,7 @@ def load_command_table(self, _):
         g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')
+        g.custom_command('generate-params', 'generate_params_file')
 
     with self.command_group('resourcemanagement private-link', resource_resourcemanagementprivatelink_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
         g.custom_command('create', 'create_resourcemanager_privatelink')

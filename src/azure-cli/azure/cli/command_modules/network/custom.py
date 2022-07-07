@@ -6998,6 +6998,7 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
             vnet.subnets = [Subnet(name=subnet_name,
                                    address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
                                    address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
+                                   private_endpoint_network_policies='Disabled',
                                    network_security_group=NetworkSecurityGroup(id=network_security_group)
                                    if network_security_group else None)]
         else:
@@ -7119,7 +7120,7 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
     if delegations:
         subnet.delegations = delegations
 
-    if disable_private_endpoint_network_policies is True:
+    if disable_private_endpoint_network_policies is None or disable_private_endpoint_network_policies is True:
         subnet.private_endpoint_network_policies = "Disabled"
     if disable_private_endpoint_network_policies is False:
         subnet.private_endpoint_network_policies = "Enabled"
@@ -7262,6 +7263,18 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
                                                          ip_address=start_ip)
     return available_ips.available_ip_addresses
 
+
+def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
+    client = network_client_factory(cmd.cli_ctx)
+    subnet = client.subnets.get(resource_group_name=resource_group_name,
+                                virtual_network_name=virtual_network_name,
+                                subnet_name=subnet_name)
+    if subnet.address_prefix is not None:
+        start_ip = subnet.address_prefix.split('/')[0]
+    available_ips = client.virtual_networks.check_ip_address_availability(resource_group_name=resource_group_name,
+                                                                          virtual_network_name=virtual_network_name,
+                                                                          ip_address=start_ip)
+    return available_ips.available_ip_addresses
 # endregion
 
 

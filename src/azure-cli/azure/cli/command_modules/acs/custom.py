@@ -37,7 +37,7 @@ import yaml
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    cf_container_registry_service,
+    get_container_registry_client,
     cf_container_services,
     get_auth_management_client,
     get_graph_rbac_management_client,
@@ -2159,7 +2159,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # in which case we ignore the KUBECONFIG variable
     # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        path = os.environ["KUBECONFIG"].split(":")[0]
+        kubeconfig_path = os.environ["KUBECONFIG"].split(":")[0]
+        if kubeconfig_path:
+            logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
+            path = kubeconfig_path
+        else:
+            logger.warning("Invalid path '%s' defined in KUBECONFIG.", kubeconfig_path)
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -3143,6 +3148,52 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
     )
 
 
+def aks_agentpool_start(cmd,   # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        cluster_name,
+                        nodepool_name,
+                        aks_custom_headers=None,
+                        no_wait=False):
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+    if not agentpool_exists:
+        raise InvalidArgumentValueError(
+            "Node pool {} doesnt exist, use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    PowerState = cmd.get_models('PowerState', operation_group='agent_pools')
+    power_state = PowerState(code="Running")
+    instance.power_state = power_state
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
+
+
+def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
+                       client,
+                       resource_group_name,
+                       cluster_name,
+                       nodepool_name,
+                       aks_custom_headers=None,
+                       no_wait=False):
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+    if not agentpool_exists:
+        raise InvalidArgumentValueError(
+            "Node pool {} doesnt exist, use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    PowerState = cmd.get_models('PowerState', operation_group='agent_pools')
+    power_state = PowerState(code="Stopped")
+    instance.power_state = power_state
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
+
+
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
                          no_wait=False):
@@ -3389,7 +3440,7 @@ def _ensure_aks_acr(cmd,
     if is_valid_resource_id(acr_name_or_id):
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
-            acr_client = cf_container_registry_service(
+            acr_client = get_container_registry_client(
                 cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
             registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])

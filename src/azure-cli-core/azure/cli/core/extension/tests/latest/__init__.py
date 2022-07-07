@@ -8,6 +8,7 @@ import unittest
 import tempfile
 import shutil
 from unittest import mock
+from azure.cli.core.extension import EXT_METADATA_MAXCLICOREVERSION, EXT_METADATA_MINCLICOREVERSION
 
 
 def get_test_data_file(filename):
@@ -35,10 +36,11 @@ class IndexPatch:
         self.patcher.stop()
 
 
-def mock_ext(filename, version=None, download_url=None, digest=None, project_url=None):
+def mock_ext(filename, version=None, download_url=None, digest=None, project_url=None, name=None, min_cli_version=None, max_cli_version=None):
     d = {
         'filename': filename,
         'metadata': {
+            'name': name,
             'version': version,
             'extensions': {
                 'python.details': {
@@ -46,7 +48,9 @@ def mock_ext(filename, version=None, download_url=None, digest=None, project_url
                         'Home': project_url or 'https://github.com/azure/some-extension'
                     }
                 }
-            }
+            },
+            EXT_METADATA_MINCLICOREVERSION: min_cli_version,
+            EXT_METADATA_MAXCLICOREVERSION: max_cli_version,
         },
         'downloadUrl': download_url or 'http://contoso.com/{}'.format(filename),
         'sha256Digest': digest

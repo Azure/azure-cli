@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.37.0"
+VERSION = "2.38.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -42,7 +42,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
@@ -71,7 +70,7 @@ DEPENDENCIES = [
     'azure-mgmt-batchai==7.0.0b1',
     'azure-mgmt-batch~=16.1.0',
     'azure-mgmt-billing==6.0.0',
-    'azure-mgmt-botservice~=0.3.0',
+    'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.2.0',
     'azure-mgmt-compute~=27.1.0',
@@ -79,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==8.2.0',
     'azure-mgmt-containerservice~=19.1.0',
-    'azure-mgmt-cosmosdb==7.0.0b2',
+    'azure-mgmt-cosmosdb==7.0.0b6',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -88,7 +87,7 @@ DEPENDENCIES = [
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==9.0.0',
-    'azure-mgmt-eventhub~=10.0.0',
+    'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
     'azure-mgmt-imagebuilder~=1.0.0',
@@ -105,7 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=3.0.0',
     'azure-mgmt-msi~=6.0.1',
-    'azure-mgmt-netapp~=7.0.0',
+    'azure-mgmt-netapp~=8.0.0',
     'azure-mgmt-network~=20.0.0',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
@@ -124,7 +123,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicelinker==1.0.0',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr==1.0.0b2',
-    'azure-mgmt-sqlvirtualmachine==1.0.0b2',
+    'azure-mgmt-sqlvirtualmachine==1.0.0b3',
     'azure-mgmt-sql==4.0.0b2',
     'azure-mgmt-storage~=20.0.0',
     'azure-mgmt-synapse==2.1.0b2',
@@ -133,7 +132,7 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.9.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.12.0',
+    'azure-synapse-artifacts~=0.13.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
