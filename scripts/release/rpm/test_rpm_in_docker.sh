@@ -18,9 +18,9 @@ cd /azure-cli/
 pip install wheel
 ./scripts/ci/build.sh
 
-# From Fedora36, when using `pip install --prefix`with root, the package is installed into `{prefix}/local/lib`.
+# From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.
 # In order to keep the original installation path, I have to set RPM_BUILD_ROOT
-# Ref https://docs.fedoraproject.org/en-US/fedora/latest/release-notes/developers/Development_Python/
+# Ref https://docs.fedoraproject.org/en-US/fedora/latest/release-notes/developers/Development_Python/#_pipsetup_py_installation_with_prefix
 export RPM_BUILD_ROOT=/
 
 pip install pytest --prefix /usr/lib64/az
