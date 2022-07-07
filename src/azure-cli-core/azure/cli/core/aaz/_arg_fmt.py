@@ -336,7 +336,7 @@ class AAZResourceLocationArgFormat(AAZBaseArgFormat):
 
         location = get_resource_group_location(ctx, rg_name)
         if location != AAZUndefined:
-            logger.debug("using location '%s' from resource group '%s'",location, rg_name)
+            logger.debug("using location '%s' from resource group '%s'", location, rg_name)
 
         return location
 
