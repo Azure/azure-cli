@@ -15,7 +15,13 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias list",
 )
 class List(AAZCommand):
-    """Gets a list of managed instance DNS aliases for a managed instance.
+    """Gets a list of Azure SQL Managed Instance DNS Alias for a managed instance.
+
+    :example: List all DNS aliases for the given managed instance
+        az sql mi dns-alias list -g <resourceGroupName> --mi <managedInstanceName>
+
+    :example: List all DNS aliases for the given managed instance with the given resource ID
+        az sql mi dns-alias list --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/managedInstances/<managedInstanceName>
     """
 
     _aaz_info = {
@@ -44,6 +50,7 @@ class List(AAZCommand):
             options=["--mi", "--mi-name", "--managed-instance-name"],
             help="The name of the managed instance.",
             required=True,
+            id_part="name"
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,

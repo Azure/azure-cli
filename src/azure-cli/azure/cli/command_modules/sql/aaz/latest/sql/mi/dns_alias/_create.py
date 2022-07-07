@@ -15,7 +15,12 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias create",
 )
 class Create(AAZCommand):
-    """Creates a managed instance DNS alias.
+    """Creates an Azure SQL Managed Instance DNS Alias.
+
+    Creates new Azure SQL Managed Instance DNS Alias that is pointing to specified managed instance.
+
+    :example: Create managed instance DNS alias
+        az sql mi dns-alias create -g <resourceGroupName> --mi <managedInstanceName> --name <dnsAliasName>
     """
 
     _aaz_info = {
@@ -167,6 +172,7 @@ class Create(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
+                typ_kwargs={"flags": {"client_flatten": True}}
             )
             _builder.set_prop("createDnsRecord", AAZBoolType, ".create_dns_record")
 

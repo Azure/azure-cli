@@ -15,7 +15,15 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias acquire",
 )
 class Acquire(AAZCommand):
-    """Acquires a managed instance DNS alias from another managed instance.
+    """Acquires an Azure SQL Managed Instance DNS Alias from another managed instance.
+
+    Moves an Azure SQL Managed Instance DNS Alias from a source managed instance to the target managed instance. After the operation is complete, the DNS alias will point to the target instance.
+
+    :example: Acquire a managed instance DNS alias with <sourceResourceId> to point to the specified managed instance
+        az sql mi dns-alias acquire -g <targetResourceGroupName> --mi <targetManagedInstanceName> --source-id /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/managedInstances/<managedInstanceName>/dnsAliases/<dnsAliasName>
+
+    :example: Acquire a managed instance DNS alias with <sourceResourceId> to point to the specified managed instance with the given resource ID
+        az sql mi dns-alias acquire --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<targetResourceGroupName>/providers/Microsoft.Sql/managedInstances/<targetManagedInstanceName> --source-id /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/managedInstances/<managedInstanceName>/dnsAliases/<dnsAliasName>
     """
 
     _aaz_info = {
@@ -45,8 +53,9 @@ class Acquire(AAZCommand):
 
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--mi-name", "--managed-instance-name"],
-            help="The name of the managed instance.",
+            help="The name of the managed instance",
             required=True,
+            id_part="name"
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -55,10 +64,10 @@ class Acquire(AAZCommand):
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
-        _args_schema.old_managed_server_dns_alias_resource_id = AAZStrArg(
-            options=["--source-id", "--source-alias-id", "--old-managed-server-dns-alias-resource-id"],
+        _args_schema.source_managed_instance_dns_alias_resource_id = AAZStrArg(
+            options=["--source-id", "--source-dns-alias", "--source-managed-instance-dns-alias-resource-id"],
             arg_group="Parameters",
-            help="The resource ID of the managed server DNS alias that will be acquired to point to this managed server instead.",
+            help="The resource ID of the managed instance DNS alias that will be acquired to point to target managed instance instead.",
         )
         return cls._args_schema
 
@@ -113,7 +122,7 @@ class Acquire(AAZCommand):
 
         @property
         def url_parameters(self):
-            dnsAliasName = str(self.ctx.args.old_managed_server_dns_alias_resource_id).split('/')[-1]
+            dnsAliasName = str(self.ctx.args.source_managed_instance_dns_alias_resource_id).split('/')[-1]
             parameters = {
                 **self.serialize_url_param(
                     "dnsAliasName", dnsAliasName,
@@ -161,8 +170,9 @@ class Acquire(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
+                typ_kwargs={"flags": {"client_flatten": True}}
             )
-            _builder.set_prop("oldManagedServerDnsAliasResourceId", AAZStrType, ".old_managed_server_dns_alias_resource_id", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("oldManagedServerDnsAliasResourceId", AAZStrType, ".source_managed_instance_dns_alias_resource_id", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 

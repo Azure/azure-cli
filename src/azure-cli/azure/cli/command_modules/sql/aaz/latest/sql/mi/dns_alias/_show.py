@@ -15,7 +15,13 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias show",
 )
 class Show(AAZCommand):
-    """Gets a managed instance DNS alias.
+    """Gets an Azure SQL Managed Instance DNS Alias.
+
+    :example: Gets a managed instance DNS alias
+        az sql mi dns-alias show -g <resourceGroupName> --mi <managedInstanceName> --name <dnsAliasName>
+
+    :example: Gets a managed instance DNS alias with the given resource ID
+        az sql mi dns-alias show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/managedInstances/<managedInstanceName>/dnsAliases/<dnsAliasName>
     """
 
     _aaz_info = {

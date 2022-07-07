@@ -15,7 +15,15 @@ from azure.cli.core.aaz import *
     "sql mi dns-alias update",
 )
 class Update(AAZCommand):
-    """Creates a managed instance DNS alias.
+    """Updates an Azure SQL Managed Instance DNS alias.
+
+    Updates the managed instance DNS alias by creating or removing the DNS record. If the --has-dns-record parameter is passed, the DNS record will be created, otherwise it will be removed (if it exists).
+
+    :example: Updates a managed instance DNS alias by creating the DNS record
+        az sql mi dns-alias update -g <resourceGroupName> --mi <managedInstanceName> --name <dnsAliasName> --dns-record
+
+    :example: Updates a managed instance DNS alias, with the given resource id, by removing the DNS record (not specifying the --dns-record parameter)
+        az sql mi dns-alias update --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/managedInstances/<managedInstanceName>/dnsAliases/<dnsAliasName>
     """
 
     _aaz_info = {

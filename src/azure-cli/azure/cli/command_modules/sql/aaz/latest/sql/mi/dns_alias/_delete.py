@@ -16,7 +16,13 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Deletes a managed instance DNS alias with the given name.
+    """Deletes an Azure SQL Managed Instance DNS Alias.
+
+    :example: Delets a managed instance DNS alias
+        az sql mi dns-alias delete -g <resourceGroupName> --mi <managedInstanceName> --name <dnsAliasName>
+
+    :example: Deletes a managed instance DNS alias with the given resource ID
+        az sql mi dns-alias delete --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/managedInstances/<managedInstanceName>/dnsAliases/<dnsAliasName>
     """
 
     _aaz_info = {
