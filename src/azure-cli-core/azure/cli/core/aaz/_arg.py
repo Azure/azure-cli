@@ -13,12 +13,18 @@ from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType
 from ._field_value import AAZObject
+from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZSubscriptionIdArgFormat, \
+    AAZResourceLocationArgFormat, AAZResourceIdArgFormat
 
 # pylint: disable=redefined-builtin, protected-access
 
 
 class AAZArgumentsSchema(AAZObjectType):
     """ Arguments' schema should be defined as fields of it """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._fmt = AAZObjectArgFormat()
 
     def __call__(self, data=None):
         return AAZObject(
@@ -64,7 +70,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
     """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
-                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False):
+                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None):
         """
 
         :param options: argument optional names.
@@ -78,6 +84,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         :param default: when the argument flag is not appeared, the default value will be used.
         :param blank: when the argument flag is used without value data, the blank value will be used.
         :param nullable: argument can accept `None` as value
+        :param fmt: argument format
         """
         super().__init__(options=options, nullable=nullable)
         self._help = {}  # the key in self._help can be 'name', 'short-summary', 'long-summary', 'populator-commands'
@@ -96,6 +103,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         self._id_part = id_part
         self._default = default
         self._blank = blank
+        self._fmt = fmt
 
     def to_cmd_arg(self, name):
         """ convert AAZArg to CLICommandArgument """
@@ -133,10 +141,9 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     """Argument accept simple value"""
 
-    def __init__(self, enum=None, enum_case_sensitive=False, fmt=None, **kwargs):
+    def __init__(self, enum=None, enum_case_sensitive=False, **kwargs):
         super().__init__(**kwargs)
         self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive) if enum else None
-        self._fmt = fmt
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
@@ -213,8 +220,8 @@ class AAZCompoundTypeArg(AAZBaseArg):
 class AAZObjectArg(AAZCompoundTypeArg, AAZObjectType):
 
     def __init__(self, fmt=None, **kwargs):
-        super().__init__(**kwargs)
-        self._fmt = fmt
+        fmt = fmt or AAZObjectArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
@@ -238,8 +245,8 @@ class AAZObjectArg(AAZCompoundTypeArg, AAZObjectType):
 class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
 
     def __init__(self, fmt=None, **kwargs):
-        super().__init__(**kwargs)
-        self._fmt = fmt
+        fmt = fmt or AAZDictArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
@@ -263,8 +270,8 @@ class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
 class AAZListArg(AAZCompoundTypeArg, AAZListType):
 
     def __init__(self, fmt=None, singular_options=None, **kwargs):
-        super().__init__(**kwargs)
-        self._fmt = fmt
+        fmt = fmt or AAZListArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
         self.singular_options = singular_options
 
     def to_cmd_arg(self, name):
@@ -324,11 +331,13 @@ class AAZResourceLocationArg(AAZStrArg):
             self, options=('--location', '-l'),
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location using `az configure --defaults location=<location>`.",
+            fmt=None,
             **kwargs):
-        super(AAZResourceLocationArg, self).__init__(
+        fmt = fmt or AAZResourceLocationArgFormat()
+        super().__init__(
             options=options,
             help=help,
-            fmt=None,   # TODO: add ResourceLocation Format, which can transform value with space
+            fmt=fmt,
             **kwargs
         )
 
@@ -348,17 +357,23 @@ class AAZResourceLocationArg(AAZStrArg):
 
 class AAZResourceIdArg(AAZStrArg):
     """ResourceId Argument"""
-    # TODO: Resource Id arg can support both name and id. And can construct id from name by ResourceId Format
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZResourceIdArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
 
 
 class AAZSubscriptionIdArg(AAZStrArg):
 
     def __init__(
-            self, help="Name or ID of subscription.",
+            self, help="Name or ID of subscription. You can configure the default subscription "
+                       "using `az account set -s NAME_OR_ID`",
+            fmt=None,
             **kwargs):
+        fmt = fmt or AAZSubscriptionIdArgFormat()
         super().__init__(
             help=help,
-            fmt=None,  # TODO: add format, which can transform name to subscription id
+            fmt=fmt,
             **kwargs
         )
 
@@ -366,7 +381,6 @@ class AAZSubscriptionIdArg(AAZStrArg):
         from azure.cli.core._completers import get_subscription_id_list
         arg = super().to_cmd_arg(name)
         arg.completer = get_subscription_id_list
-
         return arg
 
 
