@@ -3379,10 +3379,8 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     client = web_client_factory(cmd.cli_ctx)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-        
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
-        
     sku_def = SkuDescription(tier=tier, name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
