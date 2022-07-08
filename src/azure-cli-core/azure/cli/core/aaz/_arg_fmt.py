@@ -48,7 +48,7 @@ class AAZStrArgFormat(AAZBaseArgFormat):
                 f"FormatError: '{data}' length is less than {self._min_length} ")
         if self._max_length is not None and len(data) > self._max_length:
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' length is greater than {self._min_length}")
+                f"FormatError: '{data}' length is greater than {self._max_length}")
         if self._pattern is not None and not self._compiled_pattern.fullmatch(data):
             raise AAZInvalidArgValueError(
                 f"FormatError: '{data}' does not fully match regular expression pattern '{self._pattern}'")

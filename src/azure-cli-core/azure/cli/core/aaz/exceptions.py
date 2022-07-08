@@ -75,5 +75,5 @@ class AAZInvalidArgValueError(ValueError):
                 if not i.startswith('['):
                     idx += '.'
                 idx += i
-            return f"Argument Value Error: {idx}: {self.msg}"
-        return f"Argument Value Error: {self.msg}"
+            return f"InvalidArgumentValue: {idx}: {self.msg}"
+        return f"InvalidArgumentValue: {self.msg}"
