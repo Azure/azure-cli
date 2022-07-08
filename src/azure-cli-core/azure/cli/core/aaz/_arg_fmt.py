@@ -45,13 +45,13 @@ class AAZStrArgFormat(AAZBaseArgFormat):
         assert isinstance(data, str)
         if self._min_length is not None and len(data) < self._min_length:
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' length is less than {self._min_length} ")
+                f"Invalid format: '{data}' length is less than {self._min_length} ")
         if self._max_length is not None and len(data) > self._max_length:
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' length is greater than {self._max_length}")
+                f"Invalid format: '{data}' length is greater than {self._max_length}")
         if self._pattern is not None and not self._compiled_pattern.fullmatch(data):
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' does not fully match regular expression pattern '{self._pattern}'")
+                f"Invalid format: '{data}' does not fully match regular expression pattern '{self._pattern}'")
 
         return value
 
@@ -72,13 +72,13 @@ class AAZIntArgFormat(AAZBaseArgFormat):
         assert isinstance(data, int)
         if self._multiple_of is not None and data % self._multiple_of != 0:
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' is not multiple of {self._multiple_of}")
+                f"Invalid format: '{data}' is not multiple of {self._multiple_of}")
         if self._minimum is not None and data < self._minimum:
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' is less than {self._minimum}")
+                f"Invalid format: '{data}' is less than {self._minimum}")
         if self._maximum is not None and data > self._maximum:
             raise AAZInvalidArgValueError(
-                f"FormatError: '{data}' is greater than {self._maximum}")
+                f"Invalid format: '{data}' is greater than {self._maximum}")
         return value
 
 
@@ -106,7 +106,7 @@ class AAZFloatArgFormat(AAZBaseArgFormat):
             if not math.isclose(data, q * self._multiple_of, rel_tol=self._rel_tol) and \
                     not math.isclose(data, (q + 1) * self._multiple_of, rel_tol=self._rel_tol):
                 raise AAZInvalidArgValueError(
-                    f"FormatError: '{data}' is not multiple of {self._multiple_of}")
+                    f"Invalid format: '{data}' is not multiple of {self._multiple_of}")
 
         if self._minimum is not None:
             if math.isclose(data, self._minimum, rel_tol=self._rel_tol):
@@ -115,10 +115,10 @@ class AAZFloatArgFormat(AAZBaseArgFormat):
             if self._exclusive_minimum:
                 if data <= self._minimum:
                     raise AAZInvalidArgValueError(
-                        f"FormatError: '{data}' is not greater than {self._minimum}")
+                        f"Invalid format: '{data}' is not greater than {self._minimum}")
             elif data < self._minimum:
                 raise AAZInvalidArgValueError(
-                    f"FormatError: '{data}' is less than {self._minimum}")
+                    f"Invalid format: '{data}' is less than {self._minimum}")
 
         if self._maximum is not None:
             if math.isclose(data, self._maximum, rel_tol=self._rel_tol):
@@ -127,10 +127,10 @@ class AAZFloatArgFormat(AAZBaseArgFormat):
             if self._exclusive_maximum:
                 if data >= self._maximum:
                     raise AAZInvalidArgValueError(
-                        f"FormatError: '{data}' is not less than {self._maximum}")
+                        f"Invalid format: '{data}' is not less than {self._maximum}")
             elif data > self._maximum:
                 raise AAZInvalidArgValueError(
-                    f"FormatError: '{data}' is greater than {self._maximum}")
+                    f"Invalid format: '{data}' is greater than {self._maximum}")
 
         value._data = data
         return value
@@ -172,36 +172,42 @@ class AAZObjectArgFormat(AAZBaseArgFormat):
         # Because _fields of object schema is OrderedDict
         # aaz-dev should register arguments in order of their interdependence.
         for field_name, field_schema in value._schema._fields.items():
-            if not field_schema._fmt:
-                continue
-            if field_name in data:
-                try:
-                    value[field_name] = field_schema._fmt(ctx, value[field_name])
-                except AAZInvalidArgValueError as err:
-                    err.indexes = [f'{field_name}', *err.indexes]
-                    raise err from err
+            if field_schema._options:
+                option_name = field_schema._options[0]
             else:
-                # build AAZUndefined value and fmt it.
-                v = field_schema._ValueCls(field_schema, AAZUndefined)
-                try:
-                    v = field_schema._fmt(ctx, v)
-                except AAZInvalidArgValueError as err:
-                    err.indexes = [f'{field_name}', *err.indexes]
-                    raise err from err
-                if v._data != AAZUndefined:
-                    # when result has real data, assign it
-                    value[field_name] = v
+                option_name = field_name
+            if field_schema._fmt:
+                if field_name in data:
+                    try:
+                        value[field_name] = field_schema._fmt(ctx, value[field_name])
+                    except AAZInvalidArgValueError as err:
+                        err.indexes = [option_name, *err.indexes]
+                        raise err from err
+                else:
+                    # build AAZUndefined value and fmt it.
+                    v = field_schema._ValueCls(field_schema, AAZUndefined)
+                    try:
+                        v = field_schema._fmt(ctx, v)
+                    except AAZInvalidArgValueError as err:
+                        err.indexes = [option_name, *err.indexes]
+                        raise err from err
+                    if v._data != AAZUndefined:
+                        # when result has real data, assign it
+                        value[field_name] = v
+            if field_schema._required and field_name not in data:
+                raise AAZInvalidArgValueError(
+                    f"Missing required field: {option_name}")
 
         if value._is_patch:
             return value
 
         if self._min_properties and len(data) < self._min_properties:
             raise AAZInvalidArgValueError(
-                f"FormatError: object length is less than {self._min_properties}")
+                f"Invalid format: object length is less than {self._min_properties}")
 
         if self._max_properties and len(data) > self._max_properties:
             raise AAZInvalidArgValueError(
-                f"FormatError: object length is greater than {self._max_properties}")
+                f"Invalid format: object length is greater than {self._max_properties}")
 
         return value
 
@@ -234,11 +240,11 @@ class AAZDictArgFormat(AAZBaseArgFormat):
 
         if self._min_properties and len(value) < self._min_properties:
             raise AAZInvalidArgValueError(
-                f"FormatError: dict length is less than {self._min_properties}")
+                f"Invalid format: dict length is less than {self._min_properties}")
 
         if self._max_properties and len(value) > self._max_properties:
             raise AAZInvalidArgValueError(
-                f"FormatError: dict length is greater than {self._max_properties}")
+                f"Invalid format: dict length is greater than {self._max_properties}")
 
         return value
 
@@ -278,18 +284,18 @@ class AAZListArgFormat(AAZBaseArgFormat):
                     continue
                 if e._data in unique_elements:
                     raise AAZInvalidArgValueError(
-                        f"FormatError: '{e._data}' duplicate in list.",
+                        f"Invalid format: '{e._data}' duplicate in list.",
                         indexes=[f'[{idx}]']
                     )
                 unique_elements.add(e._data)
 
         if self._min_length is not None and len(value) < self._min_length:
             raise AAZInvalidArgValueError(
-                f"FormatError: list length is less than {self._min_length} ")
+                f"Invalid format: list length is less than {self._min_length} ")
 
         if self._max_length is not None and len(value) > self._max_length:
             raise AAZInvalidArgValueError(
-                f"FormatError: list length is greater than {self._max_length}")
+                f"Invalid format: list length is greater than {self._max_length}")
 
         return value
 
@@ -384,10 +390,10 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
 
                         if arg_data == AAZUndefined or arg_data is None:
                             raise AAZInvalidArgValueError(
-                                f"FormatError: Failed to construct resource id: argument '{arg_name}' is not defined")
+                                f"Invalid format: Failed to construct resource id: argument '{arg_name}' is not defined")
                         if not isinstance(arg_data, str):
                             raise AAZInvalidArgValueError(
-                                f"FormatError: Failed to construct resource id: argument '{arg_name}' is not string")
+                                f"Invalid format: Failed to construct resource id: argument '{arg_name}' is not string")
 
                         data_segments.append(arg_data)
                     else:
@@ -398,12 +404,12 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
             # verify resource id
             if len(data_segments) != len(self._segments):
                 raise AAZInvalidArgValueError(
-                    f"FormatError: resource id should be in '{self._template}' format."
+                    f"Invalid format: resource id should be in '{self._template}' format."
                 )
             for data_segment, segment in zip(data_segments, self._segments):
                 if not segment.startswith('{') and data_segment.lower() != segment.lower():
                     raise AAZInvalidArgValueError(
-                        f"FormatError: resource id should be in '{self._template}' format."
+                        f"Invalid format: resource id should be in '{self._template}' format."
                     )
 
             return data
