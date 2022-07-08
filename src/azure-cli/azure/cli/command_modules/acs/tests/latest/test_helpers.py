@@ -7,9 +7,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 from azure.cli.command_modules.acs._helpers import (
+    check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_private_cluster,
     format_parameter_name_to_option_name,
+    get_property_from_dict_or_object,
     get_snapshot,
     get_snapshot_by_snapshot_id,
     get_user_assigned_identity,
@@ -57,6 +59,14 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
     def test_safe_lower(self):
         self.assertEqual(safe_lower(None), None)
         self.assertEqual(safe_lower("ABC"), "abc")
+
+    def test_get_property_from_dict_or_object(self):
+        self.assertEqual(get_property_from_dict_or_object({"abc": "xyz"}, "abc"), "xyz")
+        self.assertEqual(get_property_from_dict_or_object(Mock(abc="xyz"), "abc"), "xyz")
+        with self.assertRaises(KeyError):
+            self.assertEqual(get_property_from_dict_or_object({}, "abc"), "xyz")
+        with self.assertRaises(AttributeError):
+            self.assertEqual(get_property_from_dict_or_object(object(), "abc"), "xyz")
 
     def test_check_is_msi_cluster(self):
         self.assertEqual(check_is_msi_cluster(None), False)
@@ -108,6 +118,22 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             location="test_location",
         )
         self.assertEqual(check_is_private_cluster(mc_4), False)
+
+    def test_check_is_managed_aad_cluster(self):
+        self.assertEqual(check_is_managed_aad_cluster(None), False)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(check_is_managed_aad_cluster(mc_1), False)
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            aad_profile=self.models.ManagedClusterAADProfile(
+                managed=True,
+            ),
+        )
+        self.assertEqual(check_is_managed_aad_cluster(mc_2), True)
 
 
 class ErrorMappingTestCase(unittest.TestCase):
@@ -173,29 +199,29 @@ class GetSnapShotTestCase(unittest.TestCase):
                 "/subscriptions/test_sub/resourcegroups/test_rg/providers/microsoft.containerservice/snapshots/test_snapshot",
             )
             self.assertEqual(snapshot, mock_snapshot)
-            mock_get_snapshot.assert_called_once_with("mock_cli_ctx", "test_rg", "test_snapshot")
+            mock_get_snapshot.assert_called_once_with("mock_cli_ctx", "test_sub", "test_rg", "test_snapshot")
 
     def test_get_snapshot(self):
         mock_snapshot = Mock()
         mock_snapshot_operations = Mock(get=Mock(return_value=mock_snapshot))
-        with patch("azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations):
-            snapshot = get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+        with patch("azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations):
+            snapshot = get_snapshot("mock_cli_ctx", "test_sub", "mock_rg", "mock_snapshot_name")
             self.assertEqual(snapshot, mock_snapshot)
 
         mock_snapshot_operations_2 = Mock(get=Mock(side_effect=AzureError("mock snapshot was not found")))
         with patch(
-            "azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations_2
+            "azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations_2
         ), self.assertRaises(ResourceNotFoundError):
-            get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+            get_snapshot("mock_cli_ctx", "test_sub", "mock_rg", "mock_snapshot_name")
 
         http_response_error = HttpResponseError()
         http_response_error.status_code = 400
         http_response_error.message = "test_error_msg"
         mock_snapshot_operations_3 = Mock(get=Mock(side_effect=http_response_error))
         with patch(
-            "azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations_3
+            "azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations_3
         ), self.assertRaises(BadRequestError):
-            get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+            get_snapshot("mock_cli_ctx", "test_sub", "mock_rg", "mock_snapshot_name")
 
 
 class GetUserAssignedIdentityTestCase(unittest.TestCase):

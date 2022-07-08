@@ -170,16 +170,16 @@ def get_postgres_tiers(sku_info):
 def get_postgres_list_skus_info(cmd, location):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.execute(location)
-    return _postgres_parse_list_skus(list_skus_result, 'postgres')
+    return _postgres_parse_list_skus(list_skus_result)
 
 
 def get_mysql_list_skus_info(cmd, location):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.list(location)
-    return _mysql_parse_list_skus(list_skus_result, 'mysql')
+    return _mysql_parse_list_skus(list_skus_result)
 
 
-def _postgres_parse_list_skus(result, database_engine):
+def _postgres_parse_list_skus(result):
     result = _get_list_from_paged_response(result)
 
     if not result:
@@ -213,7 +213,7 @@ def _postgres_parse_list_skus(result, database_engine):
             'single_az': single_az}
 
 
-def _mysql_parse_list_skus(result, database_engine):
+def _mysql_parse_list_skus(result):
     result = _get_list_from_paged_response(result)
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
@@ -362,7 +362,7 @@ def register_credential_secrets(cmd, database_engine, server, repository):
         provider = "DBforPostgreSQL"
     scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
 
-    app = create_service_principal_for_rbac(cmd, name=server.name, role='contributor', scopes=[scope])
+    app = create_service_principal_for_rbac(cmd, display_name=server.name, role='contributor', scopes=[scope])
     app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
     app['subscriptionId'] = get_subscription_id(cmd.cli_ctx)
     app.pop('displayName')
@@ -453,6 +453,16 @@ def get_user_confirmation(message, yes=False):
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def replace_memory_optimized_tier(result):
+    result = _get_list_from_paged_response(result)
+    for capability_idx, capability in enumerate(result):
+        for edition_idx, edition in enumerate(capability.supported_flexible_server_editions):
+            if edition.name == 'MemoryOptimized':
+                result[capability_idx].supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
+
+    return result
 
 
 def _is_resource_name(resource):

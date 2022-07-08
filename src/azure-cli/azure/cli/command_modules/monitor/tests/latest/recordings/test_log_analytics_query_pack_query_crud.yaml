@@ -1,0 +1,971 @@
+interactions:
+- request:
+    body: '{"location": "eastus2", "properties": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"microsoft.operationalinsights/querypacks\",\r\n
+        \ \"location\": \"eastus2\",\r\n  \"tags\": {},\r\n  \"kind\": null,\r\n  \"etag\":
+        \"\\\"4d06eb4b-0000-0200-0000-62b4871c0000\\\"\",\r\n  \"properties\": {\r\n
+        \   \"queryPackId\": \"0fb557c4-d451-4d91-8c9d-410647c5478c\",\r\n    \"timeCreated\":
+        \"2022-06-23T15:30:36.1722694Z\",\r\n    \"timeModified\": \"2022-06-23T15:30:36.1722694Z\",\r\n
+        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '618'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"body": "let newExceptionsTimeRange = 1d;let timeRangeToCheckBefore
+      = 7d;exceptions | where timestamp < ago(timeRangeToCheckBefore) | summarize
+      count() by problemId | join kind= rightanti (exceptions | where timestamp >=
+      ago(newExceptionsTimeRange) | extend stack = tostring(details[0].rawStack) |
+      summarize count(), dcount(user_AuthenticatedId), min(timestamp), max(timestamp),
+      any(stack) by problemId) on problemId | order by  count_ desc", "description":
+      "this is for test", "displayName": "query-test", "related": {"categories": ["network",
+      "monitor"], "resourceTypes": ["microsoft.network/loadbalancers", "microsoft.insights/autoscalesettings"],
+      "solutions": ["networkmonitoring"]}, "tags": {"version": ["v2022-01-01", "v2021-12-01"]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '757'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --query-id -g --query-pack-name --display-name --body --description --categories
+        --resource-types --solutions --tags
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \ \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n  \"type\": \"Microsoft.OperationalInsights/querypacks/queries\",\r\n
+        \ \"etag\": \"\\\"3f1e9e2d-0000-0200-0000-62b487220000\\\"\",\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"kairu@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n    \"lastModifiedBy\":
+        \"kairu@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2022-06-23T15:30:38.9773739Z\"\r\n  },\r\n  \"properties\": {\r\n    \"id\":
+        \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n    \"displayName\": \"query-test\",\r\n
+        \   \"description\": \"this is for test\",\r\n    \"body\": \"let newExceptionsTimeRange
+        = 1d;let timeRangeToCheckBefore = 7d;exceptions | where timestamp < ago(timeRangeToCheckBefore)
+        | summarize count() by problemId | join kind= rightanti (exceptions | where
+        timestamp >= ago(newExceptionsTimeRange) | extend stack = tostring(details[0].rawStack)
+        | summarize count(), dcount(user_AuthenticatedId), min(timestamp), max(timestamp),
+        any(stack) by problemId) on problemId | order by  count_ desc\",\r\n    \"related\":
+        {\r\n      \"categories\": [\r\n        \"network\",\r\n        \"monitor\"\r\n
+        \     ],\r\n      \"resourceTypes\": [\r\n        \"microsoft.network/loadbalancers\",\r\n
+        \       \"microsoft.insights/autoscalesettings\"\r\n      ],\r\n      \"solutions\":
+        [\r\n        \"networkmonitoring\"\r\n      ]\r\n    },\r\n    \"tags\": {\r\n
+        \     \"version\": [\r\n        \"v2022-01-01\",\r\n        \"v2021-12-01\"\r\n
+        \     ]\r\n    }\r\n  }\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1671'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \ \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n  \"type\": \"Microsoft.OperationalInsights/querypacks/queries\",\r\n
+        \ \"etag\": \"\\\"3f1e9e2d-0000-0200-0000-62b487220000\\\"\",\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"kairu@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n    \"lastModifiedBy\":
+        \"kairu@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2022-06-23T15:30:38.9773739Z\"\r\n  },\r\n  \"properties\": {\r\n    \"id\":
+        \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n    \"displayName\": \"query-test\",\r\n
+        \   \"description\": \"this is for test\",\r\n    \"body\": \"let newExceptionsTimeRange
+        = 1d;let timeRangeToCheckBefore = 7d;exceptions | where timestamp < ago(timeRangeToCheckBefore)
+        | summarize count() by problemId | join kind= rightanti (exceptions | where
+        timestamp >= ago(newExceptionsTimeRange) | extend stack = tostring(details[0].rawStack)
+        | summarize count(), dcount(user_AuthenticatedId), min(timestamp), max(timestamp),
+        any(stack) by problemId) on problemId | order by  count_ desc\",\r\n    \"related\":
+        {\r\n      \"categories\": [\r\n        \"network\",\r\n        \"monitor\"\r\n
+        \     ],\r\n      \"resourceTypes\": [\r\n        \"microsoft.network/loadbalancers\",\r\n
+        \       \"microsoft.insights/autoscalesettings\"\r\n      ],\r\n      \"solutions\":
+        [\r\n        \"networkmonitoring\"\r\n      ]\r\n    },\r\n    \"tags\": {\r\n
+        \     \"version\": [\r\n        \"v2022-01-01\",\r\n        \"v2021-12-01\"\r\n
+        \     ]\r\n    }\r\n  }\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1671'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --query-id -g --query-pack-name
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \ \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n  \"type\": \"Microsoft.OperationalInsights/querypacks/queries\",\r\n
+        \ \"etag\": \"\\\"3f1e9e2d-0000-0200-0000-62b487220000\\\"\",\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"kairu@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n    \"lastModifiedBy\":
+        \"kairu@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2022-06-23T15:30:38.9773739Z\"\r\n  },\r\n  \"properties\": {\r\n    \"id\":
+        \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n    \"displayName\": \"query-test\",\r\n
+        \   \"description\": \"this is for test\",\r\n    \"body\": \"let newExceptionsTimeRange
+        = 1d;let timeRangeToCheckBefore = 7d;exceptions | where timestamp < ago(timeRangeToCheckBefore)
+        | summarize count() by problemId | join kind= rightanti (exceptions | where
+        timestamp >= ago(newExceptionsTimeRange) | extend stack = tostring(details[0].rawStack)
+        | summarize count(), dcount(user_AuthenticatedId), min(timestamp), max(timestamp),
+        any(stack) by problemId) on problemId | order by  count_ desc\",\r\n    \"related\":
+        {\r\n      \"categories\": [\r\n        \"network\",\r\n        \"monitor\"\r\n
+        \     ],\r\n      \"resourceTypes\": [\r\n        \"microsoft.network/loadbalancers\",\r\n
+        \       \"microsoft.insights/autoscalesettings\"\r\n      ],\r\n      \"solutions\":
+        [\r\n        \"networkmonitoring\"\r\n      ]\r\n    },\r\n    \"tags\": {\r\n
+        \     \"version\": [\r\n        \"v2022-01-01\",\r\n        \"v2021-12-01\"\r\n
+        \     ]\r\n    }\r\n  }\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1671'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --query-id -g --body --query-pack-name --categories --tags
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \ \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n  \"type\": \"Microsoft.OperationalInsights/querypacks/queries\",\r\n
+        \ \"etag\": \"\\\"3f1e9e2d-0000-0200-0000-62b487220000\\\"\",\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"kairu@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n    \"lastModifiedBy\":
+        \"kairu@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2022-06-23T15:30:38.9773739Z\"\r\n  },\r\n  \"properties\": {\r\n    \"id\":
+        \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n    \"displayName\": \"query-test\",\r\n
+        \   \"description\": \"this is for test\",\r\n    \"body\": \"let newExceptionsTimeRange
+        = 1d;let timeRangeToCheckBefore = 7d;exceptions | where timestamp < ago(timeRangeToCheckBefore)
+        | summarize count() by problemId | join kind= rightanti (exceptions | where
+        timestamp >= ago(newExceptionsTimeRange) | extend stack = tostring(details[0].rawStack)
+        | summarize count(), dcount(user_AuthenticatedId), min(timestamp), max(timestamp),
+        any(stack) by problemId) on problemId | order by  count_ desc\",\r\n    \"related\":
+        {\r\n      \"categories\": [\r\n        \"network\",\r\n        \"monitor\"\r\n
+        \     ],\r\n      \"resourceTypes\": [\r\n        \"microsoft.network/loadbalancers\",\r\n
+        \       \"microsoft.insights/autoscalesettings\"\r\n      ],\r\n      \"solutions\":
+        [\r\n        \"networkmonitoring\"\r\n      ]\r\n    },\r\n    \"tags\": {\r\n
+        \     \"version\": [\r\n        \"v2022-01-01\",\r\n        \"v2021-12-01\"\r\n
+        \     ]\r\n    }\r\n  }\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1671'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"body": "heartbeat | take 10", "description": "this is
+      for test", "displayName": "query-test", "related": {"categories": ["network",
+      "monitor", "databases"], "resourceTypes": ["microsoft.network/loadbalancers",
+      "microsoft.insights/autoscalesettings"], "solutions": ["networkmonitoring"]},
+      "tags": {"version": ["v2021-12-01"]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '343'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --query-id -g --body --query-pack-name --categories --tags
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \ \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n  \"type\": \"Microsoft.OperationalInsights/querypacks/queries\",\r\n
+        \ \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"kairu@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n    \"lastModifiedBy\":
+        \"kairu@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2022-06-23T15:30:47.493006Z\"\r\n  },\r\n  \"properties\": {\r\n    \"id\":
+        \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n    \"displayName\": \"query-test\",\r\n
+        \   \"description\": \"this is for test\",\r\n    \"body\": \"heartbeat |
+        take 10\",\r\n    \"related\": {\r\n      \"categories\": [\r\n        \"network\",\r\n
+        \       \"monitor\",\r\n        \"databases\"\r\n      ],\r\n      \"resourceTypes\":
+        [\r\n        \"microsoft.network/loadbalancers\",\r\n        \"microsoft.insights/autoscalesettings\"\r\n
+        \     ],\r\n      \"solutions\": [\r\n        \"networkmonitoring\"\r\n      ]\r\n
+        \   },\r\n    \"tags\": {\r\n      \"version\": [\r\n        \"v2021-12-01\"\r\n
+        \     ]\r\n    }\r\n  }\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1256'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --query-pack-name
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \     \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n      \"type\":
+        \"Microsoft.OperationalInsights/querypacks/queries\",\r\n      \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n
+        \     \"systemData\": {\r\n        \"createdBy\": \"kairu@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n
+        \       \"lastModifiedBy\": \"kairu@microsoft.com\",\r\n        \"lastModifiedByType\":
+        \"User\",\r\n        \"lastModifiedAt\": \"2022-06-23T15:30:47.493006Z\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"id\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \       \"displayName\": \"query-test\",\r\n        \"description\": \"this
+        is for test\",\r\n        \"body\": \"heartbeat | take 10\",\r\n        \"related\":
+        {\r\n          \"categories\": [\r\n            \"network\",\r\n            \"monitor\",\r\n
+        \           \"databases\"\r\n          ],\r\n          \"resourceTypes\":
+        [\r\n            \"microsoft.network/loadbalancers\",\r\n            \"microsoft.insights/autoscalesettings\"\r\n
+        \         ],\r\n          \"solutions\": [\r\n            \"networkmonitoring\"\r\n
+        \         ]\r\n        },\r\n        \"tags\": {\r\n          \"version\":
+        [\r\n            \"v2021-12-01\"\r\n          ]\r\n        }\r\n      }\r\n
+        \   }\r\n  ],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1458'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --query-pack-name --include-body
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries?includeBody=false&api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \     \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n      \"type\":
+        \"Microsoft.OperationalInsights/querypacks/queries\",\r\n      \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n
+        \     \"systemData\": {\r\n        \"createdBy\": \"kairu@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n
+        \       \"lastModifiedBy\": \"kairu@microsoft.com\",\r\n        \"lastModifiedByType\":
+        \"User\",\r\n        \"lastModifiedAt\": \"2022-06-23T15:30:47.493006Z\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"id\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \       \"displayName\": \"query-test\",\r\n        \"description\": \"this
+        is for test\",\r\n        \"body\": null,\r\n        \"related\": {\r\n          \"categories\":
+        [\r\n            \"network\",\r\n            \"monitor\",\r\n            \"databases\"\r\n
+        \         ],\r\n          \"resourceTypes\": [\r\n            \"microsoft.network/loadbalancers\",\r\n
+        \           \"microsoft.insights/autoscalesettings\"\r\n          ],\r\n          \"solutions\":
+        [\r\n            \"networkmonitoring\"\r\n          ]\r\n        },\r\n        \"tags\":
+        {\r\n          \"version\": [\r\n            \"v2021-12-01\"\r\n          ]\r\n
+        \       }\r\n      }\r\n    }\r\n  ],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1441'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"related": {"categories": ["network"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query search
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --query-pack-name --categories
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/search?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \     \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n      \"type\":
+        \"Microsoft.OperationalInsights/querypacks/queries\",\r\n      \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n
+        \     \"systemData\": {\r\n        \"createdBy\": \"kairu@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n
+        \       \"lastModifiedBy\": \"kairu@microsoft.com\",\r\n        \"lastModifiedByType\":
+        \"User\",\r\n        \"lastModifiedAt\": \"2022-06-23T15:30:47.493006Z\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"id\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \       \"displayName\": \"query-test\",\r\n        \"description\": \"this
+        is for test\",\r\n        \"body\": \"heartbeat | take 10\",\r\n        \"related\":
+        {\r\n          \"categories\": [\r\n            \"network\",\r\n            \"monitor\",\r\n
+        \           \"databases\"\r\n          ],\r\n          \"resourceTypes\":
+        [\r\n            \"microsoft.network/loadbalancers\",\r\n            \"microsoft.insights/autoscalesettings\"\r\n
+        \         ],\r\n          \"solutions\": [\r\n            \"networkmonitoring\"\r\n
+        \         ]\r\n        },\r\n        \"tags\": {\r\n          \"version\":
+        [\r\n            \"v2021-12-01\"\r\n          ]\r\n        }\r\n      }\r\n
+        \   }\r\n  ],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1458'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"related": {"resourceTypes": ["microsoft.insights/autoscalesettings",
+      "microsoft.network/loadbalancers"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query search
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '107'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --query-pack-name --resource-types
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/search?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \     \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n      \"type\":
+        \"Microsoft.OperationalInsights/querypacks/queries\",\r\n      \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n
+        \     \"systemData\": {\r\n        \"createdBy\": \"kairu@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n
+        \       \"lastModifiedBy\": \"kairu@microsoft.com\",\r\n        \"lastModifiedByType\":
+        \"User\",\r\n        \"lastModifiedAt\": \"2022-06-23T15:30:47.493006Z\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"id\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \       \"displayName\": \"query-test\",\r\n        \"description\": \"this
+        is for test\",\r\n        \"body\": \"heartbeat | take 10\",\r\n        \"related\":
+        {\r\n          \"categories\": [\r\n            \"network\",\r\n            \"monitor\",\r\n
+        \           \"databases\"\r\n          ],\r\n          \"resourceTypes\":
+        [\r\n            \"microsoft.network/loadbalancers\",\r\n            \"microsoft.insights/autoscalesettings\"\r\n
+        \         ],\r\n          \"solutions\": [\r\n            \"networkmonitoring\"\r\n
+        \         ]\r\n        },\r\n        \"tags\": {\r\n          \"version\":
+        [\r\n            \"v2021-12-01\"\r\n          ]\r\n        }\r\n      }\r\n
+        \   }\r\n  ],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1458'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"related": {"solutions": ["networkmonitoring"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query search
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --query-pack-name --solutions
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/search?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \     \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n      \"type\":
+        \"Microsoft.OperationalInsights/querypacks/queries\",\r\n      \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n
+        \     \"systemData\": {\r\n        \"createdBy\": \"kairu@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n
+        \       \"lastModifiedBy\": \"kairu@microsoft.com\",\r\n        \"lastModifiedByType\":
+        \"User\",\r\n        \"lastModifiedAt\": \"2022-06-23T15:30:47.493006Z\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"id\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \       \"displayName\": \"query-test\",\r\n        \"description\": \"this
+        is for test\",\r\n        \"body\": \"heartbeat | take 10\",\r\n        \"related\":
+        {\r\n          \"categories\": [\r\n            \"network\",\r\n            \"monitor\",\r\n
+        \           \"databases\"\r\n          ],\r\n          \"resourceTypes\":
+        [\r\n            \"microsoft.network/loadbalancers\",\r\n            \"microsoft.insights/autoscalesettings\"\r\n
+        \         ],\r\n          \"solutions\": [\r\n            \"networkmonitoring\"\r\n
+        \         ]\r\n        },\r\n        \"tags\": {\r\n          \"version\":
+        [\r\n            \"v2021-12-01\"\r\n          ]\r\n        }\r\n      }\r\n
+        \   }\r\n  ],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1458'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"version": ["v2021-12-01"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query search
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --query-pack-name --tags
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/search?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/querypacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \     \"name\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n      \"type\":
+        \"Microsoft.OperationalInsights/querypacks/queries\",\r\n      \"etag\": \"\\\"3f1eaf2d-0000-0200-0000-62b4872a0000\\\"\",\r\n
+        \     \"systemData\": {\r\n        \"createdBy\": \"kairu@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2022-06-23T15:30:38.9773739Z\",\r\n
+        \       \"lastModifiedBy\": \"kairu@microsoft.com\",\r\n        \"lastModifiedByType\":
+        \"User\",\r\n        \"lastModifiedAt\": \"2022-06-23T15:30:47.493006Z\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"id\": \"5865fd70-3d2c-4c83-9423-7d204c3b3f90\",\r\n
+        \       \"displayName\": \"query-test\",\r\n        \"description\": \"this
+        is for test\",\r\n        \"body\": \"heartbeat | take 10\",\r\n        \"related\":
+        {\r\n          \"categories\": [\r\n            \"network\",\r\n            \"monitor\",\r\n
+        \           \"databases\"\r\n          ],\r\n          \"resourceTypes\":
+        [\r\n            \"microsoft.network/loadbalancers\",\r\n            \"microsoft.insights/autoscalesettings\"\r\n
+        \         ],\r\n          \"solutions\": [\r\n            \"networkmonitoring\"\r\n
+        \         ]\r\n        },\r\n        \"tags\": {\r\n          \"version\":
+        [\r\n            \"v2021-12-01\"\r\n          ]\r\n        }\r\n      }\r\n
+        \   }\r\n  ],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1458'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:30:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --ids --yes
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries/5865fd70-3d2c-4c83-9423-7d204c3b3f90?api-version=2019-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 23 Jun 2022 15:31:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics query-pack query list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --query-pack-name
+      User-Agent:
+      - AZURECLI/2.37.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_log_analytics_query_pack_query_crud000001/providers/Microsoft.OperationalInsights/queryPacks/clitest000002/queries?api-version=2019-09-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [],\r\n  \"nextLink\": null\r\n}"
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '40'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Jun 2022 15:31:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

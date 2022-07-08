@@ -55,6 +55,7 @@ from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockClient,
     MockCmd,
 )
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import (
     AzureInternalError,
     AzCLIError,
@@ -68,7 +69,6 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
-from knack.util import CLIError
 
 
 class AKSManagedClusterModelsTestCase(unittest.TestCase):
@@ -684,6 +684,91 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_disable_ahub(), True)
 
+    def test_get_enable_windows_gmsa(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_windows_gmsa": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_windows_gmsa(), False)
+        windows_gmsa_profile_1 = self.models.WindowsGmsaProfile(enabled=True)
+        windows_profile_1 = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_admin_username",
+            gmsa_profile=windows_gmsa_profile_1,
+        )
+        mc = self.models.ManagedCluster(location="test_location", windows_profile=windows_profile_1)
+        ctx_1.attach_mc(mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            self.assertEqual(ctx_1.get_enable_windows_gmsa(), True)
+
+    def test_get_gmsa_dns_server_and_root_domain_name(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_windows_gmsa": False,
+                    "gmsa_dns_server": None,
+                    "gmsa_root_domain_name": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_gmsa_dns_server_and_root_domain_name(), (None, None))
+        windows_gmsa_profile_1 = self.models.WindowsGmsaProfile(
+            enabled=True,
+            dns_server="test_dns_server",
+            root_domain_name="test_root_domain_name",
+        )
+        windows_profile_1 = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_admin_username",
+            gmsa_profile=windows_gmsa_profile_1,
+        )
+        mc = self.models.ManagedCluster(location="test_location", windows_profile=windows_profile_1)
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_gmsa_dns_server_and_root_domain_name(),
+            ("test_dns_server", "test_root_domain_name"),
+        )
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_windows_gmsa": True,
+                    "gmsa_dns_server": "test_gmsa_dns_server",
+                    "gmsa_root_domain_name": "test_gmsa_root_domain_name",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        windows_gmsa_profile_2 = self.models.WindowsGmsaProfile(
+            enabled=True,
+            dns_server="test_dns_server",
+            root_domain_name=None,
+        )
+        windows_profile_2 = self.models.ManagedClusterWindowsProfile(
+            admin_username="test_admin_username",
+            gmsa_profile=windows_gmsa_profile_2,
+        )
+        mc = self.models.ManagedCluster(location="test_location", windows_profile=windows_profile_2)
+        ctx_2.attach_mc(mc)
+        # fail on inconsistent state
+        with self.assertRaises(CLIInternalError):
+            ctx_2.get_gmsa_dns_server_and_root_domain_name()
+
     def test_get_service_principal_and_client_secret(
         self,
     ):
@@ -705,13 +790,11 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             (None, None),
         )
 
-        # dynamic completion
+        # custom
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "name": "test_name",
-                    "resource_group_name": "test_rg_name",
                     "enable_managed_identity": True,
                     "service_principal": "test_service_principal",
                     "client_secret": "test_client_secret",
@@ -720,26 +803,16 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx_2.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            self.assertEqual(
-                ctx_2.get_service_principal_and_client_secret(),
-                ("test_service_principal", "test_client_secret"),
-            )
+        self.assertEqual(
+            ctx_2.get_service_principal_and_client_secret(),
+            ("test_service_principal", "test_client_secret"),
+        )
 
-        # dynamic completion
+        # custom
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "name": "test_name",
-                    "resource_group_name": "test_rg_name",
                     "enable_managed_identity": True,
                     "service_principal": None,
                     "client_secret": "test_client_secret",
@@ -748,40 +821,15 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx_3.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch("azure.cli.command_modules.acs.custom.get_graph_rbac_management_client", return_value=None), patch(
-            "azure.cli.command_modules.acs.custom._build_service_principal",
-            return_value=("test_service_principal", "test_aad_session_key"),
-        ):
-            self.assertEqual(
-                ctx_3.get_service_principal_and_client_secret(),
-                ("test_service_principal", "test_client_secret"),
-            )
-        service_principal_profile = self.models.ManagedClusterServicePrincipalProfile(
-            client_id="test_mc_service_principal",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            service_principal_profile=service_principal_profile,
-        )
-        ctx_3.attach_mc(mc)
-        # fail on inconsistent state
-        with self.assertRaises(CLIInternalError):
-            self.assertEqual(
-                ctx_3.get_service_principal_and_client_secret(),
-                ("test_mc_service_principal", "test_mc_client_secret"),
-            )
+        # fail on service_principal not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_3.get_service_principal_and_client_secret()
 
-        # dynamic completion
+        # custom
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "name": "test_name",
-                    "resource_group_name": "test_rg_name",
                     "enable_managed_identity": True,
                     "service_principal": "test_service_principal",
                     "client_secret": None,
@@ -790,17 +838,31 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx_4.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            # fail on client_secret not specified
-            with self.assertRaises(CLIError):
-                ctx_4.get_service_principal_and_client_secret()
+        # fail on client_secret not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_service_principal_and_client_secret()
+
+        # custom
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_managed_identity": True,
+                    "service_principal": "test_service_principal",
+                    "client_secret": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        sp_profile_5 = self.models.ManagedClusterServicePrincipalProfile(
+            client_id=None, secret="test_client_secret"
+        )
+        mc_5 = self.models.ManagedCluster(location="test_location", service_principal_profile=sp_profile_5)
+        ctx_5.attach_mc(mc_5)
+        # fail on inconsistent state
+        with self.assertRaises(CLIInternalError):
+            ctx_5.get_service_principal_and_client_secret()
 
     def test_get_enable_managed_identity(self):
         # default
@@ -835,6 +897,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
+        self.assertEqual(ctx_2._get_enable_managed_identity(read_only=True), True)
         self.assertEqual(ctx_2.get_enable_managed_identity(), False)
 
         # custom value
@@ -959,7 +1022,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             return_value=identity_obj,
-        ):
+        ) as get_identity_helper:
             ctx_2 = AKSManagedClusterContext(
                 self.cmd,
                 AKSManagedClusterParamDict(
@@ -972,6 +1035,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 DecoratorMode.CREATE,
             )
             self.assertEqual(ctx_2.get_user_assigned_identity_client_id(), "test_client_id")
+            get_identity_helper.assert_called_with("test_assign_identity")
+            self.assertEqual(ctx_2.get_user_assigned_identity_client_id("custom_assign_identity"), "test_client_id")
+            get_identity_helper.assert_called_with("custom_assign_identity")
 
     def test_get_user_assigned_identity_object_id(self):
         ctx_1 = AKSManagedClusterContext(
@@ -991,7 +1057,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             return_value=identity_obj,
-        ):
+        ) as get_identity_helper:
             ctx_2 = AKSManagedClusterContext(
                 self.cmd,
                 AKSManagedClusterParamDict(
@@ -1003,10 +1069,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 self.models,
                 DecoratorMode.CREATE,
             )
-            self.assertEqual(
-                ctx_2.get_user_assigned_identity_object_id(),
-                "test_principal_id",
-            )
+            self.assertEqual(ctx_2.get_user_assigned_identity_object_id(), "test_principal_id")
+            get_identity_helper.assert_called_with("test_assign_identity")
+            self.assertEqual(ctx_2.get_user_assigned_identity_object_id("custom_assign_identity"), "test_principal_id")
+            get_identity_helper.assert_called_with("custom_assign_identity")
 
     def test_get_attach_acr(self):
         # default
@@ -1089,6 +1155,73 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1.get_detach_acr(), None)
+
+    def test_get_assignee_from_identity_or_sp_profile(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on no mc attached and no client id found
+        with self.assertRaises(UnknownError):
+            ctx_1.get_assignee_from_identity_or_sp_profile()
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+        )
+        ctx_2.attach_mc(mc_2)
+        # fail on kubelet identity not found
+        with self.assertRaises(UnknownError):
+            ctx_2.get_assignee_from_identity_or_sp_profile()
+
+        # custom value
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="UserAssigned"),
+            identity_profile={
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    client_id="test_client_id", object_id="test_object_id"
+                )
+            },
+        )
+        ctx_3.attach_mc(mc_3)
+        self.assertEqual(
+            ctx_3.get_assignee_from_identity_or_sp_profile(),
+            ("test_object_id", False),
+        )
+
+        # custom value
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(client_id="test_client_id"),
+        )
+        ctx_4.attach_mc(mc_4)
+        self.assertEqual(
+            ctx_4.get_assignee_from_identity_or_sp_profile(),
+            ("test_client_id", True),
+        )
 
     def test_get_load_balancer_sku(self):
         # default
@@ -1535,7 +1668,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "network_plugin": None,
                 }
@@ -1552,23 +1685,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "network_plugin": "azure",
-                    "pod_cidr": "test_pod_cidr",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        # fail on invalid network_plugin (azure) when pod_cidr is specified
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_network_plugin()
-
-        # invalid parameter
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "pod_cidr": "test_pod_cidr",
                 }
@@ -1578,7 +1695,22 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_network_plugin()
+            ctx_2.get_network_plugin()
+
+        # custom
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                    "network_plugin": "azure"
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # overwrite warning
+        self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
@@ -1586,7 +1718,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "pod_cidr": None,
                     "service_cidr": None,
@@ -1625,23 +1757,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "network_plugin": "azure",
-                    "pod_cidr": "test_pod_cidr",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        # fail on invalid network_plugin (azure) when pod_cidr is specified
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
-
-        # invalid parameter
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "pod_cidr": "test_pod_cidr",
                 }
@@ -1651,12 +1767,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
         # invalid parameter
-        ctx_4 = AKSManagedClusterContext(
+        ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "service_cidr": "test_service_cidr",
                     "dns_service_ip": "test_dns_service_ip",
@@ -1669,13 +1785,13 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_4.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
 
     def test_get_addon_consts(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({}),
+            AKSManagedClusterParamDict({}),
             self.models,
             DecoratorMode.CREATE,
         )
@@ -1709,7 +1825,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": None,
                 }
@@ -1730,7 +1846,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": "http_application_routing,monitoring",
                 }
@@ -1754,7 +1870,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": "test_addon_1,test_addon_2",
                 }
@@ -1777,7 +1893,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": "test_addon_1,test_addon_2,test_addon_1,test_addon_2",
                 }
@@ -1800,7 +1916,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_5 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "workspace_resource_id": "/test_workspace_resource_id",
                     "enable_addons": "",
@@ -1824,7 +1940,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_6 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": "virtual-node",
                 }
@@ -1848,7 +1964,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "workspace_resource_id": None,
                 }
@@ -1872,7 +1988,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value & dynamic completion
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": "monitoring",
                     "workspace_resource_id": "test_workspace_resource_id/",
@@ -1886,7 +2002,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # dynamic completion
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_addons": "monitoring",
                     "resource_group_name": "test_rg_name",
@@ -1897,23 +2013,23 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         ctx_3.set_intermediate("subscription_id", "test_subscription_id")
-        cf_resource_groups = Mock(check_existence=Mock(return_value=False))
+        get_resource_groups_client = Mock(check_existence=Mock(return_value=False))
         result = Mock(id="test_workspace_resource_id")
         async_poller = Mock(result=Mock(return_value=result), done=Mock(return_value=True))
-        cf_resources = Mock(begin_create_or_update_by_id=Mock(return_value=async_poller))
+        get_resources_client = Mock(begin_create_or_update_by_id=Mock(return_value=async_poller))
         with patch(
             "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            return_value=cf_resource_groups,
+            "azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client",
+            return_value=get_resource_groups_client,
         ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            return_value=cf_resources,
+            "azure.cli.command_modules.acs.addonconfiguration.get_resources_client",
+            return_value=get_resources_client,
         ):
             self.assertEqual(ctx_3.get_workspace_resource_id(), "/test_workspace_resource_id")
-        cf_resource_groups.check_existence.assert_called_once_with("DefaultResourceGroup-EUS")
-        cf_resource_groups.create_or_update.assert_called_once_with("DefaultResourceGroup-EUS", {"location": "eastus"})
+        get_resource_groups_client.check_existence.assert_called_once_with("DefaultResourceGroup-EUS")
+        get_resource_groups_client.create_or_update.assert_called_once_with("DefaultResourceGroup-EUS", {"location": "eastus"})
         default_workspace_resource_id = (
             "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}".format(
                 "test_subscription_id",
@@ -1922,7 +2038,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             )
         )
         # the return values are func_name, args and kwargs
-        _, args, _ = cf_resources.begin_create_or_update_by_id.mock_calls[0]
+        _, args, _ = get_resources_client.begin_create_or_update_by_id.mock_calls[0]
         # not interested in mocking generic_resource, so we only check the first two args
         self.assertEqual(args[:2], (default_workspace_resource_id, "2015-11-01-preview"))
 
@@ -1951,14 +2067,14 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
 
     def test_get_virtual_node_addon_os_type(self):
         # default
-        ctx_1 = AKSManagedClusterContext(self.cmd, AKSAgentPoolParamDict({}), self.models, DecoratorMode.CREATE)
+        ctx_1 = AKSManagedClusterContext(self.cmd, AKSManagedClusterParamDict({}), self.models, DecoratorMode.CREATE)
         self.assertEqual(ctx_1.get_virtual_node_addon_os_type(), "Linux")
 
     def test_get_aci_subnet_name(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aci_subnet_name": None,
                 }
@@ -1982,7 +2098,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "appgw_name": None,
                 }
@@ -2005,7 +2121,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "appgw_subnet_cidr": None,
                 }
@@ -2028,7 +2144,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "appgw_id": None,
                 }
@@ -2051,7 +2167,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "appgw_subnet_id": None,
                 }
@@ -2074,7 +2190,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "appgw_watch_namespace": None,
                 }
@@ -2097,7 +2213,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_sgxquotehelper": False,
                 }
@@ -2120,7 +2236,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_secret_rotation": False,
                 }
@@ -2142,7 +2258,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_secret_rotation": True,
                 }
@@ -2158,7 +2274,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_secret_rotation": False,
                 }
@@ -2171,7 +2287,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_secret_rotation": True,
                 }
@@ -2187,7 +2303,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "rotation_poll_interval": None,
                 }
@@ -2209,7 +2325,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "rotation_poll_interval": "2m",
                 }
@@ -2225,7 +2341,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_aad": False,
                 }
@@ -2244,7 +2360,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_aad": True,
                     "aad_client_app_id": "test_aad_client_app_id",
@@ -2260,7 +2376,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_aad": False,
                     "enable_azure_rbac": True,
@@ -2276,7 +2392,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_aad": True,
                 }
@@ -2299,7 +2415,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aad_client_app_id": None,
                     "aad_server_app_id": None,
@@ -2332,7 +2448,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_aad": True,
                     "aad_client_app_id": "test_aad_client_app_id",
@@ -2351,7 +2467,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aad_tenant_id": None,
                 }
@@ -2371,7 +2487,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # dynamic completion
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_aad": False,
                     "aad_client_app_id": "test_aad_client_app_id",
@@ -2390,7 +2506,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aad_tenant_id": "test_aad_tenant_id",
                 }
@@ -2414,7 +2530,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aad_admin_group_object_ids": None,
                 }
@@ -2436,7 +2552,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aad_admin_group_object_ids": "test_value_1,test_value_2",
                 }
@@ -2452,7 +2568,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aad_admin_group_object_ids": "test_value_1,test_value_2",
                 }
@@ -2476,7 +2592,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_rbac": None,
                 }
@@ -2492,7 +2608,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_rbac": True,
                     "enable_azure_rbac": True,
@@ -2508,7 +2624,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_rbac": True,
                     "enable_rbac": True,
@@ -2525,7 +2641,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_rbac": None,
                 }
@@ -2544,7 +2660,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_rbac": True,
                     "disable_rbac": True,
@@ -2561,7 +2677,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_azure_rbac": False,
                 }
@@ -2581,7 +2697,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({}),
+            AKSManagedClusterParamDict({}),
             self.models,
             DecoratorMode.CREATE,
         )
@@ -2602,7 +2718,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_azure_rbac": True,
                     "enable_aad": False,
@@ -2618,7 +2734,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_azure_rbac": True,
                 }
@@ -2635,7 +2751,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_5 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_azure_rbac": True,
                     "disable_azure_rbac": True,
@@ -2657,7 +2773,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_azure_rbac": False,
                 }
@@ -2677,7 +2793,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_azure_rbac": True,
                 }
@@ -2697,7 +2813,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_azure_rbac": True,
                     "disable_azure_rbac": True,
@@ -2719,7 +2835,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({"api_server_authorized_ip_ranges": None}),
+            AKSManagedClusterParamDict({"api_server_authorized_ip_ranges": None}),
             self.models,
             DecoratorMode.CREATE,
         )
@@ -2743,7 +2859,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # valid parameter with validation
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "load_balancer_sku": "standard",
                     "api_server_authorized_ip_ranges": "test_ip_range_1 , test_ip_range_2",
@@ -2760,7 +2876,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "load_balancer_sku": "basic",
                     "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
@@ -2776,7 +2892,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
@@ -2792,7 +2908,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default (update mode)
         ctx_5 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "api_server_authorized_ip_ranges": None,
                 }
@@ -2805,7 +2921,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value (update mode)
         ctx_6 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "api_server_authorized_ip_ranges": "",
                 }
@@ -2818,7 +2934,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value (update mode)
         ctx_7 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
                 }
@@ -2842,7 +2958,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({"fqdn_subdomain": None}),
+            AKSManagedClusterParamDict({"fqdn_subdomain": None}),
             self.models,
             DecoratorMode.CREATE,
         )
@@ -2854,7 +2970,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "dns_name_prefix": "test_dns_name_prefix",
                     "fqdn_subdomain": "test_fqdn_subdomain",
@@ -2870,7 +2986,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "fqdn_subdomain": "test_fqdn_subdomain",
@@ -2887,7 +3003,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "fqdn_subdomain": "test_fqdn_subdomain",
@@ -2905,7 +3021,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": False,
                 }
@@ -2927,7 +3043,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "load_balancer_sku": "basic",
@@ -2943,7 +3059,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
@@ -2959,7 +3075,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": False,
                     "disable_public_fqdn": True,
@@ -2975,7 +3091,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_5 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": False,
                     "private_dns_zone": "system",
@@ -2991,7 +3107,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_6 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
                 }
@@ -3014,7 +3130,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_7 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_public_fqdn": True,
                 }
@@ -3037,7 +3153,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value (update mode)
         ctx_8 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
                 }
@@ -3061,7 +3177,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": False,
                 }
@@ -3085,7 +3201,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
                     "enable_public_fqdn": True,
@@ -3101,7 +3217,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
                 }
@@ -3116,7 +3232,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
                 }
@@ -3141,7 +3257,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_public_fqdn": False,
                 }
@@ -3154,7 +3270,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
                     "enable_public_fqdn": True,
@@ -3170,7 +3286,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_public_fqdn": True,
                 }
@@ -3194,7 +3310,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "private_dns_zone": None,
                 }
@@ -3218,7 +3334,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "private_dns_zone": "test_private_dns_zone",
@@ -3234,7 +3350,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "enable_private_cluster": True,
                     "private_dns_zone": CONST_PRIVATE_DNS_ZONE_SYSTEM,
@@ -3251,7 +3367,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_4 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
                 }
@@ -3272,11 +3388,32 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_4.get_private_dns_zone(), CONST_PRIVATE_DNS_ZONE_NONE)
 
+    def test_get_user_assignd_identity_from_mc(self):
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        user_assigned_identity_1 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_1 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_1,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_1,
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_user_assignd_identity_from_mc(), "test_assign_identity")
+
     def test_get_assign_kubelet_identity(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "assign_identity": "test_assign_identity",
                     "assign_kubelet_identity": None,
@@ -3301,7 +3438,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "assign_identity": None,
                     "assign_kubelet_identity": "test_assign_kubelet_identity",
@@ -3317,11 +3454,82 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 "test_assign_kubelet_identity",
             )
 
+        # update
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "assign_identity": None,
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        user_assigned_identity_3 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_3 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_3,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_3,
+        )
+        ctx_3.attach_mc(mc_3)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            self.assertEqual(
+                ctx_3.get_assign_kubelet_identity(),
+                "test_assign_kubelet_identity",
+            )
+
+        # update
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "assign_identity": None,
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on assign_identity not specified and not existed in mc
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ), self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_assign_kubelet_identity()
+
+        # update
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "assign_identity": None,
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on no confirm
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            ctx_5.get_assign_kubelet_identity()
+
     def test_get_auto_upgrade_channel(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "auto_upgrade_channel": None,
                 }
@@ -3342,7 +3550,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "cluster_autoscaler_profile": None,
                 }
@@ -3364,7 +3572,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value (update mode)
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "cluster_autoscaler_profile": {
                         "scan-interval": "30s",
@@ -3419,7 +3627,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "uptime_sla": False,
                 }
@@ -3442,7 +3650,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "uptime_sla": False,
                 }
@@ -3464,7 +3672,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "uptime_sla": True,
                     "no_uptime_sla": True,
@@ -3488,7 +3696,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "no_uptime_sla": False,
                 }
@@ -3511,7 +3719,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "uptime_sla": True,
                     "no_uptime_sla": True,
@@ -3536,11 +3744,68 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_no_uptime_sla()
 
+    def test_get_disable_local_accounts(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"disable_local_accounts": False}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            disable_local_accounts=True,
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_disable_local_accounts(), True)
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"disable_local_accounts": True, "enable_local_accounts": True}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
+
+        # custom value
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"disable_local_accounts": True, "enable_local_accounts": True}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_3.get_disable_local_accounts()
+
+    def test_get_enable_local_accounts(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_local_accounts": False}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_enable_local_accounts(), False)
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_local_accounts": True, "disable_local_accounts": True}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_enable_local_accounts()
+
     def test_get_edge_zone(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "edge_zone": None,
                 }
@@ -3560,220 +3825,53 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_edge_zone(), "test_edge_zone")
 
-    def test_get_disable_local_accounts(self):
+    def test_get_node_resource_group(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({"disable_local_accounts": False}),
+            AKSManagedClusterParamDict({"node_resource_group": None}),
             self.models,
-            DecoratorMode.CREATE,
+            decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_disable_local_accounts(), False)
-        mc_1 = self.models.ManagedCluster(
+        self.assertEqual(ctx_1.get_node_resource_group(), None)
+        mc = self.models.ManagedCluster(
             location="test_location",
-            disable_local_accounts=True,
+            node_resource_group="test_node_resource_group",
         )
-        ctx_1.attach_mc(mc_1)
-        self.assertEqual(ctx_1.get_disable_local_accounts(), True)
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"disable_local_accounts": True, "enable_local_accounts": True}),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_2.get_disable_local_accounts(), True)
-
-        # custom value
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"disable_local_accounts": True, "enable_local_accounts": True}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_3.get_disable_local_accounts()
-
-    def test_get_enable_local_accounts(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"enable_local_accounts": False}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        self.assertEqual(ctx_1.get_enable_local_accounts(), False)
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"enable_local_accounts": True, "disable_local_accounts": True}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        # fail on mutually exclusive disable_local_accounts and enable_local_accounts
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_enable_local_accounts()
-
-    def test_get_assignee_from_identity_or_sp_profile(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        # fail on no mc attached and no client id found
-        with self.assertRaises(UnknownError):
-            ctx_1.get_assignee_from_identity_or_sp_profile()
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
-        )
-        ctx_2.attach_mc(mc_2)
-        # fail on kubelet identity not found
-        with self.assertRaises(UnknownError):
-            ctx_2.get_assignee_from_identity_or_sp_profile()
-
-        # custom value
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        mc_3 = self.models.ManagedCluster(
-            location="test_location",
-            identity=self.models.ManagedClusterIdentity(type="UserAssigned"),
-            identity_profile={
-                "kubeletidentity": self.models.UserAssignedIdentity(
-                    client_id="test_client_id", object_id="test_object_id"
-                )
-            },
-        )
-        ctx_3.attach_mc(mc_3)
-        self.assertEqual(
-            ctx_3.get_assignee_from_identity_or_sp_profile(),
-            ("test_object_id", False),
-        )
-
-        # custom value
-        ctx_4 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict({}),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        mc_4 = self.models.ManagedCluster(
-            location="test_location",
-            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(client_id="test_client_id"),
-        )
-        ctx_4.attach_mc(mc_4)
-        self.assertEqual(
-            ctx_4.get_assignee_from_identity_or_sp_profile(),
-            ("test_client_id", True),
-        )
-
-    def test_get_enable_windows_gmsa(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "enable_windows_gmsa": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_enable_windows_gmsa(), False)
-        windows_gmsa_profile_1 = self.models.WindowsGmsaProfile(enabled=True)
-        windows_profile_1 = self.models.ManagedClusterWindowsProfile(
-            admin_username="test_admin_username",
-            gmsa_profile=windows_gmsa_profile_1,
-        )
-        mc = self.models.ManagedCluster(location="test_location", windows_profile=windows_profile_1)
         ctx_1.attach_mc(mc)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
-            return_value=True,
-        ):
-            self.assertEqual(ctx_1.get_enable_windows_gmsa(), True)
+        self.assertEqual(ctx_1.get_node_resource_group(), "test_node_resource_group")
 
-    def test_get_gmsa_dns_server_and_root_domain_name(self):
-        # default
+    def test_get_defender_config(self):
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "enable_windows_gmsa": False,
-                    "gmsa_dns_server": None,
-                    "gmsa_root_domain_name": None,
-                }
+            AKSManagedClusterParamDict(
+                {"enable_defender": True, "defender_config": get_test_data_file_path("defenderconfig.json")}
             ),
             self.models,
             DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_gmsa_dns_server_and_root_domain_name(), (None, None))
-        windows_gmsa_profile_1 = self.models.WindowsGmsaProfile(
-            enabled=True,
-            dns_server="test_dns_server",
-            root_domain_name="test_root_domain_name",
+        defender_config_1 = ctx_1.get_defender_config()
+        ground_truth_defender_config_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=True, log_analytics_workspace_resource_id="test_workspace_resource_id"
         )
-        windows_profile_1 = self.models.ManagedClusterWindowsProfile(
-            admin_username="test_admin_username",
-            gmsa_profile=windows_gmsa_profile_1,
-        )
-        mc = self.models.ManagedCluster(location="test_location", windows_profile=windows_profile_1)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_gmsa_dns_server_and_root_domain_name(),
-            ("test_dns_server", "test_root_domain_name"),
-        )
+        self.assertEqual(defender_config_1, ground_truth_defender_config_1)
 
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
-                {
-                    "enable_windows_gmsa": True,
-                    "gmsa_dns_server": "test_gmsa_dns_server",
-                    "gmsa_root_domain_name": "test_gmsa_root_domain_name",
-                }
-            ),
+            AKSManagedClusterParamDict({"enable_defender": True, "defender_config": "fake-path"}),
             self.models,
             DecoratorMode.CREATE,
         )
-        windows_gmsa_profile_2 = self.models.WindowsGmsaProfile(
-            enabled=True,
-            dns_server="test_dns_server",
-            root_domain_name=None,
-        )
-        windows_profile_2 = self.models.ManagedClusterWindowsProfile(
-            admin_username="test_admin_username",
-            gmsa_profile=windows_gmsa_profile_2,
-        )
-        mc = self.models.ManagedCluster(location="test_location", windows_profile=windows_profile_2)
-        ctx_2.attach_mc(mc)
-        # fail on inconsistent state
-        with self.assertRaises(CLIInternalError):
-            ctx_2.get_gmsa_dns_server_and_root_domain_name()
+        # fail on invalid file path
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_defender_config()
 
     def test_get_yes(self):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({"yes": False}),
+            AKSManagedClusterParamDict({"yes": False}),
             self.models,
             DecoratorMode.CREATE,
         )
@@ -3783,7 +3881,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict({"no_wait": False}),
+            AKSManagedClusterParamDict({"no_wait": False}),
             self.models,
             DecoratorMode.CREATE,
         )
@@ -3793,7 +3891,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aks_custom_headers": None,
                 }
@@ -3806,7 +3904,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
-            AKSAgentPoolParamDict(
+            AKSManagedClusterParamDict(
                 {
                     "aks_custom_headers": "abc=def,xyz=123",
                 }
@@ -3907,26 +4005,30 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "nodepool_name": "test_np_name",
-                "nodepool_tags": {"k1": "v1"},
-                "nodepool_labels": {"k1": "v1", "k2": "v2"},
-                "node_count": 10,
                 "node_vm_size": "Standard_DSx_vy",
+                "os_sku": None,
+                "snapshot_id": "test_snapshot_id",
                 "vnet_subnet_id": "test_vnet_subnet_id",
-                "ppg": "test_ppg_id",
-                "zones": ["tz1", "tz2"],
+                "pod_subnet_id": "test_pod_subnet_id",
                 "enable_node_public_ip": True,
                 "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
-                "enable_encryption_at_host": True,
-                "enable_ultra_ssd": True,
-                "max_pods": 50,
-                "node_osdisk_size": 100,
-                "node_osdisk_type": "test_os_disk_type",
                 "enable_cluster_autoscaler": True,
                 "min_count": 5,
                 "max_count": 20,
+                "node_count": 10,
+                "nodepool_tags": {"k1": "v1"},
+                "nodepool_labels": {"k1": "v1", "k2": "v2"},
+                "node_osdisk_size": 100,
+                "node_osdisk_type": "test_os_disk_type",
+                "vm_set_type": None,
+                "zones": ["tz1", "tz2"],
+                "ppg": "test_ppg_id",
+                "max_pods": 50,
+                "enable_encryption_at_host": True,
+                "enable_ultra_ssd": True,
                 "enable_fips_image": True,
-                "snapshot_id": "test_snapshot_id",
-                "os_sku": None,
+                "kubelet_config": None,
+                "linux_os_config": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -3945,31 +4047,32 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             dec_mc_1 = dec_1.set_up_agentpool_profile(mc_1)
         ground_truth_agentpool_profile_1 = self.models.ManagedClusterAgentPoolProfile(
             name="test_np_name",
-            upgrade_settings=self.models.AgentPoolUpgradeSettings(),
-            os_disk_size_gb=100,
-            os_disk_type="test_os_disk_type",
+            orchestrator_version="",
+            vm_size="Standard_DSx_vy",
+            os_type=CONST_DEFAULT_NODE_OS_TYPE,
+            os_sku="snapshot_os_sku",
+            creation_data=self.models.CreationData(source_resource_id="test_snapshot_id"),
+            vnet_subnet_id="test_vnet_subnet_id",
+            pod_subnet_id="test_pod_subnet_id",
+            enable_node_public_ip=True,
+            node_public_ip_prefix_id="test_node_public_ip_prefix_id",
             enable_auto_scaling=True,
             min_count=5,
             max_count=20,
             count=10,
-            creation_data=self.models.CreationData(source_resource_id="test_snapshot_id"),
-            orchestrator_version="",
-            os_type=CONST_DEFAULT_NODE_OS_TYPE,
-            os_sku="snapshot_os_sku",
-            vm_size="Standard_DSx_vy",
             node_labels={"k1": "v1", "k2": "v2"},
             tags={"k1": "v1"},
             node_taints=[],
-            vnet_subnet_id="test_vnet_subnet_id",
-            enable_node_public_ip=True,
-            node_public_ip_prefix_id="test_node_public_ip_prefix_id",
+            os_disk_size_gb=100,
+            os_disk_type="test_os_disk_type",
+            upgrade_settings=self.models.AgentPoolUpgradeSettings(),
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
+            availability_zones=["tz1", "tz2"],
             proximity_placement_group_id="test_ppg_id",
+            max_pods=50,
             enable_encryption_at_host=True,
             enable_ultra_ssd=True,
             enable_fips=True,
-            availability_zones=["tz1", "tz2"],
-            max_pods=50,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
@@ -4172,8 +4275,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "name": "test_name",
-                "resource_group_name": "test_rg_name",
                 "enable_managed_identity": True,
                 "service_principal": "test_service_principal",
                 "client_secret": "test_client_secret",
@@ -4182,16 +4283,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
         dec_2.context.attach_mc(mc_2)
-        dec_2.context.set_intermediate("subscription_id", "1234-5678", overwrite_exists=True)
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.get_rg_location",
-            return_value="test_location",
-        ), patch(
-            "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
-            return_value=None,
-        ):
-            dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
-
+        dec_mc_2 = dec_2.set_up_service_principal_profile(mc_2)
         service_principal_profile_2 = self.models.ManagedClusterServicePrincipalProfile(
             client_id="test_service_principal", secret="test_client_secret"
         )
@@ -4412,9 +4504,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_3.context.set_intermediate("subscription_id", "test_subscription_id")
         registry = Mock(id="test_registry_id")
         with patch(
-            "azure.cli.command_modules.acs.custom.get_resource_by_name",
+            "azure.cli.command_modules.acs._roleassignments.get_resource_by_name",
             return_value=registry,
-        ), patch("azure.cli.command_modules.acs.custom._ensure_aks_acr_role_assignment") as ensure_assignment:
+        ), patch("azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment") as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True)
 
@@ -4478,6 +4570,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "dns_service_ip": None,
                 "docker_bridge_cidr": None,
                 "network_policy": None,
+                "nat_gateway_managed_outbound_ip_count": 10,
+                "nat_gateway_idle_timeout": 20,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4497,7 +4591,10 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             ),
             allocated_outbound_ports=5,
         )
-
+        nat_gateway_profile_2 = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=10),
+            idle_timeout_in_minutes=20,
+        )
         network_profile_2 = self.models.ContainerServiceNetworkProfile(
             network_plugin="kubenet",
             pod_cidr="10.246.0.0/16",
@@ -4507,6 +4604,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
             load_balancer_profile=load_balancer_profile_2,
+            nat_gateway_profile=nat_gateway_profile_2,
         )
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
@@ -4529,6 +4627,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "dns_service_ip": None,
                 "docker_bridge_cidr": None,
                 "network_policy": None,
+                "nat_gateway_managed_outbound_ip_count": None,
+                "nat_gateway_idle_timeout": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5293,6 +5393,25 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             dec_4.set_up_identity(mc_4)
 
+        # custom, identity disabled by sp
+        dec_5 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "service_principal": "test_service_principal",
+                "client_secret": "test_client_secret",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(location="test_location")
+        dec_5.context.attach_mc(mc_5)
+        dec_mc_5 = dec_5.set_up_identity(mc_5)
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
+
     def test_set_up_identity_profile(self):
         # default value in `aks_create`
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -5330,7 +5449,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
             side_effect=[identity_obj_1, identity_obj_2],
         ), patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator._ensure_cluster_identity_permission_on_kubelet_identity"
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_cluster_identity_permission_on_kubelet_identity"
         ) as mock_ensure_method:
             dec_2 = AKSManagedClusterCreateDecorator(
                 self.cmd,
@@ -5536,6 +5655,93 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_set_up_node_resource_group(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"node_resource_group": "test_node_resource_group"},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_node_resource_group(None)
+        dec_mc_1 = dec_1.set_up_node_resource_group(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            node_resource_group="test_node_resource_group",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_enabled_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+            return_value="test_workspace_resource_id",
+        ):
+            dec_mc_1 = dec_1.context.get_defender_config()
+        
+        ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=True,
+            log_analytics_workspace_resource_id="test_workspace_resource_id",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_disabled_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"disable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.context.get_defender_config()
+        ground_truth_mc_1 = self.models.ManagedClusterSecurityProfileAzureDefender(
+            enabled=False,
+        )
+
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_set_up_defender(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+
+        with patch(
+                "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+                return_value="test_workspace_resource_id",
+        ):
+            dec_mc_1 = dec_1.set_up_defender(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace_resource_id",
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
     def test_construct_mc_profile_default(self):
         import inspect
 
@@ -5591,15 +5797,15 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         ground_truth_agentpool_1 = self.models.ManagedClusterAgentPoolProfile(
             name="nodepool1",
-            upgrade_settings=upgrade_settings_1,
-            os_disk_size_gb=0,
+            orchestrator_version="",
+            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
+            os_type=CONST_DEFAULT_NODE_OS_TYPE,
+            enable_node_public_ip=False,
             enable_auto_scaling=False,
             count=3,
-            orchestrator_version="",
-            os_type=CONST_DEFAULT_NODE_OS_TYPE,
-            vm_size=CONST_DEFAULT_NODE_VM_SIZE,
             node_taints=[],
-            enable_node_public_ip=False,
+            os_disk_size_gb=0,
+            upgrade_settings=upgrade_settings_1,
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
             enable_ultra_ssd=False,
@@ -5780,7 +5986,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         mock_profile_4 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_4
-        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator._ensure_aks_acr") as mock_ensure_4:
+        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator.ensure_aks_acr") as mock_ensure_4:
             dec_4.postprocessing_after_mc_created(mc_4)
         mock_ensure_4.assert_called_once_with(
             self.cmd,
@@ -6183,7 +6389,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.context.attach_mc(mc_2)
         dec_2.context.set_intermediate("subscription_id", "test_subscription_id")
-        with patch("azure.cli.command_modules.acs.managed_cluster_decorator._ensure_aks_acr") as ensure_acr:
+        with patch("azure.cli.command_modules.acs.managed_cluster_decorator.ensure_aks_acr") as ensure_acr:
             dec_2.process_attach_detach_acr(mc_2)
             ensure_acr.assert_has_calls(
                 [
@@ -7146,6 +7352,47 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(mc_5, ground_truth_mc_5)
 
+    def test_ensure_azure_keyvault_secrets_provider_addon_profile(self):
+        # custom
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on addon azure-keyvault-secrets-provider not provided
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_1.ensure_azure_keyvault_secrets_provider_addon_profile(None)
+
+        # custom
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        dec_azure_keyvault_secrets_provider_addon_profile_2 = (
+            dec_2.ensure_azure_keyvault_secrets_provider_addon_profile(
+                azure_keyvault_secrets_provider_addon_profile_2
+            )
+        )
+        ground_truth_azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "false",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        )
+        self.assertEqual(
+            dec_azure_keyvault_secrets_provider_addon_profile_2,
+            ground_truth_azure_keyvault_secrets_provider_addon_profile_2,
+        )
+
     def test_update_azure_keyvault_secrets_provider_addon_profile(self):
         # default
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -7238,6 +7485,71 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ground_truth_azure_keyvault_secrets_provider_addon_profile_3,
         )
 
+        # custom value
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_keyvault_secrets_provider_addon_profile_4 = self.models.ManagedClusterAddonProfile(enabled=False)
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: azure_keyvault_secrets_provider_addon_profile_4
+            },
+        )
+        dec_4.context.attach_mc(mc_4)
+        # fail on addon azure-keyvault-secrets-provider not enabled
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_4.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile_4)
+
+        # backfill nil config to default then update
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_keyvault_secrets_provider_addon_profile_5 = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: azure_keyvault_secrets_provider_addon_profile_5
+            },
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_azure_keyvault_secrets_provider_addon_profile_5 = (
+            dec_5.update_azure_keyvault_secrets_provider_addon_profile(
+                azure_keyvault_secrets_provider_addon_profile_5
+            )
+        )
+        ground_truth_azure_keyvault_secrets_provider_addon_profile_5 = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "true",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        )
+        self.assertEqual(
+            dec_azure_keyvault_secrets_provider_addon_profile_5,
+            ground_truth_azure_keyvault_secrets_provider_addon_profile_5,
+        )
+
     def test_update_addon_profiles(self):
         # default value in `aks_update`
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -7303,6 +7615,222 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_1.context.get_intermediate("monitoring_addon_enabled"), True)
         self.assertEqual(dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), True)
         self.assertEqual(dec_1.context.get_intermediate("virtual_node_addon_enabled"), True)
+
+        # update addon azure_keyvault_secrets_provider with partial profile
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": "5m",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: azure_keyvault_secrets_provider_addon_profile_2
+            },
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_addon_profiles(mc_2)
+
+        ground_truth_azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "true",
+                    CONST_ROTATION_POLL_INTERVAL: "5m",
+                },
+            )
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: ground_truth_azure_keyvault_secrets_provider_addon_profile_2,
+            },
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # update addon azure_keyvault_secrets_provider with no profile
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_3.context.attach_mc(mc_3)
+        # fail on addon azure-keyvault-secrets-provider not enabled
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_3.update_addon_profiles(mc_3)
+
+    def test_update_defender(self):
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_defender": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate("subscription_id", "test_subscription_id")
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_default_log_analytics_workspace_for_monitoring",
+            return_value="test_workspace_resource_id",
+        ):
+            dec_mc_1 = dec_1.update_defender(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                azure_defender=self.models.ManagedClusterSecurityProfileAzureDefender(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace_resource_id",
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_update_identity_profile(self):
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_identity_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        cluster_identity_obj = Mock(
+            client_id="test_cluster_identity_client_id",
+            principal_id="test_cluster_identity_object_id",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
+            side_effect=[cluster_identity_obj],
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_cluster_identity_permission_on_kubelet_identity",
+            return_value=None,
+        ):
+            dec_2 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                    "yes": True,
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            cluster_identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities={"test_assign_identity": {}},
+            )
+            mc_2 = self.models.ManagedCluster(location="test_location", identity=cluster_identity)
+            dec_2.context.attach_mc(mc_2)
+            dec_mc_2 = dec_2.update_identity_profile(mc_2)
+
+            identity_profile_2 = {
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_assign_kubelet_identity",
+                )
+            }
+            ground_truth_mc_2 = self.models.ManagedCluster(
+                location="test_location",
+                identity=cluster_identity,
+                identity_profile=identity_profile_2,
+            )
+            self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            dec_3 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            cluster_identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities={"test_assign_identity": {}},
+            )
+            mc_3 = self.models.ManagedCluster(location="test_location", identity=cluster_identity)
+            dec_3.context.attach_mc(mc_3)
+            dec_3.update_identity_profile(mc_3)
+
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_4 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                    "yes": True,
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            mc_4 = self.models.ManagedCluster(location="test_location")
+            dec_4.context.attach_mc(mc_4)
+            dec_4.update_identity_profile(mc_4)
+
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
+            side_effect=[cluster_identity_obj],
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_cluster_identity_permission_on_kubelet_identity",
+            return_value=None,
+        ):
+            dec_5 = AKSManagedClusterUpdateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "enable_managed_identity": True,
+                    "assign_identity": "test_assign_identity",
+                    "assign_kubelet_identity": "test_assign_kubelet_identity",
+                    "yes": True,
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            cluster_identity = self.models.ManagedClusterIdentity(
+                type="UserAssigned",
+                user_assigned_identities={"test_assign_identity": {}},
+            )
+            mc_5 = self.models.ManagedCluster(location="test_location", identity=cluster_identity)
+            dec_5.context.attach_mc(mc_5)
+            dec_mc_5 = dec_5.update_identity_profile(mc_5)
+
+            identity_profile_5 = {
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_assign_kubelet_identity",
+                )
+            }
+            ground_truth_mc_5 = self.models.ManagedCluster(
+                location="test_location",
+                identity=cluster_identity,
+                identity_profile=identity_profile_5,
+            )
+            self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
     def test_update_mc_profile_default(self):
         import inspect
@@ -7526,7 +8054,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mock_profile_4 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_4
-        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator._ensure_aks_acr") as mock_ensure_4:
+        ), patch("azure.cli.command_modules.acs.managed_cluster_decorator.ensure_aks_acr") as mock_ensure_4:
             dec_4.postprocessing_after_mc_created(mc_4)
         mock_ensure_4.assert_called_once_with(
             self.cmd,

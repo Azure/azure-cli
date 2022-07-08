@@ -6,21 +6,19 @@
 from knack.util import CLIError
 
 from .resource_providers import GeneralPrivateEndpointClient
-from .resource_providers.batch_provider import BatchPrivateEndpointClient
 
 
 TYPE_CLIENT_MAPPING = {
     # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
-    'Microsoft.Batch/batchAccounts': BatchPrivateEndpointClient
 }
 
 
 def register_providers():
     _register_one_provider("Microsoft.Automation/automationAccounts", "2020-01-13-preview", True)
-    _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', False)
+    _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', True)
     _register_one_provider('Microsoft.ApiManagement/service', '2021-08-01', True)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
-    _register_one_provider("Microsoft.Batch/batchAccounts", "2020-03-01", True)
+    _register_one_provider("Microsoft.Batch/batchAccounts", "2022-06-01", True)
     _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
     _register_one_provider("Microsoft.Cache/Redis", "2021-06-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
@@ -66,6 +64,7 @@ def register_providers():
     _register_one_provider('Microsoft.DataFactory/factories', '2018-06-01', True)
     _register_one_provider('Microsoft.Databricks/workspaces', '2021-04-01-preview', True)
     _register_one_provider('Microsoft.RecoveryServices/vaults', '2021-07-01', True)
+    _register_one_provider('Microsoft.Kusto/clusters', '2021-08-27', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
