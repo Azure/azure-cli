@@ -226,7 +226,8 @@ def cf_blob_service(cli_ctx, kwargs):
         account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
 
-    return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
+    return t_blob_service(account_url=account_url, credential=credential,
+                          connection_timeout=kwargs.get('connection_timeout'), **client_kwargs)
 
 
 def get_credential(kwargs):
@@ -250,7 +251,8 @@ def cf_blob_client(cli_ctx, kwargs):
         kwargs.pop('blob_name')
         return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
                                            credential=credential,
-                                           snapshot=kwargs.pop('snapshot', None))
+                                           snapshot=kwargs.pop('snapshot', None),
+                                           connection_timeout=kwargs.get('connection_timeout'))
     if 'blob_url' in kwargs:
         kwargs.pop('blob_url')
 
