@@ -755,7 +755,7 @@ class SubscriptionFinder:
                     # The tenant requires MFA and can't be accessed with home tenant's refresh token
                     mfa_tenants.append(t)
                 else:
-                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                    logger.warning("Failed to authenticate %s due to error '%s'", t.tenant_id_name, ex)
                 continue
 
             if not subscriptions:

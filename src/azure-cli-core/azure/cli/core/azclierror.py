@@ -266,6 +266,9 @@ class RecommendationError(ClientError):
 
 class AuthenticationError(ServiceError):
     """ Raised when AAD authentication fails. """
+    def __init__(self, error_msg, msal_error=None, **kwargs):
+        super().__init__(error_msg, **kwargs)
+        self.msal_error = msal_error
 
 
 class HTTPError(CLIError):

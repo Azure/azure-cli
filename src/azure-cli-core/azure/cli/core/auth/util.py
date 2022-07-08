@@ -40,7 +40,7 @@ def aad_error_handler(error, **kwargs):
         else "To re-authenticate, please run:\n{}").format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(error_description, recommendation=login_message)
+    raise AuthenticationError(error_description, msal_error=error, recommendation=login_message)
 
 
 def _generate_login_command(scopes=None):
