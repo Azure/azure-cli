@@ -140,7 +140,7 @@ event_channel_name_type = CLIArgumentType(
 channel_name_type = CLIArgumentType(
     help='Name of the channel.',
     arg_type=name_type,
-    options_list=['--channel-name'],
+    options_list=['--channel-name, -n'],
     completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces/channels'))
 
 partner_topic_name_type = CLIArgumentType(

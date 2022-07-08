@@ -62,7 +62,8 @@ from azure.mgmt.eventgrid.models import (
     ChannelType,
     ChannelUpdateParameters,
     PartnerUpdateTopicInfo,
-    PartnerUpdateDestinationInfo,
+    WebhookUpdatePartnerDestinationInfo,
+    AzureADPartnerClientAuthentication,
     EventTypeInfo)
 
 logger = get_logger(__name__)
@@ -329,7 +330,7 @@ def cli_topic_event_subscription_list(   # pylint: disable=too-many-return-state
         topic_name,
         odata_query=None):
 
-    return client.list_by_topic(resource_group_name, topic_name, odata_query, DEFAULT_TOP)
+    return client.list(resource_group_name, topic_name, odata_query, DEFAULT_TOP)
 
 
 def cli_topic_event_subscription_update(
@@ -479,7 +480,11 @@ def cli_domain_event_subscription_list(   # pylint: disable=too-many-return-stat
         domain_name,
         odata_query=None):
 
-    return client.list_by_domain(resource_group_name, domain_name, odata_query, DEFAULT_TOP)
+    return client.list(
+        resource_group_name=resource_group_name,
+        domain_name=domain_name,
+        filter=odata_query,
+        top=DEFAULT_TOP)
 
 
 def cli_domain_event_subscription_update(
@@ -636,7 +641,12 @@ def cli_domain_topic_event_subscription_list(   # pylint: disable=too-many-retur
         topic_name,
         odata_query=None):
 
-    return client.list_by_domain_topic(resource_group_name, domain_name, topic_name, odata_query, DEFAULT_TOP)
+    return client.list(
+        resource_group_name=resource_group_name,
+        domain_name=domain_name,
+        topic_name=topic_name,
+        filter=odata_query,
+        top=DEFAULT_TOP)
 
 
 def cli_domain_topic_event_subscription_update(
@@ -1050,25 +1060,61 @@ def cli_channel_update(
         resource_group_name,
         partner_namespace_name,
         channel_name,
-        channel_type,
         activation_expiration_date=None,
+        azure_active_directory_tenant_id=None,
+        azure_active_directory_application_id_or_uri=None,
+        endpoint_base_url=None,
+        endpoint_url=None,
         event_type_kind=None,
         inline_event_type=None):
 
+    # Do a get on the channel to determine if channel-type is PartnerTopic
+    # or PartnerDestination
+    channel = client.get(
+        resource_group_name,
+        partner_namespace_name,
+        channel_name)
+
     partner_update_topic_info = None
-    partner_update_destination_info = None
-    if channel_type == ChannelType.PARTNER_TOPIC:
+    webhook_partner_update_destination_info = None
+    if channel.type == ChannelType.PARTNER_TOPIC:
+        # Make sure the user did not specify update
+        # parameters for PartnerDestination
+        if (azure_active_directory_tenant_id is not None
+            or azure_active_directory_application_id_or_uri is not None
+            or endpoint_base_url is not None
+            or endpoint_url is not None):
+            raise CLIError("usage error: The parameters --azure-active-directory-tenant-id, "
+                           "--azure-active-directory-application-id-or-uri, "
+                           "--endpoint-base-url, and --endpoint-url can only be specified"
+                           "when the channel is of type PartnerDestination.")
+
         event_type_info = EventTypeInfo(
             inline_event_types=inline_event_type,
             event_definition_kind=event_type_kind)
+
         partner_update_topic_info = PartnerUpdateTopicInfo(
             event_type_info=event_type_info)
-    elif channel_type == ChannelType.PARTNER_DESTINATION:
-        partner_update_destination_info = PartnerUpdateDestinationInfo()
+    elif channel.type == ChannelType.PARTNER_DESTINATION:
+        # Make sure the user did not specify update
+        # parameters for PartnerTopic
+        if (inline_event_type is not None
+            or event_type_kind is not None):
+            raise CLIError("usage error: The parameters --inline-event-type "
+                           "and --event-type-kind can only be specified when the "
+                           "channel is of type PartnerTopic.")
+        partner_client_authentication = AzureADPartnerClientAuthentication(
+            azure_active_directory_tenant_id=azure_active_directory_tenant_id,
+            azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri)
+
+        webhook_partner_update_destination_info = WebhookUpdatePartnerDestinationInfo(
+            endpoint_base_url=endpoint_base_url,
+            endpoint_url=endpoint_url,
+            client_authentication=partner_client_authentication)
 
     channel_update_parameters = ChannelUpdateParameters(
         expiration_time_if_not_activated_utc=activation_expiration_date,
-        partner_destination_info=partner_update_destination_info,
+        partner_destination_info=webhook_partner_update_destination_info,
         partner_topic_info=partner_update_topic_info)
 
     return client.update(
@@ -1138,6 +1184,10 @@ def cli_partner_configuration_authorize(
         partner_name=None,
         authorization_expiration_date=None):
 
+    if not partner_registration_immutable_id and not partner_name:
+        raise CLIError('usage error: At least one of --partner-registration-immutable-id '
+                       'or --partner-name must be specified.')
+
     partner_info = _get_partner_info(
         partner_registration_immutable_id=partner_registration_immutable_id,
         authorization_expiration_date=authorization_expiration_date,
@@ -1154,6 +1204,10 @@ def cli_partner_configuration_unauthorize(
         partner_registration_immutable_id=None,
         partner_name=None,
         authorization_expiration_date=None):
+
+    if not partner_registration_immutable_id and not partner_name:
+        raise CLIError('usage error: At least one of --partner-registration-immutable-id '
+                       'or --partner-name must be specified.')
 
     partner_info = _get_partner_info(
         partner_registration_immutable_id=partner_registration_immutable_id,
@@ -1181,7 +1235,6 @@ def cli_partner_configuration_create_or_update(
         resource_group_name,
         authorized_partner=None,
         default_maximum_expiration_time_in_days=None,
-        location=None,
         tags=None):
 
     partner_authorization = PartnerAuthorization(
@@ -1190,7 +1243,7 @@ def cli_partner_configuration_create_or_update(
 
     # PartnerConfiguration contains PartnerAuthorization
     partner_configuration_info = PartnerConfiguration(
-        location=location,
+        location=GLOBAL,
         tags=tags,
         partner_authorization=partner_authorization)
 

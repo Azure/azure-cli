@@ -87,7 +87,7 @@ DEPENDENCIES = [
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
-    'azure-mgmt-eventgrid==10.2.0b1',
+    'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=9.1.0',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
