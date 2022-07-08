@@ -19,6 +19,7 @@ import signal
 import sys
 import threading
 import time
+import re
 try:
     import termios
     import tty
@@ -355,6 +356,23 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
 
     return None, {}
 
+yaml_env_var_matcher = re.compile(r'.*\$\{([^}^{]+)\}')
+def yaml_env_var_constructor(loader, node):
+  ''' Extract the matched value, expand env variable, and replace the match '''
+  env_matcher=re.compile(r"\$\{([^}^{]+)\}")
+  value = node.value
+  match = env_matcher.findall(value)
+  if match:
+    full_value = value
+    for env_var in match:
+        full_value = full_value.replace(
+            f'${{{env_var}}}', os.environ.get(env_var, env_var)
+        )
+    return full_value
+  return value
+
+yaml.add_implicit_resolver('!env_var', yaml_env_var_matcher, None, yaml.SafeLoader)
+yaml.add_constructor('!env_var', yaml_env_var_constructor, yaml.SafeLoader)
 
 # pylint: disable=unsupported-assignment-operation,protected-access
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
