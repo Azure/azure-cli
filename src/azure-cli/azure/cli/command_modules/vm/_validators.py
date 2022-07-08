@@ -2099,7 +2099,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         if cvm_terms[1]:
                             cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
                     security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                                                                  secure_vm_disk_encryption_set_id=cvm_des_id)
                     if os_disk_image:
                         os_disk_image.security_profile = security_profile
                     else:
