@@ -536,7 +536,7 @@ def cli_domain_topic_event_subscription_create_or_update(    # pylint: disable=t
         client,
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name,
         endpoint=None,
         endpoint_type=None,
@@ -589,7 +589,7 @@ def cli_domain_topic_event_subscription_create_or_update(    # pylint: disable=t
     return client.begin_create_or_update(
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name,
         event_subscription_info)
 
@@ -598,12 +598,12 @@ def cli_eventgrid_domain_topic_event_subscription_delete(
         client,
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name):
     return client.delete(
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name)
 
 
@@ -611,15 +611,23 @@ def cli_domain_topic_event_subscription_get(
         client,
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name,
         include_full_endpoint_url=False,
         include_static_delivery_attribute_secret=False):
 
-    retrieved_event_subscription = client.get(resource_group_name, domain_name, topic_name, event_subscription_name)
+    retrieved_event_subscription = client.get(
+        resource_group_name,
+        domain_name,
+        domain_topic_name,
+        event_subscription_name)
     destination = retrieved_event_subscription.destination
     if include_full_endpoint_url and isinstance(destination, WebHookEventSubscriptionDestination):
-        full_endpoint_url = client.get_full_url(resource_group_name, domain_name, topic_name, event_subscription_name)
+        full_endpoint_url = client.get_full_url(
+            resource_group_name,
+            domain_name,
+            domain_topic_name,
+            event_subscription_name)
         destination.endpoint_url = full_endpoint_url.endpoint_url
 
     if include_static_delivery_attribute_secret and \
@@ -627,7 +635,7 @@ def cli_domain_topic_event_subscription_get(
         delivery_attributes = client.get_delivery_attributes(
             resource_group_name,
             domain_name,
-            topic_name,
+            domain_topic_name,
             event_subscription_name)
         destination.delivery_attribute_mappings = delivery_attributes
 
@@ -638,13 +646,13 @@ def cli_domain_topic_event_subscription_list(   # pylint: disable=too-many-retur
         client,
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         odata_query=None):
 
     return client.list(
         resource_group_name=resource_group_name,
         domain_name=domain_name,
-        topic_name=topic_name,
+        topic_name=domain_topic_name,
         filter=odata_query,
         top=DEFAULT_TOP)
 
@@ -653,7 +661,7 @@ def cli_domain_topic_event_subscription_update(
         client,
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name,
         endpoint=None,
         endpoint_type=WEBHOOK_DESTINATION,
@@ -667,7 +675,7 @@ def cli_domain_topic_event_subscription_update(
         enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
-    instance = client.get(resource_group_name, domain_name, topic_name, event_subscription_name)
+    instance = client.get(resource_group_name, domain_name, domain_topic_name, event_subscription_name)
 
     params = _update_event_subscription_internal(
         instance=instance,
@@ -691,9 +699,23 @@ def cli_domain_topic_event_subscription_update(
     return client.begin_update(
         resource_group_name,
         domain_name,
-        topic_name,
+        domain_topic_name,
         event_subscription_name,
         params)
+
+
+def cli_domain_topic_event_subscription_delete(
+        client,
+        resource_group_name,
+        domain_name,
+        domain_topic_name,
+        event_subscription_name):
+
+    client.begin_delete(
+        resource_group_name=resource_group_name,
+        domain_name=domain_name,
+        topic_name=domain_topic_name,
+        event_subscription_name=event_subscription_name)
 
 
 def cli_domain_update(
@@ -848,8 +870,8 @@ def cli_partner_registration_create_or_update(
         client,
         resource_group_name,
         partner_registration_name,
-        partner_name,
-        resource_type_name,
+        partner_name=None,
+        resource_type_name=None,
         display_name=None,
         description=None,
         long_description=None,
@@ -895,7 +917,7 @@ def cli_partner_registration_create_or_update(
         authorized_azure_subscription_ids=authorized_subscription_ids,
         tags=tags)
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name,
         partner_registration_name,
         partner_registration_info)
@@ -1080,10 +1102,10 @@ def cli_channel_update(
     if channel.type == ChannelType.PARTNER_TOPIC:
         # Make sure the user did not specify update
         # parameters for PartnerDestination
-        if (azure_active_directory_tenant_id is not None
-            or azure_active_directory_application_id_or_uri is not None
-            or endpoint_base_url is not None
-            or endpoint_url is not None):
+        if (azure_active_directory_tenant_id is not None or
+                azure_active_directory_application_id_or_uri is not None or
+                endpoint_base_url is not None or
+                endpoint_url is not None):
             raise CLIError("usage error: The parameters --azure-active-directory-tenant-id, "
                            "--azure-active-directory-application-id-or-uri, "
                            "--endpoint-base-url, and --endpoint-url can only be specified"
@@ -1098,8 +1120,8 @@ def cli_channel_update(
     elif channel.type == ChannelType.PARTNER_DESTINATION:
         # Make sure the user did not specify update
         # parameters for PartnerTopic
-        if (inline_event_type is not None
-            or event_type_kind is not None):
+        if (inline_event_type is not None or
+                event_type_kind is not None):
             raise CLIError("usage error: The parameters --inline-event-type "
                            "and --event-type-kind can only be specified when the "
                            "channel is of type PartnerTopic.")

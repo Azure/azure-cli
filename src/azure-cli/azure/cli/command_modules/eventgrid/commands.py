@@ -173,7 +173,7 @@ def load_command_table(self, _):
 
     with self.command_group('eventgrid domain topic event-subscription', domain_topic_event_subscriptions_mgmt_util, client_factory=domain_topic_event_subscriptions_factory, is_preview=True) as g:
         g.custom_show_command('show', 'cli_domain_topic_event_subscription_get')
-        g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('delete', 'cli_domain_topic_event_subscription_delete', confirmation=True)
         g.custom_command('list', 'cli_domain_topic_event_subscription_list')
         g.custom_command('create', 'cli_domain_topic_event_subscription_create_or_update')
         g.custom_command('update', 'cli_domain_topic_event_subscription_update')
@@ -210,7 +210,7 @@ def load_command_table(self, _):
 
     with self.command_group('eventgrid partner registration', partner_registrations_mgmt_util, client_factory=partner_registrations_factory, is_preview=True) as g:
         g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_partner_registration_list')
         g.custom_command('create', 'cli_partner_registration_create_or_update')
         # g.custom_command('update', 'cli_partner_registration_update')
@@ -224,7 +224,7 @@ def load_command_table(self, _):
         g.custom_command('key regenerate', 'cli_partner_namespace_regenerate_key')
         # g.custom_command('update', 'cli_partner_namespace_update')
 
-    with self.command_group('eventgrid partner namespace event-channel', event_channels_mgmt_util, client_factory=event_channels_factory, deprecate_info=self.deprecate(redirect='eventgrid partner namespace channel', hide=False)) as g:
+    with self.command_group('eventgrid partner namespace event-channel', event_channels_mgmt_util, client_factory=event_channels_factory, deprecate_info=self.deprecate(hide=False)) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_event_channel_list')

@@ -184,7 +184,7 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
-  - name: --delivery-attribute-mapping
+  - name: --delivery-attribute-mapping -d
     short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
     long-summary: |
         Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
@@ -197,50 +197,50 @@ examples:
   - name: Create a new event subscription for an Event Grid domain topic, using default filters.
     text: |
         az eventgrid domain topic event-subscription create --name es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
   - name: Create a new event subscription for an Event Grid domain topic, with a filter specifying a subject prefix.
     text: |
         az eventgrid domain topic event-subscription create --name es4 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code \\
             --subject-begins-with mysubject_prefix
   - name: Create a new event subscription for an Event Grid domain topic, using default filters, and CloudEvent V 1.0 as the delivery schema.
     text: |
       az eventgrid domain topic event-subscription create -n es2 \\
-          -g rg1 --domain-name domain1 --topic-name topic1 \\
+          -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
           --endpoint https://contoso.azurewebsites.net/api/f1?code=code \\
           --event-delivery-schema cloudeventschemav1_0
   - name: Create a new event subscription for an Event Grid domain topic, with a deadletter destination and custom retry policy of maximum 10 delivery attempts and an Event TTL of 2 hours (whichever happens earlier) and expiration date.
     text: |
         az eventgrid domain topic event-subscription create --name es2 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code \\
             --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/s2/blobServices/default/containers/blobcontainer1 \\
             --max-delivery-attempts 10 --event-ttl 120 --expiration-date "2022-10-31"
   - name: Create a new event subscription for an Event Grid domain topic, using Azure Active Directory enabled Webhook as a destination.
     text: |
         az eventgrid domain topic event-subscription create --name es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --azure-active-directory-tenant-id azureactivedirectorytenantid
             --azure-active-directory-application-id-or-uri azureactivedirectoryapplicationidoruri
   - name: Create a new event subscription for an Event Grid domain topic, using Azure Function as destination.
     text: |
         az eventgrid domain topic event-subscription create -n es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} --endpoint-type azurefunction
   - name: Create a new event subscription for an Event Grid domain topic using Storage Queue as destination with a ttl of 5 mins
     text: |
         az eventgrid domain topic event-subscription create -n es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint-type storagequeue \\
             --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1 \\
             --storage-queue-msg-ttl 300
   - name: Create a new event subscription for an Event Grid domain topic and enable advanced filtering on arrays
     text: |
         az eventgrid domain topic event-subscription create -n es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Web/sites/{functionappname}/functions/{functionname} --endpoint-type azurefunction \\
             --enable-advanced-filtering-on-arrays true
 
@@ -253,7 +253,7 @@ examples:
   - name: Delete an event subscription for an Event Grid domain topic.
     text: |
         az eventgrid domain topic event-subscription delete --name es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
 """
 
 helps['eventgrid domain topic event-subscription list'] = """
@@ -262,7 +262,7 @@ short-summary: List event subscriptions of a specific domain topic.
 examples:
   - name: List all event subscriptions created for an Event Grid domain topic.
     text: |
-        az eventgrid domain event-subscription list -g rg1 --domain-name domain1 --topic-name topic1
+        az eventgrid domain topic event-subscription list -g rg1 --domain-name domain1 --domain-topic-name topic1
 """
 
 helps['eventgrid domain topic event-subscription show'] = """
@@ -272,11 +272,11 @@ examples:
   - name: Show the details of an event subscription for an Event Grid domain topic.
     text: |
         az eventgrid domain topic event-subscription show --name es1 \\
-             -g rg1 --domain-name domain1 --topic-name topic1
+             -g rg1 --domain-name domain1 --domain-topic-name topic1
   - name: Show the details of an event subscription for an Event Grid domain topic include any static delivery attribute secrets.
     text: |
         az eventgrid domain topic event-subscription show --name es1 \\
-             -g rg1 --domain-name domain1 --topic-name topic1 --include-attrib-secret
+             -g rg1 --domain-name domain1 --domain-topic-name topic1 --include-attrib-secret
 """
 
 helps['eventgrid domain topic event-subscription update'] = """
@@ -309,7 +309,7 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
-  - name: --delivery-attribute-mapping
+  - name: --delivery-attribute-mapping -d
     short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
     long-summary: |
         Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
@@ -322,40 +322,40 @@ examples:
   - name: Update an event subscription for an Event Grid domain topic to specify a new endpoint.
     text: |
         az eventgrid domain topic event-subscription update --name es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 --endpoint https://contoso.azurewebsites.net/api/f1?code=code
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 --endpoint https://contoso.azurewebsites.net/api/f1?code=code
   - name: Update an event subscription for an Event Grid domain topic to specify a new subject-ends-with filter.
     text: |
         az eventgrid domain topic event-subscription update --name es2 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --subject-ends-with .jpg
   - name: Update an event subscription for an Event Grid domain topic to specify a new endpoint and a new subject-ends-with filter a new list of included event types.
     text: |
         az eventgrid domain topic event-subscription update --name es3 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --subject-ends-with .png \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --included-event-types Microsoft.Storage.BlobCreated Microsoft.Storage.BlobDeleted
   - name: Update an event subscription for an Azure Event Grid domain topic, to include a deadletter destination.
     text: |
         az eventgrid domain topic event-subscription update --name es2 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/blobcontainer1
   - name: Update an event subscription for an Azure Event Grid domain topic, using advanced filters.
     text: |
         az eventgrid domain topic event-subscription update --name es3 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
             --advanced-filter data.blobType StringIn BlockBlob
             --advanced-filter data.url StringBeginsWith https://myaccount.blob.core.windows.net
   - name: Update an event subscription for an Event Grid domain topic with Storage Queue as destination with ttl of 5 mins
     text: |
         az eventgrid domain topic event-subscription update -n es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --storage-queue-msg-ttl 300
   - name: Update an event subscription for an Event Grid domain topic with advanced filtering on arrays enabled
     text: |
         az eventgrid domain topic event-subscription update -n es1 \\
-            -g rg1 --domain-name domain1 --topic-name topic1 \\
+            -g rg1 --domain-name domain1 --domain-topic-name topic1 \\
             --enable-advanced-filtering-on-arrays true
 """
 
@@ -647,7 +647,7 @@ type: command
 short-summary: Get the details of a verified partner.
 examples:
   - name: Show the details of a partner verified partner.
-    text: az eventgrid verified-partner show --verified-partner-name verifiedpartner1
+    text: az eventgrid partner verified-partner show --verified-partner-name verifiedpartner1
 """
 
 helps['eventgrid partner verified-partner list'] = """
@@ -682,7 +682,7 @@ examples:
     text: |
         az eventgrid partner destination create --location westus2 -g rg1 \\
             --partner-destination-name destination1 \\
-            --expiration-time-if-not-activated-utc 2022-06-14T05:37:51.272Z \\
+            --activation-expiration-date 2022-06-14T05:37:51.272Z \\
             --message-for-activation "This is an activation message"
 
 """
@@ -797,7 +797,7 @@ type: command
 short-summary: Authorize a partner configuration.
 examples:
   - name: Authorize a partner based on partner registration immutable ID.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-date 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-immutable-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-date 2022-06-14T05:37:51.272Z
   - name: Authorize a partner based on partner name.
     text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-date 2022-06-14T05:37:51.272Z
 """
@@ -807,9 +807,9 @@ type: command
 short-summary: Unauthorize a partner configuration.
 examples:
   - name: Unauthorize a partner based on partner registration immutable ID.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-registration-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-date 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration unauthorize -g rg1 --partner-registration-immutable-id 795c9f2f-6d2d-42ff-a570-42fd3043192c --authorization-expiration-date 2022-06-14T05:37:51.272Z
   - name: Unauthorize a partner based on partner name.
-    text: az eventgrid partner configuration authorize -g rg1 --partner-name partner1 --authorization-expiration-date 2022-06-14T05:37:51.272Z
+    text: az eventgrid partner configuration unauthorize -g rg1 --partner-name partner1 --authorization-expiration-date 2022-06-14T05:37:51.272Z
 """
 
 helps['eventgrid partner configuration update'] = """
@@ -841,14 +841,14 @@ parameters:
 examples:
   - name: Create a new channel of type PartnerDestination with inline event types.
     text: |
-        az eventgrid partner namespace channel create -g rg1 --channel-name channel1 \\
+        az eventgrid partner namespace channel create -g rg1 --name channel1 \\
           --channel-type PartnerDestination --partner-namespace-name namespace1 \\
           --partner-destination-name destination1 \\
           --inline-event-type eventkey1 description="My event type." \\
-          --inline event type eventkey2 description="My second event type."
+          --inline-event-type eventkey2 description="My second event type."
   - name: Create a new channel of type PartnerTopic.
     text: |
-        az eventgrid partner namespace channel create -g rg1 --channel-name channel1 \\
+        az eventgrid partner namespace channel create -g rg1 --name channel1 \\
           --channel-type PartnerTopic --partner-namespace-name namespace1 \\
           --partner-topic-name topic1 \\
           --partner-topic-source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname
@@ -870,7 +870,7 @@ type: command
 short-summary: Delete a partner namespace.
 examples:
   - name: Delete a specific partner namespace.
-    text: az eventgrid partner namespace channel delete -g rg1 --partner-namespace-name partnernamespace1 --channel-name channelname1
+    text: az eventgrid partner namespace channel delete -g rg1 --partner-namespace-name partnernamespace1 --name channelname1
 """
 
 helps['eventgrid partner namespace channel show'] = """
@@ -878,7 +878,7 @@ type: command
 short-summary: Get the details of a channel under a partner namespace.
 examples:
   - name: Show the details of a channel.
-    text: az eventgrid partner namespace channel show -g rg1 --partner-namespace-name partnernamespace1 --channel-name channelname1
+    text: az eventgrid partner namespace channel show -g rg1 --partner-namespace-name partnernamespace1 --name channelname1
   - name: Show the details of a channel based on resource ID.
     text: az eventgrid partner namespace channel show --ids /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/partnenamespaces/partnernamespace1/channels/channelName1
 """
@@ -901,14 +901,14 @@ examples:
     text: |
         az eventgrid partner namespace channel update -g rg1 \\
           --partner-namespace-name partnernamespace1 \\
-          --channel-name channelname1 --channel-type PartnerDestination \\
+          --name channelname1 \\
           --activation-expiration-date 2022-06-14T05:37:51.272Z \\
 
   - name: Update the inline events of a channel.
     text: |
         az eventgrid partner namespace channel update -g rg1 \\
           --partner-namespace-name partnernamespace1 \\
-          --channel-name channelname1 --channel-type ParnterTopic \\
+          --name channelname1 \\
           --event-type-kind inline --inline-event-type eventtype1 documentation-url=https://www.microsoft.com
 """
 
@@ -1915,7 +1915,7 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
-  - name: --delivery-attribute-mapping
+  - name: --delivery-attribute-mapping -d
     short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
     long-summary: |
         Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
@@ -2040,7 +2040,7 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
-  - name: --delivery-attribute-mapping
+  - name: --delivery-attribute-mapping -d
     short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
     long-summary: |
         Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
@@ -2129,7 +2129,7 @@ parameters:
         Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
   - name: --endpoint-type
     short-summary: The type of the destination endpoint.
-  - name: --delivery-attribute-mapping
+  - name: --delivery-attribute-mapping -d
     short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
     long-summary: |
         Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
@@ -2254,7 +2254,7 @@ parameters:
         IsNullOrUndefined:         --advanced-filter data.property3 IsNullOrUndefined
         IsNotNull:                 --advanced-filter data.property3 IsNotNull
         Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
-  - name: --delivery-attribute-mapping
+  - name: --delivery-attribute-mapping -d
     short-summary: Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument.
     long-summary: |
         Usage:                        --delivery-attribute-mapping attribute-name attribute-type attribute-value [attribute-is-secret]
