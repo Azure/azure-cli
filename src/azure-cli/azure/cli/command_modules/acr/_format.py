@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from datetime import datetime
 from knack.log import get_logger
 
 
@@ -261,7 +262,8 @@ def _replication_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('LOCATION', _get_value(item, 'location')),
         ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
-        ('STATUS', _get_value(item, 'status', 'displayStatus'))
+        ('STATUS', _get_value(item, 'status', 'displayStatus')),
+        ('REGION ENDPOINT ENABLED', _get_value(item, 'regionEndpointEnabled'))
     ])
 
 
@@ -520,3 +522,7 @@ def _get_duration(start_time, finish_time):
     except ValueError:
         logger.debug("Unable to get duration with start_time '%s' and finish_time '%s'", start_time, finish_time)
         return ' '
+
+
+def add_timestamp(message):
+    return "{} {}".format(datetime.utcnow(), message)

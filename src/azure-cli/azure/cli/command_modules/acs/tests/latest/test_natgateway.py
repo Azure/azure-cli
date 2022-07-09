@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 
-from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs import _natgateway as natgateway
+from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterModels
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
-from azure.cli.command_modules.acs.decorator import AKSModels
+from azure.cli.core.profiles import ResourceType
 
 
 class TestCreateNatGatewayProfile(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestCreateNatGatewayProfile(unittest.TestCase):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
         # store all the models used by nat gateway
-        self.nat_gateway_models = AKSModels(self.cmd,ResourceType.MGMT_CONTAINERSERVICE).nat_gateway_models
+        self.nat_gateway_models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE).nat_gateway_models
 
     def test_empty_arguments(self):
         profile = natgateway.create_nat_gateway_profile(None, None, models=self.nat_gateway_models)
@@ -38,7 +38,7 @@ class TestUpdateNatGatewayProfile(unittest.TestCase):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
         # store all the models used by nat gateway
-        self.nat_gateway_models = AKSModels(self.cmd,ResourceType.MGMT_CONTAINERSERVICE).nat_gateway_models
+        self.nat_gateway_models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE).nat_gateway_models
 
     def test_empty_arguments(self):
         origin_profile = self.nat_gateway_models.ManagedClusterNATGatewayProfile(
@@ -85,3 +85,7 @@ class TestIsNatGatewayProfileProvided(unittest.TestCase):
     def test_nonempty_arguments(self):
         result = natgateway.is_nat_gateway_profile_provided(1, 4)
         self.assertTrue(result)
+
+
+if __name__ == "__main__":
+    unittest.main()

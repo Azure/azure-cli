@@ -12,7 +12,7 @@ from ..constant import SynapseSqlCreateMode, SqlPoolConnectionClientAuthenticati
 
 # Synapse sqlpool
 def create_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_name, performance_level, tags=None,
-                    storage_account_type=None, no_wait=False):
+                    storage_account_type=None, collation=None, no_wait=False):
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
     workspace_object = workspace_client.get(resource_group_name, workspace_name)
     location = workspace_object.location
@@ -20,7 +20,7 @@ def create_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_n
     sku = Sku(name=performance_level)
 
     sql_pool_info = SqlPool(sku=sku, location=location, create_mode=SynapseSqlCreateMode.Default,
-                            storage_account_type=storage_account_type, tags=tags)
+                            storage_account_type=storage_account_type, tags=tags, collation=collation)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name, sql_pool_name, sql_pool_info)
 

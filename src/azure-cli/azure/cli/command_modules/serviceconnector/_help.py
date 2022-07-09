@@ -47,7 +47,7 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.Secret: '--secret name=XX secret=XX',
         AUTH_TYPE.SecretAuto: '--secret',
         AUTH_TYPE.SystemIdentity: '--system-identity',
-        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX secret=XX',
+        AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
         AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX'
     }
 
@@ -196,7 +196,9 @@ for source in SOURCE_RESOURCES:
                 Usage: --secret name=XX secret=XX
 
                 name    : Required. Username or account name for secret auth.
-                secret  : Required. Password or account key for secret auth.
+                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
+                secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
+                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
         ''' if AUTH_TYPE.Secret in auth_types else ''
         secret_auto_param = '''
             - name: --secret

@@ -34,7 +34,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory, _resource_privatelinks_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy
@@ -53,7 +53,7 @@ from ._bicep import (
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
     validate_bicep_target_scope,
-    supports_bicep_publish
+    bicep_version_greater_than_or_equal_to
 )
 
 from ._utils import _build_preflight_error_message, _build_http_response_error_message
@@ -2310,7 +2310,7 @@ def _build_identities_info(cmd, identities, resourceGroupName):
         return ResourceIdentity(type=ResourceIdentityType.system_assigned)
 
     user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
-    if user_assigned_identities and len(user_assigned_identities) > 0:
+    if user_assigned_identities:
         msiId = _get_resource_id(cmd.cli_ctx, user_assigned_identities[0], resourceGroupName,
                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
 
@@ -3672,28 +3672,51 @@ def upgrade_bicep_cli(cmd, target_platform=None):
     ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
 
 
-def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
+def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
     args = ["build", file]
     if outdir:
         args += ["--outdir", outdir]
     if outfile:
         args += ["--outfile", outfile]
+    if no_restore:
+        args += ["--no-restore"]
     if stdout:
         args += ["--stdout"]
-        print(run_bicep_command(args))
-        return
-    run_bicep_command(args)
+
+    output = run_bicep_command(args)
+
+    if stdout:
+        print(output)
 
 
 def publish_bicep_file(cmd, file, target):
-    if supports_bicep_publish():
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.4.1008"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         run_bicep_command(["publish", file, "--target", target])
     else:
-        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def decompile_bicep_file(cmd, file):
-    run_bicep_command(["decompile", file])
+def restore_bicep_file(cmd, file, force=None):
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.4.1008"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["restore", file]
+        if force:
+            args += ["--force"]
+        run_bicep_command(args)
+    else:
+        logger.error("az bicep restore could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def decompile_bicep_file(cmd, file, force=None):
+    args = ["decompile", file]
+    if force:
+        args += ["--force"]
+    run_bicep_command(args)
 
 
 def show_bicep_cli_version(cmd):
@@ -3702,3 +3725,77 @@ def show_bicep_cli_version(cmd):
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
+
+
+def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.7.4"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["generate-params", file]
+        if no_restore:
+            args += ["--no-restore"]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+
+        output = run_bicep_command(args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep generate-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def create_resourcemanager_privatelink(
+        cmd, resource_group, name, location):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    ResourceManagementPrivateLinkLocation = cmd.get_models(
+        'ResourceManagementPrivateLinkLocation')
+    resource_management_private_link_location = ResourceManagementPrivateLinkLocation(
+        location=location)
+    return rcf.resource_management_private_link.put(resource_group, name, resource_management_private_link_location)
+
+
+def get_resourcemanager_privatelink(cmd, resource_group, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.resource_management_private_link.get(resource_group, name)
+
+
+def list_resourcemanager_privatelink(cmd, resource_group=None):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    if resource_group:
+        return rcf.resource_management_private_link.list_by_resource_group(resource_group)
+    return rcf.resource_management_private_link.list()
+
+
+def delete_resourcemanager_privatelink(cmd, resource_group, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.resource_management_private_link.delete(resource_group, name)
+
+
+def create_private_link_association(cmd, management_group_id, name, privatelink, public_network_access):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    PrivateLinkProperties, PrivateLinkObject = cmd.get_models(
+        'PrivateLinkAssociationProperties', 'PrivateLinkAssociationObject')
+    pl = PrivateLinkObject(properties=PrivateLinkProperties(
+        private_link=privatelink, public_network_access=public_network_access))
+    return rcf.private_link_association.put(group_id=management_group_id, pla_id=name, parameters=pl)
+
+
+def get_private_link_association(cmd, management_group_id, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.private_link_association.get(group_id=management_group_id, pla_id=name)
+
+
+def delete_private_link_association(cmd, management_group_id, name):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.private_link_association.delete(group_id=management_group_id, pla_id=name)
+
+
+def list_private_link_association(cmd, management_group_id):
+    rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
+    return rcf.private_link_association.list(group_id=management_group_id)

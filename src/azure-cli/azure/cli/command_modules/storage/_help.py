@@ -752,7 +752,7 @@ parameters:
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
   - name: --source-account-name
     type: string
-    short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the source account is used.
+    short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the destination account is used.
   - name: --source-account-key
     type: string
     short-summary: The account key for the source storage account.
@@ -787,6 +787,19 @@ examples:
     text: az storage blob delete -c mycontainer -n MyBlob
   - name: Delete a blob using login credentials.
     text: az storage blob delete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
+"""
+
+helps['storage blob undelete'] = """
+type: command
+short-summary: Restore soft deleted blob or snapshot.
+long-summary: >
+    Operation will only be successful if used within the specified number of days set in the delete retention policy.
+    Attempting to undelete a blob or snapshot that is not soft deleted will succeed without any changes.
+examples:
+  - name: Undelete a blob.
+    text: az storage blob undelete -c mycontainer -n MyBlob
+  - name: Undelete a blob using login credentials.
+    text: az storage blob undelete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
 """
 
 helps['storage blob delete-batch'] = """
@@ -954,6 +967,21 @@ examples:
 helps['storage blob metadata'] = """
 type: group
 short-summary: Manage blob metadata.
+"""
+
+helps['storage blob metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified blob or snapshot.
+examples:
+  - name: Show user-defined metadata for blob.
+    text: az storage blob metadata show --container-name mycontainer --name myblob
+"""
+
+helps['storage blob metadata update'] = """
+type: command
+examples:
+  - name: Set user-defined metadata for blob.
+    text: az storage blob metadata update --container-name mycontainer --name myblob --metadata key=value
 """
 
 helps['storage blob query'] = """
@@ -1193,6 +1221,8 @@ short-summary: Download a blob to a file path.
 examples:
   - name: Download a blob.
     text: az storage blob download -f /path/to/file -c mycontainer -n MyBlob
+  - name: Download a blob content to stdout(pipe support).
+    text: az storage blob download -c mycontainer -n myblob --account-name mystorageaccount --account-key myaccountkey
 """
 
 helps['storage blob url'] = """
@@ -1323,7 +1353,7 @@ examples:
 
 helps['storage container delete'] = """
 type: command
-short-summary: Marks the specified container for deletion.
+short-summary: Mark the specified container for deletion.
 long-summary: >
     The container and any blobs contained within it are later deleted during garbage collection.
 examples:
@@ -1360,6 +1390,21 @@ examples:
     text: |
         az storage container generate-sas --account-name mystorageaccount --as-user --auth-mode login --expiry 2020-01-01 --name container1 --permissions dlrw
     crafted: true
+"""
+
+helps['storage container show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified container.
+"""
+
+helps['storage container show-permission'] = """
+type: command
+short-summary: Get the permissions for the specified container.
+"""
+
+helps['storage container set-permission'] = """
+type: command
+short-summary: Set the permissions for the specified container.
 """
 
 helps['storage container immutability-policy'] = """
@@ -1483,6 +1528,16 @@ examples:
 helps['storage container metadata'] = """
 type: group
 short-summary: Manage container metadata.
+"""
+
+helps['storage container metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified container.
+"""
+
+helps['storage container metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified container.
 """
 
 helps['storage container policy'] = """
@@ -1627,6 +1682,21 @@ type: group
 short-summary: Manage file storage directories.
 """
 
+helps['storage directory create'] = """
+type: command
+short-summary: Create a new directory under the specified share or parent directory.
+"""
+
+helps['storage directory delete'] = """
+type: command
+short-summary: Delete the specified empty directory.
+"""
+
+helps['storage directory show'] = """
+type: command
+short-summary: Get all user-defined metadata and system properties for the specified directory
+"""
+
 helps['storage directory exists'] = """
 type: command
 short-summary: Check for the existence of a storage directory.
@@ -1650,6 +1720,16 @@ examples:
 helps['storage directory metadata'] = """
 type: group
 short-summary: Manage file storage directory metadata.
+"""
+
+helps['storage directory metadata show'] = """
+type: command
+short-summary: Get all user-defined metadata for the specified directory.
+"""
+
+helps['storage directory metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified directory.
 """
 
 helps['storage entity'] = """
@@ -1721,6 +1801,18 @@ short-summary: Manage file copy operations.
 helps['storage file copy start'] = """
 type: command
 short-summary: Copy a file asynchronously.
+parameters:
+  - name: --source-uri -u
+    type: string
+    short-summary: >
+        A URL of up to 2 KB in length that specifies an Azure file or blob.
+        The value should be URL-encoded as it would appear in a request URI.
+        If the source is in another account, the source must either be public
+        or must be authenticated via a shared access signature. If the source
+        is public, no authentication is required.
+        Examples:
+        https://myaccount.file.core.windows.net/myshare/mydir/myfile
+        https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken.
 examples:
     - name: Copy a file asynchronously.
       text: |
@@ -1803,6 +1895,12 @@ examples:
     crafted: true
 """
 
+helps['storage file download'] = """
+type: command
+short-summary: Download a file to a file path, with automatic chunking and progress notifications.
+long-summary: Return an instance of File with properties and metadata.
+"""
+
 helps['storage file download-batch'] = """
 type: command
 short-summary: Download files from an Azure Storage File Share to a local directory in a batch operation.
@@ -1855,6 +1953,7 @@ examples:
 
 helps['storage file generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the file.
 examples:
   - name: Generate a sas token for a file.
     text: |
@@ -1868,6 +1967,15 @@ examples:
     text: |
         az storage file generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2037-12-31T23:59:00Z --https-only --path path/file.txt --permissions rcdw --share-name myshare
     crafted: true
+"""
+
+helps['storage file show'] = """
+type: command
+short-summary: Return all user-defined metadata, standard HTTP properties, and system properties for the file.
+examples:
+  - name:  Show properties of file in file share.
+    text: |
+        az storage file show -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage file list'] = """
@@ -1884,9 +1992,51 @@ examples:
     crafted: true
 """
 
+helps['storage file delete'] = """
+type: command
+short-summary: Mark the specified file for deletion.
+long-summary: The file is later deleted during garbage collection.
+"""
+
+helps['storage file resize'] = """
+type: command
+short-summary: Resize a file to the specified size.
+long-summary: If the specified byte value is less than the current size of the file, then all ranges above
+        the specified byte value are cleared.
+parameters:
+    - name: --size
+      short-summary: Size to resize file to (in bytes).
+"""
+
 helps['storage file metadata'] = """
 type: group
 short-summary: Manage file metadata.
+"""
+
+helps['storage file metadata show'] = """
+type: command
+short-summary:  Return all user-defined metadata for the file.
+examples:
+  - name: Show metadata for the file
+    text: az storage file metadata show -s MyShare --path /path/to/file
+"""
+
+helps['storage file metadata update'] = """
+type: command
+short-summary:  Update file metadata.
+examples:
+  - name: Update metadata for the file
+    text: az storage file metadata update -s MyShare --path /path/to/file --metadata key1=value1
+"""
+
+helps['storage file update'] = """
+type: command
+short-summary: Set system properties on the file.
+long-summary: If one property is set for the content_settings, all properties will be overriden.
+examples:
+  - name:  Set system properties on the file.
+    text: |
+        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000 --content-type test/type
 """
 
 helps['storage file upload'] = """
@@ -2813,6 +2963,7 @@ examples:
 
 helps['storage share generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the share.
 examples:
   - name: Generate a sas token for a fileshare and use it to upload a file.
     text: |
@@ -2834,9 +2985,48 @@ type: command
 short-summary: List the file shares in a storage account.
 """
 
+helps['storage share show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified share.
+long-summary: The data returned does not include the shares's list of files or directories.
+"""
+
+helps['storage share delete'] = """
+type: command
+short-summary: Mark the specified share for deletion.
+long-summary: If the share does not exist, the operation fails on the service. By default, the exception is swallowed by the client. To expose the exception, specify True for fail_not_exist.
+"""
+
+helps['storage share stats'] = """
+type: command
+short-summary: Get the approximate size of the data stored on the share, rounded up to the nearest gigabyte.
+long-summary: Note that this value may not include all recently created or recently re-sized files.
+"""
+
+helps['storage share update'] = """
+type: command
+short-summary: Set service-defined properties for the specified share.
+"""
+
+helps['storage share snapshot'] = """
+type: command
+short-summary: Create a snapshot of an existing share under the specified account.
+"""
+
 helps['storage share metadata'] = """
 type: group
 short-summary: Manage the metadata of a file share.
+"""
+
+helps['storage share metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified share.
+"""
+
+helps['storage share metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified share.
+long-summary: Each call to this operation replaces all existing metadata attached to the share. To remove all metadata from the share, call this operation with no metadata dict.
 """
 
 helps['storage share policy'] = """

@@ -7,6 +7,9 @@ import platform
 import subprocess
 from abc import abstractmethod
 
+# TODO: this file is deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
+
 
 def disable_http_proxy():
     """
@@ -36,7 +39,7 @@ def _get_proxy_instance():
     if os_platform == 'Darwin':
         return MacProxy()
     if os_platform == 'Windows':
-        from .win_proxy import WinProxy
+        from azure.cli.command_modules.acs.win_proxy import WinProxy
         return WinProxy()
     if os_platform == 'Linux':
         return LinuxProxy()
