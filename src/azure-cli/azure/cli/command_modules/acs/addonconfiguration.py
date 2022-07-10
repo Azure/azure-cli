@@ -2,10 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import datetime
 import json
 
-from azure.cli.command_modules.acs._client_factory import cf_resource_groups, cf_resources
+from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
 from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_ADDON_NAME,
     CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
@@ -18,10 +17,8 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
 from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, send_raw_request
+from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, resource_id
@@ -186,8 +183,8 @@ def ensure_default_log_analytics_workspace_for_monitoring(
             default_workspace_name,
         )
     )
-    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    resource_groups = get_resource_groups_client(cmd.cli_ctx, subscription_id)
+    resources = get_resources_client(cmd.cli_ctx, subscription_id)
 
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
@@ -309,7 +306,7 @@ def ensure_container_insights_for_monitoring(
 
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
     if not remove_monitoring:
-        resources = cf_resources(cmd.cli_ctx, subscription_id)
+        resources = get_resources_client(cmd.cli_ctx, subscription_id)
         try:
             resource = resources.get_by_id(
                 workspace_resource_id, "2015-11-01-preview"
@@ -459,173 +456,6 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
-        if not _is_container_insights_solution_exists(cmd, workspace_resource_id):
-            unix_time_in_millis = int(
-                (
-                    datetime.datetime.utcnow() -
-                    datetime.datetime.utcfromtimestamp(0)
-                ).total_seconds() * 1000.0
-            )
-
-            solution_deployment_name = "ContainerInsights-{}".format(
-                unix_time_in_millis
-            )
-
-            # pylint: disable=line-too-long
-            template = {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
-                "parameters": {
-                    "workspaceResourceId": {
-                        "type": "string",
-                        "metadata": {
-                            "description": "Azure Monitor Log Analytics Resource ID"
-                        },
-                    },
-                    "workspaceRegion": {
-                        "type": "string",
-                        "metadata": {
-                            "description": "Azure Monitor Log Analytics workspace region"
-                        },
-                    },
-                    "solutionDeploymentName": {
-                        "type": "string",
-                        "metadata": {
-                            "description": "Name of the solution deployment"
-                        },
-                    },
-                },
-                "resources": [
-                    {
-                        "type": "Microsoft.Resources/deployments",
-                        "name": "[parameters('solutionDeploymentName')]",
-                        "apiVersion": "2017-05-10",
-                        "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
-                        "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
-                        "properties": {
-                            "mode": "Incremental",
-                            "template": {
-                                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                                "contentVersion": "1.0.0.0",
-                                "parameters": {},
-                                "variables": {},
-                                "resources": [
-                                    {
-                                        "apiVersion": "2015-11-01-preview",
-                                        "type": "Microsoft.OperationsManagement/solutions",
-                                        "location": "[parameters('workspaceRegion')]",
-                                        "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                        "properties": {
-                                            "workspaceResourceId": "[parameters('workspaceResourceId')]"
-                                        },
-                                        "plan": {
-                                            "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                            "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
-                                            "promotionCode": "",
-                                            "publisher": "Microsoft",
-                                        },
-                                    }
-                                ],
-                            },
-                            "parameters": {},
-                        },
-                    }
-                ],
-            }
-
-            params = {
-                "workspaceResourceId": {"value": workspace_resource_id},
-                "workspaceRegion": {"value": location},
-                "solutionDeploymentName": {"value": solution_deployment_name},
-            }
-
-            deployment_name = "aks-monitoring-{}".format(unix_time_in_millis)
-            # publish the Container Insights solution to the Log Analytics workspace
-            return _invoke_deployment(
-                cmd,
-                resource_group,
-                deployment_name,
-                template,
-                params,
-                validate=False,
-                no_wait=False,
-                subscription_id=subscription_id,)
-
-
-def _is_container_insights_solution_exists(cmd, workspace_resource_id):
-    # extract subscription ID and resource group from workspace_resource_id URL
-    is_exists = False
-    _MAX_RETRY_TIMES = 3
-    parsed = parse_resource_id(workspace_resource_id)
-    subscription_id, resource_group, workspace_name = parsed[
-        "subscription"], parsed["resource_group"], parsed["name"]
-    solution_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationsManagement/solutions/ContainerInsights({2})".format(
-        subscription_id, resource_group, workspace_name)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
-    for retry_count in range(0, _MAX_RETRY_TIMES):
-        try:
-            resources.get_by_id(solution_resource_id, '2015-11-01-preview')
-            is_exists = True
-            break
-        except HttpResponseError as ex:
-            if ex.status_code == 404:
-                is_exists = False
-                break
-            if retry_count >= (_MAX_RETRY_TIMES - 1):
-                raise ex
-    return is_exists
-
-
-def _invoke_deployment(
-    cmd,
-    resource_group_name,
-    deployment_name,
-    template,
-    parameters,
-    validate,
-    no_wait,
-    subscription_id=None,
-):
-    DeploymentProperties = cmd.get_models(
-        "DeploymentProperties",
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-    )
-    properties = DeploymentProperties(
-        template=template, parameters=parameters, mode="incremental"
-    )
-    smc = get_mgmt_service_client(
-        cmd.cli_ctx,
-        ResourceType.MGMT_RESOURCE_RESOURCES,
-        subscription_id=subscription_id,
-    ).deployments
-    if validate:
-        logger.info("==== BEGIN TEMPLATE ====")
-        logger.info(json.dumps(template, indent=2))
-        logger.info("==== END TEMPLATE ====")
-
-    Deployment = cmd.get_models(
-        "Deployment", resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
-    )
-    deployment = Deployment(properties=properties)
-
-    if validate:
-        if cmd.supported_api_version(
-            min_api="2019-10-01",
-            resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-        ):
-            validation_poller = smc.begin_validate(
-                resource_group_name, deployment_name, deployment
-            )
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return smc.validate(resource_group_name, deployment_name, deployment)
-
-    return sdk_no_wait(
-        no_wait,
-        smc.begin_create_or_update,
-        resource_group_name,
-        deployment_name,
-        deployment,
-    )
 
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):

@@ -4367,6 +4367,27 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('remoteVirtualNetworkEncryption.enforcement', '{dropUnencrypted}'),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_subnet_test')
+    def test_network_vnet_subnet_list_available_ips(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'rt': 'Microsoft.Network/virtualNetworks',
+            'rg': resource_group
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+
+        self.cmd(
+            'network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 10.0.1.0/24')
+
+        self.cmd('network vnet subnet list-available-ips -g {rg} --vnet-name {vnet} --name {subnet}', checks=[
+            self.check('length(@)', 5)
+        ])
+
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')

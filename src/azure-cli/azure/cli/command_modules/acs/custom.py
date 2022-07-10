@@ -37,7 +37,7 @@ import yaml
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    cf_container_registry_service,
+    get_container_registry_client,
     cf_container_services,
     get_auth_management_client,
     get_graph_rbac_management_client,
@@ -3440,7 +3440,7 @@ def _ensure_aks_acr(cmd,
     if is_valid_resource_id(acr_name_or_id):
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
-            acr_client = cf_container_registry_service(
+            acr_client = get_container_registry_client(
                 cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
             registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])
