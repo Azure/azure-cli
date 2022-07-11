@@ -429,7 +429,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
         self.cmd('network private-link-resource list --id {registry_id}', checks=[
             self.check('length(@)', 1)])
 
-    @ResourceGroupPreparer(location='centraluseuap')
+    @ResourceGroupPreparer(location='centralus')
     def test_private_endpoint_connection_acr(self, resource_group):
         self.kwargs.update({
             'registry_name': self.create_random_name('testreg', 20),
