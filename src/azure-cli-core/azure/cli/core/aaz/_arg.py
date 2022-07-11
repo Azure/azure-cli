@@ -110,7 +110,8 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         arg = CLICommandArgument(
             dest=name,
             options_list=[*self._options] if self._options else None,
-            required=self._required,
+            # if default is not None, arg is not required.
+            required=self._required if self._default == AAZUndefined else False,
             help=self._help.get('short-summary', None),
             id_part=self._id_part,
             default=self._default,
@@ -315,6 +316,7 @@ class AAZResourceGroupNameArg(AAZStrArg):
         from azure.cli.core.commands.parameters import get_resource_group_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name)
+
         arg.completer = get_resource_group_completion_list
         arg.configured_default = 'group'
         arg.local_context_attribute = LocalContextAttribute(
@@ -345,6 +347,11 @@ class AAZResourceLocationArg(AAZStrArg):
         from azure.cli.core.commands.parameters import get_location_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name)
+        if self._required and \
+                isinstance(self._fmt, AAZResourceLocationArgFormat) and self._fmt._resource_group_arg is not None:
+            # when location is required and it will be retrived from resource group by default, arg is not required.
+            arg.required = False
+
         arg.completer = get_location_completion_list
         arg.configured_default = 'location'
         arg.local_context_attribute = LocalContextAttribute(

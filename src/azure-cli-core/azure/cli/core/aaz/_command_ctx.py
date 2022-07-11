@@ -6,11 +6,13 @@
 # pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
+from .exceptions import AAZInvalidArgValueError
 
 
 class AAZCommandCtx:
@@ -40,7 +42,10 @@ class AAZCommandCtx:
         self._aux_tenants = set()
 
     def format_args(self):
-        self.args._schema._fmt(ctx=self, value=self.args)
+        try:
+            self.args._schema._fmt(ctx=self, value=self.args)
+        except AAZInvalidArgValueError as err:
+            raise InvalidArgumentValueError(str(err))
 
     def get_login_credential(self):
         credential, _, _ = self._profile.get_login_credentials(

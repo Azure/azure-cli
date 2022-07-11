@@ -11,7 +11,6 @@ class TestAAZResourceArgFmt(ScenarioTest):
 
     def format_arg(self, schema, data):
         from azure.cli.core.aaz._command_ctx import AAZCommandCtx
-        from azure.cli.core.aaz.exceptions import AAZInvalidArgValueError
         ctx = AAZCommandCtx(
             cli_ctx=self.cli_ctx, schema=schema,
             command_args=data
@@ -22,7 +21,7 @@ class TestAAZResourceArgFmt(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_resource_location_arg_fmt', location="eastus2")
     def test_aaz_resource_location_arg_fmt(self, resource_group):
         from azure.cli.core.aaz._arg import AAZArgumentsSchema
-        from azure.cli.core.aaz.exceptions import AAZInvalidArgValueError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
         from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZStrArg
 
         schema = AAZArgumentsSchema()
@@ -114,7 +113,7 @@ class TestAAZResourceArgFmt(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_resource_id_arg_fmt', location="eastus2")
     def test_aaz_resource_id_arg_fmt(self, resource_group):
         from azure.cli.core.aaz._arg import AAZArgumentsSchema
-        from azure.cli.core.aaz.exceptions import AAZInvalidArgValueError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
         from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZResourceIdArg, AAZStrArg, \
             AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZObjectArg, AAZListArg, AAZSubscriptionIdArg, \
             AAZSubscriptionIdArgFormat
@@ -173,7 +172,7 @@ class TestAAZResourceArgFmt(ScenarioTest):
             ]
         })
 
-        with self.assertRaises(AAZInvalidArgValueError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.format_arg(schema, {
                 "rg_name": resource_group,
                 "name": "test",
@@ -183,7 +182,7 @@ class TestAAZResourceArgFmt(ScenarioTest):
                 }
             })
 
-        with self.assertRaises(AAZInvalidArgValueError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.format_arg(schema, {
                 "rg_name": resource_group,
                 "name": "test",
@@ -192,7 +191,7 @@ class TestAAZResourceArgFmt(ScenarioTest):
                 }
             })
 
-        with self.assertRaises(AAZInvalidArgValueError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.format_arg(schema, {
                 "rg_name": resource_group,
                 "name": "test",

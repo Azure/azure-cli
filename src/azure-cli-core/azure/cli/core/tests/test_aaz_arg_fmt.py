@@ -36,16 +36,16 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             nullable=True
         )
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"str1": ""})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"str1": "1234"})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"str1": "abcdefghi"})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"str1": "aBCD"})
 
         args = self.format_arg(schema, {"str1": "abcdefgh"})
@@ -70,13 +70,13 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             nullable=True
         )
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"int1": 10})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"int1": 25})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"int1": 40})
 
         args = self.format_arg(schema, {"int1": 20})
@@ -102,22 +102,22 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             )
         )
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 1.1})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 22})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 33})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 23})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 23.099})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 31.901})
 
         args = self.format_arg(schema, {"flt1": 23.1})
@@ -126,10 +126,10 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         args = self.format_arg(schema, {"flt1": 31.9})
         self.assertEqual(args.flt1, 31.9)
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 22.0000000001})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"flt1": 32.9999999999})
 
         schema = AAZArgumentsSchema()
@@ -201,14 +201,14 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             "count": 100
         })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "properties": {
                     "name": "abcd",
                 }
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "properties": {
                     "name": "abcd",
@@ -243,21 +243,21 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         })
         self.assertEqual(args.properties.to_serialized_data(), {})
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "properties": {
                     "name": "a1234",
                 }
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "properties": {
                     "count": -10,
                 }
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "properties": {
                     "vnet": {
@@ -321,14 +321,14 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             }
         })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "tags": {
                     "flag1": "v1",
                 },
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "tags": {
                     "flag1": "v1",
@@ -338,7 +338,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
                 },
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "actions": {
                     "a": {
@@ -408,17 +408,17 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             ]
         })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "tags": ['v1',],
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "tags": ['v1', 'v2', 'v3', 'v4'],
             })
 
-        with self.assertRaises(aazerror.AAZInvalidArgValueError):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "tags": ['v1', 'v2', 'v2'],
             })
