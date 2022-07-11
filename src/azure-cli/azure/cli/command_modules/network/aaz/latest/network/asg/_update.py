@@ -61,6 +61,9 @@ class Update(AAZCommand):
         _args_schema.location = AAZResourceLocationArg(
             help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             nullable=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],

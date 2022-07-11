@@ -21,7 +21,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
+    cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -85,11 +85,6 @@ def load_command_table(self, _):
     network_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network._util#{}',
         client_factory=None
-    )
-
-    network_asg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ApplicationSecurityGroupsOperations.{}',
-        client_factory=cf_application_security_groups
     )
 
     network_ddos_sdk = CliCommandType(
@@ -704,15 +699,6 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_ssl_profile')
         g.custom_command('update', 'update_ssl_profile')
 
-    # endregion
-
-    # region ApplicationSecurityGroups
-    with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
-        g.custom_command('create', 'create_asg')
-        # g.show_command('show', 'get')
-        # g.command('list', 'list_all')
-        # g.command('delete', 'begin_delete')
-        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_asg')
     # endregion
 
     # region DdosProtectionPlans

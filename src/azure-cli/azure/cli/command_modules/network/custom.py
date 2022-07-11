@@ -2198,20 +2198,6 @@ def list_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name):
 # endregion
 
 
-# region ApplicationSecurityGroups
-def create_asg(cmd, client, resource_group_name, application_security_group_name, location=None, tags=None):
-    ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup')
-    asg = ApplicationSecurityGroup(location=location, tags=tags)
-    return client.begin_create_or_update(resource_group_name, application_security_group_name, asg)
-
-
-# def update_asg(instance, tags=None):
-#     if tags is not None:
-#         instance.tags = tags
-#     return instance
-# endregion
-
-
 # region DdosProtectionPlans
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation

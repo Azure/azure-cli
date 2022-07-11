@@ -1787,27 +1787,6 @@ examples:
     text: az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
-helps['network asg'] = """
-type: group
-short-summary: Manage application security groups (ASGs).
-long-summary: >
-    You can configure network security as a natural extension of an application's structure, ASG allows
-    you to group virtual machines and define network security policies based on those groups. You can specify an
-    application security group as the source and destination in a NSG security rule. For more information
-    visit https://docs.microsoft.com/azure/virtual-network/create-network-security-group-preview
-"""
-
-helps['network asg create'] = """
-type: command
-short-summary: Create an application security group.
-parameters:
-  - name: --name -n
-    short-summary: Name of the new application security group resource.
-examples:
-  - name: Create an application security group.
-    text: az network asg create -g MyResourceGroup -n MyAsg --tags MyWebApp, CostCenter=Marketing
-"""
-
 helps['network ddos-protection'] = """
 type: group
 short-summary: Manage DDoS Protection Plans.

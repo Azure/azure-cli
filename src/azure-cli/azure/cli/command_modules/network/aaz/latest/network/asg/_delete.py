@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network asg delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "network asg delete"
 )
 class Delete(AAZCommand):
     """Delete an application security group.
