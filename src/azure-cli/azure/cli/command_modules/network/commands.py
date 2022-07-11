@@ -1549,10 +1549,10 @@ def load_command_table(self, _):
     # region Security Partner Provider
     with self.command_group('network security-partner-provider', network_security_partner_provider_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_security_partner_provider')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_security_partner_provider')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_security_partner_provider')
-        g.command('delete', 'begin_delete')
+        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_security_partner_provider')
+        # g.show_command('show', 'get')
+        # g.custom_command('list', 'list_security_partner_provider')
+        # g.command('delete', 'begin_delete')
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
