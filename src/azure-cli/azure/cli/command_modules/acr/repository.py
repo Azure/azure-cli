@@ -16,7 +16,8 @@ from ._docker_utils import (
     request_data_from_registry,
     get_access_credentials,
     RegistryException,
-    RepoAccessTokenPermission
+    RepoAccessTokenPermission,
+    RegistryAccessTokenPermission
 )
 
 logger = get_logger(__name__)
@@ -133,7 +134,8 @@ def acr_repository_list(cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
-        password=password)
+        password=password,
+        permission=RegistryAccessTokenPermission.CATALOG.value)
 
     return _obtain_data_from_registry(
         login_server=login_server,
@@ -154,8 +156,8 @@ def acr_repository_deleted_list(cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
-        password=password)
-
+        password=password,
+        permission=RegistryAccessTokenPermission.DELETED_CATALOG.value)
     return _obtain_data_from_registry(
         login_server=login_server,
         path='/acr/v1/_deleted/_catalog',

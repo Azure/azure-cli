@@ -294,7 +294,7 @@ def acr_manifest_deleted_list(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.METADATA_READ.value)
+        permission=RepoAccessTokenPermission.DELETED_READ.value)
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
@@ -338,7 +338,7 @@ def acr_manifest_deleted_tags_list(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.METADATA_READ.value)
+        permission=RepoAccessTokenPermission.DELETED_READ.value)
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
@@ -384,7 +384,7 @@ def acr_manifest_deleted_restore(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.META_WRITE_META_READ.value)
+        permission=RepoAccessTokenPermission.DELETED_READ_RESTORE.value)
 
     post_payload = {"tag": tag}
 
