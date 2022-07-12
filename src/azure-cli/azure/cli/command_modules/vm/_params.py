@@ -1411,7 +1411,7 @@ def load_arguments(self, _):
     with self.argument_context('ppg create') as c:
         c.argument('ppg_type', options_list=['--type', '-t'], min_api='2018-04-01', help="The type of the proximity placement group. Allowed values: Standard.")
         c.argument('tags', tags_type, min_api='2018-04-01')
-        c.argument('zone', zone_type,  min_api='2021-11-01')
+        c.argument('zone', zone_type, min_api='2021-11-01')
 
     for scope in ['ppg create', 'ppg update']:
         with self.argument_context(scope) as c:
