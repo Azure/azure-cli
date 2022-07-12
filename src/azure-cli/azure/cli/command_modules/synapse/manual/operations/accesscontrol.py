@@ -7,7 +7,6 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.util import is_guid
 from azure.cli.command_modules.role import GraphError
-from msrestazure.azure_exceptions import CloudError
 from .._client_factory import cf_synapse_role_assignments, cf_synapse_role_definitions, cf_graph_client_factory
 from ..constant import ITEM_NAME_MAPPING
 import azure.cli.command_modules.synapse.custom_help as cust_help
@@ -142,7 +141,7 @@ def _resolve_object_id(cmd, assignee, fallback_to_object_id=False):
                            .format(assignee=assignee))
 
         return result[0]["id"]
-    except (GraphError):
+    except GraphError:
         if fallback_to_object_id and is_guid(assignee):
             return assignee
         raise
