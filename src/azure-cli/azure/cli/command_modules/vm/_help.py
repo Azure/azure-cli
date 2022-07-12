@@ -629,14 +629,14 @@ examples:
     text: |
         az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup
     crafted: true
-  - name: Create a proximity placement group with specifying vm sizes that can be created.
+  - name: Create a proximity placement group with specifying VM sizes that can be created.
     text: |
         az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
-            --intentvmsizes Standard_E64s_v4 Standard_M416ms_v2
-  - name: Create a proximity placement group with specifying vm sizes that can be created and availability zone.
+            --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
+  - name: Create a proximity placement group with specifying VM sizes that can be created and availability zone.
     text: |
         az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
-            --intentvmsizes Standard_E64s_v4 Standard_M416ms_v2 --zone 1
+            --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2 --zone 1
 """
 
 helps['ppg list'] = """
@@ -663,10 +663,10 @@ helps['ppg update'] = """
 type: command
 short-summary: Update a proximity placement group
 examples:
-  - name: Update a proximity placement group with specifying vm sizes that can be created.
+  - name: Update a proximity placement group with specifying VM sizes that can be created.
     text: |
         az ppg update --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
-            --intentvmsizes Standard_E64s_v4 Standard_M416ms_v2
+            --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
 helps['sig'] = """

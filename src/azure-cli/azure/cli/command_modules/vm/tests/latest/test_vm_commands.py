@@ -5988,8 +5988,8 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
 
-    @ResourceGroupPreparer(name_prefix="cli_test_ppg_intentvmsizes_and_zone_", location='eastus2')
-    def test_ppg_intentvmsizes_and_zone(self):
+    @ResourceGroupPreparer(name_prefix="cli_test_ppg_intent_vm_sizes_and_zone_", location='eastus2')
+    def test_ppg_intent_vm_sizes_and_zone(self):
         self.kwargs.update({
             'ppg1': 'my_ppg_1',
             'ppg2': 'my_ppg_2',
@@ -5999,7 +5999,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         })
 
         # test creating proximity placement group with intent vm size and available zone
-        self.cmd('ppg create -n {ppg1} -g {rg} --intentvmsizes {vm_size1} {vm_size2} --zone {zone}',
+        self.cmd('ppg create -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2} --zone {zone}',
                  checks=[
                      self.check('name', '{ppg1}'),
                      self.check('length(intent.vmSizes)', '2'),
@@ -6007,7 +6007,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
                  ])
 
         # test creating proximity placement group with intent vm size
-        self.cmd('ppg create -n {ppg2} -g {rg} --intentvmsizes {vm_size1} {vm_size2}',
+        self.cmd('ppg create -n {ppg2} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2}',
                  checks=[
                      self.check('name', '{ppg2}'),
                      self.check('length(intent.vmSizes)', '2')
@@ -6019,7 +6019,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.cmd('ppg create -n {ppg1} -g {rg} --zone {zone}')
 
         # test updating proximity placement group with intent vm size
-        self.cmd('ppg update -n {ppg1} -g {rg} --intentvmsizes {vm_size1}', checks=[
+        self.cmd('ppg update -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1}', checks=[
             self.check('name', '{ppg1}'),
             self.check('length(intent.vmSizes)', '1')
         ])

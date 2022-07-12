@@ -1413,11 +1413,11 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
 
     with self.argument_context('ppg create', min_api='2021-11-01') as c:
-        c.argument('zone', nargs='*', help="Specifies the availability zone where virtual machine, virtual machine scale set or availability set associated with the proximity placement group can be created. Accepted values 1,2,3.")
+        c.argument('zone', zone_type)
 
     for scope in ['ppg create', 'ppg update']:
-        with self.argument_context(scope, min_api='2021-11-01') as c:
-            c.argument('intentvmsizes', nargs='*', help="Specifies possible sizes of virtual machines that can be created in the proximity placement group.")
+        with self.argument_context(scope) as c:
+            c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
     with self.argument_context('ppg show', min_api='2019-07-01') as c:
         c.argument('include_colocation_status', action='store_true', help='Enable fetching the colocation status of all the resources in the proximity placement group.')

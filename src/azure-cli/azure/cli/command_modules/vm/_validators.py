@@ -2133,9 +2133,10 @@ def process_ppg_create_namespace(namespace):
     """
     The availability zone can be provided only when an intent is provided
     """
-    if namespace.zone and not namespace.intentvmsizes:
-        raise RequiredArgumentMissingError('Please use parameter --intentvmsizes to specify possible sizes of virtual '
-                                           'machines that can be created in the proximity placement group.')
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The availability zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
 # endregion
 
 
