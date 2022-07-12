@@ -2129,6 +2129,17 @@ def _disk_encryption_set_format(cmd, namespace, name):
 # endregion
 
 
+def process_ppg_create_namespace(namespace):
+    """
+    The availability zone can be provided only when an intent is provided
+    """
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
+# endregion
+
+
 def process_image_version_create_namespace(cmd, namespace):
     process_gallery_image_version_namespace(cmd, namespace)
     process_image_resource_id_namespace(namespace)
