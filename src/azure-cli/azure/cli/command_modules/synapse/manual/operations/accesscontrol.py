@@ -142,7 +142,7 @@ def _resolve_object_id(cmd, assignee, fallback_to_object_id=False):
                            .format(assignee=assignee))
 
         return result[0]["id"]
-    except (CloudError, GraphError):
+    except (GraphError):
         if fallback_to_object_id and is_guid(assignee):
             return assignee
         raise
