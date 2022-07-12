@@ -64,6 +64,7 @@ def register_providers():
     _register_one_provider('Microsoft.Databricks/workspaces', '2021-04-01-preview', True)
     _register_one_provider('Microsoft.RecoveryServices/vaults', '2021-07-01', True)
     _register_one_provider('Microsoft.Kusto/clusters', '2021-08-27', True)
+    _register_one_provider("Microsoft.KubernetesConfiguration/privateLinkScopes", '2022-04-02-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
