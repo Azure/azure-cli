@@ -3289,7 +3289,7 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
             checks=[self.check('length(@)', 1), ]).get_output_in_json()
         self.kwargs.update({
             "endpoint_request": result[0]['name'],
-            "pec_id": result[0]['id']
+            "pec_id": result[0]['id'],
             "pec_name": result[0]['id'].split('/')[-1]
         })
 
