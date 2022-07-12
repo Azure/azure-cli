@@ -21,7 +21,6 @@ from azure.cli.core.commands.parameters import (
     get_location_type,
     resource_group_name_type,
     get_resource_name_completion_list,
-    get_three_state_flag,
     file_type,
     get_enum_type)
 
