@@ -11,7 +11,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_select, validate_blob_type,
-                          validate_included_datasets, validate_custom_domain, validate_container_public_access,
+                          validate_included_datasets, validate_custom_domain,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -19,7 +19,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
                           validate_fs_public_access)
-from ._validators_azure_stack import validate_entity
+from ._validators_azure_stack import validate_entity, validate_container_public_access
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -650,7 +650,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_lease_id', arg_group='Copy Source')
 
     with self.argument_context('storage blob copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+        from azure.cli.command_modules.storage._validators_azure_stack import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
         c.argument('requires_sync', arg_type=get_three_state_flag(),
@@ -987,7 +987,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
 
     with self.argument_context('storage file copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+        from azure.cli.command_modules.storage._validators_azure_stack import validate_source_uri
 
         c.register_path_argument(options_list=('--destination-path', '-p'))
         c.register_source_uri_arguments(validator=validate_source_uri)

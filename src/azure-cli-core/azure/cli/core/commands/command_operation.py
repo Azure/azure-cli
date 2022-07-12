@@ -467,6 +467,10 @@ class WaitCommandOperation(BaseCommandOperation):
                 if not provisioning_state:
                     additional_properties = getattr(properties, 'additional_properties', {})
                     provisioning_state = additional_properties.get('provisioningState')
+
+                # some SDK, like resource, has 'provisioningState' under 'properties' dict
+                if not provisioning_state:
+                    provisioning_state = properties.get('provisioningState')
         return provisioning_state
 
     def arguments_loader(self):

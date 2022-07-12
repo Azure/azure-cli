@@ -58,7 +58,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.common import AzureException
-    from azure.core.exceptions import AzureError
+    from azure.core.exceptions import AzureError, ServiceRequestError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
@@ -79,7 +79,11 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.InvalidArgumentValueError(error_msg)
         az_error.set_recommendation(QUERY_REFERENCE)
 
-    elif isinstance(ex, SSLError):
+    # SSLError is raised when making HTTP requests with 'requests' lib behind a proxy that intercepts HTTPS traffic.
+    # - SSLError is raised when directly calling 'requests' lib, such as MSAL or `az rest`
+    # - azure.core.exceptions.ServiceRequestError is raised when indirectly calling 'requests' lib with azure.core,
+    #   which wraps the original SSLError
+    elif isinstance(ex, SSLError) or isinstance(ex, ServiceRequestError) and isinstance(ex.inner_exception, SSLError):
         az_error = azclierror.AzureConnectionError(error_msg)
         az_error.set_recommendation(SSLERROR_TEMPLATE)
 
@@ -662,7 +666,8 @@ def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
     from azure.core.polling import LROPoller as AzureCoreLROPoller
-    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
+    from azure.cli.core.aaz._poller import AAZLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller, AAZLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -886,7 +891,12 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # try to figure out the correct content type
     if body:
         try:
-            _ = shell_safe_json_parse(body)
+            body_object = shell_safe_json_parse(body)
+            # Make sure Unicode characters are escaped as ASCII by utilizing the default ensure_ascii=True kwarg
+            # of json.dumps, since http.client by default encodes the body as latin-1:
+            # https://github.com/python/cpython/blob/3.10/Lib/http/client.py#L164
+            # https://github.com/python/cpython/blob/3.10/Lib/http/client.py#L1324-L1327
+            body = json.dumps(body_object)
             if 'Content-Type' not in headers:
                 headers['Content-Type'] = 'application/json'
         except Exception:  # pylint: disable=broad-except
@@ -977,7 +987,8 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         reason = r.reason
         if r.text:
             reason += '({})'.format(r.text)
-        raise CLIError(reason)
+        from .azclierror import HTTPError
+        raise HTTPError(reason, r)
     if output_file:
         with open(output_file, 'wb') as fd:
             for chunk in r.iter_content(chunk_size=128):
@@ -1305,3 +1316,27 @@ def rmtree_with_retry(path):
             else:
                 logger.warning("Failed to delete '%s': %s. You may try to delete it manually.", path, err)
                 break
+
+
+def get_secret_store(cli_ctx, name):
+    """Create a process-concurrency-safe azure.cli.core.auth.persistence.SecretStore instance that can be used to
+    save secret data.
+    """
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.core.auth.persistence import load_secret_store
+    # Save to CLI's config dir, by default ~/.azure
+    location = os.path.join(get_config_dir(), name)
+    # We honor the system type (Windows, Linux, or MacOS) and global config
+    encrypt = should_encrypt_token_cache(cli_ctx)
+    return load_secret_store(location, encrypt)
+
+
+def should_encrypt_token_cache(cli_ctx):
+    # Only enable encryption for Windows (for now).
+    fallback = sys.platform.startswith('win32')
+
+    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
+    # encrypt_token_cache affects both MSAL token cache and service principal entries.
+    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+
+    return encrypt

@@ -23,9 +23,12 @@ from ._constants import (
     get_valid_os,
     get_valid_architecture,
     get_valid_variant,
-    ACR_NULL_CONTEXT
+    ACR_NULL_CONTEXT,
+    ALLOWED_TASK_FILE_TYPES
 )
 from ._client_factory import cf_acr_registries
+
+from ._validators import validate_docker_file_path
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -405,7 +408,12 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
     )
 
 
-def prepare_source_location(cmd, source_location, client_registries, registry_name, resource_group_name):
+def prepare_source_location(cmd,
+                            source_location,
+                            client_registries,
+                            registry_name,
+                            resource_group_name,
+                            docker_file_path=None):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
@@ -413,13 +421,34 @@ def prepare_source_location(cmd, source_location, client_registries, registry_na
             raise CLIError(
                 "Source location should be a local directory path or remote URL.")
 
+        # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
+        # Otherwise, it's based on current working directory.
+        if docker_file_path:
+            if docker_file_path.endswith(ALLOWED_TASK_FILE_TYPES) or docker_file_path == "-":
+                docker_file_path = ""
+            else:
+                validate_docker_file_path(os.path.join(source_location, docker_file_path))
+        else:
+            docker_file_path = os.path.join(source_location, "Dockerfile")
+            if os.path.isfile(docker_file_path):
+                logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
+            else:
+                docker_file_path = ""
+
         tar_file_path = os.path.join(tempfile.gettempdir(
         ), 'cli_source_archive_{}.tar.gz'.format(uuid.uuid4().hex))
 
         try:
+            if docker_file_path:
+                # NOTE: os.path.basename is unable to parse "\" in the file path
+                docker_file_name = os.path.basename(
+                    docker_file_path.replace("\\", "/"))
+            else:
+                docker_file_name = ""
+
             source_location = upload_source_code(
                 cmd, client_registries, registry_name, resource_group_name,
-                source_location, tar_file_path, "", "")
+                source_location, tar_file_path, docker_file_path, docker_file_name)
         except Exception as err:
             raise CLIError(err)
         finally:

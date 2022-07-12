@@ -353,6 +353,34 @@ class FunctionUpdatePlan(ScenarioTest):
         self.cmd('functionapp update -g {} -n {} --plan {}'
                  .format(resource_group, functionapp_name, s1_plan_name), expect_failure=True)
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_update_slot(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-slot', length=24)
+        slotname = self.create_random_name(prefix='slotname', length=24)
+        
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp, plan,
+                                                                                        storage_account), checks=[
+            JMESPathCheck('name', functionapp)
+        ])
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
+            JMESPathCheck('name', slotname)
+        ])
+        self.cmd('functionapp update -g {} -n {} --slot {} --set siteConfig.healthCheckPath=/api/HealthCheck'.format(resource_group, functionapp, slotname), checks=[
+            JMESPathCheck('name', functionapp + '/' + slotname),
+        ])
+        self.cmd('functionapp show -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
+            JMESPathCheck('name', functionapp + '/' + slotname),
+            JMESPathCheck('siteConfig.healthCheckPath', '/api/HealthCheck')
+        ])
+        self.cmd('functionapp show -g {} -n {} '.format(resource_group, functionapp), checks=[
+            JMESPathCheck('siteConfig.healthCheckPath', None)
+        ])
+
 
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)

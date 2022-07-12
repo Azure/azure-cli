@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
+                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
@@ -176,7 +176,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
     if runtime:
-        runtime = helper.remove_delimiters(runtime)
+        runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
     current_stack = None
     if is_linux:
@@ -835,10 +835,15 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
                                                'plan, please re-run this command with the \'--force\' flag.')
 
 
-def set_functionapp(cmd, resource_group_name, name, **kwargs):
+def set_functionapp(cmd, resource_group_name, name, slot=None, **kwargs):
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
-    return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
+    updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
+    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
+    if slot:
+        kwargs['slot'] = slot
+
+    return updater(**kwargs)
 
 
 def get_functionapp(cmd, resource_group_name, name, slot=None):
@@ -1755,6 +1760,27 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     return result
 
 
+def _resolve_storage_account_resource_group(cmd, name):
+    from azure.cli.command_modules.storage.operations.account import list_storage_accounts
+    accounts = [a for a in list_storage_accounts(cmd) if a.name == name]
+    if accounts:
+        return parse_resource_id(accounts[0].id).get("resource_group")
+
+
+def _set_site_config_storage_keys(cmd, site_config):
+    from azure.cli.command_modules.storage._client_factory import cf_sa_for_keys
+
+    for _, acct in site_config.azure_storage_accounts.items():
+        if acct.access_key is None:
+            scf = cf_sa_for_keys(cmd.cli_ctx, None)
+            acct_rg = _resolve_storage_account_resource_group(cmd, acct.account_name)
+            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys
+            if keys:
+                key = keys[0]
+                logger.info("Retreived key %s", key.key_name)
+                acct.access_key = key.value
+
+
 def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
                                           deployment_container_image_name=None, docker_registry_server_password=None,
                                           docker_registry_server_user=None, docker_registry_server_url=None):
@@ -1762,6 +1788,10 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
                                    None if clone_from_prod else configuration_source)
+    if site_config.azure_storage_accounts:
+        logger.warning("The configuration source has storage accounts. Looking up their access keys...")
+        _set_site_config_storage_keys(cmd, site_config)
+
     _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
                             'update_configuration', slot, site_config)
 
@@ -1896,8 +1926,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
-        if hyper_v:
-            raise ArgumentUsageError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
@@ -1910,6 +1938,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
         if not ase_found:
             err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
             raise ResourceNotFoundError(err_msg)
+        if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
+            raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -2103,9 +2133,9 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
                                      site_name=target_name, databases=db_setting,
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
-        return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
+        return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
-    return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+    return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
@@ -2716,7 +2746,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         slot_text = "Deployment slot {} in ".format(slot) if slot else ''
-        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
+        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
                                                                                             name,
                                                                                             resource_group_name))
 
@@ -2727,7 +2757,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
     if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
         slot_text = " --slot {}".format(slot) if slot else ""
-        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
+        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
                               "Use 'az webapp config hostname add --resource-group {2} "
                               "--webapp-name {1}{3} --hostname {0}' "
                               "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
@@ -2764,8 +2794,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
-    from azure.cli.command_modules.role._client_factory import _graph_client_factory
-    from azure.graphrbac.models import GraphErrorException
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
+    graph_client = graph_client_factory(cmd.cli_ctx)
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription = get_subscription_id(cmd.cli_ctx)
     # Cannot check if key vault is in another subscription
@@ -2776,15 +2806,14 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
-    graph_sp_client = _graph_client_factory(cmd.cli_ctx).service_principals
     for policy in vault.properties.access_policies:
         try:
-            sp = graph_sp_client.get(policy.object_id)
-            if sp.app_id == AZURE_PUBLIC_WEBSITES_APP_ID or sp.app_id == AZURE_GOV_WEBSITES_APP_ID:
+            sp = graph_client.service_principal_get(policy.object_id)
+            if sp['appId'] == AZURE_PUBLIC_WEBSITES_APP_ID or sp['appId'] == AZURE_GOV_WEBSITES_APP_ID:
                 for perm in policy.permissions.secrets:
                     if perm == "Get":
                         return True
-        except GraphErrorException:
+        except GraphError:
             pass  # Lookup will fail for non service principals (users, groups, etc.)
     return False
 
@@ -2893,6 +2922,9 @@ class _AbstractStackRuntimeHelper:
 
 # WebApps stack class
 class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
+    DEFAULT_DELIMETER = "|"  # character that separates runtime name from version
+    ALLOWED_DELIMETERS = "|:"  # delimiters allowed: '|', ':'
+
     # pylint: disable=too-few-public-methods
     class Runtime:
         def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
@@ -2911,16 +2943,14 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             'dotnet': 'net_framework_version',
             'dotnetcore': None
         }
-        self.default_delimeter = "|"  # character that separates runtime name from version
-        self.allowed_delimeters = "|:"  # delimiters allowed: '|', ':'
         super().__init__(cmd, linux=linux, windows=windows)
 
     def get_stack_names_only(self, delimiter=None):
         windows_stacks = [s.display_name for s in self.stacks if not s.linux]
         linux_stacks = [s.display_name for s in self.stacks if s.linux]
         if delimiter is not None:
-            windows_stacks = [n.replace(self.default_delimeter, delimiter) for n in windows_stacks]
-            linux_stacks = [n.replace(self.default_delimeter, delimiter) for n in linux_stacks]
+            windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
+            linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
         if self._linux and not self._windows:
             return linux_stacks
         if self._windows and not self._linux:
@@ -2940,10 +2970,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
-    def remove_delimiters(self, runtime):
+    @classmethod
+    def remove_delimiters(cls, runtime):
+        if not runtime:
+            return runtime
         import re
-        runtime = re.split("[{}]".format(self.allowed_delimeters), runtime)
-        return self.default_delimeter.join(filter(None, runtime))
+        runtime = re.split("[{}]".format(cls.ALLOWED_DELIMETERS), runtime)
+        return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
         display_name = display_name.lower()
@@ -4223,12 +4256,12 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _create_new_rg = False
     _site_availability = get_site_availability(cmd, name)
     _create_new_app = _site_availability.name_available
-    os_name = os_type if os_type else detect_os_form_src(src_dir, html)
+    runtime = _StackRuntimeHelper.remove_delimiters(runtime)
+    os_name = os_type if os_type else detect_os_from_src(src_dir, html, runtime)
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime:
-        runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
         if not match:
             raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "

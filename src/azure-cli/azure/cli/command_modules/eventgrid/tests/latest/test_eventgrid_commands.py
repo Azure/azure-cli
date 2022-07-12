@@ -31,7 +31,7 @@ class EventGridTests(ScenarioTest):
             self.check('[0].type', 'Microsoft.EventGrid/topicTypes/eventTypes')
         ])
 
-    @unittest.skip('Deployment failed')
+    @unittest.skip('Deployment failed. Will be re-enabled')
     @ResourceGroupPreparer()
     def test_create_domain(self, resource_group):
 

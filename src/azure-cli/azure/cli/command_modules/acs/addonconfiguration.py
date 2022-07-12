@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 
-from azure.cli.command_modules.acs._client_factory import cf_resource_groups, cf_resources
+from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
 from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_ADDON_NAME,
     CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
@@ -17,10 +17,8 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
 from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, send_raw_request
+from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, resource_id
@@ -185,8 +183,8 @@ def ensure_default_log_analytics_workspace_for_monitoring(
             default_workspace_name,
         )
     )
-    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
+    resource_groups = get_resource_groups_client(cmd.cli_ctx, subscription_id)
+    resources = get_resources_client(cmd.cli_ctx, subscription_id)
 
     # check if default RG exists
     if resource_groups.check_existence(default_workspace_resource_group):
@@ -233,8 +231,8 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
-def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
-    containerinsights_extension_dcr_exists = False
+def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
+    tags = {}
     _MAX_RETRY_TIMES = 3
     for retry_count in range(0, _MAX_RETRY_TIMES):
         try:
@@ -242,18 +240,15 @@ def is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_
                 cmd.cli_ctx, "GET", dcr_url
             )
             json_response = json.loads(resp.text)
-            destinations = json_response["properties"]["destinations"]
-            if not destinations and not destinations["logAnalytics"] and len(destinations["logAnalytics"]) > 0:
-                destinationLogAnalyticsResourceId = destinations["logAnalytics"][0]
-                if destinationLogAnalyticsResourceId.tolower() == workspace_resource_id.tolower():
-                    containerinsights_extension_dcr_exists = True
+            if ("tags" in json_response) and (json_response["tags"] is not None):
+                tags = json_response["tags"]
             break
         except CLIError as e:
             if "ResourceNotFound" in str(e):
                 break
             if retry_count >= (_MAX_RETRY_TIMES - 1):
                 raise e
-    return containerinsights_extension_dcr_exists
+    return tags
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
@@ -311,7 +306,7 @@ def ensure_container_insights_for_monitoring(
 
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
     if not remove_monitoring:
-        resources = cf_resources(cmd.cli_ctx, subscription_id)
+        resources = get_resources_client(cmd.cli_ctx, subscription_id)
         try:
             resource = resources.get_by_id(
                 workspace_resource_id, "2015-11-01-preview"
@@ -369,94 +364,70 @@ def ensure_container_insights_for_monitoring(
                 raise error
             json_response = json.loads(r.text)
             for resource in json_response["resourceTypes"]:
-                region_ids = map(
-                    lambda x: region_names_to_id[x], resource["locations"]
-                )  # map is lazy, so doing this for every region isn't slow
-                if (
-                    resource["resourceType"].lower() == "datacollectionrules" and
-                    location not in region_ids
-                ):
-                    raise ClientRequestError(
-                        f"Data Collection Rules are not supported for LA workspace region {location}"
-                    )
-                if (
-                    resource["resourceType"].lower() == "datacollectionruleassociations" and
-                    cluster_region not in region_ids
-                ):
-                    raise ClientRequestError(
-                        f"Data Collection Rule Associations are not supported for cluster region {location}"
-                    )
-            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2019-11-01-preview"
-            # Create DCR if doesnt exists already with same destination
-            if not is_container_insights_extension_dcr_exists(cmd, dcr_url, workspace_resource_id):
-                # create the DCR
-                dcr_creation_body = json.dumps(
-                    {
-                        "location": location,
-                        "properties": {
-                            "dataSources": {
-                                "extensions": [
-                                    {
-                                        "name": "ContainerInsightsExtension",
-                                        "streams": [
-                                            "Microsoft-Perf",
-                                            "Microsoft-ContainerInventory",
-                                            "Microsoft-ContainerLog",
-                                            "Microsoft-ContainerLogV2",
-                                            "Microsoft-ContainerNodeInventory",
-                                            "Microsoft-KubeEvents",
-                                            "Microsoft-KubeMonAgentEvents",
-                                            "Microsoft-KubeNodeInventory",
-                                            "Microsoft-KubePodInventory",
-                                            "Microsoft-KubePVInventory",
-                                            "Microsoft-KubeServices",
-                                            "Microsoft-InsightsMetrics",
-                                        ],
-                                        "extensionName": "ContainerInsights",
-                                    }
-                                ]
-                            },
-                            "dataFlows": [
+                if resource["resourceType"].lower() == "datacollectionrules":
+                    region_ids = map(
+                        lambda x: region_names_to_id[x], resource["locations"])
+                    if location not in region_ids:
+                        raise ClientRequestError(
+                            f"Data Collection Rules are not supported for LA workspace region {location}")
+                if resource["resourceType"].lower() == "datacollectionruleassociations":
+                    region_ids = map(
+                        lambda x: region_names_to_id[x], resource["locations"])
+                    if cluster_region not in region_ids:
+                        raise ClientRequestError(
+                            f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
+            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+                f"{dcr_resource_id}?api-version=2021-04-01"
+            # get existing tags on the container insights extension DCR if the customer added any
+            existing_tags = get_existing_container_insights_extension_dcr_tags(
+                cmd, dcr_url)
+            # create the DCR
+            dcr_creation_body = json.dumps(
+                {
+                    "location": location,
+                    "tags": existing_tags,
+                    "properties": {
+                        "dataSources": {
+                            "extensions": [
                                 {
+                                    "name": "ContainerInsightsExtension",
                                     "streams": [
-                                        "Microsoft-Perf",
-                                        "Microsoft-ContainerInventory",
-                                        "Microsoft-ContainerLog",
-                                        "Microsoft-ContainerLogV2",
-                                        "Microsoft-ContainerNodeInventory",
-                                        "Microsoft-KubeEvents",
-                                        "Microsoft-KubeMonAgentEvents",
-                                        "Microsoft-KubeNodeInventory",
-                                        "Microsoft-KubePodInventory",
-                                        "Microsoft-KubePVInventory",
-                                        "Microsoft-KubeServices",
-                                        "Microsoft-InsightsMetrics",
+                                        "Microsoft-ContainerInsights-Group-Default"
                                     ],
-                                    "destinations": ["la-workspace"],
+                                    "extensionName": "ContainerInsights",
                                 }
-                            ],
-                            "destinations": {
-                                "logAnalytics": [
-                                    {
-                                        "workspaceResourceId": workspace_resource_id,
-                                        "name": "la-workspace",
-                                    }
-                                ]
-                            },
+                            ]
                         },
-                    }
-                )
-                for _ in range(3):
-                    try:
-                        send_raw_request(
-                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                        )
-                        error = None
-                        break
-                    except AzCLIError as e:
-                        error = e
-                else:
-                    raise error
+                        "dataFlows": [
+                            {
+                                "streams": [
+                                    "Microsoft-ContainerInsights-Group-Default"
+                                ],
+                                "destinations": ["la-workspace"],
+                            }
+                        ],
+                        "destinations": {
+                            "logAnalytics": [
+                                {
+                                    "workspaceResourceId": workspace_resource_id,
+                                    "name": "la-workspace",
+                                }
+                            ]
+                        },
+                    },
+                }
+            )
+            for _ in range(3):
+                try:
+                    send_raw_request(
+                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
+                    )
+                    error = None
+                    break
+                except AzCLIError as e:
+                    error = e
+            else:
+                raise error
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster
@@ -470,7 +441,7 @@ def ensure_container_insights_for_monitoring(
                 }
             )
             association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2019-11-01-preview"
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2021-04-01"
             for _ in range(3):
                 try:
                     send_raw_request(
@@ -487,63 +458,21 @@ def ensure_container_insights_for_monitoring(
                 raise error
 
 
-def _invoke_deployment(
-    cmd,
-    resource_group_name,
-    deployment_name,
-    template,
-    parameters,
-    validate,
-    no_wait,
-    subscription_id=None,
-):
-    DeploymentProperties = cmd.get_models(
-        "DeploymentProperties",
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-    )
-    properties = DeploymentProperties(
-        template=template, parameters=parameters, mode="incremental"
-    )
-    smc = get_mgmt_service_client(
-        cmd.cli_ctx,
-        ResourceType.MGMT_RESOURCE_RESOURCES,
-        subscription_id=subscription_id,
-    ).deployments
-    if validate:
-        logger.info("==== BEGIN TEMPLATE ====")
-        logger.info(json.dumps(template, indent=2))
-        logger.info("==== END TEMPLATE ====")
-
-    Deployment = cmd.get_models(
-        "Deployment", resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
-    )
-    deployment = Deployment(properties=properties)
-
-    if validate:
-        if cmd.supported_api_version(
-            min_api="2019-10-01",
-            resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-        ):
-            validation_poller = smc.begin_validate(
-                resource_group_name, deployment_name, deployment
-            )
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-        return smc.validate(resource_group_name, deployment_name, deployment)
-
-    return sdk_no_wait(
-        no_wait,
-        smc.begin_create_or_update,
-        resource_group_name,
-        deployment_name,
-        deployment,
-    )
-
-
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     service_principal_msi_id = None
+    is_useAADAuth = False
+    # Check if monitoring addon enabled with useAADAuth = True, if it does, ignore role assignment
     # Check if service principal exists, if it does, assign permissions to service principal
     # Else, provide permissions to MSI
     if (
+        (hasattr(result, "addon_profiles")) and
+        (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
+        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], "config") and
+        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].config, "useAADAuth") and
+        result.addon_profiles[CONST_MONITORING_ADDON_NAME].config.useAADAuth
+    ):
+        is_useAADAuth = True
+    elif (
         hasattr(result, "service_principal_profile") and
         hasattr(result.service_principal_profile, "client_id") and
         result.service_principal_profile.client_id.lower() != "msi"
@@ -572,7 +501,10 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         ].identity.object_id
         is_service_principal = False
 
-    if service_principal_msi_id is not None:
+    if is_useAADAuth:
+        logger.info(
+            "Monitoring Metrics Publisher role assignment not required for monitoring addon with managed identity auth")
+    elif service_principal_msi_id is not None:
         if not add_role_assignment(
             cmd,
             "Monitoring Metrics Publisher",

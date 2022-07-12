@@ -18,8 +18,11 @@ from .action import (
 # The enum value will be used in command name
 class RESOURCE(Enum):
     WebApp = 'webapp'
-    SpringCloud = 'spring-cloud'
+    # `az spring-cloud` migrated to `az spring`
+    SpringCloud = 'spring'
+    SpringCloudDeprecated = 'spring-cloud'
     KubernetesCluster = 'aks'
+    ContainerApp = 'containerapp'
     CosmosCassandra = 'cosmos-cassandra'
     CosmosGremlin = 'cosmos-gremlin'
     CosmosMongo = 'cosmos-mongo'
@@ -69,7 +72,10 @@ class CLIENT_TYPE(Enum):
 
 
 # The source resources released as CLI extensions
-SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud]
+SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.ContainerApp]
+
+# The source resources using user token
+SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
 
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
@@ -78,8 +84,9 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
-    # TODO: Houk, uncomment this when AKS is officially supported
+    RESOURCE.SpringCloudDeprecated: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
     # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
+    RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
 
@@ -152,6 +159,28 @@ SOURCE_RESOURCES_PARAMS = {
             'placeholder': 'MyDeployment'
         }
     },
+    RESOURCE.SpringCloudDeprecated: {
+        'source_resource_group': {
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the spring-cloud',
+            'placeholder': 'SpringCloudRG'
+        },
+        'spring': {
+            'options': ['--service'],
+            'help': 'Name of the spring-cloud service',
+            'placeholder': 'MySpringService'
+        },
+        'app': {
+            'options': ['--app'],
+            'help': 'Name of the spring-cloud app',
+            'placeholder': 'MyApp'
+        },
+        'deployment': {
+            'options': ['--deployment'],
+            'help': 'The deployment name of the app',
+            'placeholder': 'MyDeployment'
+        }
+    },
     RESOURCE.KubernetesCluster: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
@@ -163,7 +192,31 @@ SOURCE_RESOURCES_PARAMS = {
             'help': 'Name of the managed cluster',
             'placeholder': 'MyCluster'
         }
+    },
+    RESOURCE.ContainerApp: {
+        'source_resource_group': {
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the container app',
+            'placeholder': 'ContainerAppRG'
+        },
+        'app': {
+            'options': ['--name', '-n'],
+            'help': 'Name of the container app',
+            'placeholder': 'MyContainerApp'
+        }
     }
+}
+
+
+# The dict defines the required parameters used in the source resources for creation.
+SOURCE_RESOURCES_CREATE_PARAMS = {
+    RESOURCE.ContainerApp: {
+        'scope': {
+            'options': ['--container', '-c'],
+            'help': 'The container where the connection information will be saved (as environment variables).',
+            'placeholder': 'MyContainer'
+        },
+    },
 }
 
 
@@ -504,23 +557,47 @@ TARGET_RESOURCES_PARAMS = {
 
 
 # The dict defines the targets which supports service endpoint
-TARGET_SUPPORT_SERVICE_ENDPOINT = {
-    RESOURCE.Postgres: True,
-    RESOURCE.Mysql: True,
-    RESOURCE.Sql: True,
-    RESOURCE.StorageBlob: True,
-    RESOURCE.StorageQueue: True,
-    RESOURCE.StorageFile: True,
-    RESOURCE.StorageTable: True,
-    RESOURCE.KeyVault: True,
-    RESOURCE.CosmosSql: True,
-    RESOURCE.CosmosCassandra: True,
-    RESOURCE.CosmosGremlin: True,
-    RESOURCE.CosmosMongo: True,
-    RESOURCE.CosmosTable: True,
-    RESOURCE.ServiceBus: True,
-    RESOURCE.EventHub: True,
-}
+TARGET_SUPPORT_SERVICE_ENDPOINT = [
+    RESOURCE.Postgres,
+    RESOURCE.Mysql,
+    RESOURCE.Sql,
+    RESOURCE.StorageBlob,
+    RESOURCE.StorageQueue,
+    RESOURCE.StorageFile,
+    RESOURCE.StorageTable,
+    RESOURCE.KeyVault,
+    RESOURCE.CosmosSql,
+    RESOURCE.CosmosCassandra,
+    RESOURCE.CosmosGremlin,
+    RESOURCE.CosmosMongo,
+    RESOURCE.CosmosTable,
+    RESOURCE.ServiceBus,
+    RESOURCE.EventHub,
+]
+
+
+TARGET_SUPPORT_PRIVATE_ENDPOINT = [
+    RESOURCE.AppConfig,
+    RESOURCE.CosmosSql,
+    RESOURCE.CosmosCassandra,
+    RESOURCE.CosmosGremlin,
+    RESOURCE.CosmosMongo,
+    RESOURCE.CosmosTable,
+    RESOURCE.Redis,
+    RESOURCE.Postgres,
+    RESOURCE.Mysql,
+    RESOURCE.EventHub,
+    RESOURCE.KeyVault,
+    RESOURCE.SignalR,
+    RESOURCE.WebPubSub,
+    RESOURCE.Sql,
+    RESOURCE.StorageBlob,
+    RESOURCE.StorageQueue,
+    RESOURCE.StorageFile,
+    RESOURCE.StorageTable,
+    RESOURCE.ServiceBus,
+]
+
 
 # The dict defines the parameters used to provide auth info
 AUTH_TYPE_PARAMS = {
@@ -649,7 +726,36 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.WebPubSub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
+    RESOURCE.ContainerApp: {
+        RESOURCE.Postgres: [AUTH_TYPE.Secret],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Mysql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+
+        RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+    },
 }
+SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
 
 
 # The dict defines the supported client types of each source-target resource pair
@@ -859,130 +965,10 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ]
-    },
-    RESOURCE.SpringCloud: {
-        RESOURCE.Postgres: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.PostgresFlexible: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Mysql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.MysqlFlexible: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Sql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Redis: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.RedisEnterprise: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosCassandra: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosGremlin: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosMongo: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosTable: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosSql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageBlob: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageQueue: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageFile: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageTable: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.KeyVault: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.AppConfig: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.EventHub: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.ServiceBus: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.ConfluentKafka: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ]
     }
 }
+
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

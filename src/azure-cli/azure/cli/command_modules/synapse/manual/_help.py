@@ -310,7 +310,7 @@ examples:
   - name: Create a SQL pool.
     text: |-
         az synapse sql pool create --name sqlpool --performance-level "DW1000c" \\
-        --workspace-name testsynapseworkspace --resource-group rg
+        --workspace-name testsynapseworkspace --resource-group rg --collation "SQL_Latin1_General_CP1_CS_AS"
 """
 
 helps['synapse sql pool show'] = """
@@ -2271,4 +2271,176 @@ examples:
         az synapse sql-script import --workspace-name testsynapseworkspace \\
           --name testsqlscriptname \\
           --file 'path/test.sql'
+"""
+
+helps['synapse link-connection'] = """
+type: group
+short-summary: Manage Synapse's link connection.
+"""
+
+helps['synapse link-connection list'] = """
+type: command
+short-summary: List link connections in a synapse workspace.
+examples:
+  - name: List link connections.
+    text: |-
+        az synapse link-connection list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse link-connection show'] = """
+type: command
+short-summary: Get a link connection.
+examples:
+  - name: Get a link-connection.
+    text: |-
+        az synapse link-connection show --workspace-name testsynapseworkspace \\
+          --name testlinkconectionname
+"""
+
+helps['synapse link-connection delete'] = """
+type: command
+short-summary: Delete a link connection.
+examples:
+  - name: Delete a link connection.
+    text: |-
+        az synapse link-connection delete --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connection create'] = """
+type: command
+short-summary: Create a link connection.
+examples:
+  - name: Create a link connection.
+    text: |-
+        az synapse link-connection create --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname \\
+          --file @"path/definition.json"
+"""
+
+helps['synapse link-connection update'] = """
+type: command
+short-summary: Update a link connection.
+examples:
+  - name: Update a link connnection.
+    text: |-
+        az synapse link-connection update --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname \\
+          --file @"path/definition.json"
+"""
+
+helps['synapse link-connection start'] = """
+type: command
+short-summary: Start a link connnection.
+examples:
+  - name: Start a link connection.
+    text: |-
+        az synapse link-connection start --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connection stop'] = """
+type: command
+short-summary: Stop a link connection.
+examples:
+  - name: Stop a link connection.
+    text: |-
+        az synapse link-connection stop --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connection get-status'] = """
+type: command
+short-summary: check a link connection status after start/stop a link connection.
+examples:
+  - name: Stop a link connection.
+    text: |-
+        az synapse link-connection get-status --workspace-name testsynapseworkspace \\
+          --name testlinkconnectionname
+"""
+
+helps['synapse link-connection list-link-tables'] = """
+type: command
+short-summary: List the link tables of a link connection.
+examples:
+  - name: List the link tables of a link connection.
+    text: |-
+        az synapse link-connection list-link-tables --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+"""
+
+helps['synapse link-connection edit-link-tables'] = """
+type: command
+short-summary: Edit tables for a link connection.
+examples:
+  - name: Edit tables for a link connection.
+    text: |-
+        az synapse link-connection edit-link-tables --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --file @path/edittablerequestfile.json
+        the file pattern should be:
+        {
+          "linkTables": [
+            {
+              "id": "<linkTableId1>",
+              "source": {
+                "tableName": "<sourceTableName1>",
+                "schemaName": "<sourceSchemaName1>"
+              },
+              "target": {
+                "tableName": "<sinkTableName1>",
+                "schemaName": "<sinkSchemaName1>",
+                "distributionOptions": {
+                  "type": "<Hash|Round_RoBin|Replicate>",
+                  "distributionColumn": "<distributionColumnName>"
+                }
+              },
+              "operationType": "add"
+            },
+            {
+              "id": "<linkTableId2>",
+              "operationType": "remove"
+            },
+            {
+              "id": "<linkTableId3>",
+              "source": {
+                "tableName": "<sourceTableName3>",
+                "schemaName": "<sourceSchemaName3>"
+              },
+              "target": {
+                "tableName": "<sinkTableName3>",
+                "schemaName": "<sinkSchemaName3>",
+                "distributionOptions": {
+                  "type": "<Hash|Round_RoBin|Replicate>",
+                  "distributionColumn": "<distributionColumnName>"
+                }
+              },
+              "operationType": "update"
+            }
+          ]
+        }
+
+"""
+
+helps['synapse link-connection get-link-tables-status'] = """
+type: command
+short-summary: Query the link table status of a link connection.
+examples:
+  - name: Query the link table status of a link connection.
+    text: |-
+        az synapse link-connection get-link-tables-status --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --max-segment-count 50 \\
+          --continuation-token token
+"""
+
+helps['synapse link-connection update-landing-zone-credential'] = """
+type: command
+short-summary: Update landing zone credetial of a link connection.
+examples:
+  - name: Update landing zone credetial of a link connection.
+    text: |-
+        az synapse link-connection update-landing-zone-credential --workspace-name testsynapseworkspace \\
+          --name linkconnectionname \\
+          --sas-token sastoken
 """

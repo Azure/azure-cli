@@ -6,7 +6,8 @@
 from azure.cli.core.commands import CliCommandType
 from ._transformers import (
     transform_support_types,
-    transform_linker_properties
+    transform_linker_properties,
+    transform_validation_result
 )
 from ._resource_config import (
     RESOURCE,
@@ -30,12 +31,12 @@ def load_command_table(self, _):
         # only when the extension is installed
         if should_load_source(source):
             with self.command_group('{} connection'.format(source.value), connection_type,
-                                    client_factory=cf_linker, is_preview=True) as og:
+                                    client_factory=cf_linker) as og:
                 og.custom_command('list', 'connection_list')
                 og.custom_show_command('show', 'connection_show', transform=transform_linker_properties)
                 og.custom_command('delete', 'connection_delete', confirmation=True, supports_no_wait=True)
                 og.custom_command('list-configuration', 'connection_list_configuration')
-                og.custom_command('validate', 'connection_validate')
+                og.custom_command('validate', 'connection_validate', transform=transform_validation_result)
                 og.custom_command('list-support-types', 'connection_list_support_types',
                                   table_transformer=transform_support_types)
                 og.custom_wait_command('wait', 'connection_show')

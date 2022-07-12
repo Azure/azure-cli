@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
-
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -21,7 +20,7 @@ class IoTHubTest(ScenarioTest):
             method_name, recording_processors=[KeyReplacer()]
         )
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
@@ -78,7 +77,7 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Storage Connection String Pattern
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
         # Test 'az iot hub update'
         updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
                                ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2} --tags e=f g=h'
@@ -175,7 +174,7 @@ class IoTHubTest(ScenarioTest):
         policy = self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Primary'.format(hub, policy_name),
                           checks=[self.check('keyName', policy_name)]).get_output_in_json()
 
-        policy_name_conn_str_pattern = r'HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
+        policy_name_conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
             hub, policy_name, policy['primaryKey'])
 
         # Test policy_name connection-string 'az iot hub show-connection-string'
@@ -449,7 +448,7 @@ class IoTHubTest(ScenarioTest):
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
 
         identity_storage_role = 'Storage Blob Data Contributor'
         storage_account_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
@@ -640,7 +639,7 @@ class IoTHubTest(ScenarioTest):
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
                      self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
-        
+
         # assign (system) re-add system identity
         self.cmd('iot hub identity assign -n {0} -g {1} --system'.format(identity_hub, rg),
                  checks=[
@@ -701,7 +700,7 @@ class IoTHubTest(ScenarioTest):
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         identity_based_auth = 'identityBased'
         key_based_auth = 'keyBased'
-        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
 
         # create user-assigned identity
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
@@ -759,13 +758,13 @@ class IoTHubTest(ScenarioTest):
         assert not updated_hub['properties']['storageEndpoints']['$default']['authenticationType']
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
-    
+
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'
                  .format(hub, rg, key_based_auth)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == key_based_auth
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
-        
+
 
         # Change to identity-based (with no identity) - fail
         self.cmd('iot hub update -n {0} -g {1} --fsa identitybased'.format(hub, rg), expect_failure=True)
@@ -805,7 +804,7 @@ class IoTHubTest(ScenarioTest):
 
         # change to user-identity - fail
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsi /test/user/identity'.format(hub, rg), expect_failure=True)
-  
+
         # add a user identity, assign access to storage account
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(storage_role, user_identity_id, storage_id))

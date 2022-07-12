@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
-    process_gallery_image_version_namespace, validate_vm_name_for_monitor_metrics)
+    validate_vm_name_for_monitor_metrics, validate_secure_vm_guest_state_sas)
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
@@ -68,7 +68,7 @@ def load_arguments(self, _):
              "Windows Server, use 'Windows_Server'. To enable Multi-tenant Hosting Rights for Windows 10, "
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
-                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES_SAP', 'SLES_HPC',
+                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC',
                                 'None', 'RHEL_ELS_6']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
@@ -129,7 +129,10 @@ def load_arguments(self, _):
 
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
-    security_type = CLIArgumentType(arg_type=get_enum_type(['TrustedLaunch']), min_api='2020-12-01', help='Specify if the VM is Trusted Launch enabled. See https://docs.microsoft.com/azure/virtual-machines/trusted-launch.')
+    security_type = CLIArgumentType(arg_type=get_enum_type(self.get_models('SecurityTypes')), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
+    gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
+    gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
+    public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -138,14 +141,12 @@ def load_arguments(self, _):
 
     for scope in ['disk', 'snapshot']:
         with self.argument_context(scope) as c:
-            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
+            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot', 'source_restore_point')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
-                c.argument('for_upload', arg_type=get_three_state_flag(),
-                           help='Create the {0} for uploading blobs later on through storage commands. Run "az {0} grant-access --access-level Write" to retrieve the {0}\'s SAS token.'.format(scope))
                 c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
@@ -163,6 +164,14 @@ def load_arguments(self, _):
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
             c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
+            c.argument('secure_vm_disk_encryption_set', min_api='2021-08-01', help='Name or ID of disk encryption set created with ConfidentialVmEncryptedWithCustomerKey encryption type.')
+    # endregion
+
+    # region Disks
+    with self.argument_context('disk grant-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
+        c.argument('secure_vm_guest_state_sas', options_list=['--secure-vm-guest-state-sas', '-s'], min_api='2022-03-02',
+                   action='store_true', validator=validate_secure_vm_guest_state_sas,
+                   help="Get SAS on managed disk with VM guest state. It will be used by default when the create option of disk is 'secureOSUpload'")
     # endregion
 
     # region Disks
@@ -181,7 +190,8 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
         c.argument('image_reference', help='ID or URN (publisher:offer:sku:version) of the image from which to create a disk')
         c.argument('image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
-        c.argument('gallery_image_reference', help='ID of the Compute Gallery image version from which to create a disk')
+        c.argument('gallery_image_reference', help='ID of the Compute, Shared or Community Gallery image version from which to create a disk. For details about valid format, please refer to the help sample')
+        c.ignore('gallery_image_reference_type')
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
@@ -189,6 +199,17 @@ def load_arguments(self, _):
         c.argument('security_type', arg_type=get_enum_type(self.get_models('DiskSecurityTypes', operation_group='disks')), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
+        c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
+    # endregion
+
+    # region Disks
+    with self.argument_context('disk create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
+        c.argument('security_data_uri', min_api='2022-03-02', help='Please specify the blob URI of VHD to be imported into VM guest state')
+        c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
+                   deprecate_info=c.deprecate(target='--for-upload', redirect='--upload-type Upload', hide=True),
+                   help='Create the disk for uploading blobs. Replaced by "--upload-type Upload"')
+        c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
+                   help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
     # endregion
 
     # region Snapshots
@@ -202,6 +223,8 @@ def load_arguments(self, _):
         c.argument('copy_start', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Create snapshot by using a deep copy process, where the resource creation is considered complete only after all data has been copied from the source.')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
+        c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
+                   help='Create the snapshot for uploading blobs later on through storage commands. Run "az snapshot grant-access --access-level Write" to retrieve the snapshot\'s SAS token.')
     # endregion
 
     # region Images
@@ -516,6 +539,7 @@ def load_arguments(self, _):
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
         c.argument('edge_zone', edge_zone_type)
+        c.argument('architecture', help='The name of architecture. ', arg_type=get_enum_type(["x64", "Arm64"]))
 
     with self.argument_context('vm image list-offers') as c:
         c.argument('edge_zone', edge_zone_type)
@@ -606,6 +630,7 @@ def load_arguments(self, _):
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
                    help="Number of fault domains that the host group can span.")
         c.argument('zones', zone_type)
+        c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2022-03-01', help='Enable a capability to have UltraSSD Enabled Virtual Machines on Dedicated Hosts of the Dedicated Host Group.')
 
     for scope in ["vm host", "vm host group"]:
         with self.argument_context("{} create".format(scope)) as c:
@@ -919,11 +944,12 @@ def load_arguments(self, _):
             c.argument('vm', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
             c.argument('application_version_ids', options_list=['--app-version-ids'], nargs='*', help="Space-separated application version ids to set to VM.")
-            c.argument('order_applications', action='store_true', help='Whether set order index at each gallery applications, the order index starts from 1.')
+            c.argument('order_applications', action='store_true', help='Whether to set order index at each gallery application. If specified, the first app version id gets specified an order = 1, then the next one 2, and so on. This parameter is meant to be used when the VMApplications specified by app version ids must be installed in a particular order; the lowest order is installed first.')
             c.argument('application_configuration_overrides', options_list=['--app-config-overrides'], nargs='*',
                        help='Space-separated application configuration overrides for each application version ids. '
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
+            c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
@@ -945,6 +971,8 @@ def load_arguments(self, _):
             c.argument('edge_zone', edge_zone_type)
             c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
             c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable the default behavior of installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
+            c.argument('os_disk_security_encryption_type', arg_type=get_enum_type(self.get_models('SecurityEncryptionTypes')), min_api='2021-11-01', help='Specify the encryption type of the OS managed disk.')
+            c.argument('os_disk_secure_vm_disk_encryption_set', min_api='2021-11-01', help='Specify the customer managed disk encryption set resource ID or name for the managed disk that is used for customer managed key encrypted Confidential VM OS disk and VM guest blob.')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -1124,6 +1152,10 @@ def load_arguments(self, _):
             c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
             c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
+    with self.argument_context('sig show') as c:
+        c.argument('select', help='The select expression to apply on the operation.')
+        c.argument('sharing_groups', action='store_true', help='The expand query option to query shared gallery groups')
+
     with self.argument_context('sig list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('shared_to', shared_to_type)
@@ -1193,16 +1225,18 @@ def load_arguments(self, _):
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', is_experimental=True,
-                   help='This property allows you to specify the permission of sharing gallery.')
+                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
         c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
                    help='Enable soft-deletion for resources in this gallery, '
                         'allowing them to be recovered within retention time.')
+        c.argument('publisher_uri', help='Community gallery publisher uri.')
+        c.argument('publisher_contact', options_list=['--publisher-email'], help='Community gallery publisher contact email.')
+        c.argument('eula', help='Community gallery publisher eula.')
+        c.argument('public_name_prefix', help='Community gallery public name prefix.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
         c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', is_experimental=True,
-                   help='This property allows you to specify the permission of sharing gallery.')
+                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
         c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
                    help='Enable soft-deletion for resources in this gallery, '
                         'allowing them to be recovered within retention time.')
@@ -1238,6 +1272,8 @@ def load_arguments(self, _):
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
         c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
         c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
+        c.argument('virtual_machine', help='Resource id of VM source')
+        c.argument('image_version', help='Resource id of gallery image version source')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1267,10 +1303,51 @@ def load_arguments(self, _):
 
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
-            c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
+            c.argument('target_regions', nargs='*',
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+
+    with self.argument_context('sig show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+
+    with self.argument_context('sig list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig image-definition show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+
+    with self.argument_context('sig image-definition list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig image-version show-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+        c.argument('gallery_image_version_name', gallery_image_name_version_type)
+
+    with self.argument_context('sig image-version list-community') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
+        c.argument('public_gallery_name', public_gallery_name_type)
+        c.argument('gallery_image_name', gallery_image_name_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
+
+    with self.argument_context('sig share enable-community') as c:
+        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
+        c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
+        c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
+        c.argument('op_type', default='EnableCommunity', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
     # endregion
 
     # region Gallery applications
@@ -1299,6 +1376,12 @@ def load_arguments(self, _):
         c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
                    help='The name of the gallery Application Version')
 
+    with self.argument_context('sig gallery-application version create') as c:
+        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
+                                             'If not specified, the package file will be named the same as the Gallery Application name.')
+        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
+                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
+
     for scope in ['create', 'update']:
         with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
@@ -1308,9 +1391,9 @@ def load_arguments(self, _):
             c.argument('install_command', help='The path and arguments to install the gallery application.')
             c.argument('remove_command', help='The path and arguments to remove the gallery application.')
             c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version '
-                                              'and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is '
+                                              ' then update operation will invoke remove command on the previous version'
+                                              ' and install command on the current version of the gallery application.')
+            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
                        'going to be replicated to. This property is updatable. Expected value: '
                        'json-string/json-file/@json-file.')
             c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
@@ -1380,13 +1463,36 @@ def load_arguments(self, _):
         c.argument('disk_encryption_set_name', disk_encryption_set_name)
         c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
         c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
-        c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys']),
-                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed.')
+        c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys', 'ConfidentialVmEncryptedWithCustomerKey']),
+                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed. ConfidentialVmEncryptedWithCustomerKey: An additional encryption type accepted for confidential VM. Disk is encrypted at rest with Customer managed key.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
         c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    options_list=['--enable-auto-key-rotation', '--auto-rotation'],
                    help='Enable automatic rotation of keys.')
+
+    with self.argument_context('disk-encryption-set create', operation_group='disk_encryption_sets',
+                               min_api='2022-03-02') as c:
+        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
+        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
+                   help='Provide this flag to use system assigned identity. Check out help for more examples')
+        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
+                   help='User Assigned Identity ids to be used for disk encryption set. '
+                        'Check out help for more examples')
+
+    with self.argument_context('disk-encryption-set update', operation_group='disk_encryption_sets',
+                               min_api='2022-03-02') as c:
+        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
+
+    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets',
+                               min_api='2022-03-02') as c:
+        c.argument('mi_system_assigned', options_list=['--system-assigned'],
+                   arg_group='Managed Identity', arg_type=get_three_state_flag(),
+                   help='Provide this flag to use system assigned identity for disk encryption set. '
+                        'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], arg_group='Managed Identity', nargs='*',
+                   help='User Assigned Identity ids to be used for disk encryption set. '
+                        'Check out help for more examples')
     # endregion
 
     # region DiskAccess
