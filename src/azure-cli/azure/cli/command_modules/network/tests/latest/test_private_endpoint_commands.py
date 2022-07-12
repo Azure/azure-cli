@@ -3241,5 +3241,69 @@ class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request1} --type {type} --yes')
 
 
+class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_grafana_private_endpoint_', location="eastus2euap")
+    def test_private_endpoint_connection_grafana(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'service_name': self.create_random_name('cli-test-srv-', 22),
+            'vnet_name': self.create_random_name('cli-test-vnet-', 22),
+            'subnet_name': self.create_random_name('cli-test-subnet-', 22),
+            'endpoint_name': self.create_random_name('cli-test-pe-', 22),
+            'endpoint_conn_name': self.create_random_name('cli-test-pec-', 22),
+            'location': resource_group_location,
+        })
+
+        # Install extension for Azure Managed Grafana Service
+        self.cmd('extension add -n amg')
+
+        # Create Azure Managed Grafana Service
+        service_created = self.cmd(
+            'grafana create -g {resource_group} -n {service_name} --l {location}').get_output_in_json()
+        self.kwargs['service_id'] = service_created['id']
+
+        # Check private link resource is available
+        self.cmd('network private-link-resource list --id {service_id}', checks=[
+            self.check('length(@)', 1),
+        ])
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        result = self.cmd(
+            'network vnet subnet show -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} ').get_output_in_json()
+
+        # Create private endpoint
+        result = self.cmd(
+            'network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--connection-name {endpoint_conn_name} --private-connection-resource-id {service_id} '
+            '--group-id Gateway').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd(
+            'network private-endpoint-connection list -g {resource_group} -n {service_name} --type Microsoft.Dashboard/grafana',
+            checks=[self.check('length(@)', 1), ]).get_output_in_json()
+        self.kwargs.update({
+            "endpoint_request": result[0]['name'],
+            "pec_id": result[0]['id']
+            "pec_name": result[0]['id'].split('/')[-1]
+        })
+
+        # Show the private endpoint connection
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+
+        self.cmd('az network private-endpoint-connection show --resource-name {service_name} -n {pec_name} -g {resource_group} --type Microsoft.Dashboard/grafana',
+                 checks=self.check('id', '{pec_id}'))
+
+        # Remove private endpoint
+        self.cmd(
+            'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.Dashboard/grafana -y')
+
+
 if __name__ == '__main__':
     unittest.main()
