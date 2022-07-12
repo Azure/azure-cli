@@ -56,13 +56,13 @@ from azure.mgmt.eventgrid.models import (
     PartnerConfiguration,
     PartnerConfigurationUpdateParameters,
     PartnerDestinationUpdateParameters,
-    PartnerDestinationInfo,
     PartnerDestination,
     Channel,
     ChannelType,
     ChannelUpdateParameters,
     PartnerUpdateTopicInfo,
     WebhookUpdatePartnerDestinationInfo,
+    WebhookPartnerDestinationInfo,
     AzureADPartnerClientAuthentication,
     EventTypeInfo)
 
@@ -104,6 +104,10 @@ GLOBAL = "global"
 KIND_AZURE = "Azure"
 KIND_AZUREARC = "AzureArc"
 CUSTOMLOCATION = "CustomLocation"
+
+# Partner namespace routings methods
+SOURCE_EVENT_ATTRIBUTE = "SourceEventAttribute"
+CHANNEL_NAME_HEADER = "ChannelNameHeader"
 
 # Deprecated event delivery schema values
 INPUT_EVENT_SCHEMA = "InputEventSchema"
@@ -939,10 +943,12 @@ def cli_partner_namespace_create_or_update(
         resource_group_name,
         partner_namespace_name,
         partner_registration_id,
+        partner_topic_routing_mode=SOURCE_EVENT_ATTRIBUTE,
         location=None,
         tags=None):
 
     partner_namespace_info = PartnerNamespace(
+        partner_topic_routing_mode=partner_topic_routing_mode,
         location=location,
         partner_registration_fully_qualified_id=partner_registration_id,
         tags=tags)
@@ -1035,6 +1041,10 @@ def cli_channel_create_or_update(
         partner_topic_name=None,
         partner_destination_name=None,
         endpoint_service_context=None,
+        azure_active_directory_tenant_id=None,
+        azure_active_directory_application_id_or_uri=None,
+        endpoint_base_url=None,
+        endpoint_url=None,
         inline_event_type=None,
         event_type_kind=None,
         activation_expiration_date=None):
@@ -1045,10 +1055,24 @@ def cli_channel_create_or_update(
     partner_topic_info = None
     partner_destination_info = None
     if channel_type == ChannelType.PARTNER_TOPIC:
+        # Make sure the user did not specify
+        # parameters for PartnerDestination
+        if (azure_active_directory_tenant_id is not None or
+                azure_active_directory_application_id_or_uri is not None or
+                endpoint_base_url is not None or
+                endpoint_url is not None or
+                endpoint_service_context is not None):
+            raise CLIError("usage error: The parameters --azure-active-directory-tenant-id, "
+                           "--azure-active-directory-application-id-or-uri, --endpoint-service-context, "
+                           "--endpoint-base-url, and --endpoint-url can only be specified"
+                           "when the channel is of type PartnerDestination.")
+
         # Create event type info
-        event_type_info = EventTypeInfo(
-            kind=event_type_kind,
-            inline_event_types=inline_event_type)
+        event_type_info = None
+        if event_type_kind is not None and inline_event_type is not None:
+            event_type_info = EventTypeInfo(
+                kind=event_type_kind,
+                inline_event_types=inline_event_type)
 
         partner_topic_info = PartnerTopicInfo(
             azure_subscription_id=subscription_id,
@@ -1057,10 +1081,26 @@ def cli_channel_create_or_update(
             event_type_info=event_type_info,
             source=partner_topic_source)
     elif channel_type == ChannelType.PARTNER_DESTINATION:
-        partner_destination_info = PartnerDestinationInfo(
+        # Make sure the user did not specify
+        # parameters for PartnerTopic
+        if (inline_event_type is not None or
+                event_type_kind is not None):
+            raise CLIError("usage error: The parameters --inline-event-type "
+                           "and --event-type-kind can only be specified when the "
+                           "channel is of type PartnerTopic.")
+
+        partner_client_authentication = None
+        partner_client_authentication = AzureADPartnerClientAuthentication(
+            azure_active_directory_tenant_id=azure_active_directory_tenant_id,
+            azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri)
+
+        partner_destination_info = WebhookPartnerDestinationInfo(
             azure_subscription_id=subscription_id,
             resource_group_name=resource_group_name,
             name=partner_destination_name,
+            endpoint_url=endpoint_url,
+            endpoint_base_url=endpoint_base_url,
+            client_authentication=partner_client_authentication,
             endpoint_service_context=endpoint_service_context)
 
     channel_info = Channel(
@@ -1284,7 +1324,7 @@ def cli_partner_configuration_update(
         tags=tags,
         default_maximum_expiration_time_in_days=default_maximum_expiration_time_in_days)
 
-    return client.begin_create_or_update(
+    return client.begin_update(
         resource_group_name,
         partner_configuration_update_params)
 
@@ -2135,7 +2175,9 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
         deadletter_identity,
         deadletter_endpoint)
 
-    if endpoint_type.lower() != WEBHOOK_DESTINATION.lower() and endpoint is None:
+    if (endpoint_type is not None and
+            endpoint_type.lower() != WEBHOOK_DESTINATION.lower() and
+            endpoint is None):
         raise CLIError('Invalid usage: Since --endpoint-type is specified, a valid endpoint must also be specified.')
 
     current_destination = instance.destination
@@ -2184,6 +2226,12 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
                 delivery_attribute_mapping)
             updated_delivery_with_resource_identity = current_destination2
     elif endpoint is not None:
+        # If this is the update path, the user does not
+        # have to specify the endpoint type so it might
+        # be None
+        if endpoint_type is None:
+            endpoint_type = current_destination.endpoint_type
+
         _validate_destination_attribute(
             endpoint_type,
             storage_queue_msg_ttl,

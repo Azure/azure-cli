@@ -843,15 +843,16 @@ examples:
     text: |
         az eventgrid partner namespace channel create -g rg1 --name channel1 \\
           --channel-type PartnerDestination --partner-namespace-name namespace1 \\
-          --partner-destination-name destination1 \\
-          --inline-event-type eventkey1 description="My event type." \\
-          --inline-event-type eventkey2 description="My second event type."
-  - name: Create a new channel of type PartnerTopic.
+          --partner-destination-name destination1
+
+  - name: Create a new channel of type PartnerTopic with inline event types.
     text: |
         az eventgrid partner namespace channel create -g rg1 --name channel1 \\
           --channel-type PartnerTopic --partner-namespace-name namespace1 \\
           --partner-topic-name topic1 \\
           --partner-topic-source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname
+          --inline-event-type eventkey1 description="My event type." \\
+          --inline-event-type eventkey2 description="My second event type."
 
 """
 

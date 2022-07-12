@@ -256,6 +256,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
         c.argument('system_assigned', options_list=['--mi-system-assigned'], action='store_true', help='Presence of this param indicates that SystemAssigned managed identity will be used')
         c.argument('update_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None))
+        c.argument('partner_topic_routing_mode', options_list=['--partner-topic-routing-mode', '--route-mode'], arg_type=get_enum_type(['SourceEventAttribute', 'ChannelNameHeader']), default='SourceEventAttribute', help="This determines if events published to this partner namespace should use the source attribute in the event payload or use the channel name in the header when matching to the partner topic. If none is specified, source attribute routing will be used to match the partner topic.")
         c.argument('user_assigned',
                    action=AddUserAssignedIdentities,
                    nargs='+',
@@ -456,15 +457,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
         c.argument('event_type_kind', arg_type=get_enum_type(['inline'], default=None), is_preview=True, help="The kind of event type used.")
         c.argument('activation_expiration_date', options_list=['--activation-expiration-date', '--act-exp-date'], help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') after which the channel and corresponding partner topic would expire and get auto deleted. If this time is not specified, the expiration date is set to seven days by default.")
+        c.argument('endpoint_url', help="The URL that represents the endpoint of the partner destination.")
+        c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant ID to get the access token that will be included as the bearer token in delivery requests.")
+        c.argument('azure_active_directory_application_id_or_uri', arg_type=aad_app_id_type, help="The Azure Active Directory Application ID or URI to get the access token that will be included as the bearer token in delivery requests.")
 
     with self.argument_context('eventgrid partner namespace channel list') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, id_part=None)
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid partner namespace channel update') as c:
-        c.argument('endpoint_url', help="The URL that represents the endpoint of the partner destination.")
-        c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant ID to get the access token that will be included as the bearer token in delivery requests.")
-        c.argument('azure_active_directory_application_id_or_uri', arg_type=aad_app_id_type, help="The Azure Active Directory Application ID or URI to get the access token that will be included as the bearer token in delivery requests.")
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid partner namespace event-channel') as c:
