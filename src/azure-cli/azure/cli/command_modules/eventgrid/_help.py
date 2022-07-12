@@ -283,7 +283,7 @@ helps['eventgrid domain topic event-subscription update'] = """
 type: command
 short-summary: Update an event subscription of a domain topic.
 parameters:
-  - name: --endpoint-type
+  - name: --update-endpoint-type
     short-summary: The type of the destination endpoint.
   - name: --advanced-filter
     short-summary: An advanced filter enables filtering of events based on a specific event property.
@@ -2014,7 +2014,7 @@ helps['eventgrid topic event-subscription update'] = """
 type: command
 short-summary: Update an event subscription of a topic.
 parameters:
-  - name: --endpoint-type
+  - name: --update-endpoint-type
     short-summary: The type of the destination endpoint.
   - name: --advanced-filter
     short-summary: An advanced filter enables filtering of events based on a specific event property.
@@ -2228,7 +2228,7 @@ helps['eventgrid domain event-subscription update'] = """
 type: command
 short-summary: Update an event subscription of a domain.
 parameters:
-  - name: --endpoint-type
+  - name: --update-endpoint-type
     short-summary: The type of the destination endpoint.
   - name: --advanced-filter
     short-summary: An advanced filter enables filtering of events based on a specific event property.
