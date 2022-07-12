@@ -175,9 +175,9 @@ def remove_batch_identity(cmd, client, resource_group_name, account_name, mi_sys
                                        if batch_account.identity.type == ResourceIdentityType.SYSTEM_ASSIGNED
                                        else ResourceIdentityType.USER_ASSIGNED)
     # batch only supports 1 managed user id
-    if mi_user_assigned and batch_account.identity.user_assigned_identities:
+    if mi_user_assigned is not None and batch_account.identity.user_assigned_identities:
         keyslist = list(batch_account.identity.user_assigned_identities.keys())
-        if keyslist and mi_user_assigned == keyslist[0]:
+        if len(mi_user_assigned) == 0 or (keyslist and mi_user_assigned[0] == keyslist[0]):
             batch_account.identity.user_assigned_identities = None
             batch_account.identity.type = (ResourceIdentityType.NONE
                                            if batch_account.identity.type == ResourceIdentityType.USER_ASSIGNED

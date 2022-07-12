@@ -246,8 +246,18 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self. cmd('batch account identity show -g {rg} -n {acc}', checks=[
         self.check('type', 'UserAssigned')])
 
-        # delete the managed identity
+        # delete specific managed identity
         self. cmd('batch account identity remove -g {rg} -n {acc} --user-assigned {identity1_id} --yes', checks=[
+        self. check('type', 'None'),
+        self. check('userAssignedIdentities', 'None')])
+
+        # create a managed identity to an existing accountS
+        self. cmd('batch account identity assign -g {rg} -n {acc} --user-assigned {identity2_id}', checks=[
+        self. check('type', 'UserAssigned'),
+        self. check('length(userAssignedIdentities)', 1)])
+
+        # delete all the managed identity
+        self. cmd('batch account identity remove -g {rg} -n {acc} --user-assigned --yes', checks=[
         self. check('type', 'None'),
         self. check('userAssignedIdentities', 'None')])
 

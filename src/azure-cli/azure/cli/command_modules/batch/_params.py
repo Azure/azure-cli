@@ -96,13 +96,13 @@ def load_arguments(self, _):
         c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
         c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
-        c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
-        c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
+        c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity', deprecate_info=c.deprecate(hide=True))
+        c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity', deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('batch account identity assign') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
-        c.argument('mi_system_assigned', options_list=['--system-assigned'], arg_type=get_three_state_flag(),
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], action='store_true',
                    arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
                    'Check out help for more examples')
         c.argument('mi_user_assigned', options_list=['--user-assigned'],
@@ -112,10 +112,10 @@ def load_arguments(self, _):
     with self.argument_context('batch account identity remove') as c:
         c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
         c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
-        c.argument('mi_system_assigned', options_list=['--system-assigned'], arg_type=get_three_state_flag(),
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], action='store_true',
                    arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
                    'Check out help for more examples')
-        c.argument('mi_user_assigned', options_list=['--user-assigned'],
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], nargs='*',
                    arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
                    'Check out help for more examples')
 
