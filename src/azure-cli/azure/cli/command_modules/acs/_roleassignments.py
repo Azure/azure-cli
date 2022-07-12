@@ -277,13 +277,18 @@ def subnet_role_assignment_exists(cmd, scope):
 def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity_object_id, scope):
     factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
+    cluster_identity_object_id = cluster_identity_object_id.lower()
+    scope = scope.lower()
 
-    for i in assignments_client.list_for_scope(scope=scope, filter="atScope()"):
-        if i.scope.lower() != scope.lower():
-            continue
+    # list all assignments of the target identity (scope) that assigned to the cluster identity
+    filter_query = "atScope() and assignedTo('{}')".format(cluster_identity_object_id)
+    for i in assignments_client.list_for_scope(scope=scope, filter=filter_query):
         if not i.role_definition_id.lower().endswith(CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID):
             continue
-        if i.principal_id.lower() != cluster_identity_object_id.lower():
+        if i.principal_id.lower() != cluster_identity_object_id:
+            continue
+        if not scope.startswith(i.scope.lower()):
+            # atScope() should return the assignments in subscription / resource group / resource level
             continue
         # already assigned
         return
