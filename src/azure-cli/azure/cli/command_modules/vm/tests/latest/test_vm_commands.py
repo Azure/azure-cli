@@ -5496,6 +5496,40 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
+    def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'version': '1.1.1',
+            'captured': 'managedImage1',
+            'location': resource_group_location,
+            'disk1': self.create_random_name(prefix='disk', length=20),
+            'snapshot1': self.create_random_name(prefix='snp', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1 --os-state Specialized --features SecurityType=ConfidentialVm --hyper-v-generation v2', checks=[
+            self.check('name', self.kwargs['image']),
+            self.check('features[0].name', 'SecurityType'),
+            self.check('features[0].value', 'ConfidentialVM'),
+            self.check('hyperVGeneration', 'V2')
+        ])
+
+        self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey ')
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
+            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
+            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVmEncryptionType', 'EncryptedWithPmk'),
+        ])
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        time.sleep(60)  # service end latency
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
         self.kwargs.update({
