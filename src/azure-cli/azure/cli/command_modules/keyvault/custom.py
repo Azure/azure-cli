@@ -2420,7 +2420,7 @@ def _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, 
 
         with open(private_key_path, 'rb') as f:
             pem_data = f.read()
-            password = passwords[private_key_index] if private_key_index < len(passwords) else None
+            password = passwords[private_key_index].encode(encoding="utf-8") if private_key_index < len(passwords) else None
             private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
 
         with open(cert_path, 'rb') as f:
