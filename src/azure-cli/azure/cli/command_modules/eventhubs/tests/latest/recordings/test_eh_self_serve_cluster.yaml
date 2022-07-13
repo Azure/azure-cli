@@ -1,0 +1,4740 @@
+interactions:
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --location
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001","name":"rg-cluster-000001","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:45:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "westus", "sku": {"name": "Dedicated", "capacity": 2}, "properties":
+      {"supportsScaling": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '108'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"status":"Unknown","supportsScaling":true},"sku":{"name":"Dedicated","capacity":2}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '348'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:45:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:45:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:46:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:46:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:47:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:47:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:48:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:48:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:49:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:49:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:50:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:51:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:51:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:52:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:52:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:53:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:53:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:54:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:54:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:55:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:55:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:56:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:56:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:57:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:57:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:58:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:58:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:59:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 09:59:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:00:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:00:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:01:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:01:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:02:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:02:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:03:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:03:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:04:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:04:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:05:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:05:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:06:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:06:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:07:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:07:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:08:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --supports-scaling --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:07:49.4101573Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":2}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '461'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:08:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:07:49.4101573Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":2}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '461'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:08:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "Standard", "tier": "Standard"},
+      "properties": {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002",
+      "publicNetworkAccess": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '290'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --location --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '953'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:08:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '953'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:08:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '953'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:09:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:08:25.54Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '953'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:10:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:10:07.08Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '951'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:10:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-ns1-000003","name":"eventhubs-ns1-000003","type":"Microsoft.EventHub/Namespaces","location":"West
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-ns1-000003","createdAt":"2022-07-11T10:08:25.54Z","updatedAt":"2022-07-11T10:10:07.08Z","serviceBusEndpoint":"https://eventhubs-ns1-000003.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '951'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:10:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:07:49.4101573Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":2}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '461'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:10:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "Dedicated", "capacity": 1}, "properties":
+      {"supportsScaling": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '108'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"status":"Unknown","supportsScaling":true},"sku":{"name":"Dedicated","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '348'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:10:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=false&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:11:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:11:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:12:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:12:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:13:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:13:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:14:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:14:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:15:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:15:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:16:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:16:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:17:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:17:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:18:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:18:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:19:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:19:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:20:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:20:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:21:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:21:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:22:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:22:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:23:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:23:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:24:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:24:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:25:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:25:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:26:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:26:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:27:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:27:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:28:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:28:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:29:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:29:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:30:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:30:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/2a6cc0ea-999a-4aa7-8494-77833c733edd?isAsyncHeader=true&resourceName=eventhubs-selfserve-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:31:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --capacity
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:31:19.3219496Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '461'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:31:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:31:19.3219496Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '461'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:31:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster namespace list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002/namespaces?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.Eventhub/namespaces/eventhubs-ns1-000003"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '166'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:31:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/manojprasad-rampup/providers/Microsoft.EventHub/clusters/manojprasad-eh-cluster","name":"manojprasad-eh-cluster","type":"Microsoft.EventHub/Clusters","location":"westus","tags":{},"properties":{"createdAt":"2022-06-09T16:38:29.5028531Z","updatedAt":"2022-06-28T01:10:44.5261254Z","status":"Deleting","supportsScaling":false,"metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-000002","name":"eventhubs-selfserve-000002","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T09:45:22.7560168Z","updatedAt":"2022-07-11T10:31:19.3219496Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51004"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-chzstck3t/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-44ab","name":"eventhubs-selfserve-44ab","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T07:37:37.8296187Z","updatedAt":"2022-07-11T08:00:04.8206499Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51002"},"sku":{"name":"Dedicated","capacity":2}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-77mni2kdy/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-wl4h","name":"eventhubs-selfserve-wl4h","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T08:42:46.8033194Z","updatedAt":"2022-07-11T09:28:14.9647503Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51009"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/framborg/providers/Microsoft.EventHub/clusters/frambowestus","name":"frambowestus","type":"Microsoft.EventHub/Clusters","location":"westus","tags":{},"properties":{"createdAt":"2022-06-20T22:00:30.7134585Z","updatedAt":"2022-06-20T22:00:35.5885209Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51007"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-rqbrjini7/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-uvyb","name":"eventhubs-selfserve-uvyb","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T06:53:26.5616982Z","updatedAt":"2022-07-11T07:26:02.2029184Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51006"},"sku":{"name":"Dedicated","capacity":2}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-5hl5q5ztd/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-pubm","name":"eventhubs-selfserve-pubm","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2022-07-11T05:57:53.2217773Z","updatedAt":"2022-07-11T06:49:17.1262781Z","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51008"},"sku":{"name":"Dedicated","capacity":2}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3218'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 Jul 2022 10:31:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
