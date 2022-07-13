@@ -2052,63 +2052,58 @@ def process_gallery_image_version_namespace(cmd, namespace):
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
-            if hasattr(namespace, 'target_region_encryption') or hasattr(namespace, 'target_region_cvm_encryption'):
-                os_disk_image = None
-                data_disk_images = None
-                if namespace.target_region_encryption:
-                    terms = namespace.target_region_encryption[i].split(',')
-                    # OS disk
-                    os_disk_image = terms[0]
-                    if os_disk_image == 'null':
-                        os_disk_image = None
-                    else:
-                        des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                        security_profile = None
-                        os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id,
-                                                              security_profile=security_profile)
-                    # Data disk
-                    if len(terms) > 1:
-                        data_disk_images = terms[1:]
-                        data_disk_images_len = len(data_disk_images)
-                        if data_disk_images_len % 2 != 0:
-                            raise ArgumentUsageError(
-                                'usage error: LUN and disk encryption set for data disk should appear in pair in '
-                                '--target-region-encryption. Example: osdes,0,datades0,1,datades1')
-                        data_disk_image_encryption_list = []
-                        for j in range(int(data_disk_images_len / 2)):
-                            lun = data_disk_images[j * 2]
-                            des_id = data_disk_images[j * 2 + 1]
-                            des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                            data_disk_image_encryption_list.append(DataDiskImageEncryption(
-                                lun=lun, disk_encryption_set_id=des_id))
-                        data_disk_images = data_disk_image_encryption_list
-                    else:
-                        data_disk_images = None
-
-                if namespace.target_region_cvm_encryption:
-                    cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
-                    storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
-                    storage_profile_types_str = ", ".join(storage_profile_types)
-                    if cvm_terms[0] not in storage_profile_types:
+            os_disk_image = None
+            data_disk_images = None
+            if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
+                terms = namespace.target_region_encryption[i].split(',')
+                # OS disk
+                os_disk_image = terms[0]
+                if os_disk_image == 'null':
+                    os_disk_image = None
+                else:
+                    des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
+                    security_profile = None
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                # Data disk
+                if len(terms) > 1:
+                    data_disk_images = terms[1:]
+                    data_disk_images_len = len(data_disk_images)
+                    if data_disk_images_len % 2 != 0:
                         raise ArgumentUsageError(
-                            "usage error: {} is an invalid os_cvm_encryption_type. "
-                            "The valid values for os_cvm_encryption_type are {}".format(
-                                cvm_terms, storage_profile_types_str))
-                    cvm_des_id = None
-                    if len(cvm_terms) > 1:
-                        if cvm_terms[1]:
-                            cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                    security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                                  secure_vm_disk_encryption_set_id=cvm_des_id)
-                    if os_disk_image:
-                        os_disk_image.security_profile = security_profile
-                    else:
-                        os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
-                encryption = EncryptionImages()
+                            'usage error: LUN and disk encryption set for data disk should appear in pair in '
+                            '--target-region-encryption. Example: osdes,0,datades0,1,datades1')
+                    data_disk_image_encryption_list = []
+                    for j in range(int(data_disk_images_len / 2)):
+                        lun = data_disk_images[j * 2]
+                        des_id = data_disk_images[j * 2 + 1]
+                        des_id = _disk_encryption_set_format(cmd, namespace, des_id)
+                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
+                            lun=lun, disk_encryption_set_id=des_id))
+                    data_disk_images = data_disk_image_encryption_list
+
+            if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+                cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
+                if not cvm_terms or len(cvm_terms) != 2:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region cvm encryption. "
+                        "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types_str = ", ".join(storage_profile_types)
+                if cvm_terms[0] not in storage_profile_types:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid os_cvm_encryption_type. "
+                        "The valid values for os_cvm_encryption_type are {}".format(
+                            cvm_terms, storage_profile_types_str))
+                cvm_des_id = None
+                if cvm_terms[1]:
+                    cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
+                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
+                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
                 if os_disk_image:
-                    encryption.os_disk_image = os_disk_image
-                if data_disk_images:
-                    encryption.data_disk_images = data_disk_images
+                    os_disk_image.security_profile = security_profile
+                else:
+                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+            encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
             # At least the region is specified
             if len(parts) >= 1:
                 regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
