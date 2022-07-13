@@ -2087,6 +2087,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     raise ArgumentUsageError(
                         "usage error: {} is an invalid target region cvm encryption. "
                         "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+
                 storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
                 storage_profile_types_str = ", ".join(storage_profile_types)
                 if cvm_terms[0] not in storage_profile_types:
