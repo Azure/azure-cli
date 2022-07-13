@@ -151,7 +151,9 @@ def _get_object_stubs(graph_client, assignees):
     result = []
     assignees = list(assignees)  # callers could pass in a set
     for i in range(0, len(assignees), 1000):
-        result += list(graph_client.directory_object_get_by_ids(assignees[i:i + 1000]))
+        body = {"ids": assignees[i:i + 1000],
+                "types": ['user', 'group', 'servicePrincipal', 'directoryObjectPartnerReference']}
+        result.extend(list(graph_client.directory_object_get_by_ids(body)))
     return result
 
 
