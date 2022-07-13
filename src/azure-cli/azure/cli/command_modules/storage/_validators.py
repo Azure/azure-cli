@@ -641,6 +641,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
             content_md5=ns.pop('content_md5', None),
             cache_control=ns.pop('content_cache_control', None)
         )
+        # In track2 SDK, content_md5 becomes bytearray.
+        from .track2_util import _str_to_bytearray
+        if new_props.content_md5:
+            new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
 
         # if update, fill in any None values with existing
         if update:
@@ -1304,6 +1308,8 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
     namespace.source = os.path.realpath(namespace.source)
     namespace.share_name = namespace.destination
+    # Ignore content_md5 for batch upload
+    namespace.content_md5 = None
 
 
 def process_file_download_batch_parameters(cmd, namespace):
