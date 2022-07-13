@@ -2062,7 +2062,6 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    security_profile = None
                     os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
                 # Data disk
                 if len(terms) > 1:
