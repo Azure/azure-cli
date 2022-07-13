@@ -2993,17 +2993,8 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
         })
 
-
         # create a workspace
         self._create_workspace()
-
-        # create firewall rule
-        # self.cmd(
-        #     'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
-        #     '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
-        #         self.check('provisioningState', 'Succeeded')
-        #     ]
-        # )
 
         self.cmd(
             'az synapse ad-only-auth get --resource-group {rg} --workspace-name {workspace}',

@@ -1087,7 +1087,7 @@ def load_arguments(self, _):
             c.argument('definition_file', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                        help='The KQL query file path')
 
-    for scope in ['show', 'wait', 'delete']:
+    for scope in ['show', 'delete']:
         with self.argument_context('synapse kql-script ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
             c.argument('script_name', arg_type=name_type,

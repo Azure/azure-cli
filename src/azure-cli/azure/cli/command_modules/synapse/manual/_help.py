@@ -2307,8 +2307,3 @@ examples:
         az synapse ad-only-auth disable --workspace-name testsynapseworkspace \\
           -g testresourcegroup
 """
-
-helps['synapse ad-only-auth wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a Azure ad-only-auth is met.
-"""

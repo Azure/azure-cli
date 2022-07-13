@@ -586,7 +586,6 @@ def load_command_table(self, _):
     with self.command_group('synapse ad-only-auth', command_type=synapse_adonlyauthentications_sdk,
                             custom_command_type=get_custom_sdk('adonlyauthentications', cf_synapse_client_azure_ad_only_authentications_factory),
                             client_factory=cf_synapse_client_azure_ad_only_authentications_factory) as g:
-        g.custom_command('enable', 'synapse_enable_adonly_auth', supports_no_wait=True)
-        g.custom_command('disable', 'synapse_disable_adonly_auth', supports_no_wait=True)
+        g.custom_command('enable', 'synapse_enable_adonly_auth')
+        g.custom_command('disable', 'synapse_disable_adonly_auth')
         g.command('get', 'list')
-        g.wait_command('wait', 'list')
