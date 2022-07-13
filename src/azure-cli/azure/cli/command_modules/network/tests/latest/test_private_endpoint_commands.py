@@ -3242,8 +3242,9 @@ class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='test_grafana_private_endpoint_', location="eastus2euap")
-    def test_private_endpoint_connection_grafana(self, resource_group, resource_group_location):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_grafana_private_endpoint_', random_name_length=40)
+    def test_private_endpoint_connection_grafana(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,
             'service_name': self.create_random_name('cli-test-srv-', 22),
@@ -3251,7 +3252,7 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
             'subnet_name': self.create_random_name('cli-test-subnet-', 22),
             'endpoint_name': self.create_random_name('cli-test-pe-', 22),
             'endpoint_conn_name': self.create_random_name('cli-test-pec-', 22),
-            'location': resource_group_location,
+            'location': "eastus2euap",
         })
 
         # Install extension for Azure Managed Grafana Service
@@ -3282,7 +3283,8 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
             'network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
             '--connection-name {endpoint_conn_name} --private-connection-resource-id {service_id} '
             '--group-id Gateway').get_output_in_json()
-        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+        self.assertTrue(
+            self.kwargs['endpoint_name'].lower() in result['name'].lower())
 
         result = self.cmd(
             'network private-endpoint-connection list -g {resource_group} -n {service_name} --type Microsoft.Dashboard/grafana',
