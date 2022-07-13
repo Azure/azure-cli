@@ -2103,8 +2103,10 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image.security_profile = security_profile
                 else:
                     os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+
             if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+
             # At least the region is specified
             if len(parts) >= 1:
                 regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
