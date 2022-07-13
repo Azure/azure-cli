@@ -8,7 +8,7 @@ import time
 import uuid
 
 from azure.cli.command_modules.acs._client_factory import (
-    cf_container_registry_service,
+    get_container_registry_client,
     get_auth_management_client,
     get_resource_by_name,
 )
@@ -317,7 +317,7 @@ def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
     if is_valid_resource_id(acr_name_or_id):
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
-            acr_client = cf_container_registry_service(cmd.cli_ctx, subscription_id=parsed_registry["subscription"])
+            acr_client = get_container_registry_client(cmd.cli_ctx, subscription_id=parsed_registry["subscription"])
             registry = acr_client.registries.get(parsed_registry["resource_group"], parsed_registry["name"])
         except (CloudError, HttpResponseError) as ex:
             raise AzCLIError(ex.message)

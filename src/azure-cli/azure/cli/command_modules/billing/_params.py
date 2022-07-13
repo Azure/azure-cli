@@ -13,7 +13,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], required=False, help='name of the invoice')
 
     with self.argument_context('billing period show') as c:
-        c.argument('billing_period_name', options_list=['--name', '-n'], help='name of the billing period')
+        c.argument('billing_period_name', options_list=['--name', '-n'], help='name of the billing period. Run the az billing period list command to list the name of billing period')
 
     with self.argument_context('billing enrollment-account show') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the enrollment account')

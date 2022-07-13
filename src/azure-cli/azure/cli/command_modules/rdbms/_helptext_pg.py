@@ -135,11 +135,6 @@ short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testserver' to a specific point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver --restore-time "2017-06-15T13:10:00Z"
-  - name: Restore 'testserver2' to 'testserverNew', where 'testserverNew' is in a different resource group from 'testserver2'.
-    text: |
-        az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
-          --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testserver2" \\
-          --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testserver' to current point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
 """

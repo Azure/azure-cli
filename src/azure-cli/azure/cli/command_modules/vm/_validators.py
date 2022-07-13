@@ -574,6 +574,17 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 "the os type of this image should be {}".format(community_gallery_image_info.os_type))
         namespace.os_type = community_gallery_image_info.os_type
 
+    if getattr(namespace, 'security_type', None) == 'ConfidentialVM' and \
+            not getattr(namespace, 'os_disk_security_encryption_type', None):
+        raise RequiredArgumentMissingError('usage error: "--os-disk-security-encryption-type" is required '
+                                           'when "--security-type" is specified as "ConfidentialVM"')
+
+    if getattr(namespace, 'os_disk_secure_vm_disk_encryption_set', None) and \
+            getattr(namespace, 'os_disk_security_encryption_type', None) != 'DiskWithVMGuestState':
+        raise ArgumentUsageError(
+            'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
+            'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
@@ -1755,6 +1766,8 @@ def process_disk_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     _validate_gallery_image_reference(cmd, namespace)
+    _validate_security_data_uri(namespace)
+    _validate_upload_type(cmd, namespace)
     _validate_secure_vm_disk_encryption_set(namespace)
     _validate_hyper_v_generation(namespace)
     if namespace.source:
@@ -1768,6 +1781,46 @@ def process_disk_create_namespace(cmd, namespace):
                 raise ArgumentUsageError(usage_error)
         except HttpResponseError:
             raise ArgumentUsageError(usage_error)
+
+
+def _validate_security_data_uri(namespace):
+    if 'security_data_uri' not in namespace or not namespace.security_data_uri:
+        return
+
+    if not namespace.security_type:
+        raise RequiredArgumentMissingError(
+            'Please specify --security-type when using the --security-data-uri parameter')
+
+    if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+        raise ArgumentUsageError(
+            "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
+
+    if not namespace.source:
+        raise RequiredArgumentMissingError(
+            'Please specify --source when using the --security-data-uri parameter')
+
+
+def _validate_upload_type(cmd, namespace):
+    if 'upload_type' not in namespace:
+        return
+
+    if not namespace.upload_type and namespace.for_upload:
+        namespace.upload_type = 'Upload'
+
+    if namespace.upload_type == 'UploadWithSecurityData':
+
+        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+            raise ArgumentUsageError(
+                "'UploadWithSecurityData' is not supported in the current profile. "
+                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
+
+        if not namespace.security_type:
+            raise RequiredArgumentMissingError(
+                "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
+
+        if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+            raise ArgumentUsageError(
+                "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
 
 
 def _validate_secure_vm_disk_encryption_set(namespace):
@@ -1999,6 +2052,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
+            os_disk_image = None
+            data_disk_images = None
             if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
                 terms = namespace.target_region_encryption[i].split(',')
                 # OS disk
@@ -2007,30 +2062,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    security_profile = None
-                    if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
-                        cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
-                        if not cvm_terms or len(cvm_terms) != 2:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid target region cvm encryption. "
-                                "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
-
-                        storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
-                        storage_profile_types_str = ", ".join(storage_profile_types)
-                        if cvm_terms[0] not in storage_profile_types:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid os_cvm_encryption_type. "
-                                "The valid values for os_cvm_encryption_type are {}".format(
-                                    cvm_terms, storage_profile_types_str))
-                        if cvm_terms[1]:
-                            cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                        else:
-                            cvm_des_id = None
-                        security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                                      secure_vm_disk_encryption_set_id=cvm_des_id)
-
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id,
-                                                          security_profile=security_profile)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
                 # Data disk
                 if len(terms) > 1:
                     data_disk_images = terms[1:]
@@ -2047,8 +2079,32 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         data_disk_image_encryption_list.append(DataDiskImageEncryption(
                             lun=lun, disk_encryption_set_id=des_id))
                     data_disk_images = data_disk_image_encryption_list
+
+            if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+                cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
+                if not cvm_terms or len(cvm_terms) != 2:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region cvm encryption. "
+                        "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+
+                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types_str = ", ".join(storage_profile_types)
+                if cvm_terms[0] not in storage_profile_types:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid os_cvm_encryption_type. "
+                        "The valid values for os_cvm_encryption_type are {}".format(
+                            cvm_terms, storage_profile_types_str))
+                cvm_des_id = None
+                if cvm_terms[1]:
+                    cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
+                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
+                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                if os_disk_image:
+                    os_disk_image.security_profile = security_profile
                 else:
-                    data_disk_images = None
+                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+
+            if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
             # At least the region is specified
@@ -2073,6 +2129,17 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
+# endregion
+
+
+def process_ppg_create_namespace(namespace):
+    """
+    The availability zone can be provided only when an intent is provided
+    """
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
 # endregion
 
 
@@ -2292,3 +2359,12 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def validate_secure_vm_guest_state_sas(cmd, namespace):
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
+    DiskCreateOption = cmd.get_models('DiskCreateOption')
+
+    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+        namespace.secure_vm_guest_state_sas = True
