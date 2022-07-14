@@ -37,6 +37,9 @@ class Style(str, Enum):
     ERROR = "error"
     SUCCESS = "success"
     WARNING = "warning"
+    # Background colors
+    BACK_PRIMARY = "back_primary"
+    BACK_WARNING = "back_warning"
 
 
 def _rgb_hex(rgb_hex: str):
@@ -70,7 +73,9 @@ THEME_DARK = {
     Style.HYPERLINK: '\x1b[96m',  # Bright Foreground Cyan
     Style.ERROR: '\x1b[91m',  # Bright Foreground Red
     Style.SUCCESS: '\x1b[92m',  # Bright Foreground Green
-    Style.WARNING: '\x1b[93m'  # Bright Foreground Yellow
+    Style.WARNING: '\x1b[93m',  # Bright Foreground Yellow
+    Style.BACK_PRIMARY: '\x1b[0;30;48;2;0;96;96m',  # Default & Foreground Black & Bright Background Cyan
+    Style.BACK_WARNING: '\x1b[4;93;48;2;0;96;96m'  # Underline & Bright Foreground Yellow & Bright Background Cyan
 }
 
 # Theme to be used in a light-themed terminal

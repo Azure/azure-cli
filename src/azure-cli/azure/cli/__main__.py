@@ -118,6 +118,19 @@ finally:
         logger.warning("Auto upgrade failed. %s", str(ex))
         telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
 
+    try:
+        from azure.cli.core.style import Style, print_styled_text, format_styled_text
+        format_styled_text.theme = 'dark'
+        styled_text = [
+            (Style.BACK_PRIMARY, "[Survey] Help us improve Azure CLI by sharing your experience. This survey should take about 3 minutes. Run "),
+            (Style.BACK_WARNING, "az survey"),
+            (Style.BACK_PRIMARY, " to open in browser. Learn more at "),
+            (Style.BACK_WARNING, "htttps://go.microsoft.com/tbd")
+        ]
+        print_styled_text(styled_text)
+    except Exception:
+        pass
+
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
     telemetry.conclude()
