@@ -9,12 +9,12 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
                                RoleBasedServicePrincipalPreparer, live_only)
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-# flake8: noqa
 
 AZURE_TEST_RUN_LIVE = bool(os.environ.get('AZURE_TEST_RUN_LIVE'))
 
 
+# TODO: deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 @unittest.skip("needs explicit service principal management")
 class AzureContainerServiceScenarioTest(ScenarioTest):
 

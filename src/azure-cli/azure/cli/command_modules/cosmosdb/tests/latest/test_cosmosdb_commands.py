@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import unittest
 
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from knack.util import CLIError
@@ -609,6 +610,96 @@ class CosmosDBTests(ScenarioTest):
         container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {ttl}').get_output_in_json()
 
         assert container_create["resource"]["analyticalStorageTtl"] == ttl
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analyticalStorageTtl')
+    def test_cosmosdb_sql_container_update_analytical_ttl(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = 3000
+        analyticalStorageTtlOnCollectionUpdate = 500
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {analyticalStorageTtlOnCollectionCreate}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
+    def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = 3000
+        analyticalStorageTtlOnCollectionUpdate = 0
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {analyticalStorageTtlOnCollectionCreate}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analytical_store_migration')
+    def test_cosmosdb_sql_container_update_analytical_store_migration(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = None
+        analyticalStorageTtlOnCollectionUpdate = -1
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
 
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
@@ -1374,6 +1465,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb table throughput update -g {rg} -a {acc} -n {tb_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["throughput"] == tp2
 
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
     @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_key_vault_key_uri(self, resource_group, key_vault):
@@ -1395,6 +1487,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert cmk_output["keyVaultKeyUri"] == key_uri
 
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
     @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
     def test_cosmosdb_managed_service_identity(self, resource_group, key_vault):
@@ -1552,7 +1645,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"', checks=[
             self.check('id', fully_qualified_role_def_id),
             self.check('roleName', 'roleName'),
-            self.check('typePropertiesType', '1'),
+            self.check('typePropertiesType', 'CustomRole'),
             self.check('assignableScopes[0]', assignable_scope),
             self.check('length(permissions)', 1)
         ])
@@ -1566,7 +1659,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"', checks=[
             self.check('id', fully_qualified_role_def_id),
             self.check('roleName', 'roleName2'),
-            self.check('typePropertiesType', '1'),
+            self.check('typePropertiesType', 'CustomRole'),
             self.check('assignableScopes[0]', assignable_scope),
             self.check('length(permissions)', 2)
         ])
@@ -1574,7 +1667,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body2}"', checks=[
             self.check('id', fully_qualified_role_def_id2),
             self.check('roleName', 'roleName3'),
-            self.check('typePropertiesType', '1'),
+            self.check('typePropertiesType', 'CustomRole'),
             self.check('assignableScopes[0]', assignable_scope),
             self.check('length(permissions)', 3)
         ])

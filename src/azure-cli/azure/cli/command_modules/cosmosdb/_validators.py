@@ -248,3 +248,129 @@ def validate_node_count(ns):
     if ns.node_count is not None:
         if int(ns.node_count) < 3:
             raise InvalidArgumentValueError("""Node count cannot be less than 3.""")
+
+
+def validate_client_encryption_policy(ns):
+    """ Validate all the included paths in client encryption policy"""
+    partition_key_path = [ns.partition_key_path]
+    client_encryption_policy = ns.client_encryption_policy
+
+    if client_encryption_policy is not None:
+        if "includedPaths" in client_encryption_policy:
+            includedPaths = client_encryption_policy['includedPaths']
+        else:
+            raise InvalidArgumentValueError("includedPaths missing in Client Encryption Policy. "
+                                            "Please verify your Client Encryption Policy JSON string.")
+
+        if includedPaths == "":
+            raise InvalidArgumentValueError("includedPaths missing in Client Encryption Policy. "
+                                            "includedPaths cannot be null or empty.")
+
+        if "policyFormatVersion" in client_encryption_policy:
+            policyFormatVersion = client_encryption_policy['policyFormatVersion']
+        else:
+            raise InvalidArgumentValueError("policyFormatVersion missing in Client Encryption Policy. "
+                                            "Please verify your Client Encryption Policy JSON string.")
+
+        if not isinstance(policyFormatVersion, int):
+            raise InvalidArgumentValueError("Invalid policyFormatVersion type used in Client Encryption Policy. "
+                                            "policyFormatVersion is an integer type. "
+                                            "Supported versions are 1 and 2.")
+
+        if(policyFormatVersion < 1 or policyFormatVersion > 2):
+            raise InvalidArgumentValueError("Invalid policyFormatVersion used in Client Encryption Policy. "
+                                            "Please verify your Client Encryption Policy JSON string. "
+                                            "Supported versions are 1 and 2.")
+
+        _validate_included_paths_in_cep(partition_key_path, includedPaths, policyFormatVersion)
+
+
+def _validate_included_paths_in_cep(partition_key_path, includedPaths, policyFormatVersion):
+    listOfPaths = []
+    for includedPath in includedPaths:
+        if "encryptionType" in includedPath:
+            encryptionType = includedPath['encryptionType']
+        else:
+            raise InvalidArgumentValueError("encryptionType missing in includedPaths. "
+                                            "Please verify your Client Encryption Policy JSON string.")
+
+        if encryptionType == "":
+            raise InvalidArgumentValueError("Invalid encryptionType included in Client Encryption Policy. "
+                                            "encryptionType cannot be null or empty.")
+
+        if(encryptionType != "Deterministic" and encryptionType != "Randomized"):
+            raise InvalidArgumentValueError(f"Invalid Encryption Type {encryptionType} used. "
+                                            "Supported types are Deterministic or Randomized.")
+
+        if "path" in includedPath:
+            path = includedPath['path']
+        else:
+            raise InvalidArgumentValueError("path missing in includedPaths. "
+                                            "Please verify your Client Encryption Policy JSON string.")
+
+        if path == "":
+            raise InvalidArgumentValueError("Invalid path included in Client Encryption Policy. "
+                                            "Path cannot be null or empty.")
+
+        if path in listOfPaths:
+            raise InvalidArgumentValueError(f"Duplicate path:{path} found in Client Encryption Policy.")
+
+        listOfPaths.append(path)
+
+        if(path[0] != "/" or path.rfind('/') != 0):
+            raise InvalidArgumentValueError("Invalid path included in Client Encryption Policy. "
+                                            "Only top level paths supported. Paths should begin with /.")
+
+        if path[1:] == "id":
+            if policyFormatVersion < 2:
+                raise InvalidArgumentValueError("id path which is part of Client Encryption policy is configured "
+                                                f"with invalid policyFormatVersion: {policyFormatVersion}. "
+                                                "Please use policyFormatVersion 2.")
+
+            if encryptionType != "Deterministic":
+                raise InvalidArgumentValueError("id path is part of Client Encryption policy "
+                                                f"with invalid encryption type: {encryptionType}. "
+                                                "Only deterministic encryption type is supported.")
+
+        if "clientEncryptionKeyId" in includedPath:
+            clientEncryptionKeyId = includedPath['clientEncryptionKeyId']
+        else:
+            raise InvalidArgumentValueError("clientEncryptionKeyId missing in includedPaths. "
+                                            "Please verify your Client Encryption Policy JSON string.")
+
+        if clientEncryptionKeyId == "":
+            raise InvalidArgumentValueError("Invalid clientEncryptionKeyId included in Client Encryption Policy. "
+                                            "clientEncryptionKeyId cannot be null or empty.")
+
+        _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, encryptionType)
+
+        if "encryptionAlgorithm" in includedPath:
+            encryptionAlgorithm = includedPath['encryptionAlgorithm']
+        else:
+            raise InvalidArgumentValueError("encryptionAlgorithm missing in includedPaths. "
+                                            "Please verify your Client Encryption Policy JSON string.")
+
+        if encryptionAlgorithm == "":
+            raise InvalidArgumentValueError("Invalid encryptionAlgorithm included in Client Encryption Policy. "
+                                            "encryptionAlgorithm cannot be null or empty.")
+
+        if encryptionAlgorithm != "AEAD_AES_256_CBC_HMAC_SHA256":
+            raise InvalidArgumentValueError("Invalid encryptionAlgorithm included in Client Encryption Policy. "
+                                            "encryptionAlgorithm should be 'AEAD_AES_256_CBC_HMAC_SHA256'.")
+
+
+def _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, encryptionType):
+    """ for each partition key path verify if its part of client encryption policy
+    or if its top level path is part of client encryption policy
+    eg: pk path is /a/b/c and /a is part of client encryption policy """
+    for pkPath in partition_key_path:
+        if path[1:] == pkPath.split('/')[1]:
+            if policyFormatVersion < 2:
+                raise InvalidArgumentValueError(f"Partition key path:{pkPath} which is part of "
+                                                "Client Encryption policy is configured "
+                                                f"with invalid policyFormatVersion: {policyFormatVersion}. "
+                                                "Please use policyFormatVersion 2.")
+            if encryptionType != "Deterministic":
+                raise InvalidArgumentValueError(f"Partition key path:{pkPath} is part of "
+                                                "Client Encryption policy with invalid encryption type. "
+                                                "Only deterministic encryption type is supported.")
