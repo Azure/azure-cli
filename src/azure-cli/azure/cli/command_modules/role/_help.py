@@ -331,68 +331,67 @@ helps['ad app federated-credential list'] = """
 type: command
 short-summary: List application federated identity credentials.
 examples:
-  - name: List application federated identity credentials.
-    text: az ad app federated-credential list --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+- name: List application federated identity credentials.
+  text: az ad app federated-credential list --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
-
+# The example is from
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-github?tabs=microsoft-graph
 helps['ad app federated-credential create'] = """
 type: command
 short-summary: Create application federated identity credential.
 examples:
-  - name: Create application federated identity credential.
-    text: |
-        az ad app federated-credential create --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --parameters credential.json
-        ("credential.json" contains the following content)
-        {
-            "name": "Testing",
-            "issuer": "https://token.actions.githubusercontent.com/",
-            "subject": "repo:octo-org/octo-repo:environment:Production",
-            "description": "Testing",
-            "audiences": [
-                "api://AzureADTokenExchange"
-            ]
-        }
+- name: Create application federated identity credential.
+  text: |
+    az ad app federated-credential create --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --parameters credential.json
+    ("credential.json" contains the following content)
+    {
+        "name": "Testing",
+        "issuer": "https://token.actions.githubusercontent.com/",
+        "subject": "repo:octo-org/octo-repo:environment:Production",
+        "description": "Testing",
+        "audiences": [
+            "api://AzureADTokenExchange"
+        ]
+    }
 """
-
 
 helps['ad app federated-credential show'] = """
 type: command
 short-summary: Show application federated identity credential.
 examples:
-  - name: Show application federated identity credential.
-    text: az ad app federated-credential show --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+- name: Show application federated identity credential with id
+  text: az ad app federated-credential show --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --federated-credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+- name: Show application federated identity credential with name
+  text: az ad app federated-credential show --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --federated-credential-id Testing
 """
-
 
 helps['ad app federated-credential update'] = """
 type: command
 short-summary: Update application federated identity credential.
 examples:
-  - name: Update application federated identity credential.
-    text: |
-        az ad app federated-credential update --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --parameters credential.json
-        ("credential.json" contains the following content)
-        {
-            "name": "Testing",
-            "issuer": "https://token.actions.githubusercontent.com/",
-            "subject": "repo:octo-org/octo-repo:environment:Production",
-            "description": "Testing",
-            "audiences": [
-                "api://AzureADTokenExchange"
-            ]
-        }
+- name: Update application federated identity credential.
+  text: |
+    az ad app federated-credential update --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --federated-credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --parameters credential.json
+    ("credential.json" contains the following content)
+    {
+        "name": "Testing",
+        "issuer": "https://token.actions.githubusercontent.com/",
+        "subject": "repo:octo-org/octo-repo:environment:Production",
+        "description": "Updated description",
+        "audiences": [
+            "api://AzureADTokenExchange"
+        ]
+    }
 """
-
 
 helps['ad app federated-credential delete'] = """
 type: command
 short-summary: Delete application federated identity credential.
 examples:
-  - name: Delete application federated identity credential.
-    text: az ad app federated-credential delete --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+- name: Delete application federated identity credential.
+  text: az ad app federated-credential delete --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --federated-credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
-
 
 helps['ad group'] = """
 type: group

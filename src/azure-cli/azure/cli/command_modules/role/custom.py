@@ -983,32 +983,30 @@ def list_permission_grants(client, identifier=None, query_filter=None, show_reso
     return result
 
 
-def app_federated_credential_list(client, identifier):
-    object_id = _resolve_application(client, identifier)
-    # This call is too simple, so it's unnecessary to extract a common method for both application and servicePrincipal
-    # and invoke it like
-    # _federated_identity_credential_list(client.application_federated_identity_credential_list, object_id)
+def app_federated_credential_list(client, app_identifier):
+    object_id = _resolve_application(client, app_identifier)
     return client.application_federated_identity_credential_list(object_id)
 
 
-def app_federated_credential_create(client, identifier, parameters):
-    object_id = _resolve_application(client, identifier)
+def app_federated_credential_create(client, app_identifier, parameters):
+    object_id = _resolve_application(client, app_identifier)
     return client.application_federated_identity_credential_create(object_id, parameters)
 
 
-def app_federated_credential_show(client, identifier, credential_id_or_name):
-    object_id = _resolve_application(client, identifier)
-    return client.application_federated_identity_credential_get(object_id, credential_id_or_name)
+def app_federated_credential_show(client, app_identifier, federated_identity_credential_id_or_name):
+    object_id = _resolve_application(client, app_identifier)
+    return client.application_federated_identity_credential_get(object_id, federated_identity_credential_id_or_name)
 
 
-def app_federated_credential_update(client, identifier, credential_id_or_name, parameters):
-    object_id = _resolve_application(client, identifier)
-    return client.application_federated_identity_credential_update(object_id, credential_id_or_name, parameters)
+def app_federated_credential_update(client, app_identifier, federated_identity_credential_id_or_name, parameters):
+    object_id = _resolve_application(client, app_identifier)
+    return client.application_federated_identity_credential_update(object_id, federated_identity_credential_id_or_name,
+                                                                   parameters)
 
 
-def app_federated_credential_delete(client, identifier, credential_id_or_name):
-    object_id = _resolve_application(client, identifier)
-    return client.application_federated_identity_credential_delete(object_id, credential_id_or_name)
+def app_federated_credential_delete(client, app_identifier, federated_identity_credential_id_or_name):
+    object_id = _resolve_application(client, app_identifier)
+    return client.application_federated_identity_credential_delete(object_id, federated_identity_credential_id_or_name)
 
 
 def create_service_principal(cmd, identifier):
@@ -1114,31 +1112,6 @@ def list_service_principal_credentials(cmd, identifier, cert=False):
     client = _graph_client_factory(cmd.cli_ctx)
     sp = show_service_principal(client, identifier)
     return _list_credentials(sp, cert)
-
-
-def sp_federated_credential_list(client, identifier):
-    object_id = _resolve_service_principal(client, identifier)
-    return client.service_principal_federated_identity_credential_list(object_id)
-
-
-def sp_federated_credential_create(client, identifier, parameters):
-    object_id = _resolve_service_principal(client, identifier)
-    return client.service_principal_federated_identity_credential_create(object_id, parameters)
-
-
-def sp_federated_credential_show(client, identifier, credential_id_or_name):
-    object_id = _resolve_service_principal(client, identifier)
-    return client.service_principal_federated_identity_credential_get(object_id, credential_id_or_name)
-
-
-def sp_federated_credential_update(client, identifier, credential_id_or_name, parameters):
-    object_id = _resolve_service_principal(client, identifier)
-    return client.service_principal_federated_identity_credential_update(object_id, credential_id_or_name, parameters)
-
-
-def sp_federated_credential_delete(client, identifier, credential_id_or_name):
-    object_id = _resolve_service_principal(client, identifier)
-    return client.service_principal_federated_identity_credential_delete(object_id, credential_id_or_name)
 
 
 def _get_app_object_id_from_sp_object_id(client, sp_object_id):

@@ -140,8 +140,7 @@ class GraphClient:
         # https://docs.microsoft.com/en-us/graph/api/application-list-federatedidentitycredentials
         result = self._send(
             "GET",
-            f"/applications/{application_id}/federatedIdentityCredentials" + _filter_to_query(filter),
-            api_version=GraphClient.BETA)
+            f"/applications/{application_id}/federatedIdentityCredentials" + _filter_to_query(filter))
         return result
 
     def application_federated_identity_credential_create(self, application_id, body):
@@ -149,15 +148,14 @@ class GraphClient:
         result = self._send(
             "POST",
             f"/applications/{application_id}/federatedIdentityCredentials",
-            body=body, api_version=GraphClient.BETA)
+            body=body)
         return result
 
     def application_federated_identity_credential_get(self, application_id, federated_identity_credential_id_or_name):
         # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-get
         result = self._send(
             "GET",
-            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
-            api_version=GraphClient.BETA)
+            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}")
         return result
 
     def application_federated_identity_credential_update(
@@ -166,15 +164,14 @@ class GraphClient:
         result = self._send(
             "PATCH",
             f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
-            body=body, api_version=GraphClient.BETA)
+            body=body)
         return result
 
     def application_federated_identity_credential_delete(self, application_id, federated_identity_credential_id_or_name):
         # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-delete
         result = self._send(
             "DELETE",
-            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
-            api_version=GraphClient.BETA)
+            f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}")
         return result
 
     def service_principal_list(self, filter=None):
@@ -215,47 +212,6 @@ class GraphClient:
     def service_principal_owner_list(self, id):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-list-owners
         result = self._send("GET", "/servicePrincipals/{id}/owners".format(id=id))
-        return result
-
-    def service_principal_federated_identity_credential_list(self, application_id, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/application-list-federatedidentitycredentials
-        result = self._send(
-            "GET",
-            f"/servicePrincipals/{application_id}/federatedIdentityCredentials" + _filter_to_query(filter),
-            api_version=GraphClient.BETA)
-        return result
-
-    def service_principal_federated_identity_credential_create(self, application_id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-post-federatedidentitycredentials
-        result = self._send(
-            "POST",
-            f"/servicePrincipals/{application_id}/federatedIdentityCredentials",
-            body=body, api_version=GraphClient.BETA)
-        return result
-
-    def service_principal_federated_identity_credential_get(self, application_id, federated_identity_credential_id_or_name):
-        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-get
-        result = self._send(
-            "GET",
-            f"/servicePrincipals/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
-            api_version=GraphClient.BETA)
-        return result
-
-    def service_principal_federated_identity_credential_update(
-            self, application_id, federated_identity_credential_id_or_name, body):
-        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-update
-        result = self._send(
-            "PATCH",
-            f"/servicePrincipals/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
-            body=body, api_version=GraphClient.BETA)
-        return result
-
-    def service_principal_federated_identity_credential_delete(self, application_id, federated_identity_credential_id_or_name):
-        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-delete
-        result = self._send(
-            "DELETE",
-            f"/servicePrincipals/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
-            api_version=GraphClient.BETA)
         return result
 
     def owned_objects_list(self):

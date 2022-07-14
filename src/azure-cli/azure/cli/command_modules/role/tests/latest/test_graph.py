@@ -201,40 +201,6 @@ class GraphScenarioTestBase(ScenarioTest):
         self.cmd('ad {object_type} credential list --id {app_id}',
                  checks=self.check('[0].endDateTime', '2100-12-31T00:00:00Z'))
 
-    def _test_federated_credential(self, object_type):
-        self.kwargs['object_type'] = object_type
-        self.kwargs['parameters'] = TEST_FEDERATED_IDENTITY_CREDENTIAL
-        self.kwargs['name'] = 'Testing'
-
-        # Create credential
-        result = self.cmd("ad {object_type} federated-credential create --id {app_id} --parameters '{parameters}'",
-                          checks=[self.check('name', '{name}')]).get_output_in_json()
-        self.kwargs['credential_id'] = result['id']
-
-        # List credential
-        self.cmd("ad {object_type} federated-credential list --id {app_id}",
-                 checks=[self.check('length(@)', 1)])
-
-        # Show credential with credential ID
-        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {credential_id}",
-                 checks=[self.check('name', '{name}')])
-        # Show with credential name
-        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {name}",
-                 checks=[self.check('name', '{name}')])
-
-        # Update credential's subject
-        update_subject = "repo:octo-org/octo-repo:environment:Staging"
-        self.kwargs['update_json'] = json.dumps({'subject': update_subject})
-        self.cmd("ad {object_type} federated-credential update --id {app_id} --credential-id {credential_id} "
-                 "--parameters '{update_json}'")
-        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {credential_id}",
-                 checks=self.check('subject', update_subject))
-
-        # Delete credential
-        self.cmd("ad {object_type} federated-credential delete --id {app_id} --credential-id {credential_id}")
-        self.cmd("ad {object_type} federated-credential list --id {app_id}",
-                 checks=[self.check('length(@)', 0)])
-
 
 class ApplicationScenarioTest(GraphScenarioTestBase):
 
@@ -643,7 +609,37 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
 
     def test_app_federated_credential(self):
         self._create_app()
-        self._test_federated_credential('app')
+        self.kwargs['parameters'] = TEST_FEDERATED_IDENTITY_CREDENTIAL
+        self.kwargs['name'] = 'Testing'
+
+        # Create credential
+        result = self.cmd("ad app federated-credential create --id {app_id} --parameters '{parameters}'",
+                          checks=[self.check('name', '{name}')]).get_output_in_json()
+        self.kwargs['credential_id'] = result['id']
+
+        # List credential
+        self.cmd("ad app federated-credential list --id {app_id}",
+                 checks=[self.check('length(@)', 1)])
+
+        # Show credential with credential ID
+        self.cmd("ad app federated-credential show --id {app_id} --federated-credential-id {credential_id}",
+                 checks=[self.check('name', '{name}')])
+        # Show with credential name
+        self.cmd("ad app federated-credential show --id {app_id} --federated-credential-id {name}",
+                 checks=[self.check('name', '{name}')])
+
+        # Update credential's subject
+        update_subject = "repo:octo-org/octo-repo:environment:Staging"
+        self.kwargs['update_json'] = json.dumps({'subject': update_subject})
+        self.cmd("ad app federated-credential update --id {app_id} --federated-credential-id {credential_id} "
+                 "--parameters '{update_json}'")
+        self.cmd("ad app federated-credential show --id {app_id} --federated-credential-id {credential_id}",
+                 checks=self.check('subject', update_subject))
+
+        # Delete credential
+        self.cmd("ad app federated-credential delete --id {app_id} --federated-credential-id {credential_id}")
+        self.cmd("ad app federated-credential list --id {app_id}",
+                 checks=[self.check('length(@)', 0)])
 
 
 class ServicePrincipalScenarioTest(GraphScenarioTestBase):

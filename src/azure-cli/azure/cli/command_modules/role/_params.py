@@ -17,7 +17,6 @@ from azure.cli.command_modules.role._validators import validate_group, validate_
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
-
 JSON_PROPERTY_HELP = "Should be in JSON format. See examples below for details"
 
 
@@ -207,15 +206,13 @@ def load_arguments(self, _):
         c.argument('create_cert', action='store_true', arg_group='keyCredentials', help='Create a self-signed certificate to use for the credential')
         c.argument('keyvault', arg_group='keyCredentials', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
 
-    for item in ['app', 'sp']:
-        with self.argument_context(f'ad {item} federated-credential') as c:
-            # TODO: We have to decide which name to use
-            #   --credential-id is consistent with API
-            #   --key-id is consistent with passwordCredentials and keyCredentials
-            c.argument('parameters', type=validate_file_or_dict,
-                       help='Parameters for creating federated identity credential. ' + JSON_PROPERTY_HELP)
-            c.argument('credential_id_or_name', options_list=['--credential-id', '--key-id'],
-                       help='Name or ID of the federated identity credential')
+    with self.argument_context('ad app federated-credential') as c:
+        c.argument('app_identifier', options_list=['--id'],
+                   help="Application's appId, identifierUri, or id (formerly known as objectId)")
+        c.argument('federated_identity_credential_id_or_name', options_list=['--federated-credential-id'],
+                   help='ID or name of the federated identity credential')
+        c.argument('parameters', type=validate_file_or_dict,
+                   help='Parameters for creating federated identity credential. ' + JSON_PROPERTY_HELP)
 
     for item in ['ad sp credential delete', 'ad sp credential list', 'ad app credential delete', 'ad app credential list']:
         with self.argument_context(item) as c:

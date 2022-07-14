@@ -6,11 +6,8 @@
 
 from collections import OrderedDict
 
-from azure.cli.core.profiles import PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
-
 from ._client_factory import _auth_client_factory, _graph_client_factory
-
 from ._validators import process_assignment_namespace
 
 
@@ -80,8 +77,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_role_assignment', min_api='2020-04-01-preview')
         g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
 
-    with self.command_group('ad app', client_factory=get_graph_client, resource_type=PROFILE_TYPE,
-                            exception_handler=graph_err_handler) as g:
+    with self.command_group('ad app', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_application')
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_applications', table_transformer=get_graph_object_transformer('app'))
@@ -99,25 +95,19 @@ def load_command_table(self, _):
         g.custom_command('credential list', 'list_application_credentials')
         g.custom_command('credential delete', 'delete_application_credential')
 
-    # Register federated-credential command group under both app and sp.
     # We use federated-credential instead of federated-identity-credential or fic, in order to align with
     # Azure Portal.
-    # It seems sp doesn't work with federatedIdentityCredentials yet.
-    # for item in ['app', 'sp']:
-    for item in ['app']:
-        with self.command_group(f'ad {item} federated-credential',
-                                client_factory=get_graph_client, resource_type=PROFILE_TYPE,
-                                exception_handler=graph_err_handler, is_experimental=True) as g:
-            for command in ['list', 'create', 'show', 'update', 'delete']:
-                g.custom_command(command, f'{item}_federated_credential_{command}')
+    with self.command_group('ad app federated-credential',
+                            client_factory=get_graph_client, exception_handler=graph_err_handler, is_preview=True) as g:
+        for command in ['list', 'create', 'show', 'update', 'delete']:
+            g.custom_command(command, f'app_federated_credential_{command}')
 
     with self.command_group('ad app owner', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_application_owners')
         g.custom_command('add', 'add_application_owner')
         g.custom_command('remove', 'remove_application_owner')
 
-    with self.command_group('ad sp', client_factory=get_graph_client, resource_type=PROFILE_TYPE,
-                            exception_handler=graph_err_handler) as g:
+    with self.command_group('ad sp', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_service_principal')
         g.custom_command('delete', 'delete_service_principal')
         g.custom_command('list', 'list_service_principals', table_transformer=get_graph_object_transformer('sp'))

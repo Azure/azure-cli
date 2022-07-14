@@ -26,6 +26,11 @@ class APIVersionException(Exception):
 
 
 # Sentinel value for profile
+# If resource_type is set to PROFILE_TYPE, it means the name of the profile, such as 'latest', '2020-09-01-hybrid',
+# is used for supported_api_version check. For example,
+#     with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
+#                             min_api='2019-03-02-hybrid') as g:
+# This checks if the current cloud's profile name >= '2019-03-02-hybrid'.
 PROFILE_TYPE = object()
 
 
