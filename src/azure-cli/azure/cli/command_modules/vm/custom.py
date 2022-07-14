@@ -2479,7 +2479,7 @@ def vm_run_command_create(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -2553,7 +2553,7 @@ def vm_run_command_update(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -4039,7 +4039,7 @@ def vmss_run_command_create(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -4115,7 +4115,7 @@ def vmss_run_command_update(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
