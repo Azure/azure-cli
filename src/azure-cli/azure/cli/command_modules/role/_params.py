@@ -17,7 +17,7 @@ from azure.cli.command_modules.role._validators import validate_group, validate_
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
-JSON_PROPERTY_HELP = "Should be in JSON format. See examples below for details"
+JSON_PROPERTY_HELP = "Should be JSON file path or in-line JSON string. See examples below for details"
 
 
 # pylint: disable=too-many-statements

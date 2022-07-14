@@ -98,7 +98,7 @@ def load_command_table(self, _):
     # We use federated-credential instead of federated-identity-credential or fic, in order to align with
     # Azure Portal.
     with self.command_group('ad app federated-credential',
-                            client_factory=get_graph_client, exception_handler=graph_err_handler, is_preview=True) as g:
+                            client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         for command in ['list', 'create', 'show', 'update', 'delete']:
             g.custom_command(command, f'app_federated_credential_{command}')
 
