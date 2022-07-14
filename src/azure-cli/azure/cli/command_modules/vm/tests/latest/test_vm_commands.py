@@ -3907,7 +3907,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
             'vmss1': self.create_random_name('vmss', 10)
         })
 
-        message = 'usage error: Delete option is available for VMSS with Flexible OrchestrationMode only'
+        message = 'usage error: --os-disk-delete-option/--data-disk-delete-option is only available for VMSS with Flexible Orchestration mode'
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
             self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --os-disk-delete-option delete --admin-username vmtest')
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
