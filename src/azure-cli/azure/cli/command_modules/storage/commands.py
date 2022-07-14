@@ -701,7 +701,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('copy cancel', 'abort_copy')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch', client_factory=cf_share_client)
 
-        g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler)
+        g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler
+                                 , resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
                                  custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
 
