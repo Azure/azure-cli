@@ -1023,6 +1023,9 @@ def load_arguments(self, _):
             c.argument('data_disk_delete_option', options_list=['--data-disk-delete-option', self.deprecate(target='--data-delete-option', redirect='--data-disk-delete-option', hide=True)],
                        nargs='+', min_api='2021-03-01',
                        help='Specify whether data disk should be deleted or detached upon VM deletion. If a single data disk is attached, the allowed values are Delete and Detach. For multiple data disks are attached, please use "<data_disk>=Delete <data_disk2>=Detach" to configure each disk')
+            if scope == 'vmss create':
+                c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', help='Specify whether OS Disk should be deleted or detached upon VMSS Flexdeletion (This feature is available for VMSS with Flexible OrchestrationMode only).')
+                c.argument('data_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', help='Specify whether data disk should be deleted or detached upon VMSS Flexdeletion (This feature is available for VMSS with Flexible OrchestrationModeonly)')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')

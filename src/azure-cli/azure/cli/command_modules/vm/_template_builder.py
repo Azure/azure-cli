@@ -911,7 +911,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
-                        os_disk_secure_vm_disk_encryption_set=None):
+                        os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -978,6 +978,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if os_disk_size_gb is not None:
             storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
+
     elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
@@ -1005,6 +1008,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if os_disk_size_gb is not None:
             storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
@@ -1043,6 +1048,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         'id': os_disk_secure_vm_disk_encryption_set
                     }
                 })
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
     if storage_profile == StorageProfile.CommunityGalleryImage:
         storage_properties['osDisk'] = {
             'caching': os_caching,
@@ -1069,6 +1076,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         'id': os_disk_secure_vm_disk_encryption_set
                     }
                 })
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
 
     if disk_info:
         data_disks = [v for k, v in disk_info.items() if k != 'os']

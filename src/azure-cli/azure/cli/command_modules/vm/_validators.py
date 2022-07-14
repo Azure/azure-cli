@@ -1553,6 +1553,11 @@ def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+    if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: Delete option is available for VMSS'
+                                            ' with Flexible OrchestrationMode only')
+
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
         # The commentted parameters are also forbidden, but they have default values.

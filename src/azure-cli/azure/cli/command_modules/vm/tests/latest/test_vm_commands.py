@@ -3899,6 +3899,32 @@ class VMSSCreateExistingOptions(ScenarioTest):
         self.cmd('network vnet show --name {vnet} -g {rg}',
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_delete_option', location='eastus')
+    def test_vmss_create_with_delete_option(self, resource_group):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'vmss1': self.create_random_name('vmss', 10)
+        })
+
+        message = 'usage error: Delete option is available for VMSS with Flexible OrchestrationMode only'
+        with self.assertRaisesRegex(InvalidArgumentValueError, message):
+            self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --os-disk-delete-option delete --admin-username vmtest')
+        with self.assertRaisesRegex(InvalidArgumentValueError, message):
+            self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --data-disk-delete-option delete --admin-username vmtest')
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --orchestration-mode Flexible --os-disk-delete-option delete', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.deleteOption', 'Delete')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image ubuntults --orchestration-mode Flexible --data-disk-sizes-gb 4 --data-disk-delete-option detach', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].deleteOption', 'Detach')
+        ])
+
+
+
 
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
