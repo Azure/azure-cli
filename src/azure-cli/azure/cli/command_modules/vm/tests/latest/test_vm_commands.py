@@ -3924,8 +3924,6 @@ class VMSSCreateExistingOptions(ScenarioTest):
         ])
 
 
-
-
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
     @AllowLargeResponse()
