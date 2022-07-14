@@ -436,6 +436,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
 
         if not parse_match and not ignore_invalid:
             raise InvalidArgumentValueError('Unable to parse: {}'.format(record_line))
+
         record_type = record['delim'].lower()
         if record_type == '$origin':
             origin_value = record['val']
