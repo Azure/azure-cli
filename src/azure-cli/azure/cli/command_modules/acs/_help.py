@@ -999,7 +999,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2022 for Windows Server 2022.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
