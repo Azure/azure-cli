@@ -71,7 +71,8 @@ _REGEX = {
     'ptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
     'srv': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[@\w\.-]+)',
     'spf': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
-    'uri': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
+    'uri': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)',
+    'alias': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>azure)\s+)?(?P<delim>alias)\s+(?P<aliasDelim>aaaa|a|cname)\s+(?P<resourceId>[a-zA-Z0-9/._-]*)',
 }
 
 _COMPILED_REGEX = {k: re.compile(v, re.IGNORECASE) for k, v in _REGEX.items()}
@@ -435,7 +436,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
 
         if not parse_match and not ignore_invalid:
             raise InvalidArgumentValueError('Unable to parse: {}'.format(record_line))
-
+            
         record_type = record['delim'].lower()
         if record_type == '$origin':
             origin_value = record['val']
