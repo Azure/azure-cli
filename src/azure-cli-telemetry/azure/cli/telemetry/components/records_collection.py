@@ -28,6 +28,7 @@ class RecordsCollection:
     def next_send(self):
         return self._next_send
 
+    # pylint: disable=line-too-long
     def snapshot_and_read(self):
         """ Scan the telemetry cache files and move all the rotated files to a temp directory. """
         from azure.cli.telemetry.const import TELEMETRY_CACHE_DIR
@@ -37,10 +38,8 @@ class RecordsCollection:
             return
 
         # Collect all cache.x files. If it has been a long time since last sent, also collect cache file itself.
-        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder) if fn != 'cache']
-        if os.path.exists(os.path.join(folder, 'cache')) and \
-                datetime.datetime.now() - self._last_sent > datetime.timedelta(hours=self._get_threshold_config()):
-            candidates.append(('cache', os.stat(os.path.join(folder, 'cache'))))
+        include_cache = datetime.datetime.now() - self._last_sent > datetime.timedelta(hours=self._get_threshold_config())
+        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder) if include_cache or fn != 'cache']
 
         # sort the cache files base on their last modification time.
         candidates = [(fn, file_stat) for fn, file_stat in candidates if stat.S_ISREG(file_stat.st_mode)]
