@@ -119,7 +119,7 @@ def create_account(client,
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None, encryption_key_source=None, public_network_access=None,
-                   encryption_key_identifier=None, mi_user_assigned=None, mi_system_assigned=None):
+                   encryption_key_identifier=None):
 
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -134,19 +134,9 @@ def update_account(client, resource_group_name, account_name,
         key_source=encryption_key_source,
         encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
 
-    identity = None
-    if mi_system_assigned:
-        identity = BatchAccountIdentity(type=ResourceIdentityType.SYSTEM_ASSIGNED)
-
-    if mi_user_assigned:
-        useridentity = UserAssignedIdentities()
-        my_dict = {mi_user_assigned: useridentity}
-        identity = BatchAccountIdentity(type=ResourceIdentityType.USER_ASSIGNED, user_assigned_identities=my_dict)
-
     parameters = BatchAccountUpdateParameters(
         tags=tags,
         encryption=encryption,
-        identity=identity,
         public_network_access=public_network_access,
         auto_storage=properties)
 
@@ -157,8 +147,20 @@ def update_account(client, resource_group_name, account_name,
 
 def assign_batch_identity(cmd, client, resource_group_name, account_name, mi_system_assigned=None,
                           mi_user_assigned=None):
-    update_account(client=client, resource_group_name=resource_group_name, account_name=account_name,
-                   mi_system_assigned=mi_system_assigned, mi_user_assigned=mi_user_assigned)
+
+    identity = None
+    if mi_system_assigned:
+        identity = BatchAccountIdentity(type=ResourceIdentityType.SYSTEM_ASSIGNED)
+
+    if mi_user_assigned:
+        useridentity = UserAssignedIdentities()
+        my_dict = {mi_user_assigned: useridentity}
+        identity = BatchAccountIdentity(type=ResourceIdentityType.USER_ASSIGNED, user_assigned_identities=my_dict)
+
+    parameters = BatchAccountUpdateParameters(identity=identity)
+
+    client.update(resource_group_name=resource_group_name, account_name=account_name, parameters=parameters)
+
     return show_batch_identity(cmd=cmd, client=client, resource_group_name=resource_group_name,
                                account_name=account_name)
 
