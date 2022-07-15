@@ -20,7 +20,7 @@ def list_workspaces(cmd, client, resource_group_name=None):
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
                      sql_admin_login_user, sql_admin_login_password, location=None, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
                      allowed_aad_tenant_ids=None, prevent_data_exfiltration=None, tags=None, repository_type=None, host_name=None, account_name=None,
-                     collaboration_branch=None, repository_name=None, root_folder='/', project_name=None, tenant_id=None, no_wait=False):
+                     collaboration_branch=None, repository_name=None, root_folder='/', project_name=None, last_commit_id=None, tenant_id=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
@@ -64,6 +64,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
                                                                               repository_name=repository_name,
                                                                               collaboration_branch=collaboration_branch,
                                                                               root_folder=root_folder,
+                                                                              last_commit_id=last_commit_id,
                                                                               tenant_id=tenant_id)
 
     workspace_info = Workspace(
@@ -84,7 +85,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 # pylint: disable=too-many-locals
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
                      allowed_aad_tenant_ids=None, tags=None, key_name=None, repository_type=None, host_name=None, account_name=None,
-                     collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, tenant_id=None, no_wait=False):
+                     collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, last_commit_id=None, tenant_id=None, no_wait=False):
     encryption = None
     tenant_ids_list = None
     workspace_repository_configuration = None
@@ -118,6 +119,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
                                                                               repository_name=repository_name,
                                                                               collaboration_branch=collaboration_branch,
                                                                               root_folder=root_folder,
+                                                                              last_commit_id=last_commit_id,
                                                                               tenant_id=tenant_id)
 
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=tenant_ids_list) if allowed_aad_tenant_ids is not None else None
