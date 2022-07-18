@@ -6,7 +6,7 @@
 # pylint: disable=too-many-lines
 
 import re
-sfrom knack.log import get_logger
+from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 from dateutil.parser import parse   # pylint: disable=import-error,relative-import
