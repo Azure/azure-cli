@@ -480,20 +480,15 @@ def transform_file_show_result(result):
         "properties": {
             "contentLength": result.pop('contentLength', None),
             "contentRange": result.pop('contentRange', None),
-            "contentSettings": {
-                "cacheControl": result['contentSettings']['cacheControl'],
-                "contentDisposition": result['contentSettings']['contentDisposition'],
-                "contentEncoding": result['contentSettings']['contentEncoding'],
-                "contentLanguage": result['contentSettings']['contentLanguage'],
-                "contentMd5": _encode_bytes(result['contentSettings']['contentMd5']),
-                "contentType": result['contentSettings']['contentType']
-            },
+            "contentSettings": result.pop('contentSettings', None),
             "copy": result.pop('copy', None),
             "etag": result.pop('etag', None),
             "lastModified": result.pop('lastModified', None),
             "serverEncrypted": result.pop('serverEncrypted', None)
         }
     }
-    del result['contentSettings']
+    if new_result['properties']['contentSettings'] and new_result['properties']['contentSettings']['contentMd5']:
+        new_result['properties']['contentSettings']['contentMd5'] = _encode_bytes(new_result['properties']
+                                                                                  ['contentSettings']['contentMd5'])
     new_result.update(result)
     return new_result
