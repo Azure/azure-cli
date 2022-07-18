@@ -63,9 +63,12 @@ class Create(AAZCommand):
             help="The security provider name.  Allowed values: Checkpoint, IBoss, ZScaler.",
             enum={"Checkpoint": "Checkpoint", "IBoss": "IBoss", "ZScaler": "ZScaler"},
         )
-        _args_schema.vhub = AAZStrArg(
+        _args_schema.vhub = AAZResourceIdArg(
             options=["--vhub"],
             help="Name or ID of the virtual hub to which the Security Partner Provider belongs.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+            )
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
