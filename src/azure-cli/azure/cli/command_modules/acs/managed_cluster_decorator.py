@@ -4127,21 +4127,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             service_principal_profile = mc.service_principal_profile
             assign_identity = self.context.get_assign_identity()
             if service_principal_profile is None and not assign_identity:
-                msg = (
-                    "It is highly recommended to use USER assigned identity "
-                    "(option --assign-identity) when you want to bring your own"
-                    "subnet, which will have no latency for the role assignment to "
-                    "take effect. When using SYSTEM assigned identity, "
-                    "azure-cli will grant Network Contributor role to the "
-                    "system assigned identity after the cluster is created, and "
-                    "the role assignment will take some time to take effect, see "
-                    "https://docs.microsoft.com/azure/aks/use-managed-identity, "
-                    "proceed to create cluster with system assigned identity?"
-                )
-                if not self.context.get_yes() and not prompt_y_n(
-                    msg, default="n"
-                ):
-                    raise DecoratorEarlyExitException()
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id

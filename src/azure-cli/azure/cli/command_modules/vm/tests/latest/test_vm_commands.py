@@ -5496,6 +5496,40 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
+    def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'version': '1.1.1',
+            'captured': 'managedImage1',
+            'location': resource_group_location,
+            'disk1': self.create_random_name(prefix='disk', length=20),
+            'snapshot1': self.create_random_name(prefix='snp', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1 --os-state Specialized --features SecurityType=ConfidentialVm --hyper-v-generation v2', checks=[
+            self.check('name', self.kwargs['image']),
+            self.check('features[0].name', 'SecurityType'),
+            self.check('features[0].value', 'ConfidentialVM'),
+            self.check('hyperVGeneration', 'V2')
+        ])
+
+        self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey ')
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
+            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
+            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVmEncryptionType', 'EncryptedWithPmk'),
+        ])
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        time.sleep(60)  # service end latency
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
         self.kwargs.update({
@@ -5986,6 +6020,47 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         
         self.cmd('ppg update -n {ppg3} -g {rg} --set tags.foo="bar"', checks=[
             self.check('tags.foo', 'bar')
+        ])
+
+    @ResourceGroupPreparer(name_prefix="cli_test_ppg_intent_vm_sizes_and_zone_", location='eastus2')
+    def test_ppg_intent_vm_sizes_and_zone(self):
+        self.kwargs.update({
+            'ppg1': 'my_ppg_1',
+            'ppg2': 'my_ppg_2',
+            'vm_size1': 'Standard_E64s_v4',
+            'vm_size2': 'Standard_M416ms_v2',
+            'zone': '2'
+        })
+
+        # test creating proximity placement group with intent vm size and available zone
+        self.cmd('ppg create -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2} --zone {zone}',
+                 checks=[
+                     self.check('name', '{ppg1}'),
+                     self.check('length(intent.vmSizes)', '2'),
+                     self.check('zones[0]', '{zone}')
+                 ])
+
+        # test creating proximity placement group with intent vm size
+        self.cmd('ppg create -n {ppg2} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2}',
+                 checks=[
+                     self.check('name', '{ppg2}'),
+                     self.check('length(intent.vmSizes)', '2')
+                 ])
+
+        # the availability zone can be provided only when an intent is provided
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        with self.assertRaises(RequiredArgumentMissingError):
+            self.cmd('ppg create -n {ppg1} -g {rg} --zone {zone}')
+
+        # test updating proximity placement group with intent vm size
+        self.cmd('ppg update -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1}', checks=[
+            self.check('name', '{ppg1}'),
+            self.check('length(intent.vmSizes)', '1')
+        ])
+
+        self.cmd('ppg show -n {ppg1} -g {rg}', checks=[
+            self.check('name', '{ppg1}'),
+            self.check('length(intent.vmSizes)', '1')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')

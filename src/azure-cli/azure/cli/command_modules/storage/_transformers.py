@@ -487,5 +487,8 @@ def transform_file_show_result(result):
             "serverEncrypted": result.pop('serverEncrypted', None)
         }
     }
+    if new_result['properties']['contentSettings'] and new_result['properties']['contentSettings']['contentMd5']:
+        new_result['properties']['contentSettings']['contentMd5'] = _encode_bytes(new_result['properties']
+                                                                                  ['contentSettings']['contentMd5'])
     new_result.update(result)
     return new_result

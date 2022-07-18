@@ -32,6 +32,9 @@ from ._validators import (
     BAD_REPO_FQDN
 )
 
+from ._constants import (
+    REF_KEY
+)
 logger = get_logger(__name__)
 
 ORDERBY_PARAMS = {
@@ -39,7 +42,6 @@ ORDERBY_PARAMS = {
     'time_desc': 'timedesc'
 }
 DEFAULT_PAGINATION = 100
-
 BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as"\
                       " 'MyRegistry.azurecr.io/hello-world' as a positional parameter or"\
                       " provide '-r MyRegistry -n hello-world' argument values."
@@ -52,8 +54,8 @@ def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
 
-def _get_referrers_path(repository, manifest):
-    return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
+def _get_referrers_path(repository):
+    return '/v2/{}/_oras/artifacts/referrers'.format(repository)
 
 
 def _obtain_manifest_from_registry(login_server,
@@ -78,12 +80,14 @@ def _obtain_referrers_from_registry(login_server,
                                     path,
                                     username,
                                     password,
+                                    digest,
                                     artifact_type=None):
 
-    result_list = {'references': []}
+    result_list = {REF_KEY: []}
     execute_next_http_call = True
 
     params = {
+        'digest': digest,
         'artifactType': artifact_type
     }
 
@@ -100,7 +104,7 @@ def _obtain_referrers_from_registry(login_server,
             params=params)
 
         if result:
-            result_list['references'].extend(result['references'])
+            result_list[REF_KEY].extend(result[REF_KEY])
 
         if next_link:
             # The registry is telling us there's more items in the list,
@@ -268,22 +272,23 @@ def acr_manifest_list_referrers(cmd,
 
     raw_result = _obtain_referrers_from_registry(
         login_server=login_server,
-        path=_get_referrers_path(repository, manifest),
+        path=_get_referrers_path(repository),
         username=username,
         password=password,
-        artifact_type=artifact_type)
+        artifact_type=artifact_type,
+        digest=manifest)
 
-    ref_key = "references"
     if recursive:
-        for referrers_obj in raw_result[ref_key]:
+        for referrers_obj in raw_result[REF_KEY]:
             internal_referrers_obj = _obtain_referrers_from_registry(
                 login_server=login_server,
-                path=_get_referrers_path(repository, referrers_obj["digest"]),
+                path=_get_referrers_path(repository),
                 username=username,
-                password=password)
+                password=password,
+                digest=referrers_obj["digest"])
 
-            for ref in internal_referrers_obj[ref_key]:
-                raw_result[ref_key].append(ref)
+            for ref in internal_referrers_obj[REF_KEY]:
+                raw_result[REF_KEY].append(ref)
 
     return raw_result
 

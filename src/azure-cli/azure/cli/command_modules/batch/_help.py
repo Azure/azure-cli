@@ -74,6 +74,103 @@ short-summary: List an account's outbound network dependencies.
 long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://docs.microsoft.com/azure/batch/batch-virtual-network."
 """
 
+helps['batch account identity'] = """
+type: group
+short-summary: Manage identities of a batch account.
+"""
+
+helps['batch account identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing batch account.
+examples:
+  - name: Add a system assigned managed identity to an existing batch account.
+    text: >
+        az batch account identity assign --name MyBatchAccount --resource-group MyResourceGroup --system-assigned
+  - name: Add a user assigned managed identity to an existing batch account.
+    text: >
+        az batch account identity assign --name MyBatchAccount --resource-group MyResourceGroup --user-assigned MyAssignedId
+"""
+
+helps['batch account identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing batch account.
+examples:
+  - name: Remove a system assigned managed identity from an existing batch account.
+    text: >
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --system-assigned
+  - name: Remove a user assigned managed identity from an existing batch account.
+    text: >
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing batch account.
+    text: >
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['batch account identity show'] = """
+type: command
+short-summary: Display managed identities of a batch account.
+examples:
+  - name: Display managed identities of a batch account.
+    text: |
+        az batch account identity show --name MyBatchAccount --resource-group MyResourceGroup
+"""
+
+helps['batch account network-profile'] = """
+type: group
+short-summary: Manage Batch account Network profiles.
+"""
+
+helps['batch account network-profile show'] = """
+type: command
+short-summary: Get information about the Network profile for Batch account.
+examples:
+  - name: Show the network-profile for both BatchAccount and NodeManagement
+    text: >
+        az batch account network-profile show -g MyResourceGroup -n MyBatchAccount
+"""
+
+helps['batch account network-profile set'] = """
+type: command
+short-summary: Set the Network profile for Batch account.
+examples:
+  - name: Set the BatchAccount network-profile to the Allow
+    text: >
+        az batch account network-profile set -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --default-action Allow
+"""
+
+helps['batch account network-profile network-rule'] = """
+type: group
+short-summary: Manage Batch account Network rules in Network Profile.
+"""
+
+helps['batch account network-profile network-rule list'] = """
+type: command
+short-summary: List the Network rules from a Network Profile.
+examples:
+  - name: List the Batch Accounts network profile
+    text: >
+        az batch account network-profile network-rule list -g MyResourceGroup -n MyBatchAccount
+"""
+
+helps['batch account network-profile network-rule add'] = """
+type: command
+short-summary: Add a Network rule from a Network Profile.
+examples:
+  - name: Add ip address to BatchAccount network rule
+    text: >
+        az batch account network-profile network-rule add -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --ip-address 1.2.3.4
+"""
+
+helps['batch account network-profile network-rule delete'] = """
+type: command
+short-summary: Delete a Network rule from a Network Profile.
+examples:
+  - name: Delete ip address from BatchAccount network rule
+    text: >
+        az batch account network-profile network-rule delete -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --ip-address 1.2.3.4
+"""
+
+
 helps['batch application'] = """
 type: group
 short-summary: Manage Batch applications.

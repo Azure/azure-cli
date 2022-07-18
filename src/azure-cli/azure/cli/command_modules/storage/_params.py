@@ -1956,7 +1956,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
         c.register_path_argument(default_file_param='local_file_path')
-        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
+        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path',
+                                             process_md5=True)
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
                    help='Path of the local file to upload as the file content.')
         c.extra('no_progress', progress_type, validator=add_progress_callback_v2)

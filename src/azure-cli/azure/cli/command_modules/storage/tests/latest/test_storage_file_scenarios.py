@@ -107,6 +107,31 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage share delete -n {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('deleted', True))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_file_upload_content_md5_scenarios(self, resource_group, storage_account):
+        import hashlib
+        import base64
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(128)
+
+        def md5(fname):
+            hash_md5 = hashlib.md5()
+            with open(fname, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+            return hash_md5.digest()
+
+        md5_digest = md5(local_file)
+        md5_base64_encode = base64.b64encode(md5_digest).decode("utf-8")
+        file_name = self.create_random_name(prefix='file', length=24) + '.txt'
+        self.storage_cmd('storage file upload -s {} --source "{}" --path {} --content-md5 {}', account_info,
+                         share, local_file, file_name, md5_base64_encode)
+        self.storage_cmd('storage file show -s {} --path {}', account_info, share, file_name). \
+            assert_with_checks(JMESPathCheck("properties.contentSettings.contentMd5", md5_base64_encode))
+
     @record_only()
     # manual test, only run the recording
     # To reproduce the prerequisite steps:

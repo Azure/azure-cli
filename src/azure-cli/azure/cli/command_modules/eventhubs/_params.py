@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
+    (KeyType, AccessRights, SkuName, KeySource, TlsVersion) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
     from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
@@ -58,6 +58,7 @@ def load_arguments_eh(self, _):
                    help='Enable System Assigned Identity')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+        c.argument('minimum_tls_version', arg_type=get_enum_type(TlsVersion), options_list=['--minimum-tls-version', '--min-tls'], help='The minimum TLS version for the cluster to support, e.g. 1.2')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
@@ -79,12 +80,13 @@ def load_arguments_eh(self, _):
             c.argument('cluster_name', arg_type=name_type, id_part=None, help='Name of Cluster')
 
     with self.argument_context('eventhubs cluster create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az evetnhubs ')
-        c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az event hubs ')
+        c.argument('supports_scaling', arg_type=get_three_state_flag(), help='A value that indicates whether Scaling is Supported.')
 
     for scope in ['eventhubs cluster create', 'eventhubs cluster update']:
         with self.argument_context(scope) as c:
             c.argument('tags', arg_type=tags_type)
+            c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
