@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
@@ -11,7 +12,8 @@ from azure.mgmt.batch.models import (
     AccountKeyType,
     KeySource,
     PublicNetworkAccessType,
-    ResourceIdentityType)
+    ResourceIdentityType,
+    EndpointAccessDefaultAction)
 from azure.batch.models import ComputeNodeDeallocationOption
 
 from azure.cli.core.commands.parameters import (
@@ -39,6 +41,16 @@ from azure.cli.command_modules.batch._validators import (
     validate_client_parameters,
     validate_json_file,
     validate_pool_resize_parameters)
+
+
+class NetworkProfile(Enum):
+    BatchAccount = "BatchAccount"
+    NodeManagement = "NodeManagement"
+
+
+profile_param_type = CLIArgumentType(
+    help="Network profile to set.",
+    arg_type=get_enum_type(NetworkProfile))
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -71,15 +83,68 @@ def load_arguments(self, _):
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
                                                      'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
-        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
+        c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
+        c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
         c.ignore('keyvault_url')
 
     with self.argument_context('batch account set') as c:
         c.argument('tags', tags_type)
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
+        c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
-        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
+
+    with self.argument_context('batch account identity assign') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], action='store_true',
+                   arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
+                   'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'],
+                   arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
+                   'Check out help for more examples')
+
+    with self.argument_context('batch account identity remove') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], action='store_true',
+                   arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
+                   'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], nargs='*',
+                   arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
+                   'Check out help for more examples')
+
+    with self.argument_context('batch account identity show') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
+    with self.argument_context('batch account network-profile show') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
+    with self.argument_context('batch account network-profile set') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('profile', arg_type=profile_param_type)
+        c.argument('default_action', help="Default action for endpoint access. It is only applicable when publicNetworkAccess is enabled. Possible values include: 'Allow', 'Deny'", arg_type=get_enum_type(EndpointAccessDefaultAction))
+
+    with self.argument_context('batch account network-profile network-rule list') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
+    with self.argument_context('batch account network-profile network-rule add') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('profile', arg_type=profile_param_type)
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
+
+    with self.argument_context('batch account network-profile network-rule delete') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('profile', arg_type=profile_param_type)
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
 
     with self.argument_context('batch account keys renew') as c:
         c.argument('resource_group_name', resource_group_name_type,

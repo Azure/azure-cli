@@ -67,6 +67,7 @@ class CLIENT_TYPE(Enum):
     Php = 'php'
     Ruby = 'ruby'
     SpringBoot = 'springBoot'
+    KafkaSpringBoot = 'kafka-springBoot'
     Django = 'django'
     Blank = 'none'
 
@@ -969,6 +970,10 @@ SUPPORTED_CLIENT_TYPE = {
 }
 
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud][RESOURCE.EventHub].append(
+    CLIENT_TYPE.KafkaSpringBoot)
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated][RESOURCE.EventHub].append(
+    CLIENT_TYPE.KafkaSpringBoot)
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
