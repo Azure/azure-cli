@@ -1688,7 +1688,7 @@ class EventGridTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-            self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group {rg} --destination-topic-name {partner_topic_name} --source {source}', checks=[
+            self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-sub-id {destination_subscription_id} --destination-rg {rg} --destination-topic-name {partner_topic_name} --source {source}', checks=[
                 self.check('type', 'Microsoft.EventGrid/partnerNamespaces/eventChannels'),
                 self.check('name', self.kwargs['event_channel_name']),
                 self.check('provisioningState', 'Succeeded'),
@@ -1703,7 +1703,7 @@ class EventGridTests(ScenarioTest):
             ])
 
             # = self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group {rg} --destination-topic-name {partner_topic_name} --source {source} --activation-expiration-date \'{exp_time}\' --partner-topic-description \'{partner_topic_friendly_description}\' --publisher-filter data.key1 NumberIn 2 3 4 100 200 --publisher-filter data.key2 StringIn 2 3 4 100 200').get_output_in_json()
-            outputeventchannel = self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group {rg} --destination-topic-name {partner_topic_name} --source {source} --activation-expiration-date \'{exp_time}\' --partner-topic-description \'{partner_topic_friendly_description}\'').get_output_in_json()
+            outputeventchannel = self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-sub-id {destination_subscription_id} --destination-rg {rg} --destination-topic-name {partner_topic_name} --source {source} --activation-expiration-date \'{exp_time}\' --partner-topic-description \'{partner_topic_friendly_description}\'').get_output_in_json()
 
 
             self.check(outputeventchannel['type'], 'Microsoft.EventGrid/partnerNamespaces/eventChannels'),
@@ -2057,7 +2057,7 @@ class EventGridTests(ScenarioTest):
 
             # Partner topic channel
 
-            self.cmd('az eventgrid partner namespace channel create --resource-group {rg} --channel-type PartnerTopic --name {channel_name} --partner-namespace-name {partner_namespace_name} --partner-topic-name {partner_topic_name} --partner-topic-source {source} --destination-subscription-id {destination_subscription_id} --destination-resource-group-name {rg}', checks=[
+            self.cmd('az eventgrid partner namespace channel create --resource-group {rg} --channel-type PartnerTopic --name {channel_name} --partner-namespace-name {partner_namespace_name} --partner-topic-name {partner_topic_name} --partner-topic-source {source} --destination-sub-id {destination_subscription_id} --destination-rg {rg}', checks=[
                 self.check('type', 'Microsoft.EventGrid/partnerNamespaces/channels'),
                 self.check('name', self.kwargs['channel_name']),
                 self.check('provisioningState', 'Succeeded')
@@ -2101,7 +2101,7 @@ class EventGridTests(ScenarioTest):
 
             # Partner destination channel
 
-            self.cmd('az eventgrid partner namespace channel create --resource-group {rg} --channel-type PartnerDestination --name {channel_name2} --partner-namespace-name {partner_namespace_name} --partner-destination-name {partner_destination_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group-name {rg} --endpoint-service-context AnyContext --endpoint-url={destination_endpoint_url} --aad-app-id {destination_application_id} --aad-tenant-id {destination_tenant_id}', checks=[
+            self.cmd('az eventgrid partner namespace channel create --resource-group {rg} --channel-type PartnerDestination --name {channel_name2} --partner-namespace-name {partner_namespace_name} --partner-destination-name {partner_destination_name} --destination-sub-id {destination_subscription_id} --destination-rg {rg} --endpoint-service-context AnyContext --endpoint-url={destination_endpoint_url} --aad-app-id {destination_application_id} --aad-tenant-id {destination_tenant_id}', checks=[
                 self.check('type', 'Microsoft.EventGrid/partnerNamespaces/channels'),
                 self.check('name', self.kwargs['channel_name2']),
                 self.check('provisioningState', 'Succeeded')

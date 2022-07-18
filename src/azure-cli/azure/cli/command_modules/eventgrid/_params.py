@@ -157,7 +157,7 @@ partner_topic_name_type = CLIArgumentType(
 partner_destination_name_type = CLIArgumentType(
     help='Name of the partner destination.',
     arg_type=name_type,
-    options_list=['--partner-destination-name'],
+    options_list=['--partner-destination-name', '--pr-dest-n'],
     completer=get_resource_name_completion_list('Microsoft.EventGrid/partnerdestinations'))
 
 partner_topic_source_type = CLIArgumentType(
@@ -251,8 +251,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('partner_registration_id', help="The fully qualified ARM Id of the partner registration that should be associated with this partner namespace. This takes the following format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/partnerRegistrations/{partnerRegistrationName}.")
         c.argument('partner_topic_source', arg_type=partner_topic_source_type)
         c.argument('destination_topic_name', help="Name of the partner topic associated with the event channel.")
-        c.argument('destination_resource_group_name', help="Azure Resource Group of the subscriber requesting the creation of the channel resource by the publisher. The corresponding partner resource (either partner topic or partner destination) associated with the channel resource will be created under this resource group.")
-        c.argument('destination_subscription_id', help="Azure subscription Id of the subscriber requesting the creation of the channel resource by the publisher. The corresponding partner resource (either partner topic or partner destination) associated with the channel resource will be created under this Azure subscription.")
+        c.argument('destination_resource_group_name', options_list=['--destination-rg'], help="Azure Resource Group of the subscriber requesting the creation of the channel resource by the publisher. The corresponding partner resource (either partner topic or partner destination) associated with the channel resource will be created under this resource group.")
+        c.argument('destination_subscription_id', options_list=['--destination-sub-id'], help="Azure subscription Id of the subscriber requesting the creation of the channel resource by the publisher. The corresponding partner resource (either partner topic or partner destination) associated with the channel resource will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
         c.argument('system_assigned', options_list=['--mi-system-assigned'], action='store_true', help='Presence of this param indicates that SystemAssigned managed identity will be used')
         c.argument('update_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None))
