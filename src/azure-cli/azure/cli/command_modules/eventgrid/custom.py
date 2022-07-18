@@ -6,6 +6,7 @@
 # pylint: disable=too-many-lines
 
 import re
+import sys
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
@@ -1036,6 +1037,8 @@ def cli_channel_create_or_update(
         partner_namespace_name,
         channel_name,
         channel_type,
+        destination_subscription_id,
+        destination_resource_group_name,
         partner_topic_source=None,
         message_for_activation=None,
         partner_topic_name=None,
@@ -1043,7 +1046,6 @@ def cli_channel_create_or_update(
         endpoint_service_context=None,
         azure_active_directory_tenant_id=None,
         azure_active_directory_application_id_or_uri=None,
-        endpoint_base_url=None,
         endpoint_url=None,
         inline_event_type=None,
         event_type_kind=None,
@@ -1059,7 +1061,6 @@ def cli_channel_create_or_update(
         # parameters for PartnerDestination
         if (azure_active_directory_tenant_id is not None or
                 azure_active_directory_application_id_or_uri is not None or
-                endpoint_base_url is not None or
                 endpoint_url is not None or
                 endpoint_service_context is not None):
             raise CLIError("usage error: The parameters --azure-active-directory-tenant-id, "
@@ -1095,11 +1096,11 @@ def cli_channel_create_or_update(
             azure_active_directory_application_id_or_uri=azure_active_directory_application_id_or_uri)
 
         partner_destination_info = WebhookPartnerDestinationInfo(
-            azure_subscription_id=subscription_id,
-            resource_group_name=resource_group_name,
+            azure_subscription_id=destination_subscription_id,
+            resource_group_name=destination_resource_group_name,
             name=partner_destination_name,
             endpoint_url=endpoint_url,
-            endpoint_base_url=endpoint_base_url,
+            endpoint_base_url=None,
             client_authentication=partner_client_authentication,
             endpoint_service_context=endpoint_service_context)
 
@@ -1818,6 +1819,10 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
         enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
 
+    normalized_endpoint_type = endpoint_type.lower()
+    normalized_webhook_destination = WEBHOOK_DESTINATION.lower()
+    normalized_azure_function_destination = AZUREFUNCTION_DESTINATION.lower()
+
     _validate_delivery_identity_args(
         endpoint,
         delivery_identity,
@@ -1841,14 +1846,14 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
     retry_policy = RetryPolicy(max_delivery_attempts=max_delivery_attempts, event_time_to_live_in_minutes=event_ttl)
 
     if max_events_per_batch is not None:
-        if endpoint_type not in (WEBHOOK_DESTINATION, AZUREFUNCTION_DESTINATION):
+        if normalized_endpoint_type not in (normalized_webhook_destination, normalized_azure_function_destination):
             raise CLIError('usage error: max-events-per-batch is applicable only for '
                            'endpoint types WebHook and AzureFunction.')
         if max_events_per_batch > 5000:
             raise CLIError('usage error: max-events-per-batch must be a number between 1 and 5000.')
 
     if preferred_batch_size_in_kilobytes is not None:
-        if endpoint_type not in (WEBHOOK_DESTINATION, AZUREFUNCTION_DESTINATION):
+        if normalized_endpoint_type not in (normalized_webhook_destination, normalized_azure_function_destination):
             raise CLIError('usage error: preferred-batch-size-in-kilobytes is applicable only for '
                            'endpoint types WebHook and AzureFunction.')
         if preferred_batch_size_in_kilobytes > 1024:
@@ -1856,7 +1861,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
                            'between 1 and 1024.')
 
     if azure_active_directory_tenant_id is not None:
-        if endpoint_type is not WEBHOOK_DESTINATION:
+        if normalized_endpoint_type != normalized_webhook_destination:
             raise CLIError('usage error: azure-active-directory-tenant-id is applicable only for '
                            'endpoint types WebHook.')
         if azure_active_directory_application_id_or_uri is None:
@@ -1864,7 +1869,7 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
                            'It should include an Azure Active Directory Application Id or Uri.')
 
     if azure_active_directory_application_id_or_uri is not None:
-        if endpoint_type is not WEBHOOK_DESTINATION:
+        if normalized_endpoint_type != normalized_webhook_destination:
             raise CLIError('usage error: azure-active-directory-application-id-or-uri is applicable only for '
                            'endpoint types WebHook.')
         if azure_active_directory_tenant_id is None:
@@ -1880,9 +1885,9 @@ def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-
     tennant_id = None
     application_id = None
 
-    condition1 = endpoint_type is not None and endpoint_type.lower() == WEBHOOK_DESTINATION.lower()
+    condition1 = endpoint_type is not None and normalized_endpoint_type == normalized_webhook_destination
     condition2 = delivery_identity_endpoint_type is not None and \
-        delivery_identity_endpoint_type.lower() == WEBHOOK_DESTINATION.lower()
+        delivery_identity_endpoint_type.lower() == normalized_webhook_destination
     if condition1 or condition2:
         tennant_id = azure_active_directory_tenant_id
         application_id = azure_active_directory_application_id_or_uri

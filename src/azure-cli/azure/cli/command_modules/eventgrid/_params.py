@@ -157,7 +157,7 @@ partner_topic_name_type = CLIArgumentType(
 partner_destination_name_type = CLIArgumentType(
     help='Name of the partner destination.',
     arg_type=name_type,
-    options_list=['--partner-destination-name', '--pd-name'],
+    options_list=['--partner-destination-name'],
     completer=get_resource_name_completion_list('Microsoft.EventGrid/partnerdestinations'))
 
 partner_topic_source_type = CLIArgumentType(
@@ -251,8 +251,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('partner_registration_id', help="The fully qualified ARM Id of the partner registration that should be associated with this partner namespace. This takes the following format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/partnerRegistrations/{partnerRegistrationName}.")
         c.argument('partner_topic_source', arg_type=partner_topic_source_type)
         c.argument('destination_topic_name', help="Name of the partner topic associated with the event channel.")
-        c.argument('destination_resource_group_name', help="Azure Resource Group of the customer creating the event channel. The partner topic associated with the event channel will be created under this resource group.")
-        c.argument('destination_subscription_id', help="Azure subscription Id of the customer creating the event channel. The partner topic associated with the event channel will be created under this Azure subscription.")
+        c.argument('destination_resource_group_name', help="Azure Resource Group of the subscriber requesting the creation of the channel resource by the publisher. The corresponding partner resource (either partner topic or partner destination) associated with the channel resource will be created under this resource group.")
+        c.argument('destination_subscription_id', help="Azure subscription Id of the subscriber requesting the creation of the channel resource by the publisher. The corresponding partner resource (either partner topic or partner destination) associated with the channel resource will be created under this Azure subscription.")
         c.argument('topic_type', help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))
         c.argument('system_assigned', options_list=['--mi-system-assigned'], action='store_true', help='Presence of this param indicates that SystemAssigned managed identity will be used')
         c.argument('update_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None))
@@ -266,7 +266,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('inline_event_type',
                    action=AddInlineEventType,
                    nargs='+',
-                   is_preview=True,
                    help='Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument',
                    options_list=['--inline-event-type'])
 
@@ -298,18 +297,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', arg_type=aad_app_id_type)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping'])
 
@@ -319,7 +316,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid topic event-subscription show') as c:
         c.argument('topic_name', arg_type=topic_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid domain') as c:
         c.argument('domain_name', arg_type=domain_name_type, options_list=['--name', '-n'], id_part='name')
@@ -346,18 +343,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', arg_type=aad_app_id_type)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping', '-d'])
 
@@ -367,7 +362,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid domain event-subscription show') as c:
         c.argument('domain_name', arg_type=domain_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/domains'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url', '--full-ed-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid domain topic') as c:
         c.argument('domain_name', arg_type=domain_name_type, id_part='name')
@@ -389,18 +384,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', arg_type=aad_app_id_type)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping', '-d'])
 
@@ -411,7 +404,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('domain_name', arg_type=domain_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/domains'))
         c.argument('domain_topic_name', arg_type=domain_topic_name_type, id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/domains/topics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url', '--full-ed-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid domain topic list') as c:
         c.argument('domain_name', arg_type=domain_name_type, id_part=None)
@@ -428,15 +421,23 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid partner registration') as c:
         c.argument('partner_registration_name', arg_type=partner_registration_name_type, options_list=['--name', '-n'], id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/partnerregistrations'))
-        c.argument('long_description', help='Description of the custom scenarios and integration. Length of this description should not exceed 2048 characters', id_part=None)
-        c.argument('customer_service_number', arg_type=phone_number_type, id_part=None)
-        c.argument('customer_service_extension', arg_type=phone_extension_type, id_part=None)
-        c.argument('customer_service_uri', help='The customer service URI of the publisher.', id_part=None)
+        c.argument('long_description', help='Description of the custom scenarios and integration. Length of this description should not exceed 2048 characters', id_part=None, deprecate_info=c.deprecate())
+        c.argument('customer_service_number', arg_type=phone_number_type, id_part=None, deprecate_info=c.deprecate())
+        c.argument('customer_service_extension', arg_type=phone_extension_type, id_part=None, deprecate_info=c.deprecate())
+        c.argument('customer_service_uri', help='The customer service URI of the publisher.', id_part=None, deprecate_info=c.deprecate())
+
+        c.argument('description', help='Description of the partner topic type.', id_part=None, deprecate_info=c.deprecate())
+        c.argument('display_name', help='Display name for the partner topic type.', id_part=None, deprecate_info=c.deprecate())
+        c.argument('logo_uri', help='URI of the partner logo.', id_part=None, deprecate_info=c.deprecate())
+        c.argument('partner_name', help='Official name of the partner.', id_part=None, deprecate_info=c.deprecate())
+        c.argument('setup_uri', help='URI of the partner website that can be used by Azure customers to setup Event Grid integration on an event source.', id_part=None, deprecate_info=c.deprecate())
+        c.argument('resource_type_name', help='Name of the partner topic resource type. This name should be unique among all partner topic types names.', id_part=None, deprecate_info=c.deprecate())
 
     with self.argument_context('eventgrid partner registration list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid partner destination') as c:
+        c.argument('partner_destination_name', arg_type=partner_destination_name_type, options_list=['--name', '-n'], id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/partnerdestinations'))
         c.argument('activation_expiration_date', options_list=['--activation-expiration-date', '--act-exp-date'], help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') which is the expiration time of the partner destination. If this timer expires and the partner destination was never activated, the partner destination and corresponding channel are deleted.")
 
     with self.argument_context('eventgrid partner namespace') as c:
@@ -453,9 +454,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
 
     with self.argument_context('eventgrid partner namespace channel') as c:
-        c.argument('channel_name', arg_type=channel_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnernamespaces'))
-        c.argument('event_type_kind', arg_type=get_enum_type(['inline'], default=None), is_preview=True, help="The kind of event type used.")
+        c.argument('channel_name', arg_type=channel_name_type, options_list=['--name', '-n'], id_part='name')
+        c.argument('event_type_kind', arg_type=get_enum_type(['inline'], default=None), help="The kind of event type used.")
         c.argument('activation_expiration_date', options_list=['--activation-expiration-date', '--act-exp-date'], help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') after which the channel and corresponding partner topic would expire and get auto deleted. If this time is not specified, the expiration date is set to seven days by default.")
         c.argument('endpoint_url', help="The URL that represents the endpoint of the partner destination.")
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant ID to get the access token that will be included as the bearer token in delivery requests.")
@@ -474,7 +475,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('partner_topic_source', arg_type=partner_topic_source_type, options_list=['--source'])
         c.argument('activation_expiration_date', help="Date or datetime in UTC ISO 8601 format (e.g., '2022-02-17T01:59:59+00:00' or '2022-02-17') after which the event channel and corresponding partner topic would expire and get auto deleted. If this time is not specified, the expiration date is set to seven days by default.")
         c.argument('partner_topic_description', help="Friendly description of the corresponding partner topic. This will be helpful to remove any ambiguity of the origin of creation of the partner topic for the customer.")
-        c.argument('publisher_filter', action=EventChannelAddFilter, nargs='+')
+        c.argument('publisher_filter', action=EventChannelAddFilter, nargs='+', deprecate_info=c.deprecate())
 
     with self.argument_context('eventgrid partner namespace event-channel show') as c:
         c.argument('partner_namespace_name', arg_type=partner_namespace_name_type, id_part='name')
@@ -493,7 +494,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('authorized_partner',
                    action=AddAuthorizedPartner,
                    nargs='+',
-                   is_preview=True,
                    help='Add authorized partner information. Multiple authorized partners can be specified by using more than one `--authorized-partner` argument',
                    options_list=['--authorized-partner'])
 
@@ -514,18 +514,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('delivery_identity_endpoint', help="Endpoint with identity where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.", is_preview=True)
         c.argument('delivery_identity_endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue', 'servicebustopic', 'azurefunction'], default=None), is_preview=True)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping'])
 
@@ -534,7 +532,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid event-subscription show') as c:
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid system-topic event-subscription') as c:
         c.argument('system_topic_name', arg_type=system_topic_name_type, id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/systemtopics'))
@@ -551,18 +549,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping'])
 
@@ -572,11 +568,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid system-topic event-subscription show') as c:
         c.argument('system_topic_name', arg_type=system_topic_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/systemtopics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid event-subscription show') as c:
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid topic event-subscription') as c:
         c.argument('topic_name', arg_type=topic_name_type, id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
@@ -593,18 +589,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', arg_type=aad_app_id_type, help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping', '-d'])
 
@@ -614,7 +608,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid topic event-subscription show') as c:
         c.argument('topic_name', arg_type=topic_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url', '--full-ed-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid partner topic event-subscription') as c:
         c.argument('partner_topic_name', arg_type=partner_topic_name_type, id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnertopics'))
@@ -631,18 +625,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('azure_active_directory_tenant_id', options_list=['--azure-active-directory-tenant-id', '--aad-tenant-id'], help="The Azure Active Directory Tenant Id to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('azure_active_directory_application_id_or_uri', help="The Azure Active Directory Application Id or Uri to get the access token that will be included as the bearer token in delivery requests. Applicable only for webhook as a destination")
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('enable_advanced_filtering_on_arrays', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_advanced_filtering_on_arrays', arg_type=get_three_state_flag(),
                    options_list=['--enable-advanced-filtering-on-arrays', '--enable-af-arr'], arg_group="Filtering",
                    help="Allows advanced filters to be evaluated against an array of values instead of expecting a singular value.")
         c.argument('storage_queue_msg_ttl',
                    help="Storage queue message time to live in seconds.",
                    type=int,
-                   options_list=['--storage-queue-msg-ttl', '--qttl'],
-                   is_preview=True)
+                   options_list=['--storage-queue-msg-ttl', '--qttl'])
         c.argument('delivery_attribute_mapping',
                    action=AddDeliveryAttributeMapping,
                    nargs='+',
-                   is_preview=True,
                    help='Add delivery attribute mapping to send additional information via HTTP headers when delivering events. This attribute is valid for all destination types except StorageQueue. Multiple attributes can be specified by using more than one `--delivery-attribute-mapping` argument',
                    options_list=['--delivery-attribute-mapping'])
 
@@ -652,7 +644,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid partner topic event-subscription show') as c:
         c.argument('partner_topic_name', arg_type=partner_topic_name_type, completer=get_resource_name_completion_list('Microsoft.EventGrid/partnertopics'))
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.")
-        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.", is_preview=True)
+        c.argument('include_static_delivery_attribute_secret', arg_type=get_three_state_flag(), options_list=['--include-static-delivery-attribute-secret', '--include-attrib-secret'], help="Indicate whether any static delivery attribute secrets should be returned. True if flag present.")
 
     with self.argument_context('eventgrid topic-type') as c:
         c.argument('topic_type_name', arg_type=name_type, help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))

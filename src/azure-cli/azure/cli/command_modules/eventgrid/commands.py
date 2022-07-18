@@ -155,7 +155,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_topic_create_or_update')
         g.custom_command('update', 'cli_topic_update')
 
-    with self.command_group('eventgrid topic event-subscription', topic_event_subscriptions_mgmt_util, client_factory=topic_event_subscriptions_factory, is_preview=True) as g:
+    with self.command_group('eventgrid topic event-subscription', topic_event_subscriptions_mgmt_util, client_factory=topic_event_subscriptions_factory) as g:
         g.custom_show_command('show', 'cli_topic_event_subscription_get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_topic_event_subscription_list')
@@ -171,7 +171,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'cli_domain_topic_delete')
         g.custom_command('create', 'cli_domain_topic_create_or_update')
 
-    with self.command_group('eventgrid domain topic event-subscription', domain_topic_event_subscriptions_mgmt_util, client_factory=domain_topic_event_subscriptions_factory, is_preview=True) as g:
+    with self.command_group('eventgrid domain topic event-subscription', domain_topic_event_subscriptions_mgmt_util, client_factory=domain_topic_event_subscriptions_factory) as g:
         g.custom_show_command('show', 'cli_domain_topic_event_subscription_get')
         g.custom_command('delete', 'cli_domain_topic_event_subscription_delete', confirmation=True)
         g.custom_command('list', 'cli_domain_topic_event_subscription_list')
@@ -187,7 +187,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.custom_command('update', 'cli_domain_update')
 
-    with self.command_group('eventgrid domain event-subscription', domain_event_subscriptions_mgmt_util, client_factory=domain_event_subscriptions_factory, is_preview=True) as g:
+    with self.command_group('eventgrid domain event-subscription', domain_event_subscriptions_mgmt_util, client_factory=domain_event_subscriptions_factory) as g:
         g.custom_show_command('show', 'cli_domain_event_subscription_get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_domain_event_subscription_list')
@@ -208,14 +208,14 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_system_topic_event_subscription_create_or_update')
         g.custom_command('update', 'cli_system_topic_event_subscription_update')
 
-    with self.command_group('eventgrid partner registration', partner_registrations_mgmt_util, client_factory=partner_registrations_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner registration', partner_registrations_mgmt_util, client_factory=partner_registrations_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_partner_registration_list')
         g.custom_command('create', 'cli_partner_registration_create_or_update')
         # g.custom_command('update', 'cli_partner_registration_update')
 
-    with self.command_group('eventgrid partner namespace', partner_namespaces_mgmt_util, client_factory=partner_namespaces_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner namespace', partner_namespaces_mgmt_util, client_factory=partner_namespaces_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_partner_namespace_list')
@@ -231,14 +231,14 @@ def load_command_table(self, _):
         # g.custom_command('update', 'cli_event_channel_update')
         g.custom_command('create', 'cli_event_channel_create_or_update')
 
-    with self.command_group('eventgrid partner namespace channel', channels_mgmt_util, client_factory=channels_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner namespace channel', channels_mgmt_util, client_factory=channels_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_channel_list')
         g.custom_command('update', 'cli_channel_update')
         g.custom_command('create', 'cli_channel_create_or_update')
 
-    with self.command_group('eventgrid partner topic', partner_topics_mgmt_util, client_factory=partner_topics_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner topic', partner_topics_mgmt_util, client_factory=partner_topics_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.command('activate', 'activate')
@@ -247,14 +247,14 @@ def load_command_table(self, _):
         # g.custom_command('create', 'cli_partner_topic_create_or_update')
         # g.custom_command('update', 'cli_partner_topic_update')
 
-    with self.command_group('eventgrid partner topic event-subscription', partner_topic_event_subscriptions_mgmt_util, client_factory=partner_topic_event_subscriptions_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner topic event-subscription', partner_topic_event_subscriptions_mgmt_util, client_factory=partner_topic_event_subscriptions_factory) as g:
         g.custom_show_command('show', 'cli_partner_topic_event_subscription_get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_partner_topic_event_subscription_list')
         g.custom_command('create', 'cli_partner_topic_event_subscription_create_or_update')
         g.custom_command('update', 'cli_partner_topic_event_subscription_update')
 
-    with self.command_group('eventgrid partner configuration', partner_configurations_mgmt_util, client_factory=partner_configurations_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner configuration', partner_configurations_mgmt_util, client_factory=partner_configurations_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('authorize', 'cli_partner_configuration_authorize')
@@ -263,7 +263,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_partner_configuration_create_or_update')
         g.custom_command('update', 'cli_partner_configuration_update')
 
-    with self.command_group('eventgrid partner destination', partner_destinations_mgmt_util, client_factory=partner_destinations_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner destination', partner_destinations_mgmt_util, client_factory=partner_destinations_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.command('activate', 'activate')
@@ -271,7 +271,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_partner_destination_create_or_update')
         g.custom_command('update', 'cli_partner_destination_update')
 
-    with self.command_group('eventgrid partner verified-partner', verified_partners_mgmt_util, client_factory=verified_partners_factory, is_preview=True) as g:
+    with self.command_group('eventgrid partner verified-partner', verified_partners_mgmt_util, client_factory=verified_partners_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_verified_partner_list')
 
