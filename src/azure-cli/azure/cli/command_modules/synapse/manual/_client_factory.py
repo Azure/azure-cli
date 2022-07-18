@@ -259,5 +259,6 @@ def cf_synapse_sql_script(cli_ctx, workspace_name):
 def cf_synapse_client_azure_ad_only_authentications_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).azure_ad_only_authentications
 
+
 def cf_synapse_link_connection(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).link_connection
