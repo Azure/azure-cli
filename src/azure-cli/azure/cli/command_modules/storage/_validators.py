@@ -1304,6 +1304,8 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
     namespace.source = os.path.realpath(namespace.source)
     namespace.share_name = namespace.destination
+    # Ignore content_md5 for batch upload
+    namespace.content_md5 = None
 
 
 def process_file_download_batch_parameters(cmd, namespace):
