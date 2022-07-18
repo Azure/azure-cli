@@ -8554,37 +8554,6 @@ def _start_tunnel(tunnel_server):
 # endregion
 
 
-# region security partner provider
-def create_security_partner_provider(cmd, resource_group_name, security_partner_provider_name,
-                                     security_provider_name, virtual_hub, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).security_partner_providers
-    SecurityPartnerProvider, SubResource = cmd.get_models('SecurityPartnerProvider', 'SubResource')
-
-    security_partner_provider = SecurityPartnerProvider(security_provider_name=security_provider_name,
-                                                        virtual_hub=SubResource(id=virtual_hub),
-                                                        location=location,
-                                                        tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         security_partner_provider_name=security_partner_provider_name,
-                                         parameters=security_partner_provider)
-
-
-def update_security_partner_provider(instance, cmd, security_provider_name=None, virtual_hub=None, tags=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('security_provider_name', security_provider_name)
-        c.set_param('virtual_hub', virtual_hub)
-        c.set_param('tags', tags)
-    return instance
-
-
-def list_security_partner_provider(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).security_partner_providers
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-    return client.list()
-# endregion
-
-
 # region network gateway connection
 def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_length, resource_group_name=None):
     ConnectionResetSharedKey = cmd.get_models('ConnectionResetSharedKey')

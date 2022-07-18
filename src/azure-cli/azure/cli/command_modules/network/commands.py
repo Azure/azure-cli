@@ -420,12 +420,6 @@ def load_command_table(self, _):
         min_api='2019-11-01'
     )
 
-    network_security_partner_provider_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SecurityPartnerProvidersOperations.{}',
-        client_factory=cf_security_partner_providers,
-        min_api='2020-03-01'
-    )
-
     network_virtual_appliances_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkVirtualAppliancesOperations.{}',
         client_factory=cf_network_virtual_appliances,
