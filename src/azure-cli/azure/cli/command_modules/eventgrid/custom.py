@@ -6,8 +6,7 @@
 # pylint: disable=too-many-lines
 
 import re
-import sys
-from knack.log import get_logger
+sfrom knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 from dateutil.parser import parse   # pylint: disable=import-error,relative-import
@@ -1030,7 +1029,7 @@ def cli_channel_list(
     return client.list_by_partner_namespace(resource_group_name, partner_namespace_name, odata_query, DEFAULT_TOP)
 
 
-def cli_channel_create_or_update(
+def cli_channel_create_or_update(    # pylint: disable=too-many-locals
         cmd,
         client,
         resource_group_name,
