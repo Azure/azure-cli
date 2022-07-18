@@ -223,8 +223,8 @@ class AAZWaitCommand(AAZCommand):
         super().__init__(loader)
 
         # add wait args in commands
-        for param_name, argtype in WaitCommandOperation.wait_args():
-            self.update_argument(param_name, argtype)
+        for param_name, argtype in WaitCommandOperation.wait_args().items():
+            self.arguments[param_name] = argtype
 
     def __call__(self, *args, **kwargs):
         from azure.cli.core.commands.command_operation import WaitCommandOperation
