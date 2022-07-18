@@ -75,3 +75,17 @@ WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'java': 'AppService/windows/java-jar-webapp-on-azure.yml',
     'tomcat': 'AppService/windows/java-war-webapp-on-azure.yml'
 }
+
+LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'FunctionApp/linux-node.js-functionapp-on-azure.yml',
+    'python': 'FunctionApp/linux-python-functionapp-on-azure.yml',
+    'dotnet': 'FunctionApp/linux-dotnet-functionapp-on-azure.yml',
+    'java': 'FunctionApp/linux-java-functionapp-on-azure.yml',
+}
+
+WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'FunctionApp/windows-node.js-functionapp-on-azure.yml',
+    'dotnet': 'FunctionApp/windows-dotnet-functionapp-on-azure.yml',
+    'java': 'FunctionApp/windows-java-functionapp-on-azure.yml',
+    'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
+}

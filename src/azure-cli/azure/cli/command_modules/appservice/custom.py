@@ -73,7 +73,8 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
-                         WINDOWS_OS_NAME)
+                         WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
 from ._github_oauth import (get_github_access_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -5257,6 +5258,262 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
     return "Disconnected successfully."
 
 
+def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
+                       branch='master', build_path=".", login_with_github=False, force=False):
+    runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
+    if not token and not login_with_github:
+        raise_missing_token_suggestion()
+    elif not token:
+        scopes = ["admin:repo_hook", "repo", "workflow"]
+        token = get_github_access_token(cmd, scopes)
+    elif token and login_with_github:
+        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
+
+    # Verify resource group, app
+    # site_availability = get_site_availability(cmd, name)
+    # if site_availability.name_available or (not site_availability.name_available and
+    #                                         site_availability.reason == 'Invalid'):
+    #     raise ResourceNotFoundError(
+    #         "The Resource 'Microsoft.Web/sites/%s' under resource group '%s' "
+    #         "was not found." % (name, resource_group))
+    # app_details = get_app_details(cmd, name)
+    # if app_details is None:
+    #     raise ResourceNotFoundError(
+    #         "Unable to retrieve details of the existing app %s. Please check that the app is a part of "
+    #         "the current subscription" % name)
+    # current_rg = app_details.resource_group
+    # if resource_group is not None and (resource_group.lower() != current_rg.lower()):
+    #     raise ResourceNotFoundError("The webapp %s exists in ResourceGroup %s and does not match the "
+    #                                 "value entered %s. Please re-run command with the correct "
+    #                                 "parameters." % (name, current_rg, resource_group))
+
+    app = show_app(cmd, resource_group, name, slot)
+    # parsed_plan_id = parse_resource_id(app_details.server_farm_id)
+    client = web_client_factory(cmd.cli_ctx)
+    # plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    is_linux = app.reserved
+
+    # Verify github repo
+    from github import Github, GithubException
+    from github.GithubException import BadCredentialsException, UnknownObjectException
+
+    if repo.strip()[-1] == '/':
+        repo = repo.strip()[:-1]
+
+    g = Github(token)
+    github_repo = None
+    try:
+        github_repo = g.get_repo(repo)
+        try:
+            github_repo.get_branch(branch=branch)
+        except GithubException as e:
+            error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
+            if e.data and e.data['message']:
+                error_msg += " Error: {}".format(e.data['message'])
+            raise CLIError(error_msg)
+        logger.warning('Verified GitHub repo and branch')
+    except BadCredentialsException:
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az webapp deployment github-actions add --help' "
+                              "for more information.")
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise CLIError(error_msg)
+
+    # Verify runtime
+    app_runtime_info = _get_app_runtime_info(
+        cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
+
+    app_runtime_string = None
+    if(app_runtime_info and app_runtime_info['display_name']):
+        app_runtime_string = app_runtime_info['display_name']
+
+    github_actions_version = None
+    if (app_runtime_info and app_runtime_info['github_actions_version']):
+        github_actions_version = app_runtime_info['github_actions_version']
+
+    if runtime and app_runtime_string:
+        if app_runtime_string.lower() != runtime.lower():
+            logger.warning('The app runtime: {app_runtime_string} does not match the runtime specified: '
+                           '{runtime}. Using the specified runtime {runtime}.')
+            app_runtime_string = runtime
+    elif runtime:
+        app_runtime_string = runtime
+
+    if not app_runtime_string:
+        raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
+
+    print(app_runtime_string)
+
+    # if not _runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, is_linux=is_linux):
+    #     raise ValidationError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
+
+    # Get workflow template
+    logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
+    workflow_template = _get_functionapp_workflow_template(github=g, runtime_string=app_runtime_string,
+                                                           is_linux=is_linux)
+
+
+    print(workflow_template.decoded_content.decode())
+
+    # Fill workflow template
+    # guid = str(uuid.uuid4()).replace('-', '')
+    # publish_profile_name = "AzureAppService_PublishProfile_{}".format(guid)
+    # logger.warning(
+    #     'Filling workflow template with name: %s, branch: %s, version: %s, slot: %s',
+    #     name, branch, github_actions_version, slot if slot else 'production')
+    completed_workflow_file = _fill_functionapp_workflow_template(content=workflow_template.decoded_content.decode(),
+                                                                  name=name, build_path=build_path, version=github_actions_version)
+    completed_workflow_file = completed_workflow_file.encode()
+
+
+
+
+
+    # Check if workflow exists in repo, otherwise push
+    if slot:
+        file_name = "{}_{}({}).yml".format(branch.replace('/', '-'), name.lower(), slot)
+    else:
+        file_name = "{}_{}.yml".format(branch.replace('/', '-'), name.lower())
+    dir_path = "{}/{}".format('.github', 'workflows')
+    file_path = "{}/{}".format(dir_path, file_name)
+    try:
+        existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
+        existing_publish_profile_name = _get_publish_profile_from_workflow_file(
+            workflow_file=str(existing_workflow_file.decoded_content))
+        if existing_publish_profile_name:
+            completed_workflow_file = completed_workflow_file.decode()
+            completed_workflow_file = completed_workflow_file.replace(
+                publish_profile_name, existing_publish_profile_name)
+            completed_workflow_file = completed_workflow_file.encode()
+            publish_profile_name = existing_publish_profile_name
+        logger.warning("Existing workflow file found")
+        if force:
+            logger.warning("Replacing the existing workflow file")
+            github_repo.update_file(path=file_path, message="Update workflow using Azure CLI",
+                                    content=completed_workflow_file, sha=existing_workflow_file.sha, branch=branch)
+        else:
+            option = prompt_y_n('Replace existing workflow file?')
+            if option:
+                logger.warning("Replacing the existing workflow file")
+                github_repo.update_file(path=file_path, message="Update workflow using Azure CLI",
+                                        content=completed_workflow_file, sha=existing_workflow_file.sha,
+                                        branch=branch)
+            else:
+                logger.warning("Use the existing workflow file")
+                if existing_publish_profile_name:
+                    publish_profile_name = existing_publish_profile_name
+    except UnknownObjectException:
+        logger.warning("Creating new workflow file: %s", file_path)
+        github_repo.create_file(path=file_path, message="Create workflow using Azure CLI",
+                                content=completed_workflow_file, branch=branch)
+
+    # Add publish profile to GitHub
+    logger.warning('Adding publish profile to GitHub')
+    _add_publish_profile_to_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo,
+                                   token=token, github_actions_secret_name=publish_profile_name,
+                                   slot=slot)
+
+    # Set site source control properties
+    _update_site_source_control_properties_for_gh_action(
+        cmd=cmd, resource_group=resource_group, name=name, token=token, repo=repo, branch=branch, slot=slot)
+
+    github_actions_url = "https://github.com/{}/actions".format(repo)
+    return github_actions_url
+
+
+def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=None, slot=None,  # pylint: disable=too-many-statements
+                          branch='master', login_with_github=False):
+    if not token and not login_with_github:
+        raise_missing_token_suggestion()
+    elif not token:
+        scopes = ["admin:repo_hook", "repo", "workflow"]
+        token = get_github_access_token(cmd, scopes)
+    elif token and login_with_github:
+        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
+
+    # Verify resource group, app
+    site_availability = get_site_availability(cmd, name)
+    if site_availability.name_available or (not site_availability.name_available and
+                                            site_availability.reason == 'Invalid'):
+        raise ResourceNotFoundError("The Resource 'Microsoft.Web/sites/%s' under resource group '%s' was not found." %
+                                    (name, resource_group))
+    app_details = get_app_details(cmd, name)
+    if app_details is None:
+        raise ResourceNotFoundError("Unable to retrieve details of the existing app %s. "
+                                    "Please check that the app is a part of the current subscription" % name)
+    current_rg = app_details.resource_group
+    if resource_group is not None and (resource_group.lower() != current_rg.lower()):
+        raise ValidationError("The webapp %s exists in ResourceGroup %s and does not match "
+                              "the value entered %s. Please re-run command with the correct "
+                              "parameters." % (name, current_rg, resource_group))
+
+    # Verify github repo
+    from github import Github, GithubException
+    from github.GithubException import BadCredentialsException, UnknownObjectException
+
+    if repo.strip()[-1] == '/':
+        repo = repo.strip()[:-1]
+
+    g = Github(token)
+    github_repo = None
+    try:
+        github_repo = g.get_repo(repo)
+        try:
+            github_repo.get_branch(branch=branch)
+        except GithubException as e:
+            error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
+            if e.data and e.data['message']:
+                error_msg += " Error: {}".format(e.data['message'])
+            raise CLIError(error_msg)
+        logger.warning('Verified GitHub repo and branch')
+    except BadCredentialsException:
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az webapp deployment github-actions add --help' "
+                              "for more information.")
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise CLIError(error_msg)
+
+    # Check if workflow exists in repo and remove
+    file_name = "{}_{}({}).yml".format(
+        branch.replace('/', '-'), name.lower(), slot) if slot else "{}_{}.yml".format(
+            branch.replace('/', '-'), name.lower())
+    dir_path = "{}/{}".format('.github', 'workflows')
+    file_path = "{}/{}".format(dir_path, file_name)
+    existing_publish_profile_name = None
+    try:
+        existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
+        existing_publish_profile_name = _get_publish_profile_from_workflow_file(
+            workflow_file=str(existing_workflow_file.decoded_content))
+        logger.warning("Removing the existing workflow file")
+        github_repo.delete_file(path=file_path, message="Removing workflow file, disconnecting github actions",
+                                sha=existing_workflow_file.sha, branch=branch)
+    except UnknownObjectException as e:
+        error_msg = "Error when removing workflow file."
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise CLIError(error_msg)
+
+    # Remove publish profile from GitHub
+    if existing_publish_profile_name:
+        logger.warning('Removing publish profile from GitHub')
+        _remove_publish_profile_from_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo, token=token,
+                                            github_actions_secret_name=existing_publish_profile_name, slot=slot)
+
+    # Remove site source control properties
+    delete_source_control(cmd=cmd,
+                          resource_group_name=resource_group,
+                          name=name,
+                          slot=slot)
+
+    return "Disconnected successfully."
+
+
 def _get_publish_profile_from_workflow_file(workflow_file):
     import re
     publish_profile = None
@@ -5324,6 +5581,28 @@ def _get_workflow_template(github, runtime_string, is_linux):
     return file_contents
 
 
+def _get_functionapp_workflow_template(github, runtime_string, is_linux):
+    from github import GithubException
+
+    file_contents = None
+    template_repo_path = 'Azure/actions-workflow-samples'
+    template_path_map = (LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH if is_linux else
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+    template_file_path = _get_functionapp_template_file_path(runtime_string=runtime_string,
+                                                             template_path_map=template_path_map)
+
+    try:
+        template_repo = github.get_repo(template_repo_path)
+        file_contents = template_repo.get_contents(template_file_path)
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when retrieving workflow template"
+        if e.data and e.data['message']:
+            error_msg += ": {}".format(e.data['message'])
+        raise CLIError(error_msg)
+    return file_contents
+
+
+
 def _fill_workflow_template(content, name, branch, slot, publish_profile, version):
     if not slot:
         slot = 'production'
@@ -5337,6 +5616,17 @@ def _fill_workflow_template(content, name, branch, slot, publish_profile, versio
     content = content.replace('${java-version}', version)
     content = content.replace('${node-version}', version)
     content = content.replace('${python-version}', version)
+    return content
+
+def _fill_functionapp_workflow_template(content, name, build_path, version):
+    content = content.replace("AZURE_FUNCTIONAPP_NAME: your-app-name", f"AZURE_FUNCTIONAPP_NAME: '{name}'")
+    content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{name}'")
+    content = content.replace("AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'", f"AZURE_FUNCTIONAPP_PACKAGE_PATH: '{build_path}'")
+    content = content.replace("POM_XML_DIRECTORY: '.'", f"POM_XML_DIRECTORY: '{build_path}'")
+    content = content.replace("DOTNET_VERSION: '2.2.402'", f"DOTNET_VERSION: '{version}'")
+    content = content.replace("JAVA_VERSION: '1.8.x'", f"JAVA_VERSION: '{version}'")
+    content = content.replace("NODE_VERSION: '10.x'", f"NODE_VERSION: '{version}'")
+    content = content.replace("PYTHON_VERSION: '3.7'", f"NODE_VERSION: '{version}'")
     return content
 
 
@@ -5360,6 +5650,21 @@ def _get_template_file_path(runtime_string, is_linux):
                 elif java_container_split[2] == 'java se':
                     runtime_stack = 'java'
         template_file_path = WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH.get(runtime_stack, None)
+
+    if not template_file_path:
+        raise ResourceNotFoundError('Unable to retrieve workflow template.')
+    return template_file_path
+
+
+def _get_functionapp_template_file_path(runtime_string, template_path_map):
+    if not runtime_string:
+        raise ResourceNotFoundError('Unable to retrieve workflow template')
+
+    runtime_string = runtime_string.lower()
+    runtime_stack = runtime_string.split('|')[0]
+    template_file_path = None
+
+    template_file_path = template_path_map.get(runtime_stack)
 
     if not template_file_path:
         raise ResourceNotFoundError('Unable to retrieve workflow template.')

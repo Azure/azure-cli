@@ -259,6 +259,10 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_github_actions')
         g.custom_command('remove', 'remove_github_actions')
 
+    with self.command_group('functionapp deployment github-actions') as g:
+        g.custom_command('add', 'add_functionapp_github_actions')
+        g.custom_command('remove', 'remove_functoinapp_github_actions')
+
     with self.command_group('webapp auth') as g:
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
