@@ -19,32 +19,1675 @@ interactions:
       User-Agent:
       - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/checkDomainAvailability?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/checkDomainAvailability?api-version=2021-01-15
   response:
     body:
-      string: '{"error":{"code":"InvalidResourceType","message":"The resource type
-        ''checkDomainAvailability'' could not be found in the namespace ''Microsoft.DomainRegistration''
-        for api version ''2022-03-01''. The supported api-versions are ''2021-03-01,2021-02-01,2021-01-15,2021-01-01,2020-12-01,2020-10-01,2020-09-01,2020-06-01,2019-08-01,2018-02-01,2015-04-01,2015-02-01''."}}'
+      string: '{"name":"testuniquedomainname1.com","available":true,"domainType":"Regular"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '359'
+      - '76'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Fri, 15 Jul 2022 00:42:18 GMT
+      - Mon, 18 Jul 2022 22:14:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
+- request:
+    body: '{"includePrivacy": true, "forTransfer": false}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice domain create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '46'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --hostname --contact-info --dryrun
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DomainRegistration/topLevelDomains/com/listAgreements?api-version=2021-01-15
+  response:
+    body:
+      string: "{\"value\":[{\"agreementKey\":\"DNRA\",\"title\":\"Domain Registration
+        Agreement\",\"content\":\"\\r\\n<style>.vsc-legal-content-module .lcm-title{margin-top:2.5rem;margin-bottom:1rem}.vsc-legal-content-module
+        .lcm-subtitle{margin-bottom:1rem}.vsc-legal-content-module .paragraph{margin-top:0;margin-bottom:1rem}.vsc-legal-content-module
+        .lcm-numbered-list ul>ol{list-style:circle inside}.vsc-legal-content-module
+        .lcm-numbered-list ol{counter-reset:section;padding-left:0}.vsc-legal-content-module
+        .lcm-numbered-list ol>li{display:block}.vsc-legal-content-module .lcm-numbered-list
+        ol>li:before{content:counters(section,\\\".\\\") \\\" \\\";counter-increment:section}</style>\\r\\n\\r\\n<div
+        id=\\\"id-6de81dbb-6ddc-4107-a4fd-86de2b44f601\\\" class=\\\"vsc-legal-content-module\\\"
+        >\\r\\n  <div class=\\\"lcm-title\\\">\\r\\n    <strong><span class=\\\"h5\\\">Azure
+        - DOMAIN NAME REGISTRATION AGREEMENT</span></strong>\\r\\n  </div>\\r\\n    <div
+        class=\\\"lcm-subtitle\\\">\\r\\n      <strong>Last Revised: 4/5/2022</strong>\\r\\n
+        \   </div>\\r\\n        <strong><strong>PLEASE READ THIS AGREEMENT CAREFULLY,
+        AS IT CONTAINS IMPORTANT INFORMATION REGARDING YOUR LEGAL RIGHTS AND REMEDIES.</strong></strong>\\r\\n\\r\\n
+        \ <p></p>\\r\\n        <strong><strong>1. OVERVIEW</strong></strong>\\r\\n\\r\\n
+        \     <p>This Domain Name Registration Agreement (this &quot;<u>Agreement</u>&quot;)
+        is entered into by and between Microsoft Azure (&quot;Azure&quot;) and you,
+        and is made effective as of the date of electronic acceptance.  This Agreement
+        sets forth the terms and conditions of your use of Azure's Domain Name Registration
+        services (the &quot;<u>Domain Name Registration Services</u>&quot; or the
+        &quot;<u>Services</u>&quot;). The terms &quot;we&quot;, &quot;us&quot; or
+        &quot;our&quot; shall refer to Azure.  The terms &quot;you&quot;, &quot;your&quot;,
+        &quot;User&quot; or &quot;customer&quot; shall refer to any individual or
+        entity who accepts this Agreement.  Unless otherwise specified, nothing in
+        this Agreement shall be deemed to confer any third-party rights or benefits.</p>\\r\\n
+        \     <p>Your electronic acceptance of this Agreement signifies that you have
+        read, understand, acknowledge and agree to be bound by this Agreement, which
+        incorporates by reference each of (i) Azure\u2019s <a href=\\\"https://www.secureserver.net/legal/agreements/universal-terms-of-service-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Universal
+        Terms of Service Agreement</a> (&quot;<u>UTOS</u>&quot;), (ii) all agreements,
+        guidelines, policies, practices, procedures, registration requirements or
+        operational standards of the top-level domain (&quot;<u>TLD</u>&quot;) in
+        which you register any domain (\u201C<u>Registry Policies</u>\u201D), and
+        (iii) any plan limits, product disclaimers or other restrictions presented
+        to you on the Domain Name Registration Services landing page of the Azure
+        website (this \u201C<u>Site</u>\u201D). </p>\\r\\n      <p><strong>TO LINK
+        TO AND REVIEW THE REGISTRY POLICIES FOR THE TLD IN WHICH YOU WISH TO REGISTER
+        A DOMAIN NAME, PLEASE CLICK</strong> <a href=\\\"https://www.secureserver.net/legal/agreements/tld-registry-policies?prog_id=510456&pl_id=510456&plid=510456\\\">HERE</a>.</p>\\r\\n
+        \     <p><p>You acknowledge and agree that (i) Azure, in its sole and absolute
+        discretion, may change or modify this Agreement, and any policies or agreements
+        which are incorporated herein, at any time, and such changes or modifications
+        shall be effective immediately upon posting to this Site, and (ii) your use
+        of this Site or the Services found at this Site after such changes or modifications
+        have been made shall constitute your acceptance of this Agreement as last
+        revised.  If you do not agree to be bound by this Agreement as last revised,
+        do not use (or continue to use) this Site or the Services found at this Site.
+        \ In addition, Azure may occasionally notify you of changes or modifications
+        to this Agreement by email.  It is therefore very important that you keep
+        your shopper account (\u201C<u>Shopper Account</u>\u201D) information, including
+        your email address, current.  Azure assumes no liability or responsibility
+        for your failure to receive an email notification if such failure results
+        from an inaccurate or out-of-date email address.  Azure is an Internet Corporation
+        for Assigned Names and Numbers (&quot;<u>ICANN</u>&quot;) accredited registrar.
+        \ \\r</p>\\n<p>You acknowledge and agree that Azure may modify this Agreement
+        in order to comply with any terms and conditions set forth by (i) ICANN and/or
+        (ii) the registry applicable to the TLD or country code top level domain (&quot;<u>ccTLD</u>&quot;)
+        in question. The term \u201CRegistry Service Provider\u201D shall refer to
+        the service provider responsible for operating and managing the registry services
+        on behalf of the Registry Operator for its applicable TLD or ccTLD.  To identify
+        the sponsoring registrar, click <a href=\\\"http://www.internic.net/whois.html\\\">here</a>.</p>\\n</p>\\r\\n
+        \       <strong><strong>2. PROVISIONS SPECIFIC TO ALL REGISTRATIONS</strong>
+        \ </strong>\\r\\n\\r\\n      <p><p><em>Unless otherwise noted, the provisions
+        below in this Section 2 are generally applicable to all TLDs that we offer.
+        \ Special provisions specific to any TLD or ccTLD (those in addition to posted
+        Registry Policies) are identified elsewhere below in this Agreement.</em>
+        \ \\r</p>\\n<p><ol><li><em><u>Registry Policies.</u></em> You agree to be
+        bound by all Registry Policies (defined above in this Agreement) applicable
+        to your domain name registration (at any level). IT IS YOUR RESPONSIBILITY
+        TO VISIT THE APPLICABLE TLD SITE AND READ AND REVIEW ALL APPLICABLE REGISTRY
+        POLICIES PRIOR TO YOUR REGISTRATION IN THE TLD.  REGISTRY POLICIES FOR EACH
+        TLD CAN BE FOUND BY VISITING THE CORRESPONDING TLD LINK LISTED<a href=\\\"https://www.secureserver.net/legal/agreements/tld-registry-policies?prog_id=510456&pl_id=510456&plid=510456\\\">HERE</a>.
+        Notwithstanding anything in this Agreement to the contrary, the Registry Operator
+        of the TLD in which the domain name registration is made is and shall be an
+        intended third party beneficiary of this Agreement. As such the parties to
+        this agreement acknowledge and agree that the third party beneficiary rights
+        of the Registry Operator have vested and that the Registry Operator has relied
+        on its third party beneficiary rights under this Agreement in agreeing to
+        Azure being a registrar for the respective TLD. The third party beneficiary
+        rights of the Registry Operator will survive any termination of this Agreement.</li>
+        \ </p>\\n</p>\\r\\n      <p><li><em><u>Registration Requirements.</u></em>
+        To the extent any TLD or ccTLD requires you meet eligibility (e.g., residency
+        for .JP, .EU, etc.), validation (e.g., DNS validation) or other authentication
+        requirements as a condition to registering a domain name in the TLD, you agree
+        that by submitting an application or registering or renewing your domain name,
+        you represent and warrant that: (a) all information provided to register or
+        renew the domain name (including all supporting documents, if any) is true,
+        complete and correct, and is not misleading in any way, and the application
+        is made in good faith; (b) you meet, and will continue to meet, the eligibility
+        criteria prescribed in the Registry Policies for the applicable TLD for the
+        duration of the domain name registration; (c) you have not previously submitted
+        an application for the domain name with another registrar using the same eligibility
+        criteria, and the other registrar has rejected the application (if applicable);
+        (d) you acknowledge and agree that even if the domain name is accepted for
+        registration, your entitlement to register the domain name may be challenged
+        by others who claim to have an entitlement to the domain name; and (e) you
+        acknowledge and agree that the Registry or the registrar can cancel the registration
+        of the domain name if any of the warranties required are found to be untrue,
+        incomplete, incorrect or misleading.</li>  </p>\\r\\n      <p><li><em><u>Ownership.</u></em>
+        You acknowledge and agree that registration of a domain name does not create
+        any proprietary right for you, the registrar, or any other person in the name
+        used as a domain name or the domain name registration and that the entry of
+        a domain name in the Registry shall not be construed as evidence or ownership
+        of the domain name registered as a domain name. You shall not in any way transfer
+        or purport to transfer a proprietary right in any domain name registration
+        or grant or purport to grant as security or in any other manner encumber or
+        purport to encumber a domain name registration.</li>  \\r</p>\\r\\n      <p><li><em><u>ICANN
+        Requirements.</u></em> You agree to comply with the ICANN requirements, standards,
+        policies, procedures, and practices for which each applicable Registry Operator
+        has monitoring responsibility in accordance with the Registry Agreement between
+        ICANN and itself or any other arrangement with ICANN. For additional ICANN-related
+        helpful information, please see <a href=\\\"https://www.icann.org/resources/pages/educational-2012-02-25-en\\\">ICANN
+        Education Materials</a> and <a href=\\\"https://www.icann.org/resources/pages/benefits-2013-09-16-en\\\">ICANN
+        Benefits and Responsibilities</a>.</li>  \\r</p>\\r\\n      <p><li><em><u>Indemnification
+        of Registry.</u></em>  You agree to indemnify, defend and hold harmless (within
+        30 days of demand) the Registry Operator and Registry Service Provider and
+        their subcontractors, subsidiaries, affiliates, divisions, shareholders, directors,
+        officers, employees, accountants, attorneys, insurers, agents, predecessors,
+        successors and assigns, from and against any and all claims, demands, damages,
+        losses, costs, expenses, causes of action or other liabilities of any kind,
+        whether known or unknown, including reasonable legal and attorney\u2019s fees
+        and expenses, in any way arising out of, relating to, or otherwise in connection
+        with the your domain name registration, including, without limitation, the
+        use, registration, extension, renewal, deletion, and/or transfer thereof and/or
+        the violation of any applicable terms or conditions governing the registration.
+        You shall not enter into any settlement or compromise of any such indemnifiable
+        claim without Registrar\u2019s or Registry Operator\u2019s prior written consent,
+        which consent shall not be unreasonably withheld, and you agree that these
+        indemnification obligations shall survive the termination or expiration of
+        the Agreement for any reason.  IN NO EVENT SHALL THE REGISTRY OPERATOR BE
+        LIABLE TO YOU OR ANY OTHER PERSON FOR ANY DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL,
+        SPECIAL, EXEMPLARY OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFIT OR GOODWILL,
+        FOR ANY MATTER, WHETHER SUCH LIABILITY IS ASSERTED ON THE BASIS OF CONTRACT,
+        TORT (INCLUDING NEGLIGENCE), BREACH OF WARRANTIES, EITHER EXPRESS OR IMPLIED,
+        ANY BREACH OF THIS AGREEMENT OR ITS INCORPORATED AGREEMENTS AND POLICIES YOUR
+        INABILITY TO USE THE DOMAIN NAME, YOUR LOSS OF DATA OR FILES OR OTHERWISE,
+        EVEN IF THE REGISTRY OPERATOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+        DAMAGES.</li>  \\r</p>\\r\\n      <p><li><em><u>Regulated TLDs.</u></em> For
+        domain name registration in any \u201CRegulated\u201D TLD, you acknowledge
+        and agree your registration is subject to the following additional requirements:
+        (a) comply with all applicable laws, including those that relate to privacy,
+        data collection, consumer protection (including in relation to misleading
+        and deceptive conduct), fair lending, debt collection, organic farming, disclosure
+        of data, and financial disclosures; (b) if you collect and maintain sensitive
+        health and financial data you must implement reasonable and appropriate security
+        measures commensurate with the offering of those services, as defined by applicable
+        law.  Regulated TLDs include: <em>.games, .juegos, .school, .schule, .toys,
+        .eco, .care, .diet, .fitness, .health, .clinic, .dental, .healthcare, .capital,
+        .cash, .broker, .claims, .exchange, .finance, .financial, .fund, .investments,
+        .lease, .loans, .market, .money, .trading, .credit, .insure, .tax, .mortgage,
+        .degree, .mba, .audio, .book, .broadway, .movie, .music, .software, .fashion,
+        .video, .app, .art, .band, .cloud, .data, .digital, .fan, .free, .gratis,
+        .discount, .sale, .media, .news, .online, .pictures, .radio, .show, .theater,
+        .tours, .accountants, .architect, .associates, .broker, .legal, .realty, .vet,
+        .engineering, .law, .limited, .show; .theater; .town, .city, .reise,</em>
+        and <em>.reisen</em></li>  \\r</p>\\r\\n      <p><p><li><em><u>Highly Regulated
+        TLDs.</u></em> In addition to the requirements for Regulated TLDs, domain
+        name registration in any Highly-Regulated TLD is subject to the following
+        requirements: (a) you will provide administrative contact information, which
+        must be kept up\u2010to\u2010date, for the notification of complaints or reports
+        of registration abuse, as well as the contact details of the relevant regulatory,
+        or Industry self\u2010regulatory, bodies in their main place of business;
+        (b) you represent that you possess any necessary authorizations, charters,
+        licenses and/or other related credentials for participation in the sector
+        associated with such Highly\u2010regulated TLD; and (c) you will report any
+        material changes to the validity of you authorizations, charters, licenses
+        and/or other related credentials for participation in the sector associated
+        with the Highly\u2010regulated TLD to ensure you continue to conform to the
+        appropriate regulations and licensing requirements and generally conduct your
+        activities in the interests of the consumers they serve.  Highly Regulated
+        TLDs include: _.abogado, .attorney, .bank, .bet, .bingo, .casino .charity
+        (and IDN equivalent), .cpa, .corp, creditcard, .creditunion .dds, .dentist,
+        .doctor, .fail, .gmbh, .gripe, .hospital, .inc, .insurance, .lawyer, .lifeinsurance,
+        .llc, .llp, .ltda, .medical, .mutuelle, .pharmacy, .poker, .university, .sarl,
+        .spreadbetting, .srl, .sucks, .surgery .university, .vermogensberater, .vesicherung,
+        and <em>.wtf.</em>\\r\\n<br><br>\\r\\nFor <em>.doctor</em>, registrants who
+        hold themselves out to be licensed medical practitioners must be able to demonstrate
+        to the Registrar and Registry, upon request, that they hold the applicable
+        license.</li>  </p>\\n</p>\\r\\n      <p><li><em><u>Special Safeguard TLDs.</u></em>
+        In addition to the requirements for Regulated and Highly-Regulated TLDs, by
+        registering a domain name in any \u201CSpecial-Safeguard\u201D TLD, you agree
+        to take reasonable steps to avoid misrepresenting or falsely implying that
+        you or your business is affiliated with, sponsored or endorsed by one or more
+        country's or government's military forces if such affiliation, sponsorship
+        or endorsement does not exist.  Special Safeguard TLDs include:  <em>.army,
+        .navy, .airforce</em></li></p>\\r\\n      <p><li><em><u>Third Party Beneficiary.</u></em>
+        Notwithstanding anything in this Agreement to the contrary, the Registry Operator
+        for any TLD in which your register a domain name is and shall be an intended
+        third party beneficiary of this Agreement. As such the parties to this agreement
+        acknowledge and agree that the third party beneficiary rights of the Registry
+        Operator have vested and that the Registry Operator has relied on its third
+        party beneficiary rights under this Agreement in agreeing to Azure being a
+        registrar for the TLD. Third party beneficiary rights of the Registry Operator
+        shall survive any termination of this Agreement.</li>  \\r</p>\\r\\n      <p><li><em><u>Variable
+        and Non-Uniform Pricing.</u></em> You acknowledge, understand and agree that
+        certain domain names in certain TLDs are established by Registry Policies
+        to be variably priced (i.e., standard v. premium names) and/or may have non-uniform
+        renewal registration pricing (such that the Fee for a domain name registration
+        renewal may differ from other domain names in the same TLD, e.g., renewal
+        registration for one domain may be $100.00 and $33.00 for a different domain
+        name).</li>  \\r</p>\\r\\n        <strong></ol><strong>3. FEES AND PAYMENTS</strong></strong>\\r\\n\\r\\n
+        \     <p><p><strong>(A) GENERAL TERMS, INCLUDING AUTOMATIC RENEWAL TERMS</strong></p>\\n<p>You
+        agree to pay any and all prices and fees due for Services purchased or obtained
+        at this Site at the time you order the Services.  Azure expressly reserves
+        the right to change or modify its prices and fees at any time, and such changes
+        or modifications shall be posted online at this Site and effective immediately
+        without need for further notice to you.  If you have purchased or obtained
+        Services for a period of months or years, changes or modifications in prices
+        and fees shall be effective when the Services in question come up for renewal
+        as further described below.   \\r</p>\\n<p>Unless otherwise specifically noted
+        (for reasons such as those highlighted in Section 2(x) above), the renewal
+        price for any domain name in any TLD will be the same as the list (non-sale)
+        price shown when you search for and select a domain, and again in the cart
+        prior to purchase.  For example, if the list price is $9.99, and a different
+        renewal price is not specifically identified, then the renewal price is also
+        $9.99.  Likewise, if a domain name has a sale price of $8.99, with the list
+        (non-sale) price shown (as a strike-through) at $9.99, the renewal price will
+        be $9.99*.  \\r</p>\\n<p><small>* Renewal price subject to change prior to
+        actual date of renewal.</small>  \\r</p>\\n<p>For all other terms and conditions
+        relating to fees, payment, refund and billing, etc. applicable to the Services
+        offered under the scope of this Agreement, please refer to the \u201CFees
+        and Payments\u201D section of our <a href=\\\"https://www.secureserver.net/legal/agreements/universal-terms-of-service-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Universal
+        Terms of Service</a>.   \\r</p>\\n</p>\\r\\n      <p><p><strong>(B) DOMAIN
+        NAME RENEWAL TERMS</strong></p>\\n<p>When you register a domain name, you
+        will have the following renewal options: </p>\\n<p><ol><li><em>Automatic Renewal.</em>
+        Automatic Renewal is the default setting. Domain names will automatically
+        renew, for a period equivalent to the length of your original domain name
+        registration, and payment will be taken from the Payment Method you have on
+        file with Azure, at Azure's then current rates. Thus, if you have chosen to
+        register your domain name for one (1) year, Azure will automatically renew
+        it for one (1) year. If you have chosen to register your domain name for two
+        (2) years, Azure will automatically renew it for two (2) years, and so on.
+        If you wish to change your automatic renewal term to a different period from
+        your original term,  as of 16 July 2020, you may manually renew the domain
+        registration to establish a new default automatic renewal term for the domain.</li></p>\\n</p>\\r\\n
+        \     <p><li><em>Manual Renewal.</em>  If you have elected to turn off automatic
+        renewal and cancel the product (i.e., cancel the domain name registration)
+        effective at expiration of the then current term, you may nonetheless elect
+        to manually renew the domain name at anytime prior to its expiration date
+        by logging into your <a href=\\\"https://account.secureserver.net?prog_id=510456&pl_id=510456&plid=510456\\\">Account
+        Manager</a> and manually implementing the renewal or by calling customer service
+        (should you in fact want the domain name to be renewed). If you fail to manually
+        implement the renewal before the expiration date, the domain name will be
+        cancelled and you will no longer have use of that name.</li></ol> </p>\\r\\n
+        \     <p>All renewals will be subject to the terms of this Agreement, as it
+        may be amended from time to time, and you acknowledge and agree to be bound
+        by the terms of this Agreement (as amended) for all renewed domains.  Domain
+        name renewals will be non-refundable. In the event that we are unable to automatically
+        renew your domain name for the renewal option selected for any reason, we
+        may automatically renew your domain name for a period less than your original
+        registration period to the extent necessary for the transaction to succeed.
+        If for any reason Azure is not able to take the payment from the Payment Method
+        you have on file, and you fail to respond to our notices, your domain name
+        registration will expire. It is your responsibility to keep your Payment Method
+        information current, which includes the expiration date if you are using a
+        credit card.  \\r</p>\\r\\n      <p><p>For certain ccTLDs (.am, .at, .be,
+        .br, .ca, .cn, .com.cn, .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it, .jp,
+        .ms, .nu, .nz, .co.nz, .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw,
+        .idv.tw, .uk, and .vg), renewal billing will occur on the first day of the
+        month prior to the month of expiration.</p>\\n<p>For certain ccTLDs (.am,
+        .at, .be, .ca, .cn, .com.cn, .net.cn, .org.cn, .de, .eu, .fm, .fr, .gs, .it,
+        .jp, .ms, .nu, .nz, .co.nz, .net.nz, .org.nz, .tc, .tk, .tw, .com.tw, .org.tw,
+        .idv.tw, .uk, and .vg), renewal will occur, or must occur manually if the
+        product was previously cancelled, no later than the 20th of the month prior
+        to the expiration date, or your domain name will be placed in non-renewal
+        status. For some ccTLDs (.es) renewal must be processed no later than seven
+        days before the expiration date, or your domain name will be placed in non-renewal
+        status.  When the domain name is in non-renewal status, you can renew the
+        domain name only by calling Azure and requesting that the domain name be renewed.
+        You cannot renew the domain name through your <a href=\\\"https://account.secureserver.net?prog_id=510456&pl_id=510456&plid=510456\\\">Account
+        Manager</a>. If you fail to manually implement the renewal of any cancelled
+        product before the expiration date, the domain name will be cancelled and
+        you will no longer have use of that name.  \\r</p>\\n</p>\\r\\n      <p>You
+        agree that Azure will not be responsible for cancelled domain names that you
+        fail to renew in the timeframes indicated in this Agreement. In any case,
+        if you fail to renew your domain name in a timely fashion, additional charges
+        may apply. If you signed up for privacy services, protected registration,
+        or any other similar service, with your domain name registration, these services
+        will automatically be renewed when your domain name registration is up for
+        renewal, and you will incur the applicable additional renewal fee unless you
+        cancel in advance. </p>\\r\\n      <p><p>If you fail to renew your domain
+        name in the timeframes indicated in this Agreement, you agree that Azure may,
+        in its sole discretion, renew your expired domain name on your behalf. If
+        Azure decides to renew your expired domain name on your behalf, you will have
+        a Renewal Grace Period during which you must reimburse Azure for the renewal
+        and keep your domain name. The Renewal Grace Period is currently twelve (12)
+        days but subject to change under the terms of this Agreement. </p>\\n<p>For
+        certain ccTLDs (.am, .at, .be, .cn, .com.cn, .net.cn, .org.cn, .de, .eu, .fm,
+        .fr, .gs, .it, .jp, .ms, .nu, .nz, .co.nz, .net.nz, .org.nz, .tc, .tk, .tw,
+        .com.tw, .org.tw, .idv.tw, .uk, and .vg) there is no Renewal Grace Period
+        after the expiration date of the domain name. If you do not reimburse Azure
+        for the renewal during the Renewal Grace Period your domain name will be placed
+        on Hold and flagged for deletion after which you may have up to a 30-day redemption
+        period to redeem your domain name, provided that your domain name is not subject
+        to an expired domain name auction bid and you pay Azure a Redemption fee.
+        </p>\\n<p>The Redemption fee is displayed at checkout and is subject to change
+        under the terms of this Agreement. If you do not redeem your domain name prior
+        to the end of the 30-day redemption period Azure may, in its sole discretion,
+        delete your domain name or transfer it to another registrant on your behalf.
+        \ During the redemption period your domain name may be parked.</p>\\n</p>\\r\\n
+        \     <p><p>If your domain name is deleted, the Registry also provides a 30-day
+        Redemption Grace Period during which you may pay Azure a redemption fee and
+        redeem your domain name. The redemption fee is displayed at checkout and is
+        subject to change under the terms of this Agreement. If you do not redeem
+        your domain name prior to the end of the Registry's Redemption Grace Period
+        the Registry will release your name and it will become available for registration
+        on a first-come-first-served basis.</p>\\n<p>Renewal Grace Periods and Redemption
+        Grace Periods vary for different ccTLDs. Please refer to the specific terms
+        for the applicable TLD. In the event there is a conflict between the provisions
+        of this paragraph and the ccTLD terms, the ccTLD terms shall control.</p>\\n<p>Our
+        registration expiration notification policy and associated fees are described
+        <a href=\\\"https://www.secureserver.net/help/expired-registration-recovery-policy-errp-compliance-statement-8803?prog_id=510456&pl_id=510456&plid=510456\\\">here</a>.
+        \ </p>\\n</p>\\r\\n      <p><p><strong>(C) FREE PRODUCT TERMS</strong></p>\\n<p>In
+        the event you are provided with free products with the registration of a domain
+        name, you acknowledge and agree that such free products will only be available
+        with a valid purchase and may be terminated in the event the domain name is
+        deleted or cancelled.  For free domain names, you acknowledge and agree that
+        you may not change the account associated with such free domain for the first
+        five (5) days after registration.  In the event a free domain name is offered
+        with the registration of another domain and if the paid domain name registered
+        fails, then we may, in our sole discretion, either delete the registration
+        of the free domain or refund the difference between the amount paid and the
+        value of the free domain.  Failed registrations associated with promotional
+        offers may result in the deletion of the free or discounted item or an adjustment
+        between the registered domain price and the value of the discounted item,
+        in our sole discretion.</p>\\n</p>\\r\\n        <strong><strong>4. TERM OF
+        AGREEMENT; TRANSFERS; DOMAIN TASTING</strong>  </strong>\\r\\n\\r\\n      <p>The
+        term of this Agreement shall continue in full force and effect as long as
+        you have any domain name registered through Azure.  \\r</p>\\r\\n      <p>You
+        agree that you will not transfer any domain name registered through Azure
+        to another domain name registrar during the first sixty (60) days after its
+        initial registration date.  You agree that you may not transfer any domain
+        name for ten (10) days after a Change of Account.  \\r</p>\\r\\n      <p>You
+        further agree that you will not engage in &quot;domain tasting&quot; by using
+        the five (5) day grace period in which a registrant may choose to cancel a
+        domain name and get a full refund of the registration fee as a vehicle to
+        test the marketability or viability of a domain name.  If Azure determines
+        (which determination shall be made by Azure in its sole and absolute discretion)
+        that you have been engaging in &quot;domain tasting&quot;, then Azure reserves
+        the right to (a) charge you a small fee (which fee shall be deducted from
+        any refund issued) or (b) refuse your cancellation/refund request altogether.
+        Azure will not charge you a fee if Azure cancels your domain name during the
+        five (5) day grace period due to fraud or other activity outside of your control.
+        The five (5) day grace period does not apply to Premium Domains, which are
+        non-refundable.  \\r</p>\\r\\n      <p>You agree that Azure shall not be bound
+        by (i) any representations made by third parties who you may use to purchase
+        services from Azure, or (ii) any statements of a general nature, which may
+        be posted on Azure's website or contained in Azure's promotional materials.</p>\\r\\n
+        \       <strong><strong>5. UP TO DATE INFORMATION; USE OF INFORMATION AND
+        EXPIRATION</strong></strong>\\r\\n\\r\\n      <p>You agree to notify Azure
+        within five (5) business days when any of the information you provided as
+        part of the application and/or registration process changes. It is your responsibility
+        to keep this information in a current and accurate status. Failure by you,
+        for whatever reason, to provide Azure with accurate and reliable information
+        on an initial and continual basis, shall be considered to be a material breach
+        of this Agreement and a basis for suspension and/or cancellation of the domain
+        name. Failure by you, for whatever reason, to respond within five (5) business
+        days to any inquiries made by Azure to determine the validity of information
+        provided by you, shall also be considered to be a material breach of this
+        Agreement and a basis for suspension and/or cancellation of the domain name.
+        You agree to retain a copy for your record of the receipt for purchase of
+        your domain name.</p>\\r\\n      <p><p>You agree that for each domain name
+        registered by you, the following contact data is required: postal address,
+        email address, telephone number, and if available, a facsimile number for
+        the Registered Name Holder and, if different from the Registered Name Holder,
+        the same contact information for, a technical contact, an administrative contact
+        and a billing contact.<br />\\n<br />\\nYou acknowledge and agree that domain
+        name registration requires that your contact information, in whole or in part,
+        be shared with the registry operator, for their use, copying, distribution,
+        publication, modification and other processing for the purpose of administration
+        of the domain name registration, which may require such information be transferred
+        back and forth across international borders, to and from the U.S. to the EU,
+        for example. As required by ICANN or for certain ccTLDs (.am, .au, .com.au,
+        .net.au, .org.au, .ca, .cz, .fr, .it, .jp, .co.jp, .kr, .co.kr, .ne.kr, .re.kr,
+        .no, .co.nz, .net.nz, .org.nz, .vg, .se, .so, .sg, .com.sg, .tw, .com.tw,
+        .net.tw, .org.tw, .uk, .co.uk, .me.uk, .org.uk, .us), this information may
+        be made publicly available by the registry operator via Whois or its successor
+        protocol (collectively referred to as the \u201CWhois&quot; Directory) that
+        is beyond, and not subject to, Azure's control.</p>\\n<p>Both Azure and the
+        registry operator may be required to archive this information with a third-party
+        escrow service. You hereby consent and give permission for all such requirements
+        and disclosures. Further, you represent and warrant that, if you are providing
+        information about a third party, you have notified the third party of the
+        disclosure and the purpose for the disclosure and you have obtained the third
+        party's consent to such disclosure. Registrar will not process data in a way
+        that is incompatible with this Agreement. Registrar will take reasonable precautions
+        to protect data from loss or misuse.</p>\\n</p>\\r\\n      <p><p>You agree
+        that for each domain name registered by you the following information could
+        be made publicly available in the Whois Directory as determined by ICANN or
+        registry policies and may be sold in bulk as set forth in the ICANN agreement:</p>\\n<ul>\\n<li>The
+        domain name;</li>\\n<li>Your name and postal address;</li>\\n<li>The name,
+        email address, postal address, voice and fax numbers for technical and administrative
+        contacts;</li>\\n<li>The Internet protocol numbers for the primary and secondary
+        name servers;</li>\\n<li>The corresponding names of the name servers; and</li>\\n<li>The
+        original date of registration and expiration date,</li>\\n<li>Name of primary
+        name server and secondary name server,</li>\\n<li>Identity of the registrar.</li>\\n</ul>\\n<p>You
+        agree that, to the extent permitted by ICANN, Azure may make use of the publicly
+        available information you provided during the registration process. If you
+        engage in the reselling of domain names you agree to provide any individuals
+        whose personal information you've obtained, information about the possible
+        uses of their personal information pursuant to ICANN policy. You also agree
+        to obtain consent, and evidence of consent, from those individuals for such
+        use of the personal information they provide.</p>\\n</p>\\r\\n      <p>You
+        agree that Azure has the right to make public and share with third parties
+        certain information in connection with the sale or purchase of domain names
+        on the website, including but not limited to (a) the name of the domain name
+        sold or purchased, (b) the sale or purchase price of the domain name sold
+        or purchased, and (c) information relating to the timing of the sale or purchase.</p>\\r\\n
+        \     <p><p>In order for us to comply with any current or future rules and
+        policies for domain name systems including any rules or policies established
+        by the CIRA or any provincial or federal government or by other organization
+        having control or authority to establish rules or policies, you hereby grant
+        to us the right to disclose to third parties through an interactive publicly
+        accessible registration database the following information that you are required
+        to provide when applying for a domain name:<br />\\n</p>\\n<ol>\\r\\n<li>The
+        domain or sub-domain name(s) registered by you;</li>  \\r\\n<li>Your organization
+        name, type and postal address;</li> \\r\\n<li>The name(s), position(s), postal
+        address(es), e-mail address(es), voice telephone number(s) and where available
+        the fax number(s) of the technical and administrative contacts for your domain
+        or sub-domain name(s);</li>  \\r\\n<li>The full hostnames and Internet protocol
+        (IP) addresses of at least two (2) name server hosts (one primary and at least
+        one secondary) for your domain or sub-domain name. Up to six (6) name servers
+        may be specified. If a host has more than one (1) IP address, use a comma-separated
+        list;</li>  \\r\\n<li>The corresponding names of those name servers;</li>
+        \ \\r\\n<li>The original creation date of the registration; and</li>  \\r\\n<li>The
+        expiration date of the registration.</li>\\r\\n</ol>\\r\\n<p>We may be required
+        to make this information available in bulk form to third parties. We may also
+        transfer or assign this information to CIRA or such other third party as we
+        may decide, in our sole discretion.</p>\\n</p>\\r\\n        <strong><strong>6.
+        DISPUTE RESOLUTION POLICY</strong></strong>\\r\\n\\r\\n      <p>You agree
+        to be bound by our current Dispute Resolution Policy. This policy is incorporated
+        herein and made a part of this Agreement. You can view the <a href=\\\"https://www.secureserver.net/legal/agreements/domain-name-dispute-resolution-policy?prog_id=510456&pl_id=510456&plid=510456\\\">Uniform
+        Domain Name Dispute Resolution Policy</a> online. You agree that Azure may
+        from time to time modify its Dispute Resolution Policy. Azure will post any
+        changes to its Dispute Resolution Policy at least thirty (30) days before
+        they become effective. You agree that by maintaining your domain name registrations
+        with Azure after the updated policy becomes effective that you agree to the
+        Dispute Resolution policy as amended. You agree to review Azure's website
+        periodically to determine if changes have been made to the Dispute Resolution
+        Policy. If you cancel or terminate your Services with Azure as a result of
+        the modified Dispute Resolution policy, no fees will be refunded to you. You
+        also agree to submit to proceedings commenced under ICANN's Uniform Rapid
+        Suspension System, if applicable. </p>\\r\\n      <p>You agree that if a dispute
+        arises as a result of one (1) or more domain names you have registered using
+        Azure, you will indemnify, defend and hold Azure harmless as provided for
+        in this Agreement. You also agree that if Azure is notified that a complaint
+        has been filed with a governmental, administrative or judicial body, regarding
+        a domain name registered by you using Azure, that Azure, in its sole discretion,
+        may take whatever action Azure deems necessary regarding further modification,
+        assignment of and/or control of the domain name deemed necessary to comply
+        with the actions or requirements of the governmental, administrative or judicial
+        body until such time as the dispute is settled. In this event you agree to
+        hold Azure harmless for any action taken by Azure.</p>\\r\\n      <p>You agree
+        to submit, without prejudice to other potentially applicable jurisdictions,
+        to the jurisdiction of the courts (1) of your domicile, (2) where registrar
+        is located or (3) where the registry operator is located (e.g., China for
+        .CN, Columbia for .CO, UK for .EU, etc.).</p>\\r\\n      <p>In the case of
+        .ca domain names, you agree that, if your use of the service or the registration
+        of a .ca domain name is challenged by a third party, you will be subject to
+        the provisions specified by CIRA in their dispute resolution policy, in effect
+        at the time of the dispute.</p>\\r\\n        <strong><strong>7. TRANSFER OF
+        DOMAIN NAMES</strong></strong>\\r\\n\\r\\n      <p>If you transfer any domain
+        name, you agree to provide the information required by, and to abide by, the
+        procedures and conditions set forth in our <a href=\\\"https://www.secureserver.net/legal/agreements/domain-name-transfer-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Domain
+        Name Transfer Agreement</a> and <a href=\\\"https://www.secureserver.net/legal/agreements/change-of-registrant-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Change
+        of Registrant Agreement</a>. You may view the latest versions of our Domain
+        Name Transfer Agreement and Change of Registrant Agreement online. In order
+        to further protect your domain name, any domain name registered with Azure
+        or transferred to Azure shall be placed on lock status, unless an opted-out
+        has occurred as defined in our Change of Registrant Agreement or Domain Name
+        Proxy Agreement. The domain name must be placed on unlock status in order
+        to initiate a transfer of the domain name away from Azure to a new Registrar.
+        You may log into your account with Azure at any time after your domain name
+        has been successfully transferred to Azure, and change the status to unlock.</p>\\r\\n
+        \       <strong><strong>8. YOUR OBLIGATIONS; SUSPENSION OF SERVICES; BREACH
+        OF AGREEMENT</strong></strong>\\r\\n\\r\\n      <p>You represent and warrant
+        to the best of your knowledge that, neither the registration of the domain
+        nor the manner it is directly or indirectly used, infringes the legal rights
+        of any third party.  You will comply with all applicable laws, including,
+        but not limited to those relating to privacy, data collection, consumer protection,
+        fair lending, debt collection, organic farming, and disclosure of data and
+        financial disclosures.  If you collect and maintain sensitive health and financial
+        data, you must implement reasonable and appropriate security measures commensurate
+        with the offering of those services, as defined by applicable law.  You represent
+        that you possess any necessary authorization, charter, license, and/or other
+        related credential for participation in the sector associated with the associated
+        registry tld string.  You will report any material changes to the validity
+        of your authorization, charter, license, and/or other related credential.
+        You will indemnify and hold harmless the registrar and registry operator,
+        and their directors, officers, employees and agents, from and against any
+        and all claims, damages, liabilities, costs and expenses (including reasonable
+        legal fees and expenses) arising out of or related to the domain name registration.
+        \ This obligation shall survive expiration or termination of this Agreement
+        or the domain name registration.</p>\\r\\n      <p><p>You agree that, in addition
+        to other events set forth in this Agreement:  \\r</p>\\n<ol><li>Your ability
+        to use any of the services provided by Azure is subject to cancellation or
+        suspension in the event there is an unresolved breach of this Agreement and/or
+        suspension or cancellation is required by any policy now in effect or adopted
+        later by ICANN;</li>  \\r\\n  \\r\\n<li>Your registration of any domain names
+        shall be subject to suspension, cancellation or transfer pursuant to any ICANN
+        adopted specification or policy, or pursuant to any Azure procedure not inconsistent
+        with an ICANN adopted specification or policy (a) to correct mistakes by Azure
+        or the registry operator in registering any domain name; or (b) for the resolution
+        of disputes concerning any domain name.</li></ol>  \\r\\n<p><br />\\nYou acknowledge
+        and agree that Azure and registry reserve the right to deny, cancel or transfer
+        any registration or transaction, or place any domain name(s) on lock, hold
+        or similar status, as either deems necessary, in the unlimited and sole discretion
+        of either Azure or the registry: (i) to comply with specifications adopted
+        by any industry group generally recognized as authoritative with respect to
+        the Internet (e.g., RFCs), (ii) to protect the integrity and stability of,
+        and correct mistakes made by, any domain name registry or registrar, (iii)
+        for the non-payment of fees to registry, (iv) to protect the integrity and
+        stability of the registry, (v) to comply with any applicable court orders,
+        laws, government rules or requirements, requests of law enforcement, or any
+        dispute resolution process, (vi) to comply with any applicable ICANN rules
+        or regulations, including without limitation, the registry agreement, (vii)
+        to avoid any liability, civil or criminal, on the part of registry operator,
+        as well as its affiliates, subsidiaries, officers, directors, and employees,
+        (viii) per the terms of this Agreement, (ix) following an occurrence of any
+        of the prohibited activities described in Section 8 below, or (x) during the
+        resolution of a dispute.</p>\\n</p>\\r\\n      <p><p>You agree that your failure
+        to comply completely with the terms and conditions of this Agreement and any
+        Azure rule or policy may be considered by Azure to be a material breach of
+        this Agreement and Azure may provide you with notice of such breach either
+        in writing or electronically (i.e. email). In the event you do not provide
+        Azure with material evidence that you have not breached your obligations to
+        Azure within ten (10) business days, Azure may terminate its relationship
+        with you and take any remedial action available to Azure under the applicable
+        laws. Such remedial action may be implemented without notice to you and may
+        include, but is not limited to, cancelling the registration of any of your
+        domain names and discontinuing any services provided by Azure to you. No fees
+        will be refunded to you should your Services be cancelled or terminated because
+        of a breach.</p>\\n<p>Azure's failure to act upon or notify you of any event,
+        which may constitute a breach, shall not relieve you from or excuse you of
+        the fact that you have committed a breach.</p>\\n</p>\\r\\n        <strong><strong>9.
+        RESTRICTION OF SERVICES; RIGHT OF REFUSAL</strong></strong>\\r\\n\\r\\n      <p>If
+        you are hosting your domain name system (\u201C<u>DNS</u>\u201D) on Azure\u2019s
+        servers, or are using our systems to forward a domain name, URL, or otherwise
+        to a system or site hosted elsewhere, or if you have your domain name registered
+        with Azure, you are responsible for ensuring there is no excessive overloading
+        on Azure\u2019s servers. You may not use Azure\u2019s servers and your domain
+        name as a source, intermediary, reply to address, or destination address for
+        mail bombs, Internet packet flooding, packet corruption, or other abusive
+        attack. Server hacking or other perpetration of security breaches is prohibited.
+        You agree that Azure reserves the right to deactivate your domain name from
+        its DNS if Azure deems it is the recipient of activities caused by your site
+        that threaten the stability of its network.</p>\\r\\n      <p><p>You agree
+        that Azure, in its sole discretion and without liability to you, may refuse
+        to accept the registration of any domain name. Azure also may in its sole
+        discretion and without liability to you delete the registration of any domain
+        name during the first thirty (30) days after registration has taken place.</p>\\n<p>In
+        the event Azure refuses a registration or deletes an existing registration
+        during the first thirty (30) days after registration, you will receive a refund
+        of any fees paid to Azure in connection with the registration either being
+        cancelled or refused. In the event Azure deletes the registration of a domain
+        name being used in association with spam or morally objectionable activities,
+        no refund will be issued.</p>\\n</p>\\r\\n        <strong><strong>10. DEFAULT
+        SETTINGS; PARKED PAGE</strong></strong>\\r\\n\\r\\n      <p><u>Choosing Your
+        Domain Name Settings.</u>  When you register a domain name with Azure, you
+        will be prompted to choose your domain name settings during the checkout process.
+        \ If you plan on using another provider for your website or hosting needs,
+        then you should enter the name servers of such provider when you choose your
+        domain name settings.  This will direct your domain name away from Azure\u2019s
+        name servers.  If you are an existing Azure customer and have already set
+        up a customer profile designating your domain name settings for new domain
+        name registrations, you will not need to complete this step again during the
+        checkout process.   </p>\\r\\n      <p><u>Azure\u2019s Default Settings.</u>
+        \ If you do not direct your domain name away from Azure\u2019s name servers
+        as described above, Azure will direct your domain name to a \u201C<u>Parked
+        Page</u>\u201D (\u201C<u>Default Setting</u>\u201D).  You acknowledge and
+        agree that Azure has the right to set the Default Setting. </p>\\r\\n      <p><u>Parked
+        Page Default Setting.</u>  Azure's Parked Page service is an online domain
+        monetization system designed to generate revenue (through the use of pay per
+        click advertising) from domain names that are not actively being used as websites.
+        \ If your domain name is directed to a Parked Page, you acknowledge and agree
+        that Azure may display both (a) in-house advertising (which includes links
+        to Azure products and services) and (b) third-party advertising (which includes
+        links to third-party products and services) on your Parked Page through the
+        use of pop-up or pop-under browser windows, banner advertisements, audio or
+        video streams, or any other advertising means, and we may aggregate for our
+        own use, related usage data by means of cookies and other similar means.  In
+        addition, you acknowledge and agree that all in-house and third-party advertising
+        will be selected by Azure and its advertising partners, as appropriate, and
+        you will not be permitted to customize the advertising, or entitled to any
+        compensation in exchange therefor.  Please note that the third-party advertising
+        displayed on Azure\u2019s Parked Pages may contain content offensive to you,
+        including but not limited to links to adult content.  Azure  makes no effort
+        to edit, control, monitor, or restrict the content and third-party advertising
+        displayed on Azure\u2019s Parked Pages, and expressly disclaims any liability
+        or responsibility to you or any third party in connection therewith.</p>\\r\\n
+        \     <p><p><u>Changing Azure\u2019s Default Settings.</u>  You may change
+        Azure\u2019s Default Settings at any time during the term of your domain name
+        registration.</p>\\n<ol><li><u>Content Displaying On Your Parked Page.</u>
+        \ You can not modify the content displaying on your Parked Page.  You may
+        select one of the other options listed below.</li>\\r\\n\\r\\n<li><u>Participating
+        In Domain Name Monetization.</u>  If you wish to participate in the domain
+        monetization potential presented by Azure\u2019s Parked Page service, please
+        review and consider purchasing our CashParking\xAE service.</li>\\r\\n \\r\\n<li><u>No
+        Content.</u>  If the options listed above are not acceptable to you, please
+        contact customer support to learn what other options might be available to
+        you.</li></ol></p>\\r\\n      <p><u>Return To Parked Page Default Setting
+        Upon Domain Name Expiration.</u>  Upon domain name expiration, and regardless
+        of how you use your domain name during the term of your domain name registration,
+        your domain name will automatically return to the Parked Page Default Setting
+        described above.  As used in this paragraph, \u201Cexpiration\u201D is deemed
+        to include any \u201Crenewal period\u201D or \u201Credemption period\u201D
+        immediately after the domain name expires, but before the domain name is returned
+        to the registry.  Once your domain name has returned to the Parked Page Default
+        Setting described above, the only way to opt out of the Parked Page service
+        is to renew, redeem, or re-register your domain name in accordance with Section
+        2(B), Domain Name Renewal Terms, of this Agreement.</p>\\r\\n        <strong><strong>11.
+        \ DOMAIN ADD-ONS</strong></strong>\\r\\n\\r\\n      <p><strong>Business Registration</strong>:
+        \ Business registration allows You to display additional information about
+        the business that is the basis of Your domain name, including, but not limited
+        to, such information as Your fax number, street address, and hours of operation.</p>\\r\\n
+        \     <p><strong>Expiration Consolidation.</strong>  You understand and acknowledge
+        the expiration consolidation service may only be used to consolidate the expiration
+        of .com and .net domain names. The service may not be used to consolidate
+        domains that are on Registrar HOLD, Registry HOLD, or pending Transfer status.
+        You acknowledge the service may only be used to push the expiration date of
+        Your domains forward in time, at least one (1) month forward and no more than
+        ten (10) years forward, and then, only for a period lasting less than twelve
+        (12) months. Once the service has been used to consolidate domains, the new
+        expiration date may not be reversed. To ensure the service is not abused or
+        used as an alternative to renewals, you may only use the service on each domain
+        once in any 12-month period. The service may only be used on domain names
+        that have not passed their expiration date. In order to change the expiration
+        date again, You will be required to renew the domain name first.  You further
+        understand and acknowledge the service may only be used to coordinate domains
+        where we are the registrar of record. Domains not registered with us must
+        be transferred before we can perform the Service.</p>\\r\\n      <p><p><strong>Discount
+        Domain Club Basic</strong>. The Discount Domain Club membership includes  the
+        purchase of discounted products and services from us, including discounts
+        on certain domain registrations. Eligible TLDs include .COM, .NET, .ORG, .INFO,
+        .BIZ, .CO, .CA, .COM.AU, .CO.UK, .US, .IN. Any available discount applies
+        only to registration fees and will not apply to any commission fees. You are
+        required to keep Your membership current as long as You have free or discounted
+        products or services that are purchased with us. If You fail to renew Your
+        membership, without canceling Your discounted domain registration or other
+        services, we will automatically renew Your products and services at the regular
+        pricing in effect at the time of renewal, charging the Payment Method on file
+        for You, and You will be unable to purchase any more discounted products or
+        services, or use Your free accounts until the Membership Agreement fee has
+        been paid. All membership fees are non-refundable.</p>\\n<p><strong>Discount
+        Domain Club Premium</strong>.  The Discount Domain Club membership includes,
+        the purchase of discounted products and services from us, including discounts
+        on selected domain registrations, one (1) free Auctions account, one (1) free
+        CashParking account, and discounts on Domain Brokerage Service. Any available
+        discount applies only to upfront Broker Service Fee and will not apply to
+        any commission fees.  You are required to keep Your membership current as
+        long as You have free or discounted products or services that are purchased
+        with us. If You fail to renew Your membership, without canceling Your discounted
+        domain registration or other services, we will automatically renew Your products
+        and services at the regular pricing in effect at the time of renewal, charging
+        the Payment Method on file for You, and You will be unable to purchase any
+        more discounted products or services, or use Your free accounts until the
+        Membership Agreement fee has been paid. All membership fees are non-refundable.</p>\\n</p>\\r\\n
+        \     <p><p><strong>Backordering/Monitoring.</strong>  You agree a domain
+        name that has expired shall be subject first to a grace period of twelve (12)
+        days, followed by the ICANN-mandated redemption grace period of thirty (30)
+        days. During this period of time, the current domain name registrant may renew
+        the domain name and retain registration rights. We do not guarantee your backorder
+        will result in you obtaining the domain name and expressly reserves the right
+        to (a) refuse additional backorders or (b) cancel existing backorders at any
+        time for any reason.  If your backorder is refused or cancelled, we agree
+        to promptly refund any fees paid for such domain name backorder. The domain
+        name may also be placed in a secondary market for resale through the Auctions\xAE
+        service.  After your first year of Auctions membership, you agree that unless
+        otherwise advised, we will automatically renew your Auctions membership using
+        the payment method you have on file for so long as your backorder credit is
+        active. You may learn more about Auctions by visiting the Auctions website.
+        The domain name may also be subject to a drop pool process before it is available
+        for purchasing. You understand we and our registrar affiliates use our services,
+        including backordering.  Therefore, the domain name may be registered with
+        a different registrar, but can be managed through your account.  By using
+        the Services, you will be able to, among other things:  \\r</p>\\n<ol><li>Backorder
+        any domain name under the top level domains .COM, .NET, .US, .BIZ, .INFO,
+        .ORG, .MOBI. A backorder for a domain name will include the price of up to
+        a one-year domain name registration. Should you successfully backorder any
+        domain name, you will be subject to the terms and conditions of the Domain
+        Name Registration and related agreements, which are incorporated herein by
+        reference.</li><li>Change your backorder until you obtain a domain name. You
+        will have the opportunity to change the credit to a different domain name
+        until you successfully capture one. After three (3) years, if the credit is
+        not used, we reserves the right to remove the credit.</li><li>Monitor your
+        currently registered domain names for changes in registrar, status, expiration
+        date or name servers at no additional cost.</li><li>Subscribe to Domain Alert
+        Pro or monitoring, which enables you to monitor any currently registered domain
+        name, regardless of registrar, for historical tracking of status changes and
+        designation of multiple email notification addresses.</li></ol>\\r\\n</p>\\r\\n
+        \     <p><p><strong>Domain Ownership Protection</strong>. Domain Ownership
+        Protection generally allows You to: (i) prevent accidental loss of a domain
+        name due to an expired credit card or invalid payment method for a period
+        of ninety (90) days before the domain goes through its normal expiration process;
+        and (ii) lock your domain name to your account. </p>\\n<p>THE SERVICE WILL
+        NOT, HOWEVER, PREVENT TRANSFERS RESULTING FROM YOUR ACTION OF LISTING YOUR
+        DOMAIN FOR SALE ON ANY OF <span style=\\\"text-transform: uppercase;\\\">Azure</span>'S
+        PLATFORMS, INCLUDING PREMIUM LISTINGS, REGARDLESS OF WHEN YOU PURCHASED THE
+        SERVICE. </p>\\n<p>Once you have elected to purchase the Service for any and
+        all domain names, the automatic renewal function will be activated for each
+        domain name and those names will not be transferable until You elect to remove
+        the service or sell the domain as mentioned above. Accordingly, You acknowledge
+        and agree You have carefully considered the implications accompanying the
+        purchase of the Service and understand the restrictions the Service will place
+        upon Your ability to transfer any domains for which You have purchased the
+        Service. Furthermore, you acknowledge and agree that the Service includes
+        additional steps to verify your registration rights prior to deactivation.
+        While You can elect to deactivate the Service at any time, you also acknowledge
+        and agree that the Service is subject to our Refund Policy, and that you may
+        not be entitled to a refund.</p>\\n</p>\\r\\n      <p><p><strong>Premium Domain
+        Listing and Buying Services.</strong></p>\\n<ol>\\n<li>\\n<p><strong>Description
+        of Service.</strong> The Premium Domain Buying Service (\u201CService\u201D)
+        is provided to facilitate the buying of currently registered domain names
+        only, and not the purchase or sale of associated website content.. Azure provides
+        a venue and a transaction facilitation process and will take a stated commission
+        for each completed transaction. Azure is not an escrow agent. As a result,
+        Azure does not guarantee the quality, safety or legality of many of the domain
+        names. Domain names listed may be withdrawn at any time by the seller or by
+        us.  You acknowledge and agree that your transaction will be handled by Azure's
+        \u201CTransaction Assurance\u201D process. By using Azure's \u201CTransaction
+        Assurance\u201D process, you authorize Azure to perform tasks on your behalf
+        in order to complete the transaction.  In these transactions, Azure acts as
+        a transaction facilitator to help you buy and sell domain names. Azure will
+        not use your funds for its operating expenses or any other corporate purposes,
+        and will not voluntarily make funds available to its creditors in the event
+        of bankruptcy or for any other purpose. You acknowledge Azure is not a bank
+        and the service is a payment processing service rather than a banking service.
+        You further acknowledge Azure is not acting as a trustee, fiduciary or escrow
+        with respect to your funds. In all transactions, where the domain name is
+        registered to us, domain names purchased through the Service may not be transferred
+        away from us to another registrar for a period of sixty (60) days following
+        the change of registrant date.</p>\\n</li>\\n<li>\\n<p><strong>Your Obligations.</strong><br><br><strong>Purchasing
+        Domain Names.</strong> As a Buyer, You are obligated to complete the transaction
+        if You purchase the domain name. You acknowledge that some listed domain names
+        may be subject to an additional registration fee. For those domain names,
+        the registration fee will be added to the price to form the purchase price.
+        You agree that by completing the transaction, You are responsible for payment
+        of the registration fee. We will obtain the funds first by the Payment Method
+        You have designated. If there are insufficient funds or invalid credit card
+        information, we may obtain the remaining funds by charging any Payment Method
+        You have on file.<br><br>Azure will remit payment of the full agreed upon
+        purchase price minus any commissions to the Seller after a prescribed period
+        of time after receiving funds from the Buyer, except in the event of a dispute
+        or where the payment is suspected to be fraudulent, as determined by Azure
+        in its sole and absolute discretion. At no time will You be able to withdraw
+        those funds or send the funds to another recipient unless the initial transaction
+        is canceled. Transfer of Registration Rights. We are not the registrant of
+        all of the domain names listed on the Site and cannot guarantee immediate
+        transfer. For domain names in which we are the registrant, transfer of registration
+        will begin upon completion of the check out procedure. Further, the transfer
+        by us of any domain name to a buyer is done without warranty and we expressly
+        waive any and all warranties or representations that a domain name does not
+        infringe upon the intellectual property rights of a third party. Any Domain
+        Ownership Protection service that is present on the domain will not prevent
+        you from listing the domain name and having the registration rights transferred
+        away from You. Azure is not responsible and disclaims all liability in the
+        event that the domain name transaction fails to complete due to breach by
+        either the Buyer or the Seller of its respective obligations. Buyer acknowledges
+        and agrees that Buyer does not obtain any rights in the registration of a
+        domain name until  the transaction is complete.<br><br><strong>Transfer of
+        Registration Rights.</strong> We are not the registrant of all of the domain
+        names listed on the Site and cannot guarantee immediate transfer. For domain
+        names in which we are the registrant, transfer of registration will begin
+        upon completion of the check out procedure. Further, the transfer by us of
+        any domain name to a buyer is done without warranty and we expressly waive
+        any and all warranties or representations that a domain name does not infringe
+        upon the intellectual property rights of a third party. Any Domain Ownership
+        Protection service that is present on the domain will not prevent you from
+        listing the domain name and having the registration rights transferred away
+        from You.<br><br>Azure is not responsible and disclaims all liability in the
+        event that the domain name transaction fails to complete due to breach by
+        either the Buyer or the Seller of its respective obligations. Buyer acknowledges
+        and agrees that Buyer does not obtain any rights in the registration of a
+        domain name until  the transaction is complete.<br><br><strong>Selling Domain
+        Names.</strong> As a Seller, You are obligated to complete the transaction
+        if the Buyer commits to purchase the domain at an agreed upon purchase price.
+        You authorize Azure to perform tasks on your behalf as part of its \u201CTransaction
+        Assurance\u201D process including making deposits. You must, at the time of
+        listing of Your domain name, establish a payee account.<br><br>After a fraud
+        holding period, if no fraud has been detected, payments for completed domain
+        name sales will be credited to your payee account and paid according to the
+        payment method selected in your payee account.<br><br>You hereby authorize
+        Azure to initiate and post (i) credit (positive) entries for payments to the
+        deposit account and (ii) debit (negative) entries to the deposit account to
+        reverse erroneous payments and/or make adjustments to incorrect payments.
+        You acknowledge and agree that the amount initiated and posted to the deposit
+        account will represent payment for domain names sold using the Services, less
+        any applicable fees and/or chargebacks. You acknowledge and agree that there
+        may be a delay of several days between the time that Azure initiates the payment
+        of proceeds and the time that the proceeds are actually posted to the deposit
+        account, and Azure expressly disclaims any liability or responsibility regarding
+        the same.<br><br>The authority granted to Azure by the deposit account owner
+        herein will remain in full force and effect until Azure has received written
+        notification from the deposit account owner that such authority has been revoked,
+        but in any event, such writing shall be provided in such a manner as to afford
+        Azure a reasonable opportunity to act on such revocation, or until Azure has
+        sent notice to terminate this Agreement. Azure will not release the domain
+        name to Buyer until receipt of confirmation that the funds have been verified.</p>\\n</li>\\n</ol>\\n</p>\\r\\n
+        \     <p><p><strong>Transfer Validation</strong> The transfer validation service
+        is provided to help You keep Your domain name secure. By choosing to use the
+        service, You are making an explicit and voluntary request to us to deny all
+        attempts to transfer Your domain name to another registrar, or to move Your
+        domain name to another account, unless You verify each request as described
+        herein. You will provide us with a contact name, phone number and PIN for
+        domain transfer validations. You will be contacted by us when a domain transfer
+        is requested for a domain name in Your account. </p>\\n<p>When we receive
+        a transfer request, we will call You to verify the transfer request. If we
+        cannot reach You with seventy-two (72) hours of receipt of the transfer request,
+        the transfer will be denied. If You do not provide the proper PIN, the transfer
+        will be denied. When we receive a change of account request, we will call
+        You to verify the change request. If we cannot reach You with seventy-two
+        (72) hours of receipt of the change request, the change will be denied. If
+        You do not provide the proper PIN, the change will be denied. Availability
+        of Services are subject to the terms and conditions of this Agreement and
+        each of our policies and procedures. We shall use commercially reasonable
+        efforts to attempt to provide certain portions of the Services on a twenty-four
+        (24) hours a day, seven (7) days a week basis throughout the term of this
+        Agreement and other portions of the service, during normal business hours.
+        </p>\\n<p>You acknowledge and agree that from time to time the Services may
+        be inaccessible or inoperable for any reason, including, without limitation:
+        (i) equipment malfunctions; (ii) periodic maintenance procedures or repairs
+        that we may undertake from time to time; or (iii) causes beyond the reasonable
+        control of us or that are not reasonably foreseeable by us, including, without
+        limitation, interruption or failure of telecommunication or digital transmission
+        links, hostile network attacks, network congestion or other failures. You
+        acknowledge and agree that we has no control over the availability of the
+        service on a continuous or uninterrupted basis.</p>\\n</p>\\r\\n      <p><p><strong>Total/Premium
+        DNS.</strong>  Total DNS is a complete Domain Name System (\u201C<u>DNS</u>\u201D)
+        tool that allows you to manage your DNS and keep your website and web-based
+        applications available and performing reliably.  The service is provided \u201Cas
+        is\u201D, \u201Cas available\u201D, and \u201Cwith all faults\u201D, and we
+        assume no liability or responsibility regarding the same.</p>\\n<p>In addition,
+        you specifically acknowledge and agree that we shall have no liability or
+        responsibility for any:  \\r</p>\\n<ol>\\r\\n<li>Service interruptions caused
+        by periodic maintenance, repairs or replacements of the  Global Nameserver
+        Infrastructure (defined below) that we may undertake from time to time;</li>\\r\\n<li>Service
+        interruptions caused by you from custom scripting, coding, programming or
+        configurations;</li>\\r\\n<li>Service interruptions caused by you from the
+        installation of third-party applications;</li>\\r\\n<li>Service interruptions
+        that do not prevent visitors from accessing your website, but merely affect
+        your ability to make changes to your website, including but not limited to,
+        changes via mechanisms such as file transfer protocol (\u201C<u>FTP</u>\u201D)
+        and email; or</li>\\r\\n<li>Service interruptions beyond the reasonable control
+        of us or that are not reasonably foreseeable by us, including, but not limited
+        to, power outages, interruption or failure of telecommunication or digital
+        transmission links, hostile network attacks, network congestion or other failures.</li>\\r\\n</ol>\\r\\n<p>Subject
+        to the provisions of Force Majeure below, we offer a service uptime guarantee
+        (\u201C<u>Service Uptime Guarantee</u>\u201D) for paid services of 99.999%
+        availability (defined below).  You shall receive service credits for any Outage
+        (defined below) of the service covered by the Service Uptime Guarantee.  The
+        service credits shall be applied as extensions to the terms of the affected
+        Service.  The Service Uptime Guarantee shall become effective fourteen (14)
+        days after your purchase of the Service covered by the Service Uptime Guarantee
+        to allow both parties time to properly configure and test the Service. </p>\\n</p>\\r\\n
+        \     <p><p><u><em>Definitions.</em></u>  For the purposes of the Service
+        Uptime Guarantee, the following definitions shall apply:  \\r</p>\\n<ol>\\r\\n<li><u>\u201CGlobal
+        Nameserver Infrastructure\u201D</u>:  The group of systems (servers, hardware,
+        and associated software) that are responsible for delivering the Services.
+        The Global Nameserver Infrastructure does not include web-based user interfaces,
+        zone transfer mechanisms, update systems, or other customer-accessible data
+        access or manipulation methods.</li>\\r\\n<li><u>\u201C99.999% availability\u201D</u>:
+        \ A guarantee that the Global Nameserver Infrastructure shall be available
+        to respond to DNS queries 99.999% of the time.</li>\\r\\n<li><u>\u201COutage\u201D</u>:
+        \ A period in which the Global Nameserver Infrastructure did not maintain
+        99.999% availability.</li>\\r\\n</ol></p>\\r\\n      <p><p><u><em>Exclusions</em></u>.
+        \ For the purposes of the Service Uptime Guarantee, downtime due to the following
+        events shall not be considered an Outage:</p>\\n<ol>\\r\\n<li>Service interruptions
+        caused by \u201C<u>Regularly Scheduled Maintenance</u>\u201D, which shall
+        be defined as any maintenance performed on the Global Nameserver Infrastructure
+        of which customer is notified twenty-four (24) hours in advance.  Email notice
+        of Regularly Scheduled Maintenance shall be provided to customer\u2019s designated
+        email address;</li>\\r\\n<li>Service interruptions caused by you from custom
+        scripting, coding, programming or configurations;</li>\\r\\n<li>Service interruptions
+        caused by you from the installation of third-party applications;</li>\\r\\n<li>Service
+        interruptions that do not prevent visitors from accessing your website, but
+        merely affect your ability to make changes to your website, including but
+        not limited to, changes via mechanisms such as file transfer protocol (\u201C<u>FTP</u>\u201D)
+        and email; or</li>\\r\\n<li>Service interruptions beyond the reasonable control
+        of us or that are not reasonably foreseeable by us, including, but not limited
+        to, power outages, interruption or failure of telecommunication or digital
+        transmission links, hostile network attacks, network congestion or other failures.</li>\\r\\n</ol>\\r\\n<p>We,
+        in our sole and absolute discretion, shall determine whether an event shall
+        be considered an Outage.</p>\\n</p>\\r\\n      <p><p><u><em>Remedies</em></u>.
+        \ For the purposes of the Service Uptime Guarantee, when the customer becomes
+        aware of an Outage, the customer shall open a ticket with our technical support
+        services within five (5) calendar days of the Outage.  If we determine that
+        an Outage did occur, then the customer shall receive a service credit in the
+        amount of two (2) months for any affected Services.  The service credit shall
+        be applied as an extension to the term of the affected Services.  A customer\u2019s
+        Account shall not be credited more than once per month under the Service Uptime
+        Guarantee.  \\r</p>\\n<p>To qualify for a service credit, you must have a
+        current and valid subscription to the Services affected, and must have an
+        Account in good standing with us.  Service credits will not apply to any charges
+        or Services other than the Services for which the Service Uptime Guarantee
+        was not met.  Customers with subscriptions for more than one Service will
+        not receive credits for unaffected Services.  The remedies set forth herein
+        shall be the sole and exclusive remedies if we do not meet the Service Uptime
+        Guarantee.</p>\\n<p>In the event either party is unable to carry out its material
+        obligations under this Agreement by reason of Force Majeure those obligations
+        will be suspended during the continuance of the Force Majeure, provided the
+        cause of the Force Majeure is remedied as quickly as practicable. The term
+        \u201C<u>Force Majeure</u>\u201D means any event caused by occurrences beyond
+        a party\u2019s reasonable control, including, but not limited to, acts of
+        God, fire or flood, war, terrorism, governmental regulations, policies or
+        actions enacted or taken subsequent to execution of this Agreement, or any
+        labor, telecommunications or other utility shortage, outage or curtailment.</p>\\n<p><small>If
+        your Services include Domain Name System Security Extensions (\u201C<u>DNSSEC</u>\u201D),
+        you will be able to secure your domain names with DNSSEC.  DNSSEC is designed
+        to protect you from forged DNS data so \u201Chackers\u201D cannot direct visitors
+        to your website to a forged site. </small></p>\\n<p><small>DNSSEC works by
+        using public key cryptography.  You acknowledge and agree that if the keys
+        do not match, a visitor\u2019s lookup of your website may fail (and result
+        in a \u201Cwebsite not found\u201D error) and we assume no liability or responsibility
+        regarding the same.  In addition, DNSSEC responses are authenticated, but
+        not encrypted.  You acknowledge and agree that DNSSEC does not provide confidentiality
+        of data, and we assume no liability or responsibility regarding the same.</small></p>\\n<p><small>We
+        prohibit the running of a public recursive DNS service on any server.  All
+        recursive DNS servers must be secured to allow only internal network access
+        or a limited set of IP addresses.  We actively scan for the presence of public
+        recursive DNS services and reserves the right to remove any servers from the
+        network that violate this restriction.</small> </p>\\n</p>\\r\\n      <p><p><strong>Full
+        Domain Protection.</strong> The Full Domain Protection service generally allows
+        You to:  \\r</p>\\n<ul>\\n<li>replace your personal details in the WHOIS Directory
+        with the details of Domains By Proxy; </li>\\n<li>set up a private email address
+        for each domain name that you can forward, filter or block; and </li>\\n<li>lock
+        your domain name in your account. </li>\\n</ul>\\n<p>The Full Domain Protection
+        service features are intended to: prevent domain-related spam; protect your
+        identity from third-parties; and add a higher level of security through 2-Step
+        Verification to disallow most accidental or malicious domain name transfers.
+        As set forth in Section 2(xi) of this Agreement, You acknowledge and agree
+        that you may not be permitted to purchase private or proxy TLD registrations
+        in certain markets, countries and territories or for certain TLDs. Your purchase
+        and use of Full Domain Protection is also subject to and governed by the terms
+        of the Domain Name Proxy Agreement.</p>\\n</p>\\r\\n      <p><p><strong>Ultimate
+        Domain Protection (also called Full Domain Privacy and Protection)</strong>.
+        The Ultimate Domain Protection service generally allows You to: </p>\\n<ul>\\n<li>replace
+        your personal details in the WHOIS Directory with the details of Domains By
+        Proxy; </li>\\n<li>set up a private email address for each domain name that
+        you can forward, filter or block; </li>\\n<li>prevent accidental loss of a
+        domain name due to an expired credit card or invalid payment method when domain
+        is set on auto-renew; and </li>\\n<li>lock your domain name in your account.
+        </li>\\n</ul>\\n<p>The Ultimate Domain Protection service features are intended
+        to: prevent domain-related spam; protect your identity from third-parties;
+        and add a higher level of security through 2-Step Verification to disallow
+        most accidental or malicious domain name transfers.. As set forth in Section
+        2(xi) of this Agreement, You acknowledge and agree that you may not be permitted
+        to purchase private or proxy TLD registrations in certain markets, countries
+        and territories or for certain TLDs. Your purchase and use of Ultimate Domain
+        Protection is also subject to and governed by the terms of the  <a href=\\\"https://www.secureserver.net/legal/agreements/domain-name-proxy-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Domain
+        Name Proxy Agreement</a>.</p>\\n</p>\\r\\n      <p><strong>Ultimate Domain
+        Protection &amp; Security</strong>. The privacy and business protection service
+        includes all the features of Full Domain Privacy and Protection, plus the
+        service generally allows You to: (i) prevent accidental loss of a domain name
+        due to an expired credit card or invalid payment method when domain is set
+        on auto-renew; (ii) lock your domain name in your account; and (iii) activate
+        Website Security Basic. The privacy and business protection service features
+        are intended to: prevent domain-related spam; protect your identity from third-parties;
+        plus add a higher level of security through 2-Step Verification to disallow
+        most accidental or malicious domain name transfers;; and provide domain name
+        protection through Website Security Basic. As set forth in Section 2(xi) of
+        this Agreement, You acknowledge and agree that you may not be permitted to
+        purchase private or proxy TLD registrations in certain markets, countries
+        and territories or for certain TLDs. Your purchase and use of Ultimate Domain
+        Protection &amp; Security is also governed by terms of the  <a href=\\\"https://www.secureserver.net/legal/agreements/domain-name-proxy-agreement?prog_id=510456&pl_id=510456&plid=510456\\\">Domain
+        Name Proxy Agreement</a> and <a href=\\\"https://www.secureserver.net/legal/agreements/website-security-terms-of-use?prog_id=510456&pl_id=510456&plid=510456\\\">Website
+        Security Terms of Use</a></p>\\r\\n      <p><p><strong>Trademark Keeper (Beta)</strong>
+        Trademark Keeper is a free beta feature of your domain that (i) automatically
+        captures a record of Your homepage including any trademarks on that homepage
+        quarterly (\u201CScreen Capture(s)\u201D), and (ii) timestamps and records
+        proof of the Screen Capture(s) using blockchain technology to ensure that
+        the record is secure. Trademark Keeper also allows You to identify up to three
+        (3) individual trademarks to help You catalog Your brand assets in Your dashboard.
+        Trademark Keeper stores the Screen Capture(s) on servers provisioned by Azure
+        but does not analyze, modify or edit the Screen Capture(s). Trademark Keeper
+        stores a digital signature of the Screen Captures on a blockchain proving
+        the Screen Captures\u2019 existence at a certain time, but does not store
+        the Screen Capture itself on the blockchain. You may request a report that
+        shows a historical record of Screen Captures that have been captured by Trademark
+        Keeper. At any time, You may opt out of Trademark Keeper and delete the historical
+        record of Screen Captures. Your Screen Captures will be deleted 24 hours after
+        You disable the \u201CKeep My Data\u201D function. If you re-enable this function
+        within 24 hours, your Screen Captures may be restored. Azure may discontinue
+        the Beta feature at any time and for any reason.</p>\\n<p><span style=\\\"text-transform:
+        uppercase;\\\">YOU ACKNOWLEDGE THAT YOUR USE OF TRADEMARK KEEPER DOES NOT
+        RESULT IN AN \u201COFFICIAL\u201D TRADEMARK REGISTRATION WITH A GOVERNMENTAL
+        TRADEMARK OFFICE. YOU ACKNOWLEDGE THAT TRADEMARK KEEPER IS NOT A LEGAL SERVICE
+        AND YOU SHOULD CONSULT A TRADEMARK ATTORNEY FOR ADVICE ON HOW TO BEST PROTECT
+        YOUR TRADEMARK RIGHTS. Azure MAKES NO REPRESENTATIONS OR WARRANTIES WITH REGARDS
+        TO ANY MATTER INCLUDING THE ADMISSIBILITY OF THE SCREEN CAPTURES OR RECORDS
+        CAPTURED THROUGH TRADEMARK KEEPER.</span></p>\\n</p>\\r\\n        <strong><strong>12.
+        PRE-REGISTRATIONS</strong></strong>\\r\\n\\r\\n      <p>If you submit an application
+        for pre-registration of a domain name, Azure does not guarantee that the name
+        will be secured for you, or that you will have immediate access to the domain
+        name if secured.  Azure may use third-party service providers for the pre-registration
+        services.</p>\\r\\n        <strong><strong>13. PROVISIONS SPECIFIC TO .BIZ
+        REGISTRATIONS</strong></strong>\\r\\n\\r\\n      <p><u><em>Domain Name Dispute
+        Policy</em></u>.  If you reserved or registered a .BIZ domain name through
+        us, in addition to our Dispute Resolution Policy, you hereby acknowledge that
+        you have read and understood and agree to be bound by the terms and conditions
+        of the <a href=\\\"https://www.icann.org/resources/pages/rdrp-2012-02-25-en\\\">Restrictions
+        Dispute Resolution Policy</a> applicable to the .biz TLD.</p>\\r\\n      <p>The
+        RDRP sets forth the terms under which any allegation that a domain name is
+        not used primarily for business or commercial purposes shall be enforced on
+        a case-by-case basis by an independent ICANN-accredited dispute provider.
+        Registry Operator will not review, monitor, or otherwise verify that any particular
+        domain name is being used primarily for business or commercial purposes or
+        that a domain name is being used in compliance with the SUDRP or UDRP processes.</p>\\r\\n
+        \     <p><u><em>One Year Registration</em></u>.  If you are registering a
+        .BIZ domain name and you elect to take advantage of special pricing applicable
+        to one-year registrations, we will automatically renew your domain name for
+        an additional one-year period at the end of the first year term by taking
+        payment from the Payment Method you have on file, unless you notify us that
+        you do not wish to renew. You will be notified and given the opportunity to
+        accept or decline the one-year renewal prior to your domain name expiration
+        date. In the event you decide not to renew your one-year .BIZ domain name
+        for a second year, your domain name registration will automatically revert
+        back to us and we will gain full rights of registration to such domain name.
+        You agree that if you delete or transfer your .BIZ domain name during the
+        first year, you will automatically be charged the second year renewal fees.</p>\\r\\n
+        \       <strong><strong>14. PROVISIONS SPECIFIC TO .INFO REGISTRATIONS</strong></strong>\\r\\n\\r\\n
+        \     <p><u><em>One Year Registration</em></u>.  If you are registering a
+        .INFO domain name and you elect to take advantage of special pricing applicable
+        to one-year registrations, we will automatically renew your domain name for
+        an additional one-year period at the end of the first year term by taking
+        payment from the Payment Method you have on file, unless you notify us that
+        you do not wish to renew. You will be notified and given the opportunity to
+        accept or decline the one-year renewal prior to your domain name expiration
+        date. In the event you decide not to renew your one-year .INFO domain name
+        for a second year, your domain name registration will automatically revert
+        back to us and we will gain full rights of registration to such domain name.
+        You agree that if you delete or transfer your .INFO domain name during the
+        first year, you will automatically be charged the second year renewal fees.</p>\\r\\n
+        \       <strong><strong>15. PROVISIONS SPECIFIC TO .NAME REGISTRATIONS</strong></strong>\\r\\n\\r\\n
+        \     <p><u><em>Defensive Registration</em></u>.  A Defensive Registration
+        is a registration designed for the protection of trademarks and service marks
+        and may be granted to prevent a third party from registering a variation of
+        a trademark or the exact trademark. If the name you wish to register is subject
+        to a Defensive Registration, you have three (3) options: (i) you may register
+        a variation of the name, (ii) you may challenge the Defensive Registration
+        under the <a href=\\\"https://www.icann.org/resources/pages/erdrp-2012-02-25-en\\\">Eligibility
+        Requirements Dispute Resolution Policy</a>, or (iii) you may request Consent
+        from the Defensive Registrant. You can request Consent by contacting the Defensive
+        Registrant listed in the GNR Whois Directory and requesting consent to register
+        the .NAME domain name. If the Defensive Registrant grants consent, they must
+        confirm in writing that they grant consent. If the Defensive Registrant does
+        not grant consent, you may wish to challenge the Defensive Registration under
+        the ERDRP.</p>\\r\\n      <p><u><em>Acceptable Use Policy</em></u>.  You agree
+        to be bound by the <a href=\\\"https://www.verisign.com/assets/name-acceptable-use-policy.pdf?inc=www.verisigninc.com\\\">.NAME
+        Acceptable Use Policy</a>, which is hereby incorporated by reference. Among
+        other limitations, this policy prohibits you from using your .NAME Email to
+        engage in Spamming activities. You will be limited to a maximum of five hundred
+        (500) messages sent from your .NAME at a time.</p>\\r\\n        <strong><strong>16.
+        PROVISIONS SPECIFIC TO .REISE REGISTRATIONS</strong></strong>\\r\\n\\r\\n
+        \     <p>Domain Names registered in .REISE should be used for purposes dedicated
+        to travel topics within six months following initial Registration, e.g. utilized
+        on the Internet or otherwise used to perform a function.</p>\\r\\n        <strong><strong>17.
+        PROVISIONS SPECIFIC TO .SEXY REGISTRATIONS</strong></strong>\\r\\n\\r\\n      <p>You
+        shall not permit content unsuitable for viewing by a minor to be viewed from
+        the main or top-level directory of a .SEXY domain name. For purposes of clarity,
+        content viewed at the main or top-level directory of a .SEXY domain name is
+        the content immediately visible if a user navigates to http://example.sexy
+        or http://www.example.sexy. No restrictions apply to the content at any other
+        page or subdirectory addressed by a .SEXY Registered Name. </p>\\r\\n        <strong><strong>18.
+        COUNTRY CODE TOP LEVEL DOMAINS</strong></strong>\\r\\n\\r\\n      <p><p>You
+        represent and warrant that you meet the eligibility requirements of each ccTLD
+        you apply for. You further agree to be bound by any registry rules, policies,
+        and agreements for that particular ccTLD. These may include, but are not limited
+        to, agreeing to indemnify the ccTLD provider, limiting the liability of the
+        ccTLD provider, and requirements that any disputes be resolved under that
+        particular country's laws.</p>\\n<p><strong><em>(A) PROVISIONS SPECIFIC TO
+        .AU REGISTRATIONS</em></strong><br />\\n.au Registrations (to include .au,
+        com.au, net.au and org.au) are governed by the following additional terms
+        and conditions:</p>\\n<p><u>auDA</u>.  auDA means .au Domain Administration
+        Limited ACN 079 009 340, the .au domain names administrator.  The Registrar
+        acts as agent for auDA for the sole purpose, but only to the extent necessary,
+        to enable auDA to receive the benefit of rights and covenants conferred to
+        it under this Agreement. auDA is an intended third party beneficiary of this
+        agreement.<br />\\n<br />\\n<u>auDA Published Policy</u>.  auDA Published
+        Policies means those specifications and policies established and published
+        by auDA from time to time at <a href=\\\"https://www.auda.org.au\\\">https://www.auda.org.au</a>.
+        \ You must comply with all auDA Published Policies, as if they were incorporated
+        into, and form part of, this Agreement. In the event of any inconsistency
+        between any auDA Published Policy and this Agreement, then the auDA Published
+        Policy will prevail to the extent of such inconsistency.  You acknowledge
+        that under the auDA Published Policies: (1) there are mandatory terms and
+        conditions that apply to all domain names; (2) licences, and such terms and
+        conditions are incorporated into, and form part of, this Agreement; (3) You
+        are bound by, and must submit to, the .au Dispute Resolution Policy; and (4)
+        auDA may delete or cancel the registration of a .au domain name. <br />\\n<br
+        />\\n<u>auDA's Liabilities and Indemnity</u>.  To the fullest extent permitted
+        by law, auDA will not be liable to Registrant for any direct, indirect, consequential,
+        special, punitive or exemplary losses or damages of any kind (including, without
+        limitation, loss of use, loss or profit, loss or corruption of data, business
+        interruption or indirect costs) suffered by Registrant arising from, as a
+        result of, or otherwise in connection with, any act or omission whatsoever
+        of auDA, its employees, agents or contractors. Registrant agrees to indemnify,
+        keep indemnified and hold auDA, its employees, agents and contractors harmless
+        from all and any claims or liabilities, arising from, as a result of, or otherwise
+        in connection with, Registrant's registration or use of its .au domain name.
+        Nothing in this document is intended to exclude the operation of Trade Practices
+        Act 1974.</p>\\n</p>\\r\\n      <p><p><strong><em>(B) PROVISIONS SPECIFIC
+        TO .CA REGISTRATIONS</em></strong><br />\\nYou acknowledge and agree that
+        registration of your selected domain name in your first application to CIRA
+        shall not be effective until you have entered into and agreed to be bound
+        by CIRA's Registrant Agreement. <br />\\n<br />\\n<u><em>CIRA Certified Registrar</em></u>.
+        \ The registrar shall immediately give notice to you in the event that it
+        is no longer a CIRA Certified Registrar, has had its certification as a CIRA
+        Certified Registrar suspended or terminated, or the Registrar Agreement between
+        CIRA and the Registrar is terminated or expires. CIRA may post notice of such
+        suspension, termination, or expiry on its website and may, if CIRA deems appropriate,
+        give notice to the registrants thereof. In the event that the registrar is
+        no longer a CIRA Certified Registrar, has had its certification as a CIRA
+        Certified Registrar suspended or terminated or in the event the Registrar
+        Agreement between CIRA and the Registrar is terminated or expires, you shall
+        be responsible for changing your Registrar of Record to a new CIRA Certified
+        Registrar within thirty (30) days of the earlier of notice thereof being given
+        to you by (i) the Registrar or (ii) CIRA in accordance with CIRA's then current
+        Registry PRP; provided, however, that if any of your domain name registrations
+        are scheduled to expire within thirty (30) days of the giving of such notice,
+        then you shall have thirty (30) days from the anniversary date of the registration(s),
+        to register with a new CIRA certified registrar and to renew such domain name
+        registration(s) in accordance with the Registry PRP.<br />\\n<br />\\nYou
+        acknowledge and agree that should there be insufficient funds prepaid by the
+        registrar in the CIRA Deposit Account to be applied in payment of any fees,
+        CIRA may in its sole discretion stop accepting applications for domain name
+        registrations from the registrar, stop effecting registrations of domain names
+        and transfers, renewals, modifications, and cancellations requested by the
+        registrar and stop performing other billable transactions requested by the
+        registrar not paid in full and CIRA may terminate the Registrar Agreement
+        between CIRA and the Registrar.<br />\\n<br />\\n<u><em>.CA ASCII and IDN
+        domain variants</em></u> are bundled and reserved for a single registrant.
+        \ Registrants are not required to register all variants in a bundle, but all
+        registered variants must be registered and managed at a single registrar.
+        Each variant registered will incur a registration fee.  In addition, when
+        registering multiple .CA domain (ASCII and IDN) variants in a bundle, your
+        registrant information <strong><em>must be identical</em></strong>.  If variants
+        are registered at other registrars or if registrant information does not match,
+        it may result in an &quot;unavailable&quot; search result, delayed or failed
+        registration. If information does not match, validation is required and may
+        take up to seven business days and delay availability of domain.</p>\\n</p>\\r\\n
+        \     <p><p><strong><em>(C) PROVISIONS SPECIFIC TO .CN REGISTRATIONS</em></strong><br
+        />\\n.CN is a restricted TLD \u2013 applications are subject to both a domain
+        name check <strong><em>and</em></strong> real name verification as required
+        by the People\u2019s Republic of China.  Registrations in .CN are therefore
+        subject to the following additional terms:</p>\\n<p><u><em>Verification, Registration
+        and Activation</em></u>.  If a domain name is not permitted to be registered
+        by the Chinese government, as determined by us, the Registry Operator and/or
+        a 3rd party provider utilized for such services and determinations, in either
+        party\u2019s discretion, the application for registration will not be successful.
+        \ In such event, the name will be deleted and you will be eligible for a refund
+        as further described below.</p>\\n<p>If permitted, then the Registration may
+        proceed, but a .CN domain name may not be activated (i.e., it will not resolve
+        in the Internet) <u><em>unless and until</em></u> you have submitted (via
+        the process described during registration) valid documents required of us
+        and the Registry to perform real name verification.  The following are acceptable
+        forms of documents for the purpose of verification:\\r\\n</p>\\n<ul><li>China:
+        Resident ID, temporary resident ID, business license or organization code
+        certificate</li>\\r\\n\\r\\n<li>Hong Kong/Macau: Resident ID, driver\u2019s
+        license, passport or business license</li>\\r\\n\\r\\n<li>Singapore: Driver\u2019s
+        license, passport or business license</li>\\r\\n\\r\\n<li>Taiwan: Resident
+        ID, driver\u2019s license or business license</li>\\r\\n\\r\\n<li>Other Countries/Regions:
+        Driver\u2019s license or passport</li></ul>\\r\\n<p>Documents submitted to
+        us are used by us and shared with the Registry solely for the purpose of real
+        name verification, and are otherwise subject to our <a href=\\\"https://www.secureserver.net/legal/agreements/privacy-policy?prog_id=510456&pl_id=510456&plid=510456\\\">Privacy
+        Policy</a>.  By registering a .CN domain, you expressly agree that your data
+        may be stored on servers in the U.S., or otherwise outside of the People's
+        Republic of China.</p>\\n<p><u><em>Refunds</em></u>.  Refunds for .CN Registrations
+        will only be allowed where (i) registration of the applied for domain name
+        is not permitted by the Chinese government; or (ii) you notify us of your
+        intent to cancel for any reason within the first five (5) days after the Registration
+        (i.e., after it is deemed permissible by the Chinese government).  For the
+        avoidance of doubt, refunds will not be permitted under any circumstances
+        after five (5) days from the date of Registration, including, for example,
+        in the event real name verification is not successful or if the Chinese government
+        determines after Registration that the domain name should not have been registered
+        (and directs us to delete).</p>\\n</p>\\r\\n      <p><p><strong><em>(D) PROVISIONS
+        SPECIFIC TO .JP REGISTRATIONS</em></strong>  <br />\\n<u><em>Registration
+        Restrictions</em></u>.  You represent and warrant that you have a local presence
+        in Japan with a home or office address. You agree that certain domain names
+        are reserved and can only be registered by certain parties. These include:
+        (i) TLDs, other than ccTLDs, as determined by ICANN; (ii) geographical-type
+        .JP domain names that are defined as metropolitan, prefectural, and municipal
+        labels; (iii) names of primary and secondary educational organizations; (iv)
+        names of organizations related to Internet management; (v) names required
+        for .JP domain name operations; and (vi) character strings which may be confused
+        with ASCII-converted Japanese domain names. The complete list of .JP Reserved
+        Domains is available <a href=\\\"https://www.nic.ad.jp/dotjp/doc/dotjp-reserved.html\\\">here</a>.
+        </p>\\n</p>\\r\\n</div>\\r\\n\",\"url\":\"http://www.secureserver.net/agreements/ShowDoc.aspx?pageid=reg_sa&pl_id=510456\"},{\"agreementKey\":\"DNPA\",\"title\":\"Domains
+        by Proxy Agreement\",\"content\":\"\\r\\n<style>.vsc-legal-content-module
+        .lcm-title{margin-top:2.5rem;margin-bottom:1rem}.vsc-legal-content-module
+        .lcm-subtitle{margin-bottom:1rem}.vsc-legal-content-module .paragraph{margin-top:0;margin-bottom:1rem}.vsc-legal-content-module
+        .lcm-numbered-list ul>ol{list-style:circle inside}.vsc-legal-content-module
+        .lcm-numbered-list ol{counter-reset:section;padding-left:0}.vsc-legal-content-module
+        .lcm-numbered-list ol>li{display:block}.vsc-legal-content-module .lcm-numbered-list
+        ol>li:before{content:counters(section,\\\".\\\") \\\" \\\";counter-increment:section}</style>\\r\\n\\r\\n<div
+        id=\\\"id-fc86ff53-d1e8-4ffa-8551-77fd27f0b3ce\\\" class=\\\"vsc-legal-content-module\\\"
+        >\\r\\n  <div class=\\\"lcm-title\\\">\\r\\n    <span class=\\\"h5\\\">Azure
+        - DOMAINS BY PROXY - DOMAIN NAME PROXY AGREEMENT</span>\\r\\n  </div>\\r\\n
+        \   <div class=\\\"lcm-subtitle\\\">\\r\\n      Last Revised:  6/6/2022\\r\\n
+        \   </div>\\r\\n\\r\\n  <p><p>Please read this Domain Name Proxy Agreement
+        (&quot;Agreement&quot;) carefully. By using the Services and/or website of
+        Domains By Proxy, LLC, a Delaware limited liability company (&quot;DBP&quot;),
+        You (as defined below) agree to all the terms and conditions set forth both
+        herein and in the DBP privacy policy, which is incorporated by reference and
+        can be found by clicking <a href=\\\"https://www.domainsbyproxy.com/policy/ShowDoc.aspx?pageid=privacy\\\">here</a>.
+        \ You acknowledge that DBP may amend this Agreement at any time upon posting
+        the amended terms on its website, and that any new, different or additional
+        features changing the services provided by DBP will automatically be subject
+        to this Agreement. If You do not agree to be bound by, or if You object to,
+        the terms and conditions of this Agreement and any amendments hereto, do not
+        use or access DBP's services. Continued use of DBP's services and its website
+        after any such changes to this Agreement have been posted, constitutes Your
+        acceptance of those changes.  \\r</p>\\n<p>This Agreement is by and between
+        DBP and you, your heirs, assigns, agents and contractors (&quot;You&quot;)
+        and is made effective as of the date of electronic execution. This Agreement
+        sets forth the terms and conditions of Your relationship with DBP and Your
+        use of DBP's services and represents the entire Agreement between You and
+        DBP. By using DBP's Services, You acknowledge that You have read, understand
+        and agree to be bound by all the terms and conditions of this Agreement, and
+        You further agree to be bound by the terms of this Agreement for transactions
+        entered into by:  \\r</p>\\n<ol type=i>\\r\\n<li>You on Your behalf;</li>
+        \  \\r\\n<li> Anyone acting as Your agent; and</li>  \\r\\n<li>Anyone who
+        uses the account You have established with DBP, whether or not the transactions
+        were on Your behalf and/or authorized by You.</li>\\r\\n</ol>\\r\\n<p>You
+        agree You will be bound by representations made by third parties acting on
+        Your behalf, which either use or purchase services from DBP. You further agree
+        that DBP will not be bound by statements of a general nature on DBP's website
+        or DBP promotional materials. You further agree to abide by the terms and
+        conditions promulgated by the Internet Corporation for Assigned Names and
+        Numbers (&quot;ICANN&quot;) (including the Uniform Domain Name Dispute Resolution
+        Policy (&quot;Dispute Resolution Policy&quot;) and Your Registrar (i.e., the
+        ICANN-accredited person or entity through which You register a domain name).</p>\\n</p>\\r\\n
+        \       <strong><strong>1 .DESCRIPTION OF DBP'S PRIVATE REGISTRATION SERVICES</strong>
+        </strong>\\r\\n\\r\\n  <p><p>When You subscribe to DBP's private registration
+        service through a DBP-affiliated Registrar, DBP will display its contact information
+        in the publicly available &quot;Whois&quot; directory in place of Your information.
+        DBP shall keep Your name, postal address, email address, phone and fax numbers
+        confidential, subject to Section 4 of this Agreement. The following information
+        (and not Your personal information) will be made publicly available in the
+        &quot;Whois&quot; directory as determined by ICANN policy:  \\r</p>\\n<ol
+        type=i>\\r\\n<li>DBP's name as the proxy Registrant of the domain name and
+        a proxy email address, phone number and postal address for the proxy Registrant's
+        contact information;</li>  \\r\\n<li>A proxy postal address and phone number
+        for the domain name registration's technical contact;</li>  \\r\\n<li>A proxy
+        email address, postal address and phone number for the domain name registration's
+        administrative contact;</li>  \\r\\n<li>A proxy email address, postal address
+        and phone number for the domain's name registration's billing contact;</li>
+        \ \\r\\n<li>The primary and secondary domain name servers You designate for
+        the domain name;</li>  \\r\\n<li>The domain name's original date of registration
+        and expiration date of the registration; and</li>  \\r\\n<li>The identity
+        of the Registrar.</li>\\r\\n</ol></p>\\r\\n        <strong><strong>2 . FULL
+        BENEFITS OF DOMAIN REGISTRATION RETAINED BY YOU</strong> </strong>\\r\\n\\r\\n
+        \ <p><p>Although DBP will show in the &quot;Whois&quot; directory as the Registrant
+        of each domain name registration You designate, You will retain the full benefits
+        of domain name registration with respect to each such domain name registration,
+        including, subject to Section 4 below: </p>\\n<ol type=i>\\r\\n<li>The right
+        to sell, transfer or assign each domain name registration, which shall require
+        cancellation of the DBP services associated with each such domain name registration;</li>
+        \ \\r\\n<li>The right to control the use of each domain name registration,
+        including designating the primary and secondary domain name servers to which
+        each domain name points;</li>  \\r\\n<li>The right to cancel each domain name
+        registration;</li>  \\r\\n<li>The right to cancel the DBP services associated
+        with each domain name registration and/or Your privacy services with DBP so
+        that Your contract information is listed in the \\\"Whois\\\" directory; and</li>
+        \  \\r\\n<li>The right to renew each domain name registration upon its expiration,
+        subject to Your Registrar's applicable rules and policies.</li>\\r\\n</ol>\\r\\n</p>\\r\\n
+        \       <strong><strong>3 . PERSONAL INFORMATION AND YOUR NOTIFICATION OBLIGATIONS;
+        REPRESENTATION AND WARRANTIES; ACCOUNT SECURITY</strong> </strong>\\r\\n\\r\\n
+        \ <p><p><strong>Personal Information and Your Notification Obligations</strong>
+        \ \\r</p>\\n<p>You agree that for each domain name for which you use DBP services,
+        You will provide accurate and current information as to:  \\r</p>\\n<ol type=i><li>Your
+        name, the email address, postal address, phone and fax numbers for the domain
+        name registration's Registrant contact;</li><li>The email address, postal
+        address, phone and fax numbers for the domain name registration's technical
+        contact;</li><li>The email address, postal address, phone and fax numbers
+        for the domain name registration's administrative contact;</li><li>The email
+        address, postal address, phone and fax numbers for the domain name registration's
+        billing contact; and</li><li>You agree to provide government issued photo
+        identification and/or government issued business identification as required
+        for verification of identity when requested.</li></ol>\\r\\n<p><strong>You
+        agree to:</strong>  \\r</p>\\n<ol type=i><li>Notify DBP within three (3) calendar
+        days when any of the personal information You provided upon subscribing to
+        DBP's services, changes;</li><li>Respond within three (3) calendar days to
+        any inquiries made by DBP to determine the validity of personal information
+        provided by You; and</li><li>Timely respond to email messages DBP sends to
+        You regarding correspondence DBP has received that is either addressed to
+        or involves You and/or Your domain name registration, as more fully set forth
+        in Section 5(c) below.</li><li>To allow DBP to act as your Designated Agent
+        (as that term is defined below) in instances when DBP services are added to
+        or cancelled from your domain name and for the purpose of facilitating a change
+        of registrant request (as further described below).</li><li>As required by
+        ICANN or for certain ccTLDs (.ag, .am, .at, .au, .be, .ca, .cl, .cn, .de,
+        .dk, .es, .fi, .fm, .fr, .gg, .gr, .gs, .in, .it, .jp, .kr, .ms, .my, .no,
+        .nu, .ph, .pl, .pt, .ru, .sc, .se, .sg, .tc, .tk, .tw, .us, .vg, .co.nz, .net.nz,
+        .org.nz, .com.tw, .org.tw, .idv.tw, .com.cn, .net.cn, .org.cn, .jobs, .eu,
+        .com.ag, .net.ag, .org.ag, .com.pl, .net.pl, .org.pl, .biz.pl, .info.pl, .com.sc,
+        .net.sc, .org.sc, .com.au, .net.au, .com.br, .co.jp, .com.sg, .com.ph, .co.za,
+        .co.in, .com.pt, .org.au, .net.in, .org.in, .firm.in, .gen.in, .ind.in, .com.my,
+        .gov.co, .com.es, .com.ve, .org.ve, .com.gr, .net.my, .nom.es, .org.es, .net.br,
+        .org.co, .co.kr, .org.my, .com.ru, .net.ru, .org.ru, .co.ve, .info.ve, .net.ve,
+        .web.ve, .ne.kr, .net.ph, .org.ph, .nyc, .vote, .law, .blackfriday, .hiv,
+        .tattoo, .voto, .pics, .sydney, .flowers, .lol, .amsterdam, .hiphop, .juegos,
+        .link, .guitars, .gift, .click, .nrw, .property, .diet, .help, .sexy, .mom,
+        .audio, .game, .christmas, .photo, .hosting, .melbourne, .re.kr), we are restricted/prohibited
+        from using Domains By Proxy (i.e., Private or Proxy data) for domains under
+        these TLDs. Your information may be made publicly available by the registry
+        operator via Whois or its successor protocol (collectively referred to as
+        the \u201CWhois\\\" Directory) that is beyond, and not subject to, GoDaddy's
+        control.</li></ol>\\r\\n<p>It is Your responsibility to keep Your personal
+        information current and accurate at all times.  \\r</p>\\n<p><strong>Renewals</strong><br
+        />\\n<br />\\nYou agree DBP will arrange for Your Registrar to charge the
+        credit card You have on file with the Registrar, at the Registrar's then current
+        rates.<br />\\n<br />\\nIf for any reason DBP and/or the Registrar for Your
+        domain name is unable to charge Your credit card for the full amount of the
+        service provided, or if DBP and/or the Registrar is charged back for any fee
+        it previously charged to the credit card You provided, You agree that DBP
+        and/or the Registrar may, without notice to You, pursue all available remedies
+        in order to obtain payment, including but not limited to immediate cancellation
+        of all services DBP provides to You.<br />\\n<br />\\n<strong>Representations
+        and Warranties</strong><br />\\n<br />\\nYou warrant that all information
+        provided by You to DBP is truthful, complete, current and accurate. You also
+        warrant that You are using DBP's private registration services in good faith
+        and You have no knowledge of Your domain name infringing upon or conflicting
+        with the legal rights of a third party or a third party's trademark or trade
+        name. You also warrant the domain name being registered by DBP on Your behalf
+        will not be used in connection with any illegal activity, or in connection
+        with the transmission of Spam, or that contains or installs any viruses, worms,
+        bugs, Trojan horses or other code, files or programs designed to, or capable
+        or, disrupting, damaging or limiting the functionality of any software or
+        hardware.<br />\\n<br />\\n<strong>Account Security</strong>  \\r</p>\\n<p>You
+        agree You are entirely responsible for maintaining the confidentiality of
+        Your customer number/login ID and password (&quot;Account Access Information&quot;).
+        \ You agree to notify DBP immediately of any unauthorized use of Your account
+        or any other breach of security.  You agree DBP will not be liable for any
+        loss that You may incur as a result of someone else using Your Account Access
+        Information, either with or without Your knowledge.  You further agree You
+        could be held liable for losses incurred by DBP or another party due to someone
+        else using Your Account Access Information.  For security purposes, You should
+        keep Account Access Information in a secure location and take precautions
+        to prevent others from gaining access to Your Account Access Information.
+        \ You agree that You are entirely responsible for all activity in Your account,
+        whether initiated by You, or by others.  DBP specifically disclaims liability
+        for any activity in Your account, regardless of whether You authorized the
+        activity.<br />\\n<br />\\n<strong>Designated Agency and Change of Registrant
+        Information</strong><br />\\n<br />\\n\u201CDESIGNATED AGENT\u201D MEANS AN
+        INDIVIDUAL OR ENTITY THAT THE PRIOR REGISTRANT OR NEW REGISTRANT EXPLICITLY
+        AUTHORIZES TO APPROVE A CHANGE OF REGISTRANT REQUEST ON ITS BEHALF.  IN THE
+        CASE OF DBP SERVICES, A CHANGE OF REGISTRANT REQUEST MAY ALSO ARISE DUE TO
+        INSTANCES WHERE DBP SERVICES ARE ADDED, OR REMOVED, FROM A DOMAIN NAME.  FOR
+        THE PURPOSE OF FACILITATING ANY SUCH CHANGE REQUEST, AND IN ACCORDANCE WITH
+        ICANN'S <a href=\\\"https://www.icann.org/resources/pages/transfer-policy-2016-06-01-en\\\">CHANGE
+        OF REGISTRANT POLICY</a>, YOU AGREE TO APPOINT DBP AS YOUR DESIGNATED AGENT
+        FOR THE SOLE PURPOSE OF EXPLICITLY CONSENTING TO MATERIAL CHANGES OF REGISTRATION
+        CONTACT INFORMATION ON YOUR BEHALF.</p>\\n</p>\\r\\n        <strong><strong>4
+        . DBP'S RIGHTS TO DENY, SUSPEND, TERMINATE SERVICE AND TO DISCLOSE YOUR PERSONAL
+        INFORMATION</strong> </strong>\\r\\n\\r\\n  <p>You understand and agree that
+        DBP has the absolute right and power, in its sole discretion and without any
+        liability to You whatsoever, to:<ol type=i><li>Cancel the privacy service
+        (which means that Your information will be available in the &quot;Whois&quot;
+        directory) and/or reveal Your name and personal information that You provided
+        to DBP<ol type=A><li>When required by law, in the good faith belief that such
+        action is necessary in order to conform to the edicts of the law or in the
+        interest of public safety;</li><li>To comply with legal process served upon
+        DBP or in response to a reasonable threat of litigation against DBP (as determined
+        by DBP in its sole and absolute discretion); or</li><li>To comply with ICANN
+        rules, policies, or procedures.</li></ol></li><li>Resolve any and all third
+        party claims, whether threatened or made, arising out of Your use of a domain
+        name for which DBP is the registrant listed in the &quot;Whois&quot; directory
+        on Your behalf; or</li><li>Take any other action DBP deems necessary:<ol type=A><li>In
+        the event you breach any provision of this Agreement or the DBP Anti-Spam
+        Policy;</li><li>To protect the integrity and stability of, and to comply with
+        registration requirements, terms, conditions and policies of, the applicable
+        domain name Registry and/or Registry Provider;</li><li>To comply with any
+        applicable laws, government rules or requirements, subpoenas, court orders
+        or requests of law enforcement;</li><li>To comply with ICANN's Dispute Resolution
+        Policy or ICANN's Change of Registrant Policy;</li><li>To avoid any financial
+        loss or legal liability (civil or criminal) on the part of DBP, its parent
+        companies, subsidiaries, affiliates, shareholders, agents, officers, directors
+        and employees;</li><li>If the domain name for which DBP is the registrant
+        on Your behalf violates or infringes a third party's trademark, trade name
+        or other legal rights; and</li><li>If it comes to DBP's attention that You
+        are using DBP's services in a manner (as determined by DBP in its sole and
+        absolute discretion) that:<ul><li> Is illegal, or promotes or encourages illegal
+        activity;</li><li> Promotes, encourages, or engages in the exploitation of
+        children, or any activity related to the proliferation of child sexual abuse
+        material (CSAM);</li><li> Promotes, encourages or engages in terrorism, violence
+        against people, animals, or property;</li><li> Promotes, encourages or engages
+        in any spam or other unsolicited bulk email, or computer or network hacking
+        or cracking;</li><li> Violates the Ryan Haight Online Pharmacy Consumer Protection
+        Act of 2008 or similar legislation, or promotes, encourages or engages in
+        the sale or distribution of prescription medication without a valid prescription;</li><li>
+        Infringes on the intellectual property rights of another User or any other
+        person or entity;</li><li> Violates the privacy or publicity rights of another
+        User or any other person or entity, or breaches any duty of confidentiality
+        that you owe to another User or any other person or entity;</li><li> Interferes
+        with the operation of DBP services;</li><li> Contains or installs any viruses,
+        worms, bugs, Trojan horses or other code, files or programs designed to, or
+        capable of, disrupting, damaging or limiting the functionality of any software
+        or hardware; or</li><li> Contains false or deceptive language, or unsubstantiated
+        or comparative claims, regarding DBP or its services.</li></ul></ol></li></ol>You
+        further understand and agree that if DBP is named as a defendant in, or investigated
+        in anticipation of, any legal or administrative proceeding arising out of
+        Your domain name registration or Your use of DBP's services, Your private
+        registration service may be canceled, which means the domain name registration
+        will revert back to You and Your identity will therefore be revealed in the
+        Whois directory as Registrant.<br><br>In the event:<ol type=i><li>DBP takes
+        any of the actions set forth in subsection i, ii, or iii above or section
+        5; and/or</li><li>You elect to cancel DBP's services for any reason --</li></ol>Neither
+        DBP nor your Registrar will refund any fees paid by You whatsoever.</p>\\r\\n
+        \       <strong><strong>5 . COMMUNICATIONS FORWARDING</strong> </strong>\\r\\n\\r\\n
+        \ <p><p><strong>a. Correspondence Forwarding</strong>  \\r</p>\\n<p>Inasmuch
+        as DBP's name, postal address and phone number will be listed in the Whois
+        directory, You agree DBP will review and forward communications addressed
+        to Your domain name that are received via email, certified or traceable courier
+        mail (such as UPS, FedEx, or DHL), or first class U.S. postal mail. You specifically
+        acknowledge DBP will not forward to You first class postal mail (other than
+        legal notices), &quot;junk&quot; mail or other unsolicited communications
+        (whether delivered through email, fax, postal mail or telephone), and You
+        further authorize DBP to either discard all such communications or return
+        all such communications to sender unopened. You agree to waive any and all
+        claims arising from Your failure to receive communications directed to Your
+        domain name but not forwarded to You by DBP. <br />\\n<br />\\n<strong>b.
+        Email Forwarding</strong><br />\\n<br />\\nThe Whois directory requires an
+        email address for every purchased domain name registration. When You purchase
+        a private domain registration, DBP creates a private email address for that
+        domain name, &quot;@domainsbyproxy.com&quot;. Thereafter, when messages are
+        sent to that private email address, DBP handles them according to the email
+        preference You selected for that particular domain name. You have three (3)
+        email preferences from which to choose. You can elect to:<br />\\n</p>\\n<ol
+        type=i>\\r\\n<li>Have all of the messages forwarded;</li>\\r\\n<li> Have all
+        of the messages filtered for Spam and then forwarded; or</li>\\r\\n<li>Have
+        none of the messages forwarded.</li>\\r\\n</ol>\\r\\n<p><br />\\nAs with all
+        communications, You agree to waive any and all claims arising from Your failure
+        to receive email directed to Your domain name but not forwarded to You by
+        DBP.</p>\\n<p><strong>c. Notifications Regarding Correspondence and Your Obligation
+        to Respond</strong><br />\\nWhen DBP receives certified or traceable courier
+        mail or legal notices addressed to Your domain name, in most cases, DBP will
+        attempt to forward the mail to you via email. If You do not respond to the
+        DBP email and/or the correspondence DBP has received regarding Your domain
+        name registration concerns a dispute of any kind or otherwise requires immediate
+        disposition, DBP may immediately reveal Your identity and/or cancel the DBP
+        private registration service regarding either the domain name registration(s)
+        in question. This means the Whois directory will revert to displaying Your
+        name, postal address, email address and phone number that you provided to
+        DBP.<br />\\n<br />\\n<strong>d. Additional Administrative Fees</strong><br
+        />\\n<br />\\nDBP reserves the right to charge You reasonable &quot;administrative
+        fees&quot; or &quot;processing fees&quot; for (i)  tasks DBP may perform outside
+        the normal scope of its Services, (ii) additional time and/or costs DBP may
+        incur in providing its Services, and/or (iii) Your non-compliance with the
+        Agreement (as determined by DBP in its sole and absolute discretion). Typical
+        administrative or processing fee scenarios include, but are not limited to,
+        (i) customer service issues that require additional personal time and attention;
+        (ii) disputes that require accounting or legal services, whether performed
+        by DBP staff or by outside firms retained by DBP; (iii) recouping any and
+        all costs and fees, including the cost of Services, incurred by DBP as the
+        result of chargebacks or other payment disputes brought by You, Your bank
+        or Payment Method processor.  These administrative fees or processing fees
+        will be billed to the Payment Method You have on file with Your Registrar.</p>\\n<p>You
+        agree to waive the right to trial by jury in any proceeding that takes place
+        relating to or arising out of this Agreement.  </p>\\n</p>\\r\\n        <strong><strong>6
+        . LIMITATIONS OF LIABILITY</strong>   </strong>\\r\\n\\r\\n  <p><p>UNDER NO
+        CIRCUMSTANCES SHALL DBP BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, PUNITIVE,
+        SPECIAL, OR CONSEQUENTIAL DAMAGES FOR ANY REASON WHATSOEVER RELATED TO THIS
+        AGREEMENT, YOUR DOMAIN NAME REGISTRATION, DBP'S SERVICES, USE OR INABILITY
+        TO USE THE DBP WEBSITE OR THE MATERIALS AND CONTENT OF THE WEBSITE OR ANY
+        OTHER WEBSITES LINKED TO THE DBP WEBSITE OR YOUR PROVISION OF ANY PERSONALLY
+        IDENTIFIABLE INFORMATION TO DBP OR ANY THIRD PARTY. THIS LIMITATION APPLIES
+        REGARDLESS OF WHETHER THE ALLEGED LIABILITY IS BASED ON CONTRACT, TORT, WARRANTY,
+        NEGLIGENCE, STRICT LIABILITY OR ANY OTHER BASIS, EVEN IF DBP HAS BEEN ADVISED
+        OF THE POSSIBILITY OF SUCH DAMAGES OR SUCH DAMAGES WERE REASONABLY FORESEEABLE.
+        BECAUSE CERTAIN JURISDICTIONS DO NOT PERMIT THE LIMITATION OR ELIMINATION
+        OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, DBP'S LIABILITY IN SUCH
+        JURISDICTIONS SHALL BE LIMITED TO THE SMALLEST AMOUNT PERMITTED BY LAW.<br
+        />\\n<br />\\nYOU FURTHER UNDERSTAND AND AGREE THAT DBP DISCLAIMS ANY LOSS
+        OR LIABILITY RESULTING FROM:\\r\\n</p>\\n<ol type=i>\\r\\n    <li>THE INADVERTENT
+        DISCLOSURE OR THEFT OF YOUR PERSONAL INFORMATION;</li>\\r\\n    <li>ACCESS
+        DELAYS OR INTERRUPTIONS TO OUR WEBSITE OR THE WEBSITES OF OUR AFFILIATED REGISTRARS;</li>\\r\\n
+        \   <li>DATA NON-DELIVERY OF MIS-DELIVERY BETWEEN YOU AND DBP;</li>\\r\\n
+        \   <li>THE FAILURE FOR WHATEVER REASON TO RENEW A PRIVATE DOMAIN NAME REGISTRATION;</li>\\r\\n
+        \   <li>THE UNAUTHORIZED USE OF YOUR DBP ACCOUNT OR ANY OF DBP'S SERVICES;</li>\\r\\n
+        \   <li>ERRORS, OMISSIONS OR MISSTATEMENTS BY DBP;</li>\\r\\n    <li>DELETION
+        OF, FAILURE TO STORE, FAILURE TO PROCESS OR ACT UPON EMAIL MESSAGES FORWARDED
+        TO EITHER YOU OR YOUR PRIVATE DOMAIN NAME REGISTRATION;</li>\\r\\n    <li>PROCESSING
+        OF UPDATED INFORMATION REGARDING YOUR DBP ACCOUNT; AND/OR</li>\\r\\n    <li>ANY
+        ACT OR OMISSION CAUSED BY YOU OR YOUR AGENTS (WHETHER AUTHORIZED BY YOU OR
+        NOT).</li>\\r\\n</ol></p>\\r\\n        <strong><strong>7 . INDEMNITY</strong>
+        \  </strong>\\r\\n\\r\\n  <p>You agree to release, defend, indemnify and hold
+        harmless DBP, its parent companies, subsidiaries, affiliates, shareholders,
+        agents, directors, officers and employees and Your Registrar, from and against
+        any and all claims, demands, liabilities, losses, damages or costs, including
+        reasonable attorneys' fees, arising out of or related in any way to this Agreement,
+        the services provided hereunder by DBP, the DBP website, Your account with
+        DBP, Your use of Your domain name registration, and/or disputes arising in
+        connection with the <a href=\\\"https://www.icann.org/resources/pages/udrp-rules-2015-03-11-en\\\">dispute
+        policy</a>.</p>\\r\\n        <strong><strong>8 . DBP WARRANTY DISCLAIMER</strong>
+        \  </strong>\\r\\n\\r\\n  <p><strong>DBP, ITS PARENT COMPANIES, SUBSIDIARIES,
+        AFFILIATES, SHAREHOLDERS, AGENTS, DIRECTORS, OFFICERS, AND EMPLOYEES EXPRESSLY
+        DISCLAIM ALL REPRESENTATIONS AND WARRANTIES OF ANY KIND IN CONNECTION WITH
+        THIS AGREEMENT, THE SERVICE PROVIDED HEREUNDER, THE DBP WEBSITE OR ANY WEBSITES
+        LINKED TO THE DBP WEBSITE, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT
+        LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+        PURPOSE AND NON-INFRINGEMENT. ALL DBP SERVICES, AS WELL AS THE DBP WEBSITE,
+        ARE PROVIDED &quot;AS IS&quot;. YOUR SUBSCRIPTION TO AND USE OF DBP'S SERVICES
+        AND ITS WEBSITE ARE ENTIRELY AT YOUR RISK. SOME JURISDICTIONS DO NOT ALLOW
+        THE DISCLAIMER OF IMPLIED WARRANTIES, IN WHICH EVENT THE FOREGOING DISCLAIMER
+        MAY NOT APPLY TO YOU.</strong></p>\\r\\n        <strong><strong>9 .COPYRIGHT
+        AND TRADEMARK</strong>   </strong>\\r\\n\\r\\n  <p><p>You understand and agree
+        that all content and materials contained in this Agreement, the <a href=\\\"https://www.domainsbyproxy.com/policy/ShowDoc.aspx?pageid=privacy\\\">Privacy
+        Policy</a> and the DBP website <a href=\\\"https://www.domainsbyproxy.com/default.aspx\\\">found
+        here</a>, are protected by the various copyright, patent, trademark, service
+        mark and trade secret laws of the United States, as well as any other applicable
+        proprietary rights and laws, and that DBP expressly reserves its rights in
+        and to all such content and materials.<br />\\n<br />\\nYou further understand
+        and agree You are prohibited from using, in any manner whatsoever, any of
+        the afore-described content and materials without the express written permission
+        of DBP. No license or right under any copyright, patent, trademark, service
+        mark or other proprietary right or license is granted to You or conferred
+        upon You by this Agreement or otherwise.</p>\\n</p>\\r\\n        <strong><strong>10
+        . MISCELLANEOUS PROVISIONS</strong> </strong>\\r\\n\\r\\n  <p><p><strong>a.
+        Severability; Construction; Entire Agreement</strong><br />\\n<br />\\nIf
+        any part of this Agreement shall be held to be illegal, unenforceable or invalid,
+        in whole or in part, such provision shall be modified to the minimum extent
+        necessary to make it legal, enforceable and valid, and the legality, enforceability
+        and validity of the remaining provisions of this Agreement shall not be affected
+        or impaired. The headings herein will not be considered a part of this Agreement.
+        You agree this Agreement, including the policies it incorporates by reference,
+        constitute the complete and only Agreement between You and DBP regarding the
+        services contemplated herein.   \\r</p>\\n<p><strong>b. Governing Law; Venue;
+        Waiver Of Trial By Jury</strong><br />\\n<br />\\nThis Agreement shall be
+        governed in all respects by the laws and judicial decisions of Maricopa County,
+        Arizona, excluding its conflicts of laws rules. Except as provided immediately
+        below, You agree that any action relating to or arising out of this Agreement,
+        shall be brought exclusively in the courts of Maricopa County, Arizona. For
+        the adjudication of domain name registration disputes, you agree to submit
+        to the exclusive jurisdiction and venue of the U.S. District Court for the
+        District of Arizona located in Phoenix, Arizona. You agree to waive the right
+        to trial by jury in any proceeding, regardless of venue, that takes place
+        relating to or arising out of this Agreement.<br />\\n<br />\\n<strong>c.
+        Notices</strong> <br />\\n<br />\\nAll notices from DBP to You will be sent
+        to the email address You provided to DBP. Notices by email shall be deemed
+        effective twenty-four (24) hours after the email is sent by DBP, unless DBP
+        receives notice that the email address is invalid, in which event DBP may
+        give You notice via first class or certified mail, return receipt requested.
+        All notices from You to DBP shall be sent via certified mail, return receipt
+        requested or traceable courier to:  \\r</p>\\n<p>Domains By Proxy, LLC<br
+        />\\nAttn: General Counsel<br />\\n2150 E. Warner Rd.<br />\\nTempe, AZ 85284
+        USA</p>\\n<p>Notices sent via certified mail or traceable courier shall be
+        deemed effective five (5) days after the date of mailing.<br />\\n<br />\\n<strong>d.
+        Insurance</strong>  <br />\\n<br />\\nIn the unlikely event You lose Your
+        domain name registration to a third party solely as a result of DBP's negligent
+        actions (and absent fraud or other negligent or willful misconduct committed
+        by a third party), You may be insured against such loss through DBP's Professional
+        Liability Insurance Policy, which is currently underwritten by American International
+        Insurance Company. Of course, every claim is subject to the then-carrier's
+        investigation into the facts and circumstances surrounding such claim. In
+        the event You have reason to believe that circumstances exist which warrant
+        the filing of an insurance claim, please send a written notice (specifying
+        the basis for such claim), via certified mail, return receipt requested, to:<br
+        />\\n<br />\\nDomains By Proxy, LLC<br />\\nAttn: Insurance Claims<br />\\n2150
+        E. Warner Rd.<br />\\nTempe, AZ 85284 USA</p>\\n<p><strong>e. Indemnification</strong>
+        <br />\\n<br />\\nIn the unlikely event You lose Your domain name registration
+        to a third party solely as a result of DBP's willful misconduct, Your Registrar
+        (the &quot;Indemnifying Party&quot;) will indemnify and hold You harmless
+        against any losses, damages or costs (including reasonable attorneys' fees)
+        resulting from any claim, action, proceeding, suit or demand arising out of
+        or related to the loss of Your domain name registration. Such indemnification
+        obligations under this Section 10(e) are conditioned upon the following:<br
+        />\\n<br />\\n</p>\\n<ol type=i>\\r\\n<li>That You promptly give both DBP
+        and the Indemnifying Party written notice of the claim, demand, or action
+        and provide reasonable assistance to the Indemnifying Party, at its cost and
+        expense, in connection therewith, and</li>\\r\\n<li>That the Indemnifying
+        Party has the right, at its option, to control and direct the defense to any
+        settlement of such claim, demand, or action.</li>\\r\\n</ol>        \\r\\n<p><br
+        />\\n<br />\\nAny notice concerning indemnification shall, with respect to
+        DBP, be sent in accordance with Section 10(c) of this Agreement. With respect
+        to Your Registrar, notices regarding indemnification should be sent in accordance
+        with the notification provisions contained in Your Registrar's Domain Name
+        Registration Agreement.  \\r</p>\\n<p><strong>f. Term of Agreement; Survival</strong><br
+        />\\n<br />\\nThe terms of this Agreement shall continue in full force and
+        effect as long as DBP is the Registrant for any domain name on Your behalf.
+        Sections 5 (Communications Forwarding), 6 (Limitation of Liability), 7 (Indemnity),
+        8 (Warranty Disclaimer) and 10 (Miscellaneous Provisions) shall survive any
+        termination or expiration of this Agreement.</p>\\n</p>\\r\\n</div>\\r\\n\",\"url\":\"http://www.secureserver.net/agreements/ShowDoc.aspx?pageid=domain_nameproxy&pl_id=510456\"}],\"nextLink\":null,\"id\":null}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '124269'
+      content-type:
+      - application/json
+      date:
+      - Mon, 18 Jul 2022 22:14:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

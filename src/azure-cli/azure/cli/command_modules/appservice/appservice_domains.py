@@ -48,7 +48,8 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
     except:
         raise CLIError("Unable to get IP address")
 
-    web_client = web_client_factory(cmd.cli_ctx)
+    # TODO remove api_version when Microsoft.DomainRegistration supports a later version
+    web_client = web_client_factory(cmd.cli_ctx, api_version="2021-01-15")
     hostname_availability = web_client.domains.check_availability(NameIdentifier(name=hostname))
 
     if not hostname_availability.available:

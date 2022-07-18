@@ -193,8 +193,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         functionapp_name, functionapp_name2 = self.create_random_name(
             'func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
-        # TODO should use a storage account preparer decorator or more unique names
-        storage, storage2 = 'functionappplanstorage', 'functionappplanstorage2'
+        storage, storage2 = self.create_random_name('funcstorage1', 24), self.create_random_name('funcstorage2', 24)
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
