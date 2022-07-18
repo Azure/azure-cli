@@ -13,6 +13,8 @@ from knack.log import get_logger
 from knack.util import CLIError
 from knack.validators import DefaultStr, DefaultInt  # pylint: disable=unused-import
 
+JSON_RECOMMENDATION_MESSAGE = "Please provide a valid JSON file path or JSON string."
+
 logger = get_logger(__name__)
 
 
@@ -83,24 +85,28 @@ def get_default_location_from_resource_group(cmd, namespace):
 
 
 def validate_file_or_dict(string):
+    """Parse string as a JSON file or in-line JSON string."""
     import os
     string = os.path.expanduser(string)
     try:
         if os.path.exists(string):
             from azure.cli.core.util import get_file_json
-            # Failure point 1: 'string' is a valid file path, but the file contains invalid JSON string
+            # Error 1: 'string' is an existing file path, but the file contains invalid JSON string
             # ex has no recommendation
             return get_file_json(string)
 
+        # Error 2: If string ends with '.json', it can't be a JSON string, since a JSON string must ends with
+        # ], }, or ", so it must be JSON file, and we don't allow parsing it as in-line string
+        if string.endswith('.json'):
+            raise CLIError("JSON file does not exist: '{}'".format(string))
+
         from azure.cli.core.util import shell_safe_json_parse
-        # Failure point 2:
-        # - 'string' is a non-existing file path
-        # - 'string' is an invalid JSON string
+        # Error 3: string is a non-existing file path or invalid JSON string
         # ex has recommendations for shell interpretation
         return shell_safe_json_parse(string)
     except CLIError as ex:
         from azure.cli.core.azclierror import InvalidArgumentValueError
-        new_ex = InvalidArgumentValueError(ex, recommendation="Please provide a valid JSON file path or JSON string.")
+        new_ex = InvalidArgumentValueError(ex, recommendation=JSON_RECOMMENDATION_MESSAGE)
         # Preserve the recommendation
         if hasattr(ex, "recommendations"):
             new_ex.set_recommendation(ex.recommendations)
