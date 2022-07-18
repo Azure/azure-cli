@@ -1499,7 +1499,7 @@ short-summary: Manage a server's virtual network rules.
 
 helps['sql server vnet-rule create'] = """
 type: command
-short-summary: Create a virtual network rule to allows access to an Azure SQL server.
+short-summary: Create a virtual network rule to allows access to an Azure SQL Server.
 
 examples:
   - name: Create a vnet rule by providing the subnet id.
