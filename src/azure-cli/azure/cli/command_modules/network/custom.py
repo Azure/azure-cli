@@ -6278,16 +6278,28 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
     return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
 
 
-def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
+def set_nw_flow_logging(cmd, client, watcher_rg, watcher_name, nsg=None, vnet=None, subnet=None, nic=None, storage_account=None,
                          resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
                          traffic_analytics_workspace=None, traffic_analytics_interval=None,
                          traffic_analytics_enabled=None):
     from azure.cli.core.commands import LongRunningOperation
-    flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
+
+    if sum(map(bool,[vnet,subnet,nic,nsg]))==0:
+        raise RequiredArgumentMissingError("Please enter atleast one resource ID.")
+    if sum(map(bool,[vnet,nic,nsg]))>1:
+        raise MutuallyExclusiveArgumentError("Please enter only one resource ID.")
+
+    if (vnet!=None and subnet!=None) or (vnet==None and subnet!=None):
+        flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=subnet)
+    elif vnet!=None and subnet is None:
+        flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=vnet)
+    elif nic!=None:
+        flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nic)
+    elif nsg!=None:
+        flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
     config = LongRunningOperation(cmd.cli_ctx)(client.begin_get_flow_log_status(watcher_rg,
                                                                                 watcher_name,
                                                                                 flowlog_status_parameters))
-
     try:
         if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
             config.flow_analytics_configuration = None
@@ -6350,7 +6362,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
 
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
-def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+def show_nw_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
                           flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
@@ -6362,14 +6374,16 @@ def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, 
     client = cf_flow_logs(cmd.cli_ctx, None)
     return client.get(watcher_rg, watcher_name, flow_log_name)
 
-
 def create_nw_flow_log(cmd,
                        client,
                        location,
                        watcher_rg,
                        watcher_name,
                        flow_log_name,
-                       nsg,
+                       nsg=None,
+                       vnet=None, 
+                       subnet=None, 
+                       nic=None,
                        storage_account=None,
                        resource_group_name=None,
                        enabled=None,
@@ -6381,11 +6395,20 @@ def create_nw_flow_log(cmd,
                        traffic_analytics_enabled=None,
                        tags=None):
     FlowLog = cmd.get_models('FlowLog')
-    flow_log = FlowLog(location=location,
-                       target_resource_id=nsg,
-                       storage_id=storage_account,
-                       enabled=enabled,
-                       tags=tags)
+
+    if sum(map(bool,[vnet,subnet,nic,nsg]))==0:
+        raise RequiredArgumentMissingError("Please enter atleast one resource ID.")
+    if sum(map(bool,[vnet,nic,nsg]))>1:
+        raise MutuallyExclusiveArgumentError("Please enter only one resource ID.")
+
+    if (vnet!=None and subnet!=None) or (vnet==None and subnet!=None):
+        flow_log = FlowLog(location=location,target_resource_id=subnet,storage_id=storage_account,enabled=enabled,tags=tags)
+    elif vnet!=None and subnet is None:
+        flow_log = FlowLog(location=location,target_resource_id=vnet,storage_id=storage_account,enabled=enabled,tags=tags)
+    elif nic!=None:
+        flow_log = FlowLog(location=location,target_resource_id=nic,storage_id=storage_account,enabled=enabled,tags=tags)
+    elif nsg!=None:
+        flow_log = FlowLog(location=location,target_resource_id=nsg,storage_id=storage_account,enabled=enabled,tags=tags)
 
     if retention > 0:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
@@ -6436,6 +6459,9 @@ def update_nw_flow_log(cmd,
                        resource_group_name=None,    # dummy parameter to let it appear in command
                        enabled=None,
                        nsg=None,
+                       vnet=None, 
+                       subnet=None, 
+                       nic=None,
                        storage_account=None,
                        retention=0,
                        log_format=None,
@@ -6448,6 +6474,17 @@ def update_nw_flow_log(cmd,
         c.set_param('enabled', enabled)
         c.set_param('tags', tags)
         c.set_param('storage_id', storage_account)
+
+    if sum(map(bool,[vnet,nic,nsg]))>1:
+        raise MutuallyExclusiveArgumentError("Please enter only one resource ID.")
+
+    if (vnet!=None and subnet!=None) or (vnet==None and subnet!=None):
+        c.set_param('target_resource_id', subnet)
+    elif vnet!=None and subnet==None:
+        c.set_param('target_resource_id', vnet)
+    elif nic!=None:
+        c.set_param('target_resource_id', nic)
+    else:
         c.set_param('target_resource_id', nsg)
 
     with cmd.update_context(instance.retention_policy) as c:
@@ -6485,7 +6522,6 @@ def list_nw_flow_log(client, watcher_rg, watcher_name, location):
 
 def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
     return client.begin_delete(watcher_rg, watcher_name, flow_log_name)
-
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
                              storage_path, resource_type=None, resource_group_name=None,

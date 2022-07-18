@@ -7108,6 +7108,12 @@ short-summary: Configure flow logging on a network security group.
 parameters:
   - name: --nsg
     short-summary: Name or ID of the Network Security Group to target.
+  - name: --vnet
+    short-summary: Name of the Virtual Network to target.
+  - name: --subnet
+    short-summary: Name or ID of the subnet.
+  - name: --nic
+    short-summary: Name or ID of the Network Interface.
   - name: --enabled
     short-summary: Enable logging.
   - name: --retention
@@ -7132,6 +7138,31 @@ examples:
       --resource-group MyResourceGroup
       --name MyFlowLog
       --nsg MyNetworkSecurityGroupName
+      --storage-account account
+  - name: Create a flow log with VNet name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --vnet MyVNetName
+      --storage-account account
+  - name: Create a flow log with Subnet name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --vnet MyVNetName
+      --subnet MySubnetName
+      --storage-account account
+  - name: Create a flow log with NIC name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --nic MyNICName
       --storage-account account
   - name: Create a flow log with Network Security Group ID (could be in other resource group)
     text: >

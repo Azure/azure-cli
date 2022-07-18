@@ -1728,6 +1728,9 @@ def load_arguments(self, _):
         c.argument('retention', type=int, help='Number of days to retain logs')
         c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
                                            'Must be in the same region of flow log.')
+        c.argument('vnet',options_list=['--vnet'],help='Name or ID of the Virtual Network Resource.')
+        c.argument('subnet',options_list=['--subnet'], help='Name or ID of Subnet')
+        c.argument('nic', options_list=['--nic'],help='Name or ID of the Network Interface (NIC) Resource.')
 
     # temporary solution for compatible with old show command's parameter
     # after old show command's parameter is deprecated and removed,
