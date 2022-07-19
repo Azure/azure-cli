@@ -215,6 +215,26 @@ class AAZCommand(CLICommand):
         return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
 
 
+class AAZWaitCommand(AAZCommand):
+    """Support wait command"""
+
+    def __init__(self, loader):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        super().__init__(loader)
+
+        # add wait args in commands
+        for param_name, argtype in WaitCommandOperation.wait_args().items():
+            self.arguments[param_name] = argtype
+
+    def __call__(self, *args, **kwargs):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        return WaitCommandOperation.wait(
+            *args, **kwargs,
+            cli_ctx=self.cli_ctx,
+            getter=lambda **command_args: self._handler(command_args)
+        )
+
+
 def register_command_group(
         name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
     """This decorator is used to register an AAZCommandGroup as a cli command group.
