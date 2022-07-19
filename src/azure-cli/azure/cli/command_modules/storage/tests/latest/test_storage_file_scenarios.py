@@ -132,6 +132,10 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file show -s {} --path {}', account_info, share, file_name). \
             assert_with_checks(JMESPathCheck("properties.contentSettings.contentMd5", md5_base64_encode))
 
+        self.storage_cmd('storage file update -s {} --path {} --content-md5 0000', account_info, share, file_name)
+        self.storage_cmd('storage file show -s {} --path {}', account_info, share, file_name). \
+            assert_with_checks(JMESPathCheck("properties.contentSettings.contentMd5", '0000'))
+
     @record_only()
     # manual test, only run the recording
     # To reproduce the prerequisite steps:
