@@ -500,6 +500,23 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_adls_file_set_expiry_scenarios(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        file = self.create_random_name(prefix="file", length=12)
+        self.storage_cmd('storage fs file create -p {} -f {} --content-type "application/json"',
+                         account_info, file, filesystem)
+        from datetime import datetime, timedelta
+        # .strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.utcnow() + timedelta(seconds=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        self.storage_cmd("storage fs file set-expiry --expiry-options Absolute --expires-on {} -p {} -f {}",
+                         account_info, expiry, file, filesystem)
+        self.sotrage_cmd("storage fs file show -p {} -f {}", account_info, file, filesystem)
+        time.sleep(6)
+        self.sotrage_cmd("storage fs file show -p {} -f {}", account_info, file, filesystem)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_metadata_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)

@@ -2417,7 +2417,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Show nextMarker in result when specified.')
 
     for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show', 'metadata update',
-                 'metadata show']:
+                 'metadata show', 'set-expiry']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],
                     help='File system name (i.e. container name).', required=True)
@@ -2472,6 +2472,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="A Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
         c.argument('permissions', permissions_type)
         c.argument('umask', umask_type)
+
+    with self.argument_context('storage fs file set-expiry') as c:
+        t_expiry_option_type = self.get_models('_generated.models#PathExpiryOptions',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.argument('expiry_options', required=True, arg_type=get_enum_type(t_expiry_option_type))
+        c.argument('expires_on', type=get_datetime_type(False), help='The time to set the file to expiry. When expiry_options is '
+                                      'RelativeTo*, expires_on should be an int in milliseconds. If the '
+                                      'type of expires_on is datetime, it should be in UTC time.')
 
     for item in ['set', 'show']:
         with self.argument_context('storage fs access {}'.format(item)) as c:
