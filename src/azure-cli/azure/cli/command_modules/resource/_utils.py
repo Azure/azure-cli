@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import json
 
 _management_group_pattern = (
     r"^\/?providers\/Microsoft.Management\/managementGroups\/(?P<management_group_id>[\w\d_\.\(\)-]+)"
@@ -88,10 +89,9 @@ def _build_preflight_error_message(preflight_error):
 def _build_http_response_error_message(http_error):
     error_txt = http_error.response.internal_response.text
 
-    import json
     error_info = json.loads(error_txt)['error']
     error_details = error_info.pop('details') if 'details' in error_info else []
-    err_messages = [f'{error_info}']
+    err_messages = [f'{json.dumps(error_info)}']
 
     for detail in error_details:
         err_messages.append(_build_error_details(detail))
@@ -101,7 +101,7 @@ def _build_http_response_error_message(http_error):
 
 def _build_error_details(error_detail):
     nested_error_details = error_detail.pop('details') if 'details' in error_detail else []
-    err_messages = [f'Inner Errors: \n{error_detail}']
+    err_messages = [f'Inner Errors: \n{json.dumps(error_detail)}']
 
     for detail in nested_error_details:
         err_messages.append(_build_error_details(detail))

@@ -244,8 +244,10 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
-    with self.argument_context('keyvault network-rule add', min_api='2018-02-14') as c:
-        c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 [ip2]...', validator=validate_ip_address)
+    for item in ['add', 'remove']:
+        with self.argument_context('keyvault network-rule {}'.format(item), min_api='2018-02-14') as c:
+            c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
+                                                     '[ip2]...', validator=validate_ip_address)
 
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
         with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
@@ -439,11 +441,11 @@ def load_arguments(self, _):
                        type=datetime_type)
             c.argument('not_before', default=None, type=datetime_type,
                        help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
-            c.argument('exportable', arg_type=get_three_state_flag(), is_preview=True,
+            c.argument('exportable', arg_type=get_three_state_flag(),
                        help='Whether the private key can be exported. To create key with release policy, '
                             '"exportable" must be true and caller must have "export" permission.')
             c.argument('release_policy', options_list=['--policy'], type=file_type, completer=FilesCompleter(),
-                       validator=process_key_release_policy, is_preview=True,
+                       validator=process_key_release_policy,
                        help='The policy rules under which the key can be exported. '
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
             c.extra('default_cvm_policy', action='store_true',
@@ -517,6 +519,11 @@ def load_arguments(self, _):
                      'An immutable release policy cannot be changed or updated after being marked immutable. '
                      'Release policies are mutable by default.')
         c.extra('tags', tags_type)
+
+    with self.argument_context('keyvault key rotation-policy') as c:
+        c.argument('key_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   required=False, completer=get_keyvault_name_completion_list('key'),
+                   help='Name of the key. Required if --id is not specified.')
 
     with self.argument_context('keyvault key rotation-policy update') as c:
         c.argument('value', type=file_type, completer=FilesCompleter(),

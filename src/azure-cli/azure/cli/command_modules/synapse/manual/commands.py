@@ -207,6 +207,11 @@ def load_command_table(self, _):
         client_factory=cf_kusto_script,
     )
 
+    synapse_link_connection_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.artifacts.operations#linkconnectionOperations.{}',
+        client_factory=None,
+    )
+
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -577,3 +582,18 @@ def load_command_table(self, _):
         g.custom_command('list', 'synapse_kusto_script_list', client_factory=cf_kusto_scripts)
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')
+
+    with self.command_group('synapse link-connection', synapse_link_connection_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('list', 'list_link_connection')
+        g.custom_show_command('show', 'get_link_connection')
+        g.custom_command('delete', 'delete_link_connection')
+        g.custom_command('create', 'create_or_update_link_connection')
+        g.custom_command('update', 'create_or_update_link_connection')
+        g.custom_command('get-status', 'get_link_connection_status')
+        g.custom_command('start ', 'start_link_connection')
+        g.custom_command('stop', 'stop_link_connection')
+        g.custom_command('list-link-tables', 'synapse_list_link_table')
+        g.custom_command('edit-link-tables', 'synapse_edit_link_table')
+        g.custom_command('get-link-tables-status', 'synapse_get_link_tables_status')
+        g.custom_command('update-landing-zone-credential', 'synapse_update_landing_zone_credential')

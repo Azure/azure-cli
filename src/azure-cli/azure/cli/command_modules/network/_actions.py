@@ -37,7 +37,7 @@ class AddBackendAddressCreate(argparse._AppendAction):
             elif kl == 'subnet':
                 d['subnet'] = v[0]
             else:
-                raise CLIError('key error: key must be one of name and ip-address.')
+                raise CLIError('key error: key must be one of name, ip-address and subnet.')
         return d
 
 

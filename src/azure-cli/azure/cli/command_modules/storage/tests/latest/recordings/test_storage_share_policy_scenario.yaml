@@ -1,0 +1,930 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002/listKeys?api-version=2021-09-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-06-08T05:51:43.0520313Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-06-08T05:51:43.0520313Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Wed, 08 Jun 2022 05:52:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002/listKeys?api-version=2021-09-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-06-08T05:51:43.0520313Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-06-08T05:51:43.0520313Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Wed, 08 Jun 2022 05:52:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002?api-version=2021-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002","name":"share000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"keyCreationTime":{"key1":"2022-06-08T05:51:43.0520313Z","key2":"2022-06-08T05:51:43.0520313Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-06-08T05:51:43.0520313Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-06-08T05:51:43.0520313Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-06-08T05:51:42.9426569Z","primaryEndpoints":{"dfs":"https://share000002.dfs.core.windows.net/","web":"https://share000002.z20.web.core.windows.net/","blob":"https://share000002.blob.core.windows.net/","queue":"https://share000002.queue.core.windows.net/","table":"https://share000002.table.core.windows.net/","file":"https://share000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available","secondaryLocation":"centralus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://share000002-secondary.dfs.core.windows.net/","web":"https://share000002-secondary.z20.web.core.windows.net/","blob":"https://share000002-secondary.blob.core.windows.net/","queue":"https://share000002-secondary.queue.core.windows.net/","table":"https://share000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1784'
+      content-type:
+      - application/json
+      date:
+      - Wed, 08 Jun 2022 05:52:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:06 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 Jun 2022 05:52:07 GMT
+      etag:
+      - '"0x8DA4913059F0191"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:07 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:08 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers
+        />"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:10 GMT
+      etag:
+      - '"0x8DA4913059F0191"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:07 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --permissions --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:12 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers
+        />"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:14 GMT
+      etag:
+      - '"0x8DA4913059F0191"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:07 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '256'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - -n -s --permissions --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:14 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 Jun 2022 05:52:14 GMT
+      etag:
+      - '"0x8DA49130A0A338A"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:14 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --start --connection-string
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:15 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:17 GMT
+      etag:
+      - '"0x8DA49130A0A338A"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:14 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '422'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - -n -s --start --connection-string
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:17 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 Jun 2022 05:52:17 GMT
+      etag:
+      - '"0x8DA49130BADBA90"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:17 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --expiry --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:18 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:18 GMT
+      etag:
+      - '"0x8DA49130BADBA90"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:17 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19Z</Start><Expiry>2021-01-01T00:00:00Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '588'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - -n -s --expiry --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      etag:
+      - '"0x8DA49130CC542EB"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -s --connection-string
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:20 GMT
+      etag:
+      - '"0x8DA49130CC542EB"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:21 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:21 GMT
+      etag:
+      - '"0x8DA49130CC542EB"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --connection-string
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:23 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:23 GMT
+      etag:
+      - '"0x8DA49130CC542EB"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:24 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:25 GMT
+      etag:
+      - '"0x8DA49130CC542EB"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --permission --expiry --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:26 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:26 GMT
+      etag:
+      - '"0x8DA49130CC542EB"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:19 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>2020-12-31T23:59:00Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19Z</Start><Expiry>2021-01-01T00:00:00Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '600'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - -n -s --permission --expiry --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:27 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 Jun 2022 05:52:26 GMT
+      etag:
+      - '"0x8DA491311CA87FD"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:27 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:28 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:28 GMT
+      etag:
+      - '"0x8DA491311CA87FD"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:27 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:30 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Start>2022-06-08T05:52:19.0000000Z</Start><Expiry>2021-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:31 GMT
+      etag:
+      - '"0x8DA491311CA87FD"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:27 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14Z</Start><Expiry>9999-12-31T23:59:59Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00Z</Start><Expiry>2020-12-31T23:59:00Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '434'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - -n -s --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:32 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 Jun 2022 05:52:31 GMT
+      etag:
+      - '"0x8DA4913149F0F06"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:32 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -s --connection-string
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.8.7 (Windows-10-10.0.22000-SP0)
+      x-ms-date:
+      - Wed, 08 Jun 2022 05:52:33 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share&comp=acl
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Start>2022-06-08T05:52:14.0000000Z</Start><Expiry>9999-12-31T23:59:59.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2020-01-01T00:00:00.0000000Z</Start><Expiry>2020-12-31T23:59:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Wed, 08 Jun 2022 05:52:33 GMT
+      etag:
+      - '"0x8DA4913149F0F06"'
+      last-modified:
+      - Wed, 08 Jun 2022 05:52:32 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+version: 1

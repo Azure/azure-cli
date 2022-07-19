@@ -254,3 +254,7 @@ def cf_kusto_scripts(cli_ctx, workspace_name):
 
 def cf_synapse_sql_script(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).sql_script
+
+
+def cf_synapse_link_connection(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).link_connection

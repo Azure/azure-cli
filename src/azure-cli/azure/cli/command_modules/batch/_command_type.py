@@ -766,7 +766,7 @@ class AzureBatchDataPlaneCommand:
                 param = 'json_file'
                 docstring = f"A file containing the {arg[0].replace('_', ' ')} specification in JSON " \
                             "(formatted to match the respective REST API body). " \
-                            "If this parameter is specified, all '{group_title(arg[0])} Arguments'" \
+                            f"If this parameter is specified, all '{group_title(arg[0])} Arguments'" \
                             " are ignored."
                 args.append((param, CLICommandArgument(param,
                                                        options_list=[arg_name(param)],

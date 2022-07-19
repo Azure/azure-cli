@@ -1,0 +1,1014 @@
+interactions:
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -l -n
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-apim-deletedservice-rg000004?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004","name":"cli-test-apim-deletedservice-rg000004","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:30:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"name": "cli-test-apim-deletedservice-000003"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim check-name
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -o
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/checkNameAvailability?api-version=2021-08-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"Valid","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '52'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:30:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Consumption", "capacity": 0}, "identity": {"type": "SystemAssigned"},
+      "location": "westus", "properties": {"notificationSenderEmail": "publisher@contoso.com",
+      "disableGateway": false, "virtualNetworkType": "None", "restore": false, "publisherEmail":
+      "publisher@contoso.com", "publisherName": "Contoso"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '321'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -l --sku-name --publisher-email --publisher-name --enable-managed-identity
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003","name":"cli-test-apim-deletedservice-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAAyixA=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Created","targetProvisioningState":"Activating","createdAtUtc":"2022-05-27T20:30:12.0054808Z","gatewayUrl":"https://cli-test-apim-deletedservice-000003.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-deletedservice-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":null,"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"mtv1"},"sku":{"name":"Consumption","capacity":0},"identity":{"type":"SystemAssigned","principalId":"e1aaa64f-45b0-496a-836c-65f1dbb73658","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"zones":null,"systemData":{"createdBy":"alanfeng@microsoft.com","createdByType":"User","createdAt":"2022-05-27T20:30:11.2356969Z","lastModifiedBy":"alanfeng@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-27T20:30:11.2356969Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1894'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:30:15 GMT
+      etag:
+      - '"AAAAAAAyixA="'
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGVsZXRlZHNlcnZpY2UteWNqbzQ0X0FjdF84NzZhNmNhYg==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --publisher-email --publisher-name --enable-managed-identity
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGVsZXRlZHNlcnZpY2UteWNqbzQ0X0FjdF84NzZhNmNhYg==?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003","name":"cli-test-apim-deletedservice-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAAyixU=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2022-05-27T20:30:12.0054808Z","gatewayUrl":"https://cli-test-apim-deletedservice-000003.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-deletedservice-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"mtv1"},"sku":{"name":"Consumption","capacity":0},"identity":{"type":"SystemAssigned","principalId":"e1aaa64f-45b0-496a-836c-65f1dbb73658","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"zones":null,"systemData":{"createdBy":"alanfeng@microsoft.com","createdByType":"User","createdAt":"2022-05-27T20:30:11.2356969Z","lastModifiedBy":"alanfeng@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-27T20:30:11.2356969Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2385'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:31:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "cli-test-apim-deletedservice-000003"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim check-name
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/checkNameAvailability?api-version=2021-08-01
+  response:
+    body:
+      string: '{"nameAvailable":false,"reason":"AlreadyExists","message":"cli-test-apim-deletedservice-000003
+        is already in use. Please select a different name."}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '147'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:31:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --created
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003","name":"cli-test-apim-deletedservice-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAAyixU=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2022-05-27T20:30:12.0054808Z","gatewayUrl":"https://cli-test-apim-deletedservice-000003.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-deletedservice-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"mtv1"},"sku":{"name":"Consumption","capacity":0},"identity":{"type":"SystemAssigned","principalId":"e1aaa64f-45b0-496a-836c-65f1dbb73658","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"zones":null,"systemData":{"createdBy":"alanfeng@microsoft.com","createdByType":"User","createdAt":"2022-05-27T20:30:11.2356969Z","lastModifiedBy":"alanfeng@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-27T20:30:11.2356969Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2385'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:31:16 GMT
+      etag:
+      - '"AAAAAAAyixU="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-apim-deletedservice-rg000004?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:31:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:31:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:31:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:32:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:32:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:32:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:32:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:33:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:33:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -y
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEQVBJTToyRERFTEVURURTRVJWSUNFOjJEUkdXVk5KLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:33:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim deletedservice list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/deletedservices?api-version=2021-08-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003","name":"cli-test-apim-deletedservice-000003","type":"Microsoft.ApiManagement/deletedservices","location":"West
+        US","properties":{"serviceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003","scheduledPurgeDate":"2022-05-29T20:31:26.1975508Z","deletionDate":"2022-05-27T20:31:59.024237Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/eastus2euap/deletedservices/kjoshieuapeus2","name":"kjoshieuapeus2","type":"Microsoft.ApiManagement/deletedservices","location":"East
+        US 2 EUAP","properties":{"serviceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kjoshitest/providers/Microsoft.ApiManagement/service/kjoshieuapeus2","scheduledPurgeDate":"2022-05-28T22:01:36.8486322Z","deletionDate":"2022-05-26T22:02:09.1702502Z"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:33:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+      - d450b700-b9a1-4f8f-8c6b-cccf75974dbe
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim deletedservice show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003","name":"cli-test-apim-deletedservice-000003","type":"Microsoft.ApiManagement/deletedservices","location":"West
+        US","properties":{"serviceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003","scheduledPurgeDate":"2022-05-29T20:31:26.1975508Z","deletionDate":"2022-05-27T20:31:59.024237Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '587'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:33:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim deletedservice purge
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -l -n
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003","name":"cli-test-apim-deletedservice-000003","type":"Microsoft.ApiManagement/deletedservices","location":"West
+        US","properties":{"serviceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-apim-deletedservice-rg000004/providers/Microsoft.ApiManagement/service/cli-test-apim-deletedservice-000003","scheduledPurgeDate":"2022-05-27T20:33:38.2076281Z","deletionDate":"2022-05-27T20:31:59.024237Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '587'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:33:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGVsZXRlZHNlcnZpY2UteWNqbzQ0X1Rlcm1fZDRmZjRkNTY=?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim deletedservice purge
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/westus/deletedservices/cli-test-apim-deletedservice-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGVsZXRlZHNlcnZpY2UteWNqbzQ0X1Rlcm1fZDRmZjRkNTY=?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 27 May 2022 20:35:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim deletedservice list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.4 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/deletedservices?api-version=2021-08-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/locations/eastus2euap/deletedservices/kjoshieuapeus2","name":"kjoshieuapeus2","type":"Microsoft.ApiManagement/deletedservices","location":"East
+        US 2 EUAP","properties":{"serviceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kjoshitest/providers/Microsoft.ApiManagement/service/kjoshieuapeus2","scheduledPurgeDate":"2022-05-28T22:01:36.8486322Z","deletionDate":"2022-05-26T22:02:09.1702502Z"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 May 2022 20:35:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+      - de5e47d9-1b37-497e-bf06-2ae03af7defc
+    status:
+      code: 200
+      message: OK
+version: 1

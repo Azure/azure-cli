@@ -40,8 +40,8 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
     acl = _get_acl(cmd, client, **kwargs)
     try:
         policy = acl[policy_name]
-        policy.start = start or policy.start
-        policy.expiry = expiry or policy.expiry
+        policy.start = start if start else policy.start
+        policy.expiry = expiry if expiry else policy.expiry
         policy.permission = permission or policy.permission
         if hasattr(acl, 'public_access'):
             kwargs['public_access'] = getattr(acl, 'public_access')
@@ -93,6 +93,11 @@ def _get_acl(cmd, client, **kwargs):
 def convert_acl_permissions(result):
     if result is None:
         return None
+    if 'signed_identifiers' in result:
+        signed_identifiers = {}
+        for identifier in result["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
+        result = signed_identifiers
     for policy in sorted(result.keys()):
         if getattr(result[policy], 'permission') is None:
             setattr(result[policy], 'permission', '')

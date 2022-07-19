@@ -58,8 +58,8 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('retentionPolicy.enabled', False),
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
-    @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
     @AllowLargeResponse(1024)
     def test_nw_flow_log_delete(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
