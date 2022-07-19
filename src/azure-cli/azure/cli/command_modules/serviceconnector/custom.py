@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import logging
 from knack.log import get_logger
 from knack.util import todict
 from azure.cli.core.util import sdk_no_wait
@@ -13,6 +14,7 @@ from azure.cli.core.azclierror import (
     AzureResponseError
 )
 from ._resource_config import (
+    CLIENT_TYPE,
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
     TARGET_RESOURCES
@@ -147,7 +149,7 @@ def connection_validate(cmd, client,
     return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
-def connection_create(cmd, client,  # pylint: disable=too-many-locals
+def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=too-many-statements
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None,
                       target_resource_group=None, target_id=None,
@@ -157,6 +159,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       key_vault_id=None,
                       service_endpoint=None,
                       private_endpoint=None,
+                      store_in_connection_string=False,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None,                                             # Resource.WebApp
@@ -189,6 +192,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
     if not new_addon and len(all_auth_info) != 1:
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+
+    if store_in_connection_string:
+        if client_type == CLIENT_TYPE.Dotnet.value:
+            client_type = CLIENT_TYPE.DotnetConnectionString.value
+        else:
+            logging.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
 
     parameters = {
         'target_service': {
@@ -271,6 +280,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       key_vault_id=None,
                       service_endpoint=None,
                       private_endpoint=None,
+                      store_in_connection_string=False,
                       no_wait=False,
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
@@ -311,13 +321,20 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
 
+    client_type = client_type or linker.get('clientType')
+    if store_in_connection_string:
+        if client_type == CLIENT_TYPE.Dotnet.value:
+            client_type = CLIENT_TYPE.DotnetConnectionString.value
+        else:
+            logging.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
+
     parameters = {
         'target_service': linker.get('targetService'),
         'auth_info': auth_info,
         'secret_store': {
             'key_vault_id': key_vault_id,
         },
-        'client_type': client_type or linker.get('clientType'),
+        'client_type': client_type,
         # scope can be updated in container app while cannot be updated in aks due to some limitations
         'scope': scope or linker.get('scope')
     }

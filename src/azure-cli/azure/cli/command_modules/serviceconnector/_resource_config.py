@@ -60,6 +60,7 @@ class AUTH_TYPE(Enum):
 # The dict defines the client types
 class CLIENT_TYPE(Enum):
     Dotnet = 'dotnet'
+    DotnetConnectionString = 'dotnet-connectionString'
     Java = 'java'
     Nodejs = 'nodejs'
     Python = 'python'
@@ -80,6 +81,9 @@ SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
 
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
+
+# The target resources could be set to connection string
+TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
 
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
