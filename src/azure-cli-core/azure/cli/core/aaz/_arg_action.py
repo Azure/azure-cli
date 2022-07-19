@@ -13,7 +13,7 @@ from collections import OrderedDict
 from knack.log import get_logger
 
 from azure.cli.core import azclierror
-from ._base import AAZUndefined
+from ._base import AAZUndefined, AAZBlankArgValue
 from ._help import AAZShowHelp
 from ._utils import AAZShortHandSyntaxParser
 from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
@@ -94,9 +94,8 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if prefix_keys is None:
             prefix_keys = []
         if values is None:
-            if cls._schema._blank == AAZUndefined:
-                raise AAZInvalidValueError("argument cannot be blank")
-            data = cls._schema._blank  # use blank data when values string is None
+
+            data = AAZBlankArgValue  # use blank data when values string is None
         else:
             if isinstance(values, list):
                 assert prefix_keys  # the values will be input as an list when parse singular option of a list argument
@@ -112,11 +111,16 @@ class AAZSimpleTypeArgAction(AAZArgAction):
                     raise aaz_help
             else:
                 data = values
-            data = cls.format_data(data)
+        data = cls.format_data(data)
         dest_ops.add(data, *prefix_keys)
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            return cls._schema._blank
+
         if isinstance(data, str):
             # transfer string into correct data
             if cls._schema.enum:
@@ -204,7 +208,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
 
         if len(value) == 0:
             # the express "a=" will return the blank value of schema 'a'
-            return schema._blank
+            return AAZBlankArgValue
 
         try:
             if isinstance(schema, AAZSimpleTypeArg):
@@ -236,6 +240,11 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            return cls._schema._blank
+
         if data is None:
             if cls._schema._nullable:
                 return data
@@ -258,6 +267,11 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            return cls._schema._blank
+
         if data is None:
             if cls._schema._nullable:
                 return data
@@ -357,6 +371,11 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            return cls._schema._blank
+
         if data is None:
             if cls._schema._nullable:
                 return data

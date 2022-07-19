@@ -99,3 +99,43 @@ class AAZValuePatch:
 
     def __init__(self, data):
         self.data = data
+
+
+class _AAZBlankArgValueType:
+    """Internal class for AAZUndefined global const"""
+
+    def __str__(self):
+        return 'BlankArgValue'
+
+    def __repr__(self):
+        return 'BlankArgValue'
+
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
+    def __bool__(self):
+        return False
+
+    def __lt__(self, other):
+        self._cmp_err(other, '<')
+
+    def __gt__(self, other):
+        self._cmp_err(other, '>')
+
+    def __le__(self, other):
+        self._cmp_err(other, '<=')
+
+    def __ge__(self, other):
+        self._cmp_err(other, '>=')
+
+    def _cmp_err(self, other, op):
+        raise TypeError(f"unorderable types: {self.__class__.__name__}() {op} {other.__class__.__name__}()")
+
+
+# AAZ framework defines a global const called AAZUndefined. Which is used to show a field is not defined.
+# In order to different with `None` value
+# This value is used in aaz package only.
+AAZBlankArgValue = _AAZBlankArgValueType()

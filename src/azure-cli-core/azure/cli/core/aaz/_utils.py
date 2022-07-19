@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
 from ._help import AAZShowHelp
+from ._base import AAZBlankArgValue
 
 
 class AAZShortHandSyntaxParser:
@@ -78,21 +79,24 @@ class AAZShortHandSyntaxParser:
             idx += length
             if idx < len(remain) and remain[idx] == ':':
                 idx += 1
+                if idx >= len(remain):
+                    raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
+
+                try:
+                    value, length = self.parse_value(remain[idx:])
+                except AAZInvalidShorthandSyntaxError as ex:
+                    ex.error_data = remain
+                    ex.error_at += idx
+                    raise ex
+                except AAZShowHelp as aaz_help:
+                    aaz_help.keys = [key, *aaz_help.keys]
+                    raise aaz_help
+            elif idx < len(remain) and remain[idx] == ',':
+                # use blank value
+                value = AAZBlankArgValue
+                idx = 0
             else:
-                raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect character ':'")
-
-            if idx >= len(remain):
-                raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
-
-            try:
-                value, length = self.parse_value(remain[idx:])
-            except AAZInvalidShorthandSyntaxError as ex:
-                ex.error_data = remain
-                ex.error_at += idx
-                raise ex
-            except AAZShowHelp as aaz_help:
-                aaz_help.keys = [key, *aaz_help.keys]
-                raise aaz_help
+                raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect characters ':' or ','")
 
             result[key] = value
             idx += length
