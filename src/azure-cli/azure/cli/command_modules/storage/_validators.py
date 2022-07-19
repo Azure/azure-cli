@@ -658,8 +658,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
         # content_md5 value to bytearray. And track2 SDK will serialize it into the right value with str type in header.
         if is_storagev2(prefix):
             if process_md5 and new_props.content_md5:
-                from .track2_util import _str_to_bytearray
-                new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
+                # During update, the content_md5 might be bytearray, we do not need to convert again.
+                if not isinstance(new_props.content_md5, bytearray):
+                    from .track2_util import _str_to_bytearray
+                    new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
 
         ns['content_settings'] = new_props
 
