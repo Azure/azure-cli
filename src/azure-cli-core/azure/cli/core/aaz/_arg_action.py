@@ -94,7 +94,6 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if prefix_keys is None:
             prefix_keys = []
         if values is None:
-
             data = AAZBlankArgValue  # use blank data when values string is None
         else:
             if isinstance(values, list):
@@ -119,7 +118,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            return cls._schema._blank
+            data = cls._schema._blank
 
         if isinstance(data, str):
             # transfer string into correct data
@@ -139,10 +138,6 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 
 
 class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
-
-    key_pattern = re.compile(
-        r'^(((\[-?[0-9]+])|(([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?)*)=(.*)$'
-    )   # 'Partial Value' format
 
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
@@ -165,37 +160,9 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     @classmethod
     def decode_values(cls, values):
         for v in values:
-            key, key_parts, v = cls._split_value_str(v)
+            key, key_parts, v = cls._str_parser.split_partial_value(v)
             v = cls._decode_value(key, key_parts, v)
             yield key, key_parts, v
-
-    @classmethod
-    def _split_value_str(cls, v):
-        """ split 'Partial Value' format """
-        assert isinstance(v, str)
-        match = cls.key_pattern.fullmatch(v)
-        if not match:
-            key = None
-        else:
-            key = match[1]
-            v = match[len(match.regs) - 1]
-        key_parts = cls._split_key(key)
-        return key, key_parts, v
-
-    @staticmethod
-    def _split_key(key):
-        """ split index key of 'Partial Value' format """
-        if key is None:
-            return tuple()
-        key_items = []
-        key = key[0] + key[1:].replace('[', '.[')  # transform 'ab[2]' to 'ab.[2]', keep '[1]' unchanged
-        for part in key.split('.'):
-            assert part
-            if part.startswith('['):
-                assert part.endswith(']')
-                part = int(part[1:-1])
-            key_items.append(part)
-        return tuple(key_items)
 
     @classmethod
     def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
@@ -243,7 +210,7 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            return cls._schema._blank
+            data = cls._schema._blank
 
         if data is None:
             if cls._schema._nullable:
@@ -270,7 +237,7 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            return cls._schema._blank
+            data = cls._schema._blank
 
         if data is None:
             if cls._schema._nullable:
@@ -341,7 +308,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 #       --args [val1,val2,val3]
 
                 for value in values:
-                    key, _, _ = cls._split_value_str(value)
+                    key, _, _ = cls._str_parser.split_partial_value(value)
                     if key is not None:
                         # key should always be None
                         raise ex
@@ -374,7 +341,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            return cls._schema._blank
+            data = cls._schema._blank
 
         if data is None:
             if cls._schema._nullable:
