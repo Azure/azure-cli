@@ -2474,7 +2474,13 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
-            if record_type == 'aaaa' or record_type == 'a':
+            # Checking for alias record
+            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set.target_resource.id:
+                target_resource_id = record_set.target_resource.id
+                record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
+                record_type = 'alias'
+                zone_obj[record_set_name][record_type] = []
+            elif record_type == 'aaaa' or record_type == 'a':
                 record_obj.update({'ip': ''})
             elif record_type == 'cname':
                 record_obj.update({'alias': ''})
