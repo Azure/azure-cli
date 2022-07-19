@@ -1972,15 +1972,15 @@ examples:
   - name: Create a policy set definition.
     text: |
         az policy set-definition create -n readOnlyStorage \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
+  - name: Create a policy set definition with parameters.
+    text: |
+        az policy set-definition create -n readOnlyStorage \\
             --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\", \\"parameters\\": \\
                     { \\"storageSku\\": { \\"value\\": \\"[parameters(\\\\"requiredSku\\\\")]\\" } } }]" \\
             --params "{ \\"requiredSku\\": { \\"type\\": \\"String\\" } }"
-  - name: Create a policy set definition with parameters.
-    text: |
-        az policy set-definition create -n readOnlyStorage \\
-            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
-                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition in a subscription.
     text: |
         az policy set-definition create -n readOnlyStorage \\
