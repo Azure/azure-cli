@@ -8,11 +8,11 @@ To set up your system to be able to alter and regenerate the grammar code, see t
 
 The steps for Windows are replicated here:
 ```
-Download https://www.antlr.org/download/antlr-4.7.2-complete.jar.
+Download https://www.antlr.org/download/antlr-4.9.3-complete.jar.
 Add antlr4-complete.jar to CLASSPATH, either:
 Permanently: Using System Properties dialog > Environment variables > Create or append to CLASSPATH variable
 Temporarily, at command line:
-SET CLASSPATH=.;C:\Javalib\antlr4-complete.jar;%CLASSPATH%
+SET CLASSPATH=.;C:\Javalib\antlr-4.9.3-complete.jar;%CLASSPATH%
 ```
 
 You will likely also need to add the path to your JDK bin directory to your PATH.
