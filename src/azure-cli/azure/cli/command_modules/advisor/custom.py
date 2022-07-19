@@ -180,16 +180,10 @@ def _set_configuration(client, resource_group_name=None, parameters=None, config
 def _get_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
     if ids:
         resource_ids = [_parse_recommendation_uri(id_arg)['resource_uri'] for id_arg in ids]
-        recs = list_recommendations(
-            client=client,
-            ids=resource_ids
-        )
+        recs = list_recommendations(client=client, ids=resource_ids)
         return [r for r in recs if r.id in ids]
 
-    recs = list_recommendations(
-            client=client,
-            resource_group_name=resource_group_name)
+    recs = list_recommendations(client=client, resource_group_name=resource_group_name)
     if recommendation_name:
         return [r for r in recs if r.name == recommendation_name]
-    
     return recs
