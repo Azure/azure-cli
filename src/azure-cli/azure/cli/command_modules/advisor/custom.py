@@ -185,11 +185,11 @@ def _get_recommendations(client, ids=None, resource_group_name=None, recommendat
             ids=resource_ids
         )
         return [r for r in recs if r.id in ids]
-    
+
     recs = list_recommendations(
             client=client,
             resource_group_name=resource_group_name)
     if recommendation_name:
         return [r for r in recs if r.name == recommendation_name]
-    else:
-        return recs
+    
+    return recs
