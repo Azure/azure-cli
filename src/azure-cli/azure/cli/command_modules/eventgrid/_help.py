@@ -668,7 +668,7 @@ type: command
 short-summary: Activate a partner destination.
 examples:
   - name: Activate a partner destination.
-    text: az eventgrid partner destination activate -g rg1 --partner-destination-name destination1
+    text: az eventgrid partner destination activate -g rg1 -n destination1
 
 """
 
@@ -677,11 +677,10 @@ type: command
 short-summary: Create a partner destination.
 examples:
   - name: Create a partner destination.
-    text: az eventgrid partner destination create --location westus2 -g rg1 --partner-destination-name destination1
+    text: az eventgrid partner destination create --location westus2 -g rg1 -n destination1
   - name: Create a partner destination with an activation message and expiration time.
     text: |
-        az eventgrid partner destination create --location westus2 -g rg1 \\
-            --partner-destination-name destination1 \\
+        az eventgrid partner destination create --location westus2 -g rg1 -n destination1 \\
             --activation-expiration-date 2022-06-14T05:37:51.272Z \\
             --message-for-activation "This is an activation message"
 
@@ -692,7 +691,7 @@ type: command
 short-summary: Delete a partner destination.
 examples:
   - name: Delete a partner destination.
-    text: az eventgrid partner destination delete -g rg1 --partner-destination-name destination1
+    text: az eventgrid partner destination delete -g rg1 -n destination1
 
 """
 
@@ -716,7 +715,7 @@ type: command
 short-summary: Get the details of a partner destination.
 examples:
   - name: Show the details of a partner destination.
-    text: az eventgrid partner destination show -g rg1 --partner-destination-name destinationname1
+    text: az eventgrid partner destination show -g rg1 -n destinationname1
 
 """
 
@@ -725,7 +724,7 @@ type: command
 short-summary: Update the details of a partner destination.
 examples:
   - name: Update the tags of a partner destination.
-    text: az eventgrid partner destination update -g rg1 --partner-destination-name destinationname1 --tags Dept=IT
+    text: az eventgrid partner destination update -g rg1 -n destinationname1 --tags Dept=IT
 
 """
 
@@ -832,7 +831,7 @@ type: command
 short-summary: Create a new channel for a partner namespace.
 parameters:
   - name: --inline-event-type
-    short-summary: Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
+    short-summary: Create a channel for an existing partner namespace, either of type partner topic or partner destination. You can also add inline event type info if channel type is partner topic. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
     long-summary: |
       Usage:       --inline-event-type KEY [description=<description>] [documentation-url=<url>] \\
                      [data-schema-url=<url>]
@@ -845,14 +844,15 @@ examples:
     text: |
         az eventgrid partner namespace channel create -g rg1 --name channel1 \\
           --channel-type PartnerDestination --partner-namespace-name namespace1 \\
-          --partner-destination-name destination1
+          --partner-destination-name destination1 --destination-sub-id e14e31c8-0ce7-4ff5-be5b-dd2b2a3f3535 --destination-rg rg2
 
   - name: Create a new channel of type PartnerTopic with inline event types.
     text: |
         az eventgrid partner namespace channel create -g rg1 --name channel1 \\
           --channel-type PartnerTopic --partner-namespace-name namespace1 \\
           --partner-topic-name topic1 \\
-          --partner-topic-source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname
+           --destination-sub-id e14e31c8-0ce7-4ff5-be5b-dd2b2a3f3535 --destination-rg rg2 \\
+          --partner-topic-source /subscriptions/1b3b4501-23b9-4790-c31b-ddbd88d72123/resourceGroups/rg2/providers/Microsoft.Storage/storageAccounts/stgaccountname \\
           --inline-event-type eventkey1 description="My event type." \\
           --inline-event-type eventkey2 description="My second event type."
 
