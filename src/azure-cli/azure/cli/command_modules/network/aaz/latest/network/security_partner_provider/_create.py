@@ -68,7 +68,7 @@ class Create(AAZCommand):
             help="Name or ID of the virtual hub to which the Security Partner Provider belongs.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-            )
+            ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
