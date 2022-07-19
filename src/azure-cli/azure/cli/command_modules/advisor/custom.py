@@ -28,7 +28,7 @@ def disable_recommendations(client, ids=None, recommendation_name=None,
         ids=ids,
         resource_group_name=resource_group_name,
         recommendation_name=recommendation_name)
-    
+
     if recs is not None:
         for rec in recs:
             suppression_name = str(uuid.uuid4())
@@ -56,10 +56,10 @@ def disable_recommendations(client, ids=None, recommendation_name=None,
 
 def enable_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
     if recommendation_name is None and ids is None:
-            from knack.prompting import prompt_y_n
-
-            if not prompt_y_n("\nAre you sure you want to enable all recommendation?"):
-                return None
+        from knack.prompting import prompt_y_n
+        
+        if not prompt_y_n("\nAre you sure you want to enable all recommendation?"):
+          return None
 
     recs = _get_recommendations(
         client=client.recommendations,
@@ -195,5 +195,4 @@ def _get_recommendations(client, ids=None, resource_group_name=None, recommendat
         recs = list_recommendations(
             client=client,
             resource_group_name=resource_group_name)
-
-    return recs
+        return recs
