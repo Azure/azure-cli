@@ -11,9 +11,7 @@ def create_acl_policy(cmd, client, policy_name, start=None, expiry=None, permiss
     """Create a stored access policy on the containing object"""
     t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
     acl = _get_acl(cmd, client, **kwargs)
-    acl[policy_name] = t_access_policy(permission if permission else '',
-                                       expiry if expiry else datetime.max,
-                                       start if start else datetime.utcnow())
+    acl[policy_name] = t_access_policy(permission, expiry, start)
     if hasattr(acl, 'public_access'):
         kwargs['public_access'] = getattr(acl, 'public_access')
 
@@ -40,9 +38,13 @@ def set_acl_policy(cmd, client, policy_name, start=None, expiry=None, permission
     acl = _get_acl(cmd, client, **kwargs)
     try:
         policy = acl[policy_name]
-        policy.start = start if start else policy.start
-        policy.expiry = expiry if expiry else policy.expiry
-        policy.permission = permission or policy.permission
+        if policy is None:
+            t_access_policy = cmd.get_models('_models#AccessPolicy', resource_type=ResourceType.DATA_STORAGE_BLOB)
+            acl[policy_name] = t_access_policy(permission, expiry, start)
+        else:
+            policy.start = start if start else policy.start
+            policy.expiry = expiry if expiry else policy.expiry
+            policy.permission = permission or policy.permission
         if hasattr(acl, 'public_access'):
             kwargs['public_access'] = getattr(acl, 'public_access')
 
@@ -99,6 +101,8 @@ def convert_acl_permissions(result):
             signed_identifiers[identifier.id] = identifier.access_policy
         result = signed_identifiers
     for policy in sorted(result.keys()):
+        if result[policy] is None:
+            continue
         if getattr(result[policy], 'permission') is None:
             setattr(result[policy], 'permission', '')
     return result
