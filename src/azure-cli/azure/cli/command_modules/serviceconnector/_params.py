@@ -148,11 +148,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                              help='Connect target service by private endpoint. '
                              'The private endpoint in source virtual network must be created ahead.')
 
-    def add_connection_string_argument(context):
-        context.argument('store_in_connection_string', options_list=['--store-in-connection-string'],
-                         arg_type=get_three_state_flag(), default=False, is_preview=True,
-                         help='Store configuration into connection string, '
-                              'only could be used together with dotnet client_type')
+    def add_connection_string_argument(context, source, target):
+        if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
+            context.argument('store_in_connection_string', options_list=['--store-connstr'],
+                             arg_type=get_three_state_flag(), default=False, is_preview=True,
+                             help='Store configuration into connection string, '
+                                  'only could be used together with dotnet client_type')
+        else:
+            context.ignore('store_in_connection_string')
 
     def add_confluent_kafka_argument(context):
         context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')
@@ -201,8 +204,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_new_addon_argument(c, source, target)
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
-                if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
-                    add_connection_string_argument(c)
+                add_connection_string_argument(c, source, target)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
@@ -210,8 +212,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_auth_block(c, source, target)
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
-                if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
-                    add_connection_string_argument(c)
+                add_connection_string_argument(c, source, target)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
