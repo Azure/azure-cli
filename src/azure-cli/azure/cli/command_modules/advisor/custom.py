@@ -17,37 +17,50 @@ def list_recommendations(client, ids=None, resource_group_name=None,
 
 def disable_recommendations(client, ids=None, recommendation_name=None,
                             resource_group_name=None, days=None):
+    if recommendation_name is None and ids is None:
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to disabled all recommendation?"):
+            return None
+
     recs = _get_recommendations(
         client=client.recommendations,
         ids=ids,
         resource_group_name=resource_group_name,
         recommendation_name=recommendation_name)
+    
+    if recs is not None:
+        for rec in recs:
+            suppression_name = str(uuid.uuid4())
+            ttl = '{}:00:00:00'.format(days) if days else ''
 
-    for rec in recs:
-        suppression_name = str(uuid.uuid4())
-        ttl = '{}:00:00:00'.format(days) if days else ''
+            result = _parse_recommendation_uri(rec.id)
+            resource_uri = result['resource_uri']
+            recommendation_id = result['recommendation_id']
+            suppression_contract = SuppressionContract(ttl=ttl)
 
-        result = _parse_recommendation_uri(rec.id)
-        resource_uri = result['resource_uri']
-        recommendation_id = result['recommendation_id']
-        suppression_contract = SuppressionContract(ttl=ttl)
+            sup = client.suppressions.create(
+                resource_uri=resource_uri,
+                recommendation_id=recommendation_id,
+                name=suppression_name,
+                suppression_contract=suppression_contract
+            )
 
-        sup = client.suppressions.create(
-            resource_uri=resource_uri,
-            recommendation_id=recommendation_id,
-            name=suppression_name,
-            suppression_contract=suppression_contract
-        )
-
-        if rec.suppression_ids:
-            rec.suppression_ids.append(sup.suppression_id)
-        else:
-            rec.suppression_ids = [sup.suppression_id]
+            if rec.suppression_ids:
+                rec.suppression_ids.append(sup.suppression_id)
+            else:
+                rec.suppression_ids = [sup.suppression_id]
 
     return recs
 
 
 def enable_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
+    if recommendation_name is None and ids is None:
+            from knack.prompting import prompt_y_n
+
+            if not prompt_y_n("\nAre you sure you want to enable all recommendation?"):
+                return None
+
     recs = _get_recommendations(
         client=client.recommendations,
         ids=ids,
@@ -178,5 +191,9 @@ def _get_recommendations(client, ids=None, resource_group_name=None, recommendat
             client=client,
             resource_group_name=resource_group_name)
         return [r for r in recs if r.name == recommendation_name]
+    else:
+        recs = list_recommendations(
+            client=client,
+            resource_group_name=resource_group_name)
 
-    return None
+    return recs
