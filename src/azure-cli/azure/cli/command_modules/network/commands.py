@@ -28,7 +28,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
     cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
