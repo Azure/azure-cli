@@ -5,9 +5,9 @@
 
 
 def _msi_client_factory(cli_ctx, **_):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_MSI)
 
 
 def _msi_user_identities_operations(cli_ctx, _):

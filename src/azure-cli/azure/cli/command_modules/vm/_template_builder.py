@@ -25,6 +25,7 @@ class StorageProfile(Enum):
     ManagedCustomImage = 5
     ManagedSpecializedOSDisk = 6
     SharedGalleryImage = 7
+    CommunityGalleryImage = 8
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -301,7 +302,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None):
+        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -463,6 +465,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 "imageReference": {
                     'sharedGalleryImageId': image_reference
                 }
+            },
+            'CommunityGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'communityGalleryImageId': image_reference
+                }
             }
         }
         if os_disk_encryption_set is not None:
@@ -475,6 +490,51 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set,
             }
+            storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+        if os_disk_security_encryption_type is not None:
+            storage_profiles['ManagedPirImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            storage_profiles['ManagedCustomImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            storage_profiles['SharedGalleryImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_profiles['ManagedPirImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+                storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+                storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+                storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
 
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
@@ -850,7 +910,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
-                        v_cpus_per_core=None):
+                        v_cpus_per_core=None, os_disk_security_encryption_type=None,
+                        os_disk_secure_vm_disk_encryption_set=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -927,6 +988,18 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set
             }
+        if os_disk_security_encryption_type is not None:
+            storage_properties['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_properties['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
         if disk_info and disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
@@ -958,6 +1031,44 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set
             }
+        if os_disk_security_encryption_type is not None:
+            storage_properties['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_properties['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+    if storage_profile == StorageProfile.CommunityGalleryImage:
+        storage_properties['osDisk'] = {
+            'caching': os_caching,
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
+            "name": os_disk_name,
+            "createOption": "fromImage"
+        }
+        storage_properties['imageReference'] = {
+            'communityGalleryImageId': image
+        }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
+        if os_disk_security_encryption_type is not None:
+            storage_properties['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_properties['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
 
     if disk_info:
         data_disks = [v for k, v in disk_info.items() if k != 'os']

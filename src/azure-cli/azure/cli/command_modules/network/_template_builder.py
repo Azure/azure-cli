@@ -59,7 +59,7 @@ def _build_appgw_private_link_ip_configuration(name,
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_tier, capacity, servers, frontend_port,
-                                       private_ip_address, private_ip_allocation,
+                                       private_ip_address, private_ip_allocation, priority,
                                        cert_data, cert_password, key_vault_secret_id,
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
@@ -258,6 +258,9 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ],
         'privateLinkConfigurations': privateLinkConfigurations,
     }
+    if sku_name.lower() == 'standard_v2' or sku_name.lower() == 'waf_v2':
+        if cmd.supported_api_version(min_api='2021-08-01') and priority:
+            ag_properties['requestRoutingRules'][0]['properties'].update({'priority': priority})
     if ssl_cert:
         ag_properties.update({'sslCertificates': [ssl_cert]})
     if enable_http2 and cmd.supported_api_version(min_api='2017-10-01'):

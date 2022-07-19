@@ -40,17 +40,19 @@ class AmsSpTests(ScenarioTest):
 
             try:
                 spjson = self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
-                    self.check('AadSecret', '{spPassword}'),
+                    self.check('AadSecretFriendlyName', '{spPassword}'),
                     self.check('ResourceGroup', '{rg}'),
-                    self.check('AccountName', '{amsname}')
+                    self.check('AccountName', '{amsname}'),
+                    self.check('Role', '{role}')
                 ]).get_output_in_json()
                 self.kwargs.update({'appId': spjson['AadClientId']})
 
                 # Wait 2 minutes for role assignment to be created.
                 time.sleep(300)
 
-                self.cmd('az ams account sp reset-credentials -a {amsname} -g {rg} -n {appId} -p {spNewPassword}', checks=[
-                    self.check('AadSecret', '{spNewPassword}'),
+                self.cmd('az ams account sp reset-credentials -a {amsname} -g {rg} -n {spName} -p {spNewPassword}', checks=[
+                    self.check('AadClientId', '{appId}'),
+                    self.check('AadSecretFriendlyName', '{spNewPassword}'),
                     self.check('ResourceGroup', '{rg}'),
                     self.check('AccountName', '{amsname}')
                 ])

@@ -32,6 +32,7 @@ from ._constants import get_managed_sku
 from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
 from .policy import acr_config_authentication_as_arm_show
+from ._format import add_timestamp
 
 
 logger = get_logger(__name__)
@@ -86,7 +87,10 @@ def _handle_challenge_phase(login_server,
 
     login_server = login_server.rstrip('/')
 
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    request_url = 'https://' + login_server + '/v2/'
+    logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(request_url)))
+    challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
+
     if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
         if is_diagnostics_context:
@@ -148,6 +152,7 @@ def _get_aad_token_after_challenge(cli_ctx,
         'access_token': creds[1]
     }
 
+    logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
@@ -178,6 +183,8 @@ def _get_aad_token_after_challenge(cli_ctx,
         'scope': scope,
         'refresh_token': refresh_token
     }
+
+    logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
@@ -279,6 +286,7 @@ def _get_token_with_username_and_password(login_server,
         'scope': scope
     }
 
+    logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
@@ -342,6 +350,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     # Validate the login server is reachable
     url = 'https://' + login_server + '/v2/'
     try:
+        logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(url)))
         challenge = requests.get(url, verify=(not should_disable_connection_verify()))
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
@@ -558,6 +567,7 @@ def request_data_from_registry(http_method,
         try:
             if file_payload:
                 with open(file_payload, 'rb') as data_payload:
+                    logger.debug(add_timestamp("Sending a HTTP {} request to {}".format(http_method, url)))
                     response = requests.request(
                         method=http_method,
                         url=url,
@@ -568,6 +578,7 @@ def request_data_from_registry(http_method,
                         verify=(not should_disable_connection_verify())
                     )
             else:
+                logger.debug(add_timestamp("Sending a HTTP {} request to {}".format(http_method, url)))
                 response = requests.request(
                     method=http_method,
                     url=url,
@@ -635,7 +646,7 @@ def parse_error_message(error_message, response):
 
     try:
         correlation_id = response.headers['x-ms-correlation-request-id']
-        return '{} Correlation ID: {}.'.format(error_message, correlation_id)
+        return add_timestamp('{} Correlation ID: {}.'.format(error_message, correlation_id))
     except (KeyError, TypeError, AttributeError):
         return error_message
 

@@ -15,5 +15,5 @@ from azure.cli.core.commands import CliCommandType
 
 def load_command_table(self, _):
 
-    with self.command_group('apim', is_experimental=True):
+    with self.command_group('apim', is_experimental=False):
         pass

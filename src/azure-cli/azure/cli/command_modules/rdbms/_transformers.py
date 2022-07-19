@@ -45,7 +45,7 @@ def table_transform_output_list_servers(result):
     return table_result
 
 
-def table_transform_output_list_skus(result):
+def postgres_table_transform_output_list_skus(result):
     table_result = []
     if len(result) > 1:
         skus_tiers = result[0]["supportedFlexibleServerEditions"]
@@ -59,6 +59,28 @@ def table_transform_output_list_skus(result):
                     new_entry['Tier'] = tier_name
                     new_entry['vCore'] = key['vCores']
                     new_entry['Memory'] = str(int(key['supportedMemoryPerVcoreMb']) * int(key['vCores']) // 1024) + " GiB"
+                    new_entry['Max Disk IOPS'] = key['supportedIops']
+                    table_result.append(new_entry)
+            except:
+                raise CLIError("There is no sku available for this location.")
+
+    return table_result
+
+
+def mysql_table_transform_output_list_skus(result):
+    table_result = []
+    if len(result) > 1:
+        skus_tiers = result[0]["supportedFlexibleServerEditions"]
+        for skus in skus_tiers:
+            tier_name = skus["name"]
+            try:
+                keys = skus["supportedServerVersions"][0]["supportedSkus"]
+                for key in keys:
+                    new_entry = OrderedDict()
+                    new_entry['SKU'] = key['name']
+                    new_entry['Tier'] = tier_name
+                    new_entry['vCore'] = key['vCores']
+                    new_entry['Memory'] = str(int(key['supportedMemoryPerVCoreMb']) * int(key['vCores']) // 1024) + " GiB"
                     new_entry['Max Disk IOPS'] = key['supportedIops']
                     table_result.append(new_entry)
             except:

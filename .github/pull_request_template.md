@@ -1,3 +1,6 @@
+**Related command**
+<!--- Please provide the related command with az {command} if you can, so that we can quickly route to the related person to review. --->
+
 **Description**<!--Mandatory-->
 <!--Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process.-->
 

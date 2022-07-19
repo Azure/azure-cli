@@ -3,31 +3,24 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
-import os
-import unittest
-
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
-from azure.cli.core.util import CLIError
+import string
+from azure.cli.core.azclierror import (
+    RequiredArgumentMissingError
+)
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
     JMESPathCheck,
     JMESPathCheckExists,
-    JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    LiveScenarioTest,
-    record_only)
+    LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from datetime import datetime, timedelta
-from time import sleep
 
 
 # Constants
@@ -72,8 +65,6 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class DomainPreparer(AbstractPreparer, SingleValueReplacer):
-    import string
-
     def __init__(self, name_prefix=sqlvm_domain_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='domainvm',
                  resource_group_parameter_name='resource_group', skip_delete=True):
@@ -86,8 +77,11 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
         self.skip_delete = skip_delete
 
     def id_generator(self, size=6, chars=string.ascii_lowercase + string.digits):
+        '''
+        dns name must conform to the following regular expression: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$.'}
+        '''
         import random
-        return ''.join(random.choice(chars) for _ in range(size))
+        return random.choice(string.ascii_lowercase) + ''.join(random.choice(chars) for _ in range(size))
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
@@ -118,6 +112,69 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
 class SqlVmScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
+    @LogAnalyticsWorkspacePreparer(location="westus")
+    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
+        
+        # create sqlvm1 with minimal required parameters
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
+                 .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                 ])
+
+        # test assessment schedule enabling succeeds
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Assessment requires a Log Analytics workspace and Log Analytics extension on VM"):
+            self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
+
+        # test assessment schedule enabling succeeds
+        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 '--workspace-rg {} --workspace-name {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # verify assessment settings were processed
+        expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, 'AssessmentSettings')
+                              ).get_output_in_json()
+        assessment_settings = expand_all['assessmentSettings']
+        self.assertTrue(assessment_settings['enable'])
+        self.assertTrue(assessment_settings['schedule']['enable'])
+        self.assertEqual(1, assessment_settings['schedule']['weeklyInterval'])
+        self.assertEqual("Monday", assessment_settings['schedule']['dayOfWeek'])
+        self.assertEqual("20:30", assessment_settings['schedule']['startTimeLocal'])
+
+        # test start-assessment succeeds
+        self.cmd('sql vm start-assessment -n {} -g {}'
+                 .format(sqlvm, resource_group))
+
+        # verify start-assessment succeeded
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # test assessment disabling succeeds
+        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
+                 .format(sqlvm, resource_group, False),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+    @ResourceGroupPreparer()
+    @SqlVirtualMachinePreparer()
     @StorageAccountPreparer()
     def test_sqlvm_mgmt(self, resource_group, resource_group_location, sqlvm, storage_account):
 
@@ -131,7 +188,7 @@ class SqlVmScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
-        with self.assertRaisesRegex(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
             self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                      .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
 
@@ -179,6 +236,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
                               .format(sqlvm, resource_group, '*')
                               ).get_output_in_json()
+        assert 'assessmentSettings' in expand_all
         assert 'autoBackupSettings' in expand_all
         assert 'autoPatchingSettings' in expand_all
         assert 'keyVaultCredentialSettings' in expand_all
@@ -188,6 +246,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_one = self.cmd('sql vm show -n {} -g {} --expand {}'
                               .format(sqlvm, resource_group, 'AutoBackupSettings')
                               ).get_output_in_json()
+        assert 'assessmentSettings' not in expand_one
         assert 'autoBackupSettings' in expand_one
         assert 'autoPatchingSettings' not in expand_one
         assert 'keyVaultCredentialSettings' not in expand_one
@@ -197,6 +256,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_comma = self.cmd('sql vm show -n {} -g {} --expand {}'
                                 .format(sqlvm, resource_group, 'AutoPatchingSettings AutoBackupSettings')
                                 ).get_output_in_json()
+        assert 'assessmentSettings' not in expand_comma
         assert 'autoBackupSettings' in expand_comma
         assert 'autoPatchingSettings' in expand_comma
         assert 'keyVaultCredentialSettings' not in expand_comma
@@ -206,6 +266,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_comma_all = self.cmd('sql vm show -n {} -g {} --expand {}'
                                     .format(sqlvm, resource_group, 'AutoPatchingSettings * AutoBackupSettings')
                                     ).get_output_in_json()
+        assert 'assessmentSettings' in expand_comma_all
         assert 'autoBackupSettings' in expand_comma_all
         assert 'autoPatchingSettings' in expand_comma_all
         assert 'keyVaultCredentialSettings' in expand_comma_all

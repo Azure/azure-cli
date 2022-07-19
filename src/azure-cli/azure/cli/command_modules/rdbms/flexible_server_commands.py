@@ -21,7 +21,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
-    table_transform_output_list_skus,
+    postgres_table_transform_output_list_skus,
+    mysql_table_transform_output_list_skus,
     table_transform_output_parameters)
 
 # from .transformers import table_transform_connection_string
@@ -148,7 +149,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
@@ -218,7 +219,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('mysql flexible-server', mysql_flexible_location_capabilities_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=mysql_table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:

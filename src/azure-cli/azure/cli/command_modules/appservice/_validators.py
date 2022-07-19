@@ -370,7 +370,7 @@ def _validate_ase_is_v3(ase):
 
 
 def _validate_ase_not_ilb(ase):
-    if ase.internal_load_balancing_mode != 0:
+    if (ase.internal_load_balancing_mode != 0) and (ase.internal_load_balancing_mode != "None"):
         raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
 
 

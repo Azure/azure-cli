@@ -141,6 +141,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
                 public_network_access=public_network_access,
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
@@ -782,8 +783,7 @@ def create_postgresql_connection_string(server_name, host, user, password):
 def check_server_name_availability(check_name_client, parameters):
     server_availability = check_name_client.execute(parameters)
     if not server_availability.name_available:
-        raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                       "other server name.".format(parameters.name))
+        raise CLIError(server_availability.message)
     return True
 
 

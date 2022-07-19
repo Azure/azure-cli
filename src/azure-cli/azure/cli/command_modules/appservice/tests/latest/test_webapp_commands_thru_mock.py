@@ -206,15 +206,14 @@ class TestWebappMocked(unittest.TestCase):
         cmd_mock = _get_test_cmd()
         SiteConfig = cmd_mock.get_models('SiteConfig')
         site_config = SiteConfig(name='antarctica')
-        site_op_mock.side_effect = [site_config, None]
+        site_op_mock.return_value = site_config
         # action
         update_site_configs(cmd_mock, 'myRG', 'myweb', java_version='1.8')
         # assert
-        config_for_set = site_op_mock.call_args_list[1][0][5]
-        self.assertEqual(config_for_set.java_version, '1.8')
+        self.assertEqual(site_config.java_version, '1.8')
         # point check some unrelated properties should stay at None
-        self.assertEqual(config_for_set.use32_bit_worker_process, None)
-        self.assertEqual(config_for_set.java_container, None)
+        self.assertEqual(site_config.use32_bit_worker_process, None)
+        self.assertEqual(site_config.java_container, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_list_publish_profiles_on_slots(self, site_op_mock):
