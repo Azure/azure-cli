@@ -30,6 +30,8 @@ ACR_RUN_DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
                            '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
 
+REF_KEY = "referrers"
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

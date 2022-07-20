@@ -312,6 +312,8 @@ def ensure_container_insights_for_monitoring(
                 workspace_resource_id, "2015-11-01-preview"
             )
             location = resource.location
+            # location can have spaces for example 'East US' hence remove the spaces
+            location = location.replace(" ", "").lower()
         except HttpResponseError as ex:
             raise ex
 
