@@ -28,7 +28,6 @@ class RecordsCollection:
     def next_send(self):
         return self._next_send
 
-    # pylint: disable=line-too-long
     def snapshot_and_read(self):
         """ Scan the telemetry cache files and move all the rotated files to a temp directory. """
         from azure.cli.telemetry.const import TELEMETRY_CACHE_DIR
@@ -38,8 +37,10 @@ class RecordsCollection:
             return
 
         # Collect all cache.x files. If it has been a long time since last sent, also collect cache file itself.
-        include_cache = datetime.datetime.now() - self._last_sent > datetime.timedelta(hours=self._get_threshold_config())
-        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder) if include_cache or fn != 'cache']
+        push_interval = datetime.timedelta(hours=self._get_push_interval_config())
+        include_cache = datetime.datetime.now() - self._last_sent > push_interval
+        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder)
+                      if include_cache or fn != 'cache']
 
         # sort the cache files base on their last modification time.
         candidates = [(fn, file_stat) for fn, file_stat in candidates if stat.S_ISREG(file_stat.st_mode)]
@@ -71,9 +72,9 @@ class RecordsCollection:
                       onerror=lambda _, p, tr: self._logger.error('Fail to remove file %s', p))
         self._logger.info('Remove directory %s', tmp)
 
-    def _get_threshold_config(self):
+    def _get_push_interval_config(self):
         config = CLIConfig(config_dir=self._config_dir)
-        threshold = config.getint('telemetry', 'push_data_threshold', fallback=24)
+        threshold = config.getint('telemetry', 'push_interval_in_hours', fallback=24)
         # the threshold for push telemetry can't be less than 1 hour, default value is 24 hours
         return threshold if threshold >= 1 else 24
 
