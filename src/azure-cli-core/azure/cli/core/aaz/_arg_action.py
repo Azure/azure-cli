@@ -6,7 +6,6 @@
 # pylint: disable=protected-access
 
 import os
-import re
 from argparse import Action
 from collections import OrderedDict
 

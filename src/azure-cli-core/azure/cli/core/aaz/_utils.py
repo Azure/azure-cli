@@ -16,7 +16,7 @@ class AAZShortHandSyntaxParser:
     HELP_EXPRESSIONS = ('??', )  # the mark to show detail help.
 
     partial_value_key_pattern = re.compile(
-        r"^(((\[-?[0-9]+])|((([a-zA-Z0-9_\-]+)|('([^']*)'(/([^']*)')*))(\[-?[0-9]+])?))(\.(([a-zA-Z0-9_\-]+)|('([^']*)'(/([^']*)')*))(\[-?[0-9]+])?)*)=(.*)$"
+        r"^(((\[-?[0-9]+])|((([a-zA-Z0-9_\-]+)|('([^']*)'(/([^']*)')*))(\[-?[0-9]+])?))(\.(([a-zA-Z0-9_\-]+)|('([^']*)'(/([^']*)')*))(\[-?[0-9]+])?)*)=(.*)$"  # pylint: disable=line-too-long
     )  # 'Partial Value' format
 
     def __call__(self, data, is_simple=False):
