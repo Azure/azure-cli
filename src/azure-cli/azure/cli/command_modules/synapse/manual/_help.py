@@ -44,7 +44,7 @@ examples:
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --repository-type AzureDevOpsGit --account-name testuser --project-name testprj \\
-          --repository-name testrepo --collaboration-branch main
+          --repository-name testrepo --collaboration-branch main --last-commit-id 000000
 """
 
 helps['synapse workspace list'] = """
@@ -1927,6 +1927,7 @@ examples:
         az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
           --pe-name testendpointname \\
           --file @path/test.json
+        test.json {"privateLinkResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test/providers/Microsoft.Storage/storageAccounts/test", "groupId": "blob"}
 """
 
 helps['synapse managed-private-endpoints list'] = """
