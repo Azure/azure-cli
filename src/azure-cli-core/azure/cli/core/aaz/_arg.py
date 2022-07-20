@@ -14,7 +14,8 @@ from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZ
     AAZSimpleType
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZSubscriptionIdArgFormat, \
-    AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat
+    AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
+    AAZDateTimeFormat, AAZDurationFormat
 
 # pylint: disable=redefined-builtin, protected-access
 
@@ -168,17 +169,39 @@ class AAZStrArg(AAZSimpleTypeArg, AAZStrType):
 
 class AAZDurationArg(AAZStrArg):
 
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZDurationFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
     @property
     def _type_in_help(self):
         return "Duration"
 
 class AAZDateArg(AAZStrArg):
 
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZDateFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
     @property
     def _type_in_help(self):
         return "Date"
 
+class AAZTimeArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZTimeFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
+    @property
+    def _type_in_help(self):
+        return "Time"
+
 class AAZDateTimeArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZDateTimeFormat()
+        super().__init__(fmt=fmt, **kwargs)
 
     @property
     def _type_in_help(self):

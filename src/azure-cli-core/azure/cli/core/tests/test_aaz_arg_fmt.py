@@ -57,6 +57,169 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         args = self.format_arg(schema, {"str1": None})
         self.assertEqual(args.str1, None)
 
+    def test_duration_fmt(self):
+        from azure.cli.core.aaz import AAZDurationArg, AAZDurationFormat
+        schema = AAZArgumentsSchema()
+        schema.duration = AAZDurationArg(
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"duration": "1s"})
+        self.assertEqual(args.duration, "PT1S")
+
+        args = self.format_arg(schema, {"duration": "1m"})
+        self.assertEqual(args.duration, "PT1M")
+
+        args = self.format_arg(schema, {"duration": "1h"})
+        self.assertEqual(args.duration, "PT1H")
+
+        args = self.format_arg(schema, {"duration": "1d"})
+        self.assertEqual(args.duration, "P1D")
+
+        args = self.format_arg(schema, {"duration": "0h1s"})
+        self.assertEqual(args.duration, "PT1S")
+
+        args = self.format_arg(schema, {"duration": "1dt1h1m1s"})
+        self.assertEqual(args.duration, "P1DT1H1M1S")
+
+        args = self.format_arg(schema, {"duration": "pt1h"})
+        self.assertEqual(args.duration, "PT1H")
+
+        args = self.format_arg(schema, {"duration": "p1yt1h"})
+        self.assertEqual(args.duration, "P1YT1H")
+
+        args = self.format_arg(schema, {"duration": "p1y"})
+        self.assertEqual(args.duration, "P1Y")
+
+        args = self.format_arg(schema, {"duration": "p1m"})
+        self.assertEqual(args.duration, "P1M")
+
+        args = self.format_arg(schema, {"duration": "P1Y1M100DT1h1s"})
+        self.assertEqual(args.duration, "P1Y1M100DT1H1S")
+
+        args = self.format_arg(schema, {"duration": None})
+        self.assertEqual(args.duration, None)
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"duration": "1m1d"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"duration": "1x"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"duration": "-1m"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"duration": "m1s"})
+
+    def test_date_fmt(self):
+        from azure.cli.core.aaz import AAZDateArg, AAZDateFormat
+        schema = AAZArgumentsSchema()
+        schema.date = AAZDateArg(
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"date": "2010-01-02 01:11:11"})
+        self.assertEqual(args.date, "2010-01-02")
+
+        args = self.format_arg(schema, {"date": "2010/01/02"})
+        self.assertEqual(args.date, "2010-01-02")
+
+        args = self.format_arg(schema, {"date": "October 1 1989"})
+        self.assertEqual(args.date, "1989-10-01")
+
+        args = self.format_arg(schema, {"date": "2010/01/02 01:11:11"})
+        self.assertEqual(args.date, "2010-01-02")
+
+        args = self.format_arg(schema, {"date": None})
+        self.assertEqual(args.date, None)
+
+        with self.assertRaises(InvalidArgumentValue):
+            args = self.format_arg(schema, {"date": "aaaa"})
+
+    def test_time_fmt(self):
+        from azure.cli.core.aaz import AAZTimeArg, AAZTimeFormat
+        schema = AAZArgumentsSchema()
+        schema.time = AAZTimeArg(
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"time": "2010-01-02 01:11:11.12345678"})
+        self.assertEqual(args.time, "01:11:11.123456")
+
+        args = self.format_arg(schema, {"time": "01:11:11.0001"})
+        self.assertEqual(args.time, "01:11:11.0001")
+
+        args = self.format_arg(schema, {"time": "21:11:11.1"})
+        self.assertEqual(args.time, "21:11:11.100")
+
+        args = self.format_arg(schema, {"time": "21:01:51.00"})
+        self.assertEqual(args.time, "21:01:51")
+
+        args = self.format_arg(schema, {"time": None})
+        self.assertEqual(args.time, None)
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"time": "21:01:151.00"})
+
+    def test_datetime_fmt(self):
+        from azure.cli.core.aaz import AAZDateTimeArg, AAZDateTimeFormat
+        schema = AAZArgumentsSchema()
+        schema.datetime = AAZDateTimeArg(
+            nullable=True
+        )
+        schema.rfc = AAZDateTimeArg(
+            fmt=AAZDateTimeFormat(protocol='rfc'),
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {
+            "datetime": "2010-01-02 01:11:11.12345678 -06:30",
+            "rfc": "2010-01-02 01:11:11.12345678 -06:30",
+        })
+        self.assertEqual(args.datetime, "2010-01-02T07:41:11.123456Z")
+        self.assertEqual(args.rfc, "Sat, 02 Jan 2010 07:41:11 GMT")
+
+        args = self.format_arg(schema, {
+            "datetime": "Sat, 02 Jan 2010 07:41:11 GMT",
+            "rfc": "2010-01-02T07:41:11.123456Z",
+        })
+        self.assertEqual(args.datetime, "2010-01-02T07:41:11.000Z")
+        self.assertEqual(args.rfc, "Sat, 02 Jan 2010 07:41:11 GMT")
+
+        args = self.format_arg(schema, {
+            "datetime": "2010/01/02 01:11:11.12345678 +06:30",
+            "rfc": "2010/01/02 01:11:11.12345678 +06:30",
+        })
+        self.assertEqual(args.datetime, "2010-01-01T18:41:11.123456Z")
+        self.assertEqual(args.rfc, "Fri, 01 Jan 2010 18:41:11 GMT")
+
+        args = self.format_arg(schema, {
+            "datetime": "2010-01-02T00:00:00Z",
+            "rfc": "2010-01-02T00:00:00Z",
+        })
+        self.assertEqual(args.datetime, "2010-01-02T00:00:00.000Z")
+        self.assertEqual(args.rfc, "Sat, 02 Jan 2010 00:00:00 GMT")
+
+        args = self.format_arg(schema, {
+            "datetime": "2010-01-02 10:00:00 +00:00",
+            "rfc": "2010-01-02 10:00:00 +00:00",
+        })
+        self.assertEqual(args.datetime, "2010-01-02T10:00:00.000Z")
+        self.assertEqual(args.rfc, "Sat, 02 Jan 2010 10:00:00 GMT")
+
+        args = self.format_arg(schema, {
+            "datetime": None,
+            "rfc": None,
+        })
+        self.assertEqual(args.datetime, None)
+        self.assertEqual(args.rfc, None)
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            args = self.format_arg(schema, {
+                "datetime": "-2010-01-a2 10:00:00 +00:00",
+            })
+
     def test_uuid_fmt(self):
         from azure.cli.core.aaz import AAZUuidArg, AAZUuidFormat
         schema = AAZArgumentsSchema()
@@ -157,6 +320,8 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         args = self.format_arg(schema, {"uuid": "(A8577A7A4F3140Abbb003557DF24A7EA)"})
         self.assertEqual(args.uuid, "(A8577A7A4F3140Abbb003557DF24A7EA)")
 
+        args = self.format_arg(schema, {"uuid": None})
+        self.assertEqual(args.uuid, None)
 
     def test_int_fmt(self):
         from azure.cli.core.aaz import AAZIntArg, AAZIntArgFormat
