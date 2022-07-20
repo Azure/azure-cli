@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck, live_only)
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
@@ -51,10 +51,18 @@ class StorageSASScenario(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage container policy list -c {} ', account_info, container) \
             .assert_with_checks(NoneCheck())
 
-        self.storage_cmd('storage container policy create -c {} -n {} --permissions racwdxyltfmei',
-                         account_info, container, policy)
+class StorageSASLiveScenario(StorageScenarioMixin, LiveScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_container_access_policy_with_sas_expiry_scenario(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info)
         local_file = self.create_temp_file(128, full_random=False)
         file_name = self.create_random_name('blobfile', 16)
+        policy = self.create_random_name('policy', 16)
+
+        self.storage_cmd('storage container policy create -c {} -n {} --permissions racwdxyltfmei',
+                         account_info, container, policy)
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', account_info, container, local_file, file_name)
         sas = self.storage_cmd('storage blob generate-sas --container-name {} --name {} --policy-name {} '
                                '--https-only --expiry 2100-01-01',
