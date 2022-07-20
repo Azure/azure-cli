@@ -15,10 +15,7 @@ from azure.cli.core.aaz import *
     "network asg list",
 )
 class List(AAZCommand):
-    """List all application security groups in a subscription or in a resource group.
-
-    :example: List all application security groups in a subscription.
-        az network asg list
+    """List all application security groups.
 
     :example: List all application security groups in a resource group.
         az network asg list -g MyResourceGroup
