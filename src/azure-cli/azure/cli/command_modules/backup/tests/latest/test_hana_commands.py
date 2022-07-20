@@ -33,70 +33,70 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     # Note: HANA Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
 
-    @record_only()
-    def test_backup_wl_hana_archive (self):
-        self.kwargs.update({
-            'vault': "archiveccyvault1",
-            'rg': "ArchiveResourceGroup",
-            'sub': "AzureBackup_Functional_Testing",
-            'item': "SAPHanaDatabase;h15;systemdb",
-            'container': "VMAppContainer;Compute;ArchiveResourceGroup;ArchHanaVM1"
-        })
+    # @record_only()
+    # def test_backup_wl_hana_archive (self):
+    #     self.kwargs.update({
+    #         'vault': "archiveccyvault1",
+    #         'rg': "ArchiveResourceGroup",
+    #         'sub': "AzureBackup_Functional_Testing",
+    #         'item': "SAPHanaDatabase;h15;systemdb",
+    #         'container': "VMAppContainer;Compute;ArchiveResourceGroup;ArchHanaVM1"
+    #     })
 
-        rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureWorkload --workload-type SAPHANA -g {rg} -v {vault} -c {container} -i {item}', checks=[
-        ]).get_output_in_json()
+    #     rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureWorkload --workload-type SAPHANA -g {rg} -v {vault} -c {container} -i {item}', checks=[
+    #     ]).get_output_in_json()
 
-        self.kwargs['rp1'] = rp_names[0]['name']
-        self.kwargs['rp1_tier'] = rp_names[0]['tierType']
-        self.kwargs['rp1_is_ready_for_move'] = rp_names[0]['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']
+    #     self.kwargs['rp1'] = rp_names[0]['name']
+    #     self.kwargs['rp1_tier'] = rp_names[0]['tierType']
+    #     self.kwargs['rp1_is_ready_for_move'] = rp_names[0]['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']
         
-        # Check Archivable Recovery Points 
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureWorkload --is-ready-for-move {rp1_is_ready_for_move} --target-tier VaultArchive --query [0]', checks=[
-            self.check("resourceGroup", '{rg}'),
-            self.check("properties.recoveryPointMoveReadinessInfo.ArchivedRP.isReadyForMove", '{rp1_is_ready_for_move}')
-        ])
+    #     # Check Archivable Recovery Points 
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureWorkload --is-ready-for-move {rp1_is_ready_for_move} --target-tier VaultArchive --query [0]', checks=[
+    #         self.check("resourceGroup", '{rg}'),
+    #         self.check("properties.recoveryPointMoveReadinessInfo.ArchivedRP.isReadyForMove", '{rp1_is_ready_for_move}')
+    #     ])
 
-        # Get Archived Recovery Points 
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureWorkload --tier {rp1_tier} --query [0]', checks=[
-            self.check("tierType", '{rp1_tier}'),
-            self.check("resourceGroup", '{rg}')
-        ])
+    #     # Get Archived Recovery Points 
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureWorkload --tier {rp1_tier} --query [0]', checks=[
+    #         self.check("tierType", '{rp1_tier}'),
+    #         self.check("resourceGroup", '{rg}')
+    #     ])
 
-        is_move = False
-        for i in rp_names:
-            if i['tierType']=="VaultStandard" and i['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']==True:
-                self.kwargs['rp_move'] = i['name']
-                is_move = True
-                break
+    #     is_move = False
+    #     for i in rp_names:
+    #         if i['tierType']=="VaultStandard" and i['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']==True:
+    #             self.kwargs['rp_move'] = i['name']
+    #             is_move = True
+    #             break
         
-        if is_move:
-            # # Move Recovery points
-            self.cmd('backup recoverypoint move -g {rg} -v {vault} -i {item} -c {container} --source-tier VaultStandard --destination-tier VaultArchive --name {rp_move}', checks=[
-                self.check("properties.entityFriendlyName", 'systemdb [BVTD2HSuse15]'),
-                self.check("resourceGroup", '{rg}'),
-                self.check("properties.operation", "MoveRecoveryPoint"),
-                self.check("properties.status", "Completed")
-            ])
+    #     if is_move:
+    #         # # Move Recovery points
+    #         self.cmd('backup recoverypoint move -g {rg} -v {vault} -i {item} -c {container} --source-tier VaultStandard --destination-tier VaultArchive --name {rp_move}', checks=[
+    #             self.check("properties.entityFriendlyName", 'systemdb [BVTD2HSuse15]'),
+    #             self.check("resourceGroup", '{rg}'),
+    #             self.check("properties.operation", "MoveRecoveryPoint"),
+    #             self.check("properties.status", "Completed")
+    #         ])
         
-        is_restorable = False
-        for i in rp_names:
-            if i['tierType']=="VaultArchive":
-                self.kwargs['rp_restore'] = i['name']
-                is_restorable = True
-                break
+    #     is_restorable = False
+    #     for i in rp_names:
+    #         if i['tierType']=="VaultArchive":
+    #             self.kwargs['rp_restore'] = i['name']
+    #             is_restorable = True
+    #             break
         
-        if is_restorable:
-            # # Integrated Restore
-            self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
-            with open("recoveryconfig_hana_archive.json", "w") as f:
-                f.write(self.kwargs['rc'])
+    #     if is_restorable:
+    #         # # Integrated Restore
+    #         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
+    #         with open("recoveryconfig_hana_archive.json", "w") as f:
+    #             f.write(self.kwargs['rc'])
 
-            # # Trigger Restore
-            self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig_hana_archive.json --rehydration-priority High', checks=[
-                self.check("properties.operation", "RestoreWithRehydrate"),
-                self.check("properties.status", "InProgress"),
-                self.check("resourceGroup", '{rg}')
-            ]).get_output_in_json()
+    #         # # Trigger Restore
+    #         self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig_hana_archive.json --rehydration-priority High', checks=[
+    #             self.check("properties.operation", "RestoreWithRehydrate"),
+    #             self.check("properties.status", "InProgress"),
+    #             self.check("resourceGroup", '{rg}')
+    #         ]).get_output_in_json()
 
     @record_only()
     def test_backup_wl_hana_container(self):
