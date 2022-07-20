@@ -57,6 +57,107 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         args = self.format_arg(schema, {"str1": None})
         self.assertEqual(args.str1, None)
 
+    def test_uuid_fmt(self):
+        from azure.cli.core.aaz import AAZUuidArg, AAZUuidFormat
+        schema = AAZArgumentsSchema()
+        schema.uuid = AAZUuidArg(
+            nullable=True
+        )
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": ""})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "a8577a7a-4f31-40ab-bb00-3557df24a7e"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "a8577a7a-4f31-40ab-bb003557df24a7ea"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "a8577Z7Z-4f31-40ab-bb00-3557df24a7ea"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "{a8577a7a-4f31-40ab-bb00-3557df24a7ea"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "a8577a7a-4f31-40ab-bb00-3557df24a7ea}"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "(a8577a7a-4f31-40ab-bb00-3557df24a7ea"})
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"uuid": "a8577a7a-4f31-40ab-bb00-3557df24a7ea)"})
+
+        args = self.format_arg(schema, {"uuid": "a8577a7a-4f31-40ab-bb00-3557df24a7ea"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-bb00-3557df24a7ea")
+
+        args = self.format_arg(schema, {"uuid": "FF0B2DF5-97EB-4E45-B028-8B0BEC803ABE"})
+        self.assertEqual(args.uuid, "FF0B2DF5-97EB-4E45-B028-8B0BEC803ABE")
+
+        args = self.format_arg(schema, {"uuid": "a8577A7a-4f31-40Ab-bb00-3557Df24a7Ea"})
+        self.assertEqual(args.uuid, "a8577A7a-4f31-40Ab-bb00-3557Df24a7Ea")
+
+        args = self.format_arg(schema, {"uuid": "{a8577a7a-4f31-40ab-bb00-3557df24a7ea}"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-bb00-3557df24a7ea")
+
+        args = self.format_arg(schema, {"uuid": "(a8577a7a-4f31-40ab-bb00-3557df24a7ea)"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-bb00-3557df24a7ea")
+
+        args = self.format_arg(schema, {"uuid": "a8577a7a4f3140abBb003557df24a7eA"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-Bb00-3557df24a7eA")
+
+        args = self.format_arg(schema, {"uuid": "{a8577a7a4f3140abbb003557df24a7ea}"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-bb00-3557df24a7ea")
+
+        args = self.format_arg(schema, {"uuid": "(a8577a7a4f3140abbb003557df24a7ea)"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-bb00-3557df24a7ea")
+
+        schema = AAZArgumentsSchema()
+        schema.uuid = AAZUuidArg(
+            fmt=AAZUuidFormat(case='upper'),
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"uuid": "(a8577a7A4f3140Abbb003557df24a7ea)"})
+        self.assertEqual(args.uuid, "A8577A7A-4F31-40AB-BB00-3557DF24A7EA")
+
+        schema = AAZArgumentsSchema()
+        schema.uuid = AAZUuidArg(
+            fmt=AAZUuidFormat(case='lower'),
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"uuid": "(A8577A7A4F3140Abbb003557DF24A7EA)"})
+        self.assertEqual(args.uuid, "a8577a7a-4f31-40ab-bb00-3557df24a7ea")
+
+        schema = AAZArgumentsSchema()
+        schema.uuid = AAZUuidArg(
+            fmt=AAZUuidFormat(hyphens_filled=False),
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"uuid": "(A8577A7A4F3140Abbb003557DF24A7EA)"})
+        self.assertEqual(args.uuid, "A8577A7A4F3140Abbb003557DF24A7EA")
+
+        schema = AAZArgumentsSchema()
+        schema.uuid = AAZUuidArg(
+            fmt=AAZUuidFormat(braces_removed=False),
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"uuid": "(a8577a7a4f3140abbb003557df24a7ea)"})
+        self.assertEqual(args.uuid, "(a8577a7a-4f31-40ab-bb00-3557df24a7ea)")
+
+        schema = AAZArgumentsSchema()
+        schema.uuid = AAZUuidArg(
+            fmt=AAZUuidFormat(braces_removed=False, hyphens_filled=False),
+            nullable=True
+        )
+
+        args = self.format_arg(schema, {"uuid": "(A8577A7A4F3140Abbb003557DF24A7EA)"})
+        self.assertEqual(args.uuid, "(A8577A7A4F3140Abbb003557DF24A7EA)")
+
+
     def test_int_fmt(self):
         from azure.cli.core.aaz import AAZIntArg, AAZIntArgFormat
 

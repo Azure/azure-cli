@@ -14,7 +14,7 @@ from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZ
     AAZSimpleType
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZSubscriptionIdArgFormat, \
-    AAZResourceLocationArgFormat, AAZResourceIdArgFormat
+    AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat
 
 # pylint: disable=redefined-builtin, protected-access
 
@@ -164,6 +164,35 @@ class AAZStrArg(AAZSimpleTypeArg, AAZStrType):
     @property
     def _type_in_help(self):
         return "String"
+
+
+class AAZDurationArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "Duration"
+
+class AAZDateArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "Date"
+
+class AAZDateTimeArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "DateTime"
+
+class AAZUuidArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZUuidFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
+    @property
+    def _type_in_help(self):
+        return "GUID/UUID"
 
 
 class AAZIntArg(AAZSimpleTypeArg, AAZIntType):

@@ -9,6 +9,7 @@ import re
 import math
 
 from knack.log import get_logger
+# from msrest.serialization import
 
 from ._command_ctx import AAZCommandCtx
 from ._field_type import AAZSimpleType
@@ -53,6 +54,69 @@ class AAZStrArgFormat(AAZBaseArgFormat):
             raise AAZInvalidArgValueError(
                 f"Invalid format: '{data}' does not fully match regular expression pattern '{self._pattern}'")
 
+        return value
+
+
+class AAZUuidFormat(AAZBaseArgFormat):
+
+    _uuid_pattern = re.compile(r'^[{(]?[0-9a-fA-F]{8}([-]?[0-9a-fA-F]{4}){3}[-]?[0-9a-fA-F]{12}[)}]?$')
+
+    def __init__(self, case=None, braces_removed=True, hyphens_filled=True):
+        """
+        :param case: 'upper' to format data into upper case, 'lower' to format data into lower case
+        """
+        self.case = case
+        self.braces_removed = braces_removed
+        self.hyphens_filled = hyphens_filled
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        if not self._uuid_pattern.fullmatch(data):
+            raise AAZInvalidArgValueError(
+                f"Invalid format: '{data}' is not a valid GUID or UUID"
+            )
+
+        if '-' in data and data.count('-') != 4:
+            raise AAZInvalidArgValueError(
+                f"Invalid format: '{data}' is not a valid GUID or UUID"
+            )
+
+        if data.startswith('{') or data.endswith('}'):
+            # remove braces
+            if not (data.startswith('{') and data.endswith('}')):
+                raise AAZInvalidArgValueError(
+                    f"Invalid format: '{data}' is not a valid GUID or UUID"
+                )
+            if self.braces_removed:
+                data = data[1:-1]
+
+        elif data.startswith('(') or data.endswith(')'):
+            # remove parentheses
+            if not (data.startswith('(') and data.endswith(')')):
+                raise AAZInvalidArgValueError(
+                    f"Invalid format: '{data}' is not a valid GUID or UUID"
+                )
+            if self.braces_removed:
+                data = data[1:-1]
+
+        if '-' not in data and self.hyphens_filled:
+            # add '-' in data
+            if data[0] in ('{', '('):
+                data = f'{data[:9]}-{data[9:13]}-{data[13:17]}-{data[17:21]}-{data[21:]}'
+            else:
+                data = f'{data[:8]}-{data[8:12]}-{data[12:16]}-{data[16:20]}-{data[20:]}'
+
+        if self.case == 'upper':
+            data = data.upper()
+        elif self.case == 'lower':
+            data = data.lower()
+
+        value._data = data
         return value
 
 
