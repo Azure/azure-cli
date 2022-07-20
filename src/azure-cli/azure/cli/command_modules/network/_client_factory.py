@@ -24,10 +24,6 @@ def cf_app_gateway_waf_policy(cli_ctx, _):
     return network_client_factory(cli_ctx).web_application_firewall_policies
 
 
-def cf_application_security_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).application_security_groups
-
-
 def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
@@ -270,10 +266,6 @@ def cf_virtual_router_peering(cli_ctx, _):
 
 def cf_bastion_hosts(cli_ctx, _):
     return network_client_factory(cli_ctx).bastion_hosts
-
-
-def cf_security_partner_providers(cli_ctx, _):
-    return network_client_factory(cli_ctx).security_partner_providers
 
 
 def cf_network_virtual_appliances(cli_ctx, _):

@@ -101,6 +101,7 @@ def load_arguments(self, _):
             c.argument('root_folder', arg_group=repository_arg_group, help='The name of the folder to the location of your Azure synapse JSON resources are imported. Default is /')
             c.argument('project_name', arg_group=repository_arg_group, help='The project name to which you are connecting.')
             c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
+            c.argument('last_commit_id', arg_group=repository_arg_group, help='The last commit ID.')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
