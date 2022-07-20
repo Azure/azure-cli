@@ -1927,6 +1927,7 @@ examples:
         az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
           --pe-name testendpointname \\
           --file @path/test.json
+        test.json {"privateLinkResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test/providers/Microsoft.Storage/storageAccounts/test", "groupId": "blob"}
 """
 
 helps['synapse managed-private-endpoints list'] = """
