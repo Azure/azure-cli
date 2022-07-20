@@ -28,7 +28,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
     cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
@@ -418,12 +418,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
         client_factory=cf_bastion_hosts,
         min_api='2019-11-01'
-    )
-
-    network_security_partner_provider_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SecurityPartnerProvidersOperations.{}',
-        client_factory=cf_security_partner_providers,
-        min_api='2020-03-01'
     )
 
     network_virtual_appliances_sdk = CliCommandType(
@@ -1543,15 +1537,6 @@ def load_command_table(self, _):
         g.custom_command('ssh', 'ssh_bastion_host')
         g.custom_command('rdp', 'rdp_bastion_host')
         g.custom_command('tunnel', 'create_bastion_tunnel')
-        g.command('delete', 'begin_delete')
-    # endregion
-
-    # region Security Partner Provider
-    with self.command_group('network security-partner-provider', network_security_partner_provider_sdk, is_preview=True) as g:
-        g.custom_command('create', 'create_security_partner_provider')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_security_partner_provider')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_security_partner_provider')
         g.command('delete', 'begin_delete')
     # endregion
 
