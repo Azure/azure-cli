@@ -2496,7 +2496,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
-# pylint: disable=too-many-return-statements, inconsistent-return-statements
+# pylint: disable=too-many-return-statements, inconsistent-return-statements, too-many-branches
 def _build_record(cmd, data):
     (
         AaaaRecord,
