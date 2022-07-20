@@ -77,3 +77,29 @@ class TestActionGroupScenarios(ScenarioTest):
         self.cmd('monitor action-group list -g {} -ojson'.format(resource_group),
                  checks=[JMESPathCheck('type(@)', 'array'),
                          JMESPathCheck('length(@)', 0)])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_ag_notifications', location='southcentralus')
+    def test_monitor_action_group_notifications(self, resource_group):
+        # the prefix is intentionally keep long so as to test the default short name conversion
+        action_group_name = self.create_random_name('cliactiongrouptest', 32)
+        self.cmd('monitor action-group create -n {} -g {} -ojson'.format(action_group_name, resource_group), checks=[
+            JMESPathCheck('length(emailReceivers)', 0),
+            JMESPathCheck('length(smsReceivers)', 0),
+            JMESPathCheck('length(webhookReceivers)', 0),
+            JMESPathCheck('length(eventHubReceivers)', 0),
+            JMESPathCheck('location', 'Global'),
+            JMESPathCheck('name', action_group_name),
+            JMESPathCheck('groupShortName', action_group_name[:12]),
+            JMESPathCheck('enabled', True),
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('tags', None)
+        ])
+
+        self.cmd('monitor action-group notification create -a --alert-type')
+        self.cmd('monitor action-group notification create -g {} -a --alert-type')
+        self.cmd('monitor action-group notification create -n {} -g {} -a --alert-type')
+
+        self.cmd('monitor action-group notification show -n {} -g {} -a --alert-type')
+        self.cmd('monitor action-group notification show -n {} -g {} -a --alert-type')
+        self.cmd('monitor action-group notification show -n {} -g {} -a --alert-type')

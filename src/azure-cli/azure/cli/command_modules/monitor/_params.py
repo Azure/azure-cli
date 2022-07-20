@@ -362,6 +362,15 @@ def load_arguments(self, _):
     with self.argument_context('monitor action-group enable-receiver') as c:
         c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
         c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+
+    with self.argument_context('monitor action-group notifications create') as c:
+        c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
+        c.argument('alert_type', type=str, help='')
+        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+
+    with self.argument_context('monitor action-group notification list') as c:
+        # c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+        c.argument('notification_id', type=str, help='')
     # endregion
 
     # region ActivityLog Alerts
