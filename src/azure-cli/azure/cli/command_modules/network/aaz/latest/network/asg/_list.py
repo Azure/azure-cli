@@ -15,10 +15,13 @@ from azure.cli.core.aaz import *
     "network asg list",
 )
 class List(AAZCommand):
-    """List all application security groups in a subscription.
+    """List all application security groups in a subscription or in a resource group.
 
     :example: List all application security groups in a subscription.
         az network asg list
+
+    :example: List all application security groups in a resource group.
+        az network asg list -g MyResourceGroup
     """
 
     _aaz_info = {

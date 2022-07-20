@@ -20,7 +20,7 @@ class Update(AAZCommand):
     This command can only be used to update the tags for an application security group. Name and resource group are immutable and cannot be updated.
 
     :example: Update an application security group with a modified tag value.
-        az network asg update -g MyResourceGroup -n MyAsg --set tags.CostCenter=MyBusinessGroup
+        az network asg update -g MyResourceGroup -n MyAsg --tags CostCenter=MyBusinessGroup
     """
 
     _aaz_info = {
