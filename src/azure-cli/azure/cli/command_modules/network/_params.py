@@ -630,11 +630,6 @@ def load_arguments(self, _):
         c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
     # region
 
-    # region ApplicationSecurityGroups
-    with self.argument_context('network asg') as c:
-        c.argument('application_security_group_name', name_arg_type, id_part='name', help='The name of the application security group.')
-    # endregion
-
     # region DDoS Protection Plans
     with self.argument_context('network ddos-protection') as c:
         for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
