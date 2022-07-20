@@ -1189,14 +1189,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
         c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
-                   help='Name of the destination blob. If the exists, it will be overwritten.')
+                   help='Name of the destination blob. If it exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
     with self.argument_context('storage blob copy cancel') as c:
         c.extra('container_name', container_name_type, options_list=('--destination-container', '-c'),
                 required=True)
         c.extra('blob_name', blob_name_type, options_list=('--destination-blob', '-b'), required=True,
-                help='Name of the destination blob. If the exists, it will be overwritten.')
+                help='Name of the destination blob. If it exists, it will be overwritten.')
         c.extra('timeout', timeout_type)
         c.extra('lease', options_list='--lease-id',
                 help='Required if the destination blob has an active infinite lease.')
@@ -1217,7 +1217,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
 
         c.argument('blob_name', options_list=['--destination-blob', '-b'], required=True,
-                   help='Name of the destination blob. If the exists, it will be overwritten.')
+                   help='Name of the destination blob. If it exists, it will be overwritten.')
         c.argument('container_name', options_list=['--destination-container', '-c'], required=True,
                    help='The container name.')
         c.extra('destination_lease', options_list='--destination-lease-id',
