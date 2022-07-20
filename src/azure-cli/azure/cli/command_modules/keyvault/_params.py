@@ -434,7 +434,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault key {}'.format(item)) as c:
             c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'],
                        help='Specifies the type of key protection.')
-            c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
+            c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.', default=False)
             c.argument('key_size', options_list=['--size'], type=int,
                        help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for oct.')
             c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
