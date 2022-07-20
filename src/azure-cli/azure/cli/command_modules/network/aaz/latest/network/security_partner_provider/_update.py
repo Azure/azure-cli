@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Update(AAZCommand):
-    """Update a Azure security partner provider.
+    """Update an Azure security partner provider.
+
+    :example: Update a security partner provider.
+        az network security-partner-provider update -n MyProvider -g MyResourceGroup --tags a=b
     """
 
     _aaz_info = {

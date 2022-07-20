@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Create(AAZCommand):
-    """Create a Azure security partner provider.
+    """Create an Azure security partner provider.
+
+    :example: Create a security partner provider.
+        az network security-partner-provider create -n MyProvider -g MyResourceGroup --vhub MyVirtualHub --provider Checkpoint
     """
 
     _aaz_info = {

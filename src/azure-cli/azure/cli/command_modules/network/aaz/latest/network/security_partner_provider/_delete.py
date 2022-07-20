@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Delete(AAZCommand):
-    """Delete a Azure security partner provider.
+    """Delete an Azure security partner provider.
+
+    :example: Delete a security partner provider.
+        az network security-partner-provider delete -n MyProvider -g MyResourceGroup
     """
 
     _aaz_info = {

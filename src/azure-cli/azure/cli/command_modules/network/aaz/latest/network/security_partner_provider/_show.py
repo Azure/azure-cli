@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Show(AAZCommand):
-    """Show a Azure security partner provider.
+    """Show an Azure security partner provider.
+
+    :example: Get details of a security partner provider.
+        az network security-partner-provider show -n MyProvider -g MyResourceGroup
     """
 
     _aaz_info = {

@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class List(AAZCommand):
-    """List all Azure security partner provider.
+    """List all Azure security partner providers.
+
+    :example: List all security partner providers in a resource group.
+        az network security-partner-provider list -g MyResourceGroup
     """
 
     _aaz_info = {
