@@ -70,21 +70,22 @@ class AAZDurationFormat(AAZBaseArgFormat):
 
         try:
             data = Serializer.serialize_duration(data.upper())
-        except ISO8601Error as err:
+        except ISO8601Error:
             try:
                 # parse '##DT##H##M##S
                 data = Serializer.serialize_duration(f'P0M{data.upper()}')
-            except ISO8601Error as err:
+            except ISO8601Error:
                 try:
                     # parse '##H##M##S'
                     data = Serializer.serialize_duration(f'PT{data.upper()}')
-                except ISO8601Error as err:
+                except ISO8601Error:
                     raise AAZInvalidArgValueError(
                         f"Invalid format: '{data}' should be of the form "
                         f"'##dT##h##m##s', '##h##m##s' or ISO8601 duration"
                     )
         value._data = data
         return value
+
 
 class AAZDateFormat(AAZBaseArgFormat):
 
@@ -121,6 +122,7 @@ class AAZDateFormat(AAZBaseArgFormat):
         data = "{:04}-{:02}-{:02}".format(dt_val.year, dt_val.month, dt_val.day)
         value._data = data
         return value
+
 
 class AAZTimeFormat(AAZBaseArgFormat):
 
@@ -161,6 +163,7 @@ class AAZTimeFormat(AAZBaseArgFormat):
 
         value._data = data
         return value
+
 
 class AAZDateTimeFormat(AAZBaseArgFormat):
 
