@@ -370,12 +370,11 @@ helps['ad app federated-credential update'] = """
 type: command
 short-summary: Update application federated identity credential.
 examples:
-- name: Update application federated identity credential.
+- name: Update application federated identity credential. Note that 'name' property cannot be changed.
   text: |
     az ad app federated-credential update --id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --federated-credential-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --parameters credential.json
     ("credential.json" contains the following content)
     {
-        "name": "Testing",
         "issuer": "https://token.actions.githubusercontent.com/",
         "subject": "repo:octo-org/octo-repo:environment:Production",
         "description": "Updated description",
