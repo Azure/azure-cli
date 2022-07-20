@@ -7559,36 +7559,6 @@ examples:
         az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 22 --port 50022
 """
 
-helps['network security-partner-provider'] = """
-type: group
-short-summary: Manage Azure security partner provider.
-"""
-
-helps['network security-partner-provider create'] = """
-type: command
-short-summary: Create a Azure security partner provider.
-"""
-
-helps['network security-partner-provider update'] = """
-type: command
-short-summary: Update a Azure security partner provider.
-"""
-
-helps['network security-partner-provider delete'] = """
-type: command
-short-summary: Delete a Azure security partner provider.
-"""
-
-helps['network security-partner-provider list'] = """
-type: command
-short-summary: List all Azure security partner provider.
-"""
-
-helps['network security-partner-provider show'] = """
-type: command
-short-summary: Show a Azure security partner provider.
-"""
-
 helps['network virtual-appliance'] = """
 type: group
 short-summary: Manage Azure Network Virtual Appliance.
