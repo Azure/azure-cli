@@ -119,7 +119,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             nullable=True
         )
 
-        args = self.format_arg(schema, {"date": "2010-01-02 01:11:11"})
+        args = self.format_arg(schema, {"date": "2010-01-02 01:11:11 +02:00"})
         self.assertEqual(args.date, "2010-01-02")
 
         args = self.format_arg(schema, {"date": "2010/01/02"})
@@ -134,7 +134,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         args = self.format_arg(schema, {"date": None})
         self.assertEqual(args.date, None)
 
-        with self.assertRaises(InvalidArgumentValue):
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
             args = self.format_arg(schema, {"date": "aaaa"})
 
     def test_time_fmt(self):
@@ -144,7 +144,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             nullable=True
         )
 
-        args = self.format_arg(schema, {"time": "2010-01-02 01:11:11.12345678"})
+        args = self.format_arg(schema, {"time": "2010-01-02 01:11:11.12345678 +01:00"})
         self.assertEqual(args.time, "01:11:11.123456")
 
         args = self.format_arg(schema, {"time": "01:11:11.0001"})
