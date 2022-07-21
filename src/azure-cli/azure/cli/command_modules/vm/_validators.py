@@ -1300,7 +1300,8 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
 
 def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
-    if namespace.security_type.lower() == 'trustedlaunch':
+    if namespace.security_type.lower() == 'trustedlaunch' and \
+            (namespace.enable_vtpm != True or namespace.enable_secure_boot != True):
         logger.warning('Please set --enable-secure-boot to True and --enable-vtpm to True in order to receive the full'
                        ' suite of security features that comes with Trusted Launch.')
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
