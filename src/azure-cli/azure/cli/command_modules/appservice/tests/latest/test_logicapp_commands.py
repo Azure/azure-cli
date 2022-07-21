@@ -111,7 +111,7 @@ class LogicappBasicE2ETest(ScenarioTest):
     def test_logicapp_https_only(self, resource_group, storage_account):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
         plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku WS1').get_output_in_json()['id']
 
         self.cmd('logicapp create -g {} -n {} -p {} -s {} --https-only'.format(resource_group, logicapp_name, plan, storage_account), checks=[JMESPathCheck('httpsOnly', True)])
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[JMESPathCheck('httpsOnly', False)])
