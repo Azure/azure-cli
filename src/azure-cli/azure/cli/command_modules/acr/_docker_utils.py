@@ -140,9 +140,8 @@ def _get_aad_token_after_challenge(cli_ctx,
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
     subscription = get_subscription_id(cli_ctx)
-    creds, _, tenant = profile.get_raw_token(
-                                    subscription=subscription,
-                                    resource = scope)
+    creds, _, tenant = profile.get_raw_token(subscription=subscription,
+                                             resource=scope)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
@@ -391,14 +390,13 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
             if registry and aad_auth_policy.status == 'disabled':
                 use_acr_audience = True
 
-            return login_server, EMPTY_GUID, _get_aad_token(
-                                                cli_ctx, 
-                                                login_server, 
-                                                only_refresh_token, 
-                                                repository, 
-                                                artifact_repository, 
-                                                permission, 
-                                                use_acr_audience=use_acr_audience)
+            return login_server, EMPTY_GUID, _get_aad_token(cli_ctx,
+                                                            login_server,
+                                                            only_refresh_token,
+                                                            repository,
+                                                            artifact_repository,
+                                                            permission,
+                                                            use_acr_audience=use_acr_audience)
         except CLIError as e:
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
