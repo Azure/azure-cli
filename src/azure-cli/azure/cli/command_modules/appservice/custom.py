@@ -5362,8 +5362,11 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
     if not github_actions_version:
         raise ValidationError('Could not detect runtime version. Please specify using the --runtime-version flag.')
 
-    if not _functionapp_runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, runtime_version=github_actions_version, functionapp_version=app_runtime_info['functionapp_version'], is_linux=is_linux):
-        raise ValidationError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
+    if not _functionapp_runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, runtime_version=github_actions_version,
+                                                        functionapp_version=app_runtime_info['functionapp_version'], is_linux=is_linux):
+        raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
+                              "on os %s for functionapp version %s." % (app_runtime_string, github_actions_version,
+                              "linux" if is_linux else "windows"), app_runtime_info['functionapp_version'])
 
     # Get workflow template
     logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
@@ -5380,8 +5383,6 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
                                                                   name=name, build_path=build_path, version=github_actions_version,
                                                                   publish_profile=publish_profile_name)
     completed_workflow_file = completed_workflow_file.encode()
-
-    0/0
 
     # Check if workflow exists in repo, otherwise push
     if slot:
@@ -5635,11 +5636,11 @@ def _fill_functionapp_workflow_template(content, name, build_path, version, publ
     content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{name}'")
     content = content.replace("AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'", f"AZURE_FUNCTIONAPP_PACKAGE_PATH: '{build_path}'")
     content = content.replace("POM_XML_DIRECTORY: '.'", f"POM_XML_DIRECTORY: '{build_path}'")
-    content = content.replace("runs-on: ubuntu-18.04", "")
+    content = content.replace("runs-on: ubuntu-18.04", "")  # repair linux python yaml
     if version:
-        content = content.replace("DOTNET_VERSION: '2.2.402'", f"DOTNET_VERSION: '{version}.x'")
+        content = content.replace("DOTNET_VERSION: '2.2.402'", f"DOTNET_VERSION: '{version}'")
         content = content.replace("JAVA_VERSION: '1.8.x'", f"JAVA_VERSION: '{version}'")
-        content = content.replace("NODE_VERSION: '10.x'", f"NODE_VERSION: '{version}.x'")
+        content = content.replace("NODE_VERSION: '10.x'", f"NODE_VERSION: '{version}'")
         content = content.replace("PYTHON_VERSION: '3.7'", f"PYTHON_VERSION: '{version}'")
     return content
 
@@ -5745,7 +5746,6 @@ def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
 
 def _functionapp_runtime_supports_github_actions(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
     import re
-    print(runtime_version)
     runtime_version = re.sub(r"[^\d\.]", "", runtime_version).rstrip('.')
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
     matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
@@ -5833,19 +5833,14 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):
     elif app_runtime and app_runtime.lower() == 'dotnet':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = getattr(app_settings, 'net_framework_version', '')
-        # app_runtime_version = app_runtime_version.replace('.0', '')
         return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'java':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = java_version=getattr(app_settings, 'java_version', '').lower()
-        # if app_runtime_version == '1.8':
-        #     app_runtime_version = '8.0'
         return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'powershell':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = java_version=getattr(app_settings, 'power_shell_version', '').lower()
-        # if '.' not in app_runtime_version:
-        #     app_runtime_version += '.0'
         return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux)
 
 
@@ -5882,14 +5877,15 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
     functionapp_version = re.sub(r"[^\d\.]", "", functionapp_version)
     app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
 
-    # Bug where dotnet 3.1 is set to 4.0 on portal (not tested on cli)
+    # Bug where dotnet 3.1 is set to 4.0 on portal and cli
     if not is_linux and app_runtime == 'dotnet':
-        if app_runtime_version == '4':
+        if app_runtime_version == '4.0':
             return {
                 "display_name": app_runtime,
                 "github_actions_version": None,
                 "functionapp_version": functionapp_version
             }
+
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
     matched_runtime = helper.resolve(app_runtime, app_runtime_version, functionapp_version, is_linux)
     gh_props = None if not matched_runtime else matched_runtime.github_actions_properties
