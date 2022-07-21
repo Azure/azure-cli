@@ -147,7 +147,7 @@ def validate_linux_host_name(namespace):
     in the CLI pre-flight.
     """
     # https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\_]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\_]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    rfc1123_regex = re.compile(r'^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$')  # pylint:disable=line-too-long
     found = rfc1123_regex.findall(namespace.name)
     if not found:
         raise CLIError('--name can contain only letters, numbers, underscores and hyphens. '
