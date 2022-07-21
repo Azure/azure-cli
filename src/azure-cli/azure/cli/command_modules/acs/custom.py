@@ -2548,7 +2548,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         if not found:
             # pylint: disable=logging-format-interpolation
             logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
+                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
                            'This is good for the current command session.\n'
                            '    2. Update system PATH environment variable by following '
                            '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
