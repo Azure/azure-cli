@@ -1300,10 +1300,6 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
 
 def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
-    if namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' and \
-            (namespace.enable_vtpm is not True or namespace.enable_secure_boot is not True):
-        logger.warning('Please set --enable-secure-boot to True and --enable-vtpm to True in order to receive the full'
-                       ' suite of security features that comes with Trusted Launch.')
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
         and namespace.enable_vtpm and namespace.enable_secure_boot
     if is_trusted_launch and not namespace.disable_integrity_monitoring:
@@ -1313,6 +1309,16 @@ def _enable_msi_for_trusted_launch(namespace):
             namespace.assign_identity = [MSI_LOCAL_ID]
         elif '[system]' not in namespace.assign_identity:
             namespace.assign_identity.append(MSI_LOCAL_ID)
+
+
+def _validate_trusted_launch(namespace):
+    if not namespace.security_type:
+        return
+
+    if namespace.security_type.lower() == 'trustedlaunch' and \
+            (namespace.enable_vtpm is not True or namespace.enable_secure_boot is not True):
+        logger.warning('Please set --enable-secure-boot to True and --enable-vtpm to True in order to receive the full'
+                       ' suite of security features that comes with Trusted Launch.')
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1386,6 +1392,7 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1679,6 +1686,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace, cmd)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
