@@ -4993,13 +4993,13 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
                                                                      key_name,
                                                                      slot,
                                                                      key_info)
-    
+
     try:
         return client.web_apps.create_or_update_function_secret(resource_group_name,
-                                                        name,
-                                                        function_name,
-                                                        key_name,
-                                                        key_info)
+                                                                name,
+                                                                function_name,
+                                                                key_name,
+                                                                key_info)
     except Exception as ex:
         if ex.status_code == 404:
              raise ResourceNotFoundError(
@@ -5009,7 +5009,6 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
         else:# check if an error occured during deployment
             raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
                    .format(ex.status_code, ex.message))
-
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
