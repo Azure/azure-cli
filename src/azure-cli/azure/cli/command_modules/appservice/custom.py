@@ -5002,13 +5002,12 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
                                                                 key_info)
     except Exception as ex:
         if ex.status_code == 404:
-             raise ResourceNotFoundError(
-             "The Resource 'Microsoft.Web/sites/%s' or The Fuction %s under resource group '%s' "
-             "was not found." % (name, function_name, resource_group_name))
-
-        else:# check if an error occured during deployment
-            raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
-                   .format(ex.status_code, ex.message))
+            raise ResourceNotFoundError(
+                "The Resource 'Microsoft.Web/sites/%s' or The Fuction %s under resource group '%s' "
+                "was not found." % (name, function_name, resource_group_name))
+        
+        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
+                       .format(ex.status_code, ex.message))
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
