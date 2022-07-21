@@ -186,6 +186,25 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionAppHttpsOnlyTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_https_only(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        linux_plan = "linux_plan"
+        windows_plan = "windows_plan"
+        self.cmd(f'appservice plan create -n {linux_plan} -g {resource_group} --is-linux')
+        self.cmd(f'appservice plan create -n {windows_plan} -g {resource_group}')
+
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account} --https-only').assert_with_checks([JMESPathCheck('httpsOnly', True)])
+        functionapp_name = self.create_random_name('function', 40)
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only true').assert_with_checks([JMESPathCheck('httpsOnly', True)])
+        functionapp_name = self.create_random_name('function', 40)
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account}').assert_with_checks([JMESPathCheck('httpsOnly', False)])
+        functionapp_name = self.create_random_name('function', 40)
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only false').assert_with_checks([JMESPathCheck('httpsOnly', False)])
+
+
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
