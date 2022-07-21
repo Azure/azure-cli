@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import logging
 from knack.log import get_logger
 from knack.util import todict
 from azure.cli.core.util import sdk_no_wait
@@ -197,7 +196,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=to
         if client_type == CLIENT_TYPE.Dotnet.value:
             client_type = CLIENT_TYPE.DotnetConnectionString.value
         else:
-            logging.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
+            logger.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
 
     parameters = {
         'target_service': {
@@ -326,7 +325,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         if client_type == CLIENT_TYPE.Dotnet.value:
             client_type = CLIENT_TYPE.DotnetConnectionString.value
         else:
-            logging.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
+            logger.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
 
     parameters = {
         'target_service': linker.get('targetService'),
