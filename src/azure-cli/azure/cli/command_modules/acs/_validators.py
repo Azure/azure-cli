@@ -150,8 +150,8 @@ def validate_linux_host_name(namespace):
     rfc1123_regex = re.compile(r'^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$')  # pylint:disable=line-too-long
     found = rfc1123_regex.findall(namespace.name)
     if not found:
-        raise CLIError('--name can contain only letters, numbers, underscores and hyphens. '
-                       'The name must start and end with letter or number.')
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, underscores (_) or dashes (-).')
 
 
 def validate_snapshot_name(namespace):
