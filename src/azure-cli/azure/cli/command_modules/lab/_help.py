@@ -273,7 +273,7 @@ parameters:
   - name: --allow-claim
     short-summary: Flag indicating if the VM should be created as claimable.
   - name: --disk-type
-    short-summary: Storage type to use for virtual machine.
+    short-summary: 'Storage type to use for virtual machine. Allowed values are: Premium, Standard, StandardSSD.'
   - name: --expiration-date
     short-summary: The expiration date in UTC(yyyy-MM-ddTHH:mm:ss) for the VM.
   - name: --generate-ssh-keys
