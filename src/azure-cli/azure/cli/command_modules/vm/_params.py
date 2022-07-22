@@ -352,7 +352,7 @@ def load_arguments(self, _):
         c.argument('dest_path', arg_type=ib_file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
 
     with self.argument_context('image builder validator add', min_api='2022-02-14') as c:
-        c.argument('continue_distribute_on_failure', arg_type=get_three_state_flag(), help="If validation fails and this field is set to false, output image(s) will not be distributed.")
+        c.argument('dis_on_failure', options_list=['--continue-distribute-on-failure', '--dis-on-failure'], arg_type=get_three_state_flag(), help="If validation fails and this field is set to false, output image(s) will not be distributed.")
         c.argument('source_validation_only', arg_type=get_three_state_flag(), help="If this field is set to true, the image specified in the 'source' section will directly be validated. No separate build will be run to generate and then validate a customized image.")
     # endregion
 

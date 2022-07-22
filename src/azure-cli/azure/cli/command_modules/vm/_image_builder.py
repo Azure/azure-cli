@@ -507,10 +507,13 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             raise RequiredArgumentMissingError('Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
     vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
 
-    image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
+    image_template = ImageTemplate(source=template_source, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
                                    identity=identity_body, vm_profile=vm_profile,
                                    staging_resource_group=staging_resource_group)
+
+    if len(template_scripts) > 0:
+        image_template.customize = template_scripts
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
@@ -702,7 +705,7 @@ def clear_template_customizer(cmd, client, resource_group_name, image_template_n
 
 
 def add_template_validator(cmd, client, resource_group_name, image_template_name,
-                           continue_distribute_on_failure=False, source_validation_only=False):
+                           dis_on_failure=False, source_validation_only=False):
     _require_defer(cmd)
     from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesValidate
 
@@ -710,7 +713,7 @@ def add_template_validator(cmd, client, resource_group_name, image_template_name
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
     image_template_properties_validate = ImageTemplatePropertiesValidate(
-        continue_distribute_on_failure=continue_distribute_on_failure, source_validation_only=source_validation_only)
+        continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
     existing_image_template.validate = image_template_properties_validate
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,

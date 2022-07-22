@@ -371,7 +371,7 @@ examples:
         az image builder create --image-source $imagesource -n myTemplate -g myGroup \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
             --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth \\
-            --identity myIdentity --staging_resource_group myStagingResourceGroup
+            --identity myIdentity --staging-resource-group myStagingResourceGroup
 
   - name: Create an image builder template using an image template file.
     text: |
@@ -471,19 +471,19 @@ type: command
 short-summary: Add validate to an existing image builder template.
 long-summary: Must be used with --defer
 examples:
-  - name: Add validate with continue distribute on failure set to true. If not specified, the default value of continue distribute on failure is false. 
+  - name: Add validate with continue distribute on failure set to true. If not specified, the default value of continue distribute on failure is false.
         If validation fails and this field is set to false, output image(s) will not be distributed.
     text: |
-        az image builder validate add -n myTemplate -g myGroup --continue-distribute-on-failure true --defer
+        az image builder validator add -n myTemplate -g myGroup --continue-distribute-on-failure true --defer
 
-  - name: Add validate with source validation only set to true. If not specified, the default value of source validation only is false. 
+  - name: Add validate with source validation only set to true. If not specified, the default value of source validation only is false.
         If this field is set to true, the image specified in the source section will directly be validated.
     text: |
-        az image builder validate add -n myTemplate -g myGroup --source-validation-only true --defer
+        az image builder validator add -n myTemplate -g myGroup --source-validation-only true --defer
 
   - name: Add validate with source validation only and continue distribute on failure set to false.
     text: |
-        az image builder validate add -n myTemplate -g myGroup --defer
+        az image builder validator add -n myTemplate -g myGroup --defer
 """
 
 helps['image builder validator remove'] = """
@@ -493,7 +493,7 @@ long-summary: Must be used with --defer
 examples:
   - name: Remove validate from an existing image builder template.
     text: |
-        az image builder validate remove -n myTemplate -g myGroup --defer
+        az image builder validator remove -n myTemplate -g myGroup --defer
 """
 
 helps['image builder validator show'] = """
@@ -503,7 +503,7 @@ long-summary: Must be used with --defer
 examples:
   - name: Show validate of an existing image builder template.
     text: |
-        az image builder validate show -n myTemplate -g myGroup --defer
+        az image builder validator show -n myTemplate -g myGroup --defer
 """
 
 helps['image builder delete'] = """
