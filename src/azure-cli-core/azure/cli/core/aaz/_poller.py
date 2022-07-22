@@ -77,7 +77,7 @@ class AAZLROPoller:
          the operation.
         """
         try:
-            for polling_method in self._polling_generator():
+            for polling_method in self._polling_generator:
                 self._polling_method = polling_method
                 try:
                     self._polling_method.run()

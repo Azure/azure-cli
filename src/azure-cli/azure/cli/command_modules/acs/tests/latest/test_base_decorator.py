@@ -148,6 +148,7 @@ class BaseAKSContextTestCase(unittest.TestCase):
         ctx_1.remove_intermediate("test-intermediate")
         self.assertEqual(ctx_1.get_intermediate("test-intermediate"), None)
 
+
 class BaseAKSManagedClusterDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -193,6 +194,7 @@ class BaseAKSManagedClusterDecoratorTestCase(unittest.TestCase):
         mc_1 = self.test_models.ManagedCluster(location="test_location")
         with self.assertRaises(NotImplementedError):
             dec_1.put_mc(mc_1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -17,7 +17,7 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db, cf_mysql_check_resource_availability, cf_mysql_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, \
-    generate_password, parse_maintenance_window
+    generate_password, parse_maintenance_window, replace_memory_optimized_tier
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
@@ -57,6 +57,9 @@ def flexible_server_create(cmd, client,
         logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
         high_availability = 'ZoneRedundant'
 
+    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+    if tier == 'BusinessCritical':
+        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               server_name=server_name,
                               location=location,
@@ -314,6 +317,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
         logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
         high_availability = 'ZoneRedundant'
 
+    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+    if tier == 'BusinessCritical':
+        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               location=location,
                               tier=tier,
@@ -557,6 +563,7 @@ def flexible_server_mysql_get(cmd, resource_group_name, server_name):
 
 def flexible_list_skus(cmd, client, location):
     result = client.list(location)
+    result = replace_memory_optimized_tier(result)
     logger.warning('For prices please refer to https://aka.ms/mysql-pricing')
     return result
 

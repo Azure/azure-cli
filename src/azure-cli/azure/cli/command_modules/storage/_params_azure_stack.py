@@ -650,7 +650,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_lease_id', arg_group='Copy Source')
 
     with self.argument_context('storage blob copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+        from azure.cli.command_modules.storage._validators_azure_stack import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
         c.argument('requires_sync', arg_type=get_three_state_flag(),
@@ -987,7 +987,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
 
     with self.argument_context('storage file copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+        from azure.cli.command_modules.storage._validators_azure_stack import validate_source_uri
 
         c.register_path_argument(options_list=('--destination-path', '-p'))
         c.register_source_uri_arguments(validator=validate_source_uri)

@@ -13,9 +13,9 @@ interactions:
       ParameterSetName:
       - --location
       User-Agent:
-      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-compute/25.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-compute/27.0.0 Python/3.8.10 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/usages?api-version=2021-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/usages?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"limit\": 2500,\r\n      \"unit\":
@@ -30,7 +30,7 @@ interactions:
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"virtualMachineScaleSets\",\r\n        \"localizedValue\":
         \"Virtual Machine Scale Sets\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        3000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        3000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 64,\r\n      \"name\":
         {\r\n        \"value\": \"dedicatedVCpus\",\r\n        \"localizedValue\":
         \"Dedicated vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 2500,\r\n
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
@@ -39,16 +39,22 @@ interactions:
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"lowPriorityCores\",\r\n        \"localizedValue\":
         \"Total Regional Low-priority vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 64,\r\n      \"name\":
+        {\r\n        \"value\": \"standardDSv3Family\",\r\n        \"localizedValue\":
+        \"Standard DSv3 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardDSv2Family\",\r\n        \"localizedValue\":
         \"Standard DSv2 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"standardDSv3Family\",\r\n        \"localizedValue\":
-        \"Standard DSv3 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        {\r\n        \"value\": \"standardDSFamily\",\r\n        \"localizedValue\":
+        \"Standard DS Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"basicAFamily\",\r\n        \"localizedValue\": \"Basic
         A Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 100,\r\n
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        {\r\n        \"value\": \"standardDv2Family\",\r\n        \"localizedValue\":
+        \"Standard Dv2 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardA0_A7Family\",\r\n        \"localizedValue\":
         \"Standard A0-A7 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
@@ -57,12 +63,6 @@ interactions:
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardDFamily\",\r\n        \"localizedValue\":
         \"Standard D Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"standardDv2Family\",\r\n        \"localizedValue\":
-        \"Standard Dv2 Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
-        100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
-        {\r\n        \"value\": \"standardDSFamily\",\r\n        \"localizedValue\":
-        \"Standard DS Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         100,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"standardGFamily\",\r\n        \"localizedValue\":
         \"Standard G Family vCPUs\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
@@ -324,12 +324,24 @@ interactions:
         \   },\r\n    {\r\n      \"limit\": 0,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\":
         0,\r\n      \"name\": {\r\n        \"value\": \"standardECIADSv5Family\",\r\n
         \       \"localizedValue\": \"Standard ECIADSv5 Family vCPUs\"\r\n      }\r\n
+        \   },\r\n    {\r\n      \"limit\": 0,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\":
+        0,\r\n      \"name\": {\r\n        \"value\": \"StandardNVADSA10v5Family\",\r\n
+        \       \"localizedValue\": \"Standard NVADSA10v5 Family vCPUs\"\r\n      }\r\n
+        \   },\r\n    {\r\n      \"limit\": 100,\r\n      \"unit\": \"Count\",\r\n
+        \     \"currentValue\": 0,\r\n      \"name\": {\r\n        \"value\": \"standardEBDSv5Family\",\r\n
+        \       \"localizedValue\": \"Standard EBDSv5 Family vCPUs\"\r\n      }\r\n
+        \   },\r\n    {\r\n      \"limit\": 100,\r\n      \"unit\": \"Count\",\r\n
+        \     \"currentValue\": 0,\r\n      \"name\": {\r\n        \"value\": \"standardEBSv5Family\",\r\n
+        \       \"localizedValue\": \"Standard EBSv5 Family vCPUs\"\r\n      }\r\n
         \   },\r\n    {\r\n      \"limit\": 100,\r\n      \"unit\": \"Count\",\r\n
         \     \"currentValue\": 0,\r\n      \"name\": {\r\n        \"value\": \"standardEIASv5Family\",\r\n
         \       \"localizedValue\": \"Standard EIASv5 Family vCPUs\"\r\n      }\r\n
         \   },\r\n    {\r\n      \"limit\": 0,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\":
         0,\r\n      \"name\": {\r\n        \"value\": \"standardEIADSv5Family\",\r\n
         \       \"localizedValue\": \"Standard EIADSv5 Family vCPUs\"\r\n      }\r\n
+        \   },\r\n    {\r\n      \"limit\": 0,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\":
+        0,\r\n      \"name\": {\r\n        \"value\": \"StandardNCADSA10v4Family\",\r\n
+        \       \"localizedValue\": \"Standard NCADSA10v4 Family vCPUs\"\r\n      }\r\n
         \   },\r\n    {\r\n      \"limit\": 50000,\r\n      \"unit\": \"Count\",\r\n
         \     \"currentValue\": 0,\r\n      \"name\": {\r\n        \"value\": \"StandardDiskCount\",\r\n
         \       \"localizedValue\": \"Standard Storage Managed Disks\"\r\n      }\r\n
@@ -348,6 +360,9 @@ interactions:
         \   {\r\n      \"limit\": 1000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\":
         0,\r\n      \"name\": {\r\n        \"value\": \"UltraSSDDiskCount\",\r\n        \"localizedValue\":
         \"UltraSSDStorageDisks\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        1000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        {\r\n        \"value\": \"PremiumV2DiskCount\",\r\n        \"localizedValue\":
+        \"PremiumV2StorageDisks\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         75000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 1,\r\n      \"name\":
         {\r\n        \"value\": \"StandardSnapshotCount\",\r\n        \"localizedValue\":
         \"StandardStorageSnapshots\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
@@ -363,13 +378,16 @@ interactions:
         32768,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"UltraSSDDiskSizeInGB\",\r\n        \"localizedValue\":
         \"UltraSSDTotalSizeInGB\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
+        65536,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
+        {\r\n        \"value\": \"PremiumV2DiskSizeInGB\",\r\n        \"localizedValue\":
+        \"PremiumV2TotalDiskSizeInGB\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\":
         1000,\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"DiskEncryptionSetCount\",\r\n        \"localizedValue\":
         \"DiskEncryptionSets\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 1000,\r\n
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"name\":
         {\r\n        \"value\": \"DiskAccessCount\",\r\n        \"localizedValue\":
         \"DiskAccesses\"\r\n      }\r\n    },\r\n    {\r\n      \"limit\": 100,\r\n
-        \     \"unit\": \"Count\",\r\n      \"currentValue\": 12,\r\n      \"name\":
+        \     \"unit\": \"Count\",\r\n      \"currentValue\": 17,\r\n      \"name\":
         {\r\n        \"value\": \"Gallery\",\r\n        \"localizedValue\": \"Gallery\"\r\n
         \     }\r\n    },\r\n    {\r\n      \"limit\": 1000,\r\n      \"unit\": \"Count\",\r\n
         \     \"currentValue\": 0,\r\n      \"name\": {\r\n        \"value\": \"GalleryImage\",\r\n
@@ -382,11 +400,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '25022'
+      - '26299'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 10 Feb 2022 07:27:52 GMT
+      - Thu, 19 May 2022 02:34:24 GMT
       expires:
       - '-1'
       pragma:
@@ -403,7 +421,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetSubscriptionInfo3Min;358
+      - Microsoft.Compute/GetSubscriptionInfo3Min;359
     status:
       code: 200
       message: OK

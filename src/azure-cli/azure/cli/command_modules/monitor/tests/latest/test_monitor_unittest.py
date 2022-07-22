@@ -9,15 +9,6 @@ from unittest import mock
 
 from knack.util import CLIError
 
-from azure.cli.command_modules.monitor.operations.autoscale_settings import scaffold_autoscale_settings_parameters
-
-
-class FilterBuilderTests(unittest.TestCase):
-    def test_scaffold_autoscale_settings_parameters(self):
-        template = scaffold_autoscale_settings_parameters(None)
-        self.assertTrue(template)
-        self.assertTrue(isinstance(template, dict))
-
 
 def _mock_get_subscription_id(_):
     return '00000000-0000-0000-0000-000000000000'

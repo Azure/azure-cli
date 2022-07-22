@@ -471,7 +471,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage directory', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('directory_azure_stack',
                                                                file_data_service_factory)) as g:
-        from ._format import transform_file_directory_result, transform_file_output
+        from ._format import transform_file_output
+        from ._format_azure_stack import transform_file_directory_result
 
         g.storage_command('create', 'create_directory', transform=create_boolean_result_output_transformer('created'),
                           table_transformer=transform_boolean_for_table)
@@ -492,7 +493,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage file', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file_azure_stack', file_data_service_factory)) as g:
-        from ._format import transform_file_directory_result, transform_boolean_for_table, transform_file_output
+        from ._format import transform_boolean_for_table, transform_file_output
         from ._transformers_azure_stack import transform_url
         g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
                                  table_transformer=transform_file_output,

@@ -18,6 +18,9 @@ from azure.cli.command_modules.role._validators import validate_group, validate_
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 
+JSON_PROPERTY_HELP = "Should be in JSON format. See examples below for details"
+
+
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('ad') as c:
@@ -91,21 +94,20 @@ def load_arguments(self, _):
                    help="Friendly name for the key.")
 
         # JSON properties
-        json_property_help = "Should be in manifest JSON format. See examples below for details"
         c.argument('required_resource_accesses', arg_group='JSON property', type=validate_file_or_dict,
                    help="Specifies the resources that the application needs to access. This property also specifies "
                         "the set of delegated permissions and application roles that it needs for each of those "
                         "resources. This configuration of access to the required resources drives the consent "
-                        "experience. " + json_property_help)
+                        "experience. " + JSON_PROPERTY_HELP)
         c.argument('app_roles', arg_group='JSON property', type=validate_file_or_dict,
                    help="The collection of roles assigned to the application. With app role assignments, these roles "
                         "can be assigned to users, groups, or service principals associated with other applications. " +
-                        json_property_help)
+                        JSON_PROPERTY_HELP)
         c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
                    help="Application developers can configure optional claims in their Azure AD applications to "
                         "specify the claims that are sent to their application by the Microsoft security token "
                         "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
-                        "/active-directory-optional-claims. " + json_property_help)
+                        "/active-directory-optional-claims. " + JSON_PROPERTY_HELP)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
@@ -204,6 +206,16 @@ def load_arguments(self, _):
 
         c.argument('create_cert', action='store_true', arg_group='keyCredentials', help='Create a self-signed certificate to use for the credential')
         c.argument('keyvault', arg_group='keyCredentials', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
+
+    for item in ['app', 'sp']:
+        with self.argument_context(f'ad {item} federated-credential') as c:
+            # TODO: We have to decide which name to use
+            #   --credential-id is consistent with API
+            #   --key-id is consistent with passwordCredentials and keyCredentials
+            c.argument('parameters', type=validate_file_or_dict,
+                       help='Parameters for creating federated identity credential. ' + JSON_PROPERTY_HELP)
+            c.argument('credential_id_or_name', options_list=['--credential-id', '--key-id'],
+                       help='Name or ID of the federated identity credential')
 
     for item in ['ad sp credential delete', 'ad sp credential list', 'ad app credential delete', 'ad app credential list']:
         with self.argument_context(item) as c:

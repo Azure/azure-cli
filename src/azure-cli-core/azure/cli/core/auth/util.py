@@ -20,17 +20,27 @@ def aad_error_handler(error, **kwargs):
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
 
+    # To trigger this function for testing, simply provide an invalid scope:
+    # az account get-access-token --scope https://my-invalid-scope
+
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
         import socket
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())
 
-    msg = error.get('error_description')
-    login_message = _generate_login_message(**kwargs)
+    error_description = error.get('error_description')
+
+    # Build recommendation message
+    login_command = _generate_login_command(**kwargs)
+    login_message = (
+        # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
+        # we let the user explicitly log in to AAD with MSAL.
+        "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
+        else "To re-authenticate, please run:\n{}").format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(msg, recommendation=login_message)
+    raise AuthenticationError(error_description, recommendation=login_message)
 
 
 def _generate_login_command(scopes=None):
@@ -41,16 +51,6 @@ def _generate_login_command(scopes=None):
         login_command.append('--scope {}'.format(' '.join(scopes)))
 
     return ' '.join(login_command)
-
-
-def _generate_login_message(**kwargs):
-    from azure.cli.core.util import in_cloud_console
-    login_command = _generate_login_command(**kwargs)
-
-    msg = "To re-authenticate, please {}" .format(
-        "refresh Azure Portal." if in_cloud_console() else "run:\n{}".format(login_command))
-
-    return msg
 
 
 def resource_to_scopes(resource):
@@ -137,6 +137,23 @@ def check_result(result, **kwargs):
         }
 
     return None
+
+
+def build_sdk_access_token(token_entry):
+    import time
+    request_time = int(time.time())
+
+    # MSAL token entry sample:
+    # {
+    #     'access_token': 'eyJ0eXAiOiJKV...',
+    #     'token_type': 'Bearer',
+    #     'expires_in': 1618
+    # }
+
+    # Importing azure.core.credentials.AccessToken is expensive.
+    # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
+    # So We define our own AccessToken.
+    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])
 
 
 def decode_access_token(access_token):

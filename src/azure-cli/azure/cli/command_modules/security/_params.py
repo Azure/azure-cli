@@ -39,7 +39,8 @@ suppression_rule_scope_contains_arg_type = CLIArgumentType(options_list=('--cont
 suppression_rule_scope_any_of_arg_type = CLIArgumentType(options_list=('--any-of'), metavar='ANYOF', help='A list of strings to scope the suppression rule by.')
 
 # Atp
-storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
+storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing Storage account.')
+cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmosdb-account'), metavar='NAME', help='Name of an existing Cosmos DB account.')
 
 # Sql Vulnerability Assessment
 va_sql_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
@@ -176,9 +177,6 @@ def load_arguments(self, _):
                 'location',
                 arg_type=location_arg_type)
             c.argument(
-                'storage_account_name',
-                arg_type=storage_account_arg_type)
-            c.argument(
                 'vm_resource_id',
                 arg_type=va_sql_vm_resource_id_arg_type)
             c.argument(
@@ -199,6 +197,15 @@ def load_arguments(self, _):
             c.argument(
                 'vm_uuid',
                 arg_type=va_sql_vm_uuid_arg_type)
+
+    with self.argument_context('security atp storage') as c:
+        c.argument(
+            'storage_account_name',
+            arg_type=storage_account_arg_type)
+    with self.argument_context('security atp cosmosdb') as c:
+        c.argument(
+            'cosmos_db_account_name',
+            arg_type=cosmos_db_account_arg_type)
 
     for scope in ['regulatory-compliance-controls']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -286,9 +293,9 @@ def load_arguments(self, _):
                 validator=validate_auto_provisioning_toggle,
                 arg_type=auto_provisioning_auto_provision_arg_type)
 
-    for scope in ['atp storage update']:
+    for scope in ['atp storage update', 'atp cosmosdb update']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage account.', arg_type=get_three_state_flag())
+            c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage or Cosmos DB account.', arg_type=get_three_state_flag())
 
     for scope in ['va sql scans show',
                   'va sql results']:

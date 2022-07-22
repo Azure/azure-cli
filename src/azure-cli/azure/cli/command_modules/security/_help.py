@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['security'] = """
 type: group
-short-summary: Manage your security posture with Azure Security Center.
+short-summary: Manage your security posture with Microsoft Defender for Cloud.
 """
 
 helps['security alert'] = """
@@ -128,6 +128,11 @@ type: group
 short-summary: View and manage Advanced Threat Protection settings for storage accounts.
 """
 
+helps['security atp cosmosdb'] = """
+type: group
+short-summary: View and manage Advanced Threat Protection settings for Cosmos DB accounts.
+"""
+
 helps['security atp storage show'] = """
 type: command
 short-summary: Display Advanced Threat Protection settings for a storage account.
@@ -135,6 +140,15 @@ examples:
   - name: Retrieve Advanced Threat Protection settings for a storage account on a subscription scope.
     text: >
         az security atp storage show --resource-group MyResourceGroup --storage-account MyStorageAccount
+"""
+
+helps['security atp cosmosdb show'] = """
+type: command
+short-summary: Display Advanced Threat Protection settings for an Azure Cosmos DB account.
+examples:
+  - name: Retrieve Advanced Threat Protection settings for an Azure Cosmos DB account on a subscription scope.
+    text: >
+        az security atp cosmosdb show --resource-group MyResourceGroup --cosmosdb-account MyCosmosDbAccount
 """
 
 helps['security atp storage update'] = """
@@ -147,6 +161,18 @@ examples:
   - name: Disable Advanced Threat Protection for a storage account on a subscription scope.
     text: >
         az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled false
+"""
+
+helps['security atp cosmosdb update'] = """
+type: command
+short-summary: Toggle status of Advanced Threat Protection for an Azure Cosmos DB account.
+examples:
+  - name: Enable Advanced Threat Protection for an Azure Cosmos DB account on a subscription scope.
+    text: >
+        az security atp cosmosdb update --resource-group MyResourceGroup --cosmosdb-account MyCosmosDbAccount --is-enabled true
+  - name: Disable Advanced Threat Protection for an Azure Cosmos DB account on a subscription scope.
+    text: >
+        az security atp cosmosdb update --resource-group MyResourceGroup --cosmosdb-account MyCosmosDbAccount --is-enabled false
 """
 
 helps['security va'] = """
@@ -445,23 +471,23 @@ examples:
 
 helps['security location'] = """
 type: group
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 """
 
 helps['security location list'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location list
 """
 
 helps['security location show'] = """
 type: command
-short-summary: Shows the Azure Security Center Home region location.
+short-summary: Shows the Microsoft Defender for Cloud Home region location.
 examples:
-  - name: Shows the Azure Security Center Home region location.
+  - name: Shows the Microsoft Defender for Cloud Home region location.
     text: >
         az security location show -n centralus
 """

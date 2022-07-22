@@ -6,7 +6,7 @@
 import re
 from typing import Any, List, TypeVar
 
-from azure.cli.command_modules.acs._client_factory import cf_snapshots, get_msi_client
+from azure.cli.command_modules.acs._client_factory import get_snapshots_client, get_msi_client
 from azure.cli.core.azclierror import (
     AzureInternalError,
     AzureResponseError,
@@ -98,6 +98,16 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
     return False
 
 
+def check_is_managed_aad_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether managed aad is enabled.
+
+    :return: bool
+    """
+    if mc and mc.aad_profile is not None and mc.aad_profile.managed:
+        return True
+    return False
+
+
 # pylint: disable=too-many-return-statements
 def map_azure_error_to_cli_error(azure_error):
     error_message = getattr(azure_error, "message", str(azure_error))
@@ -133,14 +143,15 @@ def get_snapshot_by_snapshot_id(cli_ctx, snapshot_id):
     snapshot_id = snapshot_id.lower()
     match = _re_snapshot_resource_id.search(snapshot_id)
     if match:
+        subscription_id = match.group(1)
         resource_group_name = match.group(2)
         snapshot_name = match.group(3)
-        return get_snapshot(cli_ctx, resource_group_name, snapshot_name)
+        return get_snapshot(cli_ctx, subscription_id, resource_group_name, snapshot_name)
     raise InvalidArgumentValueError("Cannot parse snapshot name from provided resource id '{}'.".format(snapshot_id))
 
 
-def get_snapshot(cli_ctx, resource_group_name, snapshot_name):
-    snapshot_client = cf_snapshots(cli_ctx)
+def get_snapshot(cli_ctx, subscription_id, resource_group_name, snapshot_name):
+    snapshot_client = get_snapshots_client(cli_ctx, subscription_id=subscription_id)
     try:
         snapshot = snapshot_client.get(resource_group_name, snapshot_name)
     # track 2 sdk raise exception from azure.core.exceptions

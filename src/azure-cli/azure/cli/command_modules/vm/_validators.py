@@ -240,7 +240,7 @@ def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
     from msrestazure.tools import is_valid_resource_id
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     import re
 
     # 1 - check if a fully-qualified ID (assumes it is an image ID)
@@ -304,7 +304,7 @@ def _parse_image_argument(cmd, namespace):
         namespace.image = _get_resource_id(cmd.cli_ctx, namespace.image, namespace.resource_group_name,
                                            'images', 'Microsoft.Compute')
         return 'image_id'
-    except CloudError:
+    except HttpResponseError:
         if images is not None:
             err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, ' \
                   'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
@@ -317,7 +317,6 @@ def _parse_image_argument(cmd, namespace):
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     try:
         compute_client = _compute_client_factory(cmd.cli_ctx)
         if namespace.os_version.lower() == 'latest':
@@ -334,7 +333,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 
         # pylint: disable=no-member
         return image.plan
-    except CloudError as ex:
+    except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
                        "will be skipped", namespace.image, ex.message)
 
@@ -574,6 +573,17 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 "The --os-type is not the correct os type of this community gallery image, "
                 "the os type of this image should be {}".format(community_gallery_image_info.os_type))
         namespace.os_type = community_gallery_image_info.os_type
+
+    if getattr(namespace, 'security_type', None) == 'ConfidentialVM' and \
+            not getattr(namespace, 'os_disk_security_encryption_type', None):
+        raise RequiredArgumentMissingError('usage error: "--os-disk-security-encryption-type" is required '
+                                           'when "--security-type" is specified as "ConfidentialVM"')
+
+    if getattr(namespace, 'os_disk_secure_vm_disk_encryption_set', None) and \
+            getattr(namespace, 'os_disk_security_encryption_type', None) != 'DiskWithVMGuestState':
+        raise ArgumentUsageError(
+            'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
+            'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
 
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
@@ -1301,11 +1311,28 @@ def _enable_msi_for_trusted_launch(namespace):
             namespace.assign_identity.append(MSI_LOCAL_ID)
 
 
+def _validate_trusted_launch(namespace):
+    if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
+        return
+
+    if not namespace.enable_vtpm or not namespace.enable_secure_boot:
+        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-secure-boot True"'
+                       ' to receive the full suite of security features that comes with Trusted Launch.')
+
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
         raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
                                  ' --application-version-ids')
+    if namespace.treat_deployment_as_failure:
+        if len(namespace.application_version_ids) != len(namespace.treat_deployment_as_failure):
+            raise ArgumentUsageError('usage error: --treat-deployment-as-failure should have the same number of items'
+                                     ' as --application-version-ids')
+        for boolean_value_in_string in namespace.treat_deployment_as_failure:
+            if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
+                raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or'
+                                         ' "false" values')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1364,6 +1391,7 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1535,6 +1563,12 @@ def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
+                                            ' available for VMSS with flexible orchestration mode')
+
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
         # The commentted parameters are also forbidden, but they have default values.
@@ -1562,6 +1596,7 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.vm_sku and not namespace.image:
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
+        _validate_trusted_launch(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1651,6 +1686,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace, cmd)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
@@ -1714,17 +1750,131 @@ def validate_vmss_disk(cmd, namespace):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
-def process_disk_or_snapshot_create_namespace(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
+def _validate_gallery_image_reference(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None \
+                  and cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
+                                                operation_group='disks', min_api='2022-03-02')
+    if not is_validate:
+        return
+
+    from azure.cli.command_modules.vm._image_builder import GalleryImageReferenceType
+    from ._vm_utils import is_compute_gallery_image_id, is_community_gallery_image_id, \
+        is_shared_gallery_image_id
+
+    gallery_image_reference = namespace.gallery_image_reference
+    if is_compute_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMPUTE.backend_key
+        return
+    if is_community_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMMUNITY.backend_key
+        return
+    if is_shared_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.SHARED.backend_key
+        return
+
+    from azure.cli.core.parser import InvalidArgumentValueError
+    raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
+                                    'compute, shared or community gallery image version. For details about valid '
+                                    'format, please refer to the help sample'.format(gallery_image_reference))
+
+
+def process_disk_create_namespace(cmd, namespace):
+    from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
+    _validate_security_data_uri(namespace)
+    _validate_upload_type(cmd, namespace)
+    _validate_secure_vm_disk_encryption_set(namespace)
+    _validate_hyper_v_generation(namespace)
+    if namespace.source:
+        usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
+                      '--source VHD_BLOB_URI [--source-storage-account-id ID]'
+        try:
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
+                namespace.source_restore_point, _ = _figure_out_storage_source(
+                    cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            if not namespace.source_blob_uri and namespace.source_storage_account_id:
+                raise ArgumentUsageError(usage_error)
+        except HttpResponseError:
+            raise ArgumentUsageError(usage_error)
+
+
+def _validate_security_data_uri(namespace):
+    if 'security_data_uri' not in namespace or not namespace.security_data_uri:
+        return
+
+    if not namespace.security_type:
+        raise RequiredArgumentMissingError(
+            'Please specify --security-type when using the --security-data-uri parameter')
+
+    if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+        raise ArgumentUsageError(
+            "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
+
+    if not namespace.source:
+        raise RequiredArgumentMissingError(
+            'Please specify --source when using the --security-data-uri parameter')
+
+
+def _validate_upload_type(cmd, namespace):
+    if 'upload_type' not in namespace:
+        return
+
+    if not namespace.upload_type and namespace.for_upload:
+        namespace.upload_type = 'Upload'
+
+    if namespace.upload_type == 'UploadWithSecurityData':
+
+        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+            raise ArgumentUsageError(
+                "'UploadWithSecurityData' is not supported in the current profile. "
+                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
+
+        if not namespace.security_type:
+            raise RequiredArgumentMissingError(
+                "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
+
+        if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+            raise ArgumentUsageError(
+                "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
+
+
+def _validate_secure_vm_disk_encryption_set(namespace):
+    if 'secure_vm_disk_encryption_set' not in namespace:
+        return
+
+    if namespace.secure_vm_disk_encryption_set:
+        if not namespace.security_type or \
+                namespace.security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
+            raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set can only be specified only '
+                                     'when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+    elif namespace.security_type and namespace.security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
+        raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set is mandatory when '
+                                 '--security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+
+def _validate_hyper_v_generation(namespace):
+    if namespace.security_type and (not namespace.hyper_v_generation or namespace.hyper_v_generation == 'V1'):
+        logger.warning(
+            'Enabling security features by using parameter "--security-type" requires UEFI support with Generation 2 '
+            'VMs, please set the parameter "--hyper-v-generation" to "V2" for enabling Generation 2 VM support.')
+
+
+def process_snapshot_create_namespace(cmd, namespace):
+    from azure.core.exceptions import HttpResponseError
+    validate_tags(namespace)
+    validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, source_info = \
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, _, source_info = \
                 _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError(usage_error)
+                raise ArgumentUsageError(usage_error)
             # autodetect copy_start for `az snapshot create`
             if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
                 if not source_info:
@@ -1744,9 +1894,10 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                 if not namespace.location:
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
-                namespace.copy_start = source_info.location != namespace.location
-        except CloudError:
-            raise CLIError(usage_error)
+                if namespace.incremental:
+                    namespace.copy_start = source_info.location != namespace.location
+        except HttpResponseError:
+            raise ArgumentUsageError(usage_error)
 
 
 def process_image_create_namespace(cmd, namespace):
@@ -1774,13 +1925,13 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot, _ = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -1798,12 +1949,15 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_disk = None
     source_snapshot = None
     source_info = None
+    source_restore_point = None
     if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
     elif '/snapshots/' in source.lower():
         source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
     else:
         source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
         if is_snapshot:
@@ -1811,7 +1965,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         else:
             source_disk = source_info.id
 
-    return (source_blob_uri, source_disk, source_snapshot, source_info)
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
 
 def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
@@ -1916,6 +2070,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
+            os_disk_image = None
+            data_disk_images = None
             if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
                 terms = namespace.target_region_encryption[i].split(',')
                 # OS disk
@@ -1924,30 +2080,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    security_profile = None
-                    if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
-                        cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
-                        if not cvm_terms or len(cvm_terms) != 2:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid target region cvm encryption. "
-                                "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
-
-                        storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
-                        storage_profile_types_str = ", ".join(storage_profile_types)
-                        if cvm_terms[0] not in storage_profile_types:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid os_cvm_encryption_type. "
-                                "The valid values for os_cvm_encryption_type are {}".format(
-                                    cvm_terms, storage_profile_types_str))
-                        if cvm_terms[1]:
-                            cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                        else:
-                            cvm_des_id = None
-                        security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                                      secure_vm_disk_encryption_set_id=cvm_des_id)
-
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id,
-                                                          security_profile=security_profile)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
                 # Data disk
                 if len(terms) > 1:
                     data_disk_images = terms[1:]
@@ -1964,8 +2097,32 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         data_disk_image_encryption_list.append(DataDiskImageEncryption(
                             lun=lun, disk_encryption_set_id=des_id))
                     data_disk_images = data_disk_image_encryption_list
+
+            if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+                cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
+                if not cvm_terms or len(cvm_terms) != 2:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region cvm encryption. "
+                        "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+
+                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types_str = ", ".join(storage_profile_types)
+                if cvm_terms[0] not in storage_profile_types:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid os_cvm_encryption_type. "
+                        "The valid values for os_cvm_encryption_type are {}".format(
+                            cvm_terms, storage_profile_types_str))
+                cvm_des_id = None
+                if cvm_terms[1]:
+                    cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
+                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
+                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                if os_disk_image:
+                    os_disk_image.security_profile = security_profile
                 else:
-                    data_disk_images = None
+                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+
+            if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
             # At least the region is specified
@@ -1990,6 +2147,56 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
+# endregion
+
+
+def process_ppg_create_namespace(namespace):
+    """
+    The availability zone can be provided only when an intent is provided
+    """
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
+# endregion
+
+
+def process_image_version_create_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+    process_image_resource_id_namespace(namespace)
+# endregion
+
+
+def process_image_version_update_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+# endregion
+
+
+def process_image_resource_id_namespace(namespace):
+    """
+    Validate the resource id from different sources
+    Only one of these arguments is allowed to provide
+    Check the format of resource id whether meets requirement
+    """
+    input_num = (1 if namespace.managed_image else 0) + (1 if namespace.virtual_machine else 0) + \
+                (1 if namespace.image_version else 0)
+    if input_num > 1:
+        raise MutuallyExclusiveArgumentError(
+            r'usage error: please specify only one of the --managed-image\--virtual-machine\--image-version arguments')
+
+    if namespace.managed_image or input_num == 0:
+        return
+
+    from ._vm_utils import is_valid_vm_resource_id, is_valid_image_version_id
+    is_vm = namespace.virtual_machine is not None
+    is_valid_function = is_valid_vm_resource_id if is_vm else is_valid_image_version_id
+    resource_id = namespace.virtual_machine if is_vm else namespace.image_version
+
+    if not is_valid_function(resource_id):
+        from azure.cli.core.parser import InvalidArgumentValueError
+        raise InvalidArgumentValueError('usage error: {} is an invalid {} id'
+                                        .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
+    namespace.managed_image = resource_id
 # endregion
 
 
@@ -2170,3 +2377,12 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def validate_secure_vm_guest_state_sas(cmd, namespace):
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
+    DiskCreateOption = cmd.get_models('DiskCreateOption')
+
+    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+        namespace.secure_vm_guest_state_sas = True

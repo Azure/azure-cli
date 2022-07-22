@@ -29,7 +29,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
-from .msgrpah import GraphError, set_object_properties
+from ._msgrpah import GraphError, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -721,7 +721,7 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
 def patch_application(cmd, identifier, parameters):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     object_id = _resolve_application(graph_client, identifier)
-    return graph_client.application_patch(object_id, parameters)
+    return graph_client.application_update(object_id, parameters)
 
 
 def show_application(client, identifier):
@@ -788,7 +788,7 @@ def reset_application_credential(cmd, client, identifier, create_cert=False, cer
         raise CLIError("can't find an application matching '{}'".format(identifier))
     result = _reset_credential(
         cmd, app, client.application_add_password, client.application_remove_password,
-        client.application_patch, create_cert=create_cert, cert=cert, years=years,
+        client.application_update, create_cert=create_cert, cert=cert, years=years,
         end_date=end_date, keyvault=keyvault, append=append, display_name=display_name)
     result['tenant'] = client.tenant
     return result
@@ -796,7 +796,7 @@ def reset_application_credential(cmd, client, identifier, create_cert=False, cer
 
 def delete_application_credential(cmd, client, identifier, key_id, cert=False):  # pylint: disable=unused-argument
     sp = show_application(client, identifier)
-    _delete_credential(sp, client.application_remove_password, client.application_patch,
+    _delete_credential(sp, client.application_remove_password, client.application_update,
                        key_id=key_id, cert=cert)
 
 
@@ -852,17 +852,21 @@ def add_permission(client, identifier, api, api_permissions):
     #         id            <- api_permissions
     #         type
 
-    application = show_application(client, identifier)
-
     resource_access_list = []
     for e in api_permissions:
-        access_id, access_type = e.split('=')
+        try:
+            access_id, access_type = e.split('=')
+        except ValueError as ex:
+            from azure.cli.core.azclierror import ArgumentUsageError
+            raise ArgumentUsageError('Usage error: Please provide both permission id and type, such as '
+                                     '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
             "id": access_id,
             "type": access_type
         }
         resource_access_list.append(resource_access)
 
+    application = show_application(client, identifier)
     required_resource_access_list = application['requiredResourceAccess']
     existing_required_resource_access = next((e for e in required_resource_access_list if e['resourceAppId'] == api),
                                              None)
@@ -875,7 +879,7 @@ def add_permission(client, identifier, api, api_permissions):
         }
         required_resource_access_list.append(required_resource_access)
     body = {'requiredResourceAccess': required_resource_access_list}
-    client.application_patch(application[ID], body)
+    client.application_update(application[ID], body)
     logger.warning('Invoking `az ad app permission grant --id %s --api %s` is needed to make the '
                    'change effective', identifier, api)
 
@@ -916,7 +920,7 @@ def delete_permission(client, identifier, api, api_permissions=None):
         required_resource_access_list.remove(existing_required_resource_access)
 
     body = {'requiredResourceAccess': required_resource_access_list}
-    return client.application_patch(application[ID], body)
+    return client.application_update(application[ID], body)
 
 
 def list_permissions(cmd, identifier):
@@ -979,14 +983,47 @@ def list_permission_grants(client, identifier=None, query_filter=None, show_reso
     return result
 
 
+def app_federated_credential_list(client, identifier):
+    object_id = _resolve_application(client, identifier)
+    # This call is too simple, so it's unnecessary to extract a common method for both application and servicePrincipal
+    # and invoke it like
+    # _federated_identity_credential_list(client.application_federated_identity_credential_list, object_id)
+    return client.application_federated_identity_credential_list(object_id)
+
+
+def app_federated_credential_create(client, identifier, parameters):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_create(object_id, parameters)
+
+
+def app_federated_credential_show(client, identifier, credential_id_or_name):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_get(object_id, credential_id_or_name)
+
+
+def app_federated_credential_update(client, identifier, credential_id_or_name, parameters):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_update(object_id, credential_id_or_name, parameters)
+
+
+def app_federated_credential_delete(client, identifier, credential_id_or_name):
+    object_id = _resolve_application(client, identifier)
+    return client.application_federated_identity_credential_delete(object_id, credential_id_or_name)
+
+
 def create_service_principal(cmd, identifier):
     return _create_service_principal(cmd.cli_ctx, identifier)
 
 
+def update_service_principal(instance):  # pylint: disable=unused-argument
+    # Do not PATCH back properties retrieved with GET and leave everything else to generic update.
+    return {}
+
+
 def patch_service_principal(cmd, identifier, parameters):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    return graph_client.service_principals.update(object_id, parameters)
+    object_id = _resolve_service_principal(graph_client, identifier)
+    return graph_client.service_principal_update(object_id, parameters)
 
 
 def _create_service_principal(cli_ctx, identifier, resolve_app=True):
@@ -1058,7 +1095,7 @@ def reset_service_principal_credential(cmd, client, identifier, create_cert=Fals
     result = _reset_credential(
         cmd, sp,
         client.service_principal_add_password, client.service_principal_remove_password,
-        client.service_principal_patch,
+        client.service_principal_update,
         create_cert=create_cert, cert=cert, years=years,
         end_date=end_date, keyvault=keyvault, append=append, display_name=display_name)
     result['tenant'] = client.tenant
@@ -1068,7 +1105,7 @@ def reset_service_principal_credential(cmd, client, identifier, create_cert=Fals
 def delete_service_principal_credential(cmd, client,  # pylint: disable=unused-argument
                                         identifier, key_id, cert=False):
     sp = show_service_principal(client, identifier)
-    _delete_credential(sp, client.service_principal_remove_password, client.service_principal_patch,
+    _delete_credential(sp, client.service_principal_remove_password, client.service_principal_update,
                        key_id=key_id, cert=cert)
 
 
@@ -1077,6 +1114,31 @@ def list_service_principal_credentials(cmd, identifier, cert=False):
     client = _graph_client_factory(cmd.cli_ctx)
     sp = show_service_principal(client, identifier)
     return _list_credentials(sp, cert)
+
+
+def sp_federated_credential_list(client, identifier):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_list(object_id)
+
+
+def sp_federated_credential_create(client, identifier, parameters):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_create(object_id, parameters)
+
+
+def sp_federated_credential_show(client, identifier, credential_id_or_name):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_get(object_id, credential_id_or_name)
+
+
+def sp_federated_credential_update(client, identifier, credential_id_or_name, parameters):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_update(object_id, credential_id_or_name, parameters)
+
+
+def sp_federated_credential_delete(client, identifier, credential_id_or_name):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_federated_identity_credential_delete(object_id, credential_id_or_name)
 
 
 def _get_app_object_id_from_sp_object_id(client, sp_object_id):
@@ -1801,7 +1863,7 @@ def update_user(client, upn_or_object_id, display_name=None, force_change_passwo
     _set_user_properties(body, display_name=display_name, password=password, mail_nickname=mail_nickname,
                          force_change_password_next_sign_in=force_change_password_next_sign_in,
                          account_enabled=account_enabled)
-    return client.user_patch(upn_or_object_id, body)
+    return client.user_update(upn_or_object_id, body)
 
 
 def _set_user_properties(body, **kwargs):
@@ -1939,13 +2001,9 @@ def _resolve_group(client, identifier):
 
 
 def _build_directory_object_json(client, object_id):
-    """Get JSON representation of the id of the directoryObject.
-    The object URL should be in the form of https://graph.microsoft.com/v1.0/directoryObjects/{id}
-    """
-    # If object_id is not a GUID, use it as-is.
-    object_url = f'{client.base_url}/directoryObjects/{object_id}'if is_guid(object_id) else object_id
+    """Get JSON representation of the id of the directoryObject."""
     body = {
-        "@odata.id": object_url
+        "@odata.id": client.get_object_url(object_id)
     }
     return body
 

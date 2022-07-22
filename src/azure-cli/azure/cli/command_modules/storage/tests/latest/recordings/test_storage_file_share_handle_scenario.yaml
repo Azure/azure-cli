@@ -15,7 +15,7 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.9.6 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Storage/storageAccounts/testfilehandlesa/listKeys?api-version=2021-09-01&$expand=kerb
   response:
@@ -25,11 +25,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '380'
+      - '260'
       content-type:
       - application/json
       date:
-      - Tue, 02 Nov 2021 04:53:38 GMT
+      - Thu, 26 May 2022 07:01:03 GMT
       expires:
       - '-1'
       pragma:
@@ -45,127 +45,382 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --recursive --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:40 GMT
+      - Thu, 26 May 2022 07:01:04 GMT
       x-ms-recursive:
-      - 'True'
+      - 'true'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://testfilehandlesa.file.core.windows.net/file-share?comp=listhandles
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235056741</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122275</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:53:02 GMT</OpenTime></Handle><Handle><HandleId>117235056739</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122273</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235318853</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384428</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle><Handle><HandleId>117235318856</HandleId><Path>dir1/dir2/1.png</Path><FileId>11529320599184736256</FileId><ParentId>13835163608398430208</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384431</HandleId><Path>dir1/dir2/1.png</Path><FileId>11529320599184736256</FileId><ParentId>13835163608398430208</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle><Handle><HandleId>117235318851</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384426</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 02 Nov 2021 04:53:39 GMT
+      - Thu, 26 May 2022 07:01:05 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --recursive --path --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:41 GMT
-      x-ms-recursive:
-      - 'True'
+      - Thu, 26 May 2022 07:01:05 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1?restype=directory
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 26 May 2022 07:01:06 GMT
+      etag:
+      - '"0x8D99DA8B30B2ECF"'
+      last-modified:
+      - Tue, 02 Nov 2021 02:30:13 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-file-attributes:
+      - Directory
+      x-ms-file-change-time:
+      - '2021-11-02T02:30:13.3556943Z'
+      x-ms-file-creation-time:
+      - '2021-11-02T02:30:13.3556943Z'
+      x-ms-file-id:
+      - '13835128424026341376'
+      x-ms-file-last-write-time:
+      - '2021-11-02T02:30:13.3556943Z'
+      x-ms-file-parent-id:
+      - '0'
+      x-ms-file-permission-key:
+      - 5966269392196536580*4185907240625151629
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --recursive --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:06 GMT
+      x-ms-recursive:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
     method: GET
     uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1?comp=listhandles
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235056739</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122273</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235318856</HandleId><Path>dir1/dir2/1.png</Path><FileId>11529320599184736256</FileId><ParentId>13835163608398430208</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384431</HandleId><Path>dir1/dir2/1.png</Path><FileId>11529320599184736256</FileId><ParentId>13835163608398430208</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle><Handle><HandleId>117235318851</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384426</HandleId><Path>dir1/testjson.json</Path><FileId>16140971433240035328</FileId><ParentId>13835128424026341376</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 02 Nov 2021 04:53:40 GMT
+      - Thu, 26 May 2022 07:01:07 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --recursive --path --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:42 GMT
+      - Thu, 26 May 2022 07:01:07 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1%2Fdir2%2F1.png?restype=directory
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
+        specified resource does not exist.\nRequestId:125b463c-f01a-0051-0ace-7075f9000000\nTime:2022-05-26T07:01:08.3576859Z</Message></Error>"
+    headers:
+      content-length:
+      - '221'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 26 May 2022 07:01:07 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-error-code:
+      - ResourceNotFound
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 404
+      message: The specified resource does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --recursive --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:08 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1/dir2/1.png?comp=listhandles
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235318856</HandleId><Path>dir1/dir2/1.png</Path><FileId>11529320599184736256</FileId><ParentId>13835163608398430208</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384431</HandleId><Path>dir1/dir2/1.png</Path><FileId>11529320599184736256</FileId><ParentId>13835163608398430208</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Thu, 26 May 2022 07:01:07 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:08 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?restype=directory
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
+        specified resource does not exist.\nRequestId:70753c05-701a-002d-3dce-705b06000000\nTime:2022-05-26T07:01:09.7732706Z</Message></Error>"
+    headers:
+      content-length:
+      - '221'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 26 May 2022 07:01:08 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-error-code:
+      - ResourceNotFound
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 404
+      message: The specified resource does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:09 GMT
+      x-ms-version:
+      - '2021-06-08'
     method: GET
     uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?comp=listhandles
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235056741</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9754924630438576513</SessionId><ClientIp>10.0.0.4:48444</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:52:58 GMT</OpenTime></Handle><Handle><HandleId>117235122275</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235318853</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9282174215060980097</SessionId><ClientIp>10.0.0.4:47518</ClientIp><OpenTime>Thu,
+        26 May 2022 06:58:50 GMT</OpenTime></Handle><Handle><HandleId>117235384428</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 02 Nov 2021 04:53:41 GMT
+      - Thu, 26 May 2022 07:01:09 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share close-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --path --handle-id --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:10 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?restype=directory
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
+        specified resource does not exist.\nRequestId:98b65288-b01a-007f-27ce-7027ee000000\nTime:2022-05-26T07:01:11.2676885Z</Message></Error>"
+    headers:
+      content-length:
+      - '221'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 26 May 2022 07:01:10 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-error-code:
+      - ResourceNotFound
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 404
+      message: The specified resource does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share close-handle
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - --name --path --handle-id --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:43 GMT
+      - Thu, 26 May 2022 07:01:11 GMT
       x-ms-handle-id:
-      - '117235056741'
+      - '117235318853'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?comp=forceclosehandles
   response:
@@ -175,64 +430,179 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 02 Nov 2021 04:53:42 GMT
+      - Thu, 26 May 2022 07:01:11 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-number-of-handles-closed:
       - '1'
+      x-ms-number-of-handles-failed:
+      - '0'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --path --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:45 GMT
+      - Thu, 26 May 2022 07:01:11 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?restype=directory
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
+        specified resource does not exist.\nRequestId:53d5d5f0-301a-004e-57ce-70c6fd000000\nTime:2022-05-26T07:01:12.6757442Z</Message></Error>"
+    headers:
+      content-length:
+      - '221'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 26 May 2022 07:01:12 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-error-code:
+      - ResourceNotFound
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 404
+      message: The specified resource does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:12 GMT
+      x-ms-version:
+      - '2021-06-08'
     method: GET
     uri: https://testfilehandlesa.file.core.windows.net/file-share/Book1.csv?comp=listhandles
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235122275</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9349670953530953225</SessionId><ClientIp>10.0.0.4:35508</ClientIp><OpenTime>Tue,
-        02 Nov 2021 04:53:02 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults><Entries><Handle><HandleId>117235384428</HandleId><Path>Book1.csv</Path><FileId>11529285414812647424</FileId><ParentId>0</ParentId><SessionId>9764085830980207629</SessionId><ClientIp>10.0.0.4:37376</ClientIp><OpenTime>Thu,
+        26 May 2022 06:59:08 GMT</OpenTime></Handle></Entries><NextMarker /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 02 Nov 2021 04:53:43 GMT
+      - Thu, 26 May 2022 07:01:12 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share close-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --path --recursive --close-all --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:12 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1?restype=directory
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 26 May 2022 07:01:13 GMT
+      etag:
+      - '"0x8D99DA8B30B2ECF"'
+      last-modified:
+      - Tue, 02 Nov 2021 02:30:13 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-file-attributes:
+      - Directory
+      x-ms-file-change-time:
+      - '2021-11-02T02:30:13.3556943Z'
+      x-ms-file-creation-time:
+      - '2021-11-02T02:30:13.3556943Z'
+      x-ms-file-id:
+      - '13835128424026341376'
+      x-ms-file-last-write-time:
+      - '2021-11-02T02:30:13.3556943Z'
+      x-ms-file-parent-id:
+      - '0'
+      x-ms-file-permission-key:
+      - 5966269392196536580*4185907240625151629
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share close-handle
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - --name --path --recursive --close-all --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:46 GMT
+      - Thu, 26 May 2022 07:01:13 GMT
       x-ms-handle-id:
       - '*'
       x-ms-recursive:
-      - 'True'
+      - 'true'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1?comp=forceclosehandles
   response:
@@ -242,27 +612,78 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 02 Nov 2021 04:53:45 GMT
+      - Thu, 26 May 2022 07:01:13 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-number-of-handles-closed:
-      - '2'
+      - '4'
+      x-ms-number-of-handles-failed:
+      - '0'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --path --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:47 GMT
+      - Thu, 26 May 2022 07:01:14 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
+    method: GET
+    uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1%2Ftestjson.json?restype=directory
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
+        specified resource does not exist.\nRequestId:ee807716-801a-004b-11ce-701426000000\nTime:2022-05-26T07:01:15.5071157Z</Message></Error>"
+    headers:
+      content-length:
+      - '221'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 26 May 2022 07:01:15 GMT
+      server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-error-code:
+      - ResourceNotFound
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 404
+      message: The specified resource does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --path --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      x-ms-date:
+      - Thu, 26 May 2022 07:01:15 GMT
+      x-ms-version:
+      - '2021-06-08'
     method: GET
     uri: https://testfilehandlesa.file.core.windows.net/file-share/dir1/testjson.json?comp=listhandles
   response:
@@ -273,33 +694,41 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 02 Nov 2021 04:53:46 GMT
+      - Thu, 26 May 2022 07:01:15 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share close-handle
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - --name --recursive --handle-id --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:48 GMT
+      - Thu, 26 May 2022 07:01:15 GMT
       x-ms-handle-id:
       - '*'
       x-ms-recursive:
-      - 'True'
+      - 'true'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://testfilehandlesa.file.core.windows.net/file-share?comp=forceclosehandles
   response:
@@ -309,29 +738,39 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 02 Nov 2021 04:53:47 GMT
+      - Thu, 26 May 2022 07:01:16 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-number-of-handles-closed:
       - '1'
+      x-ms-number-of-handles-failed:
+      - '0'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share list-handle
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --recursive --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.9.6; Windows 10) AZURECLI/2.29.1
+      - AZURECLI/2.37.0 azsdk-python-storage-file-share/12.8.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
       x-ms-date:
-      - Tue, 02 Nov 2021 04:53:49 GMT
+      - Thu, 26 May 2022 07:01:16 GMT
       x-ms-recursive:
-      - 'True'
+      - 'true'
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://testfilehandlesa.file.core.windows.net/file-share?comp=listhandles
   response:
@@ -342,13 +781,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 02 Nov 2021 04:53:49 GMT
+      - Thu, 26 May 2022 07:01:18 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK

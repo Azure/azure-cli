@@ -13,10 +13,10 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.10.4
+set PYTHON_VERSION=3.10.5
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/3.10.4/python-3.10.4-embed-win32.zip"
+set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
 set PROPAGATE_ENV_CHANGE_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/propagate_env_change.zip"
 
 REM https://pip.pypa.io/en/stable/installation/#get-pip-py
@@ -116,6 +116,9 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
    popd
 )
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --requirement %CLI_SRC%\azure-cli\requirements.py3.windows.txt
+
+REM Check azure.cli can be executed. This also prints the Python version.
+%BUILDING_DIR%\python.exe -m azure.cli --version
 
 if %errorlevel% neq 0 goto ERROR
 

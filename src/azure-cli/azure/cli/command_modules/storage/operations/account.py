@@ -749,6 +749,8 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         params['share_delete_retention_policy'] = instance.share_delete_retention_policy
 
     # set protocol settings
+    if not instance.protocol_settings or not instance.protocol_settings.smb:
+        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=cmd.get_models('SmbSetting')())
     if enable_smb_multichannel is not None:
         instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
 
@@ -760,7 +762,7 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         instance.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
     if channel_encryption is not None:
         instance.protocol_settings.smb.channel_encryption = channel_encryption
-    if any(instance.protocol_settings.smb.__dict__.values()):
+    if instance.protocol_settings and instance.protocol_settings.smb and any(instance.protocol_settings.smb.__dict__.values()):
         params['protocol_settings'] = instance.protocol_settings
 
     return params

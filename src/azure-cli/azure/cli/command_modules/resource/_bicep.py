@@ -160,6 +160,13 @@ def get_bicep_latest_release_tag():
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
 
 
+def bicep_version_greater_than_or_equal_to(version):
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+    installed_version = _get_bicep_installed_version(installation_path)
+    return semver.compare(installed_version, version) >= 0
+
+
 def supports_bicep_publish():
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
@@ -195,7 +202,7 @@ def _get_bicep_installed_version(bicep_executable_path):
 
 
 def _get_bicep_download_url(system, release_tag, target_platform=None):
-    download_url = f"https://github.com/Azure/bicep/releases/download/{release_tag}/{{}}"
+    download_url = f"https://downloads.bicep.azure.com/{release_tag}/{{}}"
 
     if target_platform:
         executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"

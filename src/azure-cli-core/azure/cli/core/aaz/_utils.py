@@ -2,17 +2,22 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import re
 from collections import OrderedDict
 
 from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
 from ._help import AAZShowHelp
+from ._base import AAZBlankArgValue
 
 
 class AAZShortHandSyntaxParser:
 
     NULL_EXPRESSIONS = ('null',)  # user can use "null" string to pass `None` value
     HELP_EXPRESSIONS = ('??', )  # the mark to show detail help.
+
+    partial_value_key_pattern = re.compile(
+        r"^(((\[-?[0-9]+])|((([a-zA-Z0-9_\-]+)|('([^']*)'(/([^']*)')*))(\[-?[0-9]+])?))(\.(([a-zA-Z0-9_\-]+)|('([^']*)'(/([^']*)')*))(\[-?[0-9]+])?)*)=(.*)$"  # pylint: disable=line-too-long
+    )  # 'Partial Value' format
 
     def __call__(self, data, is_simple=False):
         assert isinstance(data, str)
@@ -26,28 +31,28 @@ class AAZShortHandSyntaxParser:
             elif data in self.HELP_EXPRESSIONS:
                 raise AAZShowHelp()
             elif len(data) and data[0] == "'":
-                result, length = self.parse_shorthand_quote_string(data)
+                result, length = self.parse_single_quotes_string(data)
                 if length != len(data):
                     raise AAZInvalidShorthandSyntaxError(
                         data, length, len(data) - length, "Redundant tail for quota expression")
             else:
                 result = data
         else:
-            result, length = self.parse_shorthand_value(data)
+            result, length = self.parse_value(data)
             if length != len(data):
                 raise AAZInvalidShorthandSyntaxError(data, length, len(data) - length, "Redundant tail")
         return result
 
-    def parse_shorthand_value(self, remain):
+    def parse_value(self, remain):
         if remain.startswith('{'):
-            return self.parse_shorthand_dict(remain)
+            return self.parse_dict(remain)
 
         if remain.startswith('['):
-            return self.parse_shorthand_list(remain)
+            return self.parse_list(remain)
 
-        return self.parse_shorthand_string(remain)
+        return self.parse_string(remain)
 
-    def parse_shorthand_dict(self, remain):  # pylint: disable=too-many-statements
+    def parse_dict(self, remain):  # pylint: disable=too-many-statements
         result = OrderedDict()
         assert remain.startswith('{')
         idx = 1
@@ -58,7 +63,7 @@ class AAZShortHandSyntaxParser:
 
         while idx < len(remain):
             try:
-                key, length = self.parse_shorthand_string(remain[idx:])
+                key, length = self.parse_string(remain[idx:])
             except AAZInvalidShorthandSyntaxError as ex:
                 ex.error_data = remain
                 ex.error_at += idx
@@ -78,21 +83,24 @@ class AAZShortHandSyntaxParser:
             idx += length
             if idx < len(remain) and remain[idx] == ':':
                 idx += 1
+                if idx >= len(remain):
+                    raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
+
+                try:
+                    value, length = self.parse_value(remain[idx:])
+                except AAZInvalidShorthandSyntaxError as ex:
+                    ex.error_data = remain
+                    ex.error_at += idx
+                    raise ex
+                except AAZShowHelp as aaz_help:
+                    aaz_help.keys = [key, *aaz_help.keys]
+                    raise aaz_help
+            elif idx < len(remain) and remain[idx] in (',', '}'):
+                # use blank value
+                value = AAZBlankArgValue
+                length = 0
             else:
-                raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect character ':'")
-
-            if idx >= len(remain):
-                raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Cannot parse empty")
-
-            try:
-                value, length = self.parse_shorthand_value(remain[idx:])
-            except AAZInvalidShorthandSyntaxError as ex:
-                ex.error_data = remain
-                ex.error_at += idx
-                raise ex
-            except AAZShowHelp as aaz_help:
-                aaz_help.keys = [key, *aaz_help.keys]
-                raise aaz_help
+                raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect characters ':' or ','")
 
             result[key] = value
             idx += length
@@ -113,7 +121,7 @@ class AAZShortHandSyntaxParser:
 
         return result, idx
 
-    def parse_shorthand_list(self, remain):
+    def parse_list(self, remain):
         result = []
         assert remain.startswith('[')
         idx = 1
@@ -124,7 +132,7 @@ class AAZShortHandSyntaxParser:
 
         while idx < len(remain):
             try:
-                value, length = self.parse_shorthand_value(remain[idx:])
+                value, length = self.parse_value(remain[idx:])
             except AAZInvalidShorthandSyntaxError as ex:
                 ex.error_data = remain
                 ex.error_at += idx
@@ -150,10 +158,10 @@ class AAZShortHandSyntaxParser:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect character ']'")
         return result, idx
 
-    def parse_shorthand_string(self, remain):
+    def parse_string(self, remain):
         idx = 0
         if len(remain) and remain[0] == "'":
-            return self.parse_shorthand_quote_string(remain)
+            return self.parse_single_quotes_string(remain)
 
         while idx < len(remain):
             if remain[idx] in (',', ':', ']', '}'):
@@ -178,43 +186,99 @@ class AAZShortHandSyntaxParser:
 
         return remain[:idx], idx
 
-    def parse_shorthand_quote_string(self, remain):
+    @staticmethod
+    def parse_single_quotes_string(remain):
         assert remain[0] == "'"
         quote = remain[0]
         idx = 1
         result = ''
         while idx < len(remain):
             if remain[idx] == quote:
-                quote = None
-                idx += 1
-                break
-
-            if remain[idx] == '/':
-                try:
-                    c, length = self.parse_escape_character(remain[idx:])
-                except AAZInvalidShorthandSyntaxError as ex:
-                    ex.error_data = remain
-                    ex.error_at += idx
-                    raise ex
-
-                result += c
-                idx += length
+                if len(remain) > idx + 1 and remain[idx + 1] == '/':
+                    # parse '/ as '
+                    result += quote
+                    idx += 2
+                else:
+                    quote = None
+                    idx += 1
+                    break
             else:
                 result += remain[idx]
                 idx += 1
+
         if quote is not None:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, f"Miss end quota character: {quote}")
         return result, idx
 
-    @staticmethod
-    def parse_escape_character(remain):
-        assert remain[0] == '/'
-        if len(remain) < 2:
-            raise AAZInvalidShorthandSyntaxError(remain, 0, 1, f"Invalid escape character: {remain}")
-        if remain[1] == "'":
-            return "'", 2
-        if remain[1] == '/':
-            return '/', 2
-        if remain[1] == '\\':
-            return '\\', 2
-        raise AAZInvalidShorthandSyntaxError(remain, 0, 2, f"Invalid escape character: {remain[:2]}")
+    @classmethod
+    def split_partial_value(cls, v):
+        """ split 'Partial Value' format """
+        assert isinstance(v, str)
+        match = cls.partial_value_key_pattern.fullmatch(v)
+        if not match:
+            key = None
+        else:
+            key = match[1]
+            v = match[len(match.regs) - 1]
+        key_parts = cls.parse_partial_value_key(key)
+        return key, key_parts, v
+
+    @classmethod
+    def parse_partial_value_key(cls, key):
+        if key is None:
+            return tuple()
+        key_items = []
+        idx = 0
+        while idx < len(key):
+            if key[idx] == '[':
+                try:
+                    key_item, length = cls.parse_partial_value_idx_key(key[idx:])
+                except AAZInvalidShorthandSyntaxError as ex:
+                    ex.error_data = key
+                    ex.error_at += idx
+                    raise ex
+                idx += length
+            else:
+                try:
+                    key_item, length = cls.parse_partial_value_prop_key(key[idx:])
+                except AAZInvalidShorthandSyntaxError as ex:
+                    ex.error_data = key
+                    ex.error_at += idx
+                    raise ex
+                idx += length
+            key_items.append(key_item)
+        return tuple(key_items)
+
+    @classmethod
+    def parse_partial_value_idx_key(cls, remain):
+        assert remain[0] == '['
+        idx = 1
+        while idx < len(remain) and remain[idx] != ']':
+            idx += 1
+        if idx < len(remain) and remain[idx] == ']':
+            result = remain[1:idx]
+            idx += 1
+        else:
+            raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect character ']'")
+
+        if len(result) == 0:
+            raise AAZInvalidShorthandSyntaxError(remain, 0, 2, "Miss index")
+        if idx < len(remain) and remain[idx] == '.':
+            idx += 1
+        return int(result), idx
+
+    @classmethod
+    def parse_partial_value_prop_key(cls, remain):
+        idx = 0
+        if remain[0] == "'":
+            result, length = cls.parse_single_quotes_string(remain)
+            idx += length
+        else:
+            while idx < len(remain) and remain[idx] not in ('.', '['):
+                idx += 1
+            result = remain[:idx]
+        if len(result) == 0:
+            raise AAZInvalidShorthandSyntaxError(remain, 0, idx, "Miss prop name")
+        if idx < len(remain) and remain[idx] == '.':
+            idx += 1
+        return result, idx

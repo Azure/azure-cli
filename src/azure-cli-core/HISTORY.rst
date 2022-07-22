@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.38.0
+++++++
+* Shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)
+
+2.37.0
+++++++
+* Codegen v2 support (#20967)
+* Support getting SSH certificate inside Cloud Shell (#22162)
+
 2.36.0
 ++++++
 * Minor fixes

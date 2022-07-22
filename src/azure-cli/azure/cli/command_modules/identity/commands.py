@@ -27,6 +27,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_user_assigned_identities')
+        g.command('list-resources', 'list_associated_resources', min_api='2021-09-30-preview')
 
     with self.command_group('identity', msi_operations_sdk, client_factory=_msi_operations_operations) as g:
         g.command('list-operations', 'list')
