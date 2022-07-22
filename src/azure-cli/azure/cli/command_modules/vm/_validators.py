@@ -1312,13 +1312,12 @@ def _enable_msi_for_trusted_launch(namespace):
 
 
 def _validate_trusted_launch(namespace):
-    if not namespace.security_type:
+    if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
         return
 
-    if namespace.security_type.lower() == 'trustedlaunch' and \
-            (namespace.enable_vtpm is not True or namespace.enable_secure_boot is not True):
-        logger.warning('Please set --enable-secure-boot to True and --enable-vtpm to True in order to receive the full'
-                       ' suite of security features that comes with Trusted Launch.')
+    if not namespace.enable_vtpm or not namespace.enable_secure_boot:
+        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-secure-boot True"'
+                       ' to receive the full suite of security features that comes with Trusted Launch.')
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
