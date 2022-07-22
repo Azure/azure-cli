@@ -679,14 +679,14 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_waf_exclusion_rule_set')
         g.custom_command('list', 'list_waf_exclusion_rule_set')
 
-    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01') as g:
         g.custom_command('add', 'add_trusted_client_certificate')
         g.custom_command('remove', 'remove_trusted_client_certificate')
         g.custom_command('list', 'list_trusted_client_certificate')
         g.custom_show_command('show', 'show_trusted_client_certificate')
         g.custom_command('update', 'update_trusted_client_certificate')
 
-    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01') as g:
         g.custom_command('add', 'add_ssl_profile')
         g.custom_command('remove', 'remove_ssl_profile')
         g.custom_command('list', 'list_ssl_profile')
