@@ -5878,8 +5878,8 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
     app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
 
     # Bug where dotnet 3.1 is set to 4.0 on portal and cli
-    if not is_linux and app_runtime == 'dotnet':
-        if app_runtime_version == '4.0':
+    if app_runtime == 'dotnet':
+        if app_runtime_version != '6.0':
             return {
                 "display_name": app_runtime,
                 "github_actions_version": None,
