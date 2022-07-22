@@ -262,7 +262,7 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs['sig_out'] = "{}/{}=eastus".format(self.kwargs['gallery'], self.kwargs['image_def'])
 
-        # test staging resource group used to build the image
+        # test creating image template with staging resource group
         self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} '
                  '--shared-image-destinations {sig_out} --identity {ide} '
                  '--staging-resource-group {staging_resource_group1}',
@@ -270,15 +270,15 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('stagingResourceGroup', '{staging_resource_group1}')
                  ])
 
-        # test staging resource group used to build the image
+        # create image template in local cache
         self.cmd('image builder create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
-                 '--managed-image-destinations {sig_out} --identity {ide} '
-                 '--staging-resource-group {staging_resource_group2} --defer',
+                 '--managed-image-destinations {image_def}={loc} --identity {ide} --defer '
+                 '--staging-resource-group {staging_resource_group2}',
                  checks=[
                      self.check('properties.stagingResourceGroup', '{staging_resource_group2}')
                  ])
 
-        # test adding validate to template
+        # add validate to template
         self.cmd('image builder validator add -n {tmpl_02} -g {rg} '
                  '--continue-distribute-on-failure true --source-validation-only true --defer',
                  checks=[
@@ -286,35 +286,43 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('properties.validate.sourceValidationOnly', 'True')
                  ])
 
-        # test adding validate to template (default value is false if not specified)
+        # add validate to template
         self.cmd('image builder validator add -n {tmpl_02} -g {rg} --source-validation-only true --defer',
                  checks=[
                      self.check('properties.validate.continueDistributeOnFailure', 'False'),
                      self.check('properties.validate.sourceValidationOnly', 'True')
                  ])
 
-        # test adding validate to template (default value is false if not specified)
+        # remove validate from template
+        self.cmd('image builder validator remove -n {tmpl_02} -g {rg} --defer',
+                 checks=[
+                     self.check('properties.validate', 'None')
+                 ])
+
+        # add validate to template
         self.cmd('image builder validator add -n {tmpl_02} -g {rg} --defer',
                  checks=[
                      self.check('properties.validate.continueDistributeOnFailure', 'False'),
                      self.check('properties.validate.sourceValidationOnly', 'False')
                  ])
 
-        # test showing validate of template
+        # show validate of template
         self.cmd('image builder validator show -n {tmpl_02} -g {rg} --defer',
                  checks=[
                      self.check('continueDistributeOnFailure', 'False'),
                      self.check('sourceValidationOnly', 'False')
                  ])
 
-        # test removing validate from template
-        self.cmd('image builder validator remove -n {tmpl_02} -g {rg} --defer',
-                 checks=[
-                     self.check('properties.validate', 'None')
-                 ])
+        # create image template from cache
+        self.cmd('image builder update -n {tmpl_02} -g {rg}', checks=[
+            self.check('validate.continueDistributeOnFailure', 'False'),
+            self.check('validate.sourceValidationOnly', 'False'),
+            self.check('stagingResourceGroup', '{staging_resource_group2}')
+        ])
 
         # delete resource group
         self.cmd('group delete -n {staging_resource_group_name1} --yes')
+        self.cmd('group delete -n {staging_resource_group_name2} --yes')
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
