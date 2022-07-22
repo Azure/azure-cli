@@ -1635,7 +1635,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
                                      account_name,
                                      subnet,
                                      virtual_network=None):
-    """ Adds a virtual network rule to an existing Cosmos DB database account """
+    """ Remove a virtual network rule to an existing Cosmos DB database account """
     subnet = _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network)
     existing = client.get(resource_group_name, account_name)
 
