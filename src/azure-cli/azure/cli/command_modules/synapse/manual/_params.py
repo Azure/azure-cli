@@ -1102,6 +1102,11 @@ def load_arguments(self, _):
         c.argument('output_folder', type=str, help='The name of the output folder')
         c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
 
+    for scope in ['enable', 'disable']:
+        with self.argument_context('synapse ad-only-auth ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('resource_group_name', resource_group_name_type)
+
     # synapse link connections
     with self.argument_context('synapse link-connection list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
