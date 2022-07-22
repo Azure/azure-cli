@@ -364,6 +364,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'rg': resource_group,
             'location': resource_group_location,
             'storage_account': storage_account,
+            'nsg': 'nsg1',
             'vnet': 'vnet1',
             'subnet': 'subnet1',
             'nic': 'nic1',
@@ -377,7 +378,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
 
         # prepare the target resource
-        
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet}')
@@ -417,6 +418,71 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['name'], self.kwargs['flow_log'])
         self.assertEqual(res2['enabled'], True)
         self.assertTrue(res2['targetResourceId'].endswith(self.kwargs['nic']))
+        self.assertEqual(res2['name'], self.kwargs['flow_log'])
+        self.assertEqual(res2['retentionPolicy']['days'], 2)
+        self.assertEqual(res2['retentionPolicy']['enabled'], True)
+        self.assertIsNotNone(res2['tags'])
+
+        #targetId as subnet
+        self.cmd('network watcher flow-log create '
+                 '--location {location} '
+                 '--resource-group {rg} '
+                 '--vnet {vnet} '
+                 '--subnet {subnet} '
+                 '--storage-account {storage_account} '
+                 '--workspace {workspace_id} '
+                 '--name {flow_log} ')
+
+        res1 = self.cmd('network watcher flow-log show --location {location} --name {flow_log}').get_output_in_json()
+        self.assertEqual(res1['name'], self.kwargs['flow_log'])
+        self.assertEqual(res1['enabled'], True)
+        self.assertEqual(res1['retentionPolicy']['days'], 0)
+        self.assertEqual(res1['retentionPolicy']['enabled'], False)
+        self.assertIsNone(res1['tags'])
+
+        #update targetId from subnet to nsg
+        res2 = self.cmd('network watcher flow-log update '
+                        '--location {location} '
+                        '--name {flow_log} '
+                        '--nsg {nsg} '
+                        '--resource-group {rg} '
+                        '--retention 2 '
+                        '--tags foo=bar ').get_output_in_json()
+        self.assertEqual(res2['name'], self.kwargs['flow_log'])
+        self.assertEqual(res2['enabled'], True)
+        self.assertTrue(res2['targetResourceId'].endswith(self.kwargs['nsg']))
+        self.assertEqual(res2['name'], self.kwargs['flow_log'])
+        self.assertEqual(res2['retentionPolicy']['days'], 2)
+        self.assertEqual(res2['retentionPolicy']['enabled'], True)
+        self.assertIsNotNone(res2['tags'])
+
+        #targetId as NSG
+        self.cmd('network watcher flow-log create '
+                 '--location {location} '
+                 '--resource-group {rg} '
+                 '--nsg {nsg} '
+                 '--storage-account {storage_account} '
+                 '--workspace {workspace_id} '
+                 '--name {flow_log} ')
+
+        res1 = self.cmd('network watcher flow-log show --location {location} --name {flow_log}').get_output_in_json()
+        self.assertEqual(res1['name'], self.kwargs['flow_log'])
+        self.assertEqual(res1['enabled'], True)
+        self.assertEqual(res1['retentionPolicy']['days'], 0)
+        self.assertEqual(res1['retentionPolicy']['enabled'], False)
+        self.assertIsNone(res1['tags'])
+
+        #update targetId from nsg to vnet
+        res2 = self.cmd('network watcher flow-log update '
+                        '--location {location} '
+                        '--name {flow_log} '
+                        '--vnet {vnet} '
+                        '--resource-group {rg} '
+                        '--retention 2 '
+                        '--tags foo=bar ').get_output_in_json()
+        self.assertEqual(res2['name'], self.kwargs['flow_log'])
+        self.assertEqual(res2['enabled'], True)
+        self.assertTrue(res2['targetResourceId'].endswith(self.kwargs['vnet']))
         self.assertEqual(res2['name'], self.kwargs['flow_log'])
         self.assertEqual(res2['retentionPolicy']['days'], 2)
         self.assertEqual(res2['retentionPolicy']['enabled'], True)

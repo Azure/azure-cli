@@ -1540,7 +1540,7 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
 
         if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
             err_body = '--workspace ID / --workspace NAME --resource-group WORKSPACE_RESOURCE_GROUP'
-        
+
         if namespace.vnet and not is_valid_resource_id(namespace.vnet):
             err_body = '--vnet ID / --vnet NAME --resource-group VNET_RESOURCE_GROUP'
 
@@ -1549,7 +1549,7 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
 
         if namespace.nic and not is_valid_resource_id(namespace.nic):
             err_body = '--nic ID / --nic NAME --resource-group NIC_RESOURCE_GROUP'
-        
+
         if err_body is not None:
             raise CLIError(err_tpl.format(err_body))
 
@@ -1564,7 +1564,8 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
         }
         namespace.vnet = resource_id(**kwargs)
     if namespace.subnet and not is_valid_resource_id(namespace.subnet):
-        namespace.subnet = _process_subnet_name_and_id(namespace.subnet, namespace.vnet, cmd, namespace.resource_group_name)
+        namespace.subnet = _process_subnet_name_and_id(namespace.subnet, 
+        namespace.vnet, cmd, namespace.resource_group_name)
     if namespace.nic and not is_valid_resource_id(namespace.nic):
         kwargs = {
             'subscription': get_subscription_id(cmd.cli_ctx),
@@ -1616,10 +1617,10 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
     if hasattr(namespace, 'vnet') and namespace.vnet is not None:
         if not is_valid_resource_id(namespace.vnet):
             namespace.vnet = _process_vnet_name_and_id(namespace.vnet, cmd, namespace.resource_group_name)
-
     if hasattr(namespace, 'subnet') and namespace.subnet is not None: 
         if not is_valid_resource_id(namespace.subnet):
-            namespace.subnet = _process_subnet_name_and_id(namespace.subnet, namespace.vnet, cmd, namespace.resource_group_name)
+            namespace.subnet = _process_subnet_name_and_id(namespace.subnet, namespace.vnet, 
+                                cmd, namespace.resource_group_name)
 
     if hasattr(namespace, 'nic') and namespace.nic is not None:
         if not is_valid_resource_id(namespace.nic):
@@ -1664,32 +1665,6 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
         nsg = get_arm_resource_by_id(cmd.cli_ctx, namespace.nsg)
         namespace.location = nsg.location  # pylint: disable=no-member
         get_network_watcher_from_location(remove=True)(cmd, namespace)
-    elif hasattr(namespace, 'subnet') and namespace.subnet is not None: 
-        if not is_valid_resource_id(namespace.subnet):
-            namespace.subnet = _process_subnet_name_and_id(namespace.subnet, namespace.vnet, cmd, namespace.resource_group_name)
-        subnet = get_arm_resource_by_id(cmd.cli_ctx, namespace.subnet)
-        namespace.location = subnet.location  # pylint: disable=no-member
-        get_network_watcher_from_location(remove=True)(cmd, namespace)
-
-    elif hasattr(namespace, 'vnet') and namespace.vnet is not None:
-        if not is_valid_resource_id(namespace.vnet):
-            namespace.vnet = _process_vnet_name_and_id(namespace.vnet, cmd, namespace.resource_group_name)
-        vnet = get_arm_resource_by_id(cmd.cli_ctx, namespace.vnet)
-        namespace.location = vnet.location  # pylint: disable=no-member
-        get_network_watcher_from_location(remove=True)(cmd, namespace)
-
-    elif hasattr(namespace, 'nic') and namespace.nic is not None:
-        if not is_valid_resource_id(namespace.nic):
-            namespace.nic = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='networkInterfaces',
-            name=namespace.nic)
-        nic = get_arm_resource_by_id(cmd.cli_ctx, namespace.nic)
-        namespace.location = nic.location  # pylint: disable=no-member
-        get_network_watcher_from_location(remove=True)(cmd, namespace)
-        
     elif namespace.flow_log_name is not None and namespace.location is not None:
         get_network_watcher_from_location(remove=False)(cmd, namespace)
     else:
