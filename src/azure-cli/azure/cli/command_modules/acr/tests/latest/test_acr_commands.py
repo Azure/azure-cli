@@ -261,7 +261,7 @@ class AcrCommandsTests(ScenarioTest):
         # create a resource group for the source registry
         self.cmd('group create -n {source_registry_rg} -l {source_loc}')
 
-        # create a source registry 
+        # create a source registry
         self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
                  checks=[self.check('name', '{source_registry_name}'),
                          self.check('location', '{source_loc}'),

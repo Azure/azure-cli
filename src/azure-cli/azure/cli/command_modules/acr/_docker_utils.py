@@ -386,9 +386,11 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         logger.info("Attempting to retrieve AAD refresh token...")
         try:
             use_acr_audience = False
-            aad_auth_policy = acr_config_authentication_as_arm_show(cmd, registry_name, resource_group_name)
-            if registry and aad_auth_policy.status == 'disabled':
-                use_acr_audience = True
+
+            if registry:
+                aad_auth_policy = acr_config_authentication_as_arm_show(cmd, registry_name, resource_group_name)
+                if aad_auth_policy and aad_auth_policy.status == 'disabled':
+                    use_acr_audience = True
 
             return login_server, EMPTY_GUID, _get_aad_token(cli_ctx,
                                                             login_server,

@@ -95,13 +95,20 @@ def acr_config_retention_update(cmd,
 def acr_config_authentication_as_arm_show(cmd,
                                           registry_name,
                                           resource_group_name=None):
-    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+
+    AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
+
+    try:
+        registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    except Exception:
+        return AzureADAuthenticationAsArmPolicy()
+
+    Policy = cmd.get_models('Policy')
     policies = registry.policies
+    if policies is None:
+        policies = Policy()
 
-    AADAuthAsArmPolicy = policies.azure_ad_authentication_as_arm_policy \
-        if policies and hasattr(policies, 'azure_ad_authentication_as_arm_policy') else None
-
-    return AADAuthAsArmPolicy
+    return policies.azure_ad_authentication_as_arm_policy
 
 
 def acr_config_authentication_as_arm_update(cmd,
