@@ -342,8 +342,7 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         # create an aad user in db
         aaduser = generate_random_string(
             prefix="aad_" + target_type.value + '_')
-        create_aad_user_in_pg_single(cli_ctx, target_id,
-                              target_type, aaduser, client_id)
+        create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, client_id)
 
         return {
             'auth_type': 'secret',
@@ -360,12 +359,11 @@ def set_user_admin_if_not(target_id, account_user, user_object_id):
     rg = target_segments.get('resource_group')
     server = target_segments.get('name')
     # pylint: disable=not-an-iterable
-    admins = run_cli_cmd('az postgres server ad-admin list --ids {}'
-                            .format(target_id))
+    admins = run_cli_cmd('az postgres server ad-admin list --ids {}'.format(target_id))
     is_admin = any(ad.get('sid') == user_object_id for ad in admins)
     if not is_admin:
         logger.warning('Setting current user as database server AAD admin:'
-                        ' user=%s object id=%s', account_user, user_object_id)
+                       ' user=%s object id=%s', account_user, user_object_id)
         run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
                     ' --subscription {}'.format(rg, server, account_user, user_object_id, sub)).get('objectId')
 
@@ -504,7 +502,7 @@ def get_webapp_identity(source_id):
     logger.warning('Checking if WebApp enables System Identity...')
     identity = run_cli_cmd(
         'az webapp show --ids {}'.format(source_id)).get('identity')
-    if (identity is None or not "SystemAssigned" in identity.get('type')):
+    if (identity is None or "SystemAssigned" not in identity.get('type')):
         # assign system identity for spring-cloud
         logger.warning('Enabling WebApp System Identity...')
         run_cli_cmd('az webapp identity assign --ids {}'.format(source_id))
