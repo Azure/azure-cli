@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
 from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
@@ -23,7 +24,8 @@ class AAZSimpleType(AAZBaseType):
         super().__init__(*args, **kwargs)
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -56,7 +58,8 @@ class AAZFloatType(AAZSimpleType):
     DataType = float
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -94,12 +97,15 @@ class AAZObjectType(AAZBaseType):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._fields = {}
+        # It's important to keep the order of fields.
+        # This feature can help to resolve arguments interdependent problem.
+        # aaz-dev should register fields based on the interdependent order.
+        self._fields = OrderedDict()
         self._fields_alias_map = {}  # key is the option, value is field
 
         # Polymorphism support
         self._discriminator_field_name = None
-        self._discriminators = {}
+        self._discriminators = OrderedDict()
 
     def __getitem__(self, key):
         name = self.get_attr_name(key)
@@ -159,7 +165,8 @@ class AAZObjectType(AAZBaseType):
         return None
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -270,7 +277,8 @@ class AAZDictType(AAZBaseType):
         return self.Element
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)
@@ -323,7 +331,8 @@ class AAZListType(AAZBaseType):
         return self.Element
 
     def process_data(self, data, **kwargs):
-        if data is None:
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
             return AAZValuePatch.build(self)

@@ -597,6 +597,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_name = self.create_random_name(prefix='blob', length=24)
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --content-md5 {}', account_info,
                          container, local_file, blob_name, md5_base64_encode)
+        self.storage_cmd('storage blob update -c {} -n {} --content-md5 0000', account_info, container, blob_name)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

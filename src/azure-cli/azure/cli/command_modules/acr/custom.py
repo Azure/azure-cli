@@ -24,6 +24,7 @@ from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 logger = get_logger(__name__)
 DEF_DIAG_SETTINGS_NAME_TEMPLATE = '{}-diagnostic-settings'
 SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
+DENY_ACTION = 'Deny'
 
 
 def acr_check_name(client, registry_name):
@@ -132,10 +133,6 @@ def acr_update_custom(cmd,
     if tags is not None:
         instance.tags = tags
 
-    if default_action is not None:
-        NetworkRuleSet = cmd.get_models('NetworkRuleSet')
-        instance.network_rule_set = NetworkRuleSet(default_action=default_action)
-
     if data_endpoint_enabled is not None:
         instance.data_endpoint_enabled = data_endpoint_enabled
 
@@ -144,6 +141,9 @@ def acr_update_custom(cmd,
 
     if anonymous_pull_enabled is not None:
         instance.anonymous_pull_enabled = anonymous_pull_enabled
+
+    if default_action is not None:
+        _configure_default_action(cmd, instance, default_action)
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -158,7 +158,13 @@ def _configure_public_network_access(cmd, registry, enabled):
         registry.public_network_access = PublicNetworkAccess.enabled
     else:
         registry.public_network_access = PublicNetworkAccess.disabled
+        _configure_default_action(cmd, registry, DENY_ACTION)
         logger.warning('Disabling the public endpoint overrides all firewall configurations.')
+
+
+def _configure_default_action(cmd, registry, action):
+    NetworkRuleSet = cmd.get_models('NetworkRuleSet')
+    registry.network_rule_set = NetworkRuleSet(default_action=action)
 
 
 def _handle_network_bypass(cmd, registry, allow_trusted_services):

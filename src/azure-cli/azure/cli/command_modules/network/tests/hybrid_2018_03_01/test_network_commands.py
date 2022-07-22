@@ -22,32 +22,6 @@ from msrestazure.tools import resource_id
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-class NetworkApplicationSecurityGroupScenario(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_asg')
-    def test_network_asg(self, resource_group):
-
-        self.kwargs.update({
-            'asg': 'asg1'
-        })
-
-        count1 = len(self.cmd('network asg list').get_output_in_json())
-        self.cmd('network asg create -g {rg} -n {asg} --tags foo=doo',
-                 checks=self.check('tags.foo', 'doo'))
-        self.cmd('network asg update -g {rg} -n {asg} --tags foo=bar',
-                 checks=self.check('tags.foo', 'bar'))
-        count2 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count2 == count1 + 1)
-        self.cmd('network asg show -g {rg} -n {asg}', checks=[
-            self.check('name', '{asg}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('tags.foo', 'bar')
-        ])
-        self.cmd('network asg delete -g {rg} -n {asg}')
-        count3 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count3 == count1)
-
-
 class NetworkLoadBalancerWithSku(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')

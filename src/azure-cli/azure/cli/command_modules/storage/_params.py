@@ -872,7 +872,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_blob_arguments()
         c.register_precondition_options()
         t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
-        c.register_content_settings_argument(t_blob_content_settings, update=True)
+        c.register_content_settings_argument(t_blob_content_settings, update=True, process_md5=True)
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob exists') as c:
@@ -1191,14 +1191,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
         c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
-                   help='Name of the destination blob. If the exists, it will be overwritten.')
+                   help='Name of the destination blob. If it exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
     with self.argument_context('storage blob copy cancel') as c:
         c.extra('container_name', container_name_type, options_list=('--destination-container', '-c'),
                 required=True)
         c.extra('blob_name', blob_name_type, options_list=('--destination-blob', '-b'), required=True,
-                help='Name of the destination blob. If the exists, it will be overwritten.')
+                help='Name of the destination blob. If it exists, it will be overwritten.')
         c.extra('timeout', timeout_type)
         c.extra('lease', options_list='--lease-id',
                 help='Required if the destination blob has an active infinite lease.')
@@ -1219,7 +1219,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
 
         c.argument('blob_name', options_list=['--destination-blob', '-b'], required=True,
-                   help='Name of the destination blob. If the exists, it will be overwritten.')
+                   help='Name of the destination blob. If it exists, it will be overwritten.')
         c.argument('container_name', options_list=['--destination-container', '-c'], required=True,
                    help='The container name.')
         c.extra('destination_lease', options_list='--destination-lease-id',
@@ -1950,7 +1950,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('share_name', share_name_type, required=True)
         c.register_path_argument()
-        c.register_content_settings_argument(t_file_content_settings, update=True)
+        c.register_content_settings_argument(t_file_content_settings, update=True, process_md5=True)
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
@@ -1958,7 +1958,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
         c.register_path_argument(default_file_param='local_file_path')
-        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
+        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path',
+                                             process_md5=True)
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
                    help='Path of the local file to upload as the file content.')
         c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
