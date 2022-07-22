@@ -321,38 +321,28 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         # enable source mi
         identity = None
         if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
-            identity = get_springcloud_identity(source_id)
+            identity = get_springcloud_identity(source_id, source_type)
+        if source_type in {RESOURCE.WebApp}:
+            identity = get_webapp_identity(source_id)
         object_id = identity.get('principalId')
         client_id = run_cli_cmd(
             'az ad sp show --id {0}'.format(object_id)).get('appId')
 
+        # Get login user info
         account_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
         user_info = run_cli_cmd('az ad user show --id {}'.format(account_user))
         user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
             else user_info.get('id')
-
-        # set aad user
         if user_object_id is None:
             raise Exception(
                 "no object id found for user {}".format(account_user))
+        # Set login user as db aad admin
+        set_user_admin_if_not(target_id, account_user, user_object_id)
 
-        target_segments = parse_resource_id(target_id)
-        sub = target_segments.get('subscription')
-        rg = target_segments.get('resource_group')
-        server = target_segments.get('name')
-        # pylint: disable=not-an-iterable
-        admins = run_cli_cmd('az postgres server ad-admin list --ids {}'
-                             .format(target_id))
-        is_admin = any(ad.get('sid') == user_object_id for ad in admins)
-        if not is_admin:
-            logger.warning('Setting current user as database server AAD admin:'
-                           ' user=%s object id=%s', account_user, user_object_id)
-            run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
-                        ' --subscription {}'.format(rg, server, account_user, user_object_id, sub)).get('objectId')
-
+        # create an aad user in db
         aaduser = generate_random_string(
             prefix="aad_" + target_type.value + '_')
-        create_aad_user_in_db(cli_ctx, target_id,
+        create_aad_user_in_pg_single(cli_ctx, target_id,
                               target_type, aaduser, client_id)
 
         return {
@@ -363,6 +353,21 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
             }
         }
 
+
+def set_user_admin_if_not(target_id, account_user, user_object_id):
+    target_segments = parse_resource_id(target_id)
+    sub = target_segments.get('subscription')
+    rg = target_segments.get('resource_group')
+    server = target_segments.get('name')
+    # pylint: disable=not-an-iterable
+    admins = run_cli_cmd('az postgres server ad-admin list --ids {}'
+                            .format(target_id))
+    is_admin = any(ad.get('sid') == user_object_id for ad in admins)
+    if not is_admin:
+        logger.warning('Setting current user as database server AAD admin:'
+                        ' user=%s object id=%s', account_user, user_object_id)
+        run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
+                    ' --subscription {}'.format(rg, server, account_user, user_object_id, sub)).get('objectId')
 
 # pylint: disable=unused-argument, not-an-iterable, too-many-statements
 def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_public_access=False):
@@ -391,7 +396,7 @@ def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_publi
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
 
-def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
+def create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, client_id):
     import pkg_resources
     installed_packages = pkg_resources.working_set
     psyinstalled = any(('psycopg2') in d.key.lower() for d in installed_packages)
@@ -472,7 +477,7 @@ def create_aad_user_in_db(cli_ctx, target_id, target_type, aaduser, client_id):
     logger.warning("Creating service connection to postgresql ...")
 
 
-def get_springcloud_identity(source_id):
+def get_springcloud_identity(source_id, source_type):
     segments = parse_resource_id(source_id)
     sub = segments.get('subscription')
     spring = segments.get('name')
@@ -480,16 +485,32 @@ def get_springcloud_identity(source_id):
     rg = segments.get('resource_group')
     logger.warning('Checking if Spring Cloud app enables System Identity...')
     identity = run_cli_cmd(
-        'az spring app show -g {0} -s {1} -n {2} --subscription {3}'.format(rg, spring, app, sub)).get('identity')
+        'az {} app show -g {} -s {} -n {} --subscription {}'.format(source_type, rg, spring, app, sub)).get('identity')
     if (identity is None or identity.get('type') != "SystemAssigned"):
         # assign system identity for spring-cloud
         logger.warning('Enabling Spring Cloud app System Identity...')
         run_cli_cmd(
-            'az spring app identity assign -g {0} -s {1} -n {2} --subscription {3}'.format(rg, spring, app, sub))
+            'az {} app identity assign -g {} -s {} -n {} --subscription {}'.format(source_type, rg, spring, app, sub))
         cnt = 0
         while (identity is None and cnt < 5):
-            identity = run_cli_cmd('az spring app show -g {0} -s {1} -n {2} --subscription {3}'
-                                   .format(rg, spring, app, sub)).get('identity')
+            identity = run_cli_cmd('az {} app show -g {} -s {} -n {} --subscription {}'
+                                   .format(source_type, rg, spring, app, sub)).get('identity')
+            time.sleep(3)
+            cnt += 1
+    return identity
+
+
+def get_webapp_identity(source_id):
+    logger.warning('Checking if WebApp enables System Identity...')
+    identity = run_cli_cmd(
+        'az webapp show --ids {}'.format(source_id)).get('identity')
+    if (identity is None or not "SystemAssigned" in identity.get('type')):
+        # assign system identity for spring-cloud
+        logger.warning('Enabling WebApp System Identity...')
+        run_cli_cmd('az webapp identity assign --ids {}'.format(source_id))
+        cnt = 0
+        while (identity is None and cnt < 5):
+            identity = run_cli_cmd('az webapp identity show --ids {}'.format(source_id)).get('identity')
             time.sleep(3)
             cnt += 1
     return identity
