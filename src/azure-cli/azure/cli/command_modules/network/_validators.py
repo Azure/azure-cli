@@ -1522,11 +1522,35 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
         namespace.headers = headers
 
 
+def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if vnet and not is_valid_resource_id(vnet):
+        vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet)
+    return vnet
+
+
+def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
+    from azure.cli.core.azclierror import UnrecognizedArgumentError
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if subnet and not is_valid_resource_id(subnet):
+        vnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name)
+        if vnet is None:
+            raise UnrecognizedArgumentError('vnet should be provided when input subnet name instead of subnet id')
+
+        subnet = vnet + f'/subnets/{subnet}'
+    return subnet
+
 def process_nw_flow_log_create_namespace(cmd, namespace):
     """
     Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
     """
-    from msrestazure.tools import is_valid_resource_id, resource_id, _process_subnet_name_and_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
 
     # for both create and update
     if namespace.resource_group_name is None:
@@ -1564,7 +1588,7 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
         }
         namespace.vnet = resource_id(**kwargs)
     if namespace.subnet and not is_valid_resource_id(namespace.subnet):
-        namespace.subnet = _process_subnet_name_and_id(namespace.subnet, 
+        namespace.subnet = _process_subnet_name_and_id(namespace.subnet,
         namespace.vnet, cmd, namespace.resource_group_name)
     if namespace.nic and not is_valid_resource_id(namespace.nic):
         kwargs = {
@@ -1613,24 +1637,7 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
 
 
 def process_nw_flow_log_set_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id, _process_subnet_name_and_id, _process_vnet_name_and_id
-    if hasattr(namespace, 'vnet') and namespace.vnet is not None:
-        if not is_valid_resource_id(namespace.vnet):
-            namespace.vnet = _process_vnet_name_and_id(namespace.vnet, cmd, namespace.resource_group_name)
-    if hasattr(namespace, 'subnet') and namespace.subnet is not None: 
-        if not is_valid_resource_id(namespace.subnet):
-            namespace.subnet = _process_subnet_name_and_id(namespace.subnet, namespace.vnet, 
-                                cmd, namespace.resource_group_name)
-
-    if hasattr(namespace, 'nic') and namespace.nic is not None:
-        if not is_valid_resource_id(namespace.nic):
-            namespace.nic = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='networkInterfaces',
-            name=namespace.nic)
-
+    from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -1650,7 +1657,7 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
 
 
 def process_nw_flow_log_show_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id, _process_subnet_name_and_id, _process_vnet_name_and_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
     if hasattr(namespace, 'nsg') and namespace.nsg is not None:

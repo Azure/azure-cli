@@ -6388,13 +6388,13 @@ def create_nw_flow_log(cmd,
         raise MutuallyExclusiveArgumentError("Please enter only one resource ID.")
 
     if subnet is not None:
-        flow_log = FlowLog(location=location,target_resource_id=subnet,storage_id=storage_account,enabled=enabled,tags=tags)
+        flow_log = FlowLog(location=location, target_resource_id=subnet, storage_id=storage_account, enabled=enabled, tags=tags)
     elif vnet is not None and subnet is None:
-        flow_log = FlowLog(location=location,target_resource_id=vnet,storage_id=storage_account,enabled=enabled,tags=tags)
+        flow_log = FlowLog(location=location, target_resource_id=vnet, storage_id=storage_account, enabled=enabled, tags=tags)
     elif nic is not None:
-        flow_log = FlowLog(location=location,target_resource_id=nic,storage_id=storage_account,enabled=enabled,tags=tags)
+        flow_log = FlowLog(location=location, target_resource_id=nic, storage_id=storage_account, enabled=enabled, tags=tags)
     elif nsg is not None:
-        flow_log = FlowLog(location=location,target_resource_id=nsg,storage_id=storage_account,enabled=enabled,tags=tags)
+        flow_log = FlowLog(location=location, target_resource_id=nsg, storage_id=storage_account, enabled=enabled, tags=tags)
 
     if retention > 0:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')

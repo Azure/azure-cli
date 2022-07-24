@@ -7108,12 +7108,6 @@ short-summary: Configure flow logging on a network security group.
 parameters:
   - name: --nsg
     short-summary: Name or ID of the Network Security Group to target.
-  - name: --vnet
-    short-summary: Name or ID of the Virtual Network to target.
-  - name: --subnet
-    short-summary: Name or ID of the subnet to target.
-  - name: --nic
-    short-summary: Name or ID of the Network Interface to target.
   - name: --enabled
     short-summary: Enable logging.
   - name: --retention

@@ -153,7 +153,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('retentionPolicy.days', 0),
             self.check('retentionPolicy.enabled', False),
         ])
-
+    
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
     @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
     @AllowLargeResponse(1024)
@@ -237,7 +237,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
-
+        
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
     @AllowLargeResponse(1024)
@@ -356,7 +356,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('retentionPolicy.enabled', False)
         ])
 
-
+    
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
     @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
     def test_nw_flow_log_update_vnetfl(self, resource_group, resource_group_location, storage_account):
@@ -422,6 +422,11 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['retentionPolicy']['days'], 2)
         self.assertEqual(res2['retentionPolicy']['enabled'], True)
         self.assertIsNotNone(res2['tags'])
+        
+        self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
+
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
 
         #targetId as subnet
         self.cmd('network watcher flow-log create '
@@ -456,6 +461,11 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['retentionPolicy']['enabled'], True)
         self.assertIsNotNone(res2['tags'])
 
+        self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
+
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
+
         #targetId as NSG
         self.cmd('network watcher flow-log create '
                  '--location {location} '
@@ -487,7 +497,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['retentionPolicy']['days'], 2)
         self.assertEqual(res2['retentionPolicy']['enabled'], True)
         self.assertIsNotNone(res2['tags'])
-
+        
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
     def test_nw_flow_log_update(self, resource_group, resource_group_location, storage_account):
