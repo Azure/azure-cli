@@ -2670,8 +2670,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
 
 def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
     Certificate = cmd.get_models('Certificate')
-    # TODO remove api_version when Microsoft.CertificateRegistration supports a later version
-    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-15")
+    client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
@@ -2710,10 +2709,8 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
         if kv_subscription.lower() != subscription_id.lower():
-            # TODO remove api_version when Microsoft.CertificateRegistration supports a later version
             diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                               subscription_id=kv_subscription,
-                                                               api_version="2021-01-15")
+                                                               subscription_id=kv_subscription)
             ascs = diff_subscription_client.app_service_certificate_orders.list()
         else:
             ascs = client.app_service_certificate_orders.list()
