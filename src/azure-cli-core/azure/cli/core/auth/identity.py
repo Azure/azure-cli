@@ -106,6 +106,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             try:
                 self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
             except Exception as ex:
+                # When authority/tenant is invalid, MSAL raises ValueError: 'Unable to get authority configuration'
                 msal_exceptions_handler(ex)
         return self._msal_app_instance
 
