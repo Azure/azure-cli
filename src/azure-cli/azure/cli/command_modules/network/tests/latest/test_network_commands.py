@@ -1240,7 +1240,6 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
                  '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
                  '--priority {priority}')
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
-        print(show_appgw_data)
         frontend_ip = show_appgw_data['frontendIpConfigurations'][0]['name']
         self.kwargs.update({
             'appgw_frontend_ip': frontend_ip
@@ -1259,7 +1258,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
             '--servers 10.0.0.4 10.0.0.5')
         self.cmd('network application-gateway routing-rule create -g {rg} --gateway-name {appgw} '
                  '--name {appgw_routing_rule} --listener {appgw_listener} --rule-type {appgw_rule_type} '
-                 '--address-pool {appgw_address_pool} --settings {appgw_settings}',
+                 '--address-pool {appgw_address_pool} --settings {appgw_settings} --priority 1002',
                  checks=[
                      self.check('routingRules[0].name', '{appgw_routing_rule}')
                  ])
