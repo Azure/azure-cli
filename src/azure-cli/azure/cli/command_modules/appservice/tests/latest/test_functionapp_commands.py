@@ -1557,6 +1557,50 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_vnet_basic_sku_E2E(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('swiftfunctionapp', 24)
+        plan = self.create_random_name('swiftplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, functionapp_name, vnet_name, subnet_name))
+        self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_vnet_EP_sku_E2E(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('swiftfunctionapp', 24)
+        plan = self.create_random_name('swiftplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, plan))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, functionapp_name, vnet_name, subnet_name))
+        self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg2")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg3")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg4")
