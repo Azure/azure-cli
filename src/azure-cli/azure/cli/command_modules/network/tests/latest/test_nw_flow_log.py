@@ -84,6 +84,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('retentionPolicy.days', 0),
             self.check('retentionPolicy.enabled', False),
         ])
+        
         #targetId as nic
         self.cmd('network watcher flow-log create '
                  '--location {location} '
@@ -222,7 +223,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
 
         
-        #tsrgetId as nic
+        #targetId as nic
         self.cmd('network watcher flow-log create '
                  '--location {location} '
                  '--resource-group {rg} '

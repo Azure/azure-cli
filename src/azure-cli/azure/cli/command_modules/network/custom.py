@@ -15,7 +15,7 @@ from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError,\
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError, \
     UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
@@ -6355,10 +6355,12 @@ def show_nw_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, r
     if nsg is not None:
         flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
         return client.begin_get_flow_log_status(watcher_rg, watcher_name, flowlog_status_parameters)
+
     # new approach to show flow log
     from ._client_factory import cf_flow_logs
     client = cf_flow_logs(cmd.cli_ctx, None)
     return client.get(watcher_rg, watcher_name, flow_log_name)
+
 
 def create_nw_flow_log(cmd,
                        client,
@@ -6383,9 +6385,9 @@ def create_nw_flow_log(cmd,
     FlowLog = cmd.get_models('FlowLog')
 
     if sum(map(bool, [vnet, subnet, nic, nsg])) == 0:
-        raise RequiredArgumentMissingError("Please enter atleast one resource ID.")
+        raise RequiredArgumentMissingError("Please enter atleast one target resource ID.")
     if sum(map(bool, [vnet, nic, nsg])) > 1:
-        raise MutuallyExclusiveArgumentError("Please enter only one resource ID.")
+        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
 
     if subnet is not None:
         flow_log = FlowLog(location=location, target_resource_id=subnet, storage_id=storage_account, enabled=enabled, tags=tags)
@@ -6462,7 +6464,7 @@ def update_nw_flow_log(cmd,
         c.set_param('storage_id', storage_account)
 
     if sum(map(bool, [vnet, nic, nsg])) > 1:
-        raise MutuallyExclusiveArgumentError("Please enter only one resource ID.")
+        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
 
     if subnet is not None:
         c.set_param('target_resource_id', subnet)
@@ -6508,6 +6510,7 @@ def list_nw_flow_log(client, watcher_rg, watcher_name, location):
 
 def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
     return client.begin_delete(watcher_rg, watcher_name, flow_log_name)
+
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
                              storage_path, resource_type=None, resource_group_name=None,

@@ -1546,6 +1546,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
 
+
 def process_nw_flow_log_create_namespace(cmd, namespace):
     """
     Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
