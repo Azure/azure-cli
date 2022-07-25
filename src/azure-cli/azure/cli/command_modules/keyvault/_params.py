@@ -340,11 +340,11 @@ def load_arguments(self, _):
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover', 'show-deleted']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.ignore('cls')
-            c.argument('key_name', options_list=['--name', '-n'], required=False, id_part='child_name_1',
+            c.argument('name', options_list=['--name', '-n'], required=False, id_part='child_name_1',
                        completer=get_keyvault_name_completion_list('key'),
                        help='Name of the key. Required if --id is not specified.')
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
-                       id_part=None, required=False)
+            c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
+                    id_part=None, required=False)
             c.argument('key_version', options_list=['--version', '-v'],
                        help='The key version. If omitted, uses the latest version.', default='',
                        required=False, completer=get_keyvault_version_completion_list('key'))
@@ -355,22 +355,19 @@ def load_arguments(self, _):
             if item in ['list', 'list-deleted']:
                 c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
                         help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
-            elif item in ['show-deleted', 'purge', 'recover']:
-                c.extra('identifier', options_list=['--id'], validator=validate_key_id('deletedkey'),
-                        help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.')
 
     for item in ['backup', 'download']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.argument('key_name', options_list=['--name', '-n'],
+            c.argument('name', options_list=['--name', '-n'],
                        help='Name of the key. Required if --id is not specified.',
                        required=False, id_part='child_name_1', completer=get_keyvault_name_completion_list('key'))
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument('key_version', options_list=['--version', '-v'],
                        help='The key version. If omitted, uses the latest version.', default='',
                        required=False, completer=get_keyvault_version_completion_list('key'))
-            c.argument('identifier', options_list=['--id'], validator=validate_key_id('key'),
-                       help='Id of the key. If specified all other \'Id\' arguments should be omitted.')
-            c.argument('hsm_name', data_plane_hsm_name_type)
+            c.extra('identifier', options_list=['--id'], validator=validate_key_id('key'),
+                    help='Id of the key. If specified all other \'Id\' arguments should be omitted.')
+            c.extra('hsm_name', data_plane_hsm_name_type)
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -383,10 +380,10 @@ def load_arguments(self, _):
                    help='Encoding of the key, default: PEM', default='PEM')
 
     with self.argument_context('keyvault key restore', arg_group='Id') as c:
-        c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
-                   help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
-        c.argument('hsm_name', data_plane_hsm_name_type, validator=None)
+        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
+                help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
+        c.extra('hsm_name', data_plane_hsm_name_type, validator=None)
 
     with self.argument_context('keyvault key restore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -408,7 +405,7 @@ def load_arguments(self, _):
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
+            c.extra('maxresults', options_list=['--maxresults'], type=int, help='Maximum number of results to return')
 
     with self.argument_context('keyvault key list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,

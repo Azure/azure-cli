@@ -108,6 +108,48 @@ def transform_key_output(result, **command_args):
     return output
 
 
+def transform_key_properties(item):
+    if isinstance(item, dict):
+        return item
+    return {'attributes': item._attributes,
+            'tags': item._tags,
+            'managed': item.managed,
+            'kid': item._id,
+            'name': item.name}
+
+
+def transform_key_list_output(output, **command_args):
+    return [transform_key_properties(i) for i in output]
+
+
+def transform_deleted_key(item, show_key=False, **command_args):
+    if isinstance(item, dict):
+        return item
+    base = transform_key_properties(item._properties)
+    base['deletedDate'] = item._deleted_date
+    base['recoveryId'] = item._recovery_id
+    base['scheduledPurgeDate'] = item._scheduled_purge_date
+    if show_key:
+        from azure.keyvault.keys import JsonWebKey
+        import base64
+
+        if item.key and isinstance(item.key, JsonWebKey):
+            for attr in item.key._FIELDS:
+                value = getattr(item.key, attr)
+                if value and isinstance(value, bytes):
+                    setattr(item.key, attr, base64.b64encode(value))
+        base['key'] = item.key
+    return base
+
+
+def transform_deleted_key_detailed(item, **command_args):
+    return transform_deleted_key(item, show_key=True)
+
+
+def transform_key_list_deleted_output(output, **command_args):
+    return [transform_deleted_key(i) for i in output]
+
+
 # pylint: disable=unused-argument
 def transform_key_random_output(result, **command_args):
     if result and isinstance(result, bytes):

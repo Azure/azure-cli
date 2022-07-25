@@ -1146,6 +1146,33 @@ def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, ver
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
+def list_keys(client, **kwargs):
+    # `include_managed` and `maxresults` are only used in transform
+    kwargs.pop('include_managed')
+    kwargs.pop('maxresults')
+    return client.list_properties_of_keys(**kwargs)
+
+
+def list_key_versions(client, name, **kwargs):
+    # `maxresults` is only used in transform
+    kwargs.pop('maxresults')
+    return client.list_properties_of_key_versions(name, **kwargs)
+
+
+def list_deleted_keys(client, **kwargs):
+    # `maxresults` is only used in transform
+    kwargs.pop('maxresults')
+    return client.list_deleted_keys(**kwargs)
+
+
+def delete_key(client, name, **kwargs):
+    return client.begin_delete_key(name, **kwargs).result()
+
+
+def recover_key(client, name, **kwargs):
+    return client.begin_recover_deleted_key(name, **kwargs).result()
+
+
 def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
                 name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
@@ -1158,15 +1185,13 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
-def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_key(vault_base_url, key_name).value
+def backup_key(client, file_path, name):  # pylint: disable=unused-argument
+    backup = client.backup_key(name)
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
-                identifier=None, storage_resource_uri=None,  # pylint: disable=unused-argument
+def restore_key(cmd, client, file_path=None, storage_resource_uri=None,
                 storage_account_name=None, blob_container_name=None,
                 token=None, backup_folder=None, key_name=None, no_wait=False):
     if file_path:
@@ -1186,9 +1211,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
     if file_path:
         with open(file_path, 'rb') as file_in:
             data = file_in.read()
-        if hsm_name is None:  # TODO: use a more graceful way to implement.
-            hsm_name = vault_base_url
-        return client.restore_key(hsm_name, data)
+        return client.restore_key_backup(data)
 
     if not token:
         raise RequiredArgumentMissingError('Please specify --storage-container-SAS-token/-t')
@@ -1201,7 +1224,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
 
     backup_client = get_client_factory(
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'hsm_name': hsm_name})
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'vault_base_url': client.vault_url})
     return sdk_no_wait(
         no_wait, backup_client.begin_selective_restore,
         folder_url='{}/{}'.format(storage_resource_uri, backup_folder),
@@ -1408,16 +1431,14 @@ def _export_public_key_to_pem(k):
     return _export_public_key(k, encoding=Encoding.PEM)
 
 
-def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: disable=unused-argument
-                 vault_base_url=None, key_name=None, key_version='', encoding=None):
+def download_key(client, file_path, name=None, key_version='', encoding=None):
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    key = client.get_key(vault_base_url, key_name, key_version)
+    key = client.get_key(name, key_version)
     json_web_key = _jwk_to_dict(key.key)
     key_type = json_web_key['kty']
-    pub_key = ''
 
     if key_type in ['RSA', 'RSA-HSM']:
         pub_key = _extract_rsa_public_key_from_jwk(json_web_key)
@@ -1431,7 +1452,7 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
         'PEM': _export_public_key_to_pem
     }
 
-    if encoding not in methods.keys():
+    if encoding not in methods:
         raise CLIError('Unsupported encoding: {}. (Supported encodings: DER, PEM)'.format(encoding))
 
     try:

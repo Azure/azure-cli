@@ -1098,6 +1098,36 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv2} --name key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    def test_keyvault_key_delete(self, resource_group, key_vault):
+        self.kwargs.update({
+            'loc': 'eastus2',
+            'key': self.create_random_name('key-', 24),
+            'policy': os.path.join(TEST_DIR, 'rotation_policy.json')
+        })
+        keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+        key_perms.append('purge')
+        self.kwargs['key_perms'] = ' '.join(key_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+
+        self.cmd('keyvault key create --vault-name {kv} -n {key}')
+        self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+        time.sleep(5)
+        self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault key list-deleted --vault-name {kv}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault key show-deleted --vault-name {kv} -n {key}', checks=self.check('name', self.kwargs['key']))
+        self.cmd('keyvault key recover --vault-name {kv} -n {key}')
+        time.sleep(5)
+        self.cmd('keyvault key list --vault-name {kv}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+        self.cmd('keyvault key purge --vault-name {kv} -n {key}')
+        self.cmd('keyvault key list-deleted --vault-name {kv}', checks=self.is_empty())
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
     def test_keyvault_key_rotation(self, resource_group, key_vault):

@@ -616,7 +616,9 @@ def validate_key_id(entity_type):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
-        name = getattr(ns, pure_entity_type + '_name', None)
+        # `keyvault key` command has been migrated to track2, `key_name` argument is renamed to `namek
+        name_key = pure_entity_type + '_name' if pure_entity_type != 'key' else 'name'
+        name = getattr(ns, name_key, None)
         vault = getattr(ns, 'vault_base_url', None)
         if not vault:
             vault = getattr(ns, 'hsm_name', None)
@@ -631,7 +633,7 @@ def validate_key_id(entity_type):
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
-            setattr(ns, pure_entity_type + '_name', ident.name)
+            setattr(ns, name_key, ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
             if ident.version and hasattr(ns, pure_entity_type + '_version'):
                 setattr(ns, pure_entity_type + '_version', ident.version)
