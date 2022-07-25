@@ -128,11 +128,13 @@ TARGET_RESOURCES = {
 SOURCE_RESOURCES_PARAMS = {
     RESOURCE.WebApp: {
         'source_resource_group': {
+            'configured_default': 'group',
             'options': ['--resource-group', '-g'],
             'help': 'The resource group which contains the webapp',
             'placeholder': 'WebAppRG'
         },
         'site': {
+            'configured_default': 'web',
             'options': ['--name', '-n'],
             'help': 'Name of the webapp',
             'placeholder': 'MyWebApp'
@@ -300,6 +302,7 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'SqlRG'
         },
         'server': {
+            'configured_default': 'sql-server',
             'options': ['--server'],
             'help': 'Name of the sql server',
             'placeholder': 'MyServer'
@@ -936,6 +939,7 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.KafkaSpringBoot,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.ServiceBus: [
@@ -970,10 +974,6 @@ SUPPORTED_CLIENT_TYPE = {
 }
 
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
-SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud][RESOURCE.EventHub].append(
-    CLIENT_TYPE.KafkaSpringBoot)
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
-SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated][RESOURCE.EventHub].append(
-    CLIENT_TYPE.KafkaSpringBoot)
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
