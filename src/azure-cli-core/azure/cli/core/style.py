@@ -37,9 +37,8 @@ class Style(str, Enum):
     ERROR = "error"
     SUCCESS = "success"
     WARNING = "warning"
-    # Background colors
-    BACK_PRIMARY = "back_primary"
-    BACK_WARNING = "back_warning"
+    SURVEY = "survey"
+    SURVEY_LINK = "survey_link"
 
 
 def _rgb_hex(rgb_hex: str):
@@ -74,8 +73,8 @@ THEME_DARK = {
     Style.ERROR: '\x1b[91m',  # Bright Foreground Red
     Style.SUCCESS: '\x1b[92m',  # Bright Foreground Green
     Style.WARNING: '\x1b[93m',  # Bright Foreground Yellow
-    Style.BACK_PRIMARY: '\x1b[0;30;48;2;0;96;96m',  # Default & Foreground Black & Bright Background Cyan
-    Style.BACK_WARNING: '\x1b[4;93;48;2;0;96;96m'  # Underline & Bright Foreground Yellow & Bright Background Cyan
+    Style.SURVEY: '\x1b[0;38;2;255;255;255;48;2;0;120;212m',  # Default & Foreground #FFFFFF & Background #0078D4
+    Style.SURVEY_LINK: '\x1b[4;38;2;255;255;255;48;2;0;120;212m',  # Underline & Foreground #FFFFFF & Background #0078D4
 }
 
 # Theme to be used in a light-themed terminal
@@ -87,7 +86,9 @@ THEME_LIGHT = {
     Style.HYPERLINK: '\x1b[36m',  # Foreground Cyan
     Style.ERROR: '\x1b[31m',  # Foreground Red
     Style.SUCCESS: '\x1b[32m',  # Foreground Green
-    Style.WARNING: '\x1b[33m'  # Foreground Yellow
+    Style.WARNING: '\x1b[33m',  # Foreground Yellow
+    Style.SURVEY: '\x1b[0;38;2;255;255;255;48;2;0;120;212m',  # Default & Foreground #FFFFFF & Background #0078D4
+    Style.SURVEY_LINK: '\x1b[4;38;2;255;255;255;48;2;0;120;212m',  # Underline & Foreground #FFFFFF & Background #0078D4
 }
 
 # Theme to be used in Cloud Shell
@@ -101,6 +102,8 @@ THEME_CLOUD_SHELL = {
     Style.ERROR: _rgb_hex('#f55d5c'),
     Style.SUCCESS: _rgb_hex('#70d784'),
     Style.WARNING: _rgb_hex('#fbd682'),
+    Style.SURVEY: '\x1b[0;38;2;255;255;255;48;2;0;120;212m',  # Default & Foreground #FFFFFF & Background #0078D4
+    Style.SURVEY_LINK: '\x1b[4;38;2;255;255;255;48;2;0;120;212m',  # Underline & Foreground #FFFFFF & Background #0078D4
 }
 
 

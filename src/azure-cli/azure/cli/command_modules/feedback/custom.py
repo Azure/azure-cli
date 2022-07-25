@@ -39,6 +39,8 @@ _RAW_CLI_ISSUES_URL = "https://github.com/azure/azure-cli/issues/new"
 _EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
 _RAW_EXTENSIONS_ISSUES_URL = "https://github.com/azure/azure-cli-extensions/issues/new"
 
+_CLI_SURVEY_URL = "https://go.microsoft.com/fwlink/?linkid=2201856&ID={installation_id}&v={version}&d={day}"
+
 _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
     'For more information on getting started, visit: {}\n' \
@@ -592,3 +594,17 @@ def handle_feedback(cmd):
         raise CLIError('This command is interactive, however no tty is available.')
     except (EOFError, KeyboardInterrupt):
         print()
+
+
+def handle_survey(cmd):
+    from azure.cli.core import __version__ as core_version
+    from azure.cli.core._profile import Profile
+    url = _CLI_SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
+                                 version=core_version,
+                                 day=1)
+    if can_launch_browser() and not in_cloud_console():
+        open_page_in_browser(url)
+        print("A new tab of {} has been launched in your browser, thanks for taking the survey!".format(url))
+    else:
+        print("There isn't an available browser to launch the survey. You can copy and paste the url"
+              " below in a browser to submit.\n\n{}\n\n".format(url))

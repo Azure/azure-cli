@@ -8,11 +8,13 @@ import timeit
 # Log the start time
 start_time = timeit.default_timer()
 
+import os
 import sys
 import uuid
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
+from azure.cli.core._config import GLOBAL_SURVEY_NOTE_PATH
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
@@ -119,17 +121,30 @@ finally:
         telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
 
     try:
-        from azure.cli.core.style import Style, print_styled_text, format_styled_text
-        format_styled_text.theme = 'dark'
-        styled_text = [
-            (Style.BACK_PRIMARY, "[Survey] Help us improve Azure CLI by sharing your experience. This survey should take about 3 minutes. Run "),
-            (Style.BACK_WARNING, "az survey"),
-            (Style.BACK_PRIMARY, " to open in browser. Learn more at "),
-            (Style.BACK_WARNING, "htttps://go.microsoft.com/tbd")
-        ]
-        print_styled_text(styled_text)
-    except Exception:
-        pass
+        should_prompt_survey = True
+        if sys.argv[1] == 'survey':
+            should_prompt_survey = False
+
+        env_setting = os.getenv("AZURE_CORE_SURVEY_MESSAGE", default=True)
+        if (isinstance(env_setting, str) and env_setting.lower() == 'false') or (isinstance(env_setting, bool) and not env_setting):
+            should_prompt_survey = False
+
+        config_setting = az_cli.config.getboolean('core', 'survey_message', True)
+        if not config_setting:
+            should_prompt_survey = False
+
+        if should_prompt_survey:
+            from azure.cli.core.style import Style, print_styled_text
+            styled_text = [
+                (Style.SURVEY, "[Survey] Help us improve Azure CLI by sharing your experience. "
+                               "This survey should take about 3 minutes. Run "),
+                (Style.SURVEY_LINK, "az survey"),
+                (Style.SURVEY, " to open in browser. Learn more at "),
+                (Style.SURVEY_LINK, "htttps://go.microsoft.com/tbd")
+            ]
+            print_styled_text(styled_text)
+    except Exception as ex:
+        raise ex
 
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
