@@ -3220,7 +3220,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def resolve(self, runtime, version=None, functions_version=None, linux=False):
+    def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
         runtimes = [r for r in stacks if r.linux == linux and runtime == r.name]
         os = LINUX_OS_NAME if linux else WINDOWS_OS_NAME
@@ -3245,6 +3245,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
+            if disable_version_error:
+                return None
             raise ValidationError("Invalid version: {0} for runtime {1} and os {2}. Supported versions for runtime "
                                   "{1} and os {2} are: {3}. "
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
@@ -5364,14 +5366,15 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
     if not github_actions_version:
         raise ValidationError('Could not detect runtime version. Please specify using the --runtime-version flag.')
 
-    if not _functionapp_runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string,
-                                                        runtime_version=github_actions_version,
-                                                        functionapp_version=app_runtime_info['functionapp_version'],
-                                                        is_linux=is_linux):
-        raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
-                              "on os %s for functionapp version %s." % (app_runtime_string, github_actions_version,
-                                                                        "linux" if is_linux else "windows",
-                                                                        app_runtime_info['functionapp_version']))
+    # We only need to check if runtime_version is passed
+    if runtime_version:
+        if not _functionapp_runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string,
+                                                            runtime_version=github_actions_version,
+                                                            functionapp_version=app_runtime_info['functionapp_version'],
+                                                            is_linux=is_linux):
+            raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
+                                  "on os %s." % (app_runtime_string, github_actions_version,
+                                                 "linux" if is_linux else "windows"))
 
     # Get workflow template
     logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
@@ -5382,8 +5385,8 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
     guid = str(uuid.uuid4()).replace('-', '')
     publish_profile_name = "AZURE_FUNCTIONAPP_PUBLISH_PROFILE_{}".format(guid)
     logger.warning(
-        'Filling workflow template with name: %s, branch: %s, version: %s, slot: %s',
-        name, branch, github_actions_version, slot if slot else 'production')
+        'Filling workflow template with name: %s, branch: %s, version: %s, slot: %s, build_path: %s',
+        name, branch, github_actions_version, slot if slot else 'production', build_path)
     completed_workflow_file = _fill_functionapp_workflow_template(content=workflow_template.decoded_content.decode(),
                                                                   name=name, build_path=build_path,
                                                                   version=github_actions_version,
@@ -5758,7 +5761,8 @@ def _functionapp_runtime_supports_github_actions(cmd, runtime_string, runtime_ve
     if not matched_runtime:
         return False
     if matched_runtime.github_actions_properties:
-        return True
+        if matched_runtime.github_actions_properties.supported_version:
+            return True
     return False
 
 
@@ -5887,17 +5891,9 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
     functionapp_version = re.sub(r"[^\d\.]", "", functionapp_version)
     app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
 
-    # Bug where dotnet 3.1 is set to 4.0 on portal and cli
-    if app_runtime == 'dotnet':
-        if app_runtime_version != '6.0':
-            return {
-                "display_name": app_runtime,
-                "github_actions_version": None,
-                "functionapp_version": functionapp_version
-            }
-
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
-    matched_runtime = helper.resolve(app_runtime, app_runtime_version, functionapp_version, is_linux)
+    matched_runtime = helper.resolve(app_runtime, app_runtime_version, functionapp_version, is_linux,
+                                     disable_version_error=True)
     gh_props = None if not matched_runtime else matched_runtime.github_actions_properties
     if gh_props:
         if gh_props.supported_version:
@@ -5905,10 +5901,12 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
                 "display_name": app_runtime,
                 "github_actions_version": gh_props.supported_version,
                 "functionapp_version": functionapp_version
-
             }
-    raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments on os %s." %
-                          (app_runtime, app_runtime_version, "linux" if is_linux else "windows"))
+    return {
+        "display_name": app_runtime,
+        "github_actions_version": None,
+        "functionapp_version": functionapp_version
+    }
 
 
 def _encrypt_github_actions_secret(public_key, secret_value):
