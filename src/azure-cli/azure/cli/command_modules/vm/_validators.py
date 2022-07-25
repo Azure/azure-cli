@@ -1311,6 +1311,15 @@ def _enable_msi_for_trusted_launch(namespace):
             namespace.assign_identity.append(MSI_LOCAL_ID)
 
 
+def _validate_trusted_launch(namespace):
+    if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
+        return
+
+    if not namespace.enable_vtpm or not namespace.enable_secure_boot:
+        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-secure-boot True"'
+                       ' to receive the full suite of security features that comes with Trusted Launch.')
+
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
@@ -1382,6 +1391,7 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1553,6 +1563,12 @@ def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
+                                            ' available for VMSS with flexible orchestration mode')
+
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
         # The commentted parameters are also forbidden, but they have default values.
@@ -1580,6 +1596,7 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.vm_sku and not namespace.image:
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
+        _validate_trusted_launch(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1669,6 +1686,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace, cmd)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
@@ -2052,6 +2070,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
+            os_disk_image = None
+            data_disk_images = None
             if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
                 terms = namespace.target_region_encryption[i].split(',')
                 # OS disk
@@ -2060,30 +2080,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    security_profile = None
-                    if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
-                        cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
-                        if not cvm_terms or len(cvm_terms) != 2:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid target region cvm encryption. "
-                                "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
-
-                        storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
-                        storage_profile_types_str = ", ".join(storage_profile_types)
-                        if cvm_terms[0] not in storage_profile_types:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid os_cvm_encryption_type. "
-                                "The valid values for os_cvm_encryption_type are {}".format(
-                                    cvm_terms, storage_profile_types_str))
-                        if cvm_terms[1]:
-                            cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                        else:
-                            cvm_des_id = None
-                        security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                                      secure_vm_disk_encryption_set_id=cvm_des_id)
-
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id,
-                                                          security_profile=security_profile)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
                 # Data disk
                 if len(terms) > 1:
                     data_disk_images = terms[1:]
@@ -2100,8 +2097,32 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         data_disk_image_encryption_list.append(DataDiskImageEncryption(
                             lun=lun, disk_encryption_set_id=des_id))
                     data_disk_images = data_disk_image_encryption_list
+
+            if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+                cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
+                if not cvm_terms or len(cvm_terms) != 2:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region cvm encryption. "
+                        "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+
+                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types_str = ", ".join(storage_profile_types)
+                if cvm_terms[0] not in storage_profile_types:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid os_cvm_encryption_type. "
+                        "The valid values for os_cvm_encryption_type are {}".format(
+                            cvm_terms, storage_profile_types_str))
+                cvm_des_id = None
+                if cvm_terms[1]:
+                    cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
+                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
+                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                if os_disk_image:
+                    os_disk_image.security_profile = security_profile
                 else:
-                    data_disk_images = None
+                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+
+            if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
             # At least the region is specified
@@ -2126,6 +2147,17 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
+# endregion
+
+
+def process_ppg_create_namespace(namespace):
+    """
+    The availability zone can be provided only when an intent is provided
+    """
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
 # endregion
 
 

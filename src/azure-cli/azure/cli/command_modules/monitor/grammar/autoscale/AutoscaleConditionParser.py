@@ -2,57 +2,60 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# Generated from AutoscaleCondition.g4 by ANTLR 4.7.2
+# Generated from AutoscaleCondition.g4 by ANTLR 4.9.3
 # encoding: utf-8
 # pylint: disable=all
 from antlr4 import *
 from io import StringIO
 import sys
+if sys.version_info[1] > 5:
+	from typing import TextIO
+else:
+	from typing.io import TextIO
 
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write(u"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3")
-        buf.write(u"\34\u0081\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7")
-        buf.write(u"\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t")
-        buf.write(u"\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\3\2\3\2\3")
-        buf.write(u"\2\3\2\3\2\7\2(\n\2\f\2\16\2+\13\2\3\2\3\2\3\2\3\2\3")
-        buf.write(u"\2\3\2\3\2\3\2\3\2\7\2\66\n\2\f\2\16\29\13\2\3\2\7\2")
-        buf.write(u"<\n\2\f\2\16\2?\13\2\3\3\3\3\3\3\3\4\6\4E\n\4\r\4\16")
-        buf.write(u"\4F\3\5\6\5J\n\5\r\5\16\5K\3\6\3\6\3\6\3\7\3\7\3\7\3")
-        buf.write(u"\b\3\b\3\t\3\t\3\t\3\n\3\n\3\n\3\n\3\n\7\n^\n\n\f\n\16")
-        buf.write(u"\na\13\n\3\13\3\13\3\13\3\13\3\f\3\f\3\f\3\r\3\r\3\r")
-        buf.write(u"\3\16\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\20\3\20\7")
-        buf.write(u"\20w\n\20\f\20\16\20z\13\20\3\21\6\21}\n\21\r\21\16\21")
-        buf.write(u"~\3\21\2\2\22\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36")
-        buf.write(u" \2\b\5\2\3\13\32\32\34\34\7\2\3\4\6\t\f\16\32\32\34")
-        buf.write(u"\34\4\2\r\r\23\23\3\2\17\20\4\2\r\r\26\26\b\2\4\6\b\b")
-        buf.write(u"\21\21\30\30\32\32\34\34\2x\2)\3\2\2\2\4@\3\2\2\2\6D")
-        buf.write(u"\3\2\2\2\bI\3\2\2\2\nM\3\2\2\2\fP\3\2\2\2\16S\3\2\2\2")
-        buf.write(u"\20U\3\2\2\2\22X\3\2\2\2\24b\3\2\2\2\26f\3\2\2\2\30i")
-        buf.write(u"\3\2\2\2\32l\3\2\2\2\34o\3\2\2\2\36r\3\2\2\2 |\3\2\2")
-        buf.write(u"\2\"#\7\31\2\2#$\5\6\4\2$%\7\31\2\2%&\7\32\2\2&(\3\2")
-        buf.write(u"\2\2\'\"\3\2\2\2(+\3\2\2\2)\'\3\2\2\2)*\3\2\2\2*,\3\2")
-        buf.write(u"\2\2+)\3\2\2\2,-\5\b\5\2-.\7\32\2\2./\3\2\2\2/\60\5\n")
-        buf.write(u"\6\2\60\61\5\f\7\2\61\62\5\4\3\2\62\67\5\16\b\2\63\64")
-        buf.write(u"\7\32\2\2\64\66\5\22\n\2\65\63\3\2\2\2\669\3\2\2\2\67")
-        buf.write(u"\65\3\2\2\2\678\3\2\2\28=\3\2\2\29\67\3\2\2\2:<\7\33")
-        buf.write(u"\2\2;:\3\2\2\2<?\3\2\2\2=;\3\2\2\2=>\3\2\2\2>\3\3\2\2")
-        buf.write(u"\2?=\3\2\2\2@A\7\34\2\2AB\7\32\2\2B\5\3\2\2\2CE\t\2\2")
-        buf.write(u"\2DC\3\2\2\2EF\3\2\2\2FD\3\2\2\2FG\3\2\2\2G\7\3\2\2\2")
-        buf.write(u"HJ\t\3\2\2IH\3\2\2\2JK\3\2\2\2KI\3\2\2\2KL\3\2\2\2L\t")
-        buf.write(u"\3\2\2\2MN\7\27\2\2NO\7\32\2\2O\13\3\2\2\2PQ\7\30\2\2")
-        buf.write(u"QR\7\32\2\2R\r\3\2\2\2ST\7\34\2\2T\17\3\2\2\2UV\7\22")
-        buf.write(u"\2\2VW\7\32\2\2W\21\3\2\2\2XY\5\20\t\2Y_\5\24\13\2Z[")
-        buf.write(u"\5\26\f\2[\\\5\24\13\2\\^\3\2\2\2]Z\3\2\2\2^a\3\2\2\2")
-        buf.write(u"_]\3\2\2\2_`\3\2\2\2`\23\3\2\2\2a_\3\2\2\2bc\5\34\17")
-        buf.write(u"\2cd\5\30\r\2de\5\36\20\2e\25\3\2\2\2fg\t\4\2\2gh\7\32")
-        buf.write(u"\2\2h\27\3\2\2\2ij\t\5\2\2jk\7\32\2\2k\31\3\2\2\2lm\t")
-        buf.write(u"\6\2\2mn\7\32\2\2n\33\3\2\2\2op\7\34\2\2pq\7\32\2\2q")
-        buf.write(u"\35\3\2\2\2rx\5 \21\2st\5\32\16\2tu\5 \21\2uw\3\2\2\2")
-        buf.write(u"vs\3\2\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\37\3\2\2\2")
-        buf.write(u"zx\3\2\2\2{}\t\7\2\2|{\3\2\2\2}~\3\2\2\2~|\3\2\2\2~\177")
-        buf.write(u"\3\2\2\2\177!\3\2\2\2\n)\67=FK_x~")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\34")
+        buf.write("\u0081\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
+        buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\3\2\3\2\3\2\3\2\3")
+        buf.write("\2\7\2(\n\2\f\2\16\2+\13\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2")
+        buf.write("\3\2\3\2\7\2\66\n\2\f\2\16\29\13\2\3\2\7\2<\n\2\f\2\16")
+        buf.write("\2?\13\2\3\3\3\3\3\3\3\4\6\4E\n\4\r\4\16\4F\3\5\6\5J\n")
+        buf.write("\5\r\5\16\5K\3\6\3\6\3\6\3\7\3\7\3\7\3\b\3\b\3\t\3\t\3")
+        buf.write("\t\3\n\3\n\3\n\3\n\3\n\7\n^\n\n\f\n\16\na\13\n\3\13\3")
+        buf.write("\13\3\13\3\13\3\f\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3")
+        buf.write("\17\3\17\3\17\3\20\3\20\3\20\3\20\7\20w\n\20\f\20\16\20")
+        buf.write("z\13\20\3\21\6\21}\n\21\r\21\16\21~\3\21\2\2\22\2\4\6")
+        buf.write("\b\n\f\16\20\22\24\26\30\32\34\36 \2\b\5\2\3\13\32\32")
+        buf.write("\34\34\7\2\3\4\6\t\f\16\32\32\34\34\4\2\r\r\23\23\3\2")
+        buf.write("\17\20\4\2\r\r\26\26\b\2\4\6\b\b\21\21\30\30\32\32\34")
+        buf.write("\34\2x\2)\3\2\2\2\4@\3\2\2\2\6D\3\2\2\2\bI\3\2\2\2\nM")
+        buf.write("\3\2\2\2\fP\3\2\2\2\16S\3\2\2\2\20U\3\2\2\2\22X\3\2\2")
+        buf.write("\2\24b\3\2\2\2\26f\3\2\2\2\30i\3\2\2\2\32l\3\2\2\2\34")
+        buf.write("o\3\2\2\2\36r\3\2\2\2 |\3\2\2\2\"#\7\31\2\2#$\5\6\4\2")
+        buf.write("$%\7\31\2\2%&\7\32\2\2&(\3\2\2\2\'\"\3\2\2\2(+\3\2\2\2")
+        buf.write(")\'\3\2\2\2)*\3\2\2\2*,\3\2\2\2+)\3\2\2\2,-\5\b\5\2-.")
+        buf.write("\7\32\2\2./\3\2\2\2/\60\5\n\6\2\60\61\5\f\7\2\61\62\5")
+        buf.write("\4\3\2\62\67\5\16\b\2\63\64\7\32\2\2\64\66\5\22\n\2\65")
+        buf.write("\63\3\2\2\2\669\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28=\3")
+        buf.write("\2\2\29\67\3\2\2\2:<\7\33\2\2;:\3\2\2\2<?\3\2\2\2=;\3")
+        buf.write("\2\2\2=>\3\2\2\2>\3\3\2\2\2?=\3\2\2\2@A\7\34\2\2AB\7\32")
+        buf.write("\2\2B\5\3\2\2\2CE\t\2\2\2DC\3\2\2\2EF\3\2\2\2FD\3\2\2")
+        buf.write("\2FG\3\2\2\2G\7\3\2\2\2HJ\t\3\2\2IH\3\2\2\2JK\3\2\2\2")
+        buf.write("KI\3\2\2\2KL\3\2\2\2L\t\3\2\2\2MN\7\27\2\2NO\7\32\2\2")
+        buf.write("O\13\3\2\2\2PQ\7\30\2\2QR\7\32\2\2R\r\3\2\2\2ST\7\34\2")
+        buf.write("\2T\17\3\2\2\2UV\7\22\2\2VW\7\32\2\2W\21\3\2\2\2XY\5\20")
+        buf.write("\t\2Y_\5\24\13\2Z[\5\26\f\2[\\\5\24\13\2\\^\3\2\2\2]Z")
+        buf.write("\3\2\2\2^a\3\2\2\2_]\3\2\2\2_`\3\2\2\2`\23\3\2\2\2a_\3")
+        buf.write("\2\2\2bc\5\34\17\2cd\5\30\r\2de\5\36\20\2e\25\3\2\2\2")
+        buf.write("fg\t\4\2\2gh\7\32\2\2h\27\3\2\2\2ij\t\5\2\2jk\7\32\2\2")
+        buf.write("k\31\3\2\2\2lm\t\6\2\2mn\7\32\2\2n\33\3\2\2\2op\7\34\2")
+        buf.write("\2pq\7\32\2\2q\35\3\2\2\2rx\5 \21\2st\5\32\16\2tu\5 \21")
+        buf.write("\2uw\3\2\2\2vs\3\2\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y")
+        buf.write("\37\3\2\2\2zx\3\2\2\2{}\t\7\2\2|{\3\2\2\2}~\3\2\2\2~|")
+        buf.write("\3\2\2\2~\177\3\2\2\2\177!\3\2\2\2\n)\67=FK_x~")
         return buf.getvalue()
 
 
@@ -66,17 +69,16 @@ class AutoscaleConditionParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ u"<INVALID>", u"'/'", u"'.'", u"'*'", u"'-'", u"'_'", 
-                     u"':'", u"'%'", u"'#'", u"'@'", u"'\\'", u"','", u"'|'", 
-                     u"'=='", u"'!='", u"'~'" ]
+    literalNames = [ "<INVALID>", "'/'", "'.'", "'*'", "'-'", "'_'", "':'", 
+                     "'%'", "'#'", "'@'", "'\\'", "','", "'|'", "'=='", 
+                     "'!='", "'~'" ]
 
-    symbolicNames = [ u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"WHERE", u"AND", u"INCLUDES", u"EXCLUDES", u"OR", 
-                      u"OPERATOR", u"NUMBER", u"QUOTE", u"WHITESPACE", u"NEWLINE", 
-                      u"WORD" ]
+    symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
+                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
+                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
+                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
+                      "WHERE", "AND", "INCLUDES", "EXCLUDES", "OR", "OPERATOR", 
+                      "NUMBER", "QUOTE", "WHITESPACE", "NEWLINE", "WORD" ]
 
     RULE_expression = 0
     RULE_aggregation = 1
@@ -95,10 +97,10 @@ class AutoscaleConditionParser ( Parser ):
     RULE_dim_values = 14
     RULE_dim_value = 15
 
-    ruleNames =  [ u"expression", u"aggregation", u"namespace", u"metric", 
-                   u"operator", u"threshold", u"period", u"where", u"dimensions", 
-                   u"dimension", u"dim_separator", u"dim_operator", u"dim_val_separator", 
-                   u"dim_name", u"dim_values", u"dim_value" ]
+    ruleNames =  [ "expression", "aggregation", "namespace", "metric", "operator", 
+                   "threshold", "period", "where", "dimensions", "dimension", 
+                   "dim_separator", "dim_operator", "dim_val_separator", 
+                   "dim_name", "dim_values", "dim_value" ]
 
     EOF = Token.EOF
     T__0=1
@@ -128,9 +130,9 @@ class AutoscaleConditionParser ( Parser ):
     NEWLINE=25
     WORD=26
 
-    def __init__(self, input, output=sys.stdout):
-        super(AutoscaleConditionParser, self).__init__(input, output=output)
-        self.checkVersion("4.7.2")
+    def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
+        super().__init__(input, output)
+        self.checkVersion("4.9.3")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -138,9 +140,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class ExpressionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.ExpressionContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def operator(self):
@@ -163,33 +166,33 @@ class AutoscaleConditionParser ( Parser ):
             return self.getTypedRuleContext(AutoscaleConditionParser.MetricContext,0)
 
 
-        def WHITESPACE(self, i=None):
+        def WHITESPACE(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WHITESPACE)
             else:
                 return self.getToken(AutoscaleConditionParser.WHITESPACE, i)
 
-        def QUOTE(self, i=None):
+        def QUOTE(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.QUOTE)
             else:
                 return self.getToken(AutoscaleConditionParser.QUOTE, i)
 
-        def namespace(self, i=None):
+        def namespace(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(AutoscaleConditionParser.NamespaceContext)
             else:
                 return self.getTypedRuleContext(AutoscaleConditionParser.NamespaceContext,i)
 
 
-        def dimensions(self, i=None):
+        def dimensions(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(AutoscaleConditionParser.DimensionsContext)
             else:
                 return self.getTypedRuleContext(AutoscaleConditionParser.DimensionsContext,i)
 
 
-        def NEWLINE(self, i=None):
+        def NEWLINE(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.NEWLINE)
             else:
@@ -198,12 +201,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_expression
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterExpression"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterExpression" ):
                 listener.enterExpression(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitExpression"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitExpression" ):
                 listener.exitExpression(self)
 
 
@@ -276,9 +279,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class AggregationContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.AggregationContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WORD(self):
@@ -290,12 +294,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_aggregation
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterAggregation"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterAggregation" ):
                 listener.enterAggregation(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitAggregation"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitAggregation" ):
                 listener.exitAggregation(self)
 
 
@@ -321,18 +325,19 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class NamespaceContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.NamespaceContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
-        def WORD(self, i=None):
+        def WORD(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WORD)
             else:
                 return self.getToken(AutoscaleConditionParser.WORD, i)
 
-        def WHITESPACE(self, i=None):
+        def WHITESPACE(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WHITESPACE)
             else:
@@ -341,12 +346,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_namespace
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterNamespace"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterNamespace" ):
                 listener.enterNamespace(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitNamespace"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitNamespace" ):
                 listener.exitNamespace(self)
 
 
@@ -386,18 +391,19 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class MetricContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.MetricContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
-        def WORD(self, i=None):
+        def WORD(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WORD)
             else:
                 return self.getToken(AutoscaleConditionParser.WORD, i)
 
-        def WHITESPACE(self, i=None):
+        def WHITESPACE(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WHITESPACE)
             else:
@@ -406,12 +412,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_metric
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterMetric"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterMetric" ):
                 listener.enterMetric(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitMetric"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitMetric" ):
                 listener.exitMetric(self)
 
 
@@ -453,9 +459,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class OperatorContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.OperatorContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def OPERATOR(self):
@@ -467,12 +474,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_operator
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterOperator"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterOperator" ):
                 listener.enterOperator(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitOperator"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitOperator" ):
                 listener.exitOperator(self)
 
 
@@ -498,9 +505,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class ThresholdContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.ThresholdContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def NUMBER(self):
@@ -512,12 +520,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_threshold
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterThreshold"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterThreshold" ):
                 listener.enterThreshold(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitThreshold"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitThreshold" ):
                 listener.exitThreshold(self)
 
 
@@ -543,9 +551,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class PeriodContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.PeriodContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WORD(self):
@@ -554,12 +563,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_period
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterPeriod"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterPeriod" ):
                 listener.enterPeriod(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitPeriod"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitPeriod" ):
                 listener.exitPeriod(self)
 
 
@@ -583,9 +592,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class WhereContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.WhereContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WHERE(self):
@@ -597,12 +607,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_where
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterWhere"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterWhere" ):
                 listener.enterWhere(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitWhere"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitWhere" ):
                 listener.exitWhere(self)
 
 
@@ -628,23 +638,24 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class DimensionsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.DimensionsContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def where(self):
             return self.getTypedRuleContext(AutoscaleConditionParser.WhereContext,0)
 
 
-        def dimension(self, i=None):
+        def dimension(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(AutoscaleConditionParser.DimensionContext)
             else:
                 return self.getTypedRuleContext(AutoscaleConditionParser.DimensionContext,i)
 
 
-        def dim_separator(self, i=None):
+        def dim_separator(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(AutoscaleConditionParser.Dim_separatorContext)
             else:
@@ -654,12 +665,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dimensions
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDimensions"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDimensions" ):
                 listener.enterDimensions(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDimensions"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDimensions" ):
                 listener.exitDimensions(self)
 
 
@@ -698,9 +709,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class DimensionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.DimensionContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def dim_name(self):
@@ -718,12 +730,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dimension
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDimension"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDimension" ):
                 listener.enterDimension(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDimension"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDimension" ):
                 listener.exitDimension(self)
 
 
@@ -751,9 +763,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class Dim_separatorContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.Dim_separatorContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WHITESPACE(self):
@@ -765,12 +778,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dim_separator
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDim_separator"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDim_separator" ):
                 listener.enterDim_separator(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDim_separator"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDim_separator" ):
                 listener.exitDim_separator(self)
 
 
@@ -802,9 +815,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class Dim_operatorContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.Dim_operatorContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WHITESPACE(self):
@@ -813,12 +827,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dim_operator
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDim_operator"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDim_operator" ):
                 listener.enterDim_operator(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDim_operator"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDim_operator" ):
                 listener.exitDim_operator(self)
 
 
@@ -850,9 +864,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class Dim_val_separatorContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.Dim_val_separatorContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WHITESPACE(self):
@@ -864,12 +879,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dim_val_separator
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDim_val_separator"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDim_val_separator" ):
                 listener.enterDim_val_separator(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDim_val_separator"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDim_val_separator" ):
                 listener.exitDim_val_separator(self)
 
 
@@ -901,9 +916,10 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class Dim_nameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.Dim_nameContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
         def WORD(self):
@@ -915,12 +931,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dim_name
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDim_name"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDim_name" ):
                 listener.enterDim_name(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDim_name"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDim_name" ):
                 listener.exitDim_name(self)
 
 
@@ -946,19 +962,20 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class Dim_valuesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.Dim_valuesContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
-        def dim_value(self, i=None):
+        def dim_value(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(AutoscaleConditionParser.Dim_valueContext)
             else:
                 return self.getTypedRuleContext(AutoscaleConditionParser.Dim_valueContext,i)
 
 
-        def dim_val_separator(self, i=None):
+        def dim_val_separator(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(AutoscaleConditionParser.Dim_val_separatorContext)
             else:
@@ -968,12 +985,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dim_values
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDim_values"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDim_values" ):
                 listener.enterDim_values(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDim_values"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDim_values" ):
                 listener.exitDim_values(self)
 
 
@@ -1010,24 +1027,25 @@ class AutoscaleConditionParser ( Parser ):
 
 
     class Dim_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutoscaleConditionParser.Dim_valueContext, self).__init__(parent, invokingState)
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
             self.parser = parser
 
-        def NUMBER(self, i=None):
+        def NUMBER(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.NUMBER)
             else:
                 return self.getToken(AutoscaleConditionParser.NUMBER, i)
 
-        def WORD(self, i=None):
+        def WORD(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WORD)
             else:
                 return self.getToken(AutoscaleConditionParser.WORD, i)
 
-        def WHITESPACE(self, i=None):
+        def WHITESPACE(self, i:int=None):
             if i is None:
                 return self.getTokens(AutoscaleConditionParser.WHITESPACE)
             else:
@@ -1036,12 +1054,12 @@ class AutoscaleConditionParser ( Parser ):
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_dim_value
 
-        def enterRule(self, listener):
-            if hasattr(listener, "enterDim_value"):
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterDim_value" ):
                 listener.enterDim_value(self)
 
-        def exitRule(self, listener):
-            if hasattr(listener, "exitDim_value"):
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitDim_value" ):
                 listener.exitDim_value(self)
 
 

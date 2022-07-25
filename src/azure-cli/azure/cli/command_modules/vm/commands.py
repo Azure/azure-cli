@@ -33,7 +33,7 @@ from azure.cli.command_modules.vm._validators import (
     process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
-    process_image_version_create_namespace, process_image_version_update_namespace)
+    process_image_version_create_namespace, process_image_version_update_namespace, process_ppg_create_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -641,9 +641,9 @@ def load_command_table(self, _):
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.show_command('show', 'get')
-        g.custom_command('create', 'create_proximity_placement_group')
+        g.custom_command('create', 'create_proximity_placement_group', validator=process_ppg_create_namespace)
         g.custom_command('list', 'list_proximity_placement_groups')
-        g.generic_update_command('update')
+        g.generic_update_command('update', setter_name='create_or_update', custom_func_name='update_ppg')
         g.command('delete', 'delete')
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:

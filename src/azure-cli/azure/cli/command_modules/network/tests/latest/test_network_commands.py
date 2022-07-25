@@ -5893,19 +5893,18 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(name_prefix='cli_test_security_partner_provider_', location='westus')
     @AllowLargeResponse()
-    def test_network_security_partner_provider(self, resource_group):
+    def test_network_security_partner_provider(self):
         self.kwargs.update({
             'vwan': 'clitestvwan',
             'vhub': 'clitestvhub',
             'gateway': 'cligateway',
-            'name': 'clisecuritypartnerprovider',
-            'rg': resource_group
+            'name': 'clisecuritypartnerprovider'
         })
 
         self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
-        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
         self.cmd('network vpn-gateway create -g {rg} -n {gateway} --vhub {vhub}')
 
         self.cmd('network security-partner-provider create -n {name} -g {rg} --vhub {vhub} --provider Checkpoint', checks=[
