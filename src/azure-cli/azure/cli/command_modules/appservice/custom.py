@@ -5812,13 +5812,12 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):
         app_runtime = getattr(app_metadata, 'linux_fx_version', None)
         return _get_functionapp_runtime_info_helper(cmd, app_runtime, None, functionapp_version, is_linux)
 
-    if not app_runtime:
-        app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
-        for app_setting in app_settings:
-            if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_WORKER_RUNTIME':
-                app_runtime = app_setting["value"]
-                break
-        
+    app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+    for app_setting in app_settings:
+        if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_WORKER_RUNTIME':
+            app_runtime = app_setting["value"]
+            break
+ 
     if app_runtime and app_runtime.lower() == 'node':
         app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         for app_setting in app_settings:
