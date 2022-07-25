@@ -149,8 +149,5 @@ def cf_security_secure_score_controls(cli_ctx, _):
 def cf_security_secure_score_control_definitions(cli_ctx, _):
     return _cf_security(cli_ctx).secure_score_control_definitions
 
-def cf_security_security_solutions(cli_ctx, _):
-    return _cf_security(cli_ctx)
-
 def cf_security_automations(cli_ctx, _):
     return _cf_security(cli_ctx).automations
