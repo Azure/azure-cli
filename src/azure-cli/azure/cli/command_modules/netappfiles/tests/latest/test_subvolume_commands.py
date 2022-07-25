@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 
 class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
@@ -32,7 +32,7 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
             'pool_name': self.create_random_name(prefix='cli-pool-', length=24),
             'vol_name': self.create_random_name(prefix='cli-vol-', length=24),
             'sub_vol_name': self.create_random_name(prefix='cli-sub-vol-', length=24),
-            'path': "/sub_vol_1.txt",
+            'path': "/subvolume1",
             'vnet': self.create_random_name(prefix='cli-vnet-', length=24),
             'subnet': self.create_random_name(prefix='cli-subnet-', length=24),
             'vnet_loc': VNET_LOCATION,
@@ -48,7 +48,7 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
 
         # update
         self.kwargs.update({
-            'path': "/sub_vol_update.txt"
+            'path': "/subvolume-update"
         })
         self.cmd("az netappfiles subvolume update -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name} --path {path}", checks=[
@@ -76,8 +76,8 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
             'vol_name': self.create_random_name(prefix='cli-vol-', length=24),
             'sub_vol_name1': self.create_random_name(prefix='cli-sub-vol-', length=24),
             'sub_vol_name2': self.create_random_name(prefix='cli-sub-vol-', length=24),
-            'path1': "/sub_vol_1.txt",
-            'path2': "/sub_vol_2.txt",
+            'path1': "/subvolume1",
+            'path2': "/subvolume2",
             'vnet': self.create_random_name(prefix='cli-vnet-', length=24),
             'subnet': self.create_random_name(prefix='cli-subnet-', length=24),
             'vnet_loc': VNET_LOCATION,
@@ -129,7 +129,7 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
             'pool_name': self.create_random_name(prefix='cli-pool-', length=24),
             'vol_name': self.create_random_name(prefix='cli-vol-', length=24),
             'sub_vol_name': self.create_random_name(prefix='cli-sub-vol-', length=24),
-            'path': "/sub_vol_1.txt",
+            'path': "/subvolume1",
             'vnet': self.create_random_name(prefix='cli-vnet-', length=24),
             'subnet': self.create_random_name(prefix='cli-subnet-', length=24),
             'vnet_loc': VNET_LOCATION,

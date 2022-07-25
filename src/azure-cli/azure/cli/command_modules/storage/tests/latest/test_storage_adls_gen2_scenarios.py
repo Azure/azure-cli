@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import os
+import time
 from datetime import datetime, timedelta
 
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, JMESPathCheckExists,
@@ -265,6 +266,65 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem3)
 
     @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True, location="eastus2euap")
+    def test_adls_fs_soft_delete(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        container = self.create_file_system(account_info)
+        # Prepare
+        local_file = self.create_temp_file(1)
+        file_name = self.create_random_name(prefix='file', length=24)
+        dir_name = 'dir'
+
+        self.storage_cmd('storage fs file upload -f {} -s "{}" -p {} ', account_info,
+                         container, local_file, file_name)
+        self.assertEqual(len(self.storage_cmd('storage fs file list -f {}',
+                                              account_info, container).get_output_in_json()), 1)
+        self.storage_cmd('storage fs directory create -f {} -n {} ', account_info,
+                         container, dir_name)
+        self.assertEqual(len(self.storage_cmd('storage fs file list -f {}',
+                                              account_info, container).get_output_in_json()), 2)
+
+        # set delete-policy to enable soft-delete
+        self.storage_cmd('storage fs service-properties update --delete-retention --delete-retention-period 2',
+                         account_info)
+        self.storage_cmd('storage fs service-properties show',
+                         account_info).assert_with_checks(JMESPathCheck('delete_retention_policy.enabled', True),
+                                                          JMESPathCheck('delete_retention_policy.days', 2))
+        time.sleep(10)
+        # soft-delete and check
+        self.storage_cmd('storage fs file delete -f {} -p {} -y', account_info, container, file_name)
+        self.storage_cmd('storage fs directory delete -f {} -n {} -y', account_info, container, dir_name)
+        self.assertEqual(len(self.storage_cmd('storage fs file list -f {}',
+                                              account_info, container).get_output_in_json()), 0)
+
+        time.sleep(60)
+        result = self.storage_cmd('storage fs list-deleted-path -f {} --path-prefix {} ',
+                                  account_info, container, dir_name).get_output_in_json()
+        self.assertEqual(len(result), 1)
+
+        time.sleep(60)
+        result = self.storage_cmd('storage fs list-deleted-path -f {}', account_info, container) \
+            .get_output_in_json()
+        self.assertEqual(len(result), 2)
+
+        result = self.storage_cmd('storage fs list-deleted-path -f {} --num-results 1', account_info, container) \
+            .get_output_in_json()
+        self.assertEqual(len(result), 2)
+        marker = result[-1]['nextMarker']
+
+        result = self.storage_cmd('storage fs list-deleted-path -f {} --marker {}', account_info, container, marker) \
+            .get_output_in_json()
+        self.assertEqual(len(result), 1)
+
+        deleted_version = result[0]["deletionId"]
+
+        # undelete and check
+        self.storage_cmd('storage fs undelete-path -f {} --deleted-path-name {} --deletion-id  {}',
+                         account_info, container, file_name, deleted_version)
+        self.assertEqual(len(self.storage_cmd('storage fs file list -f {}',
+                                              account_info, container).get_output_in_json()), 1)
+
+    @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_directory_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
@@ -500,6 +560,51 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', fs_sas)
         self.assertIn('skv=', fs_sas)
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_directory_generate_sas_full_uri(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'testdir/subdir'
+
+        self.storage_cmd('storage fs directory create -n {} -f {}',
+                         account_info, directory, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        fs_uri = self.storage_cmd('storage fs directory generate-sas -n {} -f {} --expiry {} --permissions '
+                                  'r --https-only --full-uri', account_info, directory, filesystem, expiry).output
+        self.assertTrue(fs_uri)
+        self.assertIn('&sig=', fs_uri)
+        self.assertTrue(fs_uri.startswith('"https://{}.dfs.core.windows.net/{}/{}?s'.format(storage_account,
+                                                                                            filesystem, directory)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_directory_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'testdir/subdir'
+
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions r '
+                     '--https-only --auth-mode login'.format(storage_account, directory, filesystem, expiry))
+
+        fs_sas = self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login'.format(storage_account, directory,
+                                                                                   filesystem, expiry)).output
+        self.assertIn('&sig=', fs_sas)
+        self.assertIn('skoid=', fs_sas)
+        self.assertIn('sktid=', fs_sas)
+        self.assertIn('skt=', fs_sas)
+        self.assertIn('ske=', fs_sas)
+        self.assertIn('sks=', fs_sas)
+        self.assertIn('skv=', fs_sas)
+        self.assertIn('sr=d', fs_sas)
+        self.assertIn('sdd=2', fs_sas)
 
 class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()

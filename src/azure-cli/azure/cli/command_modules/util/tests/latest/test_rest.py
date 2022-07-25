@@ -204,6 +204,23 @@ class ResourceGroupScenarioTest(ScenarioTest):
         for app in apps:
             self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/applications/{}'.format(app['id']))
 
+    def test_rest_unicode(self):
+        display_name = '测试组'
+        self.kwargs['body'] = '{"displayName": "' + display_name + \
+                              '", "mailNickname": "testnickname", "mailEnabled": false, "securityEnabled": true}'
+
+        # Create group
+        group = self.cmd('az rest --method POST --url https://graph.microsoft.com/v1.0/groups --body \'{body}\'',
+                         checks=self.check('displayName', display_name)).get_output_in_json()
+        self.kwargs['id'] = group['id']
+
+        # Get group
+        self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/groups/{id}',
+                 checks=self.check('displayName', display_name))
+
+        # Delete group
+        self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/groups/{id}')
+
 
 if __name__ == '__main__':
     unittest.main()

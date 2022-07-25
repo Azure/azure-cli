@@ -181,6 +181,11 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
 
 
 def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
+    # If we are in Cloud Shell, dependencies should have already been installed.
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        return
+
     # Below system dependencies are required to install the psycopg2 dependency for Linux and macOS
     import platform
     import subprocess
@@ -325,11 +330,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
             source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-
-            if version:
-                err = "No matching extensions for '{} ({})'. Use --debug for more information.".format(extension_name, version)
-            else:
-                err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
+            err = "{}\n\nUse --debug for more information".format(err.args[0])
             raise CLIError(err)
     ext_name, ext_version = _get_extension_info_from_source(source)
     set_extension_management_detail(extension_name if extension_name else ext_name, ext_version)
@@ -392,7 +393,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
             set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            msg = "Extension {} with version {} not found.".format(extension_name, version) if version else "No updates available for '{}'. Use --debug for more information.".format(extension_name)
+            msg = "{}\n\nUse --debug for more information".format(err.args[0])
             logger.warning(msg)
             return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.

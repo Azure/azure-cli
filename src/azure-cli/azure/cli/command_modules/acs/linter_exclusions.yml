@@ -7,6 +7,12 @@ aks create:
       enable_sgxquotehelper:
           rule_exclusions:
           - option_length_too_long
+      nat_gateway_idle_timeout:
+          rule_exclusions:
+          - option_length_too_long
+      nat_gateway_managed_outbound_ip_count:
+          rule_exclusions:
+          - option_length_too_long
 aks enable-addons:
   parameters:
       appgw_watch_namespace:
@@ -21,6 +27,15 @@ aks enable-addons:
 aks update:
   parameters:
       disable_secret_rotation:
+          rule_exclusions:
+          - option_length_too_long
+      nat_gateway_idle_timeout:
+          rule_exclusions:
+          - option_length_too_long
+      nat_gateway_managed_outbound_ip_count:
+          rule_exclusions:
+          - option_length_too_long
+      assign_kubelet_identity:
           rule_exclusions:
           - option_length_too_long
 ...

@@ -5,9 +5,11 @@
 
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import ValidationError
 
-from azure.mgmt.media.models import (MediaService, MediaServiceIdentity, StorageAccount,
-                                     CheckNameAvailabilityInput, SyncStorageKeysInput)
+from azure.mgmt.media.models import (MediaService, MediaServiceIdentity, StorageAccount, CheckNameAvailabilityInput,
+                                     SyncStorageKeysInput, ResourceIdentity, KeyDelivery,
+                                     AccessControl)
 
 
 def get_mediaservice(client, account_name, resource_group_name=None):
@@ -20,28 +22,37 @@ def list_mediaservices(client, resource_group_name=None):
 
 
 def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None,
-                        assign_identity=False, tags=None):
+                        mi_system_assigned=False, mi_user_assigned=None, disable_public_network=False,
+                        default_action=None, ip_allow_list=None, tags=None):
     storage_account_primary = StorageAccount(type='Primary', id=storage_account)
-
     return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary],
-                                         location, assign_identity,
-                                         tags)
+                                         location, mi_system_assigned, mi_user_assigned, disable_public_network,
+                                         default_action, ip_allow_list, tags)
 
 
-def add_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account):
+def add_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account,
+                                       system_assigned=False, user_assigned=None):
     ams = client.get(resource_group_name, account_name)
+    if (system_assigned is False and user_assigned is None and ams.storage_authentication == 'ManagedIdentity'):
+        error_msg = 'Please specify either system assigned identity or a user assigned identity'
+        raise ValidationError(error_msg)
 
     storage_accounts_filtered = list(filter(lambda s: storage_account in s.id, ams.storage_accounts))
 
     storage_account_secondary = StorageAccount(type='Secondary', id=storage_account)
-
+    if ams.storage_authentication == 'ManagedIdentity':
+        storage_account_secondary.identity = ResourceIdentity(use_system_assigned_identity=system_assigned,
+                                                              user_assigned_identity=user_assigned)
     if not storage_accounts_filtered:
         ams.storage_accounts.append(storage_account_secondary)
 
-    return create_or_update_mediaservice(client, resource_group_name, account_name,
-                                         ams.storage_accounts,
-                                         ams.location,
-                                         ams.tags)
+    media_service = MediaService(name=ams.name, location=ams.location, key_delivery=ams.key_delivery,
+                                 identity=ams.identity, encryption=ams.encryption,
+                                 storage_accounts=ams.storage_accounts,
+                                 storage_authentication=ams.storage_authentication,
+                                 public_network_access=ams.public_network_access)
+
+    return client.create_or_update(resource_group_name, account_name, media_service)
 
 
 def remove_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account):
@@ -53,9 +64,13 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
     primary_storage_account = list(filter(lambda s: 'Primary' in s.type, ams.storage_accounts))[0]
     storage_accounts_filtered.append(primary_storage_account)
 
-    return create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts_filtered,
-                                         ams.location,
-                                         ams.tags)
+    media_service = MediaService(name=ams.name, location=ams.location, key_delivery=ams.key_delivery,
+                                 identity=ams.identity, encryption=ams.encryption,
+                                 storage_accounts=storage_accounts_filtered,
+                                 storage_authentication=ams.storage_authentication,
+                                 public_network_access=ams.public_network_access)
+
+    return client.create_or_update(resource_group_name, account_name, media_service)
 
 
 def sync_storage_keys(client, resource_group_name, account_name, storage_account_id):
@@ -63,21 +78,56 @@ def sync_storage_keys(client, resource_group_name, account_name, storage_account
     return client.sync_storage_keys(resource_group_name, account_name, parameters)
 
 
-def set_mediaservice_trusted_storage(client, resource_group_name, account_name,
-                                     storage_auth):
-    ams = client.get(resource_group_name, account_name)
-    media_service = MediaService(location=ams.location, storage_accounts=ams.storage_accounts,
-                                 storage_authentication=storage_auth)
+def set_mediaservice_trusted_storage(client, resource_group_name, account_name, storage_auth, storage_account_id=None,
+                                     system_assigned=False, user_assigned=None):
+    ams: MediaService = client.get(resource_group_name, account_name)\
+        if resource_group_name else client.get_by_subscription(account_name)
+    if storage_auth == 'ManagedIdentity' and storage_account_id is None:
+        error_msg = 'Please specify a storage account id for the storage account whose identity you would like to set'
+        raise ValidationError(error_msg)
+
+    for storage_account in ams.storage_accounts:
+        if storage_auth == 'ManagedIdentity':
+            if storage_account.id.lower() == storage_account_id.lower():
+                storage_account.identity = ResourceIdentity(use_system_assigned_identity=system_assigned,
+                                                            user_assigned_identity=user_assigned)
+        else:
+            storage_account.identity = None
+
+    media_service = MediaService(name=ams.name, location=ams.location, key_delivery=ams.key_delivery,
+                                 identity=ams.identity, encryption=ams.encryption,
+                                 storage_accounts=ams.storage_accounts, storage_authentication=storage_auth,
+                                 public_network_access=ams.public_network_access)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
 
 
 def create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts=None,
-                                  location=None, assign_identity=False,
+                                  location=None, mi_system_assigned=False, mi_user_assigned=None,
+                                  disable_public_network=False, default_action=None, ip_allow_list=None,
                                   tags=None):
-    identity = 'SystemAssigned' if assign_identity else 'None'
     media_service = MediaService(location=location, storage_accounts=storage_accounts,
-                                 identity=MediaServiceIdentity(type=identity), tags=tags)
+                                 tags=tags,
+                                 public_network_access='Disabled' if disable_public_network else 'Enabled')
+
+    if mi_system_assigned or mi_user_assigned:
+        identity = MediaServiceIdentity(type='')
+        identity.type = 'SystemAssigned' if mi_system_assigned else ''
+        user_id_dict = {}
+        if mi_user_assigned:
+            identity.type = ','.join([identity.type, 'UserAssigned']) if identity.type else 'UserAssigned'
+            for user_id in mi_user_assigned:
+                user_id_dict[user_id] = {}
+            identity.user_assigned_identities = user_id_dict
+        media_service.identity = identity
+
+    if default_action:
+        media_service.key_delivery = KeyDelivery(access_control=AccessControl(default_action=default_action,
+                                                                              ip_allow_list=ip_allow_list
+                                                                              if default_action == 'Deny' else []))
+    else:
+        media_service.key_delivery = KeyDelivery(access_control=AccessControl(default_action="Allow",
+                                                                              ip_allow_list=[]))
 
     return client.create_or_update(resource_group_name, account_name, media_service)
 

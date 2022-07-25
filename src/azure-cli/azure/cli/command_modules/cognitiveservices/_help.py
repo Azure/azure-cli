@@ -103,6 +103,15 @@ examples:
     text: az cognitiveservices account list-skus --kind Face --location westus
 """
 
+helps['cognitiveservices account list-models'] = """
+type: command
+short-summary: Manage Azure Cognitive Services accounts.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+examples:
+  - name: List models available for a Cognitive Services account.
+    text: az cognitiveservices account list-models -n myresource -g cognitive-services-resource-group
+"""
+
 helps['cognitiveservices account network-rule'] = """
 type: group
 short-summary: Manage network rules.

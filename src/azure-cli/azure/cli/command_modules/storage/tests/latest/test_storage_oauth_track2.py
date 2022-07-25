@@ -242,6 +242,31 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.pageRanges', None))
 
     @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
+    def test_storage_queue_oauth_track2(self, resource_group, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'queue_name': self.create_random_name(prefix='queue', length=24),
+        })
+
+        # Test create oauth
+        self.oauth_cmd('storage queue create -n {queue_name} --metadata key1=value1 --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        # Test exists oauth
+        self.oauth_cmd('storage queue exists -n {queue_name} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        # Test stats oauth
+        queue_status = self.oauth_cmd('storage queue stats --account-name {account} ').get_output_in_json()
+        self.assertIn(queue_status['geoReplication']['status'], ('live', 'unavailable'))
+
+        # Test delete oauth
+        self.oauth_cmd('storage queue delete -n {queue_name} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('deleted', True))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
     def test_storage_blob_list_oauth(self, resource_group, storage_account_info):
         storage_account, account_key = storage_account_info

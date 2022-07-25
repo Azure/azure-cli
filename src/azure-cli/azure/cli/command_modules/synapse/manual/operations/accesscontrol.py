@@ -6,10 +6,10 @@
 from knack.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.util import is_guid
-from azure.graphrbac.models import GraphErrorException
-from msrestazure.azure_exceptions import CloudError
+from azure.cli.command_modules.role import GraphError
 from .._client_factory import cf_synapse_role_assignments, cf_synapse_role_definitions, cf_graph_client_factory
 from ..constant import ITEM_NAME_MAPPING
+import azure.cli.command_modules.synapse.custom_help as cust_help
 
 
 # List Synapse Role Assignment
@@ -33,8 +33,16 @@ def _list_role_assignments(cmd, workspace_name, role=None, assignee=None, scope=
     role_id = _resolve_role_id(cmd, role, workspace_name)
     object_id = _resolve_object_id(cmd, assignee, fallback_to_object_id=True) if resolve_assignee else assignee
     client = cf_synapse_role_assignments(cmd.cli_ctx, workspace_name)
-    role_assignments = client.list_role_assignments(role_id, object_id, scope).value
-    return role_assignments
+    token = ""
+    result = []
+    while True:
+        request = client.list_role_assignments(role_id, object_id, scope, continuation_token_parameter=token,
+                                               cls=cust_help.get_deserialized_and_headers)
+        token = request[1]['x-ms-continuation']
+        result += request[0].value
+        if not token:
+            break
+    return result
 
 
 # Show Synapse Role Assignment By Id
@@ -112,12 +120,12 @@ def _resolve_object_id(cmd, assignee, fallback_to_object_id=False):
     client = cf_graph_client_factory(cmd.cli_ctx)
     result = None
     try:
-        result = list(client.users.list(filter="userPrincipalName eq '{0}' or mail eq '{0}' or displayName eq '{0}'"
-                                        .format(assignee)))
+        result = list(client.user_list(filter="userPrincipalName eq '{0}' or mail eq '{0}' or displayName eq '{0}'"
+                                       .format(assignee)))
         if not result:
-            result = list(client.service_principals.list(filter="displayName eq '{}'".format(assignee)))
+            result = list(client.service_principal_list(filter="displayName eq '{}'".format(assignee)))
         if not result:
-            result = list(client.groups.list(filter="mail eq '{}'".format(assignee)))
+            result = list(client.group_list(filter="mail eq '{}'".format(assignee)))
         if not result and is_guid(assignee):  # assume an object id, let us verify it
             result = _get_object_stubs(client, [assignee])
 
@@ -132,20 +140,20 @@ def _resolve_object_id(cmd, assignee, fallback_to_object_id=False):
                            "Please using --assignee-object-id GUID to specify assignee accurately"
                            .format(assignee=assignee))
 
-        return result[0].object_id
-    except (CloudError, GraphErrorException):
+        return result[0]["id"]
+    except GraphError:
         if fallback_to_object_id and is_guid(assignee):
             return assignee
         raise
 
 
 def _get_object_stubs(graph_client, assignees):
-    from azure.graphrbac.models import GetObjectsParameters
     result = []
     assignees = list(assignees)  # callers could pass in a set
     for i in range(0, len(assignees), 1000):
-        params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees[i:i + 1000])
-        result += list(graph_client.objects.get_objects_by_object_ids(params))
+        body = {"ids": assignees[i:i + 1000],
+                "types": ['user', 'group', 'servicePrincipal', 'directoryObjectPartnerReference']}
+        result.extend(list(graph_client.directory_object_get_by_ids(body)))
     return result
 
 

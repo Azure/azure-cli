@@ -7,6 +7,7 @@ from azure.cli.command_modules.aro._validators import validate_cidr
 from azure.cli.command_modules.aro._validators import validate_client_id
 from azure.cli.command_modules.aro._validators import validate_client_secret
 from azure.cli.command_modules.aro._validators import validate_cluster_resource_group
+from azure.cli.command_modules.aro._validators import validate_disk_encryption_set
 from azure.cli.command_modules.aro._validators import validate_domain
 from azure.cli.command_modules.aro._validators import validate_pull_secret
 from azure.cli.command_modules.aro._validators import validate_subnet
@@ -42,6 +43,9 @@ def load_arguments(self, _):
         c.argument('cluster_resource_group',
                    help='Resource group of cluster.',
                    validator=validate_cluster_resource_group)
+        c.argument('fips_validated_modules', arg_type=get_three_state_flag(),
+                   options_list=['--fips-validated-modules', '--fips'],
+                   help='Use FIPS validated cryptography modules.')
 
         c.argument('client_id',
                    help='Client ID of cluster service principal.',
@@ -54,12 +58,21 @@ def load_arguments(self, _):
                    help='CIDR of pod network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('pod_cidr'))
         c.argument('service_cidr',
-                   help='CIDR of service network. Must be a minimum of /18 or larger',
+                   help='CIDR of service network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('service_cidr'))
 
+        c.argument('disk_encryption_set',
+                   help='ResourceID of the DiskEncryptionSet to be used for master and worker VMs.',
+                   validator=validate_disk_encryption_set)
+        c.argument('master_encryption_at_host', arg_type=get_three_state_flag(),
+                   options_list=['--master-encryption-at-host', '--master-enc-host'],
+                   help='Encryption at host flag for master VMs.')
         c.argument('master_vm_size',
                    help='Size of master VMs.')
 
+        c.argument('worker_encryption_at_host', arg_type=get_three_state_flag(),
+                   options_list=['--worker-encryption-at-host', '--worker-enc-host'],
+                   help='Encryption at host flag for worker VMs.')
         c.argument('worker_vm_size',
                    help='Size of worker VMs.')
         c.argument('worker_vm_disk_size_gb',

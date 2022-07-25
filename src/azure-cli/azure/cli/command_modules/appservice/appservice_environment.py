@@ -19,7 +19,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client, get_subscription_id)
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 from azure.cli.core.util import (sdk_no_wait, random_string)
-from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, CommandNotFoundError,
+from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError,
                                        MutuallyExclusiveArgumentError)
 from knack.log import get_logger
 from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
@@ -152,11 +152,12 @@ def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_nam
         raise ValidationError('Private DNS Zone is not relevant for External ASE.')
 
     if ase.kind.lower() == 'asev3':
-        # pending SDK update (ase_client.get_ase_v3_networking_configuration(resource_group_name, name))
-        raise CommandNotFoundError('create-inbound-services is currently not supported for ASEv3.')
+        ase_network_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+        inbound_ip_address = ase_network_conf.internal_inbound_ip_addresses[0]
+    else:
+        ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
+        inbound_ip_address = ase_vip_info.internal_ip_address
 
-    ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
-    inbound_ip_address = ase_vip_info.internal_ip_address
     inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
     inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
 

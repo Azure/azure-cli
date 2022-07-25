@@ -62,11 +62,11 @@ class StorageArgumentContext(AzArgumentContext):
                            'only IPv4 style addresses.')
         self.argument('expiry', type=get_datetime_type(True),
                       help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid. Do not '
-                           'use if a stored access policy is referenced with --id that specifies this value.')
+                           'use if a stored access policy is referenced with --policy-name that specifies this value.')
         self.argument('start', type=get_datetime_type(True),
                       help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Do not use '
-                           'if a stored access policy is referenced with --id that specifies this value. Defaults to '
-                           'the time of the request.')
+                           'if a stored access policy is referenced with --policy-name that specifies this value. '
+                           'Defaults to the time of the request.')
         self.argument('protocol', options_list=('--https-only',), action='store_const', const='https',
                       help='Only permit requests made with the HTTPS protocol. If omitted, requests from both the HTTP '
                            'and HTTPS protocol are permitted.')
@@ -96,11 +96,12 @@ class StorageArgumentContext(AzArgumentContext):
                        'properties listed below is set, then that property will be cleared.',
                        arg_type=get_three_state_flag())
 
-    def register_path_argument(self, default_file_param=None, options_list=None):
+    def register_path_argument(self, default_file_param=None, options_list=None, fileshare=False):
         from ._validators import get_file_path_validator
         from .completers import file_path_completer
 
-        path_help = 'The path to the file within the file share.'
+        path_partial = '/directory' if fileshare else ''
+        path_help = f'The path to the file{path_partial} within the file share.'
         if default_file_param:
             path_help = '{} If the file name is omitted, the source file name will be used.'.format(path_help)
         self.extra('path', options_list=options_list or ('--path', '-p'),
@@ -292,7 +293,7 @@ Authentication failure. This may be caused by either invalid account key, connec
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
         from azure.cli.core.commands.parameters import get_resource_name_completion_list
-        from azure.cli.command_modules.storage._validators import validate_client_parameters
+        from azure.cli.command_modules.storage._validators import is_storagev2, validate_client_parameters
         command = self.command_loader.command_table.get(command_name, None)
         if not command:
             return
@@ -306,18 +307,42 @@ Authentication failure. This may be caused by either invalid account key, connec
                                   'present, the command will try to query the storage account key using the '
                                   'authenticated Azure account. If a large number of storage commands are executed the '
                                   'API quota may be hit')
-        command.add_argument('account_key', '--account-key', required=False, default=None,
-                             arg_group=group_name,
-                             help='Storage account key. Must be used in conjunction with storage account name. '
-                                  'Environment variable: AZURE_STORAGE_KEY')
         command.add_argument('connection_string', '--connection-string', required=False, default=None,
                              validator=validate_client_parameters, arg_group=group_name,
                              help='Storage account connection string. Environment variable: '
                                   'AZURE_STORAGE_CONNECTION_STRING')
-        command.add_argument('sas_token', '--sas-token', required=False, default=None,
-                             arg_group=group_name,
-                             help='A Shared Access Signature (SAS). Must be used in conjunction with storage account '
-                                  'name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        resource_type = command.command_kwargs['resource_type']
+        if is_storagev2(resource_type.value[0]):
+            endpoint_argument_dict = {
+                ResourceType.DATA_STORAGE_BLOB: '--blob-endpoint',
+                ResourceType.DATA_STORAGE_FILESHARE: '--file-endpoint',
+                ResourceType.DATA_STORAGE_TABLE: '--table-endpoint',
+                ResourceType.DATA_STORAGE_QUEUE: '--queue-endpoint',
+                ResourceType.DATA_STORAGE_FILEDATALAKE: '--blob-endpoint'
+            }
+            command.add_argument('account_url', endpoint_argument_dict.get(resource_type, '--service-endpoint'),
+                                 required=False, default=None, arg_group=group_name,
+                                 help='Storage data service endpoint. Must be used in conjunction with either '
+                                      'storage account key or a SAS token. You can find each service primary endpoint '
+                                      'with `az storage account show`. '
+                                      'Environment variable: AZURE_STORAGE_SERVICE_ENDPOINT')
+            command.add_argument('account_key', '--account-key', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='Storage account key. Must be used in conjunction with storage account '
+                                      'name or service endpoint. Environment variable: AZURE_STORAGE_KEY')
+            command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
+                                      'account name or service endpoint. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        else:
+            command.add_argument('account_key', '--account-key', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='Storage account key. Must be used in conjunction with storage account name. '
+                                      'Environment variable: AZURE_STORAGE_KEY')
+            command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                                 arg_group=group_name,
+                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
+                                      'account name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
 
     def _register_data_plane_oauth_arguments(self, command_name):
         from azure.cli.core.commands.parameters import get_enum_type

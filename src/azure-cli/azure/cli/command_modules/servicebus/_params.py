@@ -34,6 +34,8 @@ def load_arguments_sb(self, _):
         c.argument('default_action', help='Default action for network rule set.')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Service Bus')
         c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
         c.argument('mi_system_assigned', arg_group='Managed Identity',
                    arg_type=get_three_state_flag(),
@@ -47,6 +49,8 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='Enabling this property creates a ServiceBus Zone Redundant Namespace in regions supported availability zones')
 
     # region Namespace Authorization Rule
     with self.argument_context('servicebus namespace authorization-rule list') as c:
@@ -86,7 +90,7 @@ def load_arguments_sb(self, _):
             c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether this queue has dead letter support when a message expires.')
             c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
             c.argument('max_delivery_count', type=int, help='The maximum delivery count. A message is automatically deadlettered after this number of deliveries. default value is 10.')
-            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
+            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
             c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timeSpan or duration time format for idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.')
             c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
@@ -176,7 +180,7 @@ def load_arguments_sb(self, _):
             c.argument('max_delivery_count', type=int, help='Number of maximum deliveries.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
             c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
-            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
+            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the subscription is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('forward_to', help='Queue/Topic name to forward the messages')
             c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
             c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-letter-on-filter-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
@@ -279,6 +283,26 @@ def load_arguments_sb(self, _):
         c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
 
+# Private end point connection
+    with self.argument_context('servicebus namespace private-endpoint-connection') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the Service bus Namespace.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('servicebus namespace private-endpoint-connection {}'.format(item)) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the Service Bus Namespace.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the Service Bus Namespace. You can get '
+                         'it using `az servicebus namespace show`.')
+            c.argument('namespace_name', help='The Service Bus namesapce name.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified Service bus namespace.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
+
+# Private end point connection
+    with self.argument_context('servicebus namespace private-link-resource') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 # Identity
     with self.argument_context('servicebus namespace identity',
                                resource_type=ResourceType.MGMT_SERVICEBUS) as c:

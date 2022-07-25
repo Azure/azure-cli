@@ -774,7 +774,7 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
 
 # COMMAND NAMESPACE VALIDATORS
 
-def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
+def process_ag_http_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
         namespace.frontend_ip = _generate_ag_subproperty_id(
@@ -798,6 +798,21 @@ def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unu
         )
 
 
+def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    from msrestazure.tools import is_valid_resource_id
+    if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
+        namespace.frontend_ip = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'frontendIpConfigurations', namespace.frontend_ip)
+
+    if namespace.frontend_port and not is_valid_resource_id(namespace.frontend_port):
+        namespace.frontend_port = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'frontendPorts', namespace.frontend_port)
+
+    if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
+        namespace.ssl_cert = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
+
+
 def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
     from msrestazure.tools import is_valid_resource_id
     if namespace.probe and not is_valid_resource_id(namespace.probe):
@@ -809,6 +824,19 @@ def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disabl
                 cmd.cli_ctx, namespace, 'authenticationCertificates', val)
 
         namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
+    if namespace.root_certs:
+        def _validate_name_or_id(val):
+            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'trustedRootCertificates', val)
+
+        namespace.root_certs = [_validate_name_or_id(x) for x in namespace.root_certs]
+
+
+def process_ag_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    from msrestazure.tools import is_valid_resource_id
+    if namespace.probe and not is_valid_resource_id(namespace.probe):
+        namespace.probe = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'probes', namespace.probe)
     if namespace.root_certs:
         def _validate_name_or_id(val):
             return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
@@ -842,6 +870,21 @@ def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-
     if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
         namespace.rewrite_rule_set = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
+
+
+def process_ag_routing_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    from msrestazure.tools import is_valid_resource_id
+    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
+        namespace.address_pool = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
+
+    if namespace.listener and not is_valid_resource_id(namespace.listener):
+        namespace.listener = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'listeners', namespace.listener)
+
+    if namespace.settings and not is_valid_resource_id(namespace.settings):
+        namespace.settings = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'backendSettingsCollection', namespace.settings)
 
 
 def process_ag_ssl_policy_set_namespace(namespace):
