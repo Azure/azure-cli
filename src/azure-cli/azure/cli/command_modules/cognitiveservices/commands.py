@@ -46,6 +46,7 @@ def load_command_table(self, _):
                   client_factory=cf_deleted_accounts)
         g.custom_command('recover', 'recover')
         g.custom_command('list-skus', 'list_skus')
+        g.command('list-models', 'list_models')
         g.custom_command('list-usage', 'list_usages')
         g.custom_command('list-kinds', 'list_kinds', client_factory=cf_resource_skus)
 

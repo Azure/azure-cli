@@ -22,6 +22,13 @@ from .util import check_result
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
 
+# For environment credential
+AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
+AZURE_TENANT_ID = "AZURE_TENANT_ID"
+AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
+AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
+
+
 logger = get_logger(__name__)
 
 
@@ -346,3 +353,23 @@ def _try_remove(path):
         os.remove(path)
     except FileNotFoundError:
         pass
+
+
+def get_environment_credential():
+    # A temporary workaround used by rdbms module to use environment credential.
+    # TODO: Integrate with Identity and utilize MSAL HTTP and token cache to officially implement
+    #  https://github.com/Azure/azure-cli/issues/10241
+    from os import getenv
+
+    sp_auth = ServicePrincipalAuth({
+        _TENANT: getenv(AZURE_TENANT_ID),
+        _CLIENT_ID: getenv(AZURE_CLIENT_ID),
+        _CLIENT_SECRET: getenv(AZURE_CLIENT_SECRET)
+    })
+
+    authority, _ = _get_authority_url(
+        # Override authority host if defined as env var
+        getenv(AZURE_AUTHORITY_HOST) or 'https://login.microsoftonline.com',
+        getenv(AZURE_TENANT_ID))
+    credentials = ServicePrincipalCredential(sp_auth, authority=authority)
+    return credentials

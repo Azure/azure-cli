@@ -28,7 +28,7 @@ def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=No
         flags.append('--exclude-pattern=' + exclude_pattern)
     if include_path is not None:
         flags.append('--include-path=' + include_path)
-    if exclude_pattern is not None:
+    if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
     if content_type is not None:
         flags.append('--content-type=' + content_type)
@@ -81,10 +81,12 @@ def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs
     azcopy.copy(source, destination, flags=flags)
 
 
-def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, include_pattern=None,
-                      exclude_path=None):
+def storage_blob_sync(cmd, client, source, destination, delete_destination='true', exclude_pattern=None,
+                      include_pattern=None, exclude_path=None):
     azcopy = _azcopy_blob_client(cmd, client)
-    flags = ['--delete-destination=true']
+    flags = []
+    if delete_destination is not None:
+        flags.append('--delete-destination=' + delete_destination)
     if include_pattern is not None:
         flags.append('--include-pattern=' + include_pattern)
     if exclude_pattern is not None:

@@ -1,0 +1,179 @@
+interactions:
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resourcemanagement private-link create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/21.0.0 Python/3.10.0 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resourcemanager_privatelink_create000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/privatelink000002?api-version=2020-05-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpointConnections":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resourcemanager_privatelink_create000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/privatelink000002","name":"privatelink000002","type":"Microsoft.Authorization/resourceManagementPrivateLinks","location":"westus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '366'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 22 Apr 2022 22:57:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"privateLink": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resourcemanager_privatelink_create000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/privatelink000002",
+      "publicNetworkAccess": "enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - private-link association create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '268'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -m -n -p --public-network-access
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/21.0.0 Python/3.10.0 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/privateLinkAssociations/88888888-0000-0000-0000-000000000001?api-version=2020-05-01
+  response:
+    body:
+      string: '{"properties":{"privateLink":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resourcemanager_privatelink_create000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/privatelink000002","publicNetworkAccess":"Enabled","tenantId":"00000000-0000-0000-0000-000000000000","scope":"/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000"},"id":"/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/privateLinkAssociations/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/privateLinkAssociations","name":"88888888-0000-0000-0000-000000000001"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '701'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 22 Apr 2022 22:57:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resourcemanagement private-link delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/21.0.0 Python/3.10.0 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resourcemanager_privatelink_create000001/providers/Microsoft.Authorization/resourceManagementPrivateLinks/privatelink000002?api-version=2020-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 22 Apr 2022 22:57:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - private-link association delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -m -n --yes
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/21.0.0 Python/3.10.0 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/privateLinkAssociations/88888888-0000-0000-0000-000000000001?api-version=2020-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 22 Apr 2022 22:57:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

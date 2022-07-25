@@ -6,11 +6,14 @@
 # pylint: disable=unused-argument, line-too-long
 
 import os
+import re
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.tz import tzutc
 from knack.log import get_logger
 from knack.util import CLIError
+from urllib.request import urlretrieve
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import send_raw_request
@@ -317,3 +320,37 @@ def gitcli_check_and_login():
     output = run_subprocess_get_output("gh auth status")
     if output.returncode:
         run_subprocess("gh auth login", stdout_show=True)
+
+
+# Custom functions for server logs
+def flexible_server_log_download(client, resource_group_name, server_name, file_name):
+
+    files = client.list_by_server(resource_group_name, server_name)
+
+    for f in files:
+        if f.name in file_name:
+            urlretrieve(f.url, f.name)
+
+
+def flexible_server_log_list(client, resource_group_name, server_name, filename_contains=None,
+                             file_last_written=None, max_file_size=None):
+
+    all_files = client.list_by_server(resource_group_name, server_name)
+    files = []
+
+    if file_last_written is None:
+        file_last_written = 72
+    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+
+    for f in all_files:
+        if f.last_modified_time < time_line:
+            continue
+        if filename_contains is not None and re.search(filename_contains, f.name) is None:
+            continue
+        if max_file_size is not None and f.size_in_kb > max_file_size:
+            continue
+
+        del f.created_time
+        files.append(f)
+
+    return files

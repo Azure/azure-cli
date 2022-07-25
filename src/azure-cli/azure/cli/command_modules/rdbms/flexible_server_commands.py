@@ -12,6 +12,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_flexible_db,
     cf_mysql_flexible_replica,
     cf_mysql_flexible_location_capabilities,
+    cf_mysql_flexible_log,
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
@@ -21,7 +22,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
-    table_transform_output_list_skus,
+    postgres_table_transform_output_list_skus,
+    mysql_table_transform_output_list_skus,
     table_transform_output_parameters)
 
 # from .transformers import table_transform_connection_string
@@ -59,6 +61,11 @@ def load_flexibleserver_command_table(self, _):
     mysql_flexible_location_capabilities_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_mysql_flexible_location_capabilities
+    )
+
+    mysql_flexible_log_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LogFilesOperations.{}',
+        client_factory=cf_mysql_flexible_log
     )
 
     postgres_flexible_servers_sdk = CliCommandType(
@@ -148,7 +155,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
@@ -218,7 +225,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('mysql flexible-server', mysql_flexible_location_capabilities_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=mysql_table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
@@ -235,3 +242,9 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')
+
+    with self.command_group('mysql flexible-server server-logs', mysql_flexible_log_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_log) as g:
+        g.custom_command('list', 'flexible_server_log_list')
+        g.custom_command('download', 'flexible_server_log_download')

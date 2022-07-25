@@ -1,0 +1,1842 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2022-06-10T00:33:13Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:33:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "japanwest", "sku": {"name": "B1", "tier": "BASIC", "capacity":
+      1}, "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '163'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","name":"ssl-test-plan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"japanwest","properties":{"serverFarmId":51904,"name":"ssl-test-plan000003","sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000002-JapanWestwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000002","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_51904","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1493'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:33:26 GMT
+      etag:
+      - '"1D87C61B1AC644B"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","name":"ssl-test-plan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"Japan
+        West","properties":{"serverFarmId":51904,"name":"ssl-test-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000002-JapanWestwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000002","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_51904","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1421'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:33:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "web-ssl-test000004", "type": "Site"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '46'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2021-03-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '47'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:33:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Web/webAppStacks?api-version=2021-01-01
+  response:
+    body:
+      string: '{"value":[{"id":null,"name":"dotnet","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":".NET","value":"dotnet","preferredOs":"windows","majorVersions":[{"displayText":".NET
+        7","value":"dotnet7","minorVersions":[{"displayText":".NET 7","value":"7","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v7.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.0.x"},"isHidden":true,"isEarlyAccess":true},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|7.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.0.x"},"isHidden":true,"isEarlyAccess":true}}}]},{"displayText":".NET
+        6","value":"dotnet6","minorVersions":[{"displayText":".NET 6 (LTS)","value":"6","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v6.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"6.0.x"}},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|6.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"6.0.x"}}}}]},{"displayText":".NET
+        5","value":"dotnet5","minorVersions":[{"displayText":".NET 5","value":"5","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v5.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"5.0.x"},"endOfLifeDate":"2022-06-08T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|5.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"5.0.x"},"endOfLifeDate":"2022-06-08T00:00:00Z"}}}]},{"displayText":".NET
+        Core 3","value":"dotnetcore3","minorVersions":[{"displayText":".NET Core 3.1
+        (LTS)","value":"3.1","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"3.1","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.1.301"},"endOfLifeDate":"2023-01-03T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|3.1","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.1.301"},"endOfLifeDate":"2023-01-03T00:00:00Z"}}},{"displayText":".NET
+        Core 3.0","value":"3.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"3.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.0.103"},"endOfLifeDate":"2020-04-03T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|3.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.0.103"},"endOfLifeDate":"2020-04-03T00:00:00Z"}}}]},{"displayText":".NET
+        Core 2","value":"dotnetcore2","minorVersions":[{"displayText":".NET Core 2.2","value":"2.2","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"2.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.2.207"},"endOfLifeDate":"2020-01-23T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|2.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.2.207"},"endOfLifeDate":"2020-01-23T00:00:00Z"}}},{"displayText":".NET
+        Core 2.1 (LTS)","value":"2.1","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"2.1","remoteDebuggingSupported":false,"isDeprecated":true,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.1.807"},"endOfLifeDate":"2021-08-21T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|2.1","remoteDebuggingSupported":false,"isDeprecated":true,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.1.807"},"endOfLifeDate":"2021-08-21T00:00:00Z"}}},{"displayText":".NET
+        Core 2.0","value":"2.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"2.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.1.202"},"endOfLifeDate":"2018-11-01T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|2.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.1.202"},"endOfLifeDate":"2018-11-01T00:00:00Z"}}}]},{"displayText":".NET
+        Core 1","value":"dotnetcore1","minorVersions":[{"displayText":".NET Core 1.1","value":"1.1","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"1.1.14"},"endOfLifeDate":"2019-07-27T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|1.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"1.1.14"},"endOfLifeDate":"2019-07-27T00:00:00Z"}}},{"displayText":".NET
+        Core 1.0","value":"1.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"1.1.14"},"endOfLifeDate":"2019-07-27T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"DOTNETCORE|1.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"1.1.14"},"endOfLifeDate":"2019-07-27T00:00:00Z"}}}]},{"displayText":"ASP.NET
+        V4","value":"aspdotnetv4","minorVersions":[{"displayText":"ASP.NET V4.8","value":"v4.8","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v4.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.1"}}}}]},{"displayText":"ASP.NET
+        V3","value":"aspdotnetv3","minorVersions":[{"displayText":"ASP.NET V3.5","value":"v3.5","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"v2.0","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.1"}}}}]}]}},{"id":null,"name":"node","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Node","value":"node","preferredOs":"linux","majorVersions":[{"displayText":"Node
+        LTS","value":"lts","minorVersions":[{"displayText":"Node LTS","value":"lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true}}}}]},{"displayText":"Node
+        18","value":"18","minorVersions":[{"displayText":"Node 18 LTS","value":"18-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|18-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"18.x"},"isHidden":true},"windowsRuntimeSettings":{"runtimeVersion":"~18","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"18.x"},"isHidden":true}}}]},{"displayText":"Node
+        16","value":"16","minorVersions":[{"displayText":"Node 16 LTS","value":"16-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|16-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"16.x"},"endOfLifeDate":"2024-05-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"~16","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"16.x"},"endOfLifeDate":"2024-05-30T00:00:00Z"}}}]},{"displayText":"Node
+        14","value":"14","minorVersions":[{"displayText":"Node 14 LTS","value":"14-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|14-lts","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"14.x"},"endOfLifeDate":"2023-05-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"~14","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"14.x"},"endOfLifeDate":"2023-05-30T00:00:00Z"}}}]},{"displayText":"Node
+        12","value":"12","minorVersions":[{"displayText":"Node 12 LTS","value":"12-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|12-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"12.x"},"endOfLifeDate":"2022-05-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"12.13.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2022-05-01T00:00:00Z"}}},{"displayText":"Node
+        12.9","value":"12.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|12.9","isDeprecated":true,"remoteDebuggingSupported":true,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"12.x"},"endOfLifeDate":"2022-05-01T00:00:00Z"}}}]},{"displayText":"Node
+        10","value":"10","minorVersions":[{"displayText":"Node 10 LTS","value":"10-LTS","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.16","value":"10.16","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10.16","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.15","value":"10.15","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"10.15.2","isDeprecated":true,"isPreview":true,"isHidden":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.14","value":"10.14","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10.14","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"10.14.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.12","value":"10.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10.12","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.10","value":"10.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10.10","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"10.0.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.6","value":"10.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"10.6.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Node
+        10.1","value":"10.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|10.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"10.x"},"endOfLifeDate":"2021-05-01T00:00:00Z"}}}]},{"displayText":"Node
+        9","value":"9","minorVersions":[{"displayText":"Node 9.4","value":"9.4","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|9.4","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-07-30T00:00:00Z"}}}]},{"displayText":"Node
+        8","value":"8","minorVersions":[{"displayText":"Node 8 LTS","value":"8-lts","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.12","value":"8.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.12","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.11","value":"8.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.11","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"8.11","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.10","value":"8.10","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"8.10","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.9","value":"8.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.9","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"8.9","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.8","value":"8.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.5","value":"8.5","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"8.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.4","value":"8.4","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"8.4","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.2","value":"8.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.1","value":"8.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"8.1.4","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"}}},{"displayText":"Node
+        8.0","value":"8.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|8.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-01-31T00:00:00Z"}}}]},{"displayText":"Node
+        7","value":"7","minorVersions":[{"displayText":"Node 7.10","value":"7.10","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.10.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2017-07-30T00:00:00Z"}}}]},{"displayText":"Node
+        6","value":"6","minorVersions":[{"displayText":"Node 6 LTS","value":"6-LTS","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|6-lts","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.12","value":"6.12","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"6.12","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.11","value":"6.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|6.11","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.10","value":"6.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|6.10","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.9","value":"6.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|6.9","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"6.9.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.6","value":"6.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|6.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.5","value":"6.5","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"6.5.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-05-30T00:00:00Z"}}},{"displayText":"Node
+        6.2","value":"6.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|6.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2019-05-30T00:00:00Z"}}}]},{"displayText":"Node
+        4","value":"4","minorVersions":[{"displayText":"Node 4.8","value":"4.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|4.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2018-05-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"4.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2018-05-30T00:00:00Z"}}},{"displayText":"Node
+        4.5","value":"4.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|4.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2018-05-30T00:00:00Z"}}},{"displayText":"Node
+        4.4","value":"4.4","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"NODE|4.4","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2018-05-30T00:00:00Z"}}}]}]}},{"id":null,"name":"python","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Python","value":"python","preferredOs":"linux","majorVersions":[{"displayText":"Python
+        3","value":"3","minorVersions":[{"displayText":"Python 3.11","value":"3.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.11","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.11"},"isHidden":true}}},{"displayText":"Python
+        3.10","value":"3.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.10","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.10"},"isHidden":true,"isEarlyAccess":true}}},{"displayText":"Python
+        3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.9","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"isHidden":false}}},{"displayText":"Python
+        3.8","value":"3.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.8","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.8"}}}},{"displayText":"Python
+        3.7","value":"3.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.7"}}}},{"displayText":"Python
+        3.6","value":"3.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|3.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.6"}},"windowsRuntimeSettings":{"runtimeVersion":"3.4.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.6"}}}}]},{"displayText":"Python
+        2","value":"2","minorVersions":[{"displayText":"Python 2.7","value":"2.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PYTHON|2.7","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.7"},"endOfLifeDate":"2020-02-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"2.7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"2.7"},"endOfLifeDate":"2020-02-01T00:00:00Z"}}}]}]}},{"id":null,"name":"php","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"PHP","value":"php","preferredOs":"linux","majorVersions":[{"displayText":"PHP
+        8","value":"8","minorVersions":[{"displayText":"PHP 8.1","value":"8.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.1","isHidden":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.1","notSupportedInCreates":true}}}},{"displayText":"PHP
+        8.0","value":"8.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|8.0","isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.0","notSupportedInCreates":true},"endOfLifeDate":"2023-12-26T00:00:00Z"}}}]},{"displayText":"PHP
+        7","value":"7","minorVersions":[{"displayText":"PHP 7.4","value":"7.4","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.4","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.4","notSupportedInCreates":true},"endOfLifeDate":"2022-12-28T00:00:00Z"},"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.4","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.4","notSupportedInCreates":true},"endOfLifeDate":"2022-12-28T00:00:00Z"}}},{"displayText":"PHP
+        7.3","value":"7.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.3","notSupportedInCreates":true},"endOfLifeDate":"2022-01-06T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"7.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"7.3","notSupportedInCreates":true},"endOfLifeDate":"2022-01-06T00:00:00Z"}}},{"displayText":"PHP
+        7.2","value":"7.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-12-30T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"7.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":true},"endOfLifeDate":"2020-12-30T00:00:00Z"}}},{"displayText":"PHP
+        7.1","value":"7.1","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.1","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-03-01T00:00:00Z"}}},{"displayText":"7.0","value":"7.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|7.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-03-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"7.0","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-03-01T00:00:00Z"}}}]},{"displayText":"PHP
+        5","value":"5","minorVersions":[{"displayText":"PHP 5.6","value":"5.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"PHP|5.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-03-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"5.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-03-01T00:00:00Z"}}}]}]}},{"id":null,"name":"ruby","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Ruby","value":"ruby","preferredOs":"linux","majorVersions":[{"displayText":"Ruby
+        2","value":"2","minorVersions":[{"displayText":"Ruby 2.7","value":"2.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.7.3","value":"2.7.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.7.3","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.6","value":"2.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2022-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.6.2","value":"2.6.2","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.6.2","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2022-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.5","value":"2.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.5.5","value":"2.5.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.5.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2021-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.4","value":"2.4","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.4","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.4.5","value":"2.4.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.4.5","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2020-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.3","value":"2.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.3","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.3.8","value":"2.3.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.3.8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-05-01T00:00:00Z"}}},{"displayText":"Ruby
+        2.3.3","value":"2.3.3","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"RUBY|2.3.3","remoteDebuggingSupported":false,"isDeprecated":true,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2019-05-01T00:00:00Z"}}}]}]}},{"id":null,"name":"java","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Java","value":"java","preferredOs":"linux","majorVersions":[{"displayText":"Java
+        17","value":"17","minorVersions":[{"displayText":"Java 17","value":"17.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-10-01T00:00:00Z"}}},{"displayText":"Java
+        17.0.1","value":"17.0.1","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"17.0.1","isAutoUpdate":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"17"},"endOfLifeDate":"2031-10-01T00:00:00Z"}}}]},{"displayText":"Java
+        11","value":"11","minorVersions":[{"displayText":"Java 11","value":"11.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.13","value":"11.0.13","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.13","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.12","value":"11.0.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.12","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.11","value":"11.0.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.11","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.9","value":"11.0.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.9","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.8","value":"11.0.8","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"11.0.8","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.7","value":"11.0.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.6","value":"11.0.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.6","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.5","value":"11.0.5","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"11.0.5_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.3","value":"11.0.3","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"11.0.3_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}},{"displayText":"Java
+        11.0.2","value":"11.0.2","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"11.0.2_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"endOfLifeDate":"2026-10-01T00:00:00Z"}}}]},{"displayText":"Java
+        8","value":"8","minorVersions":[{"displayText":"Java 8","value":"8.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"1.8","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_312","value":"8.0.312","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_312","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_302","value":"8.0.302","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_302","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_292","value":"8.0.292","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_292","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_282","value":"8.0.282","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_282","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_275","value":"8.0.275","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_265","value":"8.0.265","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_265","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_252","value":"8.0.252","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_252","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_242","value":"8.0.242","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_242","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_232","value":"8.0.232","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"},"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_232_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_212","value":"8.0.212","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_212_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_202","value":"8.0.202","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_202_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_202 (Oracle)","value":"8.0.202 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_202","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}},{"displayText":"Java
+        1.8.0_181","value":"8.0.181","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_181_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_181 (Oracle)","value":"8.0.181 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_181","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}},{"displayText":"Java
+        1.8.0_172","value":"8.0.172","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_172_ZULU","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_172 (Oracle)","value":"8.0.172 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_172","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}},{"displayText":"Java
+        1.8.0_144","value":"8.0.144","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_144","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_111 (Oracle)","value":"8.0.111 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_111","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}},{"displayText":"Java
+        1.8.0_102","value":"8.0.102","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_102","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_92","value":"8.0.92","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_92","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"endOfLifeDate":"2025-04-01T00:00:00Z"}}},{"displayText":"Java
+        1.8.0_73 (Oracle)","value":"8.0.73 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_73","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}},{"displayText":"Java
+        1.8.0_60 (Oracle)","value":"8.0.60 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_60","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}},{"displayText":"Java
+        1.8.0_25 (Oracle)","value":"8.0.25 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8.0_25","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"}}}}]},{"displayText":"Java
+        7","value":"7","minorVersions":[{"displayText":"Java 7","value":"7.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7","isAutoUpdate":true,"isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_292","value":"7.0.292","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_292","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_272","value":"7.0.272","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_272","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_262","value":"7.0.262","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_262","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_242","value":"7.0.242","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_242_ZULU","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_222","value":"7.0.222","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_222_ZULU","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_191","value":"7.0.191","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_191_ZULU","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false},"endOfLifeDate":"2023-08-01T00:00:00Z"}}},{"displayText":"Java
+        1.7.0_80 (Oracle)","value":"7.0.80 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_80","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false}}}},{"displayText":"Java
+        1.7.0_71 (Oracle)","value":"7.0.71 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_71","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false}}}},{"displayText":"Java
+        1.7.0_51 (Oracle)","value":"7.0.51 (Oracle)","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.7.0_51","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false,"isDefaultOff":true},"gitHubActionSettings":{"isSupported":false}}}}]}]}},{"id":null,"name":"javacontainers","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Java
+        Containers","value":"javacontainers","majorVersions":[{"displayText":"Java
+        SE (Embedded Web Server)","value":"javase","minorVersions":[{"displayText":"Java
+        SE (Embedded Web Server)","value":"SE","stackSettings":{"windowsContainerSettings":{"javaContainer":"JAVA","javaContainerVersion":"SE","isAutoUpdate":true},"linuxContainerSettings":{"java17Runtime":"JAVA|17-java17","java11Runtime":"JAVA|11-java11","java8Runtime":"JAVA|8-jre8","isAutoUpdate":true}}},{"displayText":"Java
+        SE 17.0.1","value":"17.0.1","stackSettings":{"linuxContainerSettings":{"java17Runtime":"JAVA|17.0.1"}}},{"displayText":"Java
+        SE 11.0.13","value":"11.0.13","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.13"}}},{"displayText":"Java
+        SE 11.0.12","value":"11.0.12","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.12"}}},{"displayText":"Java
+        SE 11.0.11","value":"11.0.11","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.11"}}},{"displayText":"Java
+        SE 11.0.9","value":"11.0.9","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.9"}}},{"displayText":"Java
+        SE 11.0.7","value":"11.0.7","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.7"}}},{"displayText":"Java
+        SE 11.0.6","value":"11.0.6","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.6"}}},{"displayText":"Java
+        SE 11.0.5","value":"11.0.5","stackSettings":{"linuxContainerSettings":{"java11Runtime":"JAVA|11.0.5"}}},{"displayText":"Java
+        SE 8u312","value":"1.8.312","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u312"}}},{"displayText":"Java
+        SE 8u302","value":"1.8.302","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u302"}}},{"displayText":"Java
+        SE 8u292","value":"1.8.292","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u292"}}},{"displayText":"Java
+        SE 8u275","value":"1.8.275","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u275"}}},{"displayText":"Java
+        SE 8u252","value":"1.8.252","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u252"}}},{"displayText":"Java
+        SE 8u242","value":"1.8.242","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u242"}}},{"displayText":"Java
+        SE 8u232","value":"1.8.232","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JAVA|8u232"}}}]},{"displayText":"Red
+        Hat JBoss EAP 7","value":"jbosseap","minorVersions":[{"displayText":"Red Hat
+        JBoss EAP 7","value":"7","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7-java8","java11Runtime":"JBOSSEAP|7-java11","isAutoUpdate":true}}},{"displayText":"Red
+        Hat JBoss EAP 7.4.1","value":"7.4.1","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.1-java8","java11Runtime":"JBOSSEAP|7.4.1-java11"}}},{"displayText":"Red
+        Hat JBoss EAP 7.4.0","value":"7.4.0","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4.0-java8","java11Runtime":"JBOSSEAP|7.4.0-java11"}}},{"displayText":"Red
+        Hat JBoss EAP 7.3.9","value":"7.3.9","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.3.9-java8","java11Runtime":"JBOSSEAP|7.3.9-java11"}}},{"displayText":"Red
+        Hat JBoss EAP 7.3","value":"7.3","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.3-java8","java11Runtime":"JBOSSEAP|7.3-java11","isAutoUpdate":true,"isHidden":true}}},{"displayText":"Red
+        Hat JBoss EAP 7.4","value":"7.4","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.4-java8","java11Runtime":"JBOSSEAP|7.4-java11","isAutoUpdate":true,"isHidden":true}}},{"displayText":"JBoss
+        EAP 7.2","value":"7.2.0","stackSettings":{"linuxContainerSettings":{"java8Runtime":"JBOSSEAP|7.2-java8","isDeprecated":true}}}]},{"displayText":"Apache
+        Tomcat 10.0","value":"tomcat10.0","minorVersions":[{"displayText":"Apache
+        Tomcat 10.0","value":"10.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0","isAutoUpdate":true},"linuxContainerSettings":{"java17Runtime":"TOMCAT|10.0-java17","java11Runtime":"TOMCAT|10.0-java11","java8Runtime":"TOMCAT|10.0-jre8","isAutoUpdate":true}}},{"displayText":"Apache
+        Tomcat 10.0.12","value":"10.0.12","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"10.0.12"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|10.0.12-java8","java11Runtime":"TOMCAT|10.0.12-java11","java17Runtime":"TOMCAT|10.0.12-java17"}}}]},{"displayText":"Apache
+        Tomcat 9.0","value":"tomcat9.0","minorVersions":[{"displayText":"Apache Tomcat
+        9.0","value":"9.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0","isAutoUpdate":true},"linuxContainerSettings":{"java17Runtime":"TOMCAT|9.0-java17","java11Runtime":"TOMCAT|9.0-java11","java8Runtime":"TOMCAT|9.0-jre8","isAutoUpdate":true}}},{"displayText":"Apache
+        Tomcat 9.0.54","value":"9.0.54","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.54"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.54-java8","java11Runtime":"TOMCAT|9.0.54-java11","java17Runtime":"TOMCAT|9.0.54-java17"}}},{"displayText":"Apache
+        Tomcat 9.0.52","value":"9.0.52","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.52"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.52-java8","java11Runtime":"TOMCAT|9.0.52-java11"}}},{"displayText":"Apache
+        Tomcat 9.0.46","value":"9.0.46","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.46"},"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.46-java8","java11Runtime":"TOMCAT|9.0.46-java11"}}},{"displayText":"Apache
+        Tomcat 9.0.41","value":"9.0.41","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|9.0.41-java8","java11Runtime":"TOMCAT|9.0.41-java11"}}},{"displayText":"Apache
+        Tomcat 9.0.38","value":"9.0.38","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.38"}}},{"displayText":"Apache
+        Tomcat 9.0.37","value":"9.0.37","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.37"},"linuxContainerSettings":{"java11Runtime":"TOMCAT|9.0.37-java11","java8Runtime":"TOMCAT|9.0.37-java8"}}},{"displayText":"Apache
+        Tomcat 9.0.33","value":"9.0.33","stackSettings":{"linuxContainerSettings":{"java11Runtime":"TOMCAT|9.0.33-java11","java8Runtime":"TOMCAT|9.0.33-java8"}}},{"displayText":"Apache
+        Tomcat 9.0.31","value":"9.0.31","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.31"}}},{"displayText":"Apache
+        Tomcat 9.0.27","value":"9.0.27","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.27"}}},{"displayText":"Apache
+        Tomcat 9.0.21","value":"9.0.21","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.21"}}},{"displayText":"Apache
+        Tomcat 9.0.20","value":"9.0.20","stackSettings":{"linuxContainerSettings":{"java11Runtime":"TOMCAT|9.0.20-java11","java8Runtime":"TOMCAT|9.0.20-java8"}}},{"displayText":"Apache
+        Tomcat 9.0.14","value":"9.0.14","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.14"}}},{"displayText":"Apache
+        Tomcat 9.0.12","value":"9.0.12","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.12"}}},{"displayText":"Apache
+        Tomcat 9.0.8","value":"9.0.8","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.8"}}},{"displayText":"Apache
+        Tomcat 9.0.0","value":"9.0.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"9.0.0"}}}]},{"displayText":"Apache
+        Tomcat 8.5","value":"tomcat8.5","minorVersions":[{"displayText":"Apache Tomcat
+        8.5","value":"8.5","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5","isAutoUpdate":true},"linuxContainerSettings":{"java11Runtime":"TOMCAT|8.5-java11","java8Runtime":"TOMCAT|8.5-jre8","isAutoUpdate":true}}},{"displayText":"Apache
+        Tomcat 8.5.72","value":"8.5.72","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.72-java8","java11Runtime":"TOMCAT|8.5.72-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.72"}}},{"displayText":"Apache
+        Tomcat 8.5.69","value":"8.5.69","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.69-java8","java11Runtime":"TOMCAT|8.5.69-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.69"}}},{"displayText":"Apache
+        Tomcat 8.5.66","value":"8.5.66","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.66-java8","java11Runtime":"TOMCAT|8.5.66-java11"},"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.66"}}},{"displayText":"Apache
+        Tomcat 8.5.61","value":"8.5.61","stackSettings":{"linuxContainerSettings":{"java8Runtime":"TOMCAT|8.5.61-java8","java11Runtime":"TOMCAT|8.5.61-java11"}}},{"displayText":"Apache
+        Tomcat 8.5.58","value":"8.5.58","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.58"}}},{"displayText":"Apache
+        Tomcat 8.5.57","value":"8.5.57","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.57"},"linuxContainerSettings":{"java11Runtime":"TOMCAT|8.5.57-java11","java8Runtime":"TOMCAT|8.5.57-java8"}}},{"displayText":"Apache
+        Tomcat 8.5.53","value":"8.5.53","stackSettings":{"linuxContainerSettings":{"java11Runtime":"TOMCAT|8.5.53-java11","java8Runtime":"TOMCAT|8.5.53-java8"}}},{"displayText":"Apache
+        Tomcat 8.5.51","value":"8.5.51","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.51"}}},{"displayText":"Apache
+        Tomcat 8.5.47","value":"8.5.47","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.47"}}},{"displayText":"Apache
+        Tomcat 8.5.42","value":"8.5.42","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.42"}}},{"displayText":"Apache
+        Tomcat 8.5.41","value":"8.5.41","stackSettings":{"linuxContainerSettings":{"java11Runtime":"TOMCAT|8.5.41-java11","java8Runtime":"TOMCAT|8.5.41-java8"}}},{"displayText":"Apache
+        Tomcat 8.5.37","value":"8.5.37","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.37"}}},{"displayText":"Apache
+        Tomcat 8.5.34","value":"8.5.34","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.34"}}},{"displayText":"Apache
+        Tomcat 8.5.31","value":"8.5.31","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.31"}}},{"displayText":"Apache
+        Tomcat 8.5.20","value":"8.5.20","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.20"}}},{"displayText":"Apache
+        Tomcat 8.5.6","value":"8.5.6","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.5.6"}}}]},{"displayText":"Apache
+        Tomcat 8.0","value":"tomcat8.0","minorVersions":[{"displayText":"Apache Tomcat
+        8.0","value":"8.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.0","isAutoUpdate":true,"isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 8.0.53","value":"8.0.53","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.0.53","isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 8.0.46","value":"8.0.46","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.0.46","isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 8.0.23","value":"8.0.23","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"8.0.23","isDeprecated":true}}}]},{"displayText":"Apache
+        Tomcat 7.0","value":"tomcat7.0","minorVersions":[{"displayText":"Apache Tomcat
+        7.0","value":"7.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"7.0","isAutoUpdate":true,"isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 7.0.94","value":"7.0.94","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"7.0.94","isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 7.0.81","value":"7.0.81","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"7.0.81","isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 7.0.62","value":"7.0.62","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"7.0.62","isDeprecated":true}}},{"displayText":"Apache
+        Tomcat 7.0.50","value":"7.0.50","stackSettings":{"windowsContainerSettings":{"javaContainer":"TOMCAT","javaContainerVersion":"7.0.50","isDeprecated":true}}}]},{"displayText":"Jetty
+        9.3","value":"jetty9.3","minorVersions":[{"displayText":"Jetty 9.3","value":"9.3","stackSettings":{"windowsContainerSettings":{"javaContainer":"JETTY","javaContainerVersion":"9.3","isAutoUpdate":true,"isDeprecated":true}}},{"displayText":"Jetty
+        9.3.25","value":"9.3.25","stackSettings":{"windowsContainerSettings":{"javaContainer":"JETTY","javaContainerVersion":"9.3.25","isDeprecated":true}}},{"displayText":"Jetty
+        9.3.13","value":"9.3.13","stackSettings":{"windowsContainerSettings":{"javaContainer":"JETTY","javaContainerVersion":"9.3.13","isDeprecated":true}}}]},{"displayText":"Jetty
+        9.1","value":"jetty9.1","minorVersions":[{"displayText":"Jetty 9.1","value":"9.1","stackSettings":{"windowsContainerSettings":{"javaContainer":"JETTY","javaContainerVersion":"9.1","isAutoUpdate":true,"isDeprecated":true}}},{"displayText":"Jetty
+        9.1.0","value":"9.1.0","stackSettings":{"windowsContainerSettings":{"javaContainer":"JETTY","javaContainerVersion":"9.1.0","isDeprecated":true}}}]},{"displayText":"WildFly
+        14","value":"wildfly14","minorVersions":[{"displayText":"WildFly 14","value":"14","stackSettings":{"linuxContainerSettings":{"java8Runtime":"WILDFLY|14-jre8","isDeprecated":true,"isAutoUpdate":true}}},{"displayText":"WildFly
+        14.0.1","value":"14.0.1","stackSettings":{"linuxContainerSettings":{"isDeprecated":true,"java8Runtime":"WILDFLY|14.0.1-java8"}}}]}]}},{"id":null,"name":"staticsite","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"HTML
+        (Static Content)","value":"staticsite","preferredOs":"linux","majorVersions":[{"displayText":"HTML
+        (Static Content)","value":"1","minorVersions":[{"displayText":"HTML (Static
+        Content)","value":"1.0","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"STATICSITE|1.0","isHidden":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false}}}}]}]}},{"id":null,"name":"go","type":"Microsoft.Web/webAppStacks?stackOsType=All","properties":{"displayText":"Go","value":"go","preferredOs":"linux","majorVersions":[{"displayText":"Go
+        1","value":"go1","minorVersions":[{"displayText":"Go 1.18 (Experimental)","value":"go1.18","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"GO|1.18","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":false},"gitHubActionSettings":{"isSupported":false},"isHidden":true,"isEarlyAccess":true}}}]}]}}],"nextLink":null,"id":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66916'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:33:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Japan West", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003",
+      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "~14"}],
+      "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped": false,
+      "httpsOnly": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '477'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004","name":"web-ssl-test000004","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"web-ssl-test000004","state":"Running","hostNames":["web-ssl-test000004.azurewebsites.net"],"webSpace":"clitest.rg000002-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000002-JapanWestwebspace/sites/web-ssl-test000004","repositorySiteName":"web-ssl-test000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000004.azurewebsites.net","web-ssl-test000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-06-10T00:33:35.1533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"web-ssl-test000004","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"30E3673979DFB5673924412D39370809E608E2DE4E889BD01C7B80FC38A57EED","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"web-ssl-test000004\\$web-ssl-test000004","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"web-ssl-test000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6208'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:33:54 GMT
+      etag:
+      - '"1D87C61B8AE5115"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"format": "WebDeploy"}'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004/publishxml?api-version=2021-03-01
+  response:
+    body:
+      string: <publishData><publishProfile profileName="web-ssl-test000004 - Web Deploy"
+        publishMethod="MSDeploy" publishUrl="web-ssl-test000004.scm.azurewebsites.net:443"
+        msdeploySite="web-ssl-test000004" userName="$web-ssl-test000004" userPWD="KmhPDe1Gf29blF0ou539hg64pB7s3hoFDyJjB9w9xeSTSxXddr8E837Xx0wx"
+        destinationAppUrl="http://web-ssl-test000004.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000004
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="web-ssl-test000004\$web-ssl-test000004" userPWD="KmhPDe1Gf29blF0ou539hg64pB7s3hoFDyJjB9w9xeSTSxXddr8E837Xx0wx"
+        destinationAppUrl="http://web-ssl-test000004.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000004
+        - Zip Deploy" publishMethod="ZipDeploy" publishUrl="web-ssl-test000004.scm.azurewebsites.net:443"
+        userName="$web-ssl-test000004" userPWD="KmhPDe1Gf29blF0ou539hg64pB7s3hoFDyJjB9w9xeSTSxXddr8E837Xx0wx"
+        destinationAppUrl="http://web-ssl-test000004.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1589'
+      content-type:
+      - application/xml
+      date:
+      - Fri, 10 Jun 2022 00:33:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2022-06-10T00:33:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:33:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.KeyVault/vaults/kv-ssl-test000005''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:33:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.2 (macOS-10.16-x86_64-i386-64bit) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/me
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity","businessPhones":["+1
+        (425) 7064511"],"displayName":"Sisira Panchagnula","givenName":"Sisira","jobTitle":"PRINCIPAL
+        SOFTWARE ENG MANAGER","mail":"sisirap@microsoft.com","mobilePhone":null,"officeLocation":"16/1G00","preferredLanguage":null,"surname":"Panchagnula","userPrincipalName":"sisirap@microsoft.com","id":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '429'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:33:58 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - cac4241b-7366-4343-9f30-fecfae07d73d
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"West US 2","Slice":"E","Ring":"1","ScaleUnit":"000","RoleInstance":"CO1PEPF000018B5"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "japanwest", "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3",
+      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
+      "storage": ["all"]}}], "softDeleteRetentionInDays": 90, "networkAcls": {"bypass":
+      "AzureServices", "defaultAction": "Allow"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '465'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005","name":"kv-ssl-test000005","type":"Microsoft.KeyVault/vaults","location":"japanwest","tags":{},"systemData":{"createdBy":"sisirap@microsoft.com","createdByType":"User","createdAt":"2022-06-10T00:34:01.761Z","lastModifiedBy":"sisirap@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-06-10T00:34:01.761Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://kv-ssl-test000005.vault.azure.net","provisioningState":"RegisteringDns","publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '990'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.396.0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005","name":"kv-ssl-test000005","type":"Microsoft.KeyVault/vaults","location":"japanwest","tags":{},"systemData":{"createdBy":"sisirap@microsoft.com","createdByType":"User","createdAt":"2022-06-10T00:34:01.761Z","lastModifiedBy":"sisirap@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-06-10T00:34:01.761Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://kv-ssl-test000005.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '986'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.396.0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --spn --secret-permissions
+      User-Agent:
+      - python/3.8.2 (macOS-10.16-x86_64-i386-64bit) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames/any(c:c%20eq%20'Microsoft.Azure.WebSites')
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"f8daea97-62e7-4026-becf-13c2ea98e8b4","deletedDateTime":null,"accountEnabled":true,"alternativeNames":[],"appDisplayName":"Microsoft
+        Azure App Service","appDescription":null,"appId":"abfa0a7c-a6b6-4736-8310-5855508787cd","applicationTemplateId":null,"appOwnerOrganizationId":"f8cdef31-a31e-4b4a-93e4-5f571e91255a","appRoleAssignmentRequired":false,"createdDateTime":null,"description":null,"disabledByMicrosoftStatus":null,"displayName":"Microsoft
+        Azure App Service","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":["https://usw3.sso.azurewebsites.windows.net/","https://dxb.sso.azurewebsites.windows.net/","https://brse.sso.azurewebsites.windows.net/","https://chw.sso.azurewebsites.windows.net/","https://trydiagnosticsmesh.azure.com/","https://zrh.sso.azurewebsites.windows.net/","https://yt1.sso.azurewebsites.windows.net/","https://yq1.sso.azurewebsites.windows.net/","https://sy3.sso.azurewebsites.windows.net/","https://svg.sso.azurewebsites.windows.net/","https://sn1.sso.azurewebsites.windows.net/","https://sg1.sso.azurewebsites.windows.net/","https://se1.sso.azurewebsites.windows.net/","https://ps1.sso.azurewebsites.windows.net/","https://pn1.sso.azurewebsites.windows.net/","https://par.sso.azurewebsites.windows.net/","https://osl.sso.azurewebsites.windows.net/","https://os1.sso.azurewebsites.windows.net/","https://mwh.sso.azurewebsites.windows.net/","https://msftintsg1.sso.azurewebsites.windows.net/","https://msftintdm3.sso.azurewebsites.windows.net/","https://mrs.sso.azurewebsites.windows.net/","https://ml1.sso.azurewebsites.windows.net/","https://ma1.sso.azurewebsites.windows.net/","https://ln1.sso.azurewebsites.windows.net/","https://kw1.sso.azurewebsites.windows.net/","https://jnb21.sso.azurewebsites.windows.net/","https://hk1.sso.azurewebsites.windows.net/","https://fra.sso.azurewebsites.windows.net/","https://dm1.sso.azurewebsites.windows.net/","https://db3.sso.azurewebsites.windows.net/","https://cy4.sso.azurewebsites.windows.net/","https://cw1.sso.azurewebsites.windows.net/","https://cq1.sso.azurewebsites.windows.net/","https://cpt20.sso.azurewebsites.windows.net/","https://ch1.sso.azurewebsites.windows.net/","https://cbr21.sso.azurewebsites.windows.net/","https://cbr20.sso.azurewebsites.windows.net/","https://bn1.sso.azurewebsites.windows.net/","https://bm1.sso.azurewebsites.windows.net/","https://blu.sso.azurewebsites.windows.net/","https://ber.sso.azurewebsites.windows.net/","https://bay.sso.azurewebsites.windows.net/","https://auh.sso.azurewebsites.windows.net/","https://am2.sso.azurewebsites.windows.net/","https://euapdm1.sso.azurewebsites.windows.net/","https://euapbn1.sso.azurewebsites.windows.net/","https://msftinthk1.sso.azurewebsites.windows.net/","https://deploy-staging.azure.com","https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com","https://functions-release.azure.com"],"servicePrincipalNames":["https://appservice.azure.com","Microsoft.Azure.WebSites","abfa0a7c-a6b6-4736-8310-5855508787cd"],"servicePrincipalType":"Application","signInAudience":"AzureADMultipleOrgs","tags":["CSEOAllowGuests"],"tokenEncryptionKeyId":null,"samlSingleSignOnSettings":null,"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"addIns":[],"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[],"oauth2PermissionScopes":[{"adminConsentDescription":"Allow
+        the application to access all the APIs registered with App Service","adminConsentDisplayName":"Access
+        APIs registered with App Service","id":"e0ea806b-d128-49dc-ac08-2bf18f7874d8","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access all the APIs registered with App Service","userConsentDisplayName":"Access
+        APIs registered with App Service","value":"user_impersonation"}],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[]}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4192'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:36 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 759360f5-1a52-4077-8d9f-5459aa27ff6a
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"West US 2","Slice":"E","Ring":"1","ScaleUnit":"000","RoleInstance":"CO1PEPF0000164F"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --spn --secret-permissions
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005","name":"kv-ssl-test000005","type":"Microsoft.KeyVault/vaults","location":"japanwest","tags":{},"systemData":{"createdBy":"sisirap@microsoft.com","createdByType":"User","createdAt":"2022-06-10T00:34:01.761Z","lastModifiedBy":"sisirap@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-06-10T00:34:01.761Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://kv-ssl-test000005.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '986'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.396.0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "japanwest", "tags": {}, "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3",
+      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
+      "storage": ["all"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId":
+      "f8daea97-62e7-4026-becf-13c2ea98e8b4", "permissions": {"secrets": ["get"]}}],
+      "vaultUri": "https://kv-ssl-test000005.vault.azure.net/", "enabledForDeployment":
+      false, "enableSoftDelete": true, "softDeleteRetentionInDays": 90, "provisioningState":
+      "Succeeded", "publicNetworkAccess": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '733'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name --spn --secret-permissions
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005","name":"kv-ssl-test000005","type":"Microsoft.KeyVault/vaults","location":"japanwest","tags":{},"systemData":{"createdBy":"sisirap@microsoft.com","createdByType":"User","createdAt":"2022-06-10T00:34:01.761Z","lastModifiedBy":"sisirap@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-06-10T00:34:39.654Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"f8daea97-62e7-4026-becf-13c2ea98e8b4","permissions":{"secrets":["get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://kv-ssl-test000005.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.396.0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.2 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://kv-ssl-test000005.vault.azure.net/certificates/test-cert/import?api-version=7.0
+  response:
+    body:
+      string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
+        a Bearer or PoP token."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '97'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
+        resource="https://vault.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=216.9.31.162;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - japanwest
+      x-ms-keyvault-service-version:
+      - 1.9.422.1
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: '{"value": "MIIKYgIBAzCCCh4GCSqGSIb3DQEHAaCCCg8EggoLMIIKBzCCBggGCSqGSIb3DQEHAaCCBfkEggX1MIIF8TCCBe0GCyqGSIb3DQEMCgECoIIE/jCCBPowHAYKKoZIhvcNAQwBAzAOBAiXDoyN14zikgICB9AEggTYczAG9RXE6P9dZzKEkuAB3zAoIpepICAcTQO38wV1z2dd3E1p7vBI+RYv1Td3965af6LUHeW7iHwE1h+qUntxAQtW7vVI7cUFa9iP0Heu/ijuZraY1lmKQEzFWffCE1XIgwcH3yHpi88Ow1Au64PfaaYPlrAgklPQ69DPIwM9JuhBd5qXW1XDe6XQ1msu6kvEFR1SNLN4Ul6BfKSPvzhVPKVnq33Lbt/QsVkZ3DtabLz8sW6qVYjEa5R8uW2Z7OaBtBbQWGkM6vnuaUpnE0pXxo815RTsvHXVlZkfgSCeOakmGIAygU/EU8BGvubAWx7WNo6RWFCOiT25tJspW6VY9JEse5ESvc4QnUQm1f0C3YPCcCDUCwEt3ZatGSr4MnJHN2Y1OEf1aWjewz0Se1bP2o/SwihyBNqXXZ3QzjxC8vrR+l6E7fPX3UVPJG5hHZfn2q5aofU/OyrPLUUDCaRlrM5oBADouQBy+t77/pobdvShgdYhiy/QCD6mJGalk6OEdfvp35uoL4jgo2irh4i9C3oOzSXFADUjivG66ZsVIN0k43boaO+JueqVso4GNYB8Zz4FIRlPQOZNCXHcuqvhnU0SGhujeb+H0LSXw53xmiwpWwB7xdv7b/qacaoOV1S3C8ZTM6FkJ8oKmNRMIWiIyfgyXQpmqaMND6nCVkcKkYbmVgNQZdWmbiKg1NGm66Q8rLtSUdIlyyCYzmxngLAa4zEbqPqgMwP4LIyCnxKn7hguBeyLsDvYRk029pgLnVVl5fl+Ijk4w2Noor/Axn3yD2gXCy5h9Xel1iXUqr4JtaJnWOoELx5KFwGhXeHdmRUjRVigbVN+nNd2AdtLih2eBimKpRm2NoBCrfGg9KUDpSi8eSTmbXW/enBWkdGrlu9lVTpgK3tlXW3VUveJh15rtwxTUagsee3G06w6YOu0ZRmT4hNfV2FWmjCuB4VCkY+KeFndsRLdC52odvO2z0u2nwBlvRjFrzErpAJdHWWv+XQ/fuOOjBbP5mvV1+gPEEA8QY4tvi/ac1n5S8L2oVNhaF39+QYlwMdcpLFy2BAw2PN7OnNAQMKViTu4iqVA6861oDa22D9EVufpyvSQj4Y0UoGhs8kS8aT8qsHUvabPlrjqslSuaIDB3H2kVSXXVW9kmMLmRNlhqm7Kowa4jjobr2lNY5dZFjJKy3wD2lsBdRHvsGrC35/vakI6Qy0WHcgA1YM7JwJl808lCQ9fi5Jcd/3tjfyhRv6AvZ6Na2VMZwg2bNOCJfhMKgTyssqRLy5us9zRXRvDFI8IQHmoNcliDnQZIcaVApPx095wQOOm4n8dqfw0AFSSRpgdQT6yQRxlNUyqhQbaUzlUKxxf9F6iVvpDMizmDbCB2/wapF+1/6M4HZfHT0JV4nnOtjr96Yfm1pUYN6jkcsyyeYypOFMKcbaTe9UtU9XU/AxJnkBOl2U7YRuffu3ElkZv0pZggWaNeQ3sCE5scVrFsi8+/AFz1O264knbXyw07leoal/JKIiAquq1Hx6QMzShgz/ympyGVHcC2DJBqjOQ/E8b/34WjUaBMop+JNMStUZnoJqL68rQcxkRdWAEj27f+A2c9nagz0TyCXLB5s/LQu3mbknXQzDbH7qJQxOidFg675fqaTrhekaR7psnJDGB2zATBgkqhkiG9w0BCRUxBgQEAQAAADBdBgkrBgEEAYI3EQExUB5OAE0AaQBjAHIAbwBzAG8AZgB0ACAAUwB0AHIAbwBuAGcAIABDAHIAeQBwAHQAbwBnAHIAYQBwAGgAaQBjACAAUAByAG8AdgBpAGQAZQByMGUGCSqGSIb3DQEJFDFYHlYAUAB2AGsAVABtAHAAOgAzAGUAYQAxADIAYQBiADcALQBjAGMAYgA4AC0ANAA3ADcAZAAtAGEAYQBlADQALQA5ADgAZQA1AGYAZgAzAGEANgA4ADcAZjCCA/cGCSqGSIb3DQEHBqCCA+gwggPkAgEAMIID3QYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQMwDgQII49JHcCo5YoCAgfQgIIDsNAp0Fem6ktVE6yy8cO2q9jHI94QEA5Xu4T5v/RWz1VJJ2SdSCBXvrCYdhldYVSoXbSbeLTBsULmi/6ST1VkMETbtrl8RlW8DzzDFeYisyeZtOuxbHcVX8ByqDFo/Ro/vydvx7CRx11IstHIeg64qeVsofMU9NRS3rCGU9CwCjJ4aV9QFgZa0vEnROAZnaI1uRWOuMuHT98Kvv/wJ93xZJq2voAASyysePaZq/pUlzmRuyC/Pz2uXdNIoOu8BykMjvXw4kFzDCWt1DljYaijTLX9hGgzgxdbAOw1/2RSlEaYXpxPrhaYxOTFLGByyO2F1arn3btiMGTxBh61/2Gswg+gpUWX9J3jlT77pXXgyHgZ4YBJ45cWkTCmSSOqjyjdP6buSRInPlfTKDfQGi0riI32qdcO77gCvJdMOcN5HTleglaCDvQyFfYRAzWQ+EQ4N0WfnfDYe8v7+o136wht8cxxKQmo4/FbfOMURe6L1Hlj/hOie6yUD8+lqNMF3oFW42/rMUke5OWZZEIqDeN8tg08f/h7T2i10HW5zuDwAMllqwSdcfNZOESpcbAGbZn76wvvG2sYMXmT3lZvel4iWD8yOZTWIaCKv1+p5GqKTIiIpVOl7iXS4QTwbuNaMJl4a92zuCrnWxTJgw+ZCsmEvpC4u/OUivv7l1R7eJgbo/gdbtuaZWr3Ei4jaOlQj7W6OOGjJDAzzzY1MndsoBA+6HC3KsOCmP9aoXjp8g6hTMNnWZVehPE3Bq4AjHPoP3YXYFHfqqetUhYxnajYd6AB0JPiM9anCMTgbqUHhCTK8B+smPMCijRAGESbrP3EDcmSEJ2mjobV4SllM0qbfKBvU9ZdbUGaOHSytD/fplWpH4oc6SBvHyhK/WPzBz+o7uwgzD70Spl9OiqhsitQTw1asjWKRCs3rrby5tpAfbD0V0lSgLa9ac9bOP/B82LwRe5V7bG/TY+oE5hrN+d50rYl+FBzGsh0lZ//b9lbJIylFhNKz+C2zEobd846u90tYfBvbHgo8RSbIN082uGLo3Vi3d0g/uhkhSMqLNQdYkBku2akqPcPIVrgdaT1ezCgoxX61q5UTjtdRuZv1d9u1ZhOA8iO7Gqi0C/9MQAQhk9uhbHg+88gLE5VFeRgt7H+fI2OjvFqSkq6Xk8Tio4RCQp54wnZ9cyOl7i5mZ7pqEZBUPxbXS6ssQYjuFi67Bl4BqYdIIV11mEYCccDAuyzNmoRy6LnvKFF4JUfEWZvO09PSU7qMDswHzAHBgUrDgMCGgQUSM2AwxMfBXKBH7nTqtFwI2zPF/0EFN4t6/m7IFHS48s+ZjArJodRXSNNAgIH0A==\n",
+      "pwd": "test", "policy": {"secret_props": {"contentType": "application/x-pkcs12"}},
+      "attributes": {"enabled": true, "nbf": 1514790000, "exp": 4701913200}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3722'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.2 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://kv-ssl-test000005.vault.azure.net/certificates/test-cert/import?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://kv-ssl-test000005.vault.azure.net/certificates/test-cert/c35e9e6d477c4ea4bb6cf57fd175406c","kid":"https://kv-ssl-test000005.vault.azure.net/keys/test-cert/c35e9e6d477c4ea4bb6cf57fd175406c","sid":"https://kv-ssl-test000005.vault.azure.net/secrets/test-cert/c35e9e6d477c4ea4bb6cf57fd175406c","x5t":"npc1xFx5KwOz_8ymFIUrMu5xrWs","cer":"MIIDYTCCAk2gAwIBAgIQLVKvAHY+rqVB+C7Wbh24QDAJBgUrDgMCHQUAMDExLzAtBgNVBAMeJgAqAC4AYQB6AHUAcgBlAHcAZQBiAHMAaQB0AGUAcwAuAG4AZQB0MCAXDTE4MDEwMTA3MDAwMFoYDzIxMTgxMjMxMDcwMDAwWjAxMS8wLQYDVQQDHiYAKgAuAGEAegB1AHIAZQB3AGUAYgBzAGkAdABlAHMALgBuAGUAdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKcqVpT4O7YwltwNd/XSTqITNrpb1lxkLE5r0CpummRxDtjSKbY/vrA7cnHByZS0lRnVPgnZFSyTR0qU0XhGQxedMx+uLGnaDfvDtbCzElsrH4yaMU/dU4959liNYccV//OZOOfr8AB5xnD3k1ix/ssMphIE7sdZx2Icr9TGZzE6Ckm0afEdp7SdwUpXvOjxfB6tFtqyhN5Gtgm1f1rhugCb1QA1UCM1b0Af2XTHbhW057BmUppNI6rzYr3RPed0pXTryeI1/5U3a9ZJ2XFW3VXTXw9Wo+qv8I+9DWIUj0JdoYJ2XkTcZJEeo3woJSBx1yCv2bggR3OUM0wG7/n4HykCAwEAAaN7MHkwEwYDVR0lBAwwCgYIKwYBBQUHAwEwYgYDVR0BBFswWYAQ3sdVft+h9rOb7gSClEWvkaEzMDExLzAtBgNVBAMeJgAqAC4AYQB6AHUAcgBlAHcAZQBiAHMAaQB0AGUAcwAuAG4AZQB0ghAtUq8Adj6upUH4LtZuHbhAMAkGBSsOAwIdBQADggEBAB+08jsd9CeKCX4qeEUNx3i1uklsTAdwoEkK6xQqF4LuHsV9J8NEkQnJow1w2wsg/lULbm+k6LJmM7qCP0NquYOQra3/sdWZvPQflhFM8awpBkIOWO9/wS1oQWhyUHFCwSWUOhJ218bNxBLwIjX6bjCEVNQWNNOFooPz3/dNNVfxqXggqgWXBQ11LuZha+zvU7G82zCttImywZUFcKK3dcvdYPAU9POWQvuuvUqBBdKzPcNCnJAFyXPpJPegW+3ycwphRKxBjYUATe7aP+ulc+/YkyK19dLdUqxBkx2ElJ2HKTcUo6eEXgAuyjQ/jQejZI+fG2FV4NxGEoSned4BKng=","attributes":{"enabled":true,"nbf":1514790000,"exp":4701913200,"created":1654821280,"updated":1654821280,"recoveryLevel":"Recoverable+Purgeable"},"policy":{"id":"https://kv-ssl-test000005.vault.azure.net/certificates/test-cert/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":false},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=*.azurewebsites.net","ekus":["1.3.6.1.5.5.7.3.1"],"key_usage":[],"validity_months":1200,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"lifetime_percentage":80},"action":{"action_type":"EmailContacts"}}],"issuer":{"name":"Unknown"},"attributes":{"enabled":true,"created":1654821280,"updated":1654821280}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2229'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=216.9.31.162;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - japanwest
+      x-ms-keyvault-service-version:
+      - 1.9.422.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-vault --key-vault-certificate-name
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004","name":"web-ssl-test000004","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"web-ssl-test000004","state":"Running","hostNames":["web-ssl-test000004.azurewebsites.net"],"webSpace":"clitest.rg000002-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000002-JapanWestwebspace/sites/web-ssl-test000004","repositorySiteName":"web-ssl-test000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000004.azurewebsites.net","web-ssl-test000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-06-10T00:33:35.9533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"web-ssl-test000004","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"30E3673979DFB5673924412D39370809E608E2DE4E889BD01C7B80FC38A57EED","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"web-ssl-test000004\\$web-ssl-test000004","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"web-ssl-test000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6007'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:42 GMT
+      etag:
+      - '"1D87C61B8AE5115"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-vault --key-vault-certificate-name
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CertificateRegistration/certificateOrders?api-version=2021-03-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliTestApp/providers/Microsoft.CertificateRegistration/certificateOrders/testcert1","name":"testcert1","type":"certificateOrders","location":"global","properties":{"certificates":{"testcert1":{"keyVaultId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sisirap-rg/providers/microsoft.keyvault/vaults/sisirap-keyvault-test","keyVaultSecretName":"testcert17fd9af6e-5864-4d98-ac8a-fd39fc1e8863","provisioningState":"Succeeded"}},"distinguishedName":"CN=hi.sisiraptestdomains.com","domainVerificationToken":"e3opt4kc8jre5khef15smtvl39","validityInYears":1,"keySize":2048,"productType":"StandardDomainValidatedSsl","autoRenew":false,"status":"Issued","signedCertificate":{"version":3,"serialNumber":"62DDB86553CB1A97","thumbprint":"B74408A89E188C990D28A19185E56A53D5C59C5C","subject":"CN=hi.sisiraptestdomains.com","notBefore":"2021-08-12T21:23:30+00:00","notAfter":"2022-08-12T21:23:30+00:00","signatureAlgorithm":"sha256RSA","issuer":"CN=Go
+        Daddy Secure Certificate Authority - G2, OU=http://certs.godaddy.com/repository/,
+        O=\"GoDaddy.com, Inc.\", L=Scottsdale, S=Arizona, C=US","rawData":"-----BEGIN
+        CERTIFICATE-----\nMIIGtTCCBZ2gAwIBAgIIYt24ZVPLGpcwDQYJKoZIhvcNAQELBQAwgbQxCzAJBgNV\nBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQHEwpTY290dHNkYWxlMRow\nGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UECxMkaHR0cDovL2NlcnRz\nLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQDEypHbyBEYWRkeSBTZWN1\ncmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwHhcNMjEwODEyMjEyMzMwWhcN\nMjIwODEyMjEyMzMwWjAkMSIwIAYDVQQDExloaS5zaXNpcmFwdGVzdGRvbWFpbnMu\nY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjA3htQTvj0chkWDp\nj9fbvX42ONcSTopVfGN4Y2wRwfPsmwGG8m145VhqSNbGf8VijEy7VKJxJ1m29WjO\ns+WBbtI1FC1ysI5aI/gufOWC54FYhqYt3K/Db1CTb9ooNFogmQV5BEcCkYGLPUdS\nM7WM6MlPoQxWRPEjhvTDoMm+tclBSn+B3ftNS9NVYE7IRwSQmRCa0f09EL5aQHqN\nWi7DaXiBdlWWWqO4Y3lI4MDOHCwuUchEz1ehhTaa/5jzGOy4grbUorY29aCZaSWe\nocmKFgqq7fn1o04hTvVnjU7Xx/MVBwPwfAns0vGvpnWY3hlZboaaQ+suVRVITHrT\nvqxn7QIDAQABo4IDWDCCA1QwDAYDVR0TAQH/BAIwADAdBgNVHSUEFjAUBggrBgEF\nBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH/BAQDAgWgMDgGA1UdHwQxMC8wLaAroCmG\nJ2h0dHA6Ly9jcmwuZ29kYWRkeS5jb20vZ2RpZzJzMS0zMjA0LmNybDBdBgNVHSAE\nVjBUMEgGC2CGSAGG/W0BBxcBMDkwNwYIKwYBBQUHAgEWK2h0dHA6Ly9jZXJ0aWZp\nY2F0ZXMuZ29kYWRkeS5jb20vcmVwb3NpdG9yeS8wCAYGZ4EMAQIBMHYGCCsGAQUF\nBwEBBGowaDAkBggrBgEFBQcwAYYYaHR0cDovL29jc3AuZ29kYWRkeS5jb20vMEAG\nCCsGAQUFBzAChjRodHRwOi8vY2VydGlmaWNhdGVzLmdvZGFkZHkuY29tL3JlcG9z\naXRvcnkvZ2RpZzIuY3J0MB8GA1UdIwQYMBaAFEDCvSeOzDSDMKIz1/tss/C0LIDO\nMEMGA1UdEQQ8MDqCGWhpLnNpc2lyYXB0ZXN0ZG9tYWlucy5jb22CHXd3dy5oaS5z\naXNpcmFwdGVzdGRvbWFpbnMuY29tMB0GA1UdDgQWBBTtz2LvKZUXsTgBV8+UvTmf\nNCb5aDCCAX0GCisGAQQB1nkCBAIEggFtBIIBaQFnAHcAKXm+8J45OSHwVnOfY6V3\n5b5XfZxgCvj5TV0mXCVdx4QAAAF7PD+/6gAABAMASDBGAiEAwKSgH+rM2STyAKjl\n2Qe3FXGYDaffIFHaeXG1XoOv0hcCIQCyKj4HwAZ4LznI4eV/25oVLWFTLfwrjFuQ\nbQU0CVvhPgB1AN+lXqtogk8fbK3uuF9OPlrqzaISpGpejjsSwCBEXCpzAAABezw/\nwj8AAAQDAEYwRAIgPfX8PSp4PHu9RNQOHTejWcPDK8v3mNdMlJTzo2lR94ICIDg/\n/ZgRpZQodXCLD9auIVyah4HI86E0DvuAaLOdXeX6AHUAQcjKsd8iRkoQxqE6CUKH\nXk4xixsD6+tLx2jwkGKWBvYAAAF7PD/CoQAABAMARjBEAiAazsitS/A6ytR2K9WN\nj6mVmXAU49rHmPp0igXtzJ/EiwIgROKJ/SqR5JYZa33EtQsQaToUryPCoNViTl62\ngLULgVQwDQYJKoZIhvcNAQELBQADggEBAB22Q0I//aQoI5rLe5Vd3Z+aYlCArKli\n3z4KUHUf2/OLSZuK+7upSLBsFWu7UFYWHrbFOu17zCeFyNcvB7ZYp6ArCXi5jyeA\n0/R7qGpAEhE0d9i+j9KDbsX930KGfZsD6883VqO95l5AkFocEk+mJiSUtdU/NznX\no3anO9BK/fx4/KJIMZIkUOgq4bAEHYqHJm9zM3TL11TqGzZQPHQMqe3qgTfR5PUE\noFfpp6lBYEOhHvwSPRkTXlvVIGCBWzHyV1uy9wpBV5czyn7DCIvoYtWvH4+Tn4eK\nSWe3KELinQJuF/oz7oaugQcDLITpczrQ9+oQt4ZLxTthhA9I2XmR3LE=\n-----END
+        CERTIFICATE-----\n"},"csr":"-----BEGIN NEW CERTIFICATE REQUEST-----\r\nMIIETDCCAzQCAQAwJDEiMCAGA1UEAwwZaGkuc2lzaXJhcHRlc3Rkb21haW5zLmNv\r\nbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIwN4bUE749HIZFg6Y/X\r\n271+NjjXEk6KVXxjeGNsEcHz7JsBhvJteOVYakjWxn/FYoxMu1SicSdZtvVozrPl\r\ngW7SNRQtcrCOWiP4LnzlgueBWIamLdyvw29Qk2/aKDRaIJkFeQRHApGBiz1HUjO1\r\njOjJT6EMVkTxI4b0w6DJvrXJQUp/gd37TUvTVWBOyEcEkJkQmtH9PRC+WkB6jVou\r\nw2l4gXZVllqjuGN5SODAzhwsLlHIRM9XoYU2mv+Y8xjsuIK21KK2NvWgmWklnqHJ\r\nihYKqu359aNOIU71Z41O18fzFQcD8HwJ7NLxr6Z1mN4ZWW6GmkPrLlUVSEx6076s\r\nZ+0CAwEAAaCCAeEwHAYKKwYBBAGCNw0CAzEOFgwxMC4wLjE0MzkzLjIwTQYJKwYB\r\nBAGCNxUUMUAwPgIBBQwOUkQwMDE1NUQzMUU5MzAMH0lJUyBBUFBQT09MXEdlb01h\r\nc3RlckFwcFBvb2xDc20MCHczd3AuZXhlMIGCBgorBgEEAYI3DQICMXQwcgIBAR5q\r\nAE0AaQBjAHIAbwBzAG8AZgB0ACAARQBuAGgAYQBuAGMAZQBkACAAUgBTAEEAIABh\r\nAG4AZAAgAEEARQBTACAAQwByAHkAcAB0AG8AZwByAGEAcABoAGkAYwAgAFAAcgBv\r\nAHYAaQBkAGUAcgMBADCB7AYJKoZIhvcNAQkOMYHeMIHbMA4GA1UdDwEB/wQEAwIF\r\noDATBgNVHSUEDDAKBggrBgEFBQcDATCBlAYJKoZIhvcNAQkPBIGGMIGDMA4GCCqG\r\nSIb3DQMCAgIAgDAOBggqhkiG9w0DBAICAIAwBwYFKw4DAgcwCgYIKoZIhvcNAwcw\r\nCwYJYIZIAWUDBAEqMAsGCWCGSAFlAwQBLTALBglghkgBZQMEARYwCwYJYIZIAWUD\r\nBAEZMAsGCWCGSAFlAwQBAjALBglghkgBZQMEAQUwHQYDVR0OBBYEFO3PYu8plRex\r\nOAFXz5S9OZ80JvloMA0GCSqGSIb3DQEBCwUAA4IBAQAOK70NNGuM0gE281NY9Cwk\r\ng/A4wncGVo5aVRGIUY8wlOI4KMvxH1Qe1NojPmC2vTHim6d7P4u/5yebwLCfvb99\r\neFCymhpWXfK7nSRwyE7rFsV54nQjrf9hN5x2Ng5L62nNVO/q1K5dvOokqN+P/INk\r\niK/1rN8bXq5hwpMwbHx3nOqjtGu74NtNA2ysZWwGX5doihk/ENqtvyGU+aR4zf8v\r\nSuVucbFaVVXSq7oIn5g9hiZxYLTlzBFiFxMwRGtMvISmo9eHjVxif0DSDcE1u5ta\r\n3/dKz9HVAIKdPX/RZ2Nr20hXsLRcpwzFwxIT9FYcfymv5clPr+pvLPBUE8dxlFl1\r\n-----END
+        NEW CERTIFICATE REQUEST-----\r\n","intermediate":{"version":3,"serialNumber":"07","thumbprint":"27AC9369FAF25207BB2627CEFACCBE4EF9C319B8","subject":"CN=Go
+        Daddy Secure Certificate Authority - G2, OU=http://certs.godaddy.com/repository/,
+        O=\"GoDaddy.com, Inc.\", L=Scottsdale, S=Arizona, C=US","notBefore":"2011-05-03T07:00:00+00:00","notAfter":"2031-05-03T07:00:00+00:00","signatureAlgorithm":"sha256RSA","issuer":"CN=Go
+        Daddy Root Certificate Authority - G2, O=\"GoDaddy.com, Inc.\", L=Scottsdale,
+        S=Arizona, C=US","rawData":"-----BEGIN CERTIFICATE-----\nMIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx\nEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT\nEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290IENlcnRp\nZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMxMDUwMzA3\nMDAwMFowgbQxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQH\nEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UE\nCxMkaHR0cDovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQD\nEypHbyBEYWRkeSBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwggEi\nMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC54MsQ1K92vdSTYuswZLiBCGzD\nBNliF44v/z5lz4/OYuY8UhzaFkVLVat4a2ODYpDOD2lsmcgaFItMzEUz6ojcnqOv\nK/6AYZ15V8TPLvQ/MDxdR/yaFrzDN5ZBUY4RS1T4KL7QjL7wMDge87Am+GZHY23e\ncSZHjzhHU9FGHbTj3ADqRay9vHHZqm8A29vNMDp5T19MR/gd71vCxJ1gO7GyQ5HY\npDNO6rPWJ0+tJYqlxvTV0KaudAVkV4i1RFXULSo6Pvi4vekyCgKUZMQWOlDxSq7n\neTOvDCAHf+jfBDnCaQJsY1L6d8EbyHSHyLmTGFBUNUtpTrw700kuH9zB0lL7AgMB\nAAGjggEaMIIBFjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBBjAdBgNV\nHQ4EFgQUQMK9J47MNIMwojPX+2yz8LQsgM4wHwYDVR0jBBgwFoAUOpqFBxBnKLbv\n9r0FQW4gwZTaD94wNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhhodHRwOi8v\nb2NzcC5nb2RhZGR5LmNvbS8wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDovL2NybC5n\nb2RhZGR5LmNvbS9nZHJvb3QtZzIuY3JsMEYGA1UdIAQ/MD0wOwYEVR0gADAzMDEG\nCCsGAQUFBwIBFiVodHRwczovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkv\nMA0GCSqGSIb3DQEBCwUAA4IBAQAIfmyTEMg4uJapkEv/oV9PBO9sPpyIBslQj6Zz\n91cxG7685C/b+LrTW+C05+Z5Yg4MotdqY3MxtfWoSKQ7CC2iXZDXtHwlTxFWMMS2\nRJ17LJ3lXubvDGGqv+QqG+6EnriDfcFDzkSnE3ANkR/0yBOtg2DZ2HKocyQetawi\nDsoXiWJYRBuriSUBAA/NxBti21G00w9RKpv0vHP8ds42pM3Z2Czqrpv1KrKQ0U11\nGIo/ikGQI31bS/6kA1ibRrLDYGCD+H1QQc7CoZDDu+8CL9IVVO5EFdkKrqeKM+2x\nLXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDAB\n-----END
+        CERTIFICATE-----"},"root":{"version":3,"serialNumber":"00","thumbprint":"47BEABC922EAE80E78783462A79F45C254FDE68B","subject":"CN=Go
+        Daddy Root Certificate Authority - G2, O=\"GoDaddy.com, Inc.\", L=Scottsdale,
+        S=Arizona, C=US","notBefore":"2009-09-01T00:00:00+00:00","notAfter":"2037-12-31T23:59:59+00:00","signatureAlgorithm":"sha256RSA","issuer":"CN=Go
+        Daddy Root Certificate Authority - G2, O=\"GoDaddy.com, Inc.\", L=Scottsdale,
+        S=Arizona, C=US","rawData":"-----BEGIN CERTIFICATE-----\nMIIDxTCCAq2gAwIBAgIBADANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx\nEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT\nEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290IENlcnRp\nZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTA5MDkwMTAwMDAwMFoXDTM3MTIzMTIz\nNTk1OVowgYMxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQH\nEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjExMC8GA1UE\nAxMoR28gRGFkZHkgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkgLSBHMjCCASIw\nDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL9xYgjx+lk09xvJGKP3gElY6SKD\nE6bFIEMBO4Tx5oVJnyfq9oQbTqC023CYxzIBsQU+B07u9PpPL1kwIuerGVZr4oAH\n/PMWdYA5UXvl+TW2dE6pjYIT5LY/qQOD+qK+ihVqf94Lw7YZFAXK6sOoBJQ7Rnwy\nDfMAZiLIjWltNowRGLfTshxgtDj6AozO091GB94KPutdfMh8+7ArU6SSYmlRJQVh\nGkSBjCypQ5Yj36w6gZoOKcUcqeldHraenjAKOc7xiID7S13MMuyFYkMlNAJWJwGR\ntDtwKj9useiciAF9n9T521NtYJ2/LOdYq7hfRvzOxBsDPAnrSTFcaUaz4EcCAwEA\nAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMCAQYwHQYDVR0OBBYE\nFDqahQcQZyi27/a9BUFuIMGU2g/eMA0GCSqGSIb3DQEBCwUAA4IBAQCZ21151fmX\nWWcDYfF+OwYxdS2hII5PZYe096acvNjpL9DbWu7PdIxztDhC2gV7+AJ1uP2lsdeu\n9tfeE8tTEH6KRtGX+rcuKxGrkLAngPnon1rpN5+r5N9ss4UXnT3ZJE95kTXWXwTr\ngIOrmgIttRD02JDHBHNA7XIloKmf7J6raBKZV8aPEjoJpL1E/QYVN8Gb5DKj7Tjo\n2GTzLH4U/ALqn83/B2gX2yKQOC16jdFU8WnjXzPKej17CuPKf1855eJ1usV2GDPO\nLPAvTK33sefOT6jEm0pUBsV/fdUID+Ic/n4XuKxe9tQWskMJDE32p2u0mYRlynqI\n4uJEvlz36hz1\n-----END
+        CERTIFICATE-----"},"serialNumber":"7124052930907019927","lastCertificateIssuanceTime":"2021-08-12T21:23:50.310771","expirationTime":"2022-08-12T21:23:30","isPrivateKeyExternal":false,"appServiceCertificateNotRenewableReasons":["ExpirationNotInRenewalTimeRange"]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sisirap-RG/providers/Microsoft.CertificateRegistration/certificateOrders/test-asc-hello","name":"test-asc-hello","type":"certificateOrders","location":"global","properties":{"certificates":{"test-asc-hello":{"keyVaultId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/sisirap-rg/providers/microsoft.keyvault/vaults/sisirap-certs-akv","keyVaultSecretName":"test-asc-hellob7ea896c-74ed-4bd2-a7fb-71aa9d628aa1","provisioningState":"CertificateOrderFailed"}},"distinguishedName":"CN=sisiraptrydomains.org","domainVerificationToken":"8o51k42vl2saun2t45rfmbcsev","validityInYears":1,"keySize":2048,"productType":"StandardDomainValidatedSsl","autoRenew":false,"status":"Denied","csr":"-----BEGIN
+        NEW CERTIFICATE REQUEST-----\r\nMIIESDCCAzACAQAwIDEeMBwGA1UEAwwVc2lzaXJhcHRyeWRvbWFpbnMub3JnMIIB\r\nIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApUIdJe1e87/YK3znv4wCwcFL\r\nKZdTZ6+u5OA3E28/y5odbDQxvQJRWogGmiM/7syvMQf2idaZAUS25VoogUwjFtGM\r\nKBDyXaddYbm7mIYRSKSj4o5gEuPjq9+ynaJstm16S2xvGtyspNsOXYR/YH5biy0U\r\nWE31aqHIwJVeFzfqOS8VGKeA+y9HNXeQj/RhlzpJASRZ4GppfP53EI/LYFBNuKno\r\n/sKUQ8j5HkHbaiN1Gb0sSBrxD6u9F5j2r68tSJh61sTAtaNYEQn4cfsPdlveUpIs\r\n1Wc4yLolBInWrCnVgPXHT9o1XPvrhhghex2NX5vU57bWpSDU7bHZsIPeUEIWpQID\r\nAQABoIIB4TAcBgorBgEEAYI3DQIDMQ4WDDEwLjAuMTc3NjMuMjBNBgkrBgEEAYI3\r\nFRQxQDA+AgEFDA5SRDAwMTU1RDMxRUNFNAwfSUlTIEFQUFBPT0xcR2VvTWFzdGVy\r\nQXBwUG9vbENzbQwIdzN3cC5leGUwgYIGCisGAQQBgjcNAgIxdDByAgEBHmoATQBp\r\nAGMAcgBvAHMAbwBmAHQAIABFAG4AaABhAG4AYwBlAGQAIABSAFMAQQAgAGEAbgBk\r\nACAAQQBFAFMAIABDAHIAeQBwAHQAbwBnAHIAYQBwAGgAaQBjACAAUAByAG8AdgBp\r\nAGQAZQByAwEAMIHsBgkqhkiG9w0BCQ4xgd4wgdswDgYDVR0PAQH/BAQDAgWgMBMG\r\nA1UdJQQMMAoGCCsGAQUFBwMBMIGUBgkqhkiG9w0BCQ8EgYYwgYMwDgYIKoZIhvcN\r\nAwICAgCAMA4GCCqGSIb3DQMEAgIAgDAHBgUrDgMCBzAKBggqhkiG9w0DBzALBglg\r\nhkgBZQMEASowCwYJYIZIAWUDBAEtMAsGCWCGSAFlAwQBFjALBglghkgBZQMEARkw\r\nCwYJYIZIAWUDBAECMAsGCWCGSAFlAwQBBTAdBgNVHQ4EFgQUeAoifcVhkjkzdxRh\r\n3nMS9T5aiQEwDQYJKoZIhvcNAQELBQADggEBABHNrrDg6pVaeBPwGgznvMUfqNz+\r\nefzDw3zgPgwt8LQgcwwAJxkPD/J4KOhiXSLw9B6vIeH+SWa8xYdWghp77ouug+XD\r\n8aLp1FPoBoSgYRPIBFDqjgfrDrQFdmiai41BoLg5y9GhixOpSMbWWlnVmIP8KnxL\r\n8ezW0j43hRbtWQWOkUOOPRRZzXXD+rF6rlsS9R68LwuVoQOsiK+c08054WXwP1Fr\r\nRqzgw04oXRRW0P+tLgKwdFBagGnMgRKN0g4VRmXXrqa2j/8vxeBWSRkEjAcGPeuF\r\nMKZBAJocC/jG/8YH+RO1f2j7LOlDoobPKyEqY5dfsFBh72SC9ZxbkAWTQwo=\r\n-----END
+        NEW CERTIFICATE REQUEST-----\r\n","isPrivateKeyExternal":false,"appServiceCertificateNotRenewableReasons":["ExpirationNotInRenewalTimeRange","RegistrationStatusNotSupportedForRenewal"]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sisirap-testRG/providers/Microsoft.CertificateRegistration/certificateOrders/test-cert-22","name":"test-cert-22","type":"certificateOrders","location":"global","properties":{"distinguishedName":"CN=testdomain.com","domainVerificationToken":"qre4ul09vp2kgp4ikcljn2apkd","validityInYears":1,"keySize":2048,"productType":"StandardDomainValidatedSsl","autoRenew":true,"status":"Denied","csr":"-----BEGIN
+        NEW CERTIFICATE REQUEST-----\r\nMIIEQTCCAykCAQAwGTEXMBUGA1UEAwwOdGVzdGRvbWFpbi5jb20wggEiMA0GCSqG\r\nSIb3DQEBAQUAA4IBDwAwggEKAoIBAQD3WCIto/EryZZNs1/syi0rcoX/lPedQuwj\r\n6u5CDQBKF+XQrsZrqsnL78CFfe9xhcDM4eYDPr1FTk4Yh1ZbCQSrhGYwCuSw67TF\r\nBZjpafQgrvEv0Ae60lQ6zqKRjGQE7HVYXydgeDpWkpkTjrOXYMZkMI06pGl3Ib99\r\nSc9wqsHgVpSI4WSL+4WjQbvBJ8i/kOpPtnCWFDd+yVMpxT529MFSdupw8cc+EANx\r\nUh/VK4MpQpdUxztAKKYQFh+DgSbT2tKvnmOrYmNcG70YS53npsInEvcIhoBxRs7Q\r\n7rF1GvwwMQFHyGfK35FtGNMKch99qhq5fCQ/XKdSbj767BGr9hHLAgMBAAGgggHh\r\nMBwGCisGAQQBgjcNAgMxDhYMMTAuMC4xNDM5My4yME0GCSsGAQQBgjcVFDFAMD4C\r\nAQUMDlJEMDAxNTVENDFFREM5DB9JSVMgQVBQUE9PTFxHZW9NYXN0ZXJBcHBQb29s\r\nQ3NtDAh3M3dwLmV4ZTCBggYKKwYBBAGCNw0CAjF0MHICAQEeagBNAGkAYwByAG8A\r\ncwBvAGYAdAAgAEUAbgBoAGEAbgBjAGUAZAAgAFIAUwBBACAAYQBuAGQAIABBAEUA\r\nUwAgAEMAcgB5AHAAdABvAGcAcgBhAHAAaABpAGMAIABQAHIAbwB2AGkAZABlAHID\r\nAQAwgewGCSqGSIb3DQEJDjGB3jCB2zAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAww\r\nCgYIKwYBBQUHAwEwgZQGCSqGSIb3DQEJDwSBhjCBgzAOBggqhkiG9w0DAgICAIAw\r\nDgYIKoZIhvcNAwQCAgCAMAcGBSsOAwIHMAoGCCqGSIb3DQMHMAsGCWCGSAFlAwQB\r\nKjALBglghkgBZQMEAS0wCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQBGTALBglghkgB\r\nZQMEAQIwCwYJYIZIAWUDBAEFMB0GA1UdDgQWBBQF9DnJ9TQi2xIyjCAdwOiJcPBg\r\nnTANBgkqhkiG9w0BAQsFAAOCAQEAmIoidVZt1YjQgQXADS99JIAZgzmIZnw40T/i\r\nBEAMiXURSZi90XtW4k1rGFhzZ3jNMRc7pPlwVOd4OtGR9EaY115kOeWXorLss0rt\r\n++fkMr+9+xcIe94u8Fe+xyBDHPiETHPBkGjHYwrEch4Sg5aG9ohaXivl+3pah8JP\r\nj6ejDKTUioL51TqZsdUI2I48P1Ap7hLq9rBmloSv/3LR2gxram1bEHfYCDnfOdVL\r\n/OXfJE7ZQUGgoA2ZXHTgHO8Tci4haWh06g5yfnO9QH7yAvXUQyxFejv10Z9kncWb\r\nlsD9Sj1WynIbBVWLPUoqRna2YxBRKFbkf6Ujbxowpw46IApi8w==\r\n-----END
+        NEW CERTIFICATE REQUEST-----\r\n","isPrivateKeyExternal":false,"appServiceCertificateNotRenewableReasons":["ExpirationNotInRenewalTimeRange","RegistrationStatusNotSupportedForRenewal"]}}],"nextLink":null,"id":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '14457'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-vault --key-vault-certificate-name
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005","name":"kv-ssl-test000005","type":"Microsoft.KeyVault/vaults","location":"japanwest","tags":{},"systemData":{"createdBy":"sisirap@microsoft.com","createdByType":"User","createdAt":"2022-06-10T00:34:01.761Z","lastModifiedBy":"sisirap@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-06-10T00:34:39.654Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"f8daea97-62e7-4026-becf-13c2ea98e8b4","permissions":{"secrets":["get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://kv-ssl-test000005.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.5.396.0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-vault --key-vault-certificate-name
+      User-Agent:
+      - python/3.8.2 (macOS-10.16-x86_64-i386-64bit) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals/b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3
+  response:
+    body:
+      string: '{"error":{"code":"Request_ResourceNotFound","message":"Resource ''b72f39fa-d7a8-46e4-b9c3-efdec6cd55f3''
+        does not exist or one of its queried reference-property objects are not present.","innerError":{"date":"2022-06-10T00:34:46","request-id":"49a0ce24-d0a4-4e5a-b02f-912558347489","client-request-id":"49a0ce24-d0a4-4e5a-b02f-912558347489"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '341'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:45 GMT
+      request-id:
+      - 49a0ce24-d0a4-4e5a-b02f-912558347489
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"West US 2","Slice":"E","Ring":"1","ScaleUnit":"000","RoleInstance":"CO1PEPF000019C2"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --key-vault --key-vault-certificate-name
+      User-Agent:
+      - python/3.8.2 (macOS-10.16-x86_64-i386-64bit) AZURECLI/2.37.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals/f8daea97-62e7-4026-becf-13c2ea98e8b4
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals/$entity","id":"f8daea97-62e7-4026-becf-13c2ea98e8b4","deletedDateTime":null,"accountEnabled":true,"alternativeNames":[],"appDisplayName":"Microsoft
+        Azure App Service","appDescription":null,"appId":"abfa0a7c-a6b6-4736-8310-5855508787cd","applicationTemplateId":null,"appOwnerOrganizationId":"f8cdef31-a31e-4b4a-93e4-5f571e91255a","appRoleAssignmentRequired":false,"createdDateTime":null,"description":null,"disabledByMicrosoftStatus":null,"displayName":"Microsoft
+        Azure App Service","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":["https://usw3.sso.azurewebsites.windows.net/","https://dxb.sso.azurewebsites.windows.net/","https://brse.sso.azurewebsites.windows.net/","https://chw.sso.azurewebsites.windows.net/","https://trydiagnosticsmesh.azure.com/","https://zrh.sso.azurewebsites.windows.net/","https://yt1.sso.azurewebsites.windows.net/","https://yq1.sso.azurewebsites.windows.net/","https://sy3.sso.azurewebsites.windows.net/","https://svg.sso.azurewebsites.windows.net/","https://sn1.sso.azurewebsites.windows.net/","https://sg1.sso.azurewebsites.windows.net/","https://se1.sso.azurewebsites.windows.net/","https://ps1.sso.azurewebsites.windows.net/","https://pn1.sso.azurewebsites.windows.net/","https://par.sso.azurewebsites.windows.net/","https://osl.sso.azurewebsites.windows.net/","https://os1.sso.azurewebsites.windows.net/","https://mwh.sso.azurewebsites.windows.net/","https://msftintsg1.sso.azurewebsites.windows.net/","https://msftintdm3.sso.azurewebsites.windows.net/","https://mrs.sso.azurewebsites.windows.net/","https://ml1.sso.azurewebsites.windows.net/","https://ma1.sso.azurewebsites.windows.net/","https://ln1.sso.azurewebsites.windows.net/","https://kw1.sso.azurewebsites.windows.net/","https://jnb21.sso.azurewebsites.windows.net/","https://hk1.sso.azurewebsites.windows.net/","https://fra.sso.azurewebsites.windows.net/","https://dm1.sso.azurewebsites.windows.net/","https://db3.sso.azurewebsites.windows.net/","https://cy4.sso.azurewebsites.windows.net/","https://cw1.sso.azurewebsites.windows.net/","https://cq1.sso.azurewebsites.windows.net/","https://cpt20.sso.azurewebsites.windows.net/","https://ch1.sso.azurewebsites.windows.net/","https://cbr21.sso.azurewebsites.windows.net/","https://cbr20.sso.azurewebsites.windows.net/","https://bn1.sso.azurewebsites.windows.net/","https://bm1.sso.azurewebsites.windows.net/","https://blu.sso.azurewebsites.windows.net/","https://ber.sso.azurewebsites.windows.net/","https://bay.sso.azurewebsites.windows.net/","https://auh.sso.azurewebsites.windows.net/","https://am2.sso.azurewebsites.windows.net/","https://euapdm1.sso.azurewebsites.windows.net/","https://euapbn1.sso.azurewebsites.windows.net/","https://msftinthk1.sso.azurewebsites.windows.net/","https://deploy-staging.azure.com","https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com","https://functions-release.azure.com"],"servicePrincipalNames":["https://appservice.azure.com","Microsoft.Azure.WebSites","abfa0a7c-a6b6-4736-8310-5855508787cd"],"servicePrincipalType":"Application","signInAudience":"AzureADMultipleOrgs","tags":["CSEOAllowGuests"],"tokenEncryptionKeyId":null,"samlSingleSignOnSettings":null,"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"addIns":[],"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[],"oauth2PermissionScopes":[{"adminConsentDescription":"Allow
+        the application to access all the APIs registered with App Service","adminConsentDisplayName":"Access
+        APIs registered with App Service","id":"e0ea806b-d128-49dc-ac08-2bf18f7874d8","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access all the APIs registered with App Service","userConsentDisplayName":"Access
+        APIs registered with App Service","value":"user_impersonation"}],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4188'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Fri, 10 Jun 2022 00:34:46 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 19d958b3-b0f0-4f53-aad3-8bac568065b4
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"West US 2","Slice":"E","Ring":"1","ScaleUnit":"000","RoleInstance":"CO1PEPF000019C0"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Japan West", "properties": {"password": "", "keyVaultId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/kv-ssl-test000005",
+      "keyVaultSecretName": "test-cert", "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '407'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --key-vault --key-vault-certificate-name
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/certificates/clitest.rg000002-kv-ssl-test000005-test-cert?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/certificates/clitest.rg000002-kv-ssl-test000005-test-cert","name":"clitest.rg000002-kv-ssl-test000005-test-cert","type":"Microsoft.Web/certificates","location":"Japan
+        West","properties":{"password":null,"friendlyName":"","subjectName":"*.azurewebsites.net","hostNames":["*.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"*.azurewebsites.net","issueDate":"2018-01-01T07:00:00+00:00","expirationDate":"2118-12-31T07:00:00+00:00","thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.keyvault/vaults/kv-ssl-test000005","keyVaultSecretName":"test-cert","webSpace":"clitest.rg000002-JapanWestwebspace","serverFarmId":null,"tags":null,"resourceGroup":"clitest.rg000002"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1053'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      warning:
+      - 199 Some of the uploaded certificates are either self-signed or expired.,199
+        Some of the uploaded certificates cannot be validated to a trusted CA
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004","name":"web-ssl-test000004","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"web-ssl-test000004","state":"Running","hostNames":["web-ssl-test000004.azurewebsites.net"],"webSpace":"clitest.rg000002-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000002-JapanWestwebspace/sites/web-ssl-test000004","repositorySiteName":"web-ssl-test000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000004.azurewebsites.net","web-ssl-test000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-06-10T00:33:35.9533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"web-ssl-test000004","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"30E3673979DFB5673924412D39370809E608E2DE4E889BD01C7B80FC38A57EED","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"web-ssl-test000004\\$web-ssl-test000004","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"web-ssl-test000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6007'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:54 GMT
+      etag:
+      - '"1D87C61B8AE5115"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/certificates?api-version=2021-03-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/certificates/clitest.rg000002-kv-ssl-test000005-test-cert","name":"clitest.rg000002-kv-ssl-test000005-test-cert","type":"Microsoft.Web/certificates","location":"Japan
+        West","properties":{"password":null,"friendlyName":"","subjectName":"*.azurewebsites.net","hostNames":["*.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"*.azurewebsites.net","issueDate":"2018-01-01T07:00:00+00:00","expirationDate":"2118-12-31T07:00:00+00:00","thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.keyvault/vaults/kv-ssl-test000005","keyVaultSecretName":"test-cert","keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000002-JapanWestwebspace","serverFarmId":null,"tags":null,"resourceGroup":"clitest.rg000002"}}],"nextLink":null,"id":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1128'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004/hostNameBindings?api-version=2021-03-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004/hostNameBindings/web-ssl-test000004.azurewebsites.net","name":"web-ssl-test000004/web-ssl-test000004.azurewebsites.net","type":"Microsoft.Web/sites/hostNameBindings","location":"Japan
+        West","properties":{"siteName":"web-ssl-test000004","domainId":null,"hostNameType":"Verified"}}],"nextLink":null,"id":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '457'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:34:56 GMT
+      etag:
+      - '"1D87C61B8AE5115"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Japan West", "properties": {"hostNameSslStates": [{"name":
+      "web-ssl-test000004.azurewebsites.net", "sslState": "SniEnabled", "thumbprint":
+      "9E9735C45C792B03B3FFCCA614852B32EE71AD6B", "toUpdate": true}], "reserved":
+      false, "isXenon": false, "hyperV": false, "scmSiteAlsoStopped": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '300'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004","name":"web-ssl-test000004","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"web-ssl-test000004","state":"Running","hostNames":["web-ssl-test000004.azurewebsites.net"],"webSpace":"clitest.rg000002-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000002-JapanWestwebspace/sites/web-ssl-test000004","repositorySiteName":"web-ssl-test000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000004.azurewebsites.net","web-ssl-test000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000004.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-06-10T00:35:00.7933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"web-ssl-test000004","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"30E3673979DFB5673924412D39370809E608E2DE4E889BD01C7B80FC38A57EED","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"web-ssl-test000004\\$web-ssl-test000004","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"web-ssl-test000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6247'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:35:04 GMT
+      etag:
+      - '"1D87C61B8AE5115"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004","name":"web-ssl-test000004","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"web-ssl-test000004","state":"Running","hostNames":["web-ssl-test000004.azurewebsites.net"],"webSpace":"clitest.rg000002-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000002-JapanWestwebspace/sites/web-ssl-test000004","repositorySiteName":"web-ssl-test000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000004.azurewebsites.net","web-ssl-test000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000004.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/serverfarms/ssl-test-plan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-06-10T00:35:00.7933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"web-ssl-test000004","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"30E3673979DFB5673924412D39370809E608E2DE4E889BD01C7B80FC38A57EED","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"web-ssl-test000004\\$web-ssl-test000004","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"web-ssl-test000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6047'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:35:07 GMT
+      etag:
+      - '"1D87C61EB3FDF95"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004/config/web?api-version=2021-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004/config/web","name":"web-ssl-test000004","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$web-ssl-test000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":"1.2","ftpsState":"AllAllowed","preWarmedInstanceCount":0,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false,"storageType":"StorageVolume"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3829'
+      content-type:
+      - application/json
+      date:
+      - Fri, 10 Jun 2022 00:35:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"format": "WebDeploy"}'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp config ssl bind
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --certificate-thumbprint --ssl-type
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/web-ssl-test000004/publishxml?api-version=2021-03-01
+  response:
+    body:
+      string: <publishData><publishProfile profileName="web-ssl-test000004 - Web Deploy"
+        publishMethod="MSDeploy" publishUrl="web-ssl-test000004.scm.azurewebsites.net:443"
+        msdeploySite="web-ssl-test000004" userName="$web-ssl-test000004" userPWD="KmhPDe1Gf29blF0ou539hg64pB7s3hoFDyJjB9w9xeSTSxXddr8E837Xx0wx"
+        destinationAppUrl="http://web-ssl-test000004.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000004
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="web-ssl-test000004\$web-ssl-test000004" userPWD="KmhPDe1Gf29blF0ou539hg64pB7s3hoFDyJjB9w9xeSTSxXddr8E837Xx0wx"
+        destinationAppUrl="http://web-ssl-test000004.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000004
+        - Zip Deploy" publishMethod="ZipDeploy" publishUrl="web-ssl-test000004.scm.azurewebsites.net:443"
+        userName="$web-ssl-test000004" userPWD="KmhPDe1Gf29blF0ou539hg64pB7s3hoFDyJjB9w9xeSTSxXddr8E837Xx0wx"
+        destinationAppUrl="http://web-ssl-test000004.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1589'
+      content-type:
+      - application/xml
+      date:
+      - Fri, 10 Jun 2022 00:35:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -26,7 +26,8 @@ from ._stream_utils import stream_logs
 from ._constants import (
     ACR_NULL_CONTEXT,
     ACR_TASK_QUICKTASK,
-    ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
+    ACR_RUN_DEFAULT_TIMEOUT_IN_SEC,
+    ALLOWED_TASK_FILE_TYPES
 )
 
 logger = get_logger(__name__)
@@ -37,8 +38,6 @@ DEFAULT_TOKEN_TYPE = 'PAT'
 IDENTITY_LOCAL_ID = '[system]'
 IDENTITY_GLOBAL_REMOVE = '[all]'
 DEFAULT_CPU = 2
-ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
-                           '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
 
 
 def acr_task_create(cmd,  # pylint: disable=too-many-locals
@@ -856,6 +855,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
                  secret_arg=None,
                  target=None,
                  update_trigger_token=None,
+                 no_format=False,
                  no_logs=False,
                  no_wait=False,
                  resource_group_name=None,
@@ -876,7 +876,14 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         update_trigger_token = base64.b64encode(update_trigger_token.encode()).decode()
 
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
-    context_path = prepare_source_location(cmd, context_path, client_registries, registry_name, resource_group_name)
+    context_path = prepare_source_location(
+        cmd,
+        context_path,
+        client_registries,
+        registry_name,
+        resource_group_name,
+        file
+    )
 
     timeout = None
     task_details = get_task_details_by_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
@@ -915,7 +922,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)
 
 
 def acr_task_show_run(cmd,
@@ -984,6 +991,7 @@ def acr_task_logs(cmd,
                   run_id=None,
                   task_name=None,
                   image=None,
+                  no_format=False,
                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -1007,7 +1015,7 @@ def acr_task_logs(cmd,
                                                   task_name=task_name,
                                                   image=image))
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, None, no_format, False)
 
 
 def _get_list_runs_message(base_message, task_name=None, image=None):

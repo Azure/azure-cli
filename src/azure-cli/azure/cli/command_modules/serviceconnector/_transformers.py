@@ -39,3 +39,17 @@ def transform_linker_properties(result):
     except CLIInternalError:
         pass
     return result
+
+
+def transform_validation_result(result):
+    from azure.core.polling import LROPoller
+
+    # manually polling if result is a poller
+    if isinstance(result, LROPoller):
+        result = result.result()
+
+    result = todict(result)
+    try:
+        return result['additionalProperties']['properties']['validationDetail']
+    except Exception:  # pylint: disable=broad-except
+        return result

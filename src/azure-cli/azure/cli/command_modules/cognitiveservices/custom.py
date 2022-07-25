@@ -268,7 +268,7 @@ def identity_remove(client, resource_group_name, account_name):
     """
     params = CognitiveServicesAccount()
     params.identity = Identity(type=IdentityType.none)
-    client.begin_update(resource_group_name, account_name, params)
+    return client.begin_update(resource_group_name, account_name, params)
 
 
 def identity_show(client, resource_group_name, account_name):
@@ -282,7 +282,7 @@ def identity_show(client, resource_group_name, account_name):
 def deployment_begin_create_or_update(
         client, resource_group_name, account_name, deployment_name,
         model_format, model_name, model_version,
-        scale_settings_scale_type, scale_settings_capacity):
+        scale_settings_scale_type, scale_settings_capacity=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
@@ -294,7 +294,8 @@ def deployment_begin_create_or_update(
     dpy.properties.model.version = model_version
     dpy.properties.scale_settings = DeploymentScaleSettings()
     dpy.properties.scale_settings.scale_type = scale_settings_scale_type
-    dpy.properties.scale_settings.capacity = scale_settings_capacity
+    if scale_settings_capacity is not None:
+        dpy.properties.scale_settings.capacity = scale_settings_capacity
 
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
 
