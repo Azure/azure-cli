@@ -17,7 +17,7 @@ from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICA
     _USE_CERT_SN_ISSUER
 from .msal_authentication import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
-from .util import check_result, msal_exceptions_handler
+from .util import check_result, msal_exception_handler
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -107,7 +107,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
             except Exception as ex:
                 # When authority/tenant is invalid, MSAL raises ValueError: 'Unable to get authority configuration'
-                msal_exceptions_handler(ex)
+                msal_exception_handler(ex)
         return self._msal_app_instance
 
     def _load_msal_token_cache(self):
@@ -147,7 +147,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 scopes, prompt='select_account', port=8400 if self._is_adfs else None,
                 success_template=success_template, error_template=error_template, **kwargs)
         except Exception as ex:
-            msal_exceptions_handler(ex)
+            msal_exception_handler(ex)
         else:
             return check_result(result)
 
@@ -164,7 +164,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         try:
             result = self._msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         except Exception as ex:
-            msal_exceptions_handler(ex)
+            msal_exception_handler(ex)
         else:
             return check_result(result)
 
@@ -215,7 +215,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         try:
             return UserCredential(self.client_id, username, **self._msal_app_kwargs)
         except Exception as ex:
-            msal_exceptions_handler(ex)
+            msal_exception_handler(ex)
 
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
