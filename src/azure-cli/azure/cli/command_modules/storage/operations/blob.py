@@ -408,7 +408,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
-                                progress_callback=None, **kwargs):
+                                progress_callback=None, overwrite=False, **kwargs):
     @check_precondition_success
     def _download_blob(*args, **kwargs):
         blob = download_blob(*args, **kwargs)
@@ -419,7 +419,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     for blob_name in source_blobs:
         # remove starting path seperator and normalize
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
-        if normalized_blob_name in blobs_to_download:
+        if normalized_blob_name in blobs_to_download and not overwrite:
             raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
                            'to select for a subset of blobs to download OR utilize the `storage blob download` '
                            'command instead to download individual blobs.'.format(normalized_blob_name))
@@ -451,9 +451,9 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         destination_path = os.path.join(destination, os.path.normpath(blob_normed))
         destination_folder = os.path.dirname(destination_path)
         # Failed when there is same name for file and folder
-        if os.path.isfile(destination_path) and os.path.exists(destination_folder):
+        if os.path.isfile(destination_path) and os.path.exists(destination_folder) and not overwrite:
             raise FileOperationError("%s already exists in %s. Please rename existing file or choose another "
-                                     "destination folder. ")
+                                     "destination folder. " % (destination_path, destination_folder))
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
         include, result = _download_blob(client=blob_client, file_path=destination_path,

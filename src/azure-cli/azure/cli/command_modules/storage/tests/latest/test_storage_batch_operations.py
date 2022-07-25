@@ -81,6 +81,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd_negative('storage blob download-batch -s {} -d "{}"', storage_account_info, src_container,
                                   local_folder)
 
+        # download blobs that start with forward slash into local folder with conflicts with overwrite succeed
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --overwrite', storage_account_info, src_container,
+                                  local_folder)
+        self.assertEqual(2, sum(len(f) for r, d, f in os.walk(local_folder)))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
