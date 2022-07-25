@@ -389,8 +389,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
 
             if registry:
                 aad_auth_policy = acr_config_authentication_as_arm_show(cmd, registry_name, resource_group_name)
-                if aad_auth_policy and aad_auth_policy.status == 'disabled':
-                    use_acr_audience = True
+                use_acr_audience = (aad_auth_policy and aad_auth_policy.status == 'disabled')
 
             return login_server, EMPTY_GUID, _get_aad_token(cli_ctx,
                                                             login_server,

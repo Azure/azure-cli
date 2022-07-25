@@ -6,6 +6,7 @@
 from enum import Enum
 from azure.cli.core.commands import LongRunningOperation
 from ._utils import validate_premium_registry, get_registry_by_name
+from knack.util import CLIError
 
 POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries in Premium SKU.'
 
@@ -99,16 +100,15 @@ def acr_config_authentication_as_arm_show(cmd,
     AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
 
     try:
-        registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
-    except Exception:
+        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    except CLIError:
         return AzureADAuthenticationAsArmPolicy()
 
-    Policy = cmd.get_models('Policy')
+    AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
     policies = registry.policies
-    if policies is None:
-        policies = Policy()
+    aadAuth_policy = policies.azure_ad_authentication_as_arm_policy if policies else AzureADAuthenticationAsArmPolicy()
 
-    return policies.azure_ad_authentication_as_arm_policy
+    return aadAuth_policy
 
 
 def acr_config_authentication_as_arm_update(cmd,
