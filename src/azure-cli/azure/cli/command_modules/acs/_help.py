@@ -369,7 +369,7 @@ parameters:
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
   - name: --network-policy
     type: string
     short-summary: The Kubernetes network policy to use.
@@ -975,7 +975,7 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
