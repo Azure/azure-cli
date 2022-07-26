@@ -204,6 +204,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
                                 JMESPathCheck('properties.lease.state', 'leased'),
                                 JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage blob metadata update -n {} -c {} --metadata key1=value1 --lease-id {}',
+                         account_info, b, c, new_lease_id)
+        self.storage_cmd('storage blob show -n {} -c {} --lease-id {}', account_info, b, c, new_lease_id)\
+            .assert_with_checks(JMESPathCheck('metadata.key1', 'value1'))
         self.storage_cmd('storage blob lease break -b {} -c {} --lease-break-period 30',
                          account_info, b, c)
         self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
