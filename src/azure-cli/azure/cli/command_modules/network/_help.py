@@ -1787,62 +1787,6 @@ examples:
     text: az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
-helps['network asg'] = """
-type: group
-short-summary: Manage application security groups (ASGs).
-long-summary: >
-    You can configure network security as a natural extension of an application's structure, ASG allows
-    you to group virtual machines and define network security policies based on those groups. You can specify an
-    application security group as the source and destination in a NSG security rule. For more information
-    visit https://docs.microsoft.com/azure/virtual-network/create-network-security-group-preview
-"""
-
-helps['network asg create'] = """
-type: command
-short-summary: Create an application security group.
-parameters:
-  - name: --name -n
-    short-summary: Name of the new application security group resource.
-examples:
-  - name: Create an application security group.
-    text: az network asg create -g MyResourceGroup -n MyAsg --tags MyWebApp, CostCenter=Marketing
-"""
-
-helps['network asg delete'] = """
-type: command
-short-summary: Delete an application security group.
-examples:
-  - name: Delete an application security group.
-    text: az network asg delete -g MyResourceGroup -n MyAsg
-"""
-
-helps['network asg list'] = """
-type: command
-short-summary: List all application security groups in a subscription.
-examples:
-  - name: List all application security groups in a subscription.
-    text: az network asg list
-"""
-
-helps['network asg show'] = """
-type: command
-short-summary: Get details of an application security group.
-examples:
-  - name: Get details of an application security group.
-    text: az network asg show -g MyResourceGroup -n MyAsg
-"""
-
-helps['network asg update'] = """
-type: command
-short-summary: Update an application security group.
-long-summary: >
-    This command can only be used to update the tags for an application security group.
-    Name and resource group are immutable and cannot be updated.
-examples:
-  - name: Update an application security group with a modified tag value.
-    text: az network asg update -g MyResourceGroup -n MyAsg --set tags.CostCenter=MyBusinessGroup
-"""
-
 helps['network ddos-protection'] = """
 type: group
 short-summary: Manage DDoS Protection Plans.
@@ -7557,36 +7501,6 @@ examples:
   - name: Open a tunnel through Azure Bastion to a target virtual machine.
     text: |
         az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 22 --port 50022
-"""
-
-helps['network security-partner-provider'] = """
-type: group
-short-summary: Manage Azure security partner provider.
-"""
-
-helps['network security-partner-provider create'] = """
-type: command
-short-summary: Create a Azure security partner provider.
-"""
-
-helps['network security-partner-provider update'] = """
-type: command
-short-summary: Update a Azure security partner provider.
-"""
-
-helps['network security-partner-provider delete'] = """
-type: command
-short-summary: Delete a Azure security partner provider.
-"""
-
-helps['network security-partner-provider list'] = """
-type: command
-short-summary: List all Azure security partner provider.
-"""
-
-helps['network security-partner-provider show'] = """
-type: command
-short-summary: Show a Azure security partner provider.
 """
 
 helps['network virtual-appliance'] = """

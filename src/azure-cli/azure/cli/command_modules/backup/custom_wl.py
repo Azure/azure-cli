@@ -462,12 +462,13 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
 
     message = "For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy"
 
-    if (retain_until is not None and backup_type != 'CopyOnlyFull'):
-        logger.warning(message)
-        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
-
     if retain_until is None:
         retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+        if backup_type == 'Full':
+            retain_until = datetime.now(timezone.utc) + timedelta(days=45)
+    if backup_type in ['Differential', 'Log']:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+        logger.warning(message)
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)

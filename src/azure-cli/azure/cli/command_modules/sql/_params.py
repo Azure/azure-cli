@@ -144,7 +144,7 @@ def get_location_type_with_default_from_resource_group(cli_ctx):
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
     configured_default='sql-server',
-    help='Name of the Azure SQL server. ' + server_configure_help,
+    help='Name of the Azure SQL Server. ' + server_configure_help,
     completer=get_resource_name_completion_list('Microsoft.SQL/servers'),
     # Allow --ids command line argument. id_part=name is 1st name in uri
     id_part='name')

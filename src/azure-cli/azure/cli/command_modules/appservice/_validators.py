@@ -336,7 +336,7 @@ def validate_vnet_integration(cmd, namespace):
                                                      resource_group_name=namespace.resource_group_name)
 
         sku_name = plan_info.sku.name
-        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        disallowed_skus = {'FREE', 'SHARED', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
         if get_sku_tier(sku_name) in disallowed_skus:
             raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
                                      "Plan sku cannot be one of: {}. "

@@ -95,6 +95,7 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -3638,18 +3639,20 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_no_uptime_sla(enable_validation=True)
 
-    def get_defender_config(self) -> Union[TypeVar("ManagedClusterSecurityProfileAzureDefender"), None]:
+    def get_defender_config(self) -> Union[ManagedClusterSecurityProfileDefender, None]:
         """Obtain the value of defender.
 
-        :return: string or None
+        :return: ManagedClusterSecurityProfileDefender or None
         """
         disable_defender = self.raw_param.get("disable_defender")
         if disable_defender:
-            return self.models.ManagedClusterSecurityProfileAzureDefender(enabled=False)
+            return self.models.ManagedClusterSecurityProfileDefender(
+                security_monitoring=self.models.ManagedClusterSecurityProfileDefenderSecurityMonitoring(
+                    enabled=False
+                )
+            )
 
-        # read the original value passed by the command
         enable_defender = self.raw_param.get("enable_defender")
-
         if not enable_defender:
             return None
 
@@ -3672,10 +3675,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.get_subscription_id(),
                 self.get_resource_group_name())
 
-        azure_defender = self.models.ManagedClusterSecurityProfileAzureDefender(enabled=enable_defender)
-        if enable_defender:
-            azure_defender.log_analytics_workspace_resource_id = workspace
-
+        azure_defender = self.models.ManagedClusterSecurityProfileDefender(
+            log_analytics_workspace_resource_id=workspace,
+            security_monitoring=self.models.ManagedClusterSecurityProfileDefenderSecurityMonitoring(
+                enabled=enable_defender
+            ),
+        )
         return azure_defender
 
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
@@ -3953,7 +3958,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()
 
-            mc.security_profile.azure_defender = defender
+            mc.security_profile.defender = defender
 
         return mc
 
@@ -4127,21 +4132,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             service_principal_profile = mc.service_principal_profile
             assign_identity = self.context.get_assign_identity()
             if service_principal_profile is None and not assign_identity:
-                msg = (
-                    "It is highly recommended to use USER assigned identity "
-                    "(option --assign-identity) when you want to bring your own"
-                    "subnet, which will have no latency for the role assignment to "
-                    "take effect. When using SYSTEM assigned identity, "
-                    "azure-cli will grant Network Contributor role to the "
-                    "system assigned identity after the cluster is created, and "
-                    "the role assignment will take some time to take effect, see "
-                    "https://docs.microsoft.com/azure/aks/use-managed-identity, "
-                    "proceed to create cluster with system assigned identity?"
-                )
-                if not self.context.get_yes() and not prompt_y_n(
-                    msg, default="n"
-                ):
-                    raise DecoratorEarlyExitException()
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id
@@ -5610,7 +5600,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()
 
-            mc.security_profile.azure_defender = defender
+            mc.security_profile.defender = defender
 
         return mc
 
