@@ -5367,12 +5367,14 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
 
     # We only need to check if runtime_version is passed
     if runtime_version:
-        if not _functionapp_runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string,
-                                                            runtime_version=github_actions_version,
-                                                            functionapp_version=app_runtime_info['functionapp_version'],
-                                                            is_linux=is_linux):
+        functionapp_version = app_runtime_info['functionapp_version']
+        github_actions_version = _get_functionapp_runtime_version(cmd=cmd, runtime_string=app_runtime_string,
+                                                                  runtime_version=github_actions_version,
+                                                                  functionapp_version=functionapp_version,
+                                                                  is_linux=is_linux)
+        if not github_actions_version:
             raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
-                                  "on os %s." % (app_runtime_string, github_actions_version,
+                                  "on os %s." % (app_runtime_string, runtime_version,
                                                  "linux" if is_linux else "windows"))
 
     # Get workflow template
@@ -5751,17 +5753,17 @@ def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
     return False
 
 
-def _functionapp_runtime_supports_github_actions(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
+def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
     import re
     runtime_version = re.sub(r"[^\d\.]", "", runtime_version).rstrip('.')
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
     matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
     if not matched_runtime:
-        return False
+        return None
     if matched_runtime.github_actions_properties:
         if matched_runtime.github_actions_properties.supported_version:
-            return True
-    return False
+            return matched_runtime.github_actions_properties.supported_version
+    return None
 
 
 def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
