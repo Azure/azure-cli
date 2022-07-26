@@ -19,6 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -247,3 +248,21 @@ def get_token(cmd, repo, token):
     if not token:
         token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
     return token
+
+
+def is_logicapp(app):
+    if app is None or app.kind is None:
+        return False
+    return LOGICAPP_KIND in app.kind
+
+
+def is_functionapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and FUNCTIONAPP_KIND in app.kind
+
+
+def is_webapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
