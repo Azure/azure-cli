@@ -150,9 +150,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     def add_connection_string_argument(context, source, target):
         if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
-            context.argument('store_in_connection_string', options_list=['--store-connstr'],
+            context.argument('store_in_connection_string', options_list=['--config-connstr'],
                              arg_type=get_three_state_flag(), default=False, is_preview=True,
-                             help='Store configuration into connection string, '
+                             help='Store configuration into connection strings, '
                                   'only could be used together with dotnet client_type')
         else:
             context.ignore('store_in_connection_string')
