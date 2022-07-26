@@ -74,10 +74,9 @@ def load_command_table(self, _):
         client_factory=cf_security_regulatory_compliance_assessment
     )
 
-    security_solutions_reference_data_sdk = CliCommandType(
+    security_security_solutions_reference_data_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsReferenceDataOperations.{}',
-        client_factory=cf_security_security_solutions_reference_data,
-        operation_group='security_solutions_reference_data'
+        client_factory=cf_security_security_solutions_reference_data
     )
 
     security_tasks_sdk = CliCommandType(
@@ -249,10 +248,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_regulatory_compliance_standard')
 
     with self.command_group('security security_solutions_reference_data',
-                            security_solutions_reference_data_sdk,
+                            security_security_solutions_reference_data_sdk,
                             client_factory=cf_security_security_solutions_reference_data) as g:
-        g.custom_command('list', 'list_security_security_solutions_reference_data')
-        
+        g.custom_command('list', 'list_security_solutions_reference_data')
+
     with self.command_group('security regulatory-compliance-controls',
                             security_regulatory_compliance_controls_sdk,
                             client_factory=cf_security_regulatory_compliance_control) as g:

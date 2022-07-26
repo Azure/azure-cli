@@ -983,3 +983,12 @@ examples:
     text: >
         az security secure-score-control-definitions list
 """
+
+helps['security security_solutions_reference_data list'] = """
+type: command
+short-summary: Display all security solutions reference data at the subscription level.
+examples:
+  - name: Display all security solutions reference data.
+    text: >
+        az security security_solutions_reference_data list
+"""

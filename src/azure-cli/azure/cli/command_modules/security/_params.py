@@ -121,7 +121,7 @@ def load_arguments(self, _):
                   'secure-scores',
                   'secure-score-controls',
                   'secure-score-control-definitions',
-                  'solutions_reference_data']:
+                  'security_solutions_reference_data']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
