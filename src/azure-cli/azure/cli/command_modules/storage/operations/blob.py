@@ -9,7 +9,7 @@ from datetime import datetime
 
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import AzureResponseError
+from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
                                                     normalize_blob_file_path, check_precondition_success)
@@ -441,7 +441,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
     results = []
     for index, blob_normed in enumerate(blobs_to_download):
-        from azure.cli.core.azclierror import FileOperationError
         # add blob name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
@@ -457,7 +456,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
         include, result = _download_blob(client=blob_client, file_path=destination_path,
-                                         progress_callback=progress_callback, **kwargs)
+                                         progress_callback=progress_callback, overwrite=overwrite, **kwargs)
         if include:
             results.append(result)
 
@@ -666,7 +665,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
 
 
 def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_range=None,
-                  progress_callback=None, **kwargs):
+                  progress_callback=None, overwrite=True, **kwargs):
     offset = None
     length = None
     if start_range is not None and end_range is not None:
@@ -678,6 +677,8 @@ def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_
         kwargs['max_concurrency'] = 1
     download_stream = client.download_blob(offset=offset, length=length, **kwargs)
     if file_path:
+        if os.path.isfile(file_path) and not overwrite:
+            raise FileOperationError("%s already exists. Please rename existing file or use --overwrite" % (file_path))
         with open(file_path, open_mode) as stream:
             download_stream.readinto(stream)
         return download_stream.properties

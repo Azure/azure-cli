@@ -1048,6 +1048,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'if enabled, the memory-efficient algorithm will not be used because computing the MD5 hash '
                      'requires buffering entire blocks, and doing so defeats the purpose of the memory-efficient '
                      'algorithm.')
+        c.argument('overwrite', arg_type=get_three_state_flag(),
+                   help="Overwrite an existing file when specified. Default value is true.")
 
     with self.argument_context('storage blob download-batch') as c:
         c.ignore('source_container_name')
