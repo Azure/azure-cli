@@ -1588,8 +1588,9 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
         }
         namespace.vnet = resource_id(**kwargs)
     if namespace.subnet and not is_valid_resource_id(namespace.subnet):
-        namespace.subnet = _process_subnet_name_and_id(namespace.subnet,
-            namespace.vnet, cmd, namespace.resource_group_name)
+        namespace.subnet = _process_subnet_name_and_id(
+            namespace.subnet, namespace.vnet,
+            cmd, namespace.resource_group_name)
     if namespace.nic and not is_valid_resource_id(namespace.nic):
         kwargs = {
             'subscription': get_subscription_id(cmd.cli_ctx),

@@ -6351,7 +6351,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
 def show_nw_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
-                          flow_log_name=None):
+                         flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
         flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
