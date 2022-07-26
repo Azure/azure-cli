@@ -1523,7 +1523,6 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
 
 
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id
     if vnet and not is_valid_resource_id(vnet):
         vnet = resource_id(
@@ -1537,7 +1536,7 @@ def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
 
 def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
     from azure.cli.core.azclierror import UnrecognizedArgumentError
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from msrestazure.tools import is_valid_resource_id
     if subnet and not is_valid_resource_id(subnet):
         vnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name)
         if vnet is None:
@@ -1590,7 +1589,7 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
         namespace.vnet = resource_id(**kwargs)
     if namespace.subnet and not is_valid_resource_id(namespace.subnet):
         namespace.subnet = _process_subnet_name_and_id(namespace.subnet,
-        namespace.vnet, cmd, namespace.resource_group_name)
+            namespace.vnet, cmd, namespace.resource_group_name)
     if namespace.nic and not is_valid_resource_id(namespace.nic):
         kwargs = {
             'subscription': get_subscription_id(cmd.cli_ctx),
