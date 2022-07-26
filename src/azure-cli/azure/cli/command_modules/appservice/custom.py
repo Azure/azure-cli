@@ -5270,7 +5270,9 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
 
 
 def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None, runtime_version=None, token=None,  # pylint: disable=too-many-statements,too-many-branches
-                                   slot=None, branch='master', build_path=".", force=False):
+                                   slot=None, branch='master', build_path=".", login_with_github=False, force=False):
+    if login_with_github:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
     repo = repo_url_to_name(repo)
     token = get_token(cmd, repo, token)
 
@@ -5312,11 +5314,11 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
             error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
             if e.data and e.data['message']:
                 error_msg += " Error: {}".format(e.data['message'])
-            raise CLIError(error_msg)
+            raise ValidationError(error_msg)
         logger.warning('Verified GitHub repo and branch')
     except BadCredentialsException:
         raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
-                              "the --token argument. Run 'az webapp deployment github-actions add --help' "
+                              "the --token argument. Run 'az functionapp deployment github-actions add --help' "
                               "for more information.")
     except GithubException as e:
         error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
@@ -5444,7 +5446,9 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
 
 
 def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=None, slot=None,  # pylint: disable=too-many-statements
-                                      branch='master'):
+                                      branch='master', login_with_github=False):
+    if login_with_github:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
     repo = repo_url_to_name(repo)
     token = get_token(cmd, repo, token)
     # Verify resource group, app
@@ -5459,7 +5463,7 @@ def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=Non
                                     "Please check that the app is a part of the current subscription" % name)
     current_rg = app_details.resource_group
     if resource_group is not None and (resource_group.lower() != current_rg.lower()):
-        raise ValidationError("The webapp %s exists in ResourceGroup %s and does not match "
+        raise ValidationError("The functionapp %s exists in ResourceGroup %s and does not match "
                               "the value entered %s. Please re-run command with the correct "
                               "parameters." % (name, current_rg, resource_group))
 
@@ -5480,11 +5484,11 @@ def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=Non
             error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
             if e.data and e.data['message']:
                 error_msg += " Error: {}".format(e.data['message'])
-            raise CLIError(error_msg)
+            raise ValidationError(error_msg)
         logger.warning('Verified GitHub repo and branch')
     except BadCredentialsException:
         raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
-                              "the --token argument. Run 'az webapp deployment github-actions add --help' "
+                              "the --token argument. Run 'az functionapp deployment github-actions remove --help' "
                               "for more information.")
     except GithubException as e:
         error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
@@ -5635,6 +5639,8 @@ def _fill_functionapp_workflow_template(content, name, build_path, version, publ
     content = content.replace("AZURE_FUNCTIONAPP_PUBLISH_PROFILE", f"{publish_profile}")
     content = content.replace("AZURE_FUNCTIONAPP_NAME: your-app-name", f"AZURE_FUNCTIONAPP_NAME: '{name}'")
     content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{name}'")
+    if "AZURE_FUNCTIONAPP_PACKAGE_PATH" not in content and "POM_XML_DIRECTORY" not in content:
+        logger.warning("Runtime does not support --build-path, ignoring value.")
     content = content.replace("AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'", f"AZURE_FUNCTIONAPP_PACKAGE_PATH: '{build_path}'")
     content = content.replace("POM_XML_DIRECTORY: '.'", f"POM_XML_DIRECTORY: '{build_path}'")
     content = content.replace("runs-on: ubuntu-18.04", "")  # repair linux python yaml
