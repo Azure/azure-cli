@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","date":"2022-05-12T10:27:40Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","date":"2022-07-14T23:57:34Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:13 GMT
+      - Thu, 14 Jul 2022 23:58:01 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
     body: '{"location": "francecentral", "tags": {}, "properties": {"addressSpace":
       {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name":
       "subnet000006", "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
       - application/json
@@ -56,30 +56,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '310'
+      - '311'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007\",\r\n
-        \ \"etag\": \"W/\\\"4b4a638a-6227-4361-9607-f15d5293b19d\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3d4038bd-1b35-4e9b-adca-59ccc4ede288\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"francecentral\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"293eb9cd-0218-4ee8-9bcd-120d14fe371c\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"99104de6-e921-4458-b9fd-573a91dc3b39\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"4b4a638a-6227-4361-9607-f15d5293b19d\\\"\",\r\n
+        \       \"etag\": \"W/\\\"3d4038bd-1b35-4e9b-adca-59ccc4ede288\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -87,15 +87,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/8d475d52-d62b-40ea-8221-f9351b62f20e?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/e45dc081-8c5f-48b8-a0d8-3dcb11e4943f?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
-      - '1317'
+      - '1318'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:20 GMT
+      - Thu, 14 Jul 2022 23:58:06 GMT
       expires:
       - '-1'
       pragma:
@@ -108,7 +108,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 45d83f85-0747-4c37-81fa-f053e5f93cef
+      - d5758f67-eaba-4169-919e-f5c36884dc8c
       x-ms-ratelimit-remaining-subscription-writes:
       - '1196'
     status:
@@ -128,9 +128,9 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/8d475d52-d62b-40ea-8221-f9351b62f20e?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/e45dc081-8c5f-48b8-a0d8-3dcb11e4943f?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -142,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:24 GMT
+      - Thu, 14 Jul 2022 23:58:09 GMT
       expires:
       - '-1'
       pragma:
@@ -159,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7670df9a-5fbb-4178-abef-5c9b97ebe4ec
+      - ccb0af52-6cd9-43dd-83f5-fc89d685d234
     status:
       code: 200
       message: OK
@@ -177,24 +177,24 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007\",\r\n
-        \ \"etag\": \"W/\\\"ec8631d1-9d80-4a01-b16d-2cab03c0d9be\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b49cb5f4-c321-4d4a-ab1b-f8be8614c728\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"francecentral\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"293eb9cd-0218-4ee8-9bcd-120d14fe371c\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"99104de6-e921-4458-b9fd-573a91dc3b39\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"ec8631d1-9d80-4a01-b16d-2cab03c0d9be\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b49cb5f4-c321-4d4a-ab1b-f8be8614c728\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -202,13 +202,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1319'
+      - '1320'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:24 GMT
+      - Thu, 14 Jul 2022 23:58:09 GMT
       etag:
-      - W/"ec8631d1-9d80-4a01-b16d-2cab03c0d9be"
+      - W/"b49cb5f4-c321-4d4a-ab1b-f8be8614c728"
       expires:
       - '-1'
       pragma:
@@ -225,7 +225,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ac91348f-d397-4140-88d7-46271554e90e
+      - c9a48e47-35b5-4b49-a59f-064c0c177184
     status:
       code: 200
       message: OK
@@ -243,12 +243,12 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","date":"2022-05-12T10:27:37Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","date":"2022-07-14T23:57:33Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -257,7 +257,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:24 GMT
+      - Thu, 14 Jul 2022 23:58:10 GMT
       expires:
       - '-1'
       pragma:
@@ -291,13 +291,13 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"francecentral","properties":{"serverFarmId":26693,"name":"vnetplan000005","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_26693","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"francecentral","properties":{"serverFarmId":10833,"name":"vnetplan000005","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-025_10833","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -306,9 +306,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:43 GMT
+      - Thu, 14 Jul 2022 23:58:22 GMT
       etag:
-      - '"1D865EB0B6EE58B"'
+      - '"1D897DD987C9E20"'
       expires:
       - '-1'
       pragma:
@@ -346,14 +346,14 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2022-03-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
-        Central","properties":{"serverFarmId":26693,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_26693","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Central","properties":{"serverFarmId":10833,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-025_10833","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -362,7 +362,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:45 GMT
+      - Thu, 14 Jul 2022 23:58:23 GMT
       expires:
       - '-1'
       pragma:
@@ -398,14 +398,14 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2022-03-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
-        Central","properties":{"serverFarmId":26693,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_26693","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Central","properties":{"serverFarmId":10833,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-025_10833","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -414,7 +414,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:48 GMT
+      - Thu, 14 Jul 2022 23:58:25 GMT
       expires:
       - '-1'
       pragma:
@@ -450,24 +450,24 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007\",\r\n
-        \ \"etag\": \"W/\\\"ec8631d1-9d80-4a01-b16d-2cab03c0d9be\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b49cb5f4-c321-4d4a-ab1b-f8be8614c728\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"francecentral\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"293eb9cd-0218-4ee8-9bcd-120d14fe371c\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"99104de6-e921-4458-b9fd-573a91dc3b39\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"ec8631d1-9d80-4a01-b16d-2cab03c0d9be\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b49cb5f4-c321-4d4a-ab1b-f8be8614c728\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -475,13 +475,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1319'
+      - '1320'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:48 GMT
+      - Thu, 14 Jul 2022 23:58:25 GMT
       etag:
-      - W/"ec8631d1-9d80-4a01-b16d-2cab03c0d9be"
+      - W/"b49cb5f4-c321-4d4a-ab1b-f8be8614c728"
       expires:
       - '-1'
       pragma:
@@ -498,7 +498,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4b31b7e9-85bd-494e-880f-a76c6c9aae24
+      - d21764f1-0cf4-455e-8459-eefdcb1e81b3
     status:
       code: 200
       message: OK
@@ -516,7 +516,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -551,7 +551,8 @@ interactions:
         Central\",\"regionalDisplayName\":\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Canada\",\"longitude\":\"-79.383\",\"latitude\":\"43.653\",\"physicalLocation\":\"Toronto\",\"pairedRegion\":[{\"name\":\"canadaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\",\"name\":\"francecentral\",\"displayName\":\"France
         Central\",\"regionalDisplayName\":\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\":[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\",\"name\":\"germanywestcentral\",\"displayName\":\"Germany
         West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"displayName\":\"Norway
-        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
+        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
+        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
         South\",\"regionalDisplayName\":\"(South America) Brazil South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South
         America\",\"longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao
         Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\",\"name\":\"eastus2euap\",\"displayName\":\"East
@@ -563,7 +564,7 @@ interactions:
         Central US (Stage)\",\"regionalDisplayName\":\"(US) South Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westusstage\",\"name\":\"westusstage\",\"displayName\":\"West
         US (Stage)\",\"regionalDisplayName\":\"(US) West US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2stage\",\"name\":\"westus2stage\",\"displayName\":\"West
         US 2 (Stage)\",\"regionalDisplayName\":\"(US) West US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asia\",\"name\":\"asia\",\"displayName\":\"Asia\",\"regionalDisplayName\":\"Asia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asiapacific\",\"name\":\"asiapacific\",\"displayName\":\"Asia
-        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
+        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/singapore\",\"name\":\"singapore\",\"displayName\":\"Singapore\",\"regionalDisplayName\":\"Singapore\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
         Africa\",\"regionalDisplayName\":\"South Africa\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerland\",\"name\":\"switzerland\",\"displayName\":\"Switzerland\",\"regionalDisplayName\":\"Switzerland\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uae\",\"name\":\"uae\",\"displayName\":\"United
         Arab Emirates\",\"regionalDisplayName\":\"United Arab Emirates\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uk\",\"name\":\"uk\",\"displayName\":\"United
         Kingdom\",\"regionalDisplayName\":\"United Kingdom\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/unitedstates\",\"name\":\"unitedstates\",\"displayName\":\"United
@@ -576,8 +577,7 @@ interactions:
         Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-87.6278\",\"latitude\":\"41.8819\",\"physicalLocation\":\"Illinois\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\",\"name\":\"westus\",\"displayName\":\"West
         US\",\"regionalDisplayName\":\"(US) West US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-122.417\",\"latitude\":\"37.783\",\"physicalLocation\":\"California\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\",\"name\":\"jioindiawest\",\"displayName\":\"Jio
         India West\",\"regionalDisplayName\":\"(Asia Pacific) Jio India West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
-        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
-        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
+        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
         North\",\"regionalDisplayName\":\"(Middle East) UAE North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
         East\",\"longitude\":\"55.316666\",\"latitude\":\"25.266666\",\"physicalLocation\":\"Dubai\",\"pairedRegion\":[{\"name\":\"uaecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\",\"name\":\"centraluseuap\",\"displayName\":\"Central
         US EUAP\",\"regionalDisplayName\":\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\",\"name\":\"westcentralus\",\"displayName\":\"West
@@ -603,25 +603,23 @@ interactions:
         East\",\"regionalDisplayName\":\"(Canada) Canada East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Canada\",\"longitude\":\"-71.217\",\"latitude\":\"46.817\",\"physicalLocation\":\"Quebec\",\"pairedRegion\":[{\"name\":\"canadacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\",\"name\":\"francesouth\",\"displayName\":\"France
         South\",\"regionalDisplayName\":\"(Europe) France South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.1972\",\"latitude\":\"43.8345\",\"physicalLocation\":\"Marseille\",\"pairedRegion\":[{\"name\":\"francecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\",\"name\":\"germanynorth\",\"displayName\":\"Germany
         North\",\"regionalDisplayName\":\"(Europe) Germany North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.806422\",\"latitude\":\"53.073635\",\"physicalLocation\":\"Berlin\",\"pairedRegion\":[{\"name\":\"germanywestcentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\",\"name\":\"norwaywest\",\"displayName\":\"Norway
-        West\",\"regionalDisplayName\":\"(Europe) Norway West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\":\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\",\"name\":\"swedensouth\",\"displayName\":\"Sweden
-        South\",\"regionalDisplayName\":\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\":\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\",\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland
+        West\",\"regionalDisplayName\":\"(Europe) Norway West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\":\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\",\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland
         West\",\"regionalDisplayName\":\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"6.143158\",\"latitude\":\"46.204391\",\"physicalLocation\":\"Geneva\",\"pairedRegion\":[{\"name\":\"switzerlandnorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest\",\"name\":\"ukwest\",\"displayName\":\"UK
         West\",\"regionalDisplayName\":\"(Europe) UK West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"-3.084\",\"latitude\":\"53.427\",\"physicalLocation\":\"Cardiff\",\"pairedRegion\":[{\"name\":\"uksouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\",\"name\":\"uaecentral\",\"displayName\":\"UAE
         Central\",\"regionalDisplayName\":\"(Middle East) UAE Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
         East\",\"longitude\":\"54.366669\",\"latitude\":\"24.466667\",\"physicalLocation\":\"Abu
         Dhabi\",\"pairedRegion\":[{\"name\":\"uaenorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\",\"name\":\"brazilsoutheast\",\"displayName\":\"Brazil
         Southeast\",\"regionalDisplayName\":\"(South America) Brazil Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
-        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\",\"name\":\"qatarcentral\",\"displayName\":\"Qatar
-        Central\",\"regionalDisplayName\":\"(Europe) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"51.439327\",\"latitude\":\"25.551462\",\"physicalLocation\":\"Doha\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}}]}"
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}}]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29683'
+      - '28985'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:49 GMT
+      - Thu, 14 Jul 2022 23:58:26 GMT
       expires:
       - '-1'
       pragma:
@@ -649,7 +647,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -684,7 +682,8 @@ interactions:
         Central\",\"regionalDisplayName\":\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Canada\",\"longitude\":\"-79.383\",\"latitude\":\"43.653\",\"physicalLocation\":\"Toronto\",\"pairedRegion\":[{\"name\":\"canadaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\",\"name\":\"francecentral\",\"displayName\":\"France
         Central\",\"regionalDisplayName\":\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\":[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\",\"name\":\"germanywestcentral\",\"displayName\":\"Germany
         West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"displayName\":\"Norway
-        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
+        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
+        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
         South\",\"regionalDisplayName\":\"(South America) Brazil South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South
         America\",\"longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao
         Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\",\"name\":\"eastus2euap\",\"displayName\":\"East
@@ -696,7 +695,7 @@ interactions:
         Central US (Stage)\",\"regionalDisplayName\":\"(US) South Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westusstage\",\"name\":\"westusstage\",\"displayName\":\"West
         US (Stage)\",\"regionalDisplayName\":\"(US) West US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2stage\",\"name\":\"westus2stage\",\"displayName\":\"West
         US 2 (Stage)\",\"regionalDisplayName\":\"(US) West US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asia\",\"name\":\"asia\",\"displayName\":\"Asia\",\"regionalDisplayName\":\"Asia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asiapacific\",\"name\":\"asiapacific\",\"displayName\":\"Asia
-        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
+        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/singapore\",\"name\":\"singapore\",\"displayName\":\"Singapore\",\"regionalDisplayName\":\"Singapore\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
         Africa\",\"regionalDisplayName\":\"South Africa\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerland\",\"name\":\"switzerland\",\"displayName\":\"Switzerland\",\"regionalDisplayName\":\"Switzerland\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uae\",\"name\":\"uae\",\"displayName\":\"United
         Arab Emirates\",\"regionalDisplayName\":\"United Arab Emirates\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uk\",\"name\":\"uk\",\"displayName\":\"United
         Kingdom\",\"regionalDisplayName\":\"United Kingdom\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/unitedstates\",\"name\":\"unitedstates\",\"displayName\":\"United
@@ -709,8 +708,7 @@ interactions:
         Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-87.6278\",\"latitude\":\"41.8819\",\"physicalLocation\":\"Illinois\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\",\"name\":\"westus\",\"displayName\":\"West
         US\",\"regionalDisplayName\":\"(US) West US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-122.417\",\"latitude\":\"37.783\",\"physicalLocation\":\"California\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\",\"name\":\"jioindiawest\",\"displayName\":\"Jio
         India West\",\"regionalDisplayName\":\"(Asia Pacific) Jio India West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
-        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
-        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
+        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
         North\",\"regionalDisplayName\":\"(Middle East) UAE North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
         East\",\"longitude\":\"55.316666\",\"latitude\":\"25.266666\",\"physicalLocation\":\"Dubai\",\"pairedRegion\":[{\"name\":\"uaecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\",\"name\":\"centraluseuap\",\"displayName\":\"Central
         US EUAP\",\"regionalDisplayName\":\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\",\"name\":\"westcentralus\",\"displayName\":\"West
@@ -736,25 +734,23 @@ interactions:
         East\",\"regionalDisplayName\":\"(Canada) Canada East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Canada\",\"longitude\":\"-71.217\",\"latitude\":\"46.817\",\"physicalLocation\":\"Quebec\",\"pairedRegion\":[{\"name\":\"canadacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\",\"name\":\"francesouth\",\"displayName\":\"France
         South\",\"regionalDisplayName\":\"(Europe) France South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.1972\",\"latitude\":\"43.8345\",\"physicalLocation\":\"Marseille\",\"pairedRegion\":[{\"name\":\"francecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\",\"name\":\"germanynorth\",\"displayName\":\"Germany
         North\",\"regionalDisplayName\":\"(Europe) Germany North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.806422\",\"latitude\":\"53.073635\",\"physicalLocation\":\"Berlin\",\"pairedRegion\":[{\"name\":\"germanywestcentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\",\"name\":\"norwaywest\",\"displayName\":\"Norway
-        West\",\"regionalDisplayName\":\"(Europe) Norway West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\":\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\",\"name\":\"swedensouth\",\"displayName\":\"Sweden
-        South\",\"regionalDisplayName\":\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\":\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\",\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland
+        West\",\"regionalDisplayName\":\"(Europe) Norway West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\":\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\",\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland
         West\",\"regionalDisplayName\":\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"6.143158\",\"latitude\":\"46.204391\",\"physicalLocation\":\"Geneva\",\"pairedRegion\":[{\"name\":\"switzerlandnorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest\",\"name\":\"ukwest\",\"displayName\":\"UK
         West\",\"regionalDisplayName\":\"(Europe) UK West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"-3.084\",\"latitude\":\"53.427\",\"physicalLocation\":\"Cardiff\",\"pairedRegion\":[{\"name\":\"uksouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\",\"name\":\"uaecentral\",\"displayName\":\"UAE
         Central\",\"regionalDisplayName\":\"(Middle East) UAE Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
         East\",\"longitude\":\"54.366669\",\"latitude\":\"24.466667\",\"physicalLocation\":\"Abu
         Dhabi\",\"pairedRegion\":[{\"name\":\"uaenorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\",\"name\":\"brazilsoutheast\",\"displayName\":\"Brazil
         Southeast\",\"regionalDisplayName\":\"(South America) Brazil Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
-        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\",\"name\":\"qatarcentral\",\"displayName\":\"Qatar
-        Central\",\"regionalDisplayName\":\"(Europe) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"51.439327\",\"latitude\":\"25.551462\",\"physicalLocation\":\"Doha\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}}]}"
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}}]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29683'
+      - '28985'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:52 GMT
+      - Thu, 14 Jul 2022 23:58:27 GMT
       expires:
       - '-1'
       pragma:
@@ -782,28 +778,28 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \ \"etag\": \"W/\\\"ec8631d1-9d80-4a01-b16d-2cab03c0d9be\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"b49cb5f4-c321-4d4a-ab1b-f8be8614c728\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '542'
+      - '543'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:52 GMT
+      - Thu, 14 Jul 2022 23:58:30 GMT
       etag:
-      - W/"ec8631d1-9d80-4a01-b16d-2cab03c0d9be"
+      - W/"b49cb5f4-c321-4d4a-ab1b-f8be8614c728"
       expires:
       - '-1'
       pragma:
@@ -820,7 +816,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8b72dd12-2f13-467a-b916-a5fc1cfd42ae
+      - af2e0455-fcf9-4118-a54a-f9f63ecd8885
     status:
       code: 200
       message: OK
@@ -829,7 +825,7 @@ interactions:
       "name": "subnet000006", "type": "Microsoft.Network/virtualNetworks/subnets",
       "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"name": "delegation",
       "properties": {"serviceName": "Microsoft.Web/serverFarms"}}], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -840,41 +836,41 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '488'
+      - '489'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \ \"etag\": \"W/\\\"0297d1d5-5d63-4a3c-9a5a-33ecab25b7a1\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"27750926-a084-466a-9cc3-12de99df5868\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006/delegations/delegation\",\r\n
-        \       \"etag\": \"W/\\\"0297d1d5-5d63-4a3c-9a5a-33ecab25b7a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"27750926-a084-466a-9cc3-12de99df5868\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
         [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
         \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
-        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/dd1590e3-6b4c-4484-8fca-672434f2ae17?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/d7cc65ab-a11c-4e0a-bcc3-11d818577f72?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
-      - '1171'
+      - '1172'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:28:52 GMT
+      - Thu, 14 Jul 2022 23:58:30 GMT
       expires:
       - '-1'
       pragma:
@@ -891,9 +887,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7616a228-5eda-4d13-a536-ea271c74b670
+      - 4686244f-bb6e-44db-a5fb-4e3e0b40d108
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -911,14 +907,14 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2022-03-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
-        Central","properties":{"serverFarmId":26693,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_26693","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Central","properties":{"serverFarmId":10833,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-025_10833","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -927,7 +923,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:53 GMT
+      - Thu, 14 Jul 2022 23:58:32 GMT
       expires:
       - '-1'
       pragma:
@@ -963,7 +959,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Web/functionAppStacks?api-version=2021-01-01
   response:
@@ -990,14 +986,15 @@ interactions:
         LTS","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~8","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.x"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"node","WEBSITE_NODE_DEFAULT_VERSION":"~8"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true},"supportedFunctionsExtensionVersions":["~2"]}}}]},{"displayText":"Node.js
         6","value":"6","minorVersions":[{"displayText":"Node.js 6 LTS","value":"6
         LTS","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~6","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":false},"appSettingsDictionary":{"WEBSITE_NODE_DEFAULT_VERSION":"~6"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true},"supportedFunctionsExtensionVersions":["~1"]}}}]}]}},{"id":null,"name":"python","type":"Microsoft.Web/functionAppStacks?stackOsType=All","properties":{"displayText":"Python","value":"python","preferredOs":"linux","majorVersions":[{"displayText":"Python
-        3","value":"3","minorVersions":[{"displayText":"Python 3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.9","remoteDebuggingSupported":false,"isPreview":false,"isDefault":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.9"},"supportedFunctionsExtensionVersions":["~4","~3"]}}},{"displayText":"Python
+        3","value":"3","minorVersions":[{"displayText":"Python 3.10","value":"3.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.10","remoteDebuggingSupported":false,"isPreview":true,"isDefault":false,"isHidden":true,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.10"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.10"},"supportedFunctionsExtensionVersions":["~4"]}}},{"displayText":"Python
+        3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.9","remoteDebuggingSupported":false,"isPreview":false,"isDefault":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.9"},"supportedFunctionsExtensionVersions":["~4","~3"]}}},{"displayText":"Python
         3.8","value":"3.8","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.8","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.8"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.8"},"supportedFunctionsExtensionVersions":["~4","~3"]}}},{"displayText":"Python
         3.7","value":"3.7","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.7"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.7"},"supportedFunctionsExtensionVersions":["~4","~3","~2"]}}},{"displayText":"Python
         3.6","value":"3.6","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.6"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.6"},"supportedFunctionsExtensionVersions":["~2","~3"]}}}]}]}},{"id":null,"name":"java","type":"Microsoft.Web/functionAppStacks?stackOsType=All","properties":{"displayText":"Java","value":"java","preferredOs":"windows","majorVersions":[{"displayText":"Java
         11","value":"11","minorVersions":[{"displayText":"Java 11","value":"11.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"11","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"java"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true,"javaVersion":"11","netFrameworkVersion":"v6.0"},"supportedFunctionsExtensionVersions":["~4","~3"]},"linuxRuntimeSettings":{"runtimeVersion":"Java|11","isAutoUpdate":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"11"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"java"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Java|11"},"supportedFunctionsExtensionVersions":["~4","~3"]}}}]},{"displayText":"Java
         8","value":"8","minorVersions":[{"displayText":"Java 8","value":"8.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"1.8","isAutoUpdate":true,"isDefault":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"java"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true,"javaVersion":"1.8","netFrameworkVersion":"v6.0"},"supportedFunctionsExtensionVersions":["~4","~3","~2"]},"linuxRuntimeSettings":{"runtimeVersion":"Java|8","isAutoUpdate":true,"isDefault":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"java"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Java|8"},"supportedFunctionsExtensionVersions":["~4","~3"]}}}]}]}},{"id":null,"name":"powershell","type":"Microsoft.Web/functionAppStacks?stackOsType=All","properties":{"displayText":"PowerShell
         Core","value":"powershell","preferredOs":"windows","majorVersions":[{"displayText":"PowerShell
-        7","value":"7","minorVersions":[{"displayText":"PowerShell 7.2","value":"7.2","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.2","isPreview":true,"isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true,"powerShellVersion":"7.2","netFrameworkVersion":"v6.0"},"supportedFunctionsExtensionVersions":["~4"]},"linuxRuntimeSettings":{"runtimeVersion":"PowerShell|7.2","isPreview":true,"isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"PowerShell|7.2"},"supportedFunctionsExtensionVersions":["~4"]}}},{"displayText":"PowerShell
+        7","value":"7","minorVersions":[{"displayText":"PowerShell 7.2","value":"7.2","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"7.2","isPreview":false,"isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true,"powerShellVersion":"7.2","netFrameworkVersion":"v6.0"},"supportedFunctionsExtensionVersions":["~4"]},"linuxRuntimeSettings":{"runtimeVersion":"PowerShell|7.2","isPreview":false,"isHidden":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"PowerShell|7.2"},"supportedFunctionsExtensionVersions":["~4"]}}},{"displayText":"PowerShell
         7.0","value":"7.0","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~7","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true,"powerShellVersion":"~7","netFrameworkVersion":"v6.0"},"supportedFunctionsExtensionVersions":["~4","~3"]},"linuxRuntimeSettings":{"runtimeVersion":"PowerShell|7","isAutoUpdate":true,"isPreview":false,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"PowerShell|7"},"supportedFunctionsExtensionVersions":["~4"]}}}]},{"displayText":"PowerShell
         Core 6","value":"6","minorVersions":[{"displayText":"PowerShell Core 6.2","value":"6.2","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~6","remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"powershell"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true,"powerShellVersion":"~6"},"isDeprecated":true,"supportedFunctionsExtensionVersions":["~2","~3"],"endOfLifeDate":"2020-10-04T00:00:00Z"}}}]}]}},{"id":null,"name":"custom","type":"Microsoft.Web/functionAppStacks?stackOsType=All","properties":{"displayText":"Custom
         Handler","value":"custom","preferredOs":"windows","majorVersions":[{"displayText":"Custom
@@ -1006,11 +1003,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '18526'
+      - '19047'
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:55 GMT
+      - Thu, 14 Jul 2022 23:58:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1036,6 +1033,118 @@ interactions:
     body: null
     headers:
       Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --vnet --subnet -s
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/d7cc65ab-a11c-4e0a-bcc3-11d818577f72?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Jul 2022 23:58:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c764c0e4-668a-4b9a-8975-4bcb47111a49
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --vnet --subnet -s
+      User-Agent:
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
+        \ \"etag\": \"W/\\\"46417a99-c391-4770-a07d-0a78b8a115d3\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"46417a99-c391-4770-a07d-0a78b8a115d3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1173'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Jul 2022 23:58:34 GMT
+      etag:
+      - W/"46417a99-c391-4770-a07d-0a78b8a115d3"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0e3d86ab-ce4a-4d23-8f88-7208257568e1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
@@ -1046,12 +1155,12 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003?api-version=2021-09-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","name":"clitest000003","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-05-12T10:27:51.9773860Z","key2":"2022-05-12T10:27:51.9773860Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-12T10:27:51.9773860Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-12T10:27:51.9773860Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2022-05-12T10:27:51.8680046Z","primaryEndpoints":{"blob":"https://clitest000003.blob.core.windows.net/","queue":"https://clitest000003.queue.core.windows.net/","table":"https://clitest000003.table.core.windows.net/","file":"https://clitest000003.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003","name":"clitest000003","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-07-14T23:57:40.2787468Z","key2":"2022-07-14T23:57:40.2787468Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-07-14T23:57:40.2787468Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-07-14T23:57:40.2787468Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2022-07-14T23:57:40.2006611Z","primaryEndpoints":{"blob":"https://clitest000003.blob.core.windows.net/","queue":"https://clitest000003.queue.core.windows.net/","table":"https://clitest000003.table.core.windows.net/","file":"https://clitest000003.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -1060,7 +1169,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:55 GMT
+      - Thu, 14 Jul 2022 23:58:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1094,12 +1203,12 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2021-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-05-12T10:27:51.9773860Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-12T10:27:51.9773860Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-07-14T23:57:40.2787468Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-07-14T23:57:40.2787468Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -1108,7 +1217,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:28:55 GMT
+      - Thu, 14 Jul 2022 23:58:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1125,118 +1234,6 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '11999'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --plan --vnet --subnet -s
-      User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/francecentral/operations/dd1590e3-6b4c-4484-8fca-672434f2ae17?api-version=2021-08-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 12 May 2022 10:28:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - c663adde-ff7f-4fc5-9937-a5d4e08412a3
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --plan --vnet --subnet -s
-      User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006?api-version=2021-08-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \ \"etag\": \"W/\\\"46cb859d-259c-4d3e-a5b8-fa9421db5f6c\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006/delegations/delegation\",\r\n
-        \       \"etag\": \"W/\\\"46cb859d-259c-4d3e-a5b8-fa9421db5f6c\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
-        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
-        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
-        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1172'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 12 May 2022 10:28:56 GMT
-      etag:
-      - W/"46cb859d-259c-4d3e-a5b8-fa9421db5f6c"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 704f2d6a-c3ba-4a31-8181-e2d3ad557d5d
     status:
       code: 200
       message: OK
@@ -1265,26 +1262,26 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004?api-version=2022-03-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004","name":"vnetfunctionapp000004","type":"Microsoft.Web/sites","kind":"functionapp","location":"France
-        Central","properties":{"name":"vnetfunctionapp000004","state":"Running","hostNames":["vnetfunctionapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/vnetfunctionapp000004","repositorySiteName":"vnetfunctionapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["vnetfunctionapp000004.azurewebsites.net","vnetfunctionapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"vnetfunctionapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"vnetfunctionapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-05-12T10:29:06.25","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        Central","properties":{"name":"vnetfunctionapp000004","state":"Running","hostNames":["vnetfunctionapp000004.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-025.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/vnetfunctionapp000004","repositorySiteName":"vnetfunctionapp000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["vnetfunctionapp000004.azurewebsites.net","vnetfunctionapp000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"vnetfunctionapp000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"vnetfunctionapp000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2022-07-14T23:58:43.1833333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","secretsCollection":[],"vnetRouteAllEnabled":false,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"vnetfunctionapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV2","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"functionapp","inboundIpAddress":"20.43.43.36","possibleInboundIpAddresses":"20.43.43.36","ftpUsername":"vnetfunctionapp000004\\$vnetfunctionapp000004","ftpsHostName":"ftps://waws-prod-par-021.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.74.66.246,20.74.67.7,20.74.68.18,20.74.68.56,20.74.68.182,20.74.68.185,20.43.43.36","possibleOutboundIpAddresses":"20.74.10.172,20.74.11.5,20.74.11.16,20.74.13.91,20.74.65.15,20.74.66.179,20.74.66.246,20.74.67.7,20.74.68.18,20.74.68.56,20.74.68.182,20.74.68.185,20.74.68.188,20.74.68.228,20.74.68.239,20.74.13.59,20.74.14.186,20.74.68.241,20.74.68.247,20.74.68.249,20.74.68.251,20.74.69.13,20.74.69.14,20.74.68.238,20.74.69.28,20.74.68.189,20.74.69.35,20.74.69.92,20.74.69.106,20.74.69.147,20.43.43.36","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-021","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"vnetfunctionapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006","keyVaultReferenceIdentity":"SystemAssigned"}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null},"deploymentId":"vnetfunctionapp000004","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV2","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"functionapp","inboundIpAddress":"20.111.1.0","possibleInboundIpAddresses":"20.111.1.0","ftpUsername":"vnetfunctionapp000004\\$vnetfunctionapp000004","ftpsHostName":"ftps://waws-prod-par-025.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"51.103.5.67,51.103.5.120,51.103.5.122,51.103.5.156,51.103.5.163,51.103.5.188,20.111.1.0","possibleOutboundIpAddresses":"51.103.0.54,51.103.4.31,51.103.5.0,51.103.5.19,51.103.5.26,51.103.5.53,51.103.5.67,51.103.5.120,51.103.5.122,51.103.5.156,51.103.5.163,51.103.5.188,51.103.7.4,51.103.7.59,51.103.7.60,51.103.7.91,51.103.7.107,51.103.7.113,51.103.7.117,51.103.7.135,51.103.6.4,51.103.7.150,51.103.7.162,51.103.7.167,51.103.4.157,51.103.7.177,51.103.7.201,51.103.7.206,51.103.3.118,51.103.7.208,20.111.1.0","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-025","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"vnetfunctionapp000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006","keyVaultReferenceIdentity":"SystemAssigned"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6447'
+      - '6474'
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:29:26 GMT
+      - Thu, 14 Jul 2022 23:59:03 GMT
       etag:
-      - '"1D865EB1C4CA015"'
+      - '"1D897DDA64D9AE0"'
       expires:
       - '-1'
       pragma:
@@ -1302,7 +1299,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '499'
+      - '498'
       x-powered-by:
       - ASP.NET
     status:
@@ -1327,30 +1324,43 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-applicationinsights/1.0.0 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-applicationinsights/1.0.0 Python/3.8.13
+        (macOS-12.4-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/components/vnetfunctionapp000004?api-version=2015-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/vnetfunctionapp000004","name":"vnetfunctionapp000004","type":"microsoft.insights/components","location":"francecentral","tags":{},"kind":"web","etag":"\"0700c168-0000-0e00-0000-627ce18e0000\"","properties":{"Ver":"v2","ApplicationId":"vnetfunctionapp000004","AppId":"0387ebbb-1a6a-4469-a2da-839a08b6c3d1","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"a674f69b-a55a-472a-8b4e-971bb34a41e5","ConnectionString":"InstrumentationKey=a674f69b-a55a-472a-8b4e-971bb34a41e5;IngestionEndpoint=https://francecentral-0.in.applicationinsights.azure.com/;LiveEndpoint=https://francecentral.livediagnostics.monitor.azure.com/","Name":"vnetfunctionapp000004","CreationDate":"2022-05-12T10:29:33.7772072+00:00","TenantId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","provisioningState":"Succeeded","SamplingPercentage":null,"RetentionInDays":90,"IngestionMode":"ApplicationInsights","publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled"}}'
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/vnetfunctionapp000004\",\r\n
+        \ \"name\": \"vnetfunctionapp000004\",\r\n  \"type\": \"microsoft.insights/components\",\r\n
+        \ \"location\": \"francecentral\",\r\n  \"tags\": {},\r\n  \"kind\": \"web\",\r\n
+        \ \"etag\": \"\\\"08006774-0000-0e00-0000-62d0adce0000\\\"\",\r\n  \"properties\":
+        {\r\n    \"ApplicationId\": \"vnetfunctionapp000004\",\r\n    \"AppId\": \"b604682a-5eb1-4a22-ae12-8a8b8e3b57dd\",\r\n
+        \   \"Application_Type\": \"web\",\r\n    \"Flow_Type\": null,\r\n    \"Request_Source\":
+        null,\r\n    \"InstrumentationKey\": \"40aa7ed1-03b6-4e5f-8915-8da5adf0b20e\",\r\n
+        \   \"ConnectionString\": \"InstrumentationKey=40aa7ed1-03b6-4e5f-8915-8da5adf0b20e;IngestionEndpoint=https://francecentral-0.in.applicationinsights.azure.com/;LiveEndpoint=https://francecentral.livediagnostics.monitor.azure.com/\",\r\n
+        \   \"Name\": \"vnetfunctionapp000004\",\r\n    \"CreationDate\": \"2022-07-14T23:59:10.5994924+00:00\",\r\n
+        \   \"TenantId\": \"2edc29f4-b81f-494b-a624-cc619903b837\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"SamplingPercentage\": null,\r\n    \"RetentionInDays\":
+        90,\r\n    \"IngestionMode\": \"ApplicationInsights\",\r\n    \"publicNetworkAccessForIngestion\":
+        \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"Ver\":
+        \"v2\"\r\n  }\r\n}"
     headers:
       access-control-expose-headers:
       - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '1282'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 10:29:38 GMT
+      - Thu, 14 Jul 2022 23:59:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
-      - appId=cid-v1:920e14b1-13f3-461a-a4bb-b4fe6f1a4525
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -1384,9 +1394,9 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/config/appsettings/list?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/config/appsettings/list?api-version=2022-03-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
@@ -1399,7 +1409,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:29:39 GMT
+      - Thu, 14 Jul 2022 23:59:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1417,7 +1427,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11997'
       x-powered-by:
       - ASP.NET
     status:
@@ -1426,7 +1436,7 @@ interactions:
 - request:
     body: '{"properties": {"FUNCTIONS_WORKER_RUNTIME": "dotnet", "FUNCTIONS_EXTENSION_VERSION":
       "~3", "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000003;AccountKey=veryFakedStorageAccountKey==",
-      "APPINSIGHTS_INSTRUMENTATIONKEY": "a674f69b-a55a-472a-8b4e-971bb34a41e5"}}'
+      "APPINSIGHTS_INSTRUMENTATIONKEY": "40aa7ed1-03b6-4e5f-8915-8da5adf0b20e"}}'
     headers:
       Accept:
       - application/json
@@ -1443,13 +1453,13 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/config/appsettings?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/config/appsettings?api-version=2022-03-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
-        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000003;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"a674f69b-a55a-472a-8b4e-971bb34a41e5"}}'
+        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000003;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"40aa7ed1-03b6-4e5f-8915-8da5adf0b20e"}}'
     headers:
       cache-control:
       - no-cache
@@ -1458,9 +1468,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:29:41 GMT
+      - Thu, 14 Jul 2022 23:59:17 GMT
       etag:
-      - '"1D865EB268EA9B5"'
+      - '"1D897DDB16A5A15"'
       expires:
       - '-1'
       pragma:
@@ -1478,7 +1488,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1498,12 +1508,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/virtualNetworkConnections?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/virtualNetworkConnections?api-version=2022-03-01
   response:
     body:
-      string: '[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/virtualNetworkConnections/293eb9cd-0218-4ee8-9bcd-120d14fe371c_subnet000006","name":"293eb9cd-0218-4ee8-9bcd-120d14fe371c_subnet000006","type":"Microsoft.Web/sites/virtualNetworkConnections","location":"France
+      string: '[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/virtualNetworkConnections/99104de6-e921-4458-b9fd-573a91dc3b39_subnet000006","name":"99104de6-e921-4458-b9fd-573a91dc3b39_subnet000006","type":"Microsoft.Web/sites/virtualNetworkConnections","location":"France
         Central","properties":{"vnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006","certThumbprint":null,"certBlob":null,"routes":null,"resyncRequired":false,"dnsServers":null,"isSwift":true}}]'
     headers:
       cache-control:
@@ -1513,7 +1523,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:29:43 GMT
+      - Thu, 14 Jul 2022 23:59:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1551,9 +1561,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/networkConfig/virtualNetwork?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/networkConfig/virtualNetwork?api-version=2022-03-01
   response:
     body:
       string: ''
@@ -1563,7 +1573,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 12 May 2022 10:29:58 GMT
+      - Fri, 15 Jul 2022 00:00:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1597,9 +1607,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-web/6.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.8.13 (macOS-12.4-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/virtualNetworkConnections?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetfunctionapp000004/virtualNetworkConnections?api-version=2022-03-01
   response:
     body:
       string: '[]'
@@ -1611,7 +1621,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 10:30:00 GMT
+      - Fri, 15 Jul 2022 00:00:12 GMT
       expires:
       - '-1'
       pragma:
