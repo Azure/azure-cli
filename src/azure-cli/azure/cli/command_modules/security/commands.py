@@ -37,7 +37,8 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_secure_scores,
                               cf_security_secure_score_controls,
                               cf_security_secure_score_control_definitions,
-                              cf_security_automations)
+                              cf_security_automations,
+                              cf_security_security_solutions)
 
 
 # pylint: disable=line-too-long
@@ -230,6 +231,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#AutomationsOperations.{}',
         client_factory=cf_security_automations,
         operation_group='security_automations'
+    )
+
+    security_solutions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsOperations.{}',
+        client_factory=cf_security_security_solutions
     )
 
     with self.command_group('security secure-scores',
@@ -485,15 +491,22 @@ def load_command_table(self, _):
     with self.command_group('security automation-action-logic-app',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
+
         g.custom_command('create', 'create_security_automation_action_logic_app')
     with self.command_group('security automation-action-event-hub',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
+
         g.custom_command('create', 'create_security_automation_action_event_hub')
     with self.command_group('security automation-action-workspace',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
         g.custom_command('create', 'create_security_automation_action_workspace')
+
+    with self.command_group('security security_solutions',
+                            security_solutions_sdk,
+                            client_factory=cf_security_security_solutions) as g:
+        g.custom_command('list', 'list_security_security_solutions')
 
     with self.command_group('security'):
         pass

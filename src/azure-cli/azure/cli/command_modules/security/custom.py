@@ -333,13 +333,6 @@ def list_security_security_solutions(client):
 
     return client.security_solutions.list()
 
-def get_security_security_solutions(client, resource_name, resource_group_name):
-
-    for loc in client.locations.list():
-        client._config.asc_location = loc.name
-
-    return client.security_solutions.get(resource_group_name, resource_name)
-
 
 # --------------------------------------------------------------------------------------------
 # External Security Solutions
