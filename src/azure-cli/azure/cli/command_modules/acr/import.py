@@ -7,6 +7,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import sdk_no_wait
 
 from ._utils import (
     validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
@@ -25,7 +26,7 @@ LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
 
-def acr_import(cmd,
+def acr_import(cmd,  # pylint: disable=too-many-locals
                client,
                registry_name,
                source_image,
@@ -35,7 +36,8 @@ def acr_import(cmd,
                target_tags=None,
                resource_group_name=None,
                repository=None,
-               force=False):
+               force=False,
+               no_wait=False):
 
     if source_registry_username and not source_registry_password:
         raise CLIError(CREDENTIALS_INVALID)
@@ -94,41 +96,45 @@ def acr_import(cmd,
                                               target_tags=target_tags,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
-    result_poller = client.import_image(
-        resource_group_name=resource_group_name,
-        registry_name=registry_name,
-        parameters=import_parameters)
 
-    return _handle_result(cmd, result_poller, source_registry, source_image, registry)
+    try:
+        if no_wait:
+            logger.warning('Import has started. Due to no-wait option, failures will not be reflected.')
+            return sdk_no_wait(no_wait, client.begin_import_image, resource_group_name,
+                               registry_name, import_parameters)
+
+        result_poller = client.begin_import_image(
+            resource_group_name=resource_group_name,
+            registry_name=registry_name,
+            parameters=import_parameters)
+        return LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
+
+    except CLIError as e:
+        _handle_import_exception(e, cmd, source_registry, source_image, registry)
 
 
-def _handle_result(cmd, result_poller, source_registry, source_image, registry):
+def _handle_import_exception(e, cmd, source_registry, source_image, registry):
     from msrestazure.azure_exceptions import ClientException
     try:
-        result = LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
-    except CLIError as e:
-        try:
-            # if command fails, it might be because user specified registry twice in --source and --registry
-            if source_registry:
+        # if command fails, it might be because user specified registry twice in --source and --registry
+        if source_registry:
 
-                if not hasattr(registry, 'login_server'):
-                    if is_valid_resource_id(source_registry):
-                        registry, _ = get_registry_by_name(cmd.cli_ctx, parse_resource_id(source_registry)["name"])
-                    else:
-                        registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
+            if not hasattr(registry, 'login_server'):
+                if is_valid_resource_id(source_registry):
+                    registry, _ = get_registry_by_name(cmd.cli_ctx, parse_resource_id(source_registry)["name"])
+                else:
+                    registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
 
-                if registry.login_server.lower() in source_image.lower():
-                    logger.warning("Import from source failed.\n\tsource image: '%s'\n"
-                                   "Attention: When source registry is specified with `--registry`, "
-                                   "`--source` is considered to be a source image name. "
-                                   "Do not prefix `--source` with the registry login server name.", "{}/{}"
-                                   .format(registry.login_server, source_image))
-        except (ClientException, CLIError) as unexpected_ex:  # raise exception
-            logger.debug("Unexpected exception: %s", unexpected_ex)
+            if registry.login_server.lower() in source_image.lower():
+                logger.warning("Import from source failed.\n\tsource image: '%s'\n"
+                               "Attention: When source registry is specified with `--registry`, "
+                               "`--source` is considered to be a source image name. "
+                               "Do not prefix `--source` with the registry login server name.", "{}/{}"
+                               .format(registry.login_server, source_image))
+    except (ClientException, CLIError) as unexpected_ex:  # raise exception
+        logger.debug("Unexpected exception: %s", unexpected_ex)
 
-        raise e  # regardless re-raise the CLIError as this is an error from the service
-
-    return result
+    raise e  # regardless re-raise the CLIError as this is an error from the service
 
 
 def _split_registry_and_image(source_image):

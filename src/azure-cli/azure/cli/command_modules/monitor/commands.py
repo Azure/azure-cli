@@ -9,9 +9,9 @@ from azure.cli.core.commands import CliCommandType
 def load_command_table(self, _):
 
     from ._client_factory import (
-        cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
+        cf_alert_rules, cf_metric_def, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_log_analytics_deleted_workspaces, cf_log_analytics_workspace,
+        cf_metric_alerts, cf_metric_ns, cf_log_analytics_deleted_workspaces, cf_log_analytics_workspace,
         cf_log_analytics_workspace_tables, cf_log_analytics_workspace_management_groups,
         cf_log_analytics_workspace_usage, cf_log_analytics_workspace_schema, cf_log_analytics_workspace_shared_keys,
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
@@ -58,18 +58,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.monitor.operations.activity_log_alerts#{}',
         client_factory=cf_activity_log_alerts,
         operation_group='activity_log_alerts',
-        exception_handler=exception_handler)
-
-    alert_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#AlertRulesOperations.{}',
-        client_factory=cf_alert_rules,
-        operation_group='alert_rules',
-        exception_handler=exception_handler)
-
-    alert_rule_incidents_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#AlertRuleIncidentsOperations.{}',
-        client_factory=cf_alert_rule_incidents,
-        operation_group='alert_rule_incidents',
         exception_handler=exception_handler)
 
     autoscale_sdk = CliCommandType(
@@ -143,6 +131,13 @@ def load_command_table(self, _):
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
         exception_handler=exception_handler)
+
+    metric_namespaces_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#MetricNamespacesOperations.{}',
+        client_factory=cf_metric_ns,
+        operation_group='metric_namespaces',
+        exception_handler=exception_handler
+    )
 
     log_analytics_workspace_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#WorkspacesOperations.{}',
@@ -287,15 +282,6 @@ def load_command_table(self, _):
         g.custom_command('scope add', 'add_scope')
         g.custom_command('scope remove', 'remove_scope')
 
-    with self.command_group('monitor alert', alert_sdk, custom_command_type=alert_custom, deprecate_info=self.deprecate(redirect='monitor metrics alert', hide='2.0.44')) as g:
-        g.custom_command('create', 'create_metric_rule')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_resource_group')
-        g.command('show-incident', 'get', command_type=alert_rule_incidents_sdk)
-        g.command('list-incidents', 'list_by_alert_rule', command_type=alert_rule_incidents_sdk)
-        g.generic_update_command('update', custom_func_name='update_metric_rule')
-
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_create', validator=process_autoscale_create_namespace)
         g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
@@ -315,15 +301,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'autoscale_rule_list')
         g.custom_command('delete', 'autoscale_rule_delete')
         g.custom_command('copy', 'autoscale_rule_copy')
-
-    with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom,
-                            deprecate_info=self.deprecate(redirect='monitor autoscale', hide='2.0.34')) as g:
-        g.command('create', 'create_or_update', deprecate_info='az monitor autoscale create')
-        g.command('delete', 'delete', deprecate_info='az monitor autoscale delete')
-        g.show_command('show', 'get', deprecate_info='az monitor autoscale show')
-        g.command('list', 'list_by_resource_group', deprecate_info='az monitor autoscale list')
-        g.custom_command('get-parameters-template', 'scaffold_autoscale_settings_parameters', deprecate_info='az monitor autoscale show')
-        g.generic_update_command('update', deprecate_info='az monitor autoscale update')
 
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk, custom_command_type=diagnostics_custom) as g:
         from .validators import validate_diagnostic_settings
@@ -345,9 +322,10 @@ def load_command_table(self, _):
         g.generic_update_command('update')
 
     with self.command_group('monitor metrics') as g:
-        from .transformers import metrics_table, metrics_definitions_table
+        from .transformers import metrics_table, metrics_definitions_table, metrics_namespaces_table
         g.command('list', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
         g.command('list-definitions', 'list', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
+        g.command('list-namespaces', 'list', is_preview=True, command_type=metric_namespaces_sdk, table_transformer=metrics_namespaces_table)
 
     with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom, client_factory=cf_metric_alerts) as g:
         g.custom_command('create', 'create_metric_alert')
@@ -379,10 +357,20 @@ def load_command_table(self, _):
         g.command('list-management-groups', 'list', command_type=log_analytics_workspace_management_groups_sdk)
         g.command('get-shared-keys', 'get_shared_keys', command_type=log_analytics_workspace_shared_keys_sdk)
 
-    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables) as g:
+    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
-        g.custom_command('update', 'update_log_analytics_workspace_table')
+        g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
+        g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
+        g.command('migrate', 'migrate')
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')
+
+    with self.command_group('monitor log-analytics workspace table search-job', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
+        g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
+
+    with self.command_group('monitor log-analytics workspace table restore', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
+        g.custom_command('create', 'create_log_analytics_workspace_table_restore', supports_no_wait=True)
 
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:
@@ -415,10 +403,6 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
         g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
-        g.custom_command('update', 'update_log_analytics_cluster')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:

@@ -227,6 +227,7 @@ def step_order_create(test, rg, checks=None):
              '--country "United States" '
              '--postal-code "98052" '
              '--state "WA" '
+             '--status "Untracked" '
              '--resource-group "{rg}"',
              checks=checks)
 

@@ -17,6 +17,6 @@ def generate_username():
             for line in file_noun:
                 nouns.append(line.strip())
     adjective = random.choice(adjectives)
-    noun = random.choice(nouns).capitalize()
+    noun = random.choice(nouns)
     num = str(random.randrange(10))
     return adjective + noun + num

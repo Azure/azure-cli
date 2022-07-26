@@ -11,7 +11,44 @@
 
 from knack.help_files import helps
 
-helps['vm sshkey'] = """
+
+helps['sshkey'] = """
     type: group
     short-summary: Manage ssh public key with vm
+"""
+
+helps['sshkey list'] = """
+    type: command
+    short-summary: "Lists all of the SSH public keys in the specified resource group. Use the nextLink property in the \
+response to get the next page of SSH public keys. And Lists all of the SSH public keys in the subscription. Use the \
+nextLink property in the response to get the next page of SSH public keys."
+"""
+
+helps['sshkey show'] = """
+    type: command
+    short-summary: "Retrieves information about an SSH public key."
+    examples:
+      - name: Get an ssh public key.
+        text: |-
+               az sshkey show --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+"""
+
+helps['sshkey create'] = """
+    type: command
+    short-summary: "Creates a new SSH public key resource."
+    examples:
+      - name: Create a new SSH public key resource.
+        text: |-
+               az sshkey create --location "westus" --public-key "{ssh-rsa public key}" --resource-group \
+"myResourceGroup" --name "mySshPublicKeyName"
+"""
+
+helps['sshkey update'] = """
+    type: command
+    short-summary: "Updates a new SSH public key resource."
+"""
+
+helps['sshkey delete'] = """
+    type: command
+    short-summary: "Delete an SSH public key."
 """

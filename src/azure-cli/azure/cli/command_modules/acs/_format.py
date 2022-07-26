@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
-# pylint: disable=import-error
-from jmespath import compile as compile_jmes, Options
-# pylint: disable=import-error
+
+from jmespath import Options
+from jmespath import compile as compile_jmes
 from jmespath import functions
 
 
@@ -41,9 +41,19 @@ def aks_list_table_format(results):
     return [_aks_table_format(r) for r in results]
 
 
-def osa_list_table_format(results):
-    """"Format a list of OpenShift managed clusters as summary results for display with "-o table"."""
-    return [_osa_table_format(r) for r in results]
+def aks_run_command_result_format(cmdResult):
+    result = OrderedDict()
+    if cmdResult['provisioningState'] == "Succeeded":
+        result['exit code'] = cmdResult['exitCode']
+        result['logs'] = cmdResult['logs']
+        return result
+    if cmdResult['provisioningState'] == "Failed":
+        result['provisioning state'] = cmdResult['provisioningState']
+        result['reason'] = cmdResult['reason']
+        return result
+    result['provisioning state'] = cmdResult['provisioningState']
+    result['started At'] = cmdResult['startedAt']
+    return result
 
 
 def aks_show_table_format(result):
@@ -57,21 +67,9 @@ def _aks_table_format(result):
         location: location,
         resourceGroup: resourceGroup,
         kubernetesVersion: kubernetesVersion,
+        currentKubernetesVersion: currentKubernetesVersion,
         provisioningState: provisioningState,
         fqdn: fqdn || privateFqdn
-    }""")
-    # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
-
-
-def _osa_table_format(result):
-    parsed = compile_jmes("""{
-        name: name,
-        location: location,
-        resourceGroup: resourceGroup,
-        openShiftVersion: openShiftVersion,
-        provisioningState: provisioningState,
-        publicHostname: publicHostname
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
@@ -116,8 +114,33 @@ def aks_versions_table_format(result):
     }""")
 
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    results = parsed.search(result, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
+
+
+def aks_list_nodepool_snapshot_table_format(results):
+    """"Format a list of nodepool snapshots as summary results for display with "-o table"."""
+    return [_aks_nodepool_snapshot_table_format(r) for r in results]
+
+
+def aks_show_nodepool_snapshot_table_format(result):
+    """Format a nodepool snapshot as summary results for display with "-o table"."""
+    return [_aks_nodepool_snapshot_table_format(result)]
+
+
+def _aks_nodepool_snapshot_table_format(result):
+    parsed = compile_jmes("""{
+        name: name,
+        location: location,
+        resourceGroup: resourceGroup,
+        nodeImageVersion: nodeImageVersion,
+        kubernetesVersion: kubernetesVersion,
+        osType: osType,
+        enableFIPS: enableFIPS
+    }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict))
 
 
 def version_to_tuple(version):
@@ -135,7 +158,8 @@ def _custom_functions(preview_versions):
             """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
             try:
                 return sorted(versions, key=version_to_tuple)
-            except (TypeError, ValueError):  # if it wasn't sortable, return the input so the pipeline continues
+            # if it wasn't sortable, return the input so the pipeline continues
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['array']})

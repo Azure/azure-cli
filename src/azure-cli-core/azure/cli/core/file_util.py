@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
 
 from knack.log import get_logger

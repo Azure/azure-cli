@@ -5,7 +5,7 @@
 
 #  pylint: disable=unused-import
 from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, CustomResourceType, PROFILE_TYPE,\
-    SDKProfile
+    SDKProfile, AD_HOC_API_VERSIONS
 
 
 def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):

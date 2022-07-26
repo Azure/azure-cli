@@ -62,6 +62,45 @@ type: group
 short-summary: Manage Azure Management Groups.
 """
 
+helps['account management-group tenant-backfill'] = """
+type: group
+short-summary: Backfill Tenant Subscription Operations for Management Groups
+"""
+
+helps['account management-group tenant-backfill get'] = """
+type: command
+short-summary: Get the backfill status for a tenant.
+long-summary: Get the backfill status for a tenant.
+examples:
+  - name: Get the backfill status for a tenant.
+    text: >
+        az account management-group tenant-backfill get
+"""
+
+helps['account management-group tenant-backfill start'] = """
+type: command
+short-summary: Start backfilling subscriptions for a tenant.
+long-summary: Start backfilling subscriptions for a tenant.
+examples:
+  - name: Start backfilling subscriptions for a tenant.
+    text: >
+        az account management-group tenant-backfill start
+"""
+
+helps['account management-group check-name-availability'] = """
+type: command
+short-summary: Check if a Management Group Name is Valid.
+long-summary: Check if a Management Group Name is Valid.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Check if a Management Group Name is Valid.
+    text: >
+        az account management-group check-name-availability --name GroupName
+"""
+
 helps['account management-group create'] = """
 type: command
 short-summary: Create a new management group.
@@ -163,6 +202,52 @@ examples:
         az account management-group subscription add --name GroupName --subscription Subscription
 """
 
+helps['account management-group subscription show'] = """
+type: command
+short-summary: Show the details of a subscription under a known management group.
+long-summary: Show the details of a subscription under a known management group.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+  - name: --subscription -s
+    type: string
+    short-summary: Subscription Id or Name
+examples:
+  - name: Show the details of a subscription under a known management group.
+    text: >
+        az account management-group subscription show --name GroupName --subscription Subscription
+"""
+
+helps['account management-group subscription show-sub-under-mg'] = """
+type: command
+short-summary: Get the subscription under a management group.
+long-summary: Get the subscription under a management group.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Get the subscription under a management group.
+    text: >
+        az account management-group subscription show-sub-under-mg --name GroupName
+"""
+
+helps['account management-group entities'] = """
+type: group
+short-summary: Entity operations (Management Group and Subscriptions) for Management Groups.
+"""
+
+helps['account management-group entities list'] = """
+type: command
+short-summary: List all entities for the authenticated user.
+long-summary: List all entities for the authenticated user.
+examples:
+  - name: List all entities for the authenticated user.
+    text: >
+        az account management-group entities list
+"""
+
 helps['account management-group subscription remove'] = """
 type: command
 short-summary: Remove an existing subscription from a management group.
@@ -206,6 +291,97 @@ examples:
         az account management-group update --name GroupName --display-name DisplayName --parent ParentId/ParentName
 """
 
+helps['account management-group hierarchy-settings'] = """
+type: group
+short-summary: Provide operations for hierarchy settings defined at the management group level. Settings can only be set on the root Management Group of the hierarchy.
+"""
+
+helps['account management-group hierarchy-settings create'] = """
+type: command
+short-summary: Create hierarchy settings defined at the Management Group level.
+long-summary: Create hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+  - name: --default-management-group -m
+    type: string
+    short-summary: Set the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
+  - name: --require-authorization-for-group-creation -r
+    type: boolean
+    short-summary: Indicate whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
+examples:
+  - name: Create hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName
+  - name: Set the default Management Group new Subscriptions get placed under.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup
+  - name: Require user to have Microsoft.Management/managementGroups/write access on the Root to create new Management Groups under the Root.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName -r True
+  - name: Update both hierarchy settings.
+    text: >
+        az account management-group hierarchy-settings create --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup -r True
+"""
+
+helps['account management-group hierarchy-settings list'] = """
+type: command
+short-summary: Get all the hierarchy settings defined at the Management Group level.
+long-summary: Get all the hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Get all hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings list --name GroupName
+"""
+
+helps['account management-group hierarchy-settings delete'] = """
+type: command
+short-summary: Delete the hierarchy settings defined at the Management Group level.
+long-summary: Delete the hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+examples:
+  - name: Delete all hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings delete --name GroupName
+"""
+
+helps['account management-group hierarchy-settings update'] = """
+type: command
+short-summary: Update the hierarchy settings defined at the Management Group level.
+long-summary: Update the hierarchy settings defined at the Management Group level.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the management group.
+  - name: --default-management-group -m
+    type: string
+    short-summary: Set the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
+  - name: --require-authorization-for-group-creation -r
+    type: boolean
+    short-summary: Indicate whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
+examples:
+  - name: Create hierarchy settings defined at the Management Group level.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName
+  - name: Set the default Management Group new Subscriptions get placed under.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup
+  - name: Require user to have Microsoft.Management/managementGroups/write access on the Root to create new Management Groups under the Root.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName -r True
+  - name: Update both hierarchy settings.
+    text: >
+        az account management-group hierarchy-settings update --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup -r True
+"""
+
 helps['deployment'] = """
 type: group
 short-summary: Manage Azure Resource Manager template deployment at subscription scope.
@@ -246,6 +422,7 @@ examples:
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -271,6 +448,7 @@ examples:
 helps['deployment create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -385,6 +563,7 @@ examples:
 helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -413,6 +592,7 @@ examples:
 helps['deployment sub create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -449,6 +629,7 @@ examples:
 helps['deployment sub what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -557,6 +738,7 @@ examples:
 helps['deployment group validate'] = """
 type: command
 short-summary: Validate whether a template is valid at resource group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -587,6 +769,7 @@ examples:
 helps['deployment group create'] = """
 type: command
 short-summary: Start a deployment at resource group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -625,7 +808,7 @@ examples:
         az deployment group create --resource-group testrg --name rollout01 \\
             --template-file azuredeploy.json  --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
-  - name: Create a deployment at subscription scope from a template-spec
+  - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
@@ -633,6 +816,7 @@ examples:
 helps['deployment group what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at resource group scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -640,7 +824,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file or Bicpe file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -743,6 +927,7 @@ examples:
 helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -773,6 +958,7 @@ examples:
 helps['deployment mg what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at management group scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -808,6 +994,7 @@ examples:
 helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -913,6 +1100,7 @@ examples:
 helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -941,6 +1129,7 @@ examples:
 helps['deployment tenant what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -974,6 +1163,7 @@ examples:
 helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1124,6 +1314,35 @@ examples:
     text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
 """
 
+helps['feature registration'] = """
+type: group
+short-summary: Manage resource provider feature registrations.
+"""
+
+helps['feature registration list'] = """
+type: command
+short-summary: List feature registrations.
+examples:
+  - name: List feature registrations
+    text: az feature registration list
+"""
+
+helps['feature registration create'] = """
+type: command
+short-summary: Create a feature registration.
+examples:
+  - name: create the "Shared Image Gallery" feature
+    text: az feature registration create --namespace Microsoft.Compute --name GalleryPreview
+"""
+
+helps['feature registration delete'] = """
+type: command
+short-summary: Delete a feature registration.
+examples:
+  - name: delete the "Shared Image Gallery" feature
+    text: az feature registration delete --namespace Microsoft.Compute --name GalleryPreview
+"""
+
 helps['group'] = """
 type: group
 short-summary: Manage resource groups and template deployments.
@@ -1145,6 +1364,9 @@ examples:
   - name: Delete a resource group.
     text: >
         az group delete -n MyResourceGroup
+  - name: Force delete all the Virtual Machines in a resource group.
+    text: >
+        az group delete -n MyResourceGroup --force-deletion-types Microsoft.Compute/virtualMachines
 """
 
 helps['group deployment'] = """
@@ -1321,9 +1543,13 @@ short-summary: Manage Azure locks.
 helps['lock create'] = """
 type: command
 short-summary: Create a lock.
-long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to add locks at different levels, please refer to the following examples.'
 examples:
   - name: Create a read-only subscription level lock.
+    text: >
+        az lock create --name lockName --lock-type ReadOnly
+  - name: Create a read-only resource group level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
   - name: Create a read-only resource level lock on a vnet resource.
@@ -1339,10 +1565,18 @@ examples:
 helps['lock delete'] = """
 type: command
 short-summary: Delete a lock.
+long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource. \
+                For how to delete locks at different levels, please refer to the following examples.'
 examples:
-  - name: Delete a resource group-level lock
+  - name: Delete a subscription level lock
+    text: >
+        az lock delete --name lockName
+  - name: Delete a resource group level lock
     text: >
         az lock delete --name lockName --resource-group group
+  - name: Delete a resource level lock
+    text: >
+        az lock delete --name lockName --resource-group group --resource resourceName --resource-type resourceType
 """
 
 helps['lock list'] = """
@@ -1512,13 +1746,25 @@ examples:
             { \\"value\\": [ \\"australiaeast\\", \\"eastus\\", \\"japaneast\\" ] } }"
   - name: Create a resource policy assignment with a system assigned identity.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity
+        az policy assignment create --name myPolicy --policy {PolicyName} --mi-system-assigned --location eastus
   - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
+        az policy assignment create --name myPolicy --policy {PolicyName} --mi-system-assigned --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor --location eastus
+  - name: Create a resource policy assignment with a user assigned identity.
+    text: >
+        az policy assignment create --name myPolicy --policy {PolicyName} -g MyResourceGroup --mi-user-assigned myAssignedId --location westus
   - name: Create a resource policy assignment with an enforcement mode. It indicates whether a policy effect will be enforced or not during assignment creation and update. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.
     text: >
         az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
+"""
+
+helps['policy assignment update'] = """
+type: command
+short-summary: Update a resource policy assignment.
+examples:
+  - name: Update a resource policy assignment's description.
+    text: |
+        az policy assignment update --name myPolicy --description 'My policy description'
 """
 
 helps['policy assignment delete'] = """
@@ -1538,14 +1784,17 @@ short-summary: Manage a policy assignment's managed identity.
 
 helps['policy assignment identity assign'] = """
 type: command
-short-summary: Add a system assigned identity to a policy assignment.
+short-summary: Add a system assigned identity or a user assigned identity to a policy assignment.
 examples:
   - name: Add a system assigned managed identity to a policy assignment.
     text: >
-        az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment
+        az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment
   - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
     text: >
-        az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+        az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+  - name: Add a user assigned managed identity to a policy assignment.
+    text: >
+        az policy assignment identity assign --user-assigned MyAssignedId -g MyResourceGroup -n MyPolicyAssignment
 """
 
 helps['policy assignment identity remove'] = """
@@ -1561,6 +1810,44 @@ examples:
     text: |
         az policy assignment identity show --name MyPolicyAssignment --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup'
     crafted: true
+"""
+
+helps['policy assignment non-compliance-message'] = """
+type: group
+short-summary: Manage a policy assignment's non-compliance messages.
+"""
+
+helps['policy assignment non-compliance-message create'] = """
+type: command
+short-summary: Add a non-compliance message to a policy assignment.
+examples:
+  - name: Add a non-compliance message to a policy assignment.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Add a non-compliance message for a specific policy in an assigned policy set definition.
+    text: >
+        az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
+"""
+
+helps['policy assignment non-compliance-message list'] = """
+type: command
+short-summary: List the non-compliance messages for a policy assignment.
+examples:
+  - name: List the non-compliance messages for a policy assignment.
+    text: >
+        az policy assignment non-compliance-message list -g MyResourceGroup -n MyPolicyAssignment
+"""
+
+helps['policy assignment non-compliance-message delete'] = """
+type: command
+short-summary: Remove one or more non-compliance messages from a policy assignment.
+examples:
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and no policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+  - name: Remove non-compliance messages from a policy assignment that contain a specific message and a specific policy definition reference ID.
+    text: >
+        az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
 """
 
 helps['policy assignment list'] = """
@@ -1685,15 +1972,15 @@ examples:
   - name: Create a policy set definition.
     text: |
         az policy set-definition create -n readOnlyStorage \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
+  - name: Create a policy set definition with parameters.
+    text: |
+        az policy set-definition create -n readOnlyStorage \\
             --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\", \\"parameters\\": \\
                     { \\"storageSku\\": { \\"value\\": \\"[parameters(\\\\"requiredSku\\\\")]\\" } } }]" \\
             --params "{ \\"requiredSku\\": { \\"type\\": \\"String\\" } }"
-  - name: Create a policy set definition with parameters.
-    text: |
-        az policy set-definition create -n readOnlyStorage \\
-            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
-                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition in a subscription.
     text: |
         az policy set-definition create -n readOnlyStorage \\
@@ -1732,9 +2019,9 @@ helps['policy set-definition show'] = """
 type: command
 short-summary: Show a policy set definition.
 examples:
-  - name: Show a policy set definition. (autogenerated)
+  - name: Show a policy set definition. If the policy set is scoped to a management group, then you must include the `--management-group` parameter and value.
     text: |
-        az policy set-definition show --name MyPolicySetDefinition
+        az policy set-definition show --name MyPolicySetDefinition --management-group MyManagementGroup
     crafted: true
 """
 
@@ -1760,6 +2047,79 @@ examples:
             --definition-groups "[{ \\"name\\": \\"CostSaving\\" }, { \\"name\\": \\"Organizational\\" } ]"
 """
 
+helps['policy exemption'] = """
+type: group
+short-summary: Manage resource policy exemptions.
+"""
+
+helps['policy exemption create'] = """
+type: command
+short-summary: Create a policy exemption.
+examples:
+  - name: Create a policy exemption in default subscription.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver"
+  - name: Create a policy exemption in the resource group.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver" \\
+            --resource-group "myResourceGroup"
+  - name: Create a policy exemption in a management group.
+    text: |
+        az policy exemption create -n exemptTestVM \\
+            --policy-assignment "/providers/Microsoft.Management/managementGroups/myMG/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+            --exemption-category "Waiver" \\
+            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+"""
+
+helps['policy exemption delete'] = """
+type: command
+short-summary: Delete a policy exemption.
+examples:
+  - name: Delete a policy exemption.
+    text: |
+        az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"
+    crafted: true
+"""
+
+helps['policy exemption list'] = """
+type: command
+short-summary: List policy exemptions.
+"""
+
+helps['policy exemption show'] = """
+type: command
+short-summary: Show a policy exemption.
+examples:
+  - name: Show a policy exemption.
+    text: |
+        az policy exemption show --name MyPolicyExemption --resource-group "myResourceGroup"
+    crafted: true
+"""
+
+helps['policy exemption update'] = """
+type: command
+short-summary: Update a policy exemption.
+examples:
+  - name: Update a policy exemption.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated"
+  - name: Update a policy exemption in the resource group.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated" \\
+            --resource-group "myResourceGroup"
+  - name: Update a policy exemption in a management group.
+    text: |
+        az policy exemption update -n exemptTestVM \\
+            --exemption-category "Mitigated" \\
+            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+"""
+
 helps['provider'] = """
 type: group
 short-summary: Manage resource providers.
@@ -1770,7 +2130,17 @@ type: command
 examples:
   - name: Display all resource types for the network resource provider.
     text: >
-        az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
+        az provider list --query "[?namespace=='Microsoft.Network'].resourceTypes[].resourceType"
+"""
+
+helps['provider permission'] = """
+type: group
+short-summary: Manage permissions for a provider.
+"""
+
+helps['provider permission list'] = """
+type: command
+short-summary: List permissions from a provider.
 """
 
 helps['provider operation'] = """
@@ -1846,6 +2216,13 @@ examples:
   - name: Create a resource by using the latest api-version whether this version is a preview version.
     text: >
         az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
+  - name: Create a site extension to a web app
+    text: |
+        az resource create -g myRG --api-version "2018-02-01" \\
+            --name "{sitename+slot}/siteextensions/Contrast.NetCore.Azure.SiteExtension"  \\
+                --resource-type Microsoft.Web/sites/siteextensions --is-full-object \\
+                    --properties "{ \\"id\\": \\"Contrast.NetCore.Azure.SiteExtension\\", \\
+                        \\"location\\": \\"West US\\", \\"version\\": \\"1.9.0\\" }"
 """
 
 helps['resource delete'] = """
@@ -2133,6 +2510,7 @@ long-summary: >
     The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
     This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
     The specified entity can have a maximum of 50 tags.
+    Please note: 'tag create' acts like a 'tag init' hence tags created with this command are the only ones being present after execution.
 parameters:
   - name: --name -n
     short-summary: The name of the tag to create.
@@ -2258,7 +2636,7 @@ examples:
   - name: Update the description of a template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description" --yes
   - name: Update all the properties of a template spec version.
-    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description" --ui-form-definition formDefinition.json
   - name: Remove tag(s) from template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --tags --yes
 
@@ -2325,35 +2703,67 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+  - name: Install Bicep CLI and specify the target platform.
+    text: az bicep install --target-platform linux-x64
+"""
+
+helps['bicep uninstall'] = """
+type: command
+short-summary: Uninstall Bicep CLI.
 """
 
 helps['bicep upgrade'] = """
 type: command
 short-summary: Upgrade Bicep CLI to the latest version.
+examples:
+  - name: Upgrade Bicep CLI.
+    text: az bicep upgrade
+  - name: Upgrade Bicep CLI and specify the target platform.
+    text: az bicep upgrade --target-platform linux-x64
 """
 
 helps['bicep build'] = """
 type: command
-short-summary: Build one or more Bicep files.
+short-summary: Build a Bicep file.
 examples:
   - name: Build a Bicep file.
-    text: az bicep build --files {bicep_file}
-  - name: Build multiple Bicep files.
-    text: az bicep build --files {bicep_file1} {bicep_file2}
-  - name: Build a Bicep file and prints all output to stdout.
-    text: az bicep build --files {bicep_file} --stdout
-  - name: Build multiple Bicep files and prints all output to stdout.
-    text: az bicep build --files {bicep_file1} {bicep_file2} --stdout
+    text: az bicep build --file {bicep_file}
+  - name: Build a Bicep file and print all output to stdout.
+    text: az bicep build --file {bicep_file} --stdout
+  - name: Build a Bicep file and save the result to the specified directory.
+    text: az bicep build --file {bicep_file} --outdir {out_dir}
+  - name: Build a Bicep file and save the result to the specified file.
+    text: az bicep build --file {bicep_file} --outfile {out_file}
+  - name: Build a Bicep file without restoring external modules.
+    text: az bicep build --file {bicep_file} --no-restore
 """
 
 helps['bicep decompile'] = """
 type: command
-short-summary: Attempt to decompile one or more ARM template files to Bicep files
+short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
-    text: az bicep decompile --files {json_template_file}
-  - name: Decompile multiple ARM template files.
-    text: az bicep decompile --files {json_template_file1} {json_template_file2}
+    text: az bicep decompile --file {json_template_file}
+  - name: Decompile an ARM template file and overwrite existing Bicep file.
+    text: az bicep decompile --file {json_template_file} --force
+"""
+
+helps['bicep publish'] = """
+type: command
+short-summary: Publish a bicep file to a remote module registry.
+examples:
+  - name: Publish a bicep file.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
+"""
+
+helps['bicep restore'] = """
+type: command
+short-summary: Restore external modules for a bicep file.
+examples:
+  - name: Retore external modules.
+    text: az bicep restore --file {bicep_file}
+  - name: Retore external modules and overwrite cached external modules.
+    text: az bicep restore --file {bicep_file} --force
 """
 
 helps['bicep version'] = """
@@ -2364,4 +2774,96 @@ short-summary: Show the installed version of Bicep CLI.
 helps['bicep list-versions'] = """
 type: command
 short-summary: List out all available versions of Bicep CLI.
+"""
+
+helps['bicep generate-params'] = """
+type: command
+short-summary: Generate parameters file for a Bicep file.
+examples:
+  - name: Generate parameters file for a Bicep file.
+    text: az bicep generate-params --file {bicep_file}
+  - name: Generate parameters file for a Bicep file and print all output to stdout.
+    text: az bicep generate-params --file {bicep_file} --stdout
+  - name: Generate parameters file for a Bicep file and save the result to the specified directory.
+    text: az bicep generate-params --file {bicep_file} --outdir {out_dir}
+  - name: Generate parameters file for a Bicep file and save the result to the specified file.
+    text: az bicep generate-params --file {bicep_file} --outfile {out_file}
+  - name: Generate parameters file for a Bicep file without restoring external modules.
+    text: az bicep generate-params --file {bicep_file} --no-restore
+"""
+
+helps['resourcemanagement'] = """
+type: group
+short-summary: resourcemanagement CLI command group.
+"""
+helps['resourcemanagement private-link'] = """
+type: group
+short-summary: resourcemanagement private-link management on a resource.
+"""
+helps['private-link'] = """
+type: group
+short-summary: private-link association CLI command group.
+"""
+helps['private-link association'] = """
+type: group
+short-summary: private-link association management on a resource.
+"""
+
+helps['resourcemanagement private-link create'] = """
+type: command
+short-summary: Create a resource management group private link.
+examples:
+  - name: Create a resource management group private link.
+    text: az resourcemanagement private-link create --resource-group testRG --name TestRMPL --location WestUS
+"""
+helps['resourcemanagement private-link show'] = """
+type: command
+short-summary: Get resource management private.
+examples:
+  - name: Get single resource management private link.
+    text: az resourcemanagement private-link show --resource-group testRG --name TestRMPL
+"""
+helps['resourcemanagement private-link list'] = """
+type: command
+short-summary: Get all the resource management private links at scope.
+examples:
+  - name: List all resource management private links in a subscription.
+    text: az resourcemanagement private-link list
+  - name: List all resource management private links in a resource group.
+    text: az resourcemanagement private-link list --resource-group testRG
+"""
+helps['resourcemanagement private-link delete'] = """
+type: command
+short-summary: Delete a resource management private link.
+examples:
+  - name: Delete a resource management private link.
+    text: az resourcemanagement private-link delete --resource-group TestRG --name testRMPL
+"""
+helps['private-link association create'] = """
+type: command
+short-summary: Create a PrivateLinkAssociation.
+examples:
+  - name: Create a PrivateLinkAssociation.
+    text: az private-link association create --management-group-id TestMG --name testPLA --privatelink testPL --public-network-access enabled
+"""
+helps['private-link association show'] = """
+type: command
+short-summary: Get a private link association.
+examples:
+  - name: Get a single private link association.
+    text: az private-link association show --management-group-id TestMG --name testPLA
+"""
+helps['private-link association list'] = """
+type: command
+short-summary: Get a private link association for a management group scope.
+examples:
+  - name: Get a private link association for a management group scope.
+    text: az private-link association list --management-group-id TestMG
+"""
+helps['private-link association delete'] = """
+type: command
+short-summary: Delete a PrivateLinkAssociation.
+examples:
+  - name: Delete a PrivateLinkAssociation.
+    text: az private-link association delete --management-group-id TestMG --name testPLA
 """

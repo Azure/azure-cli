@@ -3,15 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import logging
 import shutil
 import inspect
 from inspect import getmembers as inspect_getmembers
 
 import unittest
-import mock
+from unittest import mock
 import tempfile
 
 from knack.help import GroupHelpFile, HelpAuthoringException

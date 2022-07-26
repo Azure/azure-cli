@@ -10,7 +10,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
                                JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
@@ -91,7 +91,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'non_exist_share_name': non_exist_share_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {non_exist_share_name}')
 
         # 5. Test update command.
@@ -180,6 +180,57 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
         self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
             JMESPathCheck('length(@)', 0)
+        })
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer(name_prefix="cli_snapshot", location="eastus")
+    @StorageAccountPreparer(name_prefix="snapshot", location="eastus", kind='StorageV2')
+    def test_storage_share_rm_with_snapshot(self):
+        self.kwargs.update({
+            'share': self.create_random_name('share', 24),
+        })
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share}')
+
+        result = self.cmd('storage share-rm snapshot --storage-account {sa} -g {rg} -n {share} '
+                          '-q 10 --metadata k1=v1 --access-tier Hot --enabled-protocols SMB --root-squash AllSquash').get_output_in_json()
+        self.assertEqual(result['name'], self.kwargs['share'])
+        self.assertEqual(result['shareQuota'], 10)
+        self.assertEqual(result['metadata']['k1'], 'v1')
+        self.assertEqual(result['accessTier'], 'Hot')
+        self.assertEqual(result['enabledProtocols'], 'SMB')
+        self.assertEqual(result['rootSquash'], 'AllSquash')
+        self.assertIsNotNone(result['snapshotTime'])
+
+        self.kwargs.update({
+            'snapshot': result['snapshotTime']
+        })
+
+        self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}', checks=[
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('snapshotTime', self.kwargs['snapshot'])
+        ])
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-snapshot', checks={
+            JMESPathCheck('length(@)', 2)
+        })
+
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaises(ResourceExistsError):
+            self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot} -y')
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --include-snapshot', checks={
+            JMESPathCheck('length(@)', 1)
+        })
+
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}')
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --include-snapshot', checks={
+            JMESPathCheck('length(@)', 1)
         })
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')

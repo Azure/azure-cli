@@ -13,39 +13,26 @@ from azure.cli.command_modules.dms._client_factory import (dms_client_factory,
 from azure.cli.core.commands import CliCommandType
 
 
-def dms_api_exception_handler(ex):
-    from knack.util import CLIError
-    from azure.mgmt.datamigration.models import ApiErrorException
-
-    if isinstance(ex, ApiErrorException):
-        raise CLIError(ex)
-    raise ex
-
-
 def load_command_table(self, _):
 
     dms_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations#ServicesOperations.{}',
-        client_factory=dms_client_factory,
-        exception_handler=dms_api_exception_handler
+        client_factory=dms_client_factory
     )
 
     dms_skus_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations#ResourceSkusOperations.{}',
-        client_factory=dms_client_factory,
-        exception_handler=dms_api_exception_handler
+        client_factory=dms_client_factory
     )
 
     dms_projects_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations#ProjectsOperations.{}',
-        client_factory=dms_client_factory,
-        exception_handler=dms_api_exception_handler
+        client_factory=dms_client_factory
     )
 
     dms_tasks_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations#TasksOperations.{}',
-        client_factory=dms_client_factory,
-        exception_handler=dms_api_exception_handler
+        client_factory=dms_client_factory
     )
 
     with self.command_group('dms', dms_sdk, client_factory=dms_cf_services) as g:

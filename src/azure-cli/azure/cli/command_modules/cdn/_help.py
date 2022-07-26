@@ -36,53 +36,59 @@ parameters:
     type: string
     short-summary: The host name of the custom domain. Must be a domain name.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Create a custom domain with resource name customdomain1 within an endpoint and profile.
     text: >
         az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name --hostname www.example.com
-  - name: Enable custom https with a minimum
-    text: >
-        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name --hostname www.example.com
+        -n customdomain1 --hostname www.example.com
 """
 
 helps['cdn custom-domain delete'] = """
 type: command
 short-summary: Delete the custom domain of a CDN.
 examples:
-  - name: Delete a custom domain.
+  - name: Delete a custom domain with resource name customdomain1.
     text: >
         az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name
+        -n customdomain1
 """
 
 helps['cdn custom-domain show'] = """
 type: command
 short-summary: Show details for the custom domain of a CDN.
 examples:
-  - name: Get the details of a custom domain.
+  - name: Get the details of a custom domain with resource name customdomain1.
     text: >
         az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile
-        -n domain-name
+        -n customdomain1
 """
 
 helps['cdn custom-domain enable-https'] = """
 type: command
-short-summary: Enable HTTPS delivery of the custom domain.
+short-summary: Enable HTTPS for a custom domain. The resource name of the custom domain could be obtained using "az cdn custom-domain list".
 examples:
-  - name: Enable HTTPS using a CDN-managed certificate
+  - name: Enable HTTPS for custom domain with resource name customdomain1 using a CDN-managed certificate
     text: >
         az cdn custom-domain enable-https -g group --profile-name profile --endpoint-name endpoint
-        -n domain-name
-  - name: Enable HTTPS using a CDN-managed certificate and a minimum TLS version of 1.2
+        -n customdomain1
+  - name: Enable HTTPS for custom domain with resource name customdomain1 using a CDN-managed certificate and set the minimum TLS version to 1.2
     text: >
         az cdn custom-domain enable-https -g group --profile-name profile --endpoint-name endpoint
-        -n domain-name --min-tls-version 1.2
+        -n customdomain1 --min-tls-version 1.2
 """
 
 helps['cdn edge-node'] = """
 type: group
 short-summary: View all available CDN edge nodes.
+"""
+
+helps['cdn name-exists'] = """
+type: command
+short-summary: Check the availability of a resource name.
+               This is needed for resources where name is globally unique, such as a CDN endpoint.
+examples:
+  - name: Check whether the resource name contoso is available or not.
+    text: >
+        az cdn name-exists --name contoso
 """
 
 helps['cdn endpoint'] = """
@@ -108,10 +114,14 @@ examples:
         --origin www.example.com 80 443
         /subscriptions/subid/resourcegroups/rg1/providers/Microsoft.Network/privateLinkServices/pls1
         eastus "Please approve this request"
-  - name: Create an endpoint with a custom domain with compression and only HTTPS.
+  - name: Create an https-only endpoint with a custom domain origin and support compression for Azure CDN's default compression MIME types.
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile
         --origin www.example.com --no-http --enable-compression
+  - name: Create an endpoint with a custom domain origin and support compression for specific MIME types.
+    text: >
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com --enable-compression --content-types-to-compress text/plain text/html
 """
 
 helps['cdn endpoint delete'] = """
@@ -134,6 +144,11 @@ examples:
 helps['cdn endpoint load'] = """
 type: command
 short-summary: Pre-load content for a CDN endpoint.
+parameters:
+  - name: --content-paths
+    type: string
+    short-summary: The path to the content to be loaded. Path should be a relative
+                   file URL of the origin.
 examples:
   - name: Pre-load Javascript and CSS content for an endpoint.
     text: >
@@ -144,11 +159,29 @@ examples:
 helps['cdn endpoint purge'] = """
 type: command
 short-summary: Purge pre-loaded content for a CDN endpoint.
+parameters:
+  - name: --content-paths
+    type: string
+    short-summary: The path to the content to be purged. Can describe a file path or a
+                   wildcard directory.
 examples:
   - name: Purge pre-loaded Javascript and CSS content.
     text: >
         az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths
         '/scripts/app.js' '/styles/*'
+"""
+
+helps['cdn endpoint validate-custom-domain'] = """
+type: command
+short-summary: Validates the custom domain mapping to ensure it maps to the correct CDN endpoint in DNS.
+parameters:
+  - name: --host-name
+    type: string
+    short-summary: The host name of the custom domain. Must be a domain name.
+examples:
+  - name: Validate domain www.contoso.com to see whether it maps to the correct CDN endpoint in DNS.
+    text: >
+        az cdn endpoint validate-custom-domain -g group -n endpoint --profile-name profile-name --host-name www.contoso.com
 """
 
 helps['cdn endpoint start'] = """
@@ -196,16 +229,26 @@ short-summary: Manage delivery rules for an endpoint.
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: >
+        Name of the rule, only required for Microsoft SKU.
 examples:
   - name: Create a global rule to disable caching.
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0
         --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
-  - name: Create a rule for http to https redirect
+  - name: Create a rule for http to https redirect.
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
-        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS
+        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTP
         --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
+  - name: Create a rule to distribute requests with "/test1" in its URL path to origin group with name "origingroup1".
+    text: >
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
+        --rule-name "origin-groupo-verride" --match-variable UrlPath --operator Contains --match-values /test1
+        --action-name "OriginGroupOverride" --origin-group origingroup1
 """
 
 helps['cdn endpoint rule remove'] = """
@@ -215,6 +258,9 @@ examples:
   - name: Remove the global rule.
     text: >
         az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global
+  - name: Remove the rule with the order 4.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --order 4
 """
 
 helps['cdn endpoint rule show'] = """
@@ -661,6 +707,15 @@ examples:
     crafted: true
 """
 
+helps['cdn waf'] = """
+type: group
+short-summary: Manage CDN WAF.
+long-summary: >
+    WAF on Azure CDN from Microsoft is currently in public preview and is provided with a preview service level agreement.
+    Certain features may not be supported or may have constrained capabilities.
+    See the Supplemental Terms of Use for Microsoft Azure Previews (https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/) for details.
+"""
+
 helps['cdn waf policy'] = """
 type: group
 short-summary: Manage CDN WAF policies.
@@ -997,6 +1052,11 @@ examples:
         az cdn waf policy rate-limit-rule show -g group --policy-name policy -n ratelimitrule
 """
 
+helps['afd'] = """
+type: group
+short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://docs.microsoft.com/en-us/cli/azure/network/front-door?view=azure-cli-latest
+"""
+
 helps['afd profile'] = """
 type: group
 short-summary: Manage AFD profiles.
@@ -1142,9 +1202,11 @@ helps['afd custom-domain create'] = """
 type: command
 short-summary: Create a custom domain within the specified profile.
 long-summary: >
-    Your need to create a DNS TXT record to prove the custom domain's ownership to make the operation successful.
-    Suggest to use "--no-wait" if the DNS update take a lot of time. Use "az afd custom-domain show" to obtain the validation token and
-    create a DNS TXT record for record "_dnsauth.{your custom domain}" with the validation token as its value.
+    The operation will complete with a created custom domain with its validation state set to 'Pending.
+    You have to create a DNS TXT record "_dnsauth.<your_custom_domain>" with the validation token as its value to make the domain's validation state become 'Approved' to server traffic.
+    Use "az afd custom-domain show" to obtain the validation token.
+    The validation token will expire after 7 days and your domain's validation state will become "Timeout" if no correct TXT record detected in that period.
+    You could use 'az afd custom-domain regenerate-validation-token' to regenerate the validation token to restart the validation process.
 examples:
   - name: Create a custom domain that uses AFD managed cerficate for SSL/TLS encryption.
     text: >
@@ -1203,6 +1265,14 @@ examples:
     text: az afd custom-domain wait -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain --created
 """
 
+helps['afd custom-domain regenerate-validation-token'] = """
+type: command
+short-summary: Regenerate the domain validation token to restart the validation process.
+examples:
+  - name: Regenerate the domain validation token.
+    text: az afd custom-domain regenerate-validation-token -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain
+"""
+
 helps['afd endpoint'] = """
 type: group
 short-summary: Manage AFD endpoints within the specified profile.
@@ -1213,19 +1283,23 @@ long-summary: >
 helps['afd endpoint create'] = """
 type: command
 short-summary: Creates an endpoint within the specified profile.
+long-summary: >
+    Azure Front Door will generate a deterministic DNS domain based on the customer input endpoint name in the form of <endpoint name>-<hash>.z01.azurefd.net,
+    the deterministic DNS domain could be reused within the tenant, subscription, or resource group depends on the --name-reuse-scope option.
+    Customer will get the same DNS domain in the reuse scope if the endpoint get deleted and recreated.
 examples:
-  - name: Creates an enabled endpoint with origin response timeout set to 60 seconds.
+  - name: Creates an enabled endpoint
     text: >
-        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 60 --enabled-state Enabled
+        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Enabled
 """
 
 helps['afd endpoint update'] = """
 type: command
 short-summary: Update an endpoint within the specified profile.
 examples:
-  - name: Update an endpoint's origin response timeout to 30 seconds.
+  - name: Update an endpoint's state to disabled.
     text: >
-        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 30
+        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Disabled
 """
 
 helps['afd endpoint delete'] = """
@@ -1255,6 +1329,15 @@ examples:
         az afd endpoint list -g group --profile-name profile
 """
 
+helps['afd endpoint purge'] = """
+type: command
+short-summary: Removes cached contents from Azure Front Door.
+examples:
+  - name: Remove all cached cotents under directory "/script" for domain www.contoso.com
+    text: >
+        az afd endpoint purge -g group --profile-name profile --domains www.contoso.com --content-paths '/scripts/*'
+"""
+
 helps['afd route'] = """
 type: group
 short-summary: Manage routes under an AFD endpoint.
@@ -1268,16 +1351,16 @@ short-summary: Creates a new route within the specified endpoint.
 examples:
   - name: Creates a route to assoicate the endpoint's default domain with an origin group for all HTTPS requests.
     text: >
-        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect False
+        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect Disabled
         --origin-group og001 --supported-protocols Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest
   - name: Creates a route to assoicate the endpoint's default domain with an origin group for all requests and use the specified rule sets to customize the route behavior.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
-        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect False
+        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect Disabled
   - name: Creates a route to assoicate the endpoint's default domain and a custom domain with an origin group for all requests with the specified path patterns and redirect all trafic to use Https.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --patterns-to-match /test1/* /tes2/*
-        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect True --link-to-default-domain Enabled
+        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect Enabled --link-to-default-domain Enabled
 """
 
 helps['afd route update'] = """
@@ -1287,7 +1370,7 @@ examples:
   - name: Update a route to accept both Http and Https requests and redirect all trafic to use Https.
     text: >
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1
-        --supported-protocols Http Https --https-redirect True
+        --supported-protocols Http Https --https-redirect Enabled
   - name: Update a route's rule sets settings to customize the route behavior.
     text: >
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
@@ -1352,7 +1435,7 @@ examples:
   - name: Creates a secret using the specified certificate version.
     text: >
         az afd secret create -g group --profile-name profile --secret-name secret1 --secret-version version1
-        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/certificates/cert1
+        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1
 """
 
 helps['afd secret update'] = """
@@ -1526,6 +1609,11 @@ examples:
         az afd rule action list -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
 """
 
+helps['afd log-analytic'] = """
+type: group
+short-summary: Manage afd log analytic results.
+"""
+
 helps['afd log-analytic location'] = """
 type: group
 short-summary: Manage available location names for AFD log analysis.
@@ -1539,6 +1627,11 @@ short-summary: Manage metric statistics for AFD profile.
 helps['afd log-analytic ranking'] = """
 type: group
 short-summary: Manage ranking statistics for AFD profile.
+"""
+
+helps['afd waf-log-analytic'] = """
+type: group
+short-summary: Manage afd WAF related log analytic results.
 """
 
 helps['afd log-analytic resource'] = """

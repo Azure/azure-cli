@@ -13,12 +13,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2021-06-01
   response:
     body:
       string: '{"error":{"code":"ParentResourceNotFound","message":"Can not perform
@@ -28,11 +25,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '157'
+      - '154'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:07 GMT
+      - Thu, 07 Apr 2022 07:47:19 GMT
       expires:
       - '-1'
       pragma:
@@ -47,7 +44,8 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "global", "sku": {"name": "Standard_AzureFrontDoor"}}'
+    body: '{"location": "global", "sku": {"name": "Standard_AzureFrontDoor"}, "properties":
+      {"originResponseTimeoutSeconds": 30}}'
     headers:
       Accept:
       - application/json
@@ -58,32 +56,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '66'
+      - '118'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --profile-name --sku
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"frontDoorId":"266e441c-3910-461a-b405-890fd3127875","resourceState":"Creating","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"originResponseTimeoutSeconds":30,"frontDoorId":"45b6f845-9e66-4dca-9ee6-1df1e14dafba","resourceState":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a89f37b2-4e14-46f9-91ca-77db3ff642a1?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7ccb476f-98da-4580-85cd-5310fe2db67c?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
-      - '475'
+      - '444'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:15 GMT
+      - Thu, 07 Apr 2022 07:47:28 GMT
       expires:
       - '-1'
       pragma:
@@ -103,7 +98,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -113,22 +108,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name --sku
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a89f37b2-4e14-46f9-91ca-77db3ff642a1?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7ccb476f-98da-4580-85cd-5310fe2db67c?api-version=2021-06-01
   response:
     body:
-      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '61'
+      - '62'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:26 GMT
+      - Thu, 07 Apr 2022 07:47:38 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +144,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -160,22 +154,67 @@ interactions:
       ParameterSetName:
       - -g --profile-name --sku
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7ccb476f-98da-4580-85cd-5310fe2db67c?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"frontDoorId":"266e441c-3910-461a-b405-890fd3127875","resourceState":"Active","provisioningState":"Succeeded"}}'
+      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '474'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:26 GMT
+      - Thu, 07 Apr 2022 07:48:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - afd profile create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --profile-name --sku
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002","type":"Microsoft.Cdn/profiles","name":"profile000002","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"originResponseTimeoutSeconds":30,"frontDoorId":"45b6f845-9e66-4dca-9ee6-1df1e14dafba","resourceState":"Active","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 07 Apr 2022 07:48:09 GMT
       expires:
       - '-1'
       pragma:
@@ -191,7 +230,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '46'
+      - '49'
     status:
       code: 200
       message: OK
@@ -209,12 +248,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2021-06-01
   response:
     body:
       string: '{"value":[]}'
@@ -226,7 +262,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:27 GMT
+      - Thu, 07 Apr 2022 07:48:10 GMT
       expires:
       - '-1'
       pragma:
@@ -245,7 +281,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -256,18 +292,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2'
-      Content-Type:
-      - application/json; charset=utf-8
+      - '0'
       ParameterSetName:
       - -g --rule-set-name --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2021-06-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/rulesets/ruleset000003","type":"Microsoft.Cdn/profiles/rulesets","name":"ruleset000003","properties":{"provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}'
@@ -275,11 +306,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '373'
+      - '305'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:28 GMT
+      - Thu, 07 Apr 2022 07:48:12 GMT
       expires:
       - '-1'
       pragma:
@@ -309,12 +340,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2021-06-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/rulesets/ruleset000003","type":"Microsoft.Cdn/profiles/rulesets","name":"ruleset000003","properties":{"provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}]}'
@@ -322,11 +350,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '385'
+      - '317'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:29 GMT
+      - Thu, 07 Apr 2022 07:48:12 GMT
       expires:
       - '-1'
       pragma:
@@ -358,12 +386,9 @@ interactions:
       ParameterSetName:
       - -g --rule-set-name --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2021-06-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/rulesets/ruleset000003","type":"Microsoft.Cdn/profiles/rulesets","name":"ruleset000003","properties":{"provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}'
@@ -371,11 +396,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '373'
+      - '305'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:29 GMT
+      - Thu, 07 Apr 2022 07:48:15 GMT
       expires:
       - '-1'
       pragma:
@@ -409,12 +434,9 @@ interactions:
       ParameterSetName:
       - -g --rule-set-name --profile-name --yes
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2021-06-01
   response:
     body:
       string: ''
@@ -424,7 +446,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 19 Feb 2021 11:48:31 GMT
+      - Thu, 07 Apr 2022 07:48:16 GMT
       expires:
       - '-1'
       pragma:
@@ -454,12 +476,9 @@ interactions:
       ParameterSetName:
       - -g --rule-set-name --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets/ruleset000003?api-version=2021-06-01
   response:
     body:
       string: '{"error":{"code":"NotFound","message":"The requested resource was not
@@ -472,7 +491,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:32 GMT
+      - Thu, 07 Apr 2022 07:48:17 GMT
       expires:
       - '-1'
       pragma:
@@ -500,12 +519,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/7.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile000002/ruleSets?api-version=2021-06-01
   response:
     body:
       string: '{"value":[]}'
@@ -517,7 +533,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Feb 2021 11:48:33 GMT
+      - Thu, 07 Apr 2022 07:48:19 GMT
       expires:
       - '-1'
       pragma:

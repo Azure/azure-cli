@@ -58,3 +58,12 @@ class StatusCodes:
 class HttpHeaders:
     from azure.cli.core import __version__ as core_version
     USER_AGENT = "AZURECLI.APPCONFIG/{0}".format(core_version)
+
+
+class KVSetConstants:
+    KVSETRootElementName = "items"
+
+
+class ImportExportProfiles:
+    KVSET = "appconfig/kvset"
+    DEFAULT = "appconfig/default"

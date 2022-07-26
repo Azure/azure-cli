@@ -8,6 +8,7 @@
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
+from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -26,17 +27,50 @@ def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None
     return client.regenerate_key(resource_group_name, account_name, regenerate_key_parameters)
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches
+def generate_sas(cmd, client, services, resource_types, permission, expiry, start=None,
+                 ip=None, protocol=None, **kwargs):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
+    if not client.account_name or not client.credential or not client.credential.account_key:
+        error_msg = """
+        Missing/Invalid credentials to access storage service. The following variations are accepted:
+            (1) account name and key (--account-name and --account-key options or
+                set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
+            (2) account name (--account-name option or AZURE_STORAGE_ACCOUNT environment variable;
+                this will make calls to query for a storage account key using login credentials)
+            (3) connection string (--connection-string option or
+                set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
+                quoting to preserve literal character interpretation.
+        """
+        raise RequiredArgumentMissingError(error_msg)
+
+    t_account_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                            '_shared.shared_access_signature#SharedAccessSignature')
+
+    return t_account_sas(account_name=client.account_name, account_key=client.credential.account_key).\
+        generate_account(services=services, resource_types=resource_types, permission=permission, expiry=expiry,
+                         start=start, ip=ip, protocol=protocol, **kwargs)
+
+
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
-                           tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
+                           tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
+                           encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
+                           access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
+                           sam_account_name=None, account_type=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
-                           min_tls_version=None, allow_shared_key_access=None):
+                           min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
+                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           allow_cross_tenant_replication=None, default_share_permission=None,
+                           enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
+                           immutability_period_since_creation_in_days=None, immutability_policy_state=None,
+                           allow_protected_append_writes=None, public_network_access=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -52,8 +86,30 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
+
+    # Encryption
     if encryption_services:
         params.encryption = Encryption(services=encryption_services)
+
+    if encryption_key_source is not None:
+        params.encryption.key_source = encryption_key_source
+
+    if params.encryption.key_source and params.encryption.key_source == "Microsoft.Keyvault":
+        if params.encryption.key_vault_properties is None:
+            KeyVaultProperties = cmd.get_models('KeyVaultProperties')
+            params.encryption.key_vault_properties = KeyVaultProperties(key_name=encryption_key_name,
+                                                                        key_vault_uri=encryption_key_vault,
+                                                                        key_version=encryption_key_version)
+
+    if identity_type and 'UserAssigned' in identity_type and user_identity_id:
+        params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
+    elif identity_type:
+        params.identity = Identity(type=identity_type)
+    if key_vault_user_identity_id is not None:
+        EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        params.encryption.encryption_identity = EncryptionIdentity(
+            encryption_user_assigned_identity=key_vault_user_identity_id)
+
     if access_tier:
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
@@ -80,7 +136,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
                                                                     domain_sid=domain_sid,
-                                                                    azure_storage_sid=azure_storage_sid)
+                                                                    azure_storage_sid=azure_storage_sid,
+                                                                    sam_account_name=sam_account_name,
+                                                                    account_type=account_type)
             # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
@@ -96,15 +154,30 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='None')
 
+    if default_share_permission is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
+
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
 
-    if NetworkRuleSet and (bypass or default_action):
+    if NetworkRuleSet and (bypass or default_action or subnet):
+        virtual_network_rules = None
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-        params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
-                                                 virtual_network_rules=None)
+        if subnet:
+            from msrestazure.tools import is_valid_resource_id
+            if not is_valid_resource_id(subnet):
+                raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
+            VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
+            virtual_network_rules = [VirtualNetworkRule(virtual_network_resource_id=subnet,
+                                                        action=action)]
+        params.network_rule_set = NetworkRuleSet(
+            bypass=bypass, default_action=default_action, ip_rules=None,
+            virtual_network_rules=virtual_network_rules)
 
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
@@ -137,6 +210,44 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if allow_shared_key_access is not None:
         params.allow_shared_key_access = allow_shared_key_access
 
+    if edge_zone is not None:
+        ExtendedLocation, ExtendedLocationTypes = cmd.get_models('ExtendedLocation', 'ExtendedLocationTypes')
+        params.extended_location = ExtendedLocation(name=edge_zone,
+                                                    type=ExtendedLocationTypes.EDGE_ZONE)
+
+    if key_expiration_period_in_days is not None:
+        KeyPolicy = cmd.get_models('KeyPolicy')
+        params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
+
+    if sas_expiration_period:
+        SasPolicy = cmd.get_models('SasPolicy')
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
+    if enable_nfs_v3 is not None:
+        params.enable_nfs_v3 = enable_nfs_v3
+
+    if enable_alw is not None:
+        ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
+        AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
+        immutability_policy = None
+
+        if any([immutability_period_since_creation_in_days, immutability_policy_state,
+                allow_protected_append_writes is not None]):
+            immutability_policy = AccountImmutabilityPolicyProperties(
+                immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,
+                state=immutability_policy_state,
+                allow_protected_append_writes=allow_protected_append_writes
+            )
+
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=enable_alw,
+                                                                           immutability_policy=immutability_policy)
+
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -163,6 +274,17 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
         except AttributeError:
             # Older API versions have a slightly different structure
             keys = [obj.key1, obj.key2]  # pylint: disable=no-member
+
+        sa = scf.get_properties(resource_group_name, account_name)
+        if getattr(sa, 'primary_endpoints') is not None:
+            if not blob_endpoint:
+                blob_endpoint = getattr(sa.primary_endpoints, 'blob', None)
+            if not file_endpoint:
+                file_endpoint = getattr(sa.primary_endpoints, 'file', None)
+            if not queue_endpoint:
+                queue_endpoint = getattr(sa.primary_endpoints, 'queue', None)
+            if not table_endpoint:
+                table_endpoint = getattr(sa.primary_endpoints, 'table', None)
 
         connection_string = '{}{}{}'.format(
             connection_string,
@@ -203,16 +325,21 @@ def get_storage_account_properties(cli_ctx, account_id):
     return scf.storage_accounts.get_properties(result['resource_group'], result['name'])
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions, line-too-long
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_version=None,
                            encryption_key_name=None, encryption_key_vault=None,
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
-                           domain_sid=None, azure_storage_sid=None, routing_choice=None,
-                           publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None):
+                           domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
+                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           allow_cross_tenant_replication=None, default_share_permission=None,
+                           immutability_period_since_creation_in_days=None, immutability_policy_state=None,
+                           allow_protected_append_writes=None, public_network_access=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -233,8 +360,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if encryption_key_source:
         encryption.key_source = encryption_key_source
 
-    KeySource = cmd.get_models('KeySource')
-    if encryption.key_source == KeySource.microsoft_keyvault:
+    if encryption.key_source and encryption.key_source == "Microsoft.Keyvault":
         if encryption.key_vault_properties is None:
             KeyVaultProperties = cmd.get_models('KeyVaultProperties')
             encryption.key_vault_properties = KeyVaultProperties()
@@ -260,6 +386,22 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+
+    if identity_type and 'UserAssigned' in identity_type and user_identity_id:
+        user_assigned_identities = {user_identity_id: {}}
+        if instance.identity and instance.identity.user_assigned_identities:
+            for item in instance.identity.user_assigned_identities:
+                if item != user_identity_id:
+                    user_assigned_identities[item] = None
+        params.identity = Identity(type=identity_type, user_assigned_identities=user_assigned_identities)
+    elif identity_type:
+        params.identity = Identity(type=identity_type)
+
+    if key_vault_user_identity_id is not None:
+        EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        params.encryption.encryption_identity = EncryptionIdentity(
+            encryption_user_assigned_identity=key_vault_user_identity_id)
+
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         if enable_files_aadds:  # enable AADDS
@@ -301,7 +443,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
                                                                     domain_sid=domain_sid,
-                                                                    azure_storage_sid=azure_storage_sid)
+                                                                    azure_storage_sid=azure_storage_sid,
+                                                                    sam_account_name=sam_account_name,
+                                                                    account_type=account_type)
             # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
 
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
@@ -322,6 +466,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             else:
                 params.azure_files_identity_based_authentication = \
                     origin_storage_account.azure_files_identity_based_authentication
+    if default_share_permission is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')
@@ -361,6 +510,34 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_shared_key_access is not None:
         params.allow_shared_key_access = allow_shared_key_access
+
+    if key_expiration_period_in_days is not None:
+        KeyPolicy = cmd.get_models('KeyPolicy')
+        params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
+
+    if sas_expiration_period:
+        SasPolicy = cmd.get_models('SasPolicy')
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+
+    if allow_cross_tenant_replication is not None:
+        params.allow_cross_tenant_replication = allow_cross_tenant_replication
+
+    if any([immutability_period_since_creation_in_days, immutability_policy_state, allow_protected_append_writes is not None]):
+        ImmutableStorageAccount = cmd.get_models('ImmutableStorageAccount')
+        AccountImmutabilityPolicyProperties = cmd.get_models('AccountImmutabilityPolicyProperties')
+        immutability_policy = None
+
+        immutability_policy = AccountImmutabilityPolicyProperties(
+            immutability_period_since_creation_in_days=immutability_period_since_creation_in_days,
+            state=immutability_policy_state,
+            allow_protected_append_writes=allow_protected_append_writes
+        )
+
+        params.immutable_storage_with_versioning = ImmutableStorageAccount(enabled=None,
+                                                                           immutability_policy=immutability_policy)
+
+    if public_network_access is not None:
+        params.public_network_access = public_network_access
 
     return params
 
@@ -502,7 +679,8 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
                                    enable_delete_retention=None, delete_retention_days=None,
                                    enable_restore_policy=None, restore_days=None,
                                    enable_versioning=None, enable_container_delete_retention=None,
-                                   container_delete_retention_days=None, default_service_version=None):
+                                   container_delete_retention_days=None, default_service_version=None,
+                                   enable_last_access_tracking=None):
     if enable_change_feed is not None:
         if enable_change_feed is False:
             change_feed_retention_days = None
@@ -533,11 +711,18 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
     if default_service_version is not None:
         instance.default_service_version = default_service_version
 
+    # Update last access time tracking policy
+    if enable_last_access_tracking is not None:
+        LastAccessTimeTrackingPolicy = cmd.get_models('LastAccessTimeTrackingPolicy')
+        instance.last_access_time_tracking_policy = LastAccessTimeTrackingPolicy(enable=enable_last_access_tracking)
+
     return instance
 
 
 def update_file_service_properties(cmd, instance, enable_delete_retention=None,
-                                   delete_retention_days=None, enable_smb_multichannel=None):
+                                   delete_retention_days=None, enable_smb_multichannel=None,
+                                   versions=None, authentication_methods=None, kerberos_ticket_encryption=None,
+                                   channel_encryption=None):
     from azure.cli.core.azclierror import ValidationError
     params = {}
     # set delete retention policy according input
@@ -564,11 +749,20 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         params['share_delete_retention_policy'] = instance.share_delete_retention_policy
 
     # set protocol settings
+    if not instance.protocol_settings or not instance.protocol_settings.smb:
+        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=cmd.get_models('SmbSetting')())
     if enable_smb_multichannel is not None:
-        instance.protocol_settings = cmd.get_models('ProtocolSettings')()
-        instance.protocol_settings.smb = cmd.get_models('SmbSetting')(
-            multichannel=cmd.get_models('Multichannel')(enabled=enable_smb_multichannel))
-    if instance.protocol_settings.smb.multichannel:
+        instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
+
+    if versions is not None:
+        instance.protocol_settings.smb.versions = versions
+    if authentication_methods is not None:
+        instance.protocol_settings.smb.authentication_methods = authentication_methods
+    if kerberos_ticket_encryption is not None:
+        instance.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
+    if channel_encryption is not None:
+        instance.protocol_settings.smb.channel_encryption = channel_encryption
+    if instance.protocol_settings and instance.protocol_settings.smb and any(instance.protocol_settings.smb.__dict__.values()):
         params['protocol_settings'] = instance.protocol_settings
 
     return params
@@ -639,10 +833,11 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
-        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default' \
-                and account_name == or_policy.source_account:
-            raise CLIError(
-                'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')
+        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
+            from msrestazure.tools import parse_resource_id
+            if account_name == parse_resource_id(or_policy.source_account)['name']:
+                raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
+                               'destination account.')
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
@@ -732,3 +927,38 @@ def update_or_rule(client, resource_group_name, account_name, policy_id, rule_id
 
     return get_or_rule(client, resource_group_name=resource_group_name, account_name=account_name,
                        policy_id=policy_id, rule_id=rule_id)
+
+
+def create_blob_inventory_policy(cmd, client, resource_group_name, account_name, policy):
+    if os.path.exists(policy):
+        policy = get_file_json(policy)
+    else:
+        policy = shell_safe_json_parse(policy)
+
+    BlobInventoryPolicy, InventoryRuleType, BlobInventoryPolicyName = \
+        cmd.get_models('BlobInventoryPolicy', 'InventoryRuleType', 'BlobInventoryPolicyName')
+    properties = BlobInventoryPolicy()
+    if 'type' not in policy:
+        policy['type'] = InventoryRuleType.INVENTORY
+    properties.policy = policy
+
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=properties)
+
+
+def delete_blob_inventory_policy(cmd, client, resource_group_name, account_name):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.delete(resource_group_name=resource_group_name, account_name=account_name,
+                         blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT)
+
+
+def get_blob_inventory_policy(cmd, client, resource_group_name, account_name):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                      blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT)
+
+
+def update_blob_inventory_policy(cmd, client, resource_group_name, account_name, parameters=None):
+    BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)

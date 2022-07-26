@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import platform
 
 from azure.cli.core.commands.arm import resource_exists
@@ -54,7 +53,7 @@ def get_folded_parameter_help_string(
 def _validate_name_or_id(
         cli_ctx, resource_group_name, property_value, property_type, parent_value, parent_type):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
     has_parent = parent_type is not None
     if is_valid_resource_id(property_value):
         resource_id_parts = parse_resource_id(property_value)
@@ -96,7 +95,7 @@ def get_folded_parameter_validator(
 
     # construct the validator
     def validator(cmd, namespace):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         type_field_name = '{}_type'.format(property_name)
         property_val = getattr(namespace, property_name, None)
         parent_val = getattr(namespace, parent_name, None) if parent_name else None

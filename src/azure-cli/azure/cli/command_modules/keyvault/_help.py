@@ -207,6 +207,13 @@ long-summary: The ENCRYPT operation encrypts an arbitrary sequence of bytes usin
     the key. This operation is supported for asymmetric keys as a convenience for callers that
     have a key-reference but do not have access to the public key material. This operation
     requires the keys/encrypt permission.
+examples:
+  - name: Encrypt value(Base64 encoded string) with valut's key using RSA-OAEP.
+    text: |
+        az keyvault key encrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --value "YWJjZGVm" --data-type base64
+  - name: Encrypt value(plaintext) with MHSM's key using AES-GCM.
+    text: |
+        az keyvault key encrypt --name mykey --hsm-name myhsm --algorithm A256GCM --value "this is plaintext" --data-type plaintext --aad "101112131415161718191a1b1c1d1e1f"
 """
 
 helps['keyvault key decrypt'] = """
@@ -218,6 +225,14 @@ long-summary: The DECRYPT operation decrypts a well-formed block of ciphertext u
     and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys
     stored in Vault or HSM since it uses the private portion of the key. This operation
     requires the keys/decrypt permission.
+examples:
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with valut's key using RSA-OAEP and get result as base64 encoded.
+    text: |
+        az keyvault key decrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --data-type base64 --value "CbFcCxHG7WTU+nbpFRrHoqSduwlPy8xpWxf1JxZ2y12BY/qFJirMSYq1i4SO9rvSmvmEMxFV5kw5s9Tc+YoKmv8X6oe+xXx+JytYV8obA5l3OQD9epuuQHWW0kir/mp88lzhcYWxYuF7mKDpPKDV4if+wnAZqQ4woB6t2JEZU5MVK3s+3E/EU4ehb5XrVxAl6xpYy8VYbyF33uJ5s+aUsYIrsVtXgrW99HQ3ic7tJtIOGuWqKhPCdQRezRkOcyxkJcmnDHOLjWA/9strzzx/dyg/t884gT7qrkmIHh8if9SFal/vi1h4XhoDqUleMTnKev2IFHyDNcYVYG3pftJiuA=="
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with MHSM's key using AES-GCM and get result as plaintext.
+    text: |
+        az keyvault key decrypt --name mykey --hsm-name myhsm --algorithm A256GCM --value "N5w02jS77xg536Ddzv/xPWQ=" --data-type plaintext
+        --aad "101112131415161718191a1b1c1d1e1f" --iv "727b26f78e55cf4cd8d34216" --tag "f7207d02cead35a77a1c7e5f8af959e9"
 """
 
 helps['keyvault key backup'] = """
@@ -325,6 +340,55 @@ type: command
 short-summary: Return policy template as JSON encoded policy definition.
 """
 
+helps['keyvault key rotate'] = """
+type: command
+short-summary: Rotate the key based on the key policy by generating a new version of the key.
+"""
+
+helps['keyvault key rotation-policy'] = """
+type: group
+short-summary: Manage key's rotation policy.
+"""
+
+helps['keyvault key rotation-policy update'] = """
+type: command
+short-summary: Update the rotation policy of a Key Vault key.
+examples:
+  - name: Set rotation policy using json file
+    text: |
+        az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --value path/to/policy.json
+        A valid example for policy.json is:
+        {
+          "lifetimeActions": [
+            {
+              "trigger": {
+                "timeAfterCreate": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
+                "timeBeforeExpiry" : null
+              },
+              "action": {
+                "type": "Rotate"
+              }
+            },
+            {
+              "trigger": {
+                "timeBeforeExpiry" : "P30D" // ISO 8601 duration.
+              },
+              "action": {
+                "type": "Notify"
+              }
+            }
+          ],
+          "attributes": {
+            "expiryTime": "P2Y" // ISO 8601 duration.
+          }
+        }
+"""
+
+helps['keyvault key rotation-policy show'] = """
+type: command
+short-summary: Get the rotation policy of a Key Vault key.
+"""
+
 helps['keyvault list'] = """
 type: command
 short-summary: List Vaults and/or HSMs.
@@ -346,12 +410,12 @@ examples:
 
 helps['keyvault private-endpoint-connection'] = """
 type: group
-short-summary: Manage vault private endpoint connections.
+short-summary: Manage vault/HSM private endpoint connections.
 """
 
 helps['keyvault private-endpoint-connection approve'] = """
 type: command
-short-summary: Approve a private endpoint connection request for a Key Vault.
+short-summary: Approve a private endpoint connection request for a Key Vault/HSM.
 examples:
   - name: Approve a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -367,11 +431,14 @@ examples:
     text: |
         name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
         az keyvault private-endpoint-connection approve -g myrg --vault-name mykv --name $name
+  - name: Approve a private endpoint connection request for a HSM using hsm name and connection name.
+    text: |
+        az keyvault private-endpoint-connection approve -g myrg --hsm-name myhsm --name myconnection
 """
 
 helps['keyvault private-endpoint-connection reject'] = """
 type: command
-short-summary: Reject a private endpoint connection request for a Key Vault.
+short-summary: Reject a private endpoint connection request for a Key Vault/HSM.
 examples:
   - name: Reject a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -387,11 +454,14 @@ examples:
     text: |
         name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
         az keyvault private-endpoint-connection reject -g myrg --vault-name mystorageaccount --name $name
+  - name: Reject a private endpoint connection request for a HSM using hsm name and connection name.
+    text: |
+        az keyvault private-endpoint-connection reject -g myrg --hsm-name myhsm --name myconnection
 """
 
 helps['keyvault private-endpoint-connection delete'] = """
 type: command
-short-summary: Delete the specified private endpoint connection associated with a Key Vault.
+short-summary: Delete the specified private endpoint connection associated with a Key Vault/HSM.
 examples:
   - name: Delete a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -400,18 +470,30 @@ examples:
     text: |
         id = (az keyvault show -n mykv --query "privateEndpointConnections[0].id")
         az keyvault private-endpoint-connection delete --id $id
-  - name: Delete a private endpoint connection request for a Key Vault using account name and connection name.
+  - name: Delete a private endpoint connection request for a Key Vault using vault name and connection name.
     text: |
         az keyvault private-endpoint-connection delete -g myrg --vault-name mykv --name myconnection
-  - name: Delete a private endpoint connection request for a Key Vault using account name and connection name.
+  - name: Delete a private endpoint connection request for a Key Vault using vault name and connection name.
     text: |
         name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
         az keyvault private-endpoint-connection delete -g myrg --vault-name mykv --name $name
+  - name: Delete a private endpoint connection request for a HSM using hsm name and connection name.
+    text: |
+        az keyvault private-endpoint-connection delete -g myrg --hsm-name myhsm --name myconnection
+"""
+
+helps['keyvault private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections associated with a HSM.
+examples:
+  - name: List all private endpoint connections associated with a HSM using hsm name.
+    text: |
+        az keyvault private-endpoint-connection list -g myrg --hsm-name myhsm
 """
 
 helps['keyvault private-endpoint-connection show'] = """
 type: command
-short-summary: Show details of a private endpoint connection associated with a Key Vault.
+short-summary: Show details of a private endpoint connection associated with a Key Vault/HSM.
 examples:
   - name: Show details of a private endpoint connection request for a Key Vault by ID.
     text: |
@@ -443,16 +525,19 @@ examples:
 
 helps['keyvault private-link-resource'] = """
 type: group
-short-summary: Manage vault private link resources.
+short-summary: Manage vault/HSM private link resources.
 """
 
 helps['keyvault private-link-resource list'] = """
 type: command
-short-summary: List the private link resources supported for a Key Vault.
+short-summary: List the private link resources supported for a Key Vault/HSM.
 examples:
   - name: Get the private link resources that need to be created for a Key Vault.
     text: |
         az keyvault private-link-resource list --vault-name mykv
+  - name: Get the private link resources that need to be created for a HSM.
+    text: |
+        az keyvault private-link-resource list --hsm-name myhsm
 """
 
 helps['keyvault recover'] = """
@@ -481,6 +566,63 @@ type: group
 short-summary: Manage role definitions.
 """
 
+helps['keyvault role definition create'] = """
+type: command
+short-summary: Create a custom role definition.
+examples:
+  - name: Create a role by a JSON string.
+    text: |
+        az keyvault role definition create --hsm-name MyHSM --role-definition '{
+            "roleName": "My Custom Role",
+            "description": "The description of the custom rule.",
+            "actions": [],
+            "notActions": [],
+            "dataActions": [
+                "Microsoft.KeyVault/managedHsm/keys/read/action"
+            ],
+            "notDataActions": []
+        }'
+  - name: Create a role from a file containing a JSON description.
+    text: >
+        az keyvault role definition create --hsm-name MyHSM --role-definition @keyvault-role.json
+"""
+
+helps['keyvault role definition update'] = """
+type: command
+short-summary: Update a role definition.
+examples:
+  - name: Update a role by a JSON string.
+    text: |
+        az keyvault role definition update --hsm-name MyHSM --role-definition '{
+            "roleName": "My Custom Role",
+            "name": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "id": "Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "description": "The description of the custom rule.",
+            "actions": [],
+            "notActions": [],
+            "dataActions": [
+                "Microsoft.KeyVault/managedHsm/keys/read/action",
+                "Microsoft.KeyVault/managedHsm/keys/write/action",
+                "Microsoft.KeyVault/managedHsm/keys/backup/action",
+                "Microsoft.KeyVault/managedHsm/keys/create"
+            ],
+            "notDataActions": []
+        }'
+  - name: Update a role from a file containing a JSON description.
+    text: >
+        az keyvault role definition update --hsm-name MyHSM --role-definition @keyvault-role.json
+"""
+
+helps['keyvault role definition delete'] = """
+type: command
+short-summary: Delete a role definition.
+"""
+
+helps['keyvault role definition show'] = """
+type: command
+short-summary: Show the details of a role definition.
+"""
+
 helps['keyvault secret'] = """
 type: group
 short-summary: Manage secrets.
@@ -489,6 +631,13 @@ short-summary: Manage secrets.
 helps['keyvault secret set'] = """
 type: command
 short-summary: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+examples:
+  - name: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+    text: |
+        az keyvault secret set --name MySecretName --vault-name MyKeyVault --value MyVault
+  - name: Create a secret (if one doesn't exist) or update a secret in a KeyVault through a file.
+    text: |
+        az keyvault secret set --name MySecretName --vault-name MyKeyVault --file /path/to/file --encoding MyEncoding
 """
 
 helps['keyvault show'] = """
@@ -499,6 +648,15 @@ examples:
     text: |
         az keyvault show --name MyKeyVault
     crafted: true
+"""
+
+helps['keyvault show-deleted'] = """
+type: command
+short-summary: Show details of a deleted Vault or HSM.
+examples:
+  - name: Show details of a deleted key vault.
+    text: |
+        az keyvault show-deleted --name MyKeyVault
 """
 
 helps['keyvault storage'] = """

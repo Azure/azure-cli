@@ -7,13 +7,12 @@
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.core.exceptions import HttpResponseError
 from azure.cli.command_modules.servicefabric._sf_utils import (
     _get_resource_group_by_name,
-    _create_resource_group_name,
-    _log_error_exception
+    _create_resource_group_name
 )
-from azure.mgmt.servicefabric.models import (
-    ErrorModelException,
+from azure.mgmt.servicefabricmanagedclusters.models import (
     ManagedCluster,
     Sku,
     ClientCertificate
@@ -26,6 +25,7 @@ from .._client_factory import (resource_client_factory)
 logger = get_logger(__name__)
 
 
+# pylint:disable=too-many-locals
 def create_cluster(cmd,
                    client,
                    resource_group_name,
@@ -41,6 +41,9 @@ def create_cluster(cmd,
                    client_cert_thumbprint=None,
                    client_cert_common_name=None,
                    client_cert_issuer_thumbprint=None,
+                   upgrade_mode=None,
+                   upgrade_cadence=None,
+                   code_version=None,
                    tags=None):
     try:
 
@@ -87,14 +90,17 @@ def create_cluster(cmd,
                                      client_connection_port=client_connection_port,
                                      http_gateway_connection_port=gateway_connection_port,
                                      clients=client_certs,
+                                     cluster_upgrade_mode=upgrade_mode,
+                                     cluster_upgrade_cadence=upgrade_cadence,
+                                     cluster_code_version=code_version,
                                      tags=tags)
 
         logger.info("Creating managed cluster '%s'", cluster_name)
-        poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, new_cluster)
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, new_cluster)
         cluster = LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -118,10 +124,10 @@ def update_cluster(cmd,
         if tags is not None:
             cluster.tags = tags
 
-        poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -148,10 +154,10 @@ def add_client_cert(cmd,
         else:
             CLIError("Thumbprint and Common name are empty")
 
-        poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -174,11 +180,11 @@ def delete_client_cert(cmd,
                 cluster.clients = [cert for cert in cluster.clients if cert.common_name.lower() not in common_name]
 
             if initial_size > len(cluster.clients):
-                poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+                poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -191,8 +197,8 @@ def list_clusters(client,
 
         logger.info("Getting managed clusters by resource group '%s'", resource_group_name)
         return client.managed_clusters.list_by_resource_group(resource_group_name)
-    except ErrorModelException as ex:
-        _log_error_exception(ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 

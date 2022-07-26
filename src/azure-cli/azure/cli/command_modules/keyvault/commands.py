@@ -13,7 +13,10 @@ from azure.cli.command_modules.keyvault._client_factory import (
 
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers, transform_key_decryption_output, keep_max_results)
+    multi_transformers, transform_key_decryption_output, keep_max_results,
+    transform_key_output, transform_key_encryption_output, transform_key_random_output)
+
+from azure.cli.command_modules.keyvault._format import transform_secret_list
 
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -38,6 +41,7 @@ def load_command_table(self, _):
     mgmt_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
+    data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
 
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
@@ -77,6 +81,7 @@ def load_command_table(self, _):
         g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('list_deleted'))
+        g.custom_command('show-deleted', 'get_deleted_vault_or_hsm')
         g.generic_update_command(
             'update', setter_name='update_vault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_vault',
@@ -89,9 +94,9 @@ def load_command_table(self, _):
                                 client_factory=mgmt_hsms_entity.client_factory) as g:
             g.generic_update_command(
                 'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-                custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
+                custom_func_name='update_hsm', supports_no_wait=True,
                 doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
-            g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
+            g.custom_wait_command('wait-hsm', 'wait_hsm')
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -105,41 +110,40 @@ def load_command_table(self, _):
     with self.command_group('keyvault private-endpoint-connection',
                             mgmt_pec_entity.command_type,
                             min_api='2018-02-14',
-                            client_factory=mgmt_pec_entity.client_factory,
-                            is_preview=True) as g:
+                            client_factory=mgmt_pec_entity.client_factory) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id, supports_no_wait=True)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.wait_command('wait', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id, supports_no_wait=True)
+        g.custom_command('list', 'list_private_endpoint_connection')
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
+        g.custom_wait_command('wait', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',
                             mgmt_plr_entity.command_type,
                             min_api='2018-02-14',
-                            client_factory=mgmt_plr_entity.client_factory,
-                            is_preview=True) as g:
+                            client_factory=mgmt_plr_entity.client_factory) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
+        g.custom_command('list', 'list_private_link_resource', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault backup', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault backup', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_backup',
                               doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_backup'))
 
-        with self.command_group('keyvault restore', data_backup_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_restore',
                               doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_restore'))
 
-        with self.command_group('keyvault security-domain', private_data_entity.command_type,
-                                is_preview=True) as g:
+        with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
-            g.keyvault_custom('download', 'security_domain_download')
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_entity.command_type) as g:
@@ -156,10 +160,6 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                extract_subresource_name(id_parameter='kid')))
-        g.keyvault_custom('create', 'create_key',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
-        g.keyvault_command('set-attributes', 'update_key')
-        g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
         g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
@@ -168,18 +168,34 @@ def load_command_table(self, _):
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
-        g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
+
+    with self.command_group('keyvault key', data_key_entity.command_type) as g:
+        g.keyvault_custom('create', 'create_key', transform=transform_key_output,
+                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
+        g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
+        g.keyvault_command('show', 'get_key', transform=transform_key_output)
+        g.keyvault_custom('import', 'import_key', transform=transform_key_output)
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
-        g.keyvault_command('encrypt', 'encrypt', is_preview=True)
-        g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
+        g.keyvault_custom('encrypt', 'encrypt_key', is_preview=True, transform=transform_key_encryption_output)
+        g.keyvault_custom('decrypt', 'decrypt_key', is_preview=True, transform=transform_key_decryption_output)
+
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault key', data_key_entity.command_type) as g:
+            g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
+            g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
+
+        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
+            g.keyvault_command('show', 'get_key_rotation_policy', )
+            g.keyvault_custom('update', 'update_key_rotation_policy')
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',
                            transform=multi_transformers(
                                filter_out_managed_resources,
                                keep_max_results,
-                               extract_subresource_name()))
+                               extract_subresource_name()),
+                           table_transformer=transform_secret_list)
         g.keyvault_command('list-versions', 'get_secret_versions',
                            transform=multi_transformers(
                                keep_max_results,
@@ -199,7 +215,7 @@ def load_command_table(self, _):
                                    'will be moved to the soft deleted state. You will not be able to create a secret '
                                    'with the same name within this key vault until the secret has been purged from the '
                                    'soft-deleted state. Please see the following documentation for additional guidance.'
-                                   '\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
+                                   '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
@@ -235,7 +251,7 @@ def load_command_table(self, _):
                                    'create a certificate with the same name within this key vault until the '
                                    'certificate has been purged from the soft-deleted state. Please see the following '
                                    'documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
                            transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
@@ -268,8 +284,7 @@ def load_command_table(self, _):
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault role', data_access_control_entity.command_type,
-                                is_preview=True):
+        with self.command_group('keyvault role', data_access_control_entity.command_type):
             pass
 
         with self.command_group('keyvault role assignment', data_access_control_entity.command_type) as g:
@@ -279,6 +294,10 @@ def load_command_table(self, _):
 
         with self.command_group('keyvault role definition', data_access_control_entity.command_type) as g:
             g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
+            g.keyvault_custom('create', 'create_role_definition')
+            g.keyvault_custom('update', 'update_role_definition')
+            g.keyvault_custom('delete', 'delete_role_definition')
+            g.keyvault_custom('show', 'show_role_definition')
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')

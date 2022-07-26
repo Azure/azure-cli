@@ -30,6 +30,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
 from ._utils import get_registry_by_name, ResourceNotFound
+from ._format import add_timestamp
 
 
 logger = get_logger(__name__)
@@ -48,6 +49,8 @@ class RepoAccessTokenPermission(Enum):
     DELETE = 'delete'
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
+    PULL = 'pull'
+    PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
 
 
 class HelmAccessTokenPermission(Enum):
@@ -82,7 +85,10 @@ def _handle_challenge_phase(login_server,
 
     login_server = login_server.rstrip('/')
 
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    request_url = 'https://' + login_server + '/v2/'
+    logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(request_url)))
+    challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
+
     if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
         if is_diagnostics_context:
@@ -136,6 +142,7 @@ def _get_aad_token_after_challenge(cli_ctx,
         'access_token': creds[1]
     }
 
+    logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
@@ -166,6 +173,8 @@ def _get_aad_token_after_challenge(cli_ctx,
         'scope': scope,
         'refresh_token': refresh_token
     }
+
+    logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
@@ -265,6 +274,7 @@ def _get_token_with_username_and_password(login_server,
         'scope': scope
     }
 
+    logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
@@ -328,6 +338,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     # Validate the login server is reachable
     url = 'https://' + login_server + '/v2/'
     try:
+        logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(url)))
         challenge = requests.get(url, verify=(not should_disable_connection_verify()))
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
@@ -484,6 +495,17 @@ def get_authorization_header(username, password):
     return {'Authorization': auth}
 
 
+def get_manifest_authorization_header(username, password):
+    if username == EMPTY_GUID:
+        auth = _get_bearer_auth_str(password)
+    else:
+        auth = _get_basic_auth_str(username, password)
+    return {'Authorization': auth,
+            'Accept': '*/*, application/vnd.cncf.oras.artifact.manifest.v1+json'
+            ', application/vnd.oci.image.manifest.v1+json'}
+
+
+# pylint: disable=too-many-statements
 def request_data_from_registry(http_method,
                                login_server,
                                path,
@@ -493,6 +515,8 @@ def request_data_from_registry(http_method,
                                json_payload=None,
                                file_payload=None,
                                params=None,
+                               manifest_headers=False,
+                               raw=False,
                                retry_times=3,
                                retry_interval=5,
                                timeout=300):
@@ -509,13 +533,18 @@ def request_data_from_registry(http_method,
         raise ValueError("Non-empty payload is required for http method: {}".format(http_method))
 
     url = 'https://{}{}'.format(login_server, path)
-    headers = get_authorization_header(username, password)
+
+    if manifest_headers:
+        headers = get_manifest_authorization_header(username, password)
+    else:
+        headers = get_authorization_header(username, password)
 
     for i in range(0, retry_times):
         errorMessage = None
         try:
             if file_payload:
                 with open(file_payload, 'rb') as data_payload:
+                    logger.debug(add_timestamp("Sending a HTTP {} request to {}".format(http_method, url)))
                     response = requests.request(
                         method=http_method,
                         url=url,
@@ -526,6 +555,7 @@ def request_data_from_registry(http_method,
                         verify=(not should_disable_connection_verify())
                     )
             else:
+                logger.debug(add_timestamp("Sending a HTTP {} request to {}".format(http_method, url)))
                 response = requests.request(
                     method=http_method,
                     url=url,
@@ -538,6 +568,8 @@ def request_data_from_registry(http_method,
 
             log_registry_response(response)
 
+            if manifest_headers and raw and response.status_code == 200:
+                return response.content.decode('utf-8'), None
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
@@ -591,7 +623,7 @@ def parse_error_message(error_message, response):
 
     try:
         correlation_id = response.headers['x-ms-correlation-request-id']
-        return '{} Correlation ID: {}.'.format(error_message, correlation_id)
+        return add_timestamp('{} Correlation ID: {}.'.format(error_message, correlation_id))
     except (KeyError, TypeError, AttributeError):
         return error_message
 

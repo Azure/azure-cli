@@ -775,7 +775,7 @@ helps['mysql server ad-admin create'] = """
 type: command
 short-summary: Create an Active Directory administrator for MySQL server.
 examples:
-  - name: Crate Active Directory Administrator username@domain.com in the server testsvr.
+  - name: Create Active Directory Administrator username@domain.com in the server testsvr.
     text: az mysql server ad-admin create --server-name testsvr -g testgroup --display-name username@domain.com --object-id 1FCD6583-267B-4484-BF9B-507E4B62DE79
 """
 
@@ -906,7 +906,7 @@ examples:
         az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\
             --sku-name B_Gen5_1 --ssl-enforcement Enabled --minimal-tls-version TLS1_0 --public-network-access Disabled \\
             --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 \\
-            --tags "key=value" --version 11.0
+            --tags "key=value" --version 11
 """
 
 helps['postgres server delete'] = """
@@ -1184,7 +1184,7 @@ helps['postgres server ad-admin create'] = """
 type: command
 short-summary: Create an Active Directory Administrator for PostgreSQL server.
 examples:
-  - name: Crate Active Directory Administrator username@domain.com in server testsvr.
+  - name: Create Active Directory Administrator username@domain.com in server testsvr.
     text: az postgres server ad-admin create --server-name testsvr -g testgroup --display-name username@domain.com --object-id 1FCD6583-267B-4484-BF9B-507E4B62DE79
 """
 

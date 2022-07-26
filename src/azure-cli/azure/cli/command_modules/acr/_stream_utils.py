@@ -13,17 +13,18 @@ from msrestazure.azure_exceptions import CloudError
 from azure.common import AzureHttpError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from ._azure_utils import get_blob_info
+from ._constants import ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
 
 logger = get_logger(__name__)
 
 DEFAULT_CHUNK_SIZE = 1024 * 4
-DEFAULT_LOG_TIMEOUT_IN_SEC = 60 * 30  # 30 minutes
 
 
 def stream_logs(cmd, client,
                 run_id,
                 registry_name,
                 resource_group_name,
+                timeout=ACR_RUN_DEFAULT_TIMEOUT_IN_SEC,
                 no_format=False,
                 raise_error_on_failure=False):
     log_file_sas = None
@@ -52,9 +53,11 @@ def stream_logs(cmd, client,
         account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
             log_file_sas)
         AppendBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#AppendBlobService')
+        if not timeout:
+            timeout = ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
         _stream_logs(no_format,
                      DEFAULT_CHUNK_SIZE,
-                     DEFAULT_LOG_TIMEOUT_IN_SEC,
+                     timeout,
                      AppendBlobService(
                          account_name=account_name,
                          sas_token=sas_token,
@@ -78,6 +81,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     if not no_format:
         colorama.init()
 
+    log_exist = False
     stream = BytesIO()
     metadata = {}
     start = 0
@@ -92,10 +96,18 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     # Try to get the initial properties so there's no waiting.
     # If the storage call fails, we'll just sleep and try again after.
     try:
-        props = blob_service.get_blob_properties(
+        # Need to call "exists" API to prevent storage SDK logging BlobNotFound error
+        log_exist = blob_service.exists(
             container_name=container_name, blob_name=blob_name)
-        metadata = props.metadata
-        available = props.properties.content_length
+
+        if log_exist:
+            props = blob_service.get_blob_properties(
+                container_name=container_name, blob_name=blob_name)
+            metadata = props.metadata
+            available = props.properties.content_length
+        else:
+            # Wait a little bit before checking the existence again
+            time.sleep(1)
     except (AttributeError, AzureHttpError):
         pass
 
@@ -140,10 +152,14 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
                 return
 
         try:
-            props = blob_service.get_blob_properties(
-                container_name=container_name, blob_name=blob_name)
-            metadata = props.metadata
-            available = props.properties.content_length
+            if log_exist:
+                props = blob_service.get_blob_properties(
+                    container_name=container_name, blob_name=blob_name)
+                metadata = props.metadata
+                available = props.properties.content_length
+            else:
+                log_exist = blob_service.exists(
+                    container_name=container_name, blob_name=blob_name)
         except AzureHttpError as ae:
             if ae.status_code != 404:
                 raise CLIError(ae)

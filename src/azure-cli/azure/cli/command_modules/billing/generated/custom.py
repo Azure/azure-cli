@@ -42,7 +42,7 @@ def billing_account_update(client,
     parameters['billing_profiles'] = {}
     parameters['billing_profiles']['value'] = billing_profiles_value
     return sdk_no_wait(no_wait,
-                       client.update,
+                       client.begin_update,
                        billing_account_name=account_name,
                        parameters=parameters)
 
@@ -124,7 +124,7 @@ def billing_profile_create(client,
     parameters['invoice_sections'] = {}
     parameters['invoice_sections']['value'] = invoice_sections_value
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        billing_account_name=account_name,
                        billing_profile_name=profile_name,
                        parameters=parameters)
@@ -149,7 +149,7 @@ def billing_profile_update(client,
     parameters['invoice_sections'] = {}
     parameters['invoice_sections']['value'] = invoice_sections_value
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        billing_account_name=account_name,
                        billing_profile_name=profile_name,
                        parameters=parameters)
@@ -202,13 +202,15 @@ def billing_invoice_section_create(client,
                                    display_name=None,
                                    labels=None,
                                    no_wait=False):
+    parameters = {}
+    parameters['display_name'] = display_name
+    parameters['labels'] = labels
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        billing_account_name=account_name,
                        billing_profile_name=profile_name,
                        invoice_section_name=invoice_section_name,
-                       display_name=display_name,
-                       labels=labels)
+                       parameters=parameters)
 
 
 def billing_invoice_section_update(client,
@@ -218,13 +220,15 @@ def billing_invoice_section_update(client,
                                    display_name=None,
                                    labels=None,
                                    no_wait=False):
+    parameters = {}
+    parameters['display_name'] = display_name
+    parameters['labels'] = labels
     return sdk_no_wait(no_wait,
-                       client.create_or_update,
+                       client.begin_create_or_update,
                        billing_account_name=account_name,
                        billing_profile_name=profile_name,
                        invoice_section_name=invoice_section_name,
-                       display_name=display_name,
-                       labels=labels)
+                       parameters=parameters)
 
 
 def billing_permission_list(client,
@@ -285,17 +289,21 @@ def billing_subscription_move(client,
                               account_name,
                               destination_invoice_section_id,
                               no_wait=False):
+    parameters = {}
+    parameters['destination_invoice_section_id'] = destination_invoice_section_id
     return sdk_no_wait(no_wait,
-                       client.move,
+                       client.begin_move,
                        billing_account_name=account_name,
-                       destination_invoice_section_id=destination_invoice_section_id)
+                       parameters=parameters)
 
 
 def billing_subscription_validate_move(client,
                                        account_name,
                                        destination_invoice_section_id):
+    parameters = {}
+    parameters['destination_invoice_section_id'] = destination_invoice_section_id
     return client.validate_move(billing_account_name=account_name,
-                                destination_invoice_section_id=destination_invoice_section_id)
+                                parameters=parameters)
 
 
 def billing_product_list(client,
@@ -346,18 +354,22 @@ def billing_product_move(client,
                          account_name,
                          product_name,
                          destination_invoice_section_id=None):
+    parameters = {}
+    parameters['destination_invoice_section_id'] = destination_invoice_section_id
     return client.move(billing_account_name=account_name,
                        product_name=product_name,
-                       destination_invoice_section_id=destination_invoice_section_id)
+                       parameters=parameters)
 
 
 def billing_product_validate_move(client,
                                   account_name,
                                   product_name,
                                   destination_invoice_section_id=None):
+    parameters = {}
+    parameters['destination_invoice_section_id'] = destination_invoice_section_id
     return client.validate_move(billing_account_name=account_name,
                                 product_name=product_name,
-                                destination_invoice_section_id=destination_invoice_section_id)
+                                parameters=parameters)
 
 
 def billing_invoice_list(client,
@@ -413,7 +425,9 @@ def billing_property_show(client):
 
 def billing_property_update(client,
                             cost_center=None):
-    return client.update(cost_center=cost_center)
+    parameters = {}
+    parameters['cost_center'] = cost_center
+    return client.update(parameters=parameters)
 
 
 def billing_role_definition_list(client,

@@ -7,6 +7,7 @@ import unittest
 from azure.cli.testsdk import LocalContextScenarioTest
 
 
+@unittest.skip("Conflict with ConfigTest")
 class ParamPersistScenarioTest(LocalContextScenarioTest):
 
     def test_param_persist_commands(self):

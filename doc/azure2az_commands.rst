@@ -18,33 +18,33 @@ azure account list                                           az account list
 azure account set                                            az account set
 azure account show                                           az account show
 azure location list                                          az account list-locations
-azure network application-gateway address-pool create        az network application-gateway address-pool create
-azure network application-gateway address-pool delete        az network application-gateway address-pool delete
-azure network application-gateway create                     az network application-gateway create
-azure network application-gateway delete                     az network application-gateway delete
-azure network application-gateway frontend-ip create         az network application-gateway frontend-ip create
-azure network application-gateway frontend-ip delete         az network application-gateway frontend-ip delete
-azure network application-gateway frontend-port create       az network application-gateway frontend-port create
-azure network application-gateway frontend-port delete       az network application-gateway frontend-port delete
-azure network application-gateway http-listener create       az network application-gateway http-listener create
-azure network application-gateway http-listener delete       az network application-gateway http-listener delete
-azure network application-gateway http-settings create       az network application-gateway http-settings create
-azure network application-gateway http-settings delete       az network application-gateway http-settings delete
-azure network application-gateway list                       az network application-gateway list
-azure network application-gateway probe create               az network application-gateway probe create
-azure network application-gateway probe delete               az network application-gateway probe delete
-azure network application-gateway rule create                az network application-gateway rule create
-azure network application-gateway rule delete                az network application-gateway rule delete
-azure network application-gateway set                        az network application-gateway update
-azure network application-gateway show                       az network application-gateway show
-azure network application-gateway ssl-cert create            az network application-gateway ssl-cert create
-azure network application-gateway ssl-cert delete            az network application-gateway ssl-cert delete
-azure network application-gateway start                      az network application-gateway start
-azure network application-gateway stop                       az network application-gateway stop
-azure network application-gateway url-path-map create        az network application-gateway url-path-map create
-azure network application-gateway url-path-map delete        az network application-gateway url-path-map delete
-azure network application-gateway url-path-map rule create   az network application-gateway url-path-map rule create
-azure network application-gateway url-path-map rule delete   az network application-gateway url-path-map rule delete
+azure network application-gateway address-pool create        az network application-gateway address-pool create
+azure network application-gateway address-pool delete        az network application-gateway address-pool delete
+azure network application-gateway create                     az network application-gateway create
+azure network application-gateway delete                     az network application-gateway delete
+azure network application-gateway frontend-ip create         az network application-gateway frontend-ip create
+azure network application-gateway frontend-ip delete         az network application-gateway frontend-ip delete
+azure network application-gateway frontend-port create       az network application-gateway frontend-port create
+azure network application-gateway frontend-port delete       az network application-gateway frontend-port delete
+azure network application-gateway http-listener create       az network application-gateway http-listener create
+azure network application-gateway http-listener delete       az network application-gateway http-listener delete
+azure network application-gateway http-settings create       az network application-gateway http-settings create
+azure network application-gateway http-settings delete       az network application-gateway http-settings delete
+azure network application-gateway list                       az network application-gateway list
+azure network application-gateway probe create               az network application-gateway probe create
+azure network application-gateway probe delete               az network application-gateway probe delete
+azure network application-gateway rule create                az network application-gateway rule create
+azure network application-gateway rule delete                az network application-gateway rule delete
+azure network application-gateway set                        az network application-gateway update
+azure network application-gateway show                       az network application-gateway show
+azure network application-gateway ssl-cert create            az network application-gateway ssl-cert create
+azure network application-gateway ssl-cert delete            az network application-gateway ssl-cert delete
+azure network application-gateway start                      az network application-gateway start
+azure network application-gateway stop                       az network application-gateway stop
+azure network application-gateway url-path-map create        az network application-gateway url-path-map create
+azure network application-gateway url-path-map delete        az network application-gateway url-path-map delete
+azure network application-gateway url-path-map rule create   az network application-gateway url-path-map rule create
+azure network application-gateway url-path-map rule delete   az network application-gateway url-path-map rule delete
 azure network dns record-set add-record                      az network dns record-set [ptr|mx|*] add
 azure network dns record-set create                          az network dns record-set create
 azure network dns record-set delete                          az network dns record-set delete
@@ -56,22 +56,22 @@ azure network dns zone delete                                az network dns zone
 azure network dns zone list                                  az network dns zone list
 azure network dns zone set                                   az network dns zone update
 azure network dns zone show                                  az network dns zone show
-azure network express-route authorization create             az network express-route circuit-auth create
-azure network express-route authorization delete             az network express-route circuit-auth delete
-azure network express-route authorization list               az network express-route circuit-auth list
-azure network express-route authorization set                az network express-route circuit-auth update
-azure network express-route authorization show               az network express-route circuit-auth show
-azure network express-route circuit create                   az network express-route circuit create
+azure network express-route authorization create             az network express-route circuit-auth create
+azure network express-route authorization delete             az network express-route circuit-auth delete
+azure network express-route authorization list               az network express-route circuit-auth list
+azure network express-route authorization set                az network express-route circuit-auth update
+azure network express-route authorization show               az network express-route circuit-auth show
+azure network express-route circuit create                   az network express-route circuit create
 azure network express-route circuit delete                   az network express-route circuit delete
-azure network express-route circuit list                     az network express-route circuit list
-azure network express-route circuit set                      az network express-route circuit update
-azure network express-route circuit show                     az network express-route circuit show
-azure network express-route peering create                   az network express-route circuit-peering create
-azure network express-route peering delete                   az network express-route circuit-peering delete
-azure network express-route peering list                     az network express-route circuit-peering list
-azure network express-route peering set                      az network express-route circuit-peering update
-azure network express-route peering show                     az network express-route circuit-peering show
-azure network express-route provider list                    az network express-route service-provider list
+azure network express-route circuit list                     az network express-route circuit list
+azure network express-route circuit set                      az network express-route circuit update
+azure network express-route circuit show                     az network express-route circuit show
+azure network express-route peering create                   az network express-route circuit-peering create
+azure network express-route peering delete                   az network express-route circuit-peering delete
+azure network express-route peering list                     az network express-route circuit-peering list
+azure network express-route peering set                      az network express-route circuit-peering update
+azure network express-route peering show                     az network express-route circuit-peering show
+azure network express-route provider list                    az network express-route service-provider list
 azure network lb address-pool create                         az network lb address-pool create
 azure network lb address-pool delete                         az network lb address-pool delete
 azure network lb address-pool list                           az network lb address-pool list
@@ -164,14 +164,14 @@ azure network vnet subnet delete                             az network vnet sub
 azure network vnet subnet list                               az network vnet subnet list
 azure network vnet subnet set                                az network vnet subnet update
 azure network vnet subnet show                               az network vnet subnet show
-azure network vpn-connection create                          az network vpn-connection create
-azure network vpn-connection delete                          az network vpn-connection delete
-azure network vpn-connection list                            az network vpn-connection list
-azure network vpn-connection set                             az network vpn-connection update
+azure network vpn-connection create                          az network vpn-connection create
+azure network vpn-connection delete                          az network vpn-connection delete
+azure network vpn-connection list                            az network vpn-connection list
+azure network vpn-connection set                             az network vpn-connection update
 azure network vpn-connection shared-key reset                az network vpn-connection shared-key reset
-azure network vpn-connection shared-key set                  az network vpn-connection shared-key update
+azure network vpn-connection shared-key set                  az network vpn-connection shared-key update
 azure network vpn-connection shared-key show                 az network vpn-connection shared-key show
-azure network vpn-connection show                            az network vpn-connection show
+azure network vpn-connection show                            az network vpn-connection show
 azure network vpn-gateway create                             az network vpn-gateway create
 azure network vpn-gateway delete                             az network vpn-gateway delete
 azure network vpn-gateway list                               az network vpn-gateway list

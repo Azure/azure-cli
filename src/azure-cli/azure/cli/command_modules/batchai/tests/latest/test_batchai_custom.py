@@ -30,7 +30,7 @@ from azure.mgmt.batchai.models import (
     SshConfiguration, ImageReference, ScaleSettings, ManualScaleSettings, AutoScaleSettings, ResourceId, SetupTask
 )
 # Some valid ssh public key value.
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 SSH_KEY = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKUDnWeK6rx36apNE9ij1iAXn68FKXLTW0009XK/7dyMewlNfXi6Z2opnxHDD' \
           'YWucMluU0dsvBR22OuYH2RHriPJTi1jN3aZ0zZSrlH/W4MSNQKlG/AnrjJPA3xfYjIKLGuKBqSIvMsmrkuDfIfMaDnPcxb+GzM1' \
@@ -113,7 +113,7 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_when_key_is_wrong(self):
         params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
-        with self.assertRaisesRegexp(CLIError, 'Incorrect ssh public key value'):
+        with self.assertRaisesRegex(CLIError, 'Incorrect ssh public key value'):
             _update_user_account_settings(params, 'user', 'my key', None)
 
     @patch('getpass.getuser')
@@ -184,7 +184,7 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_update_fileserver_user_account_settings_using_command_line_when_key_is_wrong(self):
         params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
-        with self.assertRaisesRegexp(CLIError, 'Incorrect ssh public key value'):
+        with self.assertRaisesRegex(CLIError, 'Incorrect ssh public key value'):
             _update_user_account_settings(params, 'user', 'my key', None)
 
     @patch('getpass.getuser')
@@ -406,7 +406,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        with self.assertRaisesRegexp(CLIError, 'Cannot find "account1" storage account'):
+        with self.assertRaisesRegex(CLIError, 'Cannot find "account1" storage account'):
             _patch_mount_volumes(DummyCli(), mount_volumes)
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
@@ -425,7 +425,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
+        with self.assertRaisesRegex(CLIError, 'Please configure Azure Storage account name'):
             _patch_mount_volumes(DummyCli(), mount_volumes)
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
@@ -459,7 +459,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        with self.assertRaisesRegexp(CLIError, 'Azure File URL cannot absent or be empty'):
+        with self.assertRaisesRegex(CLIError, 'Azure File URL cannot absent or be empty'):
             _patch_mount_volumes(DummyCli(), mount_volumes)
 
     def test_batchai_patch_mount_volumes_ill_formed_azure_file_url(self):
@@ -474,11 +474,11 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        with self.assertRaisesRegexp(CLIError, 'Ill-formed Azure File URL'):
+        with self.assertRaisesRegex(CLIError, 'Ill-formed Azure File URL'):
             _patch_mount_volumes(DummyCli(), mount_volumes)
 
     def test_batchai_add_nfs_to_mount_volumes_no_relative_mount_path(self):
-        with self.assertRaisesRegexp(CLIError, 'File server relative mount path cannot be empty'):
+        with self.assertRaisesRegex(CLIError, 'File server relative mount path cannot be empty'):
             _add_nfs_to_mount_volumes(MountVolumes(), 'id', '')
 
     def test_batchai_add_nfs_to_empty_mount_volumes(self):
@@ -502,11 +502,11 @@ class TestBatchAICustom(unittest.TestCase):
             self.assertEqual('rw', mount_volumes.file_servers[i].mount_options)
 
     def test_batchai_add_azure_file_share_to_mount_volumes_no_account_info(self):
-        with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
+        with self.assertRaisesRegex(CLIError, 'Please configure Azure Storage account name'):
             _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', 'relative_path')
 
     def test_batchai_add_azure_file_share_to_mount_volumes_no_relative_mount_path(self):
-        with self.assertRaisesRegexp(CLIError, 'Azure File share relative mount path cannot be empty'):
+        with self.assertRaisesRegex(CLIError, 'Azure File share relative mount path cannot be empty'):
             _add_azure_file_share_to_mount_volumes(DummyCli(), MountVolumes(), 'share', '')
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
@@ -580,11 +580,11 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_batchai_add_azure_container_mount_volumes_no_account(self):
-        with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
+        with self.assertRaisesRegex(CLIError, 'Please configure Azure Storage account name'):
             _add_azure_container_to_mount_volumes(DummyCli(), MountVolumes(), 'container', 'relative_path')
 
     def test_batchai_add_azure_container_mount_volumes_no_relative_path(self):
-        with self.assertRaisesRegexp(CLIError, 'Azure Storage Container relative mount path cannot be empty'):
+        with self.assertRaisesRegex(CLIError, 'Azure Storage Container relative mount path cannot be empty'):
             _add_azure_container_to_mount_volumes(DummyCli(), MountVolumes(), 'container', '')
 
     def test_batchai_add_azure_container_to_absent_mount_volumes(self):
@@ -652,7 +652,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', None, 2, 2)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(ImageReference(
             publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference
@@ -663,7 +663,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, 2, 2)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference)
@@ -672,7 +672,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, None, None)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference
@@ -682,7 +682,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Update to auto-scale with initial count Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 1, 0, 2)
         self.assertEqual(result.vm_size, 'Standard_NC6')
-        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(result.vm_priority, None)
         self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference)
@@ -704,22 +704,22 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEqual(params, result)
 
         # Wrong image.
-        with self.assertRaisesRegexp(CLIError, 'Unsupported image alias'):
+        with self.assertRaisesRegex(CLIError, 'Unsupported image alias'):
             _update_nodes_information(params, 'unsupported', None, None, '', None, None, None)
 
         # No VM size.
         params.vm_size = None
-        with self.assertRaisesRegexp(CLIError, 'Please provide VM size'):
+        with self.assertRaisesRegex(CLIError, 'Please provide VM size'):
             _update_nodes_information(params, 'unsupported', None, None, '', None, None, None)
 
         # No scale settings.
         params.vm_size = 'Standard_NC6'
         params.scale_settings = None
-        with self.assertRaisesRegexp(CLIError, 'Please provide scale setting for the cluster'):
+        with self.assertRaisesRegex(CLIError, 'Please provide scale setting for the cluster'):
             _update_nodes_information(params, None, None, None, '', None, None, None)
 
         # Error if only min is specified
-        with self.assertRaisesRegexp(CLIError, 'You need to either provide both min and max node'):
+        with self.assertRaisesRegex(CLIError, 'You need to either provide both min and max node'):
             _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, 2, None)
 
     def test_get_image_or_die_supported_aliases(self):
@@ -731,7 +731,7 @@ class TestBatchAICustom(unittest.TestCase):
             _get_image_reference('ubuntudsvm', None))
 
     def test_get_image_or_die_unsupported_alias(self):
-        with self.assertRaisesRegexp(CLIError, 'Unsupported image alias "ubuntu", supported aliases are'):
+        with self.assertRaisesRegex(CLIError, 'Unsupported image alias "ubuntu", supported aliases are'):
             _get_image_reference('ubuntu', None)
 
     def test_get_image_or_die_with_valid_spec(self):
@@ -743,15 +743,15 @@ class TestBatchAICustom(unittest.TestCase):
             _get_image_reference('Canonical:UbuntuServer:16.04-LTS:latest', None))
 
     def test_get_image_or_die_with_invalid_spec(self):
-        with self.assertRaisesRegexp(CLIError, "--image must have format"):
+        with self.assertRaisesRegex(CLIError, "--image must have format"):
             _get_image_reference('Canonical:UbuntuServer:16.04-LTS', None)
-        with self.assertRaisesRegexp(CLIError, "--image must have format"):
+        with self.assertRaisesRegex(CLIError, "--image must have format"):
             _get_image_reference('Canonical:UbuntuServer:16.04-LTS:latest:', None)
-        with self.assertRaisesRegexp(CLIError, "Image publisher must be provided in --image argument"):
+        with self.assertRaisesRegex(CLIError, "Image publisher must be provided in --image argument"):
             _get_image_reference(':UbuntuServer:16.04-LTS:latest', None)
-        with self.assertRaisesRegexp(CLIError, "Image offer must be provided in --image argument"):
+        with self.assertRaisesRegex(CLIError, "Image offer must be provided in --image argument"):
             _get_image_reference('Canonical::16.04-LTS:latest', None)
-        with self.assertRaisesRegexp(CLIError, "Image sku must be provided in --image argument"):
+        with self.assertRaisesRegex(CLIError, "Image sku must be provided in --image argument"):
             _get_image_reference('Canonical:Offer::latest', None)
 
     def test_get_image_or_die_with_custom_image_without_version(self):
@@ -783,11 +783,11 @@ class TestBatchAICustom(unittest.TestCase):
         )
 
     def test_get_image_or_die_with_invalid_custom_image(self):
-        with self.assertRaisesRegexp(CLIError, 'Ill-formed custom image resource id'):
+        with self.assertRaisesRegex(CLIError, 'Ill-formed custom image resource id'):
             _get_image_reference('ubuntults', 'bla-bla')
 
     def test_get_image_or_die_with_custom_image_but_without_image(self):
-        with self.assertRaisesRegexp(CLIError, 'You need to specify --image argument'):
+        with self.assertRaisesRegex(CLIError, 'You need to specify --image argument'):
             _get_image_reference(
                 None, '/subscriptions/00/resourceGroups/gr/providers/Microsoft.Compute/images/img')
 
@@ -801,7 +801,7 @@ class TestBatchAICustom(unittest.TestCase):
             'mockrg', 'mockws', None)
 
     def test_validate_subnet_wrong_resource_id(self):
-        with self.assertRaisesRegexp(CLIError, 'Ill-formed subnet resource id'):
+        with self.assertRaisesRegex(CLIError, 'Ill-formed subnet resource id'):
             _ensure_subnet_is_valid(None, 'bla-bla', 'mockrg', 'mockws', 'mocknfs')
 
     def test_validate_subnet_no_conflicts(self):
@@ -821,7 +821,7 @@ class TestBatchAICustom(unittest.TestCase):
             return_value=FileServer(
                 subnet=ResourceId(id='conflict')
             ))
-        with self.assertRaisesRegexp(CLIError, 'Cluster and mounted NFS must be in the same subnet'):
+        with self.assertRaisesRegex(CLIError, 'Cluster and mounted NFS must be in the same subnet'):
             _ensure_subnet_is_valid(
                 mock_client,
                 '/subscriptions/000/resourceGroups/gr/providers/Microsoft.Network/virtualNetworks/vn/subnets/subnet',
@@ -847,7 +847,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEqual(_list_node_setup_files_for_cluster(DummyCli(), Cluster(), '.', 60), [])
 
     def test_list_setup_task_files_for_cluster_when_output_not_on_mounts_root(self):
-        with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
+        with self.assertRaisesRegex(CLIError, 'List files is supported only for clusters with startup task'):
             cluster = Cluster(
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
@@ -856,7 +856,7 @@ class TestBatchAICustom(unittest.TestCase):
             _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     def test_list_setup_task_files_for_cluster_when_cluster_doesnt_support_suffix(self):
-        with self.assertRaisesRegexp(CLIError, 'List files is not supported for this cluster'):
+        with self.assertRaisesRegex(CLIError, 'List files is not supported for this cluster'):
             cluster = Cluster(
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
@@ -865,7 +865,7 @@ class TestBatchAICustom(unittest.TestCase):
             _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     def test_list_setup_task_files_for_cluster_when_cluster_has_not_mount_volumes(self):
-        with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
+        with self.assertRaisesRegex(CLIError, 'List files is supported only for clusters with startup task'):
             cluster = Cluster(
                 node_setup=NodeSetup(
                     setup_task=SetupTask(
@@ -875,7 +875,7 @@ class TestBatchAICustom(unittest.TestCase):
             _list_node_setup_files_for_cluster(DummyCli(), cluster, '.', 60)
 
     def test_list_setup_task_files_for_cluster_when_output_not_on_afs_or_bfs(self):
-        with self.assertRaisesRegexp(CLIError, 'List files is supported only for clusters with startup task'):
+        with self.assertRaisesRegex(CLIError, 'List files is supported only for clusters with startup task'):
             cluster = Cluster(
                 vm_size=None,
                 user_account_settings=None,
@@ -953,7 +953,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertTrue(len(names) > 90)
 
     def test_setup_task_no_output(self):
-        with self.assertRaisesRegexp(CLIError, '--setup-task requires providing of --setup-task-output'):
+        with self.assertRaisesRegex(CLIError, '--setup-task requires providing of --setup-task-output'):
             _add_setup_task('echo hi', None, ClusterCreateParameters(vm_size=None, user_account_settings=None))
 
     def test_setup_task_added_to_cluster_without_node_setup(self):

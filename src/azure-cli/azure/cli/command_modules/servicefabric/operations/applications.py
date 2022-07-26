@@ -9,7 +9,8 @@ import os
 import time
 
 from azure.cli.core.util import get_file_json
-from azure.mgmt.servicefabric.models import (ErrorModelException,
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.servicefabric.models import (ApplicationTypeResource,
                                              ApplicationTypeVersionResource,
                                              ApplicationResource,
                                              ApplicationUpgradePolicy,
@@ -49,10 +50,10 @@ def create_app(client,
                                           maximum_nodes=maximum_nodes,
                                           parameters=application_parameters)
         appResource.name = application_name
-        app = client.applications.create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
+        app = client.applications.begin_create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
         return app
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -111,9 +112,9 @@ def update_app(client,
 
         # TODO: change to patch once the fix is deployed in the rp
         # client.applications.update(resource_group_name, cluster_name, application_name, appResourceUpdate)
-        return client.applications.create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+        return client.applications.begin_create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -125,10 +126,11 @@ def create_app_type(client, resource_group_name, cluster_name, application_type_
                 logger.info("Application type '%s' already exists", application_type_name)
                 return appType
 
+        appTypeResource = ApplicationTypeResource()
         logger.info("Creating application type '%s'", application_type_name)
-        return client.application_types.create_or_update(resource_group_name, cluster_name, application_type_name)
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+        return client.application_types.create_or_update(resource_group_name, cluster_name, application_type_name, appTypeResource)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -148,13 +150,13 @@ def create_app_type_version(client,
 
         appTypeVersionResource = ApplicationTypeVersionResource(app_package_url=package_url)
         logger.info("Creating application type version %s:%s", application_type_name, version)
-        return client.application_type_versions.create_or_update(resource_group_name,
-                                                                 cluster_name,
-                                                                 application_type_name,
-                                                                 version,
-                                                                 appTypeVersionResource).result()
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+        return client.application_type_versions.begin_create_or_update(resource_group_name,
+                                                                       cluster_name,
+                                                                       application_type_name,
+                                                                       version,
+                                                                       appTypeVersionResource).result()
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 

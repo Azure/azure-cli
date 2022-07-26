@@ -1,36 +1,88 @@
 interactions:
 - request:
-    body: null
+    body: '{"location": "eastus", "identity": {"type": "SystemAssigned"}, "properties":
+      {"defaultDataLakeStorage": {"accountUrl": "https://adlsgen2000002.dfs.core.windows.net",
+      "filesystem": "testfilesystem"}, "sqlAdministratorLoginPassword": "Pswd1000004",
+      "sqlAdministratorLogin": "cliuser1"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql ad-admin create
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '284'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Provisioning","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000003","dev":"https://clitest000003.dev.azuresynapse.net","sqlOnDemand":"clitest000003-ondemand.sql.azuresynapse.net","sql":"clitest000003.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200","privateEndpointConnections":[],"workspaceUID":"20e8dbd8-dba3-45e0-9328-95f5bc44a43b","extraProperties":{"WorkspaceType":"Normal"},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"674368bb-7eaa-4100-aef7-138f65f50648"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003","location":"eastus","name":"clitest000003","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"b73fc415-451c-4eb1-ae78-a77565f8ea3c"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1393'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 06:57:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
       Connection:
       - keep-alive
       ParameterSetName:
-      - --workspace-name --resource-group --display-name --object-id
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace","location":"eastus","name":"testsynapseworkspace","type":"Microsoft.Synapse/workspaces","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"5c40eee1-1044-4ec5-9d56-bbbd73b93df0"},"tags":{"key1":"value2"},"properties":{"connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3%2fresourceGroups%2frg%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2ftestsynapseworkspace","dev":"https://testsynapseworkspace.dev.azuresynapse.net","sqlOnDemand":"testsynapseworkspace-ondemand.sql.azuresynapse.net","sql":"testsynapseworkspace.sql.azuresynapse.net"},"managedResourceGroupName":"workspacemanagedrg-cf1e0457-375a-4c2d-a9b4-51676e4fce7c","defaultDataLakeStorage":{"accountUrl":"https://newzzyadlsgen2.dfs.core.windows.net","filesystem":"testfilesystem"},"sqlAdministratorLogin":"zzy","privateEndpointConnections":[],"workspaceUID":"55b6dcb5-2507-4063-ae78-9dfe279b4f89","extraProperties":{"IsScopeEnabled":false,"WorkspaceType":"Normal"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded"}}'
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1282'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:56:14 GMT
+      - Mon, 30 May 2022 06:58:09 GMT
       expires:
       - '-1'
       pragma:
@@ -49,8 +101,336 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "login":
-      "fakeuser", "administratorType": "activeDirectory", "sid": "00000000-0000-0000-0000-000000000000"}}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 06:58:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 06:59:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 06:59:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 07:00:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/3f789c77-4260-4afa-9955-84354ed64ef3?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 07:00:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000003","dev":"https://clitest000003.dev.azuresynapse.net","sqlOnDemand":"clitest000003-ondemand.sql.azuresynapse.net","sql":"clitest000003.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200","sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"20e8dbd8-dba3-45e0-9328-95f5bc44a43b","extraProperties":{"WorkspaceType":"Normal","IsScopeEnabled":false},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"674368bb-7eaa-4100-aef7-138f65f50648"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003","location":"eastus","name":"clitest000003","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"b73fc415-451c-4eb1-ae78-a77565f8ea3c"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1448'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 07:00:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql ad-admin create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --workspace-name --resource-group --display-name --object-id
+      User-Agent:
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2f0b1f6471-1bf0-4dda-aec3-cb9272f09590%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000003","dev":"https://clitest000003.dev.azuresynapse.net","sqlOnDemand":"clitest000003-ondemand.sql.azuresynapse.net","sql":"clitest000003.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200","sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"20e8dbd8-dba3-45e0-9328-95f5bc44a43b","extraProperties":{"WorkspaceType":"Normal","IsScopeEnabled":false},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"674368bb-7eaa-4100-aef7-138f65f50648"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003","location":"eastus","name":"clitest000003","identity":{"type":"SystemAssigned","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"b73fc415-451c-4eb1-ae78-a77565f8ea3c"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1448'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 May 2022 07:00:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "login":
+      "fakeuser", "administratorType": "activeDirectory", "sid": "00000000-0000-4002-becf-488f3e6ab703"}}'
     headers:
       Accept:
       - application/json
@@ -63,16 +443,13 @@ interactions:
       Content-Length:
       - '176'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --workspace-name --resource-group --display-name --object-id
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory?api-version=2021-06-01
   response:
     body:
       string: ''
@@ -82,17 +459,17 @@ interactions:
       access-control-expose-headers:
       - Location
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/9e702dbc-d126-44c1-85df-5f2acc34f29a?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/119c5c77-61d4-4486-992d-1de677744d59?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 08 Dec 2020 10:56:15 GMT
+      - Mon, 30 May 2022 07:00:59 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationResults/9e702dbc-d126-44c1-85df-5f2acc34f29a?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationResults/119c5c77-61d4-4486-992d-1de677744d59?api-version=2021-06-01
       pragma:
       - no-cache
       server:
@@ -110,7 +487,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -120,10 +497,9 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group --display-name --object-id
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/9e702dbc-d126-44c1-85df-5f2acc34f29a?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/119c5c77-61d4-4486-992d-1de677744d59?api-version=2021-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -135,7 +511,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:56:46 GMT
+      - Mon, 30 May 2022 07:01:30 GMT
       expires:
       - '-1'
       pragma:
@@ -157,7 +533,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -167,22 +543,21 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group --display-name --object-id
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationResults/119c5c77-61d4-4486-992d-1de677744d59?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspacemanagedrg-cf1e0457-375a-4c2d-a9b4-51676e4fce7c/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser","sid":"00000000-0000-0000-0000-000000000000","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser","sid":"00000000-0000-4002-becf-488f3e6ab703","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '467'
+      - '468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:56:46 GMT
+      - Mon, 30 May 2022 07:01:32 GMT
       expires:
       - '-1'
       pragma:
@@ -214,24 +589,21 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspacemanagedrg-cf1e0457-375a-4c2d-a9b4-51676e4fce7c/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser","sid":"00000000-0000-0000-0000-000000000000","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser","sid":"00000000-0000-4002-becf-488f3e6ab703","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '467'
+      - '468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:56:47 GMT
+      - Mon, 30 May 2022 07:01:37 GMT
       expires:
       - '-1'
       pragma:
@@ -263,24 +635,21 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group --display-name
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspacemanagedrg-cf1e0457-375a-4c2d-a9b4-51676e4fce7c/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser","sid":"00000000-0000-0000-0000-000000000000","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser","sid":"00000000-0000-4002-becf-488f3e6ab703","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '467'
+      - '468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:56:48 GMT
+      - Mon, 30 May 2022 07:01:43 GMT
       expires:
       - '-1'
       pragma:
@@ -299,8 +668,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "login":
-      "fakeuser@fakedomain.com", "administratorType": "ActiveDirectory", "sid": "00000000-0000-0000-0000-000000000000"}}'
+    body: '{"properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "login":
+      "fakeuser@fakedomain.com", "administratorType": "ActiveDirectory", "sid": "00000000-0000-4002-becf-488f3e6ab703"}}'
     headers:
       Accept:
       - application/json
@@ -313,16 +682,13 @@ interactions:
       Content-Length:
       - '191'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --workspace-name --resource-group --display-name
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory?api-version=2021-06-01
   response:
     body:
       string: ''
@@ -332,17 +698,17 @@ interactions:
       access-control-expose-headers:
       - Location
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/96115aa1-7f81-4ba3-b952-c5d35af75395?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/17699fd4-4b85-4d89-8412-aab58fa76f88?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 08 Dec 2020 10:56:49 GMT
+      - Mon, 30 May 2022 07:01:48 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationResults/96115aa1-7f81-4ba3-b952-c5d35af75395?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationResults/17699fd4-4b85-4d89-8412-aab58fa76f88?api-version=2021-06-01
       pragma:
       - no-cache
       server:
@@ -352,7 +718,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -360,7 +726,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -370,10 +736,9 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group --display-name
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/96115aa1-7f81-4ba3-b952-c5d35af75395?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/17699fd4-4b85-4d89-8412-aab58fa76f88?api-version=2021-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -385,7 +750,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:57:19 GMT
+      - Mon, 30 May 2022 07:02:19 GMT
       expires:
       - '-1'
       pragma:
@@ -407,7 +772,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -417,22 +782,21 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group --display-name
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationResults/17699fd4-4b85-4d89-8412-aab58fa76f88?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspacemanagedrg-cf1e0457-375a-4c2d-a9b4-51676e4fce7c/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser@fakedomain.com","sid":"00000000-0000-0000-0000-000000000000","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapseworkspace-managedrg-38bc5213-43c0-41af-8261-b4dcb794d200/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory","name":"activeDirectory","type":"Microsoft.Synapse/workspaces/administrators","properties":{"administratorType":"ActiveDirectory","login":"fakeuser@fakedomain.com","sid":"00000000-0000-4002-becf-488f3e6ab703","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '482'
+      - '483'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:57:20 GMT
+      - Mon, 30 May 2022 07:02:20 GMT
       expires:
       - '-1'
       pragma:
@@ -464,14 +828,11 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --workspace-name --resource-group
+      - --workspace-name --resource-group -y
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory?api-version=2021-06-01
   response:
     body:
       string: ''
@@ -481,17 +842,17 @@ interactions:
       access-control-expose-headers:
       - Location
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/4bfc414c-5278-4cfc-8808-932c5d05b58f?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/a3962d01-e8e3-4c0a-93ca-2958948c76df?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 08 Dec 2020 10:57:20 GMT
+      - Mon, 30 May 2022 07:02:26 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationResults/4bfc414c-5278-4cfc-8808-932c5d05b58f?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationResults/a3962d01-e8e3-4c0a-93ca-2958948c76df?api-version=2021-06-01
       pragma:
       - no-cache
       server:
@@ -509,7 +870,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -517,24 +878,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --workspace-name --resource-group
+      - --workspace-name --resource-group -y
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/4bfc414c-5278-4cfc-8808-932c5d05b58f?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationStatuses/a3962d01-e8e3-4c0a-93ca-2958948c76df?api-version=2021-06-01
   response:
     body:
-      string: '{"status":"InProgress"}'
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '23'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:57:52 GMT
+      - Mon, 30 May 2022 07:02:58 GMT
       expires:
       - '-1'
       pragma:
@@ -556,7 +916,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -564,24 +924,19 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --workspace-name --resource-group
+      - --workspace-name --resource-group -y
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/4bfc414c-5278-4cfc-8808-932c5d05b58f?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/operationResults/a3962d01-e8e3-4c0a-93ca-2958948c76df?api-version=2021-06-01
   response:
     body:
-      string: '{"status":"Succeeded"}'
+      string: ''
     headers:
       cache-control:
       - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
       date:
-      - Tue, 08 Dec 2020 10:58:22 GMT
+      - Mon, 30 May 2022 07:02:59 GMT
       expires:
       - '-1'
       pragma:
@@ -590,15 +945,11 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
-      code: 200
-      message: OK
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
@@ -613,12 +964,9 @@ interactions:
       ParameterSetName:
       - --workspace-name --resource-group
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.37.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/administrators/activeDirectory?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000003/administrators/activeDirectory?api-version=2021-06-01
   response:
     body:
       string: '{"code":"NotFound","message":"Server administrator with name \u0027activeDirectory\u0027
@@ -634,7 +982,7 @@ interactions:
       dataserviceversion:
       - 3.0;
       date:
-      - Tue, 08 Dec 2020 10:58:23 GMT
+      - Mon, 30 May 2022 07:03:06 GMT
       server:
       - Microsoft-HTTPAPI/2.0
       - Microsoft-HTTPAPI/2.0

@@ -10,17 +10,15 @@ import platform
 import tempfile
 import time
 import unittest
-import mock
+from unittest import mock
 import uuid
 
-import six
-
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer)
+    StorageAccountPreparer, KeyVaultPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -63,6 +61,8 @@ class VMUsageScenarioTest(ScenarioTest):
 
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
+    # Replay mode has problem
+    @live_only()
     @AllowLargeResponse()
     def test_vm_images_list_thru_services(self):
         result = self.cmd('vm image list -l westus --publisher Canonical --offer UbuntuServer -o tsv --all').output
@@ -561,6 +561,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 
 class VMOSDiskSize(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
@@ -674,6 +675,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
     def test_vm_create_state_modifications(self, resource_group):
 
@@ -1079,6 +1081,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
 
 class VMBootDiagnostics(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
     @StorageAccountPreparer(name_prefix='clitestbootdiag')
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
@@ -1225,6 +1228,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
 class VMCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     @StorageAccountPreparer()
     def test_vm_create_existing_options(self, resource_group, storage_account):
@@ -1283,6 +1287,7 @@ class VMCreateExistingOptions(ScenarioTest):
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing_ids')
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
@@ -1492,6 +1497,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
 class VMSSCreateAndModify(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_and_modify')
     def test_vmss_create_and_modify(self):
 
@@ -1558,6 +1564,7 @@ class VMSSCreateAndModify(ScenarioTest):
 
 class VMSSCreateOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
 
@@ -1750,6 +1757,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
+    @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
     def test_vm_create_linux_secrets(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -1759,15 +1767,12 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmlinuxkv', 20)
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        with self.assertRaisesRegexp(CLIError, message):
+        with self.assertRaisesRegex(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
-
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
         time.sleep(60)
 
@@ -1781,11 +1786,11 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
             self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
         ])
 
     @ResourceGroupPreparer()
+    @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -1793,17 +1798,13 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'loc': 'westus',
             'image': 'Win2012R2Datacenter',
             'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}]),
-            'vault': self.create_random_name('vmkeyvault', 20)
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
         })
 
         message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
                   'vaultCertificate index 0'
-        with self.assertRaisesRegexp(CLIError, message):
+        with self.assertRaisesRegex(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'')
-
-        vault_out = self.cmd(
-            'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
         time.sleep(60)
 
@@ -1817,7 +1818,6 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
             self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', self.kwargs['secret_out']),
             self.check('osProfile.secrets[0].vaultCertificates[0].certificateStore', 'My')
         ])
@@ -1826,18 +1826,16 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
+    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
     @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group):
         self.kwargs.update({
             'loc': 'westus',
             'vmss': 'vmss1-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmsslinuxkv', 20),
             'secret': 'mysecret',
             'ssh_key': TEST_SSH_KEY_PUB
         })
-
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
         time.sleep(60)
 
@@ -1852,13 +1850,13 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('virtualMachineProfile.osProfile.secrets[0].sourceVault.id', vault_out['id']),
             self.check('virtualMachineProfile.osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
         ])
 
 
 class VMSSCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_options')
     def test_vmss_create_existing_options(self):
 
@@ -1891,6 +1889,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
 
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
@@ -1964,7 +1963,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
             self.check('instanceId', '{id}')
         ])
         result = self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {vmss}').get_output_in_json()
-        self.assertTrue(result['instance 0'].split('.')[1], '5000')
+        self.assertEqual(result['instance 0'].split(':')[1], '50000')
         self.cmd('vmss restart --resource-group {rg} --name {vmss} --instance-ids *')
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {rg} --name {vmss} --instance-ids *')
@@ -2063,6 +2062,7 @@ class VMSSILBTest(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
 class VMSSLoadBalancerWithSku(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
     def test_vmss_lb_sku(self, resource_group):
 
@@ -2119,7 +2119,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
 class VMZoneScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='eastus2')
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vm_create_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2145,7 +2145,7 @@ class VMZoneScenarioTest(ScenarioTest):
             self.assertTrue('availability zone is not yet supported' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vmss_create_single_zone(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2171,7 +2171,7 @@ class VMZoneScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vmss_create_x_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2233,7 +2233,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group, resource_group_location, self.kwargs['disk'], self.kwargs['zones']]).issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vmss_create_zonal_with_fd(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2282,12 +2282,11 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault', additional_params='--enabled-for-disk-encryption')
     def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
-            'vault': self.create_random_name('vault', 10),
             'vm': 'vm1'
         })
-        self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
         time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
         self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
@@ -2434,15 +2433,14 @@ class VMCreateWithExistingNic(ScenarioTest):
 class VMSecretTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
+    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption --enabled-for-deployment')
     def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
-            'vault': self.create_random_name('vmsecretkv', 20),
             'cert': 'vm-secrt-cert',
             'loc': resource_group_location
         })
 
-        vault_result = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-disk-encryption true --enabled-for-deployment true').get_output_in_json()
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
         self.cmd('vm create -g {rg} -n {vm} --image rhel --generate-ssh-keys --admin-username rheladmin')
@@ -2451,7 +2449,6 @@ class VMSecretTest(ScenarioTest):
         self.cmd('keyvault certificate create --vault-name {vault} -n {cert} -p @"{policy_path}"')
         secret_result = self.cmd('vm secret add -g {rg} -n {vm} --keyvault {vault} --certificate {cert}', checks=[
             self.check('length([])', 1),
-            self.check('[0].sourceVault.id', vault_result['id']),
             self.check('length([0].vaultCertificates)', 1),
         ]).get_output_in_json()
         self.assertTrue('https://{vault}.vault.azure.net/secrets/{cert}/'.format(**self.kwargs) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])

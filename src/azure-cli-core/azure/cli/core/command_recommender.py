@@ -5,7 +5,7 @@
 
 from enum import Enum
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from knack.log import get_logger
 
 
@@ -134,6 +134,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
         correlation_id = telemetry._session.correlation_id  # pylint: disable=protected-access
         subscription_id = telemetry._get_azure_subscription_id()  # pylint: disable=protected-access
+        event_id = telemetry._session.event_id  # pylint: disable=protected-access
         # Used for DDOS protection and rate limiting
         user_id = telemetry._get_user_azure_id()  # pylint: disable=protected-access
         hashed_user_id = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
@@ -152,9 +153,11 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
                 context['correlationId'] = correlation_id
             if subscription_id:
                 context['subscriptionId'] = subscription_id
+            if event_id:
+                context['eventId'] = event_id
 
         parameters = self._normalize_parameters(self.parameters)
-        parameters = [item for item in parameters if item not in ['--debug', '--verbose', '--only-show-errors']]
+        parameters = [item for item in set(parameters) if item not in ['--debug', '--verbose', '--only-show-errors']]
         query = {
             "command": self.command,
             "parameters": ','.join(parameters)
@@ -294,7 +297,10 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
 
             # generate decorated commands shown to users
             decorated_command = highlight_command(raw_command)
-            decorated_description = [(Style.SECONDARY, recommendation['description'] + '\n')]
+            decorated_description = [(
+                Style.SECONDARY,
+                recommendation.get('description', 'No description is found.') + '\n'
+            )]
             decorated_recommendations.append((decorated_command, decorated_description))
 
         # add reference link as a recommendation

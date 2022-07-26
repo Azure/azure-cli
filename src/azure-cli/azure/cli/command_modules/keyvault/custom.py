@@ -14,6 +14,7 @@ import struct
 import sys
 import time
 import uuid
+from ipaddress import ip_network
 
 from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
@@ -27,15 +28,12 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
-from azure.graphrbac.models import GraphErrorException
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
-
-from msrestazure.azure_exceptions import CloudError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -212,11 +210,21 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
     assert hsm_name
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    logger.warning('This command will soft delete the resource, and you will still be billed until it is purged. '
+                   'For more information, go to https://aka.ms/doc/KeyVaultMHSMSoftDelete')
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
         name=hsm_name
     )
+
+
+def get_deleted_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None):
+    if is_azure_stack_profile(cmd) or vault_name:
+        return client.get_deleted(vault_name=vault_name, location=location)
+
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return hsm_client.get_deleted(name=hsm_name, location=location)
 
 
 def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
@@ -228,7 +236,14 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
             location=location,
             vault_name=vault_name
         )
-    return None
+
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return sdk_no_wait(
+        no_wait,
+        hsm_client.begin_purge_deleted,
+        location=location,
+        name=hsm_name
+    )
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
@@ -236,10 +251,15 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        return client.list_deleted()
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        resources.extend(client.list_deleted())
+        resources.extend(hsm_client.list_deleted())
+        return resources
 
     if resource_type == 'hsm':
-        raise InvalidArgumentValueError('Operation "list-deleted" has not been supported for HSM.')
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return hsm_client.list_deleted()
 
     if resource_type == 'vault':
         return client.list_deleted()
@@ -284,18 +304,13 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
-    try:
-        current_user = graph_client.signed_in_user.get()
-        if current_user and current_user.object_id:  # pylint:disable=no-member
-            return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
-        pass
+    current_user = graph_client.signed_in_user_get()
+    return current_user['id']
 
 
 def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principals.list(
+    accounts = list(graph_client.service_principal_list(
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
@@ -304,11 +319,11 @@ def _get_object_id_by_spn(graph_client, spn):
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
+    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
         return None
@@ -316,7 +331,7 @@ def _get_object_id_by_upn(graph_client, upn):
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
@@ -389,16 +404,17 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
-    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
+    # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
+    # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
     parameters = ManagedHsm(location=location,
                             sku=ManagedHsmSku(name='Standard_B1', family='B'),
-                            properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
+                            properties={'tenant_id': tenant_id, 'create_mode': 'Recover'})
 
     return sdk_no_wait(
         no_wait, client.begin_create_or_update,
@@ -512,7 +528,9 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         default_action=None,
                         no_self_perms=None,
                         tags=None,
-                        no_wait=False):
+                        no_wait=False,
+                        public_network_access=None,
+                        ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
                             client=client,
@@ -534,7 +552,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             default_action=default_action,
                             no_self_perms=no_self_perms,
                             tags=tags,
-                            no_wait=no_wait)
+                            no_wait=no_wait,
+                            public_network_access=public_network_access)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -610,7 +629,7 @@ def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault(cmd, client,  # pylint: disable=too-many-locals
+def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
                  resource_group_name, vault_name, location=None, sku=None,
                  enabled_for_deployment=None,
                  enabled_for_disk_encryption=None,
@@ -626,9 +645,19 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  default_action=None,
                  no_self_perms=None,
                  tags=None,
-                 no_wait=False):
+                 no_wait=False,
+                 public_network_access=None):
+    from azure.core.exceptions import HttpResponseError
+    try:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        if vault:
+            raise InvalidArgumentValueError('The specified vault: {} already exists'.format(vault_name))
+    except HttpResponseError:
+        # if client.get raise exception, we can take it as no existing vault found
+        # just continue the normal creation process
+        pass
     from azure.cli.core._profile import Profile
-    from azure.graphrbac import GraphRbacManagementClient
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -642,13 +671,10 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
+    _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    graph_client = GraphRbacManagementClient(
-        cred,
-        tenant_id,
-        base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
@@ -663,51 +689,58 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore,
-                                        KeyPermissions.recover],
-                                  secrets=[
-                                      SecretPermissions.get,
-                                      SecretPermissions.list,
-                                      SecretPermissions.set,
-                                      SecretPermissions.delete,
-                                      SecretPermissions.backup,
-                                      SecretPermissions.restore,
-                                      SecretPermissions.recover],
-                                  certificates=[
-                                      CertificatePermissions.get,
-                                      CertificatePermissions.list,
-                                      CertificatePermissions.delete,
-                                      CertificatePermissions.create,
-                                      CertificatePermissions.import_enum,
-                                      CertificatePermissions.update,
-                                      CertificatePermissions.managecontacts,
-                                      CertificatePermissions.getissuers,
-                                      CertificatePermissions.listissuers,
-                                      CertificatePermissions.setissuers,
-                                      CertificatePermissions.deleteissuers,
-                                      CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover],
-                                  storage=[
-                                      StoragePermissions.get,
-                                      StoragePermissions.list,
-                                      StoragePermissions.delete,
-                                      StoragePermissions.set,
-                                      StoragePermissions.update,
-                                      StoragePermissions.regeneratekey,
-                                      StoragePermissions.setsas,
-                                      StoragePermissions.listsas,
-                                      StoragePermissions.getsas,
-                                      StoragePermissions.deletesas])
+        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.get,
+                                            KeyPermissions.create,
+                                            KeyPermissions.delete,
+                                            KeyPermissions.list,
+                                            KeyPermissions.update,
+                                            KeyPermissions.import_enum,
+                                            KeyPermissions.backup,
+                                            KeyPermissions.restore,
+                                            KeyPermissions.recover],
+                                      secrets=[
+                                          SecretPermissions.get,
+                                          SecretPermissions.list,
+                                          SecretPermissions.set,
+                                          SecretPermissions.delete,
+                                          SecretPermissions.backup,
+                                          SecretPermissions.restore,
+                                          SecretPermissions.recover],
+                                      certificates=[
+                                          CertificatePermissions.get,
+                                          CertificatePermissions.list,
+                                          CertificatePermissions.delete,
+                                          CertificatePermissions.create,
+                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.update,
+                                          CertificatePermissions.managecontacts,
+                                          CertificatePermissions.getissuers,
+                                          CertificatePermissions.listissuers,
+                                          CertificatePermissions.setissuers,
+                                          CertificatePermissions.deleteissuers,
+                                          CertificatePermissions.manageissuers,
+                                          CertificatePermissions.recover],
+                                      storage=[
+                                          StoragePermissions.get,
+                                          StoragePermissions.list,
+                                          StoragePermissions.delete,
+                                          StoragePermissions.set,
+                                          StoragePermissions.update,
+                                          StoragePermissions.regeneratekey,
+                                          StoragePermissions.setsas,
+                                          StoragePermissions.listsas,
+                                          StoragePermissions.getsas,
+                                          StoragePermissions.deletesas])
+
         try:
             object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
+        except GraphError:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
@@ -735,7 +768,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                  enable_rbac_authorization=enable_rbac_authorization,
                                  enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
-                                 soft_delete_retention_in_days=int(retention_days))
+                                 soft_delete_retention_in_days=int(retention_days),
+                                 public_network_access=public_network_access)
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -761,6 +795,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
+                                    tags=parameters.tags,
                                     properties=parameters.properties),
                                 no_wait=no_wait)
 
@@ -786,7 +821,8 @@ def update_vault(cmd, instance,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
-                 default_action=None):
+                 default_action=None,
+                 public_network_access=None):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -820,6 +856,10 @@ def update_vault(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
+
     return instance
 
 
@@ -832,7 +872,8 @@ def update_hsm(cmd, instance,
         instance.properties.enable_purge_protection = enable_purge_protection
 
     if secondary_locations is not None:
-        instance.properties.secondary_locations = secondary_locations
+        # service not ready
+        raise InvalidArgumentValueError('--secondary-locations has not been supported yet for hsm')
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
@@ -847,15 +888,9 @@ def update_hsm(cmd, instance,
 
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.core._profile import Profile
-        from azure.graphrbac import GraphRbacManagementClient
+        from azure.cli.command_modules.role import graph_client_factory
 
-        profile = Profile(cli_ctx=cli_ctx)
-        cred, _, tenant_id = profile.get_login_credentials(
-            resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-        graph_client = GraphRbacManagementClient(cred,
-                                                 tenant_id,
-                                                 base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+        graph_client = graph_client_factory(cli_ctx)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -864,12 +899,12 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
 
 def _permissions_distinct(permissions):
     if permissions:
-        return [_ for _ in {p for p in permissions}]
+        return list(set(permissions))
     return permissions
 
 
 def set_policy(cmd, client, resource_group_name, vault_name,
-               object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
+               object_id=None, application_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None, no_wait=False):
     """ Update security policy settings for a Key Vault. """
 
@@ -897,12 +932,14 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
+                   (application_id or '').lower() == (p.application_id or '').lower() and
                    vault.properties.tenant_id.lower() == p.tenant_id.lower()), None)
     if not policy:
         # Add new policy as none found
         vault.properties.access_policies.append(AccessPolicyEntry(
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
+            application_id=application_id,
             permissions=Permissions(keys=key_permissions,
                                     secrets=secret_permissions,
                                     certificates=certificate_permissions,
@@ -941,6 +978,10 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set(cmd)
     rules = vault.properties.network_acls
 
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
+
+    to_update = False
     if subnet:
         rules.virtual_network_rules = rules.virtual_network_rules or []
 
@@ -952,17 +993,28 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                 break
         if to_modify:
             rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+            to_update = True
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
         # if the rule already exists, don't add again
-        to_modify = True
-        for x in rules.ip_rules:
-            if x.value == ip_address:
-                to_modify = False
-                break
-        if to_modify:
-            rules.ip_rules.append(IPRule(value=ip_address))
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_update:
+        return vault
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_type=ResourceType.MGMT_KEYVAULT,
@@ -999,7 +1051,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
@@ -1027,7 +1080,8 @@ def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint:
     return vault.properties.network_acls
 
 
-def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None, no_wait=False):
+def delete_policy(cmd, client, resource_group_name, vault_name,
+                  object_id=None, application_id=None, spn=None, upn=None, no_wait=False):
     """ Delete security policy settings for a Key Vault. """
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -1046,7 +1100,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
                                         vault.properties.tenant_id.lower() != p.tenant_id.lower() or
-                                        object_id.lower() != p.object_id.lower()]
+                                        object_id.lower() != p.object_id.lower() or
+                                        (application_id or '').lower() != (p.application_id or '').lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 
@@ -1064,21 +1119,43 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
+def create_key(client, name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
 
-    return client.create_key(vault_base_url=vault_base_url,
-                             key_name=key_name,
-                             kty=kty,
-                             key_size=key_size,
-                             key_ops=key_ops,
-                             key_attributes=key_attrs,
+    return client.create_key(name=name,
+                             key_type=kty,
+                             size=key_size,
+                             key_operations=key_ops,
+                             enabled=not disabled,
+                             not_before=not_before,
+                             expires_on=expires,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             exportable=exportable,
+                             release_policy=release_policy)
+
+
+def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, version=None):
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
+
+
+def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
+                name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 authentication_tag=binascii.unhexlify(tag) if tag else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1184,17 +1261,13 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disable=too-many-locals
-               hsm_name=None, identifier=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', curve=None):
+               byok_string=None, kty='RSA', curve=None, exportable=None, release_policy=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1235,7 +1308,11 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    return client.import_key(name=name, key=key_obj,
+                             hardware_protected=(protection == 'hsm'),
+                             enabled=not disabled, tags=tags,
+                             not_before=not_before, expires_on=expires,
+                             exportable=exportable, release_policy=release_policy)
 
 
 def _bytes_to_int(b):
@@ -1368,17 +1445,52 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
 
 def get_policy_template():
     policy = {
-        'version': '0.2',
+        'version': '1.0.0',
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
                 'claim': '<claim name>',
-                'condition': 'equals',
-                'value': '<value to match>'
+                'equals': '<value to match>'
             }]
         }]
     }
     return policy
+
+
+def update_key_rotation_policy(cmd, client, value, key_name=None):
+    from azure.cli.core.util import read_file_content, get_json_object
+    if os.path.exists(value):
+        value = read_file_content(value)
+
+    policy = get_json_object(value)
+    if not policy:
+        raise InvalidArgumentValueError("Please specify a valid policy")
+
+    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
+                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyRotationPolicy = cmd.loader.get_sdk('KeyRotationPolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    lifetime_actions = []
+    if policy.get('lifetime_actions', None):
+        for action in policy['lifetime_actions']:
+            try:
+                action_type = action['action'].get('type', None) if action.get('action', None) else None
+            except AttributeError:
+                action_type = action.get('action', None)
+            time_after_create = action['trigger'].get('time_after_create', None) \
+                if action.get('trigger', None) else action.get('time_after_create', None)
+            time_before_expiry = action['trigger'].get('time_before_expiry', None) \
+                if action.get('trigger', None) else action.get('time_before_expiry', None)
+            lifetime_action = KeyRotationLifetimeAction(action_type,
+                                                        time_after_create=time_after_create,
+                                                        time_before_expiry=time_before_expiry)
+            lifetime_actions.append(lifetime_action)
+    expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
+    if policy.get('attributes', None):
+        expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
+    return client.update_key_rotation_policy(key_name=key_name,
+                                             policy=KeyRotationPolicy(lifetime_actions=lifetime_actions,
+                                                                      expires_in=expires_in))
 # endregion
 
 
@@ -1555,7 +1667,7 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
 
 
 def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''):   # pylint: disable=unused-argument
+                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -1729,45 +1841,57 @@ def restore_storage_account(client, vault_base_url, file_path):
 # endregion
 
 
+# region private_link
+def _verify_vault_or_hsm_name(vault_name, hsm_name):
+    if not vault_name and not hsm_name:
+        raise RequiredArgumentMissingError('Please specify --vault-name or --hsm-name.')
+
+
+def list_private_link_resource(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    _verify_vault_or_hsm_name(vault_name, hsm_name)
+
+    if is_azure_stack_profile(cmd) or vault_name:
+        return client.list_by_vault(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    hsm_plr_client = get_client_factory(ResourceType.MGMT_KEYVAULT,
+                                        Clients.mhsm_private_link_resources)(cmd.cli_ctx, None)
+    return hsm_plr_client.list_by_mhsm_resource(resource_group_name=resource_group_name, name=hsm_name)
+# endregion
+
+
 # region private_endpoint
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, name,
                                                private_endpoint_connection_name, is_approved=True, description=None,
                                                no_wait=False):
     PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
                                                             resource_type=ResourceType.MGMT_KEYVAULT)
 
-    connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                            private_endpoint_connection_name=private_endpoint_connection_name)
+    connection = client.get(resource_group_name, name, private_endpoint_connection_name)
 
     new_status = PrivateEndpointServiceConnectionStatus.approved \
         if is_approved else PrivateEndpointServiceConnectionStatus.rejected
     connection.private_link_service_connection_state.status = new_status
     connection.private_link_service_connection_state.description = description
 
-    retval = client.put(resource_group_name=resource_group_name,
-                        vault_name=vault_name,
-                        private_endpoint_connection_name=private_endpoint_connection_name,
-                        properties=connection)
+    retval = client.put(resource_group_name, name, private_endpoint_connection_name, connection)
 
     if no_wait:
         return retval
 
     new_retval = \
-        _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name)
+        _wait_private_link_operation(client, resource_group_name, name, private_endpoint_connection_name)
 
     if new_retval:
         return new_retval
     return retval
 
 
-def _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name):
+def _wait_private_link_operation(client, resource_group_name, name, private_endpoint_connection_name):
     retries = 0
     max_retries = 10
     wait_second = 1
     while retries < max_retries:
-        pl = client.get(resource_group_name=resource_group_name,
-                        vault_name=vault_name,
-                        private_endpoint_connection_name=private_endpoint_connection_name)
+        pl = client.get(resource_group_name, name, private_endpoint_connection_name)
 
         if pl.provisioning_state == 'Succeeded':
             return pl
@@ -1777,24 +1901,50 @@ def _wait_private_link_operation(client, resource_group_name, vault_name, privat
     return None
 
 
-def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
-                                        description=None, no_wait=False):
+def _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name):
+    _verify_vault_or_hsm_name(vault_name, hsm_name)
+    if is_azure_stack_profile(cmd) or vault_name:
+        return client
+    return get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.mhsm_private_endpoint_connections)(cmd.cli_ctx, None)
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                        vault_name=None, hsm_name=None, description=None, no_wait=False):
     """Approve a private endpoint connection request for a Key Vault."""
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return _update_private_endpoint_connection_status(cmd, pec_client, resource_group_name,
+                                                      vault_name or hsm_name, private_endpoint_connection_name,
+                                                      is_approved=True, description=description, no_wait=no_wait)
 
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
-        description=description, no_wait=no_wait
-    )
 
-
-def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
-                                       description=None, no_wait=False):
+def reject_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                       vault_name=None, hsm_name=None, description=None, no_wait=False):
     """Reject a private endpoint connection request for a Key Vault."""
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return _update_private_endpoint_connection_status(cmd, pec_client, resource_group_name,
+                                                      vault_name or hsm_name, private_endpoint_connection_name,
+                                                      is_approved=False, description=description, no_wait=no_wait)
 
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
-        description=description, no_wait=no_wait
-    )
+
+def delete_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                       vault_name=None, hsm_name=None):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return pec_client.begin_delete(resource_group_name,
+                                   vault_name or hsm_name,
+                                   private_endpoint_connection_name)
+
+
+def list_private_endpoint_connection(cmd, client, resource_group_name, hsm_name):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, None, hsm_name)
+    return pec_client.list_by_resource(resource_group_name, hsm_name)
+
+
+def show_private_endpoint_connection(cmd, client, resource_group_name, private_endpoint_connection_name,
+                                     vault_name=None, hsm_name=None):
+    pec_client = _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name)
+    return pec_client.get(resource_group_name,
+                          vault_name or hsm_name,
+                          private_endpoint_connection_name)
 # endregion
 
 
@@ -1831,15 +1981,22 @@ def _get_role_dics(role_defs):
 def _get_principal_dics(cli_ctx, role_assignments):
     principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
     if principal_ids:
+        from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role._client_factory import _graph_client_factory
-            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+            from azure.cli.command_modules.role.custom import (_get_displayable_name, _get_object_stubs,
+                                                               _odata_type_to_arm_principal_type)
 
-            graph_client = _graph_client_factory(cli_ctx)
+            graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
 
-        except (CloudError, GraphErrorException) as ex:
+            results = {}
+            for i in principals:
+                object_id = i['id']
+                display_name = _get_displayable_name(i)
+                principal_type = _odata_type_to_arm_principal_type(i['@odata.type'])
+                results[object_id] = (display_name, principal_type)
+            return results
+        except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -1873,9 +2030,15 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# for injecting test seems to produce predictable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
+
+
+# pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
-                           assignee_principal_type=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_principal_type=None, hsm_name=None, identifier=None):
     """ Create a new role assignment for a user, group, or service principal. """
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
@@ -1894,7 +2057,7 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                        'to check whether the role is existing.'.format(role))
 
     if role_assignment_name is None:
-        role_assignment_name = str(uuid.uuid4())
+        role_assignment_name = str(_gen_guid())
 
     if scope is None:
         scope = ''
@@ -1915,8 +2078,9 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
     )
 
 
+# pylint: disable=unused-argument
 def delete_role_assignment(cmd, client, role_assignment_name=None, scope=None, assignee=None, role=None,
-                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):
     """ Delete a role assignment. """
     query_scope = scope
     if query_scope is None:
@@ -2031,13 +2195,104 @@ def _reconstruct_role_definition(role_definition):
     return ret
 
 
-def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, hsm_name=None, custom_role_only=False):  # pylint: disable=unused-argument
     """ List role definitions. """
     query_scope = scope
     if query_scope is None:
         query_scope = ''
     role_definitions = client.list_role_definitions(role_scope=query_scope)
+    if custom_role_only:
+        role_definitions = [role for role in role_definitions if role.role_type == 'CustomRole']
     return [_reconstruct_role_definition(role) for role in role_definitions]
+
+
+def create_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=False)
+
+
+def update_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=True)
+
+
+def _create_update_role_definition(client, role_definition, for_update):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from azure.keyvault.administration import KeyVaultPermission
+
+    if os.path.exists(role_definition):
+        role_definition = get_file_json(role_definition)
+    else:
+        role_definition = shell_safe_json_parse(role_definition)
+
+    if not isinstance(role_definition, dict):
+        raise InvalidArgumentValueError('Invalid role definition. A valid dictionary JSON representation is expected.')
+    # to workaround service defects, ensure property names are camel case
+    # e.g. NotActions -> notActions
+    names = [p for p in role_definition if p[:1].isupper()]
+    for n in names:
+        new_name = n[:1].lower() + n[1:]
+        role_definition[new_name] = role_definition.pop(n)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    role_definition_name = None
+    role_name = role_definition.get('roleName', None)
+    description = role_definition.get('description', None)
+    permissions = [KeyVaultPermission(
+        allowed_actions=role_definition.get('actions', None),
+        denied_actions=role_definition.get('notActions', None),
+        allowed_data_actions=role_definition.get('dataActions', None),
+        denied_data_actions=role_definition.get('notDataActions', None)
+    )]
+
+    if for_update:
+        role_definition_name = role_definition.get('name', None)
+        role_id = role_definition.get('id', None)
+
+        if role_definition_name is None and role_id is None:
+            raise InvalidArgumentValueError('Please provide "name" or "id" property in'
+                                            ' your role definition JSON content.')
+
+        role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    result_role_definition = client.set_role_definition(
+        role_scope=role_scope,
+        permissions=permissions,
+        role_definition_name=role_definition_name,
+        role_name=role_name,
+        description=description
+    )
+
+    return _reconstruct_role_definition(result_role_definition)
+
+
+def _get_role_definition_name(role_definition_name, role_id):
+    if role_definition_name is None and role_id is None:
+        raise InvalidArgumentValueError('Please specify either --role-definition-name or --role-id.')
+
+    if role_definition_name is None:
+        if '/' not in role_id:
+            raise InvalidArgumentValueError('The role resource id is invalid: {}'.format(role_id))
+        role_definition_name = role_id.split('/')[-1]
+
+    return role_definition_name
+
+
+# pylint: disable=unused-argument
+def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    client.delete_role_definition(role_scope, role_definition_name)
+
+
+def show_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    result_role_definition = client.get_role_definition(role_scope, role_definition_name)
+
+    return _reconstruct_role_definition(result_role_definition)
 # endregion
 
 
@@ -2083,11 +2338,11 @@ def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=Non
 
 # region security domain
 def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
-                                  identifier=None):  # pylint: disable=unused-argument
+                                  identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
     if os.path.exists(sd_exchange_key):
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
-    ret = client.transfer_key(vault_base_url=hsm_name)
+    ret = client.transfer_key(vault_base_url=hsm_name or vault_base_url)
     exchange_key = json.loads(json.loads(ret)['transfer_key'])
 
     def get_x5c_as_pem():
@@ -2114,14 +2369,22 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
         raise ex
 
 
-def _wait_security_domain_operation(client, hsm_name, identifier=None):  # pylint: disable=unused-argument
+def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
+                                    identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
     retries = 0
     max_retries = 30
     wait_second = 5
     while retries < max_retries:
         try:
-            ret = client.upload_pending(vault_base_url=hsm_name)
-            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Failed']:
+            ret = None
+            if target_operation == 'upload':
+                ret = client.upload_pending(vault_base_url=hsm_name or vault_base_url)
+            elif target_operation == 'download':
+                ret = client.download_pending(vault_base_url=hsm_name or vault_base_url)
+
+            # v7.2-preview and v7.2 will change the upload operation from Sync to Async
+            # due to service defects, it returns 'Succeeded' before the change and 'Success' after the change
+            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Success', 'Failed']:
                 return ret
         except:  # pylint: disable=bare-except
             pass
@@ -2158,6 +2421,8 @@ def _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, 
         with open(private_key_path, 'rb') as f:
             pem_data = f.read()
             password = passwords[private_key_index] if private_key_index < len(passwords) else None
+            if password and not isinstance(password, bytes):
+                password = password.encode(encoding="utf-8")
             private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
 
         with open(cert_path, 'rb') as f:
@@ -2222,7 +2487,7 @@ def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
 
 
 def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None, no_wait=False):  # pylint: disable=unused-argument
+                           identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2261,19 +2526,21 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     )
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
-    retval = client.upload(vault_base_url=hsm_name, security_domain=security_domain)
+    retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
 
     if no_wait:
         return retval
 
-    new_retval = _wait_security_domain_operation(client, hsm_name)
+    wait_second = 5
+    time.sleep(wait_second)
+    new_retval = _wait_security_domain_operation(client, hsm_name, 'upload', vault_base_url=vault_base_url)
     if new_retval:
         return new_retval
     return retval
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
-                             identifier=None):  # pylint: disable=unused-argument
+                             identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
@@ -2316,15 +2583,30 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
         certificates.append(sd_jwk)
 
+    # save security-domain backup value to local file
+    def _save_to_local_file(file_path, security_domain):
+        try:
+            with open(file_path, 'w') as f:
+                f.write(security_domain.value)
+        except Exception as ex:  # pylint: disable=bare-except
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            from azure.cli.core.azclierror import FileOperationError
+            raise FileOperationError(str(ex))
+
     ret = client.download(
-        vault_base_url=hsm_name,
+        vault_base_url=hsm_name or vault_base_url,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
 
-    try:
-        with open(security_domain_file, 'w') as f:
-            f.write(ret.value)
-    except:  # pylint: disable=bare-except
-        if os.path.isfile(security_domain_file):
-            os.remove(security_domain_file)
+    if not no_wait:
+        wait_second = 5
+        time.sleep(wait_second)
+        polling_ret = _wait_security_domain_operation(client, hsm_name, 'download', vault_base_url=vault_base_url)
+        # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
+        if polling_ret and getattr(polling_ret, 'status', None) != 'Failed':
+            _save_to_local_file(security_domain_file, ret)
+        return polling_ret
+
+    _save_to_local_file(security_domain_file, ret)
 # endregion

@@ -46,8 +46,9 @@ def load_command_table(self, _):
         g.command('list', 'list_by_resource_group')
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='update_search_service', setter_name='begin_create_or_update', setter_arg_name='service')
-        g.custom_command('create', 'create_search_service')
+        g.generic_update_command('update', supports_no_wait=True, custom_func_name='update_search_service', setter_name='begin_create_or_update', setter_arg_name='service')
+        g.custom_command('create', 'create_search_service', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('search private-endpoint-connection', search_private_endpoint_connections_sdk) as g:
         g.command('list', 'list_by_service')
@@ -62,8 +63,9 @@ def load_command_table(self, _):
         g.command('list', 'list_by_service')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('create', 'create_shared_private_link_resource')
-        g.custom_command('update', 'update_shared_private_link_resource')
+        g.custom_command('create', 'create_shared_private_link_resource', supports_no_wait=True)
+        g.custom_command('update', 'update_shared_private_link_resource', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('search admin-key', search_admin_keys_sdk) as g:
         g.show_command('show', 'get')
@@ -74,5 +76,5 @@ def load_command_table(self, _):
         g.command('create', 'create')
         g.command('delete', 'delete')
 
-    with self.command_group('search', is_preview=True):
+    with self.command_group('search'):
         pass

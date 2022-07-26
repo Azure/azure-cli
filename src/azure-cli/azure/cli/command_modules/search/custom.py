@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
+from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 logger = get_logger(__name__)
 
@@ -16,7 +18,8 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 
 
 def create_search_service(cmd, resource_group_name, search_service_name, sku, location=None, partition_count=0,
-                          replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None):
+                          replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None,
+                          hosting_mode="default", no_wait=False):
     """
     Creates a Search service in the given resource group.
 
@@ -29,8 +32,10 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     :param public_network_access: Public accessibility to the search service;
                                   allowed values are "enabled" or "disabled".
     :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma or semicolon;
-                     These IP rules are applicable only when public_network_access is "enabled".
+                     these IP rules are applicable only when --public-network-access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
+    :param hosting_mode: The hosting mode; possible values include: "default", "highDensity";
+                     Note that "highDensity" is only applicable to the standard3 SKU.
     """
     from azure.mgmt.search.models import SearchService, Sku, NetworkRuleSet, IpRule, Identity
     from azure.cli.command_modules.search._client_factory import cf_search_services
@@ -49,8 +54,16 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     if partition_count > 0:
         _search.partition_count = partition_count
     if (public_network_access.lower() not in ["enabled", "disabled"]):
-        raise ValueError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+        raise UnrecognizedArgumentError(
+            "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+    if (hosting_mode not in ["default", "highDensity"]):
+        raise UnrecognizedArgumentError(
+            "SearchService.HostingMode: only [""default"", ""highDensity""] are allowed")
+    if (hosting_mode == "highDensity" and sku.lower() != "standard3"):
+        raise UnrecognizedArgumentError(
+            "SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
     _search.public_network_access = public_network_access
+    _search.hosting_mode = hosting_mode
 
     if ip_rules:
         _ip_rules = []
@@ -63,7 +76,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
         _identity = Identity(type=identity_type)
         _search.identity = _identity
 
-    return _client.begin_create_or_update(resource_group_name, search_service_name, _search)
+    return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name, search_service_name, _search)
 
 
 def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
@@ -76,7 +89,7 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
     :param public_network_access: Public accessibility to the search service;
                                   allowed values are "enabled" or "disabled".
     :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma(',') or
-                     semicolon(';'); If spaces (ex - ' '), ',' or ';' is provided, any existing IP rule will be
+                     semicolon(';'); If spaces (' '), ',' or ';' is provided, any existing IP rule will be
                      nullified and no public IP rule is applied. These IP rules are applicable only when
                      public_network_access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
@@ -92,7 +105,8 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
         instance.partition_count = partition_count
     if public_network_access:
         if (public_network_access.lower() not in ["enabled", "disabled"]):
-            raise ValueError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+            raise UnrecognizedArgumentError(
+                "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
         instance.public_network_access = public_network_access
     if ip_rules:
         _ip_rules = []
@@ -117,8 +131,8 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
 
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.
-    :param private_endpoint_connection_name: Name of the private endpoint connection resource.
-        Ex - {the name of the private endpoint resource}.{guid}.
+    :param private_endpoint_connection_name: Name of the private endpoint connection resource;
+        for example: {the name of the private endpoint resource}.{guid}.
     :param private_link_service_connection_status: The updated status of the private endpoint connection resource.
         Possible values include: "Pending", "Approved", "Rejected", "Disconnected".
     :param private_link_service_connection_description: Custom description when updating
@@ -150,7 +164,8 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
 def create_shared_private_link_resource(cmd, resource_group_name, search_service_name,
                                         shared_private_link_resource_name, shared_private_link_resource_id,
                                         shared_private_link_resource_group_id,
-                                        shared_private_link_resource_request_message="Please approve"):
+                                        shared_private_link_resource_request_message="Please approve",
+                                        no_wait=False):
     """
     Create shared privatelink resources in a Search service in the given resource group.
 
@@ -158,9 +173,9 @@ def create_shared_private_link_resource(cmd, resource_group_name, search_service
     :param search_service_name: Name of the search service.
     :param shared_private_link_resource_name: Name of the shared private link resource.
     :param shared_private_link_resource_id: Fully qualified resource ID for the resource.
-        Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
+        for example: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
         {resourceProviderNamespace}/{resourceType}/{resourceName}.
-    :param shared_private_link_resource_group_id: The group id of the resource. Ex, blob, sql or vault.
+    :param shared_private_link_resource_group_id: The group id of the resource; for example: blob, sql or vault.
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
@@ -176,24 +191,25 @@ def create_shared_private_link_resource(cmd, resource_group_name, search_service
         request_message=shared_private_link_resource_request_message
     )
 
-    return _client.begin_create_or_update(resource_group_name, search_service_name, shared_private_link_resource_name,
-                                          _shared_private_link_resource)
+    return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name,
+                       search_service_name, shared_private_link_resource_name, _shared_private_link_resource)
 
 
 def update_shared_private_link_resource(cmd, resource_group_name, search_service_name,
                                         shared_private_link_resource_name, shared_private_link_resource_id,
                                         shared_private_link_resource_group_id,
-                                        shared_private_link_resource_request_message):
+                                        shared_private_link_resource_request_message,
+                                        no_wait=False):
     """
     Update shared privatelink resources in a Search service in the given resource group.
 
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.
     :param shared_private_link_resource_name: Name of the shared private link resource.
-    :param shared_private_link_resource_id: Fully qualified resource ID for the resource.
-        Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
+    :param shared_private_link_resource_id: Fully qualified resource ID for the resource;
+        for example: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
         {resourceProviderNamespace}/{resourceType}/{resourceName}.
-    :param shared_private_link_resource_group_id: The group id of the resource. Ex, blob, sql or vault.
+    :param shared_private_link_resource_group_id: The group id of the resource; for example: blob, sql or vault.
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
@@ -209,5 +225,5 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
         request_message=shared_private_link_resource_request_message
     )
 
-    return _client.begin_create_or_update(resource_group_name, search_service_name, shared_private_link_resource_name,
-                                          _shared_private_link_resource)
+    return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name,
+                       search_service_name, shared_private_link_resource_name, _shared_private_link_resource)

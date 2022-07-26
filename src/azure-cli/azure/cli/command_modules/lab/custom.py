@@ -90,7 +90,8 @@ def create_environment(client, resource_group_name, lab_name, name, arm_template
 
     from azure.mgmt.devtestlabs.models import EnvironmentDeploymentProperties, DtlEnvironment
 
-    environment_deployment_properties = EnvironmentDeploymentProperties(arm_template, parameters)
+    environment_deployment_properties = EnvironmentDeploymentProperties(arm_template_id=arm_template,
+                                                                        parameters=parameters)
     dtl_environment = DtlEnvironment(tags=tags,
                                      deployment_properties=environment_deployment_properties)
 

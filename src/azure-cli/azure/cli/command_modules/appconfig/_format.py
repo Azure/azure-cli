@@ -14,6 +14,10 @@ def configstore_output_format(result):
     return _output_format(result, _configstore_format_group)
 
 
+def deleted_configstore_output_format(result):
+    return _output_format(result, _deleted_configstore_format_group)
+
+
 def configstore_identity_format(result):
     return _output_format(result, _configstore_identity_format_group)
 
@@ -57,7 +61,19 @@ def _configstore_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
         ('RESOURCE GROUP', _get_value(item, 'resourceGroup')),
-        ('SKU', sku)
+        ('SKU', sku),
+        ('PURGE PROTECTION', 'ENABLED' if _get_value(item, 'enablePurgeProtection').lower() == 'true' else 'DISABLED'),
+        ('SOFT DELETE RETENTION PERIOD', _get_value(item, 'softDeleteRetentionInDays') + ' DAYS')
+    ])
+
+
+def _deleted_configstore_format_group(item):
+    return OrderedDict([
+        ('DELETION DATE', _format_datetime(_get_value(item, 'deletionDate'))),
+        ('LOCATION', _get_value(item, 'location')),
+        ('NAME', _get_value(item, 'name')),
+        ('PURGE PROTECTION', 'ENABLED' if _get_value(item, 'purgeProtectionEnabled').lower() == 'true' else 'DISABLED'),
+        ('SCHEDULED PURGE DATE', _format_datetime(_get_value(item, 'scheduledPurgeDate')))
     ])
 
 

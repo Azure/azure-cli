@@ -29,13 +29,9 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Creating')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
-        for i in range(10):
-            time.sleep(15)
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
+        account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
 
@@ -59,14 +55,9 @@ class CognitiveServicesByoxTests(ScenarioTest):
         self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Creating')])
+                         self.check('sku.name', '{sku}')])
 
-        for i in range(10):
-            time.sleep(15)  # when generating recording, use a large value such as 15
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
+        account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
 
         self.assertEqual(self.cmd('az cognitiveservices account identity show -n {sname} -g {rg}').get_output_in_json(), {})
 

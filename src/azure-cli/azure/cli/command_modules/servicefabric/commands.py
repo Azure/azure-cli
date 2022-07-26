@@ -11,8 +11,13 @@ from ._client_factory import (servicefabric_clusters_client_factory,
                               servicefabric_application_type_version_client_factory,
                               servicefabric_application_client_factory,
                               servicefabric_service_client_factory,
-                              servicefabric_managed_clusters_client_factory,
-                              servicefabric_node_types_client_factory)
+                              servicefabric_managed_client_factory_all,
+                              servicefabric_managed_cluster_client_factory,
+                              servicefabric_managed_node_type_client_factory,
+                              servicefabric_managed_application_type_client_factory,
+                              servicefabric_managed_application_type_version_client_factory,
+                              servicefabric_managed_application_client_factory,
+                              servicefabric_managed_service_client_factory)
 
 
 # pylint: disable=too-many-statements
@@ -52,8 +57,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_cluster')
         g.custom_command('create', 'new_cluster')
-        g.custom_command('certificate add', 'add_cluster_cert')
-        g.custom_command('certificate remove', 'remove_cluster_cert')
         g.custom_command('client-certificate add', 'add_client_cert')
         g.custom_command('client-certificate remove', 'remove_client_cert')
         g.custom_command('setting set', 'set_cluster_setting')
@@ -71,21 +74,21 @@ def load_command_table(self, _):
     with self.command_group('sf application-type', application_type_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app_type')
 
     with self.command_group('sf application-type version', application_type_version_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app_type_version')
 
     with self.command_group('sf application', application_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app')
         g.custom_command('update', 'update_app')
@@ -93,39 +96,64 @@ def load_command_table(self, _):
     with self.command_group('sf service', service_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_service')
 
-    with self.command_group('sf', is_preview=False):
+    with self.command_group('sf'):
         pass
 
     # Managed clusters
 
     managed_cluster_custom_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.servicefabric.operations.managed_clusters#{}',
-        client_factory=servicefabric_client_factory_all
+        client_factory=servicefabric_managed_client_factory_all
     )
 
     managed_cluster_mgmt = CliCommandType(
-        operations_tmpl='azure.mgmt.servicefabric.operations#ManagedClustersOperations.{}',
-        client_factory=servicefabric_managed_clusters_client_factory
+        operations_tmpl='azure.mgmt.servicefabricmanagedclusters.operations#ManagedClustersOperations.{}',
+        client_factory=servicefabric_managed_cluster_client_factory
     )
 
     managed_node_type_custom_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.servicefabric.operations.managed_node_types#{}',
-        client_factory=servicefabric_client_factory_all
+        client_factory=servicefabric_managed_client_factory_all
     )
 
     node_type_mgmt = CliCommandType(
-        operations_tmpl='azure.mgmt.servicefabric.operations#NodeTypesOperations.{}',
-        client_factory=servicefabric_node_types_client_factory
+        operations_tmpl='azure.mgmt.servicefabricmanagedclusters.operations#NodeTypesOperations.{}',
+        client_factory=servicefabric_managed_node_type_client_factory
     )
 
-    with self.command_group('sf managed-cluster', managed_cluster_mgmt, is_preview=True,
+    managed_application_type_mgmt = CliCommandType(
+        operations_tmpl='azure.mgmt.servicefabricmanagedclusters.operations#ApplicationTypesOperations.{}',
+        client_factory=servicefabric_managed_application_type_client_factory
+    )
+
+    managed_application_type_version_mgmt = CliCommandType(
+        operations_tmpl='azure.mgmt.servicefabricmanagedclusters.operations#ApplicationTypeVersionsOperations.{}',
+        client_factory=servicefabric_managed_application_type_version_client_factory
+    )
+
+    managed_application_mgmt = CliCommandType(
+        operations_tmpl='azure.mgmt.servicefabricmanagedclusters.operations#ApplicationsOperations.{}',
+        client_factory=servicefabric_managed_application_client_factory
+    )
+
+    managed_service_mgmt = CliCommandType(
+        operations_tmpl='azure.mgmt.servicefabricmanagedclusters.operations#ServicesOperations.{}',
+        client_factory=servicefabric_managed_service_client_factory
+    )
+
+    managed_application_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicefabric.operations.managed_applications#{}',
+        client_factory=servicefabric_managed_client_factory_all
+    )
+
+    with self.command_group('sf managed-cluster', managed_cluster_mgmt,
                             custom_command_type=managed_cluster_custom_type) as g:
         g.custom_command('list', 'list_clusters')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_cluster')
         g.custom_command('update', 'update_cluster')
@@ -135,10 +163,10 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_client_cert')
         g.custom_command('delete', 'delete_client_cert')
 
-    with self.command_group('sf managed-node-type', node_type_mgmt, is_preview=True,
+    with self.command_group('sf managed-node-type', node_type_mgmt,
                             custom_command_type=managed_node_type_custom_type) as g:
         g.command('list', 'list_by_managed_clusters')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_node_type')
         g.custom_command('update', 'update_node_type')
@@ -157,3 +185,47 @@ def load_command_table(self, _):
     with self.command_group('sf managed-node-type vm-secret', node_type_mgmt,
                             custom_command_type=managed_node_type_custom_type) as g:
         g.custom_command('add', 'add_vm_secret')
+
+    with self.command_group('sf managed-application-type', managed_application_type_mgmt,
+                            custom_command_type=managed_application_custom_type) as g:
+        g.command('list', 'list')
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_app_type')
+        g.custom_command('update', 'update_app_type')
+
+    with self.command_group('sf managed-application-type version', managed_application_type_version_mgmt,
+                            custom_command_type=managed_application_custom_type) as g:
+        g.command('list', 'list_by_application_types')
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_app_type_version')
+        g.custom_command('update', 'update_app_type_version')
+
+    with self.command_group('sf managed-application', managed_application_mgmt,
+                            custom_command_type=managed_application_custom_type) as g:
+        g.command('list', 'list')
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_app')
+        g.custom_command('update', 'update_app')
+
+    with self.command_group('sf managed-service', managed_service_mgmt,
+                            custom_command_type=managed_application_custom_type) as g:
+        g.command('list', 'list_by_applications')
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_service')
+        g.custom_command('update', 'update_service')
+
+    with self.command_group('sf managed-service correlation-scheme', managed_service_mgmt,
+                            custom_command_type=managed_application_custom_type) as g:
+        g.custom_command('create', 'create_service_correlation')
+        g.custom_command('update', 'update_service_correlation')
+        g.custom_command('delete', 'delete_service_correlation')
+
+    with self.command_group('sf managed-service load-metrics', managed_service_mgmt,
+                            custom_command_type=managed_application_custom_type) as g:
+        g.custom_command('create', 'create_service_load_metric')
+        g.custom_command('update', 'update_service_load_metric')
+        g.custom_command('delete', 'delete_service_load_metric')

@@ -28,6 +28,56 @@ acr helm show:
     chart:
       rule_exclusions:
       - no_positional_parameters
+acr manifest delete:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-referrers:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-metadata:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata list:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata update:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show-metadata:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest update-metadata:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr pack build:
   parameters:
     source_location:
@@ -121,6 +171,9 @@ acs create:
       rule_exclusions:
       - option_length_too_long
     master_vnet_subnet_id:
+      rule_exclusions:
+      - option_length_too_long
+    master_pod_subnet_id:
       rule_exclusions:
       - option_length_too_long
 acs kubernetes install-cli:
@@ -223,6 +276,9 @@ aks create:
     enable_node_public_ip:
       rule_exclusions:
       - option_length_too_long
+    node_public_ip_prefix_id:
+      rule_exclusions:
+        - option_length_too_long
     enable_private_cluster:
       rule_exclusions:
       - option_length_too_long
@@ -253,12 +309,24 @@ aks create:
     workspace_resource_id:
       rule_exclusions:
       - option_length_too_long
+    enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
+      rule_exclusions:
+      - option_length_too_long
+    enable_encryption_at_host:
+      rule_exclusions:
+      - option_length_too_long
+    assign_kubelet_identity:
       rule_exclusions:
       - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
+      rule_exclusions:
+      - option_length_too_long
+    enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -269,6 +337,12 @@ aks install-cli:
 aks nodepool add:
   parameters:
     enable_node_public_ip:
+      rule_exclusions:
+      - option_length_too_long
+    node_public_ip_prefix_id:
+      rule_exclusions:
+      - option_length_too_long
+    enable_encryption_at_host:
       rule_exclusions:
       - option_length_too_long
 aks update:
@@ -292,6 +366,9 @@ aks update:
       rule_exclusions:
       - option_length_too_long
     load_balancer_outbound_ports:
+      rule_exclusions:
+      - option_length_too_long
+    enable_managed_identity:
       rule_exclusions:
       - option_length_too_long
 aks update-credentials:
@@ -759,6 +836,9 @@ backup recoverypoint list:
     backup_management_type:
       rule_exclusions:
       - option_length_too_long
+    recommended_for_archive:
+      rule_exclusions:
+      - option_length_too_long
 backup recoverypoint show:
   parameters:
     backup_management_type:
@@ -787,6 +867,9 @@ backup restore restore-disks:
     restore_to_staging_storage_account:
       rule_exclusions:
       - option_length_too_long
+    target_vnet_resource_group:
+      rule_exclusions:
+      - option_length_too_long
 backup vault backup-properties set:
   parameters:
     backup_storage_redundancy:
@@ -796,6 +879,14 @@ backup vault backup-properties set:
       rule_exclusions:
       - option_length_too_long
     cross_region_restore_flag:
+      rule_exclusions:
+      - option_length_too_long
+    hybrid_backup_security_features:
+      rule_exclusions:
+      - option_length_too_long
+backup vault encryption update:
+  parameters:
+    infrastructure_encryption:
       rule_exclusions:
       - option_length_too_long
 batch account create:
@@ -1326,6 +1417,16 @@ cosmosdb update:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+cosmosdb database:
+  parameters:
+    db_resource_group_name:
+      rule_exclusions:
+        - parameter_should_not_end_in_resource_group
+cosmosdb collection:
+  parameters:
+    db_resource_group_name:
+      rule_exclusions:
+        - parameter_should_not_end_in_resource_group
 deploymentmanager service create:
   parameters:
     service_topology_name:
@@ -1403,6 +1504,9 @@ disk create:
       rule_exclusions:
       - option_length_too_long
     source_storage_account_id:
+      rule_exclusions:
+      - option_length_too_long
+    secure_vm_disk_encryption_set:
       rule_exclusions:
       - option_length_too_long
 disk update:
@@ -1615,6 +1719,9 @@ eventgrid event-subscription create:
     preferred_batch_size_in_kilobytes:
       rule_exclusions:
       - option_length_too_long
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid event-subscription show:
   parameters:
     include_full_endpoint_url:
@@ -1634,6 +1741,9 @@ eventgrid event-subscription update:
     endpoint_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid partner namespace create:
   parameters:
     partner_registration_id:
@@ -1644,12 +1754,13 @@ eventgrid partner namespace event-channel create:
     activation_expiration_date:
       rule_exclusions:
       - option_length_too_long
-    desination_topic_name:
+    destination_topic_name:
       rule_exclusions:
       - option_length_too_long
     destination_resource_group_name:
       rule_exclusions:
       - option_length_too_long
+      - parameter_should_not_end_in_resource_group
     destination_subscription_id:
       rule_exclusions:
       - option_length_too_long
@@ -1715,6 +1826,9 @@ eventgrid partner topic event-subscription create:
     preferred_batch_size_in_kilobytes:
       rule_exclusions:
       - option_length_too_long
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid partner topic event-subscription show:
   parameters:
     include_full_endpoint_url:
@@ -1725,6 +1839,9 @@ eventgrid partner topic event-subscription update:
     endpoint_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid system-topic event-subscription create:
   parameters:
     azure_active_directory_application_id_or_uri:
@@ -1745,6 +1862,9 @@ eventgrid system-topic event-subscription create:
     preferred_batch_size_in_kilobytes:
       rule_exclusions:
       - option_length_too_long
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid system-topic event-subscription show:
   parameters:
     include_full_endpoint_url:
@@ -1755,6 +1875,9 @@ eventgrid system-topic event-subscription update:
     endpoint_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    delivery_attribute_mapping:
+      rule_exclusions:
+      - option_length_too_long
 eventgrid topic create:
   parameters:
     input_mapping_default_values:
@@ -1954,6 +2077,9 @@ iot dps linked-hub create:
     apply_allocation_policy:
       rule_exclusions:
       - option_length_too_long
+    hub_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 iot dps linked-hub update:
   parameters:
     apply_allocation_policy:
@@ -1974,6 +2100,11 @@ iot hub policy list:
 iot hub route list:
   rule_exclusions:
   - no_ids_for_list_commands
+iot hub routing-endpoint create:
+  parameters:
+    endpoint_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 iot hub routing-endpoint list:
   rule_exclusions:
   - no_ids_for_list_commands
@@ -2340,6 +2471,11 @@ network lb address-pool create:
     backend_addresses_config_file:
       rule_exclusions:
       - option_length_too_long
+network lb address-pool update:
+  parameters:
+    backend_addresses_config_file:
+      rule_exclusions:
+      - option_length_too_long
 network lb create:
   parameters:
     private_ip_address_version:
@@ -2365,6 +2501,22 @@ network lb inbound-nat-pool create:
       rule_exclusions:
       - option_length_too_long
 network lb inbound-nat-pool update:
+  parameters:
+    frontend_port_range_end:
+      rule_exclusions:
+      - option_length_too_long
+    frontend_port_range_start:
+      rule_exclusions:
+      - option_length_too_long
+network lb inbound-nat-rule create:
+  parameters:
+    frontend_port_range_end:
+      rule_exclusions:
+      - option_length_too_long
+    frontend_port_range_start:
+      rule_exclusions:
+      - option_length_too_long
+network lb inbound-nat-rule update:
   parameters:
     frontend_port_range_end:
       rule_exclusions:
@@ -3548,6 +3700,9 @@ vmss create:
     automatic_repairs_grace_period:
       rule_exclusions:
       - option_length_too_long
+    automatic_repairs_action:
+      rule_exclusions:
+      - option_length_too_long
     data_disk_encryption_sets:
       rule_exclusions:
       - option_length_too_long
@@ -3603,6 +3758,9 @@ vmss update:
       rule_exclusions:
       - option_length_too_long
     enable_automatic_repairs:
+      rule_exclusions:
+      - option_length_too_long
+    automatic_repairs_action:
       rule_exclusions:
       - option_length_too_long
     enable_terminate_notification:

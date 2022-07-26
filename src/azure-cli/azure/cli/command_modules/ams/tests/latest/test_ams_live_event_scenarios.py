@@ -378,7 +378,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['crossDomainPolicy'])
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['clientAccessPolicy'])
-
+    
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_show(self, storage_account_for_create):
@@ -424,7 +424,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_live_event_name': nonexits_live_event_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams live-event show -a {amsname} -n {nonexits_live_event_name} -g {rg}')
 
         self.cmd('az ams live-event delete -a {amsname} -n {liveEventName} -g {rg}')

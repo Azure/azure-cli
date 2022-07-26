@@ -29,7 +29,8 @@ from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyCle
                                      ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader,
                                      ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier,
                                      ContentKeyPolicyPlayReadyPlayRight,
-                                     ContentKeyPolicyPlayReadyExplicitAnalogTelevisionRestriction)
+                                     ContentKeyPolicyPlayReadyExplicitAnalogTelevisionRestriction,
+                                     ContentKeyPolicy)
 
 
 def create_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
@@ -51,8 +52,9 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                                         rental_and_lease_key_type, rental_duration, play_ready_template,
                                                         fp_playback_duration_seconds, fp_storage_duration_seconds)
 
+    parameters = ContentKeyPolicy(description=description, options=[policy_option])
     return client.create_or_update(resource_group_name, account_name,
-                                   content_key_policy_name, [policy_option], description)
+                                   content_key_policy_name, parameters)
 
 
 def show_content_key_policy(client, resource_group_name, account_name, content_key_policy_name,
@@ -111,8 +113,9 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
 
     options.append(policy_option)
 
+    parameters = ContentKeyPolicy(options=options, description=policy.description)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, options, policy.description)
+                         content_key_policy_name, parameters)
 
 
 def remove_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -128,8 +131,9 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
 
     policy.options = list(filter(lambda option: option.policy_option_id != policy_option_id, policy.options))
 
+    parameters = ContentKeyPolicy(options=policy.options)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, policy.options)
+                         content_key_policy_name, parameters)
 
 
 def update_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -225,14 +229,16 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
         if play_ready_template is not None and _valid_playready_configuration(play_ready_template):
             _play_ready_configuration_factory(json.loads(play_ready_template))
 
+    parameters = ContentKeyPolicy(options=policy.options, description=policy.description)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, policy.options, policy.description)
+                         content_key_policy_name, parameters)
 
 
 def update_content_key_policy_setter(client, resource_group_name, account_name, content_key_policy_name,
                                      parameters):
+    params = ContentKeyPolicy(description=parameters.description, options=parameters.options)
     return client.update(resource_group_name, account_name,
-                         content_key_policy_name, parameters.options, parameters.description)
+                         content_key_policy_name, params)
 
 
 def update_content_key_policy(instance, description=None):

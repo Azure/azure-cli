@@ -112,7 +112,7 @@ def cloud_storage_account_service_factory(cli_ctx, kwargs):
 
 def multi_service_properties_factory(cli_ctx, kwargs):
     """Create multiple data services properties instance based on the services option"""
-    from .services_wrapper import ServiceProperties
+    from .services_wrapper_azure_stack import ServiceProperties
 
     t_base_blob_service, t_file_service, t_queue_service, = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                                                     'blob.baseblobservice#BaseBlobService',

@@ -264,6 +264,10 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2
                 resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p7/foo",
                 change_type=ChangeType.delete,
             ),
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p8/foo",
+                change_type=ChangeType.unsupported,
+            ),
         ]
 
         expected = f"""
@@ -275,6 +279,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
   + p2/foo{Color.RESET}{Color.BLUE}
   ! p4/foo{Color.RESET}{Color.RESET}
   = p3/foo{Color.RESET}{Color.GRAY}
+  x p8/foo{Color.RESET}{Color.GRAY}
   * p1/foo
 {Color.RESET}"""
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes))
@@ -350,6 +355,21 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                         after="bar",
                     ),
                     WhatIfPropertyChange(
+                        path="path.a.to.change2",
+                        property_change_type=PropertyChangeType.modify,
+                        before={
+                            "tag1": "value"
+                        },
+                        after={
+                            "tag2": "value"
+                        },
+                    ),
+                    WhatIfPropertyChange(
+                        path="path.a.to.change3",
+                        property_change_type=PropertyChangeType.no_effect,
+                        after=12345,
+                    ),
+                    WhatIfPropertyChange(
                         path="path.b.to.nested.change",
                         property_change_type=PropertyChangeType.array,
                         children=[
@@ -383,7 +403,15 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 {Color.PURPLE}
   ~ p1/foo{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} path.a.to.change{Color.RESET}:{Color.RESET} {Color.ORANGE}"foo"{Color.RESET} => {Color.GREEN}"bar"{Color.RESET}
+    {Color.PURPLE}~{Color.RESET} path.a.to.change{Color.RESET}:{Color.RESET}  {Color.ORANGE}"foo"{Color.RESET} => {Color.GREEN}"bar"{Color.RESET}
+    {Color.PURPLE}~{Color.RESET} path.a.to.change2{Color.RESET}:{Color.RESET}{Color.ORANGE}
+
+        tag1{Color.RESET}:{Color.ORANGE} "value"
+{Color.RESET}
+      =>{Color.GREEN}
+
+        tag2{Color.RESET}:{Color.GREEN} "value"
+{Color.RESET}
     {Color.PURPLE}~{Color.RESET} path.b.to.nested.change{Color.RESET}:{Color.RESET} [
       {Color.PURPLE}~{Color.RESET} 4{Color.RESET}:{Color.RESET}
 
@@ -395,6 +423,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
       {Color.ORANGE}-{Color.RESET} 5{Color.RESET}:{Color.RESET} {Color.ORANGE}12345{Color.RESET}
       ]
+    {Color.GRAY}x{Color.RESET} path.a.to.change3{Color.RESET}:{Color.RESET} {Color.GRAY}12345{Color.RESET}
 {Color.PURPLE}{Color.RESET}"""
 
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes))

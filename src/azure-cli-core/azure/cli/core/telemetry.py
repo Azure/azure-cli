@@ -14,8 +14,8 @@ import traceback
 import uuid
 from collections import defaultdict
 from functools import wraps
-
-import azure.cli.core.decorators as decorators
+from knack.util import CLIError
+from azure.cli.core import decorators
 
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
@@ -45,6 +45,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.module_correlation = None
         self.extension_name = None
         self.extension_version = None
+        self.event_id = str(uuid.uuid4())
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -105,7 +106,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
                 props.update(base)
                 props.update(cli)
                 props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
-                              'Reserved.EventId': str(uuid.uuid4())})
+                              'Reserved.EventId': self.event_id})
                 self.events[DEFAULT_INSTRUMENTATION_KEY].append({
                     'name': name,
                     'properties': props
@@ -117,7 +118,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def _get_base_properties(self):
         return {
             'Reserved.ChannelUsed': 'AI',
-            'Reserved.EventId': str(uuid.uuid4()),
+            'Reserved.EventId': self.event_id,
             'Reserved.SequenceNumber': 1,
             'Reserved.SessionId': _get_session_id(),
             'Reserved.TimeSinceSessionStart': 0,
@@ -527,7 +528,10 @@ def _get_hash_machine_id():
 @decorators.suppress_all_exceptions(fallback_return='')
 @decorators.hash256_result
 def _get_user_azure_id():
-    return _get_profile().get_current_account_user()
+    try:
+        return _get_profile().get_current_account_user()
+    except CLIError:
+        return ''
 
 
 def _get_env_string():
@@ -537,7 +541,10 @@ def _get_env_string():
 
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_azure_subscription_id():
-    return _get_profile().get_subscription_id()
+    try:
+        return _get_profile().get_subscription_id()
+    except CLIError:
+        return None
 
 
 def _get_shell_type():

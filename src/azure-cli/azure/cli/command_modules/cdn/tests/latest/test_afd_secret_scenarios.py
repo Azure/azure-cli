@@ -6,7 +6,10 @@ from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest, record_only
 from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
+from azure.core.exceptions import (HttpResponseError)
 
+
+# This tests relies on a specific subscription with existing resources
 class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_afd_secret_specific_version_crud(self, resource_group):
@@ -18,11 +21,20 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_secret_list_cmd(resource_group, profile_name, checks=list_checks)
 
-        # Create a secret
+        # Create a secret with expired certificate
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc/certificates/localdev-multi"
-        secret_version = "3528eb888f114c20930edbd56c7ed57c"
+        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
+        secret_version = "5f652542f6ef46ef9fc4ed8af07c54f1"
 
+        with self.assertRaisesRegexp(HttpResponseError, "The server \\(leaf\\) certificate isn't within the validity period"):
+            self.afd_secret_create_cmd(resource_group,
+                               profile_name,
+                               secret_name,
+                               secret_source,
+                               use_latest_version=False,
+                               secret_version=secret_version)
+
+        secret_version = "255adcc454844929a2f95c2aa3b6c61f"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,
@@ -44,17 +56,6 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('@[0].provisioningState', 'Succeeded')]
         self.afd_secret_list_cmd(resource_group, profile_name, checks=list_checks)
 
-        # Secret update is not supported in RP yet.
-        # update_checks = [JMESPathCheck('provisioningState', 'Succeeded'),
-        #                  JMESPathCheck('parameters.type', 'CustomerCertificate'),
-        #                  JMESPathCheck('parameters.secretVersion', None),
-        #                  JMESPathCheck('parameters.useLatestVersion', True)]
-        # self.afd_secret_update_cmd(resource_group,
-        #                            profile_name,
-        #                            secret_name,
-        #                            use_latest_version=True,
-        #                            checks=update_checks)
-
         # Delete the secret
         self.afd_secret_delete_cmd(resource_group, profile_name, secret_name)
         list_checks = [JMESPathCheck('length(@)', 0)]
@@ -70,8 +71,8 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc/certificates/localdev-multi"
-        latest_version = "8191a537d089481d91f20dc0b1e59e0a"
+        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
+        latest_version = "255adcc454844929a2f95c2aa3b6c61f"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,
@@ -84,7 +85,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         show_checks = [JMESPathCheck('name', secret_name),
                        JMESPathCheck('provisioningState', 'Succeeded'),
                        JMESPathCheck('parameters.type', 'CustomerCertificate'),
-                       JMESPathCheck('parameters.secretSource.id', secret_source),
+                       JMESPathCheck('parameters.secretSource.id', secret_source, False),
                        JMESPathCheck('parameters.secretVersion', latest_version),
                        JMESPathCheck('parameters.useLatestVersion', True)]
         self.afd_secret_show_cmd(resource_group, profile_name, secret_name, checks=show_checks)

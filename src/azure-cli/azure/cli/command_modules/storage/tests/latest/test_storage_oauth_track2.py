@@ -86,13 +86,13 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_lease_oauth(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
+    def test_storage_blob_lease_oauth(self, resource_group, storage_account_info):
+        storage_account, account_key = storage_account_info
         self.kwargs.update({
             'rg': resource_group,
             'sa': storage_account,
             'local_file': self.create_temp_file(128),
-            'c': self.create_container(account_info),
+            'c': self.create_container(storage_account_info),
             'b': self.create_random_name('blob', 24),
             'proposed_lease_id': 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd',
             'new_lease_id': 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba',
@@ -130,13 +130,13 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_show_oauth(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
+    def test_storage_blob_show_oauth(self, resource_group, storage_account_info):
+        storage_account, account_key = storage_account_info
 
         self.kwargs.update({
             'rg': resource_group,
             'account': storage_account,
-            'container': self.create_container(account_info=account_info),
+            'container': self.create_container(account_info=storage_account_info),
             'local_file': self.create_temp_file(128),
             'block': self.create_random_name(prefix='block', length=12),
             'page': self.create_random_name(prefix='page', length=12),
@@ -242,14 +242,39 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.pageRanges', None))
 
     @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
+    def test_storage_queue_oauth_track2(self, resource_group, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'queue_name': self.create_random_name(prefix='queue', length=24),
+        })
+
+        # Test create oauth
+        self.oauth_cmd('storage queue create -n {queue_name} --metadata key1=value1 --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        # Test exists oauth
+        self.oauth_cmd('storage queue exists -n {queue_name} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        # Test stats oauth
+        queue_status = self.oauth_cmd('storage queue stats --account-name {account} ').get_output_in_json()
+        self.assertIn(queue_status['geoReplication']['status'], ('live', 'unavailable'))
+
+        # Test delete oauth
+        self.oauth_cmd('storage queue delete -n {queue_name} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('deleted', True))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
-    def test_storage_blob_list_oauth(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
+    def test_storage_blob_list_oauth(self, resource_group, storage_account_info):
+        storage_account, account_key = storage_account_info
 
         self.kwargs.update({
             'rg': resource_group,
             'account': storage_account,
-            'container': self.create_container(account_info=account_info),
+            'container': self.create_container(account_info=storage_account_info),
             'local_file': self.create_temp_file(128),
             'blob_name1': "/".join(["dir", self.create_random_name(prefix='blob', length=24)]),
             'blob_name2': "/".join(["dir", self.create_random_name(prefix='blob', length=24)])
@@ -356,11 +381,11 @@ class StorageBlobSetTierOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2', sku='Premium_LRS')
-    def test_storage_page_blob_set_tier_oauth(self, resource_group, storage_account):
+    def test_storage_page_blob_set_tier_oauth(self, resource_group, storage_account_info):
 
         source_file = self.create_temp_file(16)
-        account_info = self.get_account_info(resource_group, storage_account)
-        container_name = self.create_container(account_info)
+        storage_account, account_key = storage_account_info
+        container_name = self.create_container(storage_account_info)
         blob_name = self.create_random_name(prefix='blob', length=24)
 
         self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" -t page --tier P10 --account-name {} '.format(
@@ -381,11 +406,11 @@ class StorageBlobSetTierOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2')
-    def test_storage_block_blob_set_tier_oauth(self, resource_group, storage_account):
+    def test_storage_block_blob_set_tier_oauth(self, resource_group, storage_account_info):
 
         source_file = self.create_temp_file(16)
-        account_info = self.get_account_info(resource_group, storage_account)
-        container_name = self.create_container(account_info)
+        storage_account, account_key = storage_account_info
+        container_name = self.create_container(storage_account_info)
 
         # test rehydrate from Archive to Cool by High priority
         blob_name = self.create_random_name(prefix='blob', length=24)

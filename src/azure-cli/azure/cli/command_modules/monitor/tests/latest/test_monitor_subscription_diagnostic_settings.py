@@ -11,11 +11,17 @@ class TestDiagnosticSettingsSubscriptionScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
     def test_monitor_diagnostic_settings_subscription(self, resource_group, storage_account):
+        from msrestazure.tools import resource_id
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20),
-            'ws': self.create_random_name('cliws', 20)
+            'ws': self.create_random_name('cliws', 20),
+            'storage': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
         })
-        self.kwargs['storage'] = self.cmd('storage account show -n {sa} -g {rg} --query id -otsv').output.strip()
         self.kwargs['log_config'] = json.dumps([
             {
                 "category": "Security",

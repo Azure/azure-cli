@@ -3,15 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+
 from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
 UPGRADE_MSG = 'Not able to upgrade automatically. Instructions can be found at https://aka.ms/doc/InstallAzureCli'
+SECRET_STORE_DEMO = "secret_store_demo"
 
 
 def rest_call(cmd, url, method=None, headers=None, uri_parameters=None,
               body=None, skip_authorization_header=False, resource=None, output_file=None):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    # No transform should be performed on `az rest`.
+    unregister_global_transforms(cmd.cli_ctx)
+
     from azure.cli.core.util import send_raw_request
     r = send_raw_request(cmd.cli_ctx, method, url, headers, uri_parameters, body,
                          skip_authorization_header, resource, output_file)
@@ -32,22 +40,20 @@ def show_version(cmd):  # pylint: disable=unused-argument
 
 
 def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
-    import os
     import platform
     import sys
     import subprocess
-    import azure.cli.core.telemetry as telemetry
+    from azure.cli.core import telemetry
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.extension import get_extensions, WheelExtension
-    from distutils.version import LooseVersion
-    from knack.util import CLIError
+    from packaging.version import parse
 
     update_cli = True
     from azure.cli.core.util import get_latest_from_github
     try:
         latest_version = get_latest_from_github()
-        if latest_version and LooseVersion(latest_version) <= LooseVersion(local_version):
+        if latest_version and parse(latest_version) <= parse(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
             if not update_all:
@@ -131,8 +137,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
-            logger.debug("Update azure cli with MSI from https://aka.ms/installazurecliwindows")
-            exit_code = subprocess.call(['powershell.exe', '-NoProfile', "Start-Process msiexec.exe -Wait -ArgumentList '/i https://aka.ms/installazurecliwindows'"])  # pylint: disable=line-too-long
+            exit_code = _upgrade_on_windows()
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
@@ -141,20 +146,23 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         telemetry.set_failure(err_msg)
         sys.exit(exit_code)
 
-    import azure.cli.core
+    # Avoid using python modules directly as they may have been changed due to upgrade.
+    # If you do need to use them, you may need to reload them and their dependent modules.
+    # Otherwise you may have such issue https://github.com/Azure/azure-cli/issues/16952
     import importlib
-    importlib.reload(azure.cli.core)
-    new_version = azure.cli.core.__version__
+    import json
+    importlib.reload(subprocess)
+    importlib.reload(json)
+
+    version_result = subprocess.check_output(['az', 'version', '-o', 'json'], shell=platform.system() == 'Windows')
+    version_json = json.loads(version_result)
+    new_version = version_json['azure-cli-core']
 
     if update_cli and new_version == local_version:
         err_msg = "CLI upgrade failed or aborted."
         logger.warning(err_msg)
         telemetry.set_failure(err_msg)
         sys.exit(1)
-
-    # Python is reinstalled in another versioned directory with Homebrew, subprocess needs to be reloaded
-    if installer == 'HOMEBREW' and exts:
-        importlib.reload(subprocess)
 
     if exts:
         logger.warning("Upgrading extensions")
@@ -172,9 +180,55 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                    else auto_upgrade_msg)
 
 
+def _upgrade_on_windows():
+    """Download MSI to a temp folder and install it with msiexec.exe.
+    Directly installing from URL may be blocked by policy: https://github.com/Azure/azure-cli/issues/19171
+    This also gives the user a chance to manually install the MSI in case of msiexec.exe failure.
+    """
+    logger.warning("Updating Azure CLI with MSI from https://aka.ms/installazurecliwindows")
+    tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
+
+    logger.warning("Installing MSI")
+    import subprocess
+    exit_code = subprocess.call(['msiexec.exe', '/i', msi_path])
+
+    if exit_code:
+        logger.warning("Installation Failed. You may manually install %s", msi_path)
+    else:
+        from azure.cli.core.util import rmtree_with_retry
+        logger.warning("Succeeded. Deleting %s", tmp_dir)
+        rmtree_with_retry(tmp_dir)
+    return exit_code
+
+
+def _download_from_url(url):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    if r.status_code != 200:
+        raise CLIError("Request to {} failed with {}".format(url, r.status_code))
+
+    # r.url is the real path of the msi, like'https://azcliprod.blob.core.windows.net/msi/azure-cli-2.27.1.msi'
+    file_name = r.url.rsplit('/')[-1]
+    import tempfile
+    tmp_dir = tempfile.mkdtemp()
+    msi_path = os.path.join(tmp_dir, file_name)
+    logger.warning("Downloading MSI to %s", msi_path)
+
+    with open(msi_path, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            f.write(chunk)
+
+    # Return both the temp directory and MSI path, like
+    # 'C:\Users\<name>\AppData\Local\Temp\tmpzv4pelsf',
+    # 'C:\Users\<name>\AppData\Local\Temp\tmpzv4pelsf\azure-cli-2.27.1.msi'
+    return tmp_dir, msi_path
+
+
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text, format_styled_text
-    format_styled_text.theme = theme
+    if theme:
+        format_styled_text.theme = theme
     print_styled_text("[How to call print_styled_text]")
     # Print an empty line
     print_styled_text()
@@ -188,17 +242,17 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     print_styled_text()
 
     print_styled_text("[Available styles]\n")
-    placeholder = '{:19s}: {}\n'
+    placeholder = '████ {:8s}: {}\n'
     styled_text = [
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
-        (Style.SECONDARY, placeholder.format("Bright Black", "Secondary text color")),
-        (Style.IMPORTANT, placeholder.format("Bright/Dark Magent", "Important text color")),
+        (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
-            "Bright/Dark Blue", "Commands, parameters, and system inputs. (White in legacy powershell terminal.)")),
-        (Style.HYPERLINK, placeholder.format("Bright/Dark Cyan", "Hyperlink")),
-        (Style.ERROR, placeholder.format("Bright/Dark Red", "Error message indicator")),
-        (Style.SUCCESS, placeholder.format("Bright/Dark Green", "Success message indicator")),
-        (Style.WARNING, placeholder.format("Bright/Dark Yellow", "Warning message indicator")),
+            "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),
+        (Style.HYPERLINK, placeholder.format("Cyan", "Hyperlink")),
+        (Style.ERROR, placeholder.format("Red", "Error message indicator")),
+        (Style.SUCCESS, placeholder.format("Green", "Success message indicator")),
+        (Style.WARNING, placeholder.format("Yellow", "Warning message indicator")),
     ]
     print_styled_text(styled_text)
 
@@ -243,7 +297,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.ACTION, "--resource-group"),
         (Style.PRIMARY, " MyResourceGroup\n"),
         (Style.SECONDARY, "Create a storage account. For more detail, see "),
-        (Style.HYPERLINK, "https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?"
+        (Style.HYPERLINK, "https://docs.microsoft.com/azure/storage/common/storage-account-create?"
                           "tabs=azure-cli#create-a-storage-account-1"),
         (Style.SECONDARY, "\n"),
     ]
@@ -256,6 +310,30 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.PRIMARY, ". To switch to another subscription, run "),
         (Style.ACTION, "az account set --subscription"),
         (Style.PRIMARY, " <subscription ID>\n"),
-        (Style.WARNING, "WARNING: The subscription has been disabled!")
+        (Style.WARNING, "WARNING: The subscription has been disabled!\n")
     ]
     print_styled_text(styled_text)
+
+    print_styled_text("[logs]\n")
+
+    # Print logs
+    logger.debug("This is a debug log entry.")
+    logger.info("This is a info log entry.")
+    logger.warning("This is a warning log entry.")
+    logger.error("This is a error log entry.")
+    logger.critical("This is a critical log entry.")
+
+
+def secret_store_save(cmd, key_value):
+    data = dict(kv.split('=', 1) for kv in key_value)
+    from azure.cli.core.util import get_secret_store
+    store = get_secret_store(cmd.cli_ctx, SECRET_STORE_DEMO)
+    store.save(data)
+    logger.warning("Data written to %s: %s",
+                   store._persistence.get_location(), data)  # pylint: disable=protected-access
+
+
+def secret_store_load(cmd):
+    from azure.cli.core.util import get_secret_store
+    store = get_secret_store(cmd.cli_ctx, SECRET_STORE_DEMO)
+    return store.load()

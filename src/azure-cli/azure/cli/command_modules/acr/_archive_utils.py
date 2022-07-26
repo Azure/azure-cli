@@ -57,7 +57,9 @@ def upload_source_code(cmd, client,
     BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     BlockBlobService(account_name=account_name,
                      sas_token=sas_token,
-                     endpoint_suffix=endpoint_suffix).create_blob_from_path(
+                     endpoint_suffix=endpoint_suffix,
+                     # Increase socket timeout from default of 20s for clients with slow network connection.
+                     socket_timeout=300).create_blob_from_path(
                          container_name=container_name,
                          blob_name=blob_name,
                          file_path=tar_file_path)
@@ -126,6 +128,10 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
         if rule.startswith('!'):
             self.ignore = False
             rule = rule[1:]  # remove !
+            # load path without leading slash in linux and windows
+            # environments (interferes with dockerignore file)
+            if rule.startswith('/'):
+                rule = rule[1:]  # remove beginning '/'
 
         self.pattern = "^"
         tokens = rule.split('/')

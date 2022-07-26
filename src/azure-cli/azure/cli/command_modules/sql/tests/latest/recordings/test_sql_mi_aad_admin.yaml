@@ -1,49 +1,480 @@
 interactions:
 - request:
-    body: '{"location": "westeurope"}'
+    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "dmitar@aadsqlmi.net",
+      "sid": "03db4d3a-a1d3-42d1-8055-2452646dbc2a", "tenantId": "3312f4d4-a202-41eb-a696-5b3bc1c7ac36"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network route-table create
+      - sql mi ad-admin create
       Connection:
       - keep-alive
       Content-Length:
-      - '26'
+      - '187'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -l
+      - --mi -g -i -u
       User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DejanDuVnetRG/providers/Microsoft.Network/routeTables/vcCliTestRouteTableAad?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
-        ''DejanDuVnetRG'' could not be found."}}'
+      string: '{"operation":"UpdateActiveDirectoryAdministrator","startTime":"2021-07-26T06:10:45.297Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/2de9518b-19ed-41f2-a369-b1b48fb9190a?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '105'
+      - '89'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 21 Jan 2021 10:04:27 GMT
+      - Mon, 26 Jul 2021 06:10:45 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/2de9518b-19ed-41f2-a369-b1b48fb9190a?api-version=2020-11-01-preview
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
-      code: 404
-      message: Not Found
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -i -u
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/2de9518b-19ed-41f2-a369-b1b48fb9190a?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"2de9518b-19ed-41f2-a369-b1b48fb9190a","status":"Succeeded","startTime":"2021-07-26T06:10:45.297Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -i -u
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"administratorType":"ActiveDirectory","login":"dmitar@aadsqlmi.net","sid":"03db4d3a-a1d3-42d1-8055-2452646dbc2a","tenantId":"3312f4d4-a202-41eb-a696-5b3bc1c7ac36"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"administratorType":"ActiveDirectory","login":"dmitar@aadsqlmi.net","sid":"03db4d3a-a1d3-42d1-8055-2452646dbc2a","tenantId":"3312f4d4-a202-41eb-a696-5b3bc1c7ac36"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"administratorType": "ActiveDirectory", "login": "srdan@aadsqlmi.onmicrosoft.com",
+      "sid": "23716ccd-3bf5-4934-9773-20ce34909e2e", "tenantId": "3312f4d4-a202-41eb-a696-5b3bc1c7ac36"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '198'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"UpdateActiveDirectoryAdministrator","startTime":"2021-07-26T06:11:02.717Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '89'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"0b7dd855-e6fe-4b94-8f71-ad8c47b8a87c","status":"Succeeded","startTime":"2021-07-26T06:11:02.717Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g -u -i
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"administratorType":"ActiveDirectory","login":"srdan@aadsqlmi.onmicrosoft.com","sid":"23716ccd-3bf5-4934-9773-20ce34909e2e","tenantId":"3312f4d4-a202-41eb-a696-5b3bc1c7ac36"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/managedInstances/administrators"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '453'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators/ActiveDirectory?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"operation":"DropActiveDirectoryAdministrator","startTime":"2021-07-26T06:11:19.11Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/6c3ac037-f3cd-4e34-bcc5-e9084487ce88?api-version=2020-11-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '86'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:18 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorOperationResults/6c3ac037-f3cd-4e34-bcc5-e9084487ce88?api-version=2020-11-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/locations/westeurope/administratorAzureAsyncOperation/6c3ac037-f3cd-4e34-bcc5-e9084487ce88?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"name":"6c3ac037-f3cd-4e34-bcc5-e9084487ce88","status":"Succeeded","startTime":"2021-07-26T06:11:19.11Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi ad-admin list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --mi -g
+      User-Agent:
+      - AZURECLI/2.26.1 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (macOS-10.16-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/srbozovi_test/providers/Microsoft.Sql/managedInstances/migrantpermissionstest/administrators?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jul 2021 06:11:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

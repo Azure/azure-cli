@@ -13,12 +13,9 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
       string: ''
@@ -28,7 +25,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 24 Feb 2021 12:01:08 GMT
+      - Mon, 16 May 2022 06:11:15 GMT
       expires:
       - '-1'
       pragma:
@@ -41,6 +38,48 @@ interactions:
       code: 204
       message: No Content
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mariadb server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-16T06:11:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:11:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"name": "azuredbclitest000002", "type": "Microsoft.DBforMariaDB"}'
     headers:
       Accept:
@@ -52,18 +91,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '109'
+      - '66'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/checkNameAvailability?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMariaDB/checkNameAvailability?api-version=2018-06-01
   response:
     body:
       string: '{"nameAvailable":true,"message":""}'
@@ -75,7 +111,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:01:10 GMT
+      - Mon, 16 May 2022 06:11:17 GMT
       expires:
       - '-1'
       pragma:
@@ -111,34 +147,31 @@ interactions:
       Content-Length:
       - '247'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServer","startTime":"2021-02-24T12:01:15.563Z"}'
+      string: '{"operation":"UpsertElasticServer","startTime":"2022-05-16T06:11:25.82Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/dda3c6ba-1b43-48ef-bc30-aa65062bbd11?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/0123a985-a145-4674-b826-00310461be00?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
-      - '74'
+      - '73'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:01:16 GMT
+      - Mon, 16 May 2022 06:11:26 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/operationResults/dda3c6ba-1b43-48ef-bc30-aa65062bbd11?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/operationResults/0123a985-a145-4674-b826-00310461be00?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -148,7 +181,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1170'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -156,7 +189,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -166,22 +199,67 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/dda3c6ba-1b43-48ef-bc30-aa65062bbd11?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/0123a985-a145-4674-b826-00310461be00?api-version=2018-06-01
   response:
     body:
-      string: '{"name":"dda3c6ba-1b43-48ef-bc30-aa65062bbd11","status":"Succeeded","startTime":"2021-02-24T12:01:15.563Z"}'
+      string: '{"name":"0123a985-a145-4674-b826-00310461be00","status":"Succeeded","startTime":"2022-05-16T06:11:25.82Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:02:16 GMT
+      - Mon, 16 May 2022 06:12:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mariadb server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2022-05-16T06:21:26.1+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '932'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:12:27 GMT
       expires:
       - '-1'
       pragma:
@@ -213,59 +291,9 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2021-02-24T12:11:15.877+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1122'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:02:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mariadb server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/databases/defaultdb?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002/databases/defaultdb?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
@@ -279,7 +307,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:02:45 GMT
+      - Mon, 16 May 2022 06:13:01 GMT
       expires:
       - '-1'
       pragma:
@@ -307,22 +335,19 @@ interactions:
       Content-Length:
       - '35'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/databases/defaultdb?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002/databases/defaultdb?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerDatabase","startTime":"2021-02-24T12:02:46.217Z"}'
+      string: '{"operation":"UpsertElasticServerDatabase","startTime":"2022-05-16T06:13:02.503Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/bac28e84-3e0f-4c6d-8830-4a915de2fa3b?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/8e994ed8-a2b3-433d-bfe2-535c9017291b?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -330,11 +355,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:02:46 GMT
+      - Mon, 16 May 2022 06:13:01 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/operationResults/bac28e84-3e0f-4c6d-8830-4a915de2fa3b?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/operationResults/8e994ed8-a2b3-433d-bfe2-535c9017291b?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -344,104 +369,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1168'
+      - '1199'
     status:
       code: 202
       message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mariadb server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/bac28e84-3e0f-4c6d-8830-4a915de2fa3b?api-version=2018-06-01
-  response:
-    body:
-      string: '{"name":"bac28e84-3e0f-4c6d-8830-4a915de2fa3b","status":"Succeeded","startTime":"2021-02-24T12:02:46.217Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:03:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mariadb server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/databases/defaultdb?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"charset":"latin1","collation":"latin1_swedish_ci"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/databases/defaultdb","name":"defaultdb","type":"Microsoft.DBforMariaDB/servers/databases"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '411'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:03:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
 - request:
     body: null
     headers:
@@ -456,7 +387,7 @@ interactions:
       ParameterSetName:
       - -g --name --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateLinkResources?api-version=2018-06-01
   response:
@@ -466,11 +397,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '405'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:02 GMT
+      - Mon, 16 May 2022 06:13:03 GMT
       expires:
       - '-1'
       pragma:
@@ -491,7 +422,8 @@ interactions:
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "cli-subnet-000004",
-      "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
+      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
       - application/json
@@ -502,27 +434,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '222'
+      - '308'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"448a3745-6096-49b3-810e-b700f9a2a023\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3c20b5e7-1d6c-43b1-952d-1f16f7b32f4f\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"6b683385-a11c-442b-b65d-d0d0ed63a8b7\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"8bcabd34-3b35-4db8-8999-70d2afd16b03\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"448a3745-6096-49b3-810e-b700f9a2a023\\\"\",\r\n
+        \       \"etag\": \"W/\\\"3c20b5e7-1d6c-43b1-952d-1f16f7b32f4f\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -533,15 +465,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/88eb6894-e804-43d9-aa19-fd8fa41938b7?api-version=2020-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e5badd1d-774c-431c-aa1a-07c54a90b14a?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
-      - '1494'
+      - '1335'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:08 GMT
+      - Mon, 16 May 2022 06:13:10 GMT
       expires:
       - '-1'
       pragma:
@@ -554,9 +486,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f42094f9-a772-4d71-ad92-696b5ceafc63
+      - 9c4514e9-e4ef-4d60-a12d-26e3b7badca2
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1171'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -574,9 +506,9 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/88eb6894-e804-43d9-aa19-fd8fa41938b7?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e5badd1d-774c-431c-aa1a-07c54a90b14a?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -588,7 +520,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:11 GMT
+      - Mon, 16 May 2022 06:13:14 GMT
       expires:
       - '-1'
       pragma:
@@ -605,7 +537,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8a4ad7ef-184c-4953-91c5-c20c291c5c34
+      - 0077b040-cf9b-42e7-9db8-35a9efe66f44
     status:
       code: 200
       message: OK
@@ -623,21 +555,21 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"19edd3cf-476a-4d4a-b574-27afc24604b4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8bda6d3e-b5da-44df-949d-d0c8fcf8a468\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6b683385-a11c-442b-b65d-d0d0ed63a8b7\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"8bcabd34-3b35-4db8-8999-70d2afd16b03\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"19edd3cf-476a-4d4a-b574-27afc24604b4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8bda6d3e-b5da-44df-949d-d0c8fcf8a468\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -648,13 +580,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1496'
+      - '1337'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:12 GMT
+      - Mon, 16 May 2022 06:13:14 GMT
       etag:
-      - W/"19edd3cf-476a-4d4a-b574-27afc24604b4"
+      - W/"8bda6d3e-b5da-44df-949d-d0c8fcf8a468"
       expires:
       - '-1'
       pragma:
@@ -671,7 +603,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5578a2d9-2032-4d77-845e-075bd8b7856e
+      - 3c0bcda6-1dab-46eb-bdeb-5d21ba61a565
     status:
       code: 200
       message: OK
@@ -689,13 +621,13 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"19edd3cf-476a-4d4a-b574-27afc24604b4\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"8bda6d3e-b5da-44df-949d-d0c8fcf8a468\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -704,13 +636,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '639'
+      - '557'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:13 GMT
+      - Mon, 16 May 2022 06:13:15 GMT
       etag:
-      - W/"19edd3cf-476a-4d4a-b574-27afc24604b4"
+      - W/"8bda6d3e-b5da-44df-949d-d0c8fcf8a468"
       expires:
       - '-1'
       pragma:
@@ -727,15 +659,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 25a8ba0a-c48b-4268-a7a0-ec53dfdcede1
+      - b83b7149-0cef-4f70-bd0d-681ed0d82656
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
-      "name": "cli-subnet-000004", "properties": {"addressPrefix": "10.0.0.0/24",
-      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}'
+      "name": "cli-subnet-000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -746,34 +678,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '451'
+      - '422'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"c73e425e-1de8-4d04-9932-47a04e3de772\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"aee4ab42-df1f-4903-b5e4-65a3c3d19091\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/70c72099-ce5d-4f9d-a4db-3d012b1d02d8?api-version=2020-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/28810c47-e2d4-4942-b5ae-9cf4a5ae00a6?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
-      - '639'
+      - '557'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:13 GMT
+      - Mon, 16 May 2022 06:13:16 GMT
       expires:
       - '-1'
       pragma:
@@ -790,9 +722,101 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a322cc77-5f3c-4479-8707-de93bb4333c9
+      - 286581aa-d45c-4b95-9162-53131ce12ddb
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1177'
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mariadb server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMariaDB/locations/westus/azureAsyncOperation/8e994ed8-a2b3-433d-bfe2-535c9017291b?api-version=2018-06-01
+  response:
+    body:
+      string: '{"name":"8e994ed8-a2b3-433d-bfe2-535c9017291b","status":"Succeeded","startTime":"2022-05-16T06:13:02.503Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:13:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mariadb server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002/databases/defaultdb?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"charset":"latin1","collation":"latin1_swedish_ci"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/databases/defaultdb","name":"defaultdb","type":"Microsoft.DBforMariaDB/servers/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:13:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -810,9 +834,9 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/70c72099-ce5d-4f9d-a4db-3d012b1d02d8?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/28810c47-e2d4-4942-b5ae-9cf4a5ae00a6?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -824,7 +848,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:17 GMT
+      - Mon, 16 May 2022 06:13:19 GMT
       expires:
       - '-1'
       pragma:
@@ -841,7 +865,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b051b79e-2da5-4c23-9561-b36bad01b2d8
+      - 775b2cb5-1ac3-41ea-a6c3-5adc64902a74
     status:
       code: 200
       message: OK
@@ -859,13 +883,13 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"74542598-ac02-4f61-bed4-5d141b91bcad\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"31447e7d-f809-4b23-a34f-318875503178\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -874,13 +898,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '640'
+      - '558'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:17 GMT
+      - Mon, 16 May 2022 06:13:20 GMT
       etag:
-      - W/"74542598-ac02-4f61-bed4-5d141b91bcad"
+      - W/"31447e7d-f809-4b23-a34f-318875503178"
       expires:
       - '-1'
       pragma:
@@ -897,7 +921,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 97f1966f-4a64-40e9-a74a-a4c422594d1c
+      - 579cb9b1-b3a7-4359-98e3-152bb0aae03a
     status:
       code: 200
       message: OK
@@ -915,24 +939,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2021-02-24T12:11:15.877+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2022-05-16T06:21:26.1+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1122'
+      - '932'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:18 GMT
+      - Mon, 16 May 2022 06:13:21 GMT
       expires:
       - '-1'
       pragma:
@@ -964,7 +985,7 @@ interactions:
       ParameterSetName:
       - -g -n --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateLinkResources?api-version=2018-06-01
   response:
@@ -974,11 +995,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '405'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:19 GMT
+      - Mon, 16 May 2022 06:13:22 GMT
       expires:
       - '-1'
       pragma:
@@ -997,9 +1018,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "privateLinkServiceConnections": [{"name": "cli-pec-000008", "properties": {"privateLinkServiceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002",
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "privateLinkServiceConnections": [{"name": "cli-pec-000008", "properties":
+      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002",
       "groupIds": ["mariadbServer"]}}]}}'
     headers:
       Accept:
@@ -1011,48 +1033,50 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '699'
+      - '621'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"a9db787c-c75f-45bc-80d8-d3531a4fbbab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8b823c5c-c93b-4e97-a702-ae717275d478\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"61b23d8b-9ccb-4fc3-b076-305412059f9d\",\r\n    \"privateLinkServiceConnections\":
+        \"7869f4fd-2afa-417a-8ca6-48ae0c29cdd0\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\",\r\n
-        \       \"etag\": \"W/\\\"a9db787c-c75f-45bc-80d8-d3531a4fbbab\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8b823c5c-c93b-4e97-a702-ae717275d478\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
         \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
         \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
-        \"Approved\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"Approved\",\r\n            \"description\": \"Auto Approved\",\r\n            \"actionsRequired\":
         \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
-        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.65eebfc8-2f48-4629-84f7-3057cbbf2d00\"\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.ae746311-666f-48f8-b509-b5afe06961a4\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/668e9a69-1f09-4c4f-80a6-9997a68e95ba?api-version=2020-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/28e46f64-5dfa-4f2e-a9be-99b80e84a923?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
-      - '2358'
+      - '2021'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:26 GMT
+      - Mon, 16 May 2022 06:13:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1065,9 +1089,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2b721264-206c-40a3-b35c-4d3d93343c91
+      - 148d9b55-5b89-4506-afb4-f1f95f4e7281
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1169'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1086,21 +1110,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/668e9a69-1f09-4c4f-80a6-9997a68e95ba?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/28e46f64-5dfa-4f2e-a9be-99b80e84a923?api-version=2021-08-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:36 GMT
+      - Mon, 16 May 2022 06:13:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1117,7 +1141,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a78b9c47-83a1-4c9c-96d2-c3926a636005
+      - b5f1f6a6-ce01-4438-8f9f-733b18c50c73
     status:
       code: 200
       message: OK
@@ -1136,18 +1160,118 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/28e46f64-5dfa-4f2e-a9be-99b80e84a923?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:13:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 68c082f4-0f3e-451e-8b5c-820cefc62912
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/28e46f64-5dfa-4f2e-a9be-99b80e84a923?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:14:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6b3aa1c4-0488-434f-ae6d-915642313e84
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"8ba0c28b-ba2a-4149-b31f-90b85454d816\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"795cc777-0d76-45a3-abe5-b1fb86d7e2f8\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"61b23d8b-9ccb-4fc3-b076-305412059f9d\",\r\n    \"privateLinkServiceConnections\":
+        \"7869f4fd-2afa-417a-8ca6-48ae0c29cdd0\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\",\r\n
-        \       \"etag\": \"W/\\\"8ba0c28b-ba2a-4149-b31f-90b85454d816\\\"\",\r\n
+        \       \"etag\": \"W/\\\"795cc777-0d76-45a3-abe5-b1fb86d7e2f8\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
         \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
@@ -1155,8 +1279,10 @@ interactions:
         \"Approved\",\r\n            \"description\": \"Auto-approved\",\r\n            \"actionsRequired\":
         \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
-        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.65eebfc8-2f48-4629-84f7-3057cbbf2d00\"\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.ae746311-666f-48f8-b509-b5afe06961a4\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
         \"azuredbclitest000002.mariadb.database.azure.com\",\r\n        \"ipAddresses\":
         [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -1164,13 +1290,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2566'
+      - '2173'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:36 GMT
+      - Mon, 16 May 2022 06:14:12 GMT
       etag:
-      - W/"8ba0c28b-ba2a-4149-b31f-90b85454d816"
+      - W/"795cc777-0d76-45a3-abe5-b1fb86d7e2f8"
       expires:
       - '-1'
       pragma:
@@ -1187,7 +1313,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 00e29f5b-7cdf-4663-98cf-e4a49c7b2eaa
+      - 99708df0-0e0d-4db4-95b5-6d7ee73ba5ac
     status:
       code: 200
       message: OK
@@ -1205,24 +1331,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2021-02-24T12:11:15.877+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2022-05-16T06:21:26.1+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1863'
+      - '1490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:39 GMT
+      - Mon, 16 May 2022 06:14:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1254,21 +1377,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","name":"cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","name":"cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '879'
+      - '685'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:39 GMT
+      - Mon, 16 May 2022 06:14:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1300,21 +1423,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","name":"cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","name":"cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '879'
+      - '685'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:40 GMT
+      - Mon, 16 May 2022 06:14:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1336,8 +1459,8 @@ interactions:
     body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
       are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a",
-      "name": "cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962",
+      "name": "cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1348,15 +1471,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '901'
+      - '707'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -1369,7 +1492,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:41 GMT
+      - Mon, 16 May 2022 06:14:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1381,7 +1504,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1175'
+      - '1199'
     status:
       code: 400
       message: Bad Request
@@ -1399,21 +1522,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","name":"cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","name":"cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '879'
+      - '685'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:42 GMT
+      - Mon, 16 May 2022 06:14:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1435,8 +1558,8 @@ interactions:
     body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
       are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a",
-      "name": "cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962",
+      "name": "cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1447,15 +1570,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '901'
+      - '707'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -1468,7 +1591,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:42 GMT
+      - Mon, 16 May 2022 06:14:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1480,7 +1603,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1172'
+      - '1199'
     status:
       code: 400
       message: Bad Request
@@ -1500,15 +1623,15 @@ interactions:
       ParameterSetName:
       - --id -y
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-125a6a08-8c52-4c03-9dd9-63a68ff5702a?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-07d4d4b8-67c0-465f-845b-58b1fb196962?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2021-02-24T12:03:43.987Z"}'
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2022-05-16T06:14:21.363Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/1d1f424f-b849-4688-9491-d73b55c625ef?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/bee1b688-04ff-420c-8604-abbed5d710a3?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1516,11 +1639,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:45 GMT
+      - Mon, 16 May 2022 06:14:22 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/1d1f424f-b849-4688-9491-d73b55c625ef?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/bee1b688-04ff-420c-8604-abbed5d710a3?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -1530,14 +1653,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14994'
+      - '14999'
     status:
       code: 202
       message: Accepted
 - request:
-    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "manualPrivateLinkServiceConnections": [{"name": "cli-pec-000009", "properties":
-      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002",
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "cli-pec-000009",
+      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002",
       "groupIds": ["mariadbServer"]}}]}}'
     headers:
       Accept:
@@ -1549,48 +1673,50 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '705'
+      - '627'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
-        \ \"etag\": \"W/\\\"130f043e-817d-4dac-97f8-4ed03e1bf916\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"eb0846e5-8719-46a6-b612-39ea1fce47b7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"e6053906-620f-429a-8184-0c2cc358bad2\",\r\n    \"privateLinkServiceConnections\":
+        \"2b822d0a-3230-4b0c-947b-2ad7e5b346d7\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
-        \       \"etag\": \"W/\\\"130f043e-817d-4dac-97f8-4ed03e1bf916\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb0846e5-8719-46a6-b612-39ea1fce47b7\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
         \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
         \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
         \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
         \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.15cfec37-ab42-4146-bfa3-c48c079cf121\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.4223222a-9141-47d7-93f2-359f6906c567\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c3d3cd0c-6bec-4d22-951b-dcc3090727ee?api-version=2020-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d7e42e3d-6c46-4754-8dc6-b44354403474?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
-      - '2386'
+      - '2036'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:03:50 GMT
+      - Mon, 16 May 2022 06:14:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1603,9 +1729,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 49cfa00c-e0b1-4588-9492-21ba79fe966c
+      - 1c461a59-da82-4a96-8dc4-f1496af5c73d
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1167'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1624,21 +1750,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c3d3cd0c-6bec-4d22-951b-dcc3090727ee?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d7e42e3d-6c46-4754-8dc6-b44354403474?api-version=2021-08-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:04:01 GMT
+      - Mon, 16 May 2022 06:14:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1655,7 +1781,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3de5e517-51e1-44f9-8d3e-0498004972f9
+      - bf772021-3835-4761-82bd-f13b09ff4d6c
     status:
       code: 200
       message: OK
@@ -1674,39 +1800,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d7e42e3d-6c46-4754-8dc6-b44354403474?api-version=2021-08-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
-        \ \"etag\": \"W/\\\"fd8db97c-53a2-4e86-b1ae-b01cc0c4688d\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"e6053906-620f-429a-8184-0c2cc358bad2\",\r\n    \"privateLinkServiceConnections\":
-        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
-        \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
-        \       \"etag\": \"W/\\\"fd8db97c-53a2-4e86-b1ae-b01cc0c4688d\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
-        \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
-        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
-        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
-        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.15cfec37-ab42-4146-bfa3-c48c079cf121\"\r\n
-        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2370'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:04:01 GMT
-      etag:
-      - W/"fd8db97c-53a2-4e86-b1ae-b01cc0c4688d"
+      - Mon, 16 May 2022 06:14:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1723,7 +1831,77 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 67172681-e66f-487f-b2a9-0e7574ec6b52
+      - a62cbdd4-65d4-4223-bf9f-4cfa71759b04
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
+        \ \"etag\": \"W/\\\"c22c4599-211e-4051-95cf-4630c9f9c81c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"2b822d0a-3230-4b0c-947b-2ad7e5b346d7\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
+        \       \"etag\": \"W/\\\"c22c4599-211e-4051-95cf-4630c9f9c81c\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.4223222a-9141-47d7-93f2-359f6906c567\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2020'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:14:51 GMT
+      etag:
+      - W/"c22c4599-211e-4051-95cf-4630c9f9c81c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fadbff67-f401-4e65-920c-feceb5cbf77d
     status:
       code: 200
       message: OK
@@ -1741,24 +1919,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2021-02-24T12:11:15.877+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2022-05-16T06:21:26.1+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1849'
+      - '1476'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:04:02 GMT
+      - Mon, 16 May 2022 06:14:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1790,21 +1965,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","name":"cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","name":"cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '865'
+      - '671'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:04:03 GMT
+      - Mon, 16 May 2022 06:14:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1836,21 +2011,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","name":"cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","name":"cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '865'
+      - '671'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:04:04 GMT
+      - Mon, 16 May 2022 06:14:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1872,8 +2047,8 @@ interactions:
     body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
       are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7",
-      "name": "cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246",
+      "name": "cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1884,655 +2059,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '901'
+      - '707'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"ApproveElasticServerPrivateEndpointConnection","startTime":"2021-02-24T12:04:05.207Z"}'
+      string: '{"operation":"ApproveElasticServerPrivateEndpointConnection","startTime":"2022-05-16T06:14:57.04Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/affb4b75-66d2-46fa-9001-8e0ab693b66b?api-version=2018-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '100'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:06 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/affb4b75-66d2-46fa-9001-8e0ab693b66b?api-version=2018-06-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1167'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection approve
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
-        are approved!","actionsRequired":"None"},"provisioningState":"Approving"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","name":"cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '887'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection approve
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
-        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","name":"cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:27 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection reject
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
-        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","name":"cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:27 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},
-      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
-      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7",
-      "name": "cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection reject
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '901'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
-  response:
-    body:
-      string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
-        Endpoint Connection Status is not Pending"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '124'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:28 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1165'
-    status:
-      code: 400
-      message: Bad Request
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --id -y
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-3cdd44e1-2af4-4a9a-bde4-2f72ee1103a7?api-version=2018-06-01
-  response:
-    body:
-      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2021-02-24T12:04:29.963Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/69d9b32e-6a20-4867-bd9f-c15e2b49cfa3?api-version=2018-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '97'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:30 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/69d9b32e-6a20-4867-bd9f-c15e2b49cfa3?api-version=2018-06-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14993'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "manualPrivateLinkServiceConnections": [{"name": "cli-pec-000010", "properties":
-      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002",
-      "groupIds": ["mariadbServer"]}}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '705'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id --manual-request
-      User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-08-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
-        \ \"etag\": \"W/\\\"cfb2f522-e61b-4721-b40e-110e1a0ac563\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"5c1f4209-f62c-4756-aac5-bd3b3c8fc472\",\r\n    \"privateLinkServiceConnections\":
-        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
-        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
-        \       \"etag\": \"W/\\\"cfb2f522-e61b-4721-b40e-110e1a0ac563\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
-        \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
-        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
-        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
-        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.e1f064ac-8218-4dba-a05d-e04d73156326\"\r\n
-        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d379cc90-1c7f-4721-b3e2-897010af6d43?api-version=2020-08-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '2386'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - dd501384-bfe2-4c27-87cc-42e08901d267
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1167'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id --manual-request
-      User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d379cc90-1c7f-4721-b3e2-897010af6d43?api-version=2020-08-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 6450af7d-ed8a-4b69-803c-d5edc2138770
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id --manual-request
-      User-Agent:
-      - AZURECLI/2.19.1 azsdk-python-azure-mgmt-network/17.1.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-08-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
-        \ \"etag\": \"W/\\\"0069d73a-fa6c-45c5-a91b-1562cbf0eff6\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"5c1f4209-f62c-4756-aac5-bd3b3c8fc472\",\r\n    \"privateLinkServiceConnections\":
-        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
-        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
-        \       \"etag\": \"W/\\\"0069d73a-fa6c-45c5-a91b-1562cbf0eff6\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
-        \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
-        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
-        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
-        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.e1f064ac-8218-4dba-a05d-e04d73156326\"\r\n
-        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2370'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:48 GMT
-      etag:
-      - W/"0069d73a-fa6c-45c5-a91b-1562cbf0eff6"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 4a990584-da1b-49ad-8f18-69750c3fa531
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mariadb server show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2018-06-01 Azure-SDK-For-Python AZURECLI/2.19.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2021-02-24T12:11:15.877+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1849'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-name -g --name --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","name":"cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '865'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection reject
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","name":"cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '865'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Feb 2021 12:04:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},
-      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
-      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743",
-      "name": "cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection reject
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '901'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
-  response:
-    body:
-      string: '{"operation":"RejectElasticServerPrivateEndpointConnection","startTime":"2021-02-24T12:04:52.263Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/768d3843-d7b2-4de3-9f2b-7b7d9a09e1ad?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/025bc316-5fe5-405d-9e0e-1bbfcd53b1ff?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2540,11 +2081,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:04:52 GMT
+      - Mon, 16 May 2022 06:14:57 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/768d3843-d7b2-4de3-9f2b-7b7d9a09e1ad?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/025bc316-5fe5-405d-9e0e-1bbfcd53b1ff?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -2554,7 +2095,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1170'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -2566,28 +2107,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection reject
+      - network private-endpoint-connection approve
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
-        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","name":"cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Approving"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","name":"cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '883'
+      - '693'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:05:03 GMT
+      - Mon, 16 May 2022 06:15:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2619,22 +2160,708 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
-        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","name":"cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","name":"cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '883'
+      - '689'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:05:04 GMT
+      - Mon, 16 May 2022 06:15:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-name -g --name --description --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","name":"cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '689'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
+      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246",
+      "name": "cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '707'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-name -g --name --description --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
+  response:
+    body:
+      string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
+        Endpoint Connection Status is not Pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '124'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-2d898c96-4990-4d3c-982d-9e8e78da5246?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2022-05-16T06:15:25.51Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/76af5d83-66ba-4580-8ed7-ea7fb5e5133d?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:26 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/76af5d83-66ba-4580-8ed7-ea7fb5e5133d?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "cli-pec-000010",
+      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002",
+      "groupIds": ["mariadbServer"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '627'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
+        \ \"etag\": \"W/\\\"47fd7022-e5a5-4e6d-b8cc-5954879aaef2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"3b8682a3-073c-4918-adc8-7e270c0c396d\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
+        \       \"etag\": \"W/\\\"47fd7022-e5a5-4e6d-b8cc-5954879aaef2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.aee10786-f0e7-41d0-9e2a-9d172346ad8d\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2d420cf-5b50-44b0-aa4f-717a808dc797?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2036'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5010a12e-478c-4203-983a-6b278cdbbe75
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2d420cf-5b50-44b0-aa4f-717a808dc797?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6cbe917d-69fa-4729-bf70-ed97f9abd4ec
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2d420cf-5b50-44b0-aa4f-717a808dc797?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4aebab7c-2055-4bcf-8d45-f1baeee65722
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
+        \ \"etag\": \"W/\\\"c5de7ab9-fded-430e-9d73-ea3fbe98977c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"3b8682a3-073c-4918-adc8-7e270c0c396d\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
+        \       \"etag\": \"W/\\\"c5de7ab9-fded-430e-9d73-ea3fbe98977c\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mariadbServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.aee10786-f0e7-41d0-9e2a-9d172346ad8d\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2020'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:54 GMT
+      etag:
+      - W/"c5de7ab9-fded-430e-9d73-ea3fbe98977c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1d2afd5d-049d-45f1-9ca6-7864f16b9004
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mariadb server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.36.0 azsdk-python-mgmt-rdbms/10.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2022-05-16T06:21:26.1+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1476'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-name -g --name --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","name":"cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '671'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-name -g --name --description --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","name":"cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '671'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
+      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51",
+      "name": "cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '707'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-name -g --name --description --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"RejectElasticServerPrivateEndpointConnection","startTime":"2022-05-16T06:15:58.733Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/5a5229d7-3e48-4e59-b114-b2e609057626?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '99'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:15:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/5a5229d7-3e48-4e59-b114-b2e609057626?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-name -g --name --description --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","name":"cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '689'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:16:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-name -g --name --description --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","name":"cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","type":"Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '689'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 May 2022 06:16:11 GMT
       expires:
       - '-1'
       pragma:
@@ -2656,8 +2883,8 @@ interactions:
     body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
       are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743",
-      "name": "cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51",
+      "name": "cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51", "type": "Microsoft.DBforMariaDB/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -2668,15 +2895,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '901'
+      - '707'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -2689,7 +2916,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:05:05 GMT
+      - Mon, 16 May 2022 06:16:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2701,7 +2928,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1184'
+      - '1199'
     status:
       code: 400
       message: Bad Request
@@ -2719,22 +2946,22 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002?api-version=2018-06-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2021-02-24T12:11:15.877+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"10.2","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mariadb.database.azure.com","earliestRestoreDate":"2022-05-16T06:21:26.1+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","infrastructureEncryption":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"},"provisioningState":"Ready"}}],"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMariaDB/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1867'
+      - '1494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:05:06 GMT
+      - Mon, 16 May 2022 06:16:13 GMT
       expires:
       - '-1'
       pragma:
@@ -2768,15 +2995,15 @@ interactions:
       ParameterSetName:
       - --id -y
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.19.1
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-135cd9ca-f850-46b2-aec2-4157b91f6743?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-e58e6069-2ec0-4332-95f0-596348d08b51?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2021-02-24T12:05:08.387Z"}'
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2022-05-16T06:16:14.873Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/2079ddcd-6779-4ad0-b76d-a66625ab4f9d?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionAzureAsyncOperation/05e461f0-fb94-486b-bcce-c73b9101bcc9?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2784,11 +3011,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Feb 2021 12:05:09 GMT
+      - Mon, 16 May 2022 06:16:15 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/2079ddcd-6779-4ad0-b76d-a66625ab4f9d?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMariaDB/locations/westus/privateEndpointConnectionOperationResults/05e461f0-fb94-486b-bcce-c73b9101bcc9?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -2798,7 +3025,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14989'
+      - '14999'
     status:
       code: 202
       message: Accepted

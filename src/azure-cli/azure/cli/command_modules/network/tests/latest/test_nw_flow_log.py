@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+from azure.cli.testsdk.scenario_tests.decorators import AllowLargeResponse
 
 
 class NWFlowLogScenarioTest(ScenarioTest):
@@ -57,8 +58,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('retentionPolicy.enabled', False),
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
-    @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
+    @AllowLargeResponse(1024)
     def test_nw_flow_log_delete(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
             'rg': resource_group,
@@ -98,11 +100,12 @@ class NWFlowLogScenarioTest(ScenarioTest):
 
         self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    @AllowLargeResponse(1024)
     def test_nw_flow_log_show(self, resource_group, resource_group_location, storage_account):
         """
         This test is used to demonstrate different outputs between the new and deprecating parameters

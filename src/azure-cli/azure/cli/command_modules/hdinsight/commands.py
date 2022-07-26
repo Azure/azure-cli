@@ -52,13 +52,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # cluster operations
     with self.command_group('hdinsight', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
         g.custom_command('create', 'create_cluster', supports_no_wait=True)
-        g.command('resize', 'resize', supports_no_wait=True)
+        g.custom_command('resize', 'resize_cluster', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_clusters')
         g.wait_command('wait')
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('rotate-disk-encryption-key', 'rotate_hdi_cluster_key', supports_no_wait=True)
-        g.command('update', 'update', supports_no_wait=True)
+        g.custom_command('update', 'update_cluster', supports_no_wait=True)
 
     # usage operations
     with self.command_group('hdinsight', hdinsight_locations_sdk, client_factory=cf_hdinsight_locations) as g:
@@ -91,19 +91,26 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'get')
         g.command('list', 'list_by_cluster')
         g.wait_command('wait')
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
 
-    # Monitoring operations
+    # Monitoring operations(classic monitor)
     with self.command_group('hdinsight monitor', hdinsight_extensions_sdk, client_factory=cf_hdinsight_extensions) as g:
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
-        g.command('disable', 'disable_monitoring')
+        g.command('disable', 'begin_disable_monitoring')
+
+    # New Azure Monitor operations
+    with self.command_group('hdinsight azure-monitor', hdinsight_extensions_sdk,
+                            client_factory=cf_hdinsight_extensions) as g:
+        g.show_command('show', 'get_azure_monitor_status')
+        g.custom_command('enable', 'enable_hdi_azure_monitor')
+        g.command('disable', 'begin_disable_azure_monitor')
 
     # VirtualMachine operations
     with self.command_group('hdinsight host', hdinsight_virtual_machines_sdk,
                             client_factory=cf_hdinsight_virtual_machines) as g:
         g.command('list', 'list_hosts')
-        g.command('restart', 'restart_hosts', confirmation=True)
+        g.command('restart', 'begin_restart_hosts', confirmation=True)
 
     # Autoscale operations
     with self.command_group('hdinsight autoscale', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:

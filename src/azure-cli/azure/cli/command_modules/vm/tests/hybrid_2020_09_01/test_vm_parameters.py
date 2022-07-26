@@ -4,10 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 
 def mock_echo_args(command_name, parameters):

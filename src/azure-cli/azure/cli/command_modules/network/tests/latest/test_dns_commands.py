@@ -67,15 +67,15 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Is a directory: ') as e:
             self._test_zone('404zone.com', '')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied: ') as e:
             self._test_zone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
@@ -87,12 +87,12 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
         # Difference with Linux platform while reading a directory
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied:') as e:
             self._test_zone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 
@@ -169,6 +169,8 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} create -n myrs{0} -g {{rg}} --zone-name {{zone}}'.format(t))
             add_command = 'set-record' if t == 'cname' else 'add-record'
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
+            # Issue 10467: FIX add-record is not idempotent
+            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
             # test creating the record set at the same time you add records
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0}alt {1}'.format(t, args[t], add_command))
 
@@ -182,7 +184,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -195,7 +197,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
@@ -252,7 +254,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -265,7 +267,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
@@ -440,7 +442,11 @@ class DnsParseZoneFiles(unittest.TestCase):
             (7200, 7, 'foo bar')
         ])
         self._check_txt(zone, 'mytxtrs.' + zn, [(3600, 2, 'hi')])
-        self._check_srv(zone, 'mysrv.' + zn, [(3600, 1, 2, 1234, 'target.contoso.com.')])
+        self._check_srv(zone, 'mysrv.' + zn, [
+            (3600, 1, 2, 1234, 'target-1.contoso.com.'),
+            (3600, 1, 2, 1234, 'target-2.contoso.com.'),
+            (3600, 1, 2, 1234, 'target-3.contoso.com.')
+        ])
         self._check_caa(zone, 'caa1.' + zn, [
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 128, 'iodef', 'mailto:test@contoso.com')

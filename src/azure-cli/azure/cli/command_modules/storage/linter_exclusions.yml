@@ -1,0 +1,23 @@
+---
+ # exclusions for the acr module
+
+storage blob copy start:
+    parameters:
+        if_modified_since:
+            rule_exclusions:
+            - option_length_too_long
+        if_none_match:
+            rule_exclusions:
+            - option_length_too_long
+        if_tags_match_condition:
+            rule_exclusions:
+            - option_length_too_long
+        if_unmodified_since:
+            rule_exclusions:
+            - option_length_too_long
+storage copy:
+    parameters:
+        extra_options:
+            rule_exclusions:
+            - no_positional_parameters
+...
