@@ -273,6 +273,7 @@ def load_arguments(self, _):
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
         c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/azure/virtual-machines/linux/image-builder-json')
         c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
+        c.argument('staging_resource_group', min_api='2022-02-14', help='The staging resource group id in the same subscription as the image template that will be used to build the image.')
 
         # VM profile
         c.argument('vm_size', help='Size of the virtual machine used to build, customize and capture images. Omit or specify empty string to use the default (Standard_D1_v2)')
@@ -350,6 +351,9 @@ def load_arguments(self, _):
         c.argument('file_source', arg_type=ib_file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
         c.argument('dest_path', arg_type=ib_file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
 
+    with self.argument_context('image builder validator add', min_api='2022-02-14') as c:
+        c.argument('dis_on_failure', options_list=['--continue-distribute-on-failure', '--dis-on-failure'], arg_type=get_three_state_flag(), help="If validation fails and this parameter is set to false, output image(s) will not be distributed.")
+        c.argument('source_validation_only', arg_type=get_three_state_flag(), help="If this parameter is set to true, the image specified in the 'source' section will directly be validated. No separate build will be run to generate and then validate a customized image.")
     # endregion
 
     # region AvailabilitySets

@@ -429,3 +429,28 @@ examples:
   - name: Run an existing workflow in your github repository
     text: az mysql flexible-server deploy run --action-name testAction --branch userBranch
 """
+
+helps['mysql flexible-server server-logs'] = """
+type: group
+short-summary: Manage server logs.
+"""
+
+helps['mysql flexible-server server-logs download'] = """
+type: command
+short-summary: Download log files.
+examples:
+  - name: Download log files f1 and f2 to the current directory from the server 'testsvr'.
+    text: az mysql flexible-server server-logs download -g testgroup -s testsvr -n f1.log f2.log
+"""
+
+helps['mysql flexible-server server-logs list'] = """
+type: command
+short-summary: List log files for a server.
+examples:
+  - name: List log files for 'testsvr' modified in the last 72 hours (default value).
+    text: az mysql flexible-server server-logs list -g testgroup -s testsvr
+  - name: List log files for 'testsvr' modified in the last 10 hours.
+    text: az mysql flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
+  - name: List log files for 'testsvr' less than 30Kb in size.
+    text: az mysql flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+"""
