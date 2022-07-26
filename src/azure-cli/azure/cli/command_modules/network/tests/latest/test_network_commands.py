@@ -2229,6 +2229,12 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('action', 'Log'),
                      self.check('matchConditions | length(@)', 0)
                  ])
+        # validate match condition
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaisesRegex(ArgumentUsageError, "Non-any operator requires --match-values."):
+            self.cmd("network application-gateway waf-policy custom-rule match-condition add -g {rg} "
+                     "--policy-name {waf} -n {rule} "
+                     "--match-variables RequestHeaders.value --operator Contains --transform lowercase")
 
         # add match condition to the previous created custom rule
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
