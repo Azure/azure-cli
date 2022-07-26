@@ -9,10 +9,9 @@ import tempfile
 from knack.util import CLIError
 from knack.log import get_logger
 
-from knack.prompting import prompt_y_n, NoTTYException
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -24,9 +23,12 @@ from ._constants import (
     get_valid_os,
     get_valid_architecture,
     get_valid_variant,
-    ACR_NULL_CONTEXT
+    ACR_NULL_CONTEXT,
+    ALLOWED_TASK_FILE_TYPES
 )
 from ._client_factory import cf_acr_registries
+
+from ._validators import validate_docker_file_path
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -195,22 +197,12 @@ def _invalid_sku_downgrade():
         "Managed registries could not be downgraded to Classic SKU.")
 
 
-def user_confirmation(message, yes=False):
-    if yes:
-        return
-    try:
-        if not prompt_y_n(message):
-            raise CLIError('Operation cancelled.')
-    except NoTTYException:
-        raise CLIError(
-            'Unable to prompt for confirmation as no tty available. Use --yes.')
-
-
 def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture')
+    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='runs')
+
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
@@ -297,10 +289,14 @@ def get_custom_registry_credentials(cmd,
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
+    Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
+        SecretObjectType = cmd.get_models(
+            'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject',
+            'SecretObjectType',
+            operation_group='tasks')
 
     source_registry_credentials = None
     if auth_mode:
-        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
@@ -312,11 +308,6 @@ def get_custom_registry_credentials(cmd,
         is_identity_credential = False
         if not username and not password:
             is_identity_credential = identity is not None
-
-        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
-            'CustomRegistryCredentials',
-            'SecretObject',
-            'SecretObjectType')
 
         if not is_remove:
             if is_identity_credential:
@@ -340,7 +331,6 @@ def get_custom_registry_credentials(cmd,
 
         custom_registries = {login_server: custom_reg_credential}
 
-    Credentials = cmd.get_models('Credentials')
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
@@ -348,9 +338,8 @@ def get_custom_registry_credentials(cmd,
 
 
 def build_timers_info(cmd, schedules):
-    TimerTrigger, TriggerStatus = cmd.get_models(
-        'TimerTrigger', 'TriggerStatus')
     timer_triggers = []
+    TriggerStatus, TimerTrigger = cmd.get_models('TriggerStatus', 'TimerTrigger', operation_group='tasks')
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):
@@ -419,7 +408,12 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
     )
 
 
-def prepare_source_location(cmd, source_location, client_registries, registry_name, resource_group_name):
+def prepare_source_location(cmd,
+                            source_location,
+                            client_registries,
+                            registry_name,
+                            resource_group_name,
+                            docker_file_path=None):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
@@ -427,13 +421,34 @@ def prepare_source_location(cmd, source_location, client_registries, registry_na
             raise CLIError(
                 "Source location should be a local directory path or remote URL.")
 
+        # NOTE: If docker_file_path is not specified, the default is Dockerfile in source_location.
+        # Otherwise, it's based on current working directory.
+        if docker_file_path:
+            if docker_file_path.endswith(ALLOWED_TASK_FILE_TYPES) or docker_file_path == "-":
+                docker_file_path = ""
+            else:
+                validate_docker_file_path(os.path.join(source_location, docker_file_path))
+        else:
+            docker_file_path = os.path.join(source_location, "Dockerfile")
+            if os.path.isfile(docker_file_path):
+                logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
+            else:
+                docker_file_path = ""
+
         tar_file_path = os.path.join(tempfile.gettempdir(
         ), 'cli_source_archive_{}.tar.gz'.format(uuid.uuid4().hex))
 
         try:
+            if docker_file_path:
+                # NOTE: os.path.basename is unable to parse "\" in the file path
+                docker_file_name = os.path.basename(
+                    docker_file_path.replace("\\", "/"))
+            else:
+                docker_file_name = ""
+
             source_location = upload_source_code(
                 cmd, client_registries, registry_name, resource_group_name,
-                source_location, tar_file_path, "", "")
+                source_location, tar_file_path, docker_file_path, docker_file_name)
         except Exception as err:
             raise CLIError(err)
         finally:
@@ -472,7 +487,7 @@ def parse_repositories_from_actions(actions):
     return list(set(repositories))
 
 
-def parse_scope_map_actions(repository_actions_list, gateway_actions_list):
+def parse_scope_map_actions(repository_actions_list=None, gateway_actions_list=None):
     from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
     valid_actions = {action.value for action in RepoScopeMapActions}
     actions = _parse_scope_map_actions(repository_actions_list, valid_actions, 'repositories')
@@ -486,7 +501,7 @@ def _parse_scope_map_actions(actions_list, valid_actions, action_prefix):
         return []
     actions = []
     for rule in actions_list:
-        resource = rule[0]
+        resource = rule[0].lower()
         if len(rule) < 2:
             raise CLIError('At least one action must be specified with "{}".'.format(resource))
         for action in rule[1:]:
@@ -519,11 +534,14 @@ def create_default_scope_map(cmd,
             raise CLIError('The default scope map was already configured with different repository permissions.' +
                            '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
                            .format(registry_name, scope_map_name))
-    except CloudError:
+    except ResourceNotFoundError:
         pass
     logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
-    poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
-                                     actions, scope_map_description)
+    scope_map_request = {
+        'actions': actions,
+        'scope_map_description': scope_map_description
+    }
+    poller = scope_map_client.begin_create(resource_group_name, registry_name, scope_map_name, scope_map_request)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
     return scope_map
 
@@ -572,3 +590,14 @@ def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
     return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+
+
+def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_name):
+    """Returns the task details.
+    :param str resource_group_name: The name of resource group
+    :param str registry_name: The name of container registry
+    :param str task_name: The name of task
+    """
+    from ._client_factory import cf_acr_tasks
+    client = cf_acr_tasks(cli_ctx)
+    return client.get_details(resource_group_name, registry_name, task_name)

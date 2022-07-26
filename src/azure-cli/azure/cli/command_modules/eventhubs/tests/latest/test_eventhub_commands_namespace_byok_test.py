@@ -7,7 +7,7 @@
 
 import time
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer)
 
 
 # pylint: disable=line-too-long
@@ -15,13 +15,14 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 
 class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
-    from azure_devtools.scenario_tests import AllowLargeResponse
+    from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, additional_params='--enable-soft-delete --enable-purge-protection')
     def test_eh_namespace_byok(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': 'southcentralus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -31,7 +32,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
             'tier': 'Standard',
-            'clusterarmid': '/subscriptions/326100e2-f69d-4268-8503-075374f62b6e/resourceGroups/prod-by3-533-rg/providers/Microsoft.EventHub/clusters/PMTestCluster',
+            'clusterarmid': '/subscriptions/326100e2-f69d-4268-8503-075374f62b6e/resourceGroups/v-ajnavtest/providers/Microsoft.EventHub/clusters/PMTestCluster',
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
             'defaultauthorizationrule': 'RootManageSharedAccessKey',
             'accessrights': 'Send',
@@ -45,7 +46,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         })
 
-        kv_name = self.create_random_name(prefix='cli', length=15)
+        kv_name = self.kwargs['kv']
         key_name = self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/".format(kv_name)
         self.kwargs.update({
@@ -73,7 +74,6 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         })
 
         # Create AzKeyvault
-        self.cmd('az keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {principal_id} --key-permissions  get unwrapKey wrapKey')
         self.cmd('az keyvault key create -n {key_name} --vault-name {kv_name}')
 

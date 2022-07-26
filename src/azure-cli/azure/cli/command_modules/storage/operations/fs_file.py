@@ -69,18 +69,23 @@ def get_file_properties(client, timeout=None):
     return result
 
 
-def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=None, exclude_dir=None, marker=None):
+def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=None, exclude_dir=None,
+                  marker=None, show_next_marker=None):
     generator = client.get_paths(path=path, max_results=num_results, recursive=recursive, timeout=timeout)
     pages = generator.by_page(continuation_token=marker)
 
-    result = next(pages)
-
-    if pages.continuation_token:
-        logger.warning('Next Marker:')
-        logger.warning(pages.continuation_token)
+    result = list(next(pages))
 
     if exclude_dir:
-        return list(f for f in result if not f.is_directory)
+        result = list(f for f in result if not f.is_directory)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
 
     return result
 

@@ -4,12 +4,40 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import unittest
 
-from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from knack.util import CLIError
-
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from datetime import datetime, timedelta, timezone
+from dateutil import parser
 
 class CosmosDBTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_analytical_storage_schema_type_on_create(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40)
+        })
+
+        schemaType = "FullFidelity"
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --analytical-storage-schema-type ' + schemaType)
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('analyticalStorageConfiguration.schemaType', schemaType)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_analytical_storage_schema_type_on_update(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40)
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --analytical-storage-schema-type FullFidelity')
+        schemaType = "WellDefined"
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --analytical-storage-schema-type ' + schemaType)
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('analyticalStorageConfiguration.schemaType', schemaType)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_create_database_account(self, resource_group):
@@ -20,7 +48,7 @@ class CosmosDBTests(ScenarioTest):
             'network_acl_bypass_resource_id': network_acl_bypass_resource_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids "{network_acl_bypass_resource_id}" --backup-interval 480 --backup-retention 8')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
@@ -51,9 +79,12 @@ class CosmosDBTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_update_database_account(self, resource_group):
-
+        from azure.mgmt.cosmosdb.models import BackupStorageRedundancy
         self.kwargs.update({
-            'acc': self.create_random_name(prefix='cli', length=40)
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'geo': BackupStorageRedundancy.Geo.value,
+            'lrs': BackupStorageRedundancy.Local.value,
+            'zrs': BackupStorageRedundancy.Zone.value
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-range-filter "20.10.10.10,12.12.122.122,12.22.11.11" --server-version 3.2 --enable-analytical-storage true --enable-free-tier false')
@@ -83,7 +114,21 @@ class CosmosDBTests(ScenarioTest):
             self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
             self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
             self.check('backupPolicy.type', 'Periodic'),
-        ])
+        ]).get_output_in_json()
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8 --backup-redundancy {geo}', checks=[
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.periodicModeProperties.backupStorageRedundancy', BackupStorageRedundancy.Geo.value),
+            self.check('backupPolicy.type', 'Periodic'),
+        ]).get_output_in_json()
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8 --backup-redundancy {lrs}', checks=[
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.periodicModeProperties.backupStorageRedundancy', BackupStorageRedundancy.Local.value),
+            self.check('backupPolicy.type', 'Periodic')
+        ]).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_delete_database_account(self, resource_group):
@@ -284,7 +329,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
 
-        with self.assertRaisesRegexp(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
+        with self.assertRaisesRegex(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
             self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
 
         vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
@@ -463,7 +508,6 @@ class CosmosDBTests(ScenarioTest):
         assert "defaultTtl" not in disable_ttl["collection"]
 
         self.cmd('az cosmosdb collection delete -g {rg} -n {acc} -d {db_name} -c {col} --yes')
-        assert not self.cmd('az cosmosdb collection exists -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_database')
     def test_cosmosdb_sql_database(self, resource_group):
@@ -566,6 +610,96 @@ class CosmosDBTests(ScenarioTest):
         container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {ttl}').get_output_in_json()
 
         assert container_create["resource"]["analyticalStorageTtl"] == ttl
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analyticalStorageTtl')
+    def test_cosmosdb_sql_container_update_analytical_ttl(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = 3000
+        analyticalStorageTtlOnCollectionUpdate = 500
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {analyticalStorageTtlOnCollectionCreate}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
+    def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = 3000
+        analyticalStorageTtlOnCollectionUpdate = 0
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {analyticalStorageTtlOnCollectionCreate}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analytical_store_migration')
+    def test_cosmosdb_sql_container_update_analytical_store_migration(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        analyticalStorageTtlOnCollectionCreate = None
+        analyticalStorageTtlOnCollectionUpdate = -1
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
+            'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionCreate
+
+        container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --analytical-storage-ttl {analyticalStorageTtlOnCollectionUpdate}').get_output_in_json()
+
+        assert container_update["resource"]["analyticalStorageTtl"] == analyticalStorageTtlOnCollectionUpdate
 
         self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
@@ -1331,24 +1465,727 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb table throughput update -g {rg} -a {acc} -n {tb_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["throughput"] == tp2
 
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
-    def test_cosmosdb_key_vault_key_uri(self, resource_group):
-        kv_name = self.create_random_name(prefix='cli', length=15)
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
+    def test_cosmosdb_key_vault_key_uri(self, resource_group, key_vault):
         key_name = self.create_random_name(prefix='cli', length=15)
-        key_uri = "https://{}.vault.azure.net/keys/{}".format(kv_name, key_name)
+        key_uri = "https://{}.vault.azure.net/keys/{}".format(key_vault, key_name)
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
-            'kv_name': kv_name,
+            'kv_name': key_vault,
             'key_name': key_name,
             'key_uri': key_uri,
             'location': "eastus2"
         })
 
-        self.cmd('az keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn a232010e-820c-4083-83bb-3ace5fc29d0b --key-permissions get unwrapKey wrapKey')
         self.cmd('az keyvault key create -n {key_name} --kty RSA --size 3072 --vault-name {kv_name}')
 
         cmk_output = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri}').get_output_in_json()
 
         assert cmk_output["keyVaultKeyUri"] == key_uri
+
+    @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')
+    @KeyVaultPreparer(name_prefix='cli', name_len=15, location='eastus2', additional_params='--enable-purge-protection')
+    def test_cosmosdb_managed_service_identity(self, resource_group, key_vault):
+        key_name = self.create_random_name(prefix='cli', length=15)
+        key_uri = "https://{}.vault.azure.net/keys/{}".format(key_vault, key_name)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'acc2': self.create_random_name(prefix='cli', length=15),
+            'kv_name': key_vault,
+            'key_name': key_name,
+            'key_uri': key_uri,
+            'location': "eastus2",
+            'id1': self.create_random_name(prefix='cli', length=15),
+            'id2': self.create_random_name(prefix='cli', length=15)
+        })
+
+        self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn a232010e-820c-4083-83bb-3ace5fc29d0b --key-permissions get unwrapKey wrapKey')
+        self.cmd('az keyvault key create -n {key_name} --kty RSA --size 3072 --vault-name {kv_name}')
+
+        cmk_account = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity [system] --default-identity FirstPartyIdentity').get_output_in_json()
+
+        assert cmk_account["keyVaultKeyUri"] == key_uri
+        assert cmk_account["defaultIdentity"] == 'FirstPartyIdentity'
+        assert cmk_account["identity"]['type'] == 'SystemAssigned'
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned"
+
+        identity_principal_id = identity_output["principalId"]
+        self.kwargs.update({
+            'identity_principal_id': identity_principal_id
+        })
+        self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {identity_principal_id} --key-permissions get unwrapKey wrapKey')
+
+        # System assigned identity tests
+        cmk_account = self.cmd('az cosmosdb update -n {acc} -g {rg} --default-identity SystemAssignedIdentity').get_output_in_json()
+        assert cmk_account["defaultIdentity"] == 'SystemAssignedIdentity'
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned"
+
+        # User assigned identity tests
+        user_identity1 = self.cmd('az identity create -n {id1} -g {rg}').get_output_in_json()
+        user_identity2 = self.cmd('az identity create -n {id2} -g {rg}').get_output_in_json()
+        id1 = user_identity1["id"]
+        id1principal = user_identity1["principalId"]
+        id2 = user_identity2["id"]
+        self.kwargs.update({
+            'id1': id1,
+            'id2': id2,
+            'id1principal': id1principal
+        })
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert list(identity_output["userAssignedIdentities"])[0] == id1
+        assert len(identity_output["userAssignedIdentities"]) == 1
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert (list(identity_output["userAssignedIdentities"])[0] == id2 or list(identity_output["userAssignedIdentities"])[1] == id2)
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg}').get_output_in_json()
+        assert identity_output["type"] == "UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "UserAssigned"
+        assert list(identity_output["userAssignedIdentities"])[0] == id1
+        assert len(identity_output["userAssignedIdentities"]) == 1
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "UserAssigned"
+        assert (list(identity_output["userAssignedIdentities"])[0] == id2 or list(identity_output["userAssignedIdentities"])[1] == id2)
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1} {id2}').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 2
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id2}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 1
+
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1}').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned"
+
+        identity_output = self.cmd('az cosmosdb identity assign -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
+        assert identity_output["type"] == "SystemAssigned,UserAssigned"
+        assert len(identity_output["userAssignedIdentities"]) == 2
+        identity_output = self.cmd('az cosmosdb identity remove -n {acc} -g {rg} --identities {id1} {id2} [system]').get_output_in_json()
+        assert identity_output["type"] == "None"
+
+        # Default identity tests
+        self.cmd('az keyvault set-policy --name {kv_name} --object-id {id1principal} --key-permissions get unwrapKey wrapKey')
+        default_id_acct = self.cmd('az cosmosdb create -n {acc2} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri} --assign-identity {id1} --default-identity "UserAssignedIdentity={id1}"').get_output_in_json()
+        assert default_id_acct["identity"]["type"] == "UserAssigned"
+        assert list(default_id_acct["identity"]["userAssignedIdentities"])[0] == id1
+        assert default_id_acct["defaultIdentity"] == "UserAssignedIdentity=" + id1
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
+    def test_cosmosdb_sql_role(self, resource_group):
+        acc_name = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+
+        subscription = self.get_subscription_id()
+        role_def_id = 'be79875a-2cc4-40d5-8958-566017875b39'
+        role_def_id2 = '6328f5f7-dbf7-4244-bba8-fbb9d8066506'
+        role_assignment_id = 'cb8ed2d7-2371-4e3c-bd31-6cc1560e84f8'
+        role_assignment_id2 = '09d117e6-ab6a-4a8b-948a-c6c34aa631db'
+        role_assignment_id3 = 'd6496da9-2eb3-472a-ba38-140fa2a6a304'
+        role_definition_create_body = ' {{ \\"Id\\": \\"{0}\\", \\"RoleName\\": \\"roleName\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\", \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }} '.format(role_def_id)
+        role_definition_update_body = ' {{ \\"Id\\": \\"{0}\\", \\"RoleName\\": \\"roleName2\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"Permissions\\": [ {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\" ] }}, {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }} ] }}'.format(role_def_id)
+        role_definition_create_body2 = ' {{ \\"Id\\": \\"{0}\\", \\"RoleName\\": \\"roleName3\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"Permissions\\": [ {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\" ] }}, {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }}, {{ \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/replace\\" ] }} ] }}'.format(role_def_id2)
+        fully_qualified_role_def_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleDefinitions/{3}'.format(subscription, resource_group, acc_name, role_def_id)
+        fully_qualified_role_def_id2 = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleDefinitions/{3}'.format(subscription, resource_group, acc_name, role_def_id2)
+        fully_qualified_role_assignment_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleAssignments/{3}'.format(subscription, resource_group, acc_name, role_assignment_id)
+        fully_qualified_role_assignment_id2 = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleAssignments/{3}'.format(subscription, resource_group, acc_name, role_assignment_id2)
+        assignable_scope = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}'.format(subscription, resource_group, acc_name)
+        scope = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/dbs/{3}'.format(subscription, resource_group, acc_name, db_name)
+        principal_id = 'ed4c2395-a18c-4018-afb3-6e521e7534d2'
+
+        self.kwargs.update({
+            'acc': acc_name,
+            'db_name': db_name,
+            'create_body': role_definition_create_body,
+            'update_body': role_definition_update_body,
+            'create_body2': role_definition_create_body2,
+            'role_def_id': role_def_id,
+            'fully_qualified_role_def_id': fully_qualified_role_def_id,
+            'role_def_id2': role_def_id2,
+            'fully_qualified_role_def_id2': fully_qualified_role_def_id2,
+            'role_assignment_id': role_assignment_id,
+            'role_assignment_id2': role_assignment_id2,
+            'role_assignment_id3': role_assignment_id3,
+            'fully_qualified_role_assignment_id': fully_qualified_role_assignment_id,
+            'fully_qualified_role_assignment_id2': fully_qualified_role_assignment_id2,
+            'scope': scope,
+            'principal_id': principal_id
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"', checks=[
+            self.check('id', fully_qualified_role_def_id),
+            self.check('roleName', 'roleName'),
+            self.check('typePropertiesType', 'CustomRole'),
+            self.check('assignableScopes[0]', assignable_scope),
+            self.check('length(permissions)', 1)
+        ])
+
+        assert self.cmd('az cosmosdb sql role definition exists -g {rg} -a {acc} -i {role_def_id}').get_output_in_json()
+
+        self.cmd('az cosmosdb sql role definition show -g {rg} -a {acc} -i {role_def_id}', checks=[
+            self.check('roleName', 'roleName')
+        ])
+
+        self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"', checks=[
+            self.check('id', fully_qualified_role_def_id),
+            self.check('roleName', 'roleName2'),
+            self.check('typePropertiesType', 'CustomRole'),
+            self.check('assignableScopes[0]', assignable_scope),
+            self.check('length(permissions)', 2)
+        ])
+
+        self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body2}"', checks=[
+            self.check('id', fully_qualified_role_def_id2),
+            self.check('roleName', 'roleName3'),
+            self.check('typePropertiesType', 'CustomRole'),
+            self.check('assignableScopes[0]', assignable_scope),
+            self.check('length(permissions)', 3)
+        ])
+
+        role_definition_list = self.cmd('az cosmosdb sql role definition list -g {rg} -a {acc}').get_output_in_json()
+        assert len(role_definition_list) == 4
+
+        self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -d {fully_qualified_role_def_id} -i {role_assignment_id}', checks=[
+            self.check('id', fully_qualified_role_assignment_id),
+            self.check('roleDefinitionId', fully_qualified_role_def_id),
+            self.check('scope', scope),
+            self.check('principalId', principal_id)
+        ])
+
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id}').get_output_in_json()
+
+        self.cmd('az cosmosdb sql role assignment show -g {rg} -a {acc} -i {role_assignment_id}', checks=[
+            self.check('id', fully_qualified_role_assignment_id)
+        ])
+
+        self.cmd('az cosmosdb sql role assignment update -g {rg} -a {acc} -d {role_def_id2} -i {fully_qualified_role_assignment_id}', checks=[
+            self.check('id', fully_qualified_role_assignment_id),
+            self.check('roleDefinitionId', fully_qualified_role_def_id2),
+            self.check('scope', scope),
+            self.check('principalId', principal_id)
+        ])
+
+        self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -n roleName2 -i {role_assignment_id2}', checks=[
+            self.check('id', fully_qualified_role_assignment_id2),
+            self.check('roleDefinitionId', fully_qualified_role_def_id),
+            self.check('scope', scope),
+            self.check('principalId', principal_id)
+        ])
+
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -n roleName2 -i {role_assignment_id3} --no-wait')
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        self.cmd('az cosmosdb sql role assignment wait -g {rg} -a {acc} -i {role_assignment_id3} --exists')
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json()
+
+        role_assignment_list = self.cmd('az cosmosdb sql role assignment list -g {rg} -a {acc}').get_output_in_json()
+        assert len(role_assignment_list) == 3
+
+        self.cmd('az cosmosdb sql role assignment delete -g {rg} -a {acc} -i {role_assignment_id} --yes')
+        self.cmd('az cosmosdb sql role assignment delete -g {rg} -a {acc} -i {role_assignment_id2} --yes')
+        self.cmd('az cosmosdb sql role assignment delete -g {rg} -a {acc} -i {role_assignment_id3} --yes')
+        role_assignment_list = self.cmd('az cosmosdb sql role assignment list -g {rg} -a {acc}').get_output_in_json()
+        assert len(role_assignment_list) == 0
+
+        self.cmd('az cosmosdb sql role definition delete -g {rg} -a {acc} -i {role_def_id} --yes')
+        self.cmd('az cosmosdb sql role definition delete -g {rg} -a {acc} -i {fully_qualified_role_def_id2} --yes')
+        role_definition_list = self.cmd('az cosmosdb sql role definition list -g {rg} -a {acc}').get_output_in_json()
+        assert len(role_definition_list) == 2
+
+    @ResourceGroupPreparer(name_prefix='cli_update_backup_policy_database_account')
+    def test_update_backup_policy_database_account(self, resource_group):
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40)
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('backupPolicy.type', 'Periodic')
+        ])
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8', checks=[
+            self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
+            self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
+            self.check('backupPolicy.type', 'Periodic'),
+        ])
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-policy-type Continuous', checks=[
+            self.check('backupPolicy.type', 'Continuous'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_restore_using_create', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
+    def test_cosmosdb_restore_using_create(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        restorable_accounts_list = self.cmd('az cosmosdb restorable-database-account list -l {loc}').get_output_in_json()
+        restorable_database_account = next(acc for acc in restorable_accounts_list if acc['name'] == account['instanceId'])
+
+        account_creation_time = restorable_database_account['creationTime']
+        import dateutil.parser
+        from datetime import timedelta
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts_string = restore_ts.isoformat()
+        import time
+        time.sleep(300)
+        self.kwargs.update({
+            'db_id': restorable_database_account['id'],
+            'rts': restore_ts_string
+        })
+
+        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts}')
+        restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime')
+        ]).get_output_in_json()
+
+        assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
+        assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_restore_command', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
+    def test_cosmosdb_restore_command(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'ins_id': account['instanceId']
+        })
+
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        import dateutil.parser
+        import time
+        from datetime import timedelta
+
+        # This should fail as restore time is before account creation time
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(days=30)
+        self.kwargs.update({
+            'invalid_restore_time': invalid_restore_time.isoformat()
+        })
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # This should fail as restore time is in future
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(days=30)
+        self.kwargs.update({
+            'invalid_restore_time': invalid_restore_time.isoformat()
+        })
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # Get correct restore ts
+        account_creation_time = restorable_database_account['creationTime']
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        # This should fail as account doesn't exist with this name
+        self.kwargs.update({
+            'invalid_account_name': self.create_random_name(prefix='cli', length=15)
+        })
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # This should fail as regional database doesn't exist in this location
+        # invalid_location = "westus2"
+        # self.kwargs.update({
+        #     'invalid_location': invalid_location
+        # })
+        # self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {invalid_location} --target-database-account-name {restored_acc}'))
+
+        # This should fail as account is empty
+        # self.assertRaises(Exception, lambda: self.cmd(
+        #     'az cosmosdb restore -n {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+
+        # Create content in account and triggering restore
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        time.sleep(300)
+
+        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+        self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime'),
+            self.check('restoreParameters.restoreSource', restorable_database_account['id']),
+            self.check('restoreParameters.restoreTimestampInUtc', restore_ts_string)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_deleted_account_restore', parameter_name_for_location='location')
+    @AllowLargeResponse(size_kb=9999)
+    def test_cosmosdb_deleted_account_restore(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'ins_id': account['instanceId']
+        })
+
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        import dateutil.parser
+        import time
+        from datetime import timedelta
+
+        # Get correct restore ts
+        account_creation_time = restorable_database_account['creationTime']
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        # Create content in account and triggering restore
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        time.sleep(300)
+        self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
+
+        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+        self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime'),
+            self.check('restoreParameters.restoreSource', restorable_database_account['id']),
+            self.check('restoreParameters.restoreTimestampInUtc', restore_ts_string)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_restorable_commands', parameter_name_for_location='location')
+    def test_cosmosdb_sql_restorable_commands(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'ins_id': account['instanceId']
+        })
+
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        restorable_databases = self.cmd('az cosmosdb sql restorable-database list --location {loc} --instance-id {ins_id}').get_output_in_json()
+        assert len(restorable_databases) == 1
+        restorable_databases[0]['resource']['ownerId'] == db_name
+
+        self.kwargs.update({
+            'db_rid': restorable_databases[0]['resource']['ownerResourceId']
+        })
+
+        restorable_containers = self.cmd('az cosmosdb sql restorable-container list --location {loc} --instance-id {ins_id} --database-rid {db_rid}').get_output_in_json()
+        assert len(restorable_containers) == 1
+        assert restorable_containers[0]['resource']['ownerId'] == col
+
+        account_creation_time = restorable_database_account['creationTime']
+        import dateutil.parser
+        from datetime import timedelta
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
+        import time
+        time.sleep(200)
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        restorable_resources = self.cmd('az cosmosdb sql restorable-resource list --restore-location {loc} -l {loc} --instance-id {ins_id} --restore-timestamp {rts}').get_output_in_json()
+        assert len(restorable_resources) == 1
+        assert restorable_resources[0]['databaseName'] == db_name
+        assert len(restorable_resources[0]['collectionNames']) == 1
+        assert restorable_resources[0]['collectionNames'][0] == col
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_restorable_commands', parameter_name_for_location='location')
+    def test_cosmosdb_mongodb_restorable_commands(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'col': col,
+            'loc': location
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+
+        self.kwargs.update({
+            'ins_id': account['instanceId'],
+            'shard_key': "theShardKey",
+            'throughput': "1000",
+        })
+
+        self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col} --shard {shard_key} --throughput {throughput}').get_output_in_json()
+
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        restorable_databases = self.cmd('az cosmosdb mongodb restorable-database list --location {loc} --instance-id {ins_id}').get_output_in_json()
+        assert len(restorable_databases) == 1
+        restorable_databases[0]['resource']['ownerId'] == db_name
+
+        self.kwargs.update({
+            'db_rid': restorable_databases[0]['resource']['ownerResourceId']
+        })
+
+        restorable_containers = self.cmd('az cosmosdb mongodb restorable-collection list --location {loc} --instance-id {ins_id} --database-rid {db_rid}').get_output_in_json()
+        assert len(restorable_containers) == 1
+        assert restorable_containers[0]['resource']['ownerId'] == col
+
+        account_creation_time = restorable_database_account['creationTime']
+        import dateutil.parser
+        from datetime import timedelta
+        creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
+        import time
+        time.sleep(200)
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        restorable_resources = self.cmd('az cosmosdb mongodb restorable-resource list --restore-location {loc} -l {loc} --instance-id {ins_id} --restore-timestamp {rts}').get_output_in_json()
+        assert len(restorable_resources) == 1
+        assert restorable_resources[0]['databaseName'] == db_name
+        assert len(restorable_resources[0]['collectionNames']) == 1
+        assert restorable_resources[0]['collectionNames'][0] == col
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_backupinfo', parameter_name_for_location='location')
+    def test_cosmosdb_sql_container_backupinfo(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+        new_default_ttl1 = 2000
+        new_default_ttl2 = 5000
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'col': col,
+            'loc': location,
+            'nttl1': new_default_ttl1,
+            'nttl2': new_default_ttl2,
+        })
+
+        # This should fail as account doesn't exist
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+
+        # This should fail as database doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create database
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        # This should fail as container doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create container
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+
+        # Update container
+        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
+        # assert container_update["resource"]["defaultTtl"] == 2000
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time >= backup_time
+
+        # Update container again
+        # container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl2}').get_output_in_json()
+        # assert container_update["resource"]["defaultTtl"] == 3000
+
+        backup_info = self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time2 = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time2 >= backup_time
+        assert new_backup_time2 >= new_backup_time
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_collection_backupinfo', parameter_name_for_location='location')
+    def test_cosmosdb_mongodb_collection_backupinfo(self, resource_group, location):
+        col = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+        new_default_ttl1 = 2000
+        new_default_ttl2 = 5000
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'restored_acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'col': col,
+            'loc': location,
+            'nttl1': new_default_ttl1,
+            'nttl2': new_default_ttl2,
+            'shard_key': "theShardKey",
+            'throughput': "1000"
+        })
+
+        # This should fail as account doesn't exist
+        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+
+        # This should fail as database doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create database
+        self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
+
+        # This should fail as collection doesn't exist
+        self.assertRaises(CLIError, lambda: self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
+
+        # Create collection
+        self.cmd('az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col} --shard {shard_key} --throughput {throughput}').get_output_in_json()
+
+        backup_info = self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+
+        # Update collection
+        # collection_update = self.cmd('az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl1}').get_output_in_json()
+        # assert collection_update["resource"]["defaultTtl"] == 2000
+
+        backup_info = self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time >= backup_time
+
+        # Update collection again
+        # collection_update = self.cmd('az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col} --ttl {nttl2}').get_output_in_json()
+        # assert collection_update["resource"]["defaultTtl"] == 3000
+
+        backup_info = self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}').get_output_in_json()
+        print(backup_info)
+
+        assert backup_info is not None
+        assert backup_info['continuousBackupInformation'] is not None
+
+        new_backup_time2 = parser.parse(backup_info['continuousBackupInformation']['latestRestorableTimestamp'])
+        assert new_backup_time2 >= backup_time
+        assert new_backup_time2 >= new_backup_time
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_locations', parameter_name_for_location='location')
+    def test_cosmosdb_locations(self, resource_group, location):
+        self.kwargs.update({
+            'loc': location
+        })
+
+        locations_list = self.cmd('az cosmosdb locations list').get_output_in_json()
+        assert len(locations_list) > 0
+        for location_val in locations_list:
+            assert location_val['id'] != None
+            assert location_val['name'] != None
+            assert location_val['type'] != None
+            assert location_val['properties']['backupStorageRedundancies'] != None
+            assert location_val['properties']['isResidencyRestricted'] != None
+            assert location_val['properties']['supportsAvailabilityZone'] != None
+
+        locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
+        assert locations_show['id'] != None
+        assert locations_show['name'] != None
+        assert locations_show['type'] != None
+        assert locations_show['properties']['backupStorageRedundancies'] != None
+        assert locations_show['properties']['isResidencyRestricted'] != None
+        assert locations_show['properties']['supportsAvailabilityZone'] != None

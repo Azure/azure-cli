@@ -5,8 +5,9 @@
 
 import os
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck, StringCheck, StringContainCheck)
+                               JMESPathCheck, NoneCheck, StringCheck, StringContainCheck, JMESPathCheckExists)
 from ..storage_test_util import StorageScenarioMixin
+from azure.cli.testsdk.scenario_tests import record_only
 
 
 class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
@@ -105,6 +106,78 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage share delete -n {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('deleted', True))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_file_upload_content_md5_scenarios(self, resource_group, storage_account):
+        import hashlib
+        import base64
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(128)
+
+        def md5(fname):
+            hash_md5 = hashlib.md5()
+            with open(fname, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+            return hash_md5.digest()
+
+        md5_digest = md5(local_file)
+        md5_base64_encode = base64.b64encode(md5_digest).decode("utf-8")
+        file_name = self.create_random_name(prefix='file', length=24) + '.txt'
+        self.storage_cmd('storage file upload -s {} --source "{}" --path {} --content-md5 {}', account_info,
+                         share, local_file, file_name, md5_base64_encode)
+        self.storage_cmd('storage file show -s {} --path {}', account_info, share, file_name). \
+            assert_with_checks(JMESPathCheck("properties.contentSettings.contentMd5", md5_base64_encode))
+
+        self.storage_cmd('storage file update -s {} --path {} --content-md5 0000', account_info, share, file_name)
+        self.storage_cmd('storage file show -s {} --path {}', account_info, share, file_name). \
+            assert_with_checks(JMESPathCheck("properties.contentSettings.contentMd5", '0000'))
+
+    @record_only()
+    # manual test, only run the recording
+    # To reproduce the prerequisite steps:
+    # 1. Create a file share under a storage account/ resource group as specified below
+    # 2. Upload Book1.csv to the root dir of the file share, add a dir called dir1 and upload another file testjson.json
+    # 3. Create a Python file to open both files and sleep so the file handles are held
+    # 4. Create two VMs and ssh to them
+    # 5. Mount the file share using the script in the connect tab and run the Python file
+    def test_storage_file_share_handle_scenario(self):
+        resource_group = 'azure-cli-test-file-handle-rg'
+        storage_account = 'testfilehandlesa'
+        account_info = self.get_account_info(resource_group, storage_account)
+        file_share = 'file-share'
+        self.storage_cmd('storage share list-handle --name {} --recursive', account_info, file_share).\
+            assert_with_checks(JMESPathCheck("length(items[?path=='Book1.csv'])",2),
+                               JMESPathCheck("length(items[?path=='dir1/testjson.json'])",2),
+                               JMESPathCheck("length(items[?path=='dir1/dir2/1.png'])",2))
+
+        self.storage_cmd("storage share list-handle --name {} --recursive --path dir1",  account_info, file_share).\
+            assert_with_checks(JMESPathCheck("length(items[?path=='dir1/testjson.json'])", 2),
+                               JMESPathCheck("length(items[?path=='dir1/dir2/1.png'])",2))
+
+        self.storage_cmd("storage share list-handle --name {} --recursive --path ./dir1/dir2/1.png", account_info, file_share). \
+            assert_with_checks(JMESPathCheck("length(items[?path=='dir1/dir2/1.png'])", 2))
+
+        result = self.storage_cmd("storage share list-handle --name {} --path 'Book1.csv'", account_info, file_share).\
+            get_output_in_json()['items']
+        self.assertEqual(len(result), 2)
+        handle_id = result[0]["handleId"]
+
+        self.storage_cmd("storage share close-handle --name {} --path 'Book1.csv' --handle-id {}", account_info,
+                         file_share, handle_id)
+        self.storage_cmd("storage share list-handle --name {} --path 'Book1.csv'", account_info, file_share). \
+            assert_with_checks(JMESPathCheck("length(items[?path=='Book1.csv'])", 1))
+        self.storage_cmd("storage share close-handle --name {} --path 'dir1' --recursive --close-all", account_info,
+                         file_share)
+        self.storage_cmd("storage share list-handle --name {} --path 'dir1/testjson.json'", account_info, file_share). \
+            assert_with_checks(JMESPathCheck("length(items[?path=='dir1/testjson.json'])", 0))
+        self.storage_cmd("storage share close-handle --name {} --recursive --handle-id '*'", account_info,
+                         file_share)
+        self.storage_cmd("storage share list-handle --name {} --recursive", account_info, file_share). \
+            assert_with_checks(JMESPathCheck("length(items)", 0))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
+from unittest import mock
 import time
 
 from azure.cli.core.util import CLIError
@@ -75,7 +75,7 @@ class AmsJobTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_job_name': nonexits_job_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams job show -a {amsname} -n{nonexits_job_name} -g {rg} -t {transformName}')
 
         list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()

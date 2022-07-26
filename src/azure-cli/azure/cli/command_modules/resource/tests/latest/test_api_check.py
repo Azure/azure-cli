@@ -4,11 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    from mock import MagicMock
+from unittest.mock import MagicMock
 
 from knack.util import CLIError
 from azure.cli.command_modules.resource.custom import (_ResourceUtils, _validate_resource_inputs,

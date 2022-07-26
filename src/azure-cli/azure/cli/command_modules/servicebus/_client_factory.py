@@ -6,8 +6,8 @@
 
 def cf_servicebus(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.servicebus import ServiceBusManagementClient
-    return get_mgmt_service_client(cli_ctx, ServiceBusManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_SERVICEBUS)
 
 
 def namespaces_mgmt_client_factory(cli_ctx, _):
@@ -36,3 +36,11 @@ def disaster_recovery_mgmt_client_factory(cli_ctx, _):
 
 def migration_mgmt_client_factory(cli_ctx, _):
     return cf_servicebus(cli_ctx).migration_configs
+
+
+def private_endpoint_connections_mgmt_client_factory(cli_ctx, _):
+    return cf_servicebus(cli_ctx).private_endpoint_connections
+
+
+def private_link_mgmt_client_factory(cli_ctx, _):
+    return cf_servicebus(cli_ctx).private_link_resources

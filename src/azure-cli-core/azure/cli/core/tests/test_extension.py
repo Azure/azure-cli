@@ -8,7 +8,7 @@ import unittest
 import shutil
 import zipfile
 
-import mock
+from unittest import mock
 
 from azure.cli.core.extension import (get_extensions, build_extension_path, extension_exists,
                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
@@ -153,7 +153,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.1'
         azext_metadata = None
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, cli_version, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, cli_version, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
             self.assertEqual(cli_version, expected_cli_version)
 
@@ -165,7 +165,7 @@ class TestExtensions(TestExtensionsBase):
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required,
                           EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, cli_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+            is_compatible, cli_version, min_required, max_required, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
             self.assertEqual(cli_version, expected_cli_version)
             self.assertEqual(min_required, expected_min_required)
@@ -176,7 +176,7 @@ class TestExtensions(TestExtensionsBase):
         expected_min_required = '0.0.1'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
 
     def test_ext_compat_with_cli_failed_bad_min_v_constraint(self):
@@ -184,7 +184,7 @@ class TestExtensions(TestExtensionsBase):
         expected_min_required = '0.0.7'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
     def test_ext_compat_with_cli_failed_bad_min_but_close_v_constraint(self):
@@ -192,7 +192,7 @@ class TestExtensions(TestExtensionsBase):
         expected_min_required = '0.0.5+dev'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
     def test_ext_compat_with_cli_only_max_v_constraint(self):
@@ -200,7 +200,7 @@ class TestExtensions(TestExtensionsBase):
         expected_max_required = '0.0.10'
         azext_metadata = {EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
 
     def test_ext_compat_with_cli_failed_bad_max_v_constraint(self):
@@ -208,7 +208,7 @@ class TestExtensions(TestExtensionsBase):
         expected_max_required = '0.0.3'
         azext_metadata = {EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
     def test_ext_compat_with_cli_failed_bad_max_but_close_v_constraint(self):
@@ -216,8 +216,19 @@ class TestExtensions(TestExtensionsBase):
         expected_max_required = '0.0.5b1'
         azext_metadata = {EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
         with mock.patch('azure.cli.core.__version__', expected_cli_version):
-            is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
+            is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
+
+    def test_ext_compat_with_cli_require_ext_min_version(self):
+        expected_cli_version = '0.0.5'
+        expected_min_ext_required = '0.2.0'
+        azext_metadata = {'name': 'myext', 'version': '0.1.0'}
+        with mock.patch('azure.cli.core.__version__', expected_cli_version), \
+            mock.patch('azure.cli.core.extension.EXTENSION_VERSION_REQUIREMENTS',
+                       {'myext': {'minExtVersion': expected_min_ext_required}}):
+            is_compatible, _, _, _, min_ext_required = ext_compat_with_cli(azext_metadata)
+            self.assertFalse(is_compatible)
+            self.assertEqual(min_ext_required, expected_min_ext_required)
 
 
 class TestWheelExtension(TestExtensionsBase):

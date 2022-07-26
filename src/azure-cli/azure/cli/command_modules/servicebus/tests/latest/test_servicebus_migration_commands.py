@@ -15,7 +15,7 @@ from knack.util import CLIError
 
 
 class SBNSMigrationCRUDScenarioTest(ScenarioTest):
-    from azure_devtools.scenario_tests import AllowLargeResponse
+    from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     # Test playback fails and the live-only flag will be removed once it is addressed
     @live_only()

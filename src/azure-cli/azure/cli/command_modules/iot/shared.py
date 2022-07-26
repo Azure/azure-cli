@@ -33,6 +33,7 @@ class RouteSourceType(Enum):
     DeviceLifecycleEvents = 'devicelifecycleevents'
     DeviceJobLifecycleEvents = 'devicejoblifecycleevents'
     DigitalTwinChangeEvents = 'digitaltwinchangeevents'
+    DeviceConnectionStateEvents = 'deviceconnectionstateevents'
 
 
 # pylint: disable=too-few-public-methods
@@ -59,5 +60,16 @@ class AuthenticationType(Enum):
     """
     Type of the Authentication for the routing endpoint.
     """
-    KeyBased = 'keybased'
-    IdentityBased = 'identitybased'
+    KeyBased = 'keyBased'
+    IdentityBased = 'identityBased'
+
+
+# pylint: disable=too-few-public-methods
+class IdentityType(Enum):
+    """
+    Type of managed identity for the IoT Hub.
+    """
+    system_assigned = "SystemAssigned"
+    user_assigned = "UserAssigned"
+    system_assigned_user_assigned = "SystemAssigned, UserAssigned"
+    none = "None"

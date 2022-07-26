@@ -72,11 +72,11 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
                 execute(self.cli_ctx,
                         'az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import HttpResponseError
         try:
             execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
-        except CloudError as ex:
-            if 'Recovery Services vault cannot be deleted as there are backup items in soft deleted state in the vault' not in str(ex):
+        except HttpResponseError as ex:
+            if "Operation returned an invalid status 'Bad Request'" not in str(ex):
                 raise ex
 
 
@@ -229,7 +229,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create an item, a resource group is required. Please add ' \
+            template = 'To create a Policy, a resource group is required. Please add ' \
                        'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
@@ -238,7 +238,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
+            template = 'To create a Policy, a vault is required. Please add ' \
                        'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
@@ -281,7 +281,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create an item, a resource group is required. Please add ' \
+            template = 'To create an RP, a resource group is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
@@ -290,7 +290,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
+            template = 'To create an RP, a vault is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
@@ -299,7 +299,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vm_parameter_name)
         except KeyError:
-            template = 'To create an rp, a VM is required. Please add ' \
+            template = 'To create an RP, a VM is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ItemPreparer.__name__, self.vm_parameter_name))
 
@@ -345,7 +345,7 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create an item, a resource group is required. Please add ' \
+            template = 'To create a Policy, a resource group is required. Please add ' \
                        'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
@@ -354,7 +354,7 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
+            template = 'To create a Policy, a vault is required. Please add ' \
                        'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
@@ -409,8 +409,8 @@ class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create an item, a resource group is required. Please add ' \
-                       'decorator @{} in front of this Policy preparer.'
+            template = 'To create a Fileshare, a resource group is required. Please add ' \
+                       'decorator @{} in front of this Fileshare preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -424,8 +424,8 @@ class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.storage_account_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @StorageAccountPreparer in front of this Policy preparer.'
+            template = 'To create a Fileshare, a storage_account is required. Please add ' \
+                       'decorator @StorageAccountPreparer in front of this Fileshare preparer.'
             raise CliTestError(template)
 
 
@@ -468,7 +468,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
             template = 'To create an item, a resource group is required. Please add ' \
-                       'decorator @{} in front of this Policy preparer.'
+                       'decorator @{} in front of this Item preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -477,7 +477,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
             template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @{} in front of this Policy preparer.'
+                       'decorator @{} in front of this Item preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
 
@@ -485,8 +485,8 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.storage_account_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @StorageAccountPreparer in front of this Policy preparer.'
+            template = 'To create an item, a storage_account is required. Please add ' \
+                       'decorator @StorageAccountPreparer in front of this Item preparer.'
             raise CliTestError(template)
 
     def _get_file_share(self, **kwargs):
@@ -494,7 +494,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.afs_parameter_name)
         except KeyError:
             template = 'To create an item, a fileshare is required. Please add ' \
-                       'decorator @FileSharePreparer in front of this Policy preparer.'
+                       'decorator @FileSharePreparer in front of this Item preparer.'
             raise CliTestError(template)
 
     def _get_policy(self, **kwargs):
@@ -502,7 +502,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.policy_parameter_name)
         except KeyError:
             template = 'To create an item, a policy is required. Please add ' \
-                       'decorator @AFSPolicyPreparer in front of this Policy preparer.'
+                       'decorator @AFSPolicyPreparer in front of this Item preparer.'
             raise CliTestError(template)
 
 
@@ -545,8 +545,8 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create an item, a resource group is required. Please add ' \
-                       'decorator @{} in front of this Policy preparer.'
+            template = 'To create an RP, a resource group is required. Please add ' \
+                       'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -554,8 +554,8 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @{} in front of this Policy preparer.'
+            template = 'To create an RP, a vault is required. Please add ' \
+                       'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
 
@@ -563,16 +563,16 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.storage_account_parameter_name)
         except KeyError:
-            template = 'To create a RP, an item is required. Please add ' \
-                       'decorator @AFSItemPreparer in front of this Policy preparer.'
+            template = 'To create an RP, a storage_account is required. Please add ' \
+                       'decorator @AFSItemPreparer in front of this RP preparer.'
             raise CliTestError(template)
 
     def _get_file_share(self, **kwargs):
         try:
             return kwargs.get(self.afs_parameter_name)
         except KeyError:
-            template = 'To create an item, a fileshare is required. Please add ' \
-                       'decorator @FileSharePreparer in front of this Policy preparer.'
+            template = 'To create an RP, a fileshare is required. Please add ' \
+                       'decorator @FileSharePreparer in front of this RP preparer.'
             raise CliTestError(template)
 
 

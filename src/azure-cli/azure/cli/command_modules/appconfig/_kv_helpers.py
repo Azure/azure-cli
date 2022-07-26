@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,too-many-nested-blocks
+# pylint: disable=line-too-long,too-many-nested-blocks,too-many-lines,too-many-return-statements
 
 import io
 import json
-import re
+from difflib import Differ
+from itertools import filterfalse
+from json import JSONDecodeError
+from urllib.parse import urlparse
 
 import chardet
 import javaproperties
@@ -15,11 +18,15 @@ import yaml
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.appconfiguration import ResourceReadOnlyError
-from azure.core.exceptions import HttpResponseError
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants)
-from ._utils import user_confirmation, prep_label_filter_for_url_encoding
+from azure.keyvault.key_vault_id import KeyVaultIdentifier
+from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
+from azure.core.exceptions import HttpResponseError
+from azure.cli.core.util import user_confirmation
+from azure.cli.core.azclierror import FileOperationError, AzureInternalError
+
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles)
+from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -29,6 +36,7 @@ from._featuremodels import (map_keyvalue_to_featureflag,
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
+FEATURE_FLAG_PROPERTIES = {'id', 'description', 'enabled', 'conditions'}
 
 
 class FeatureManagementReservedKeywords:
@@ -91,6 +99,9 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 
 def validate_import_key(key):
     if key:
+        if not isinstance(key, str):
+            logger.warning("Ignoring invalid key '%s'. Key must be a string.", key)
+            return False
         if key == '.' or key == '..' or '%' in key:
             logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
             return False
@@ -100,16 +111,13 @@ def validate_import_key(key):
     else:
         logger.warning("Ignoring invalid key ''. Key cannot be empty.")
         return False
-
     return True
 
 
 def validate_import_feature(feature):
     if feature:
-        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
-        invalid = re.search(invalid_pattern, feature)
-        if invalid:
-            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
+        if '%' in feature:
+            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
             return False
     else:
         logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
@@ -120,6 +128,42 @@ def validate_import_feature(feature):
 
 # File <-> List of KeyValue object
 
+def __read_with_appropriate_encoding(file_path, format_):
+    config_data = {}
+    default_encoding = 'utf-8'
+    detected_encoding = __check_file_encoding(file_path)
+
+    try:
+        with io.open(file_path, 'r', encoding=default_encoding) as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+
+            elif format_ == 'yaml':
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+
+            elif format_ == 'properties':
+                config_data = javaproperties.load(config_file)
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        if detected_encoding == default_encoding:
+            raise
+
+        with io.open(file_path, 'r', encoding=detected_encoding) as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+
+            elif format_ == 'yaml':
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+
+            elif format_ == 'properties':
+                config_data = javaproperties.load(config_file)
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+
+    return config_data
+
 
 def __read_kv_from_file(file_path,
                         format_,
@@ -129,34 +173,21 @@ def __read_kv_from_file(file_path,
                         content_type=None):
     config_data = {}
     try:
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
-            if format_ == 'json':
-                config_data = json.load(config_file)
-                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
-                    # delete all feature management sections in any name format.
-                    # If users have not skipped features, and there are multiple
-                    # feature sections, we will error out while reading features.
-                    if feature_management_keyword in config_data:
-                        del config_data[feature_management_keyword]
-
-            elif format_ == 'yaml':
-                for yaml_data in list(yaml.safe_load_all(config_file)):
-                    config_data.update(yaml_data)
-                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
-                    # delete all feature management sections in any name format.
-                    # If users have not skipped features, and there are multiple
-                    # feature sections, we will error out while reading features.
-                    if feature_management_keyword in config_data:
-                        del config_data[feature_management_keyword]
-
-            elif format_ == 'properties':
-                config_data = javaproperties.load(config_file)
-                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
-
-    except ValueError:
-        raise CLIError('The input is not a well formatted %s file.' % (format_))
+        config_data = __read_with_appropriate_encoding(file_path, format_)
+        if format_ in ('json', 'yaml'):
+            for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
+                # delete all feature management sections in any name format.
+                # If users have not skipped features, and there are multiple
+                # feature sections, we will error out while reading features.
+                if feature_management_keyword in config_data:
+                    del config_data[feature_management_keyword]
+    except ValueError as ex:
+        raise CLIError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
+    except yaml.YAMLError as ex:
+        raise CLIError('The input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
         raise CLIError('File is not available.')
+
     flattened_data = {}
     if format_ == 'json' and content_type and __is_json_content_type(content_type):
         for key in config_data:
@@ -202,17 +233,10 @@ def __read_features_from_file(file_path, format_):
         return features_dict
 
     try:
-        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
-            if format_ == 'json':
-                config_data = json.load(config_file)
-
-            elif format_ == 'yaml':
-                for yaml_data in list(yaml.safe_load_all(config_file)):
-                    config_data.update(yaml_data)
-
+        config_data = __read_with_appropriate_encoding(file_path, format_)
         found_feature_section = False
         for index, feature_management_keyword in enumerate(FEATURE_MANAGEMENT_KEYWORDS):
-            # find the first occurence of feature management section in file.
+            # find the first occurrence of feature management section in file.
             # Enforce the same naming convention for 'EnabledFor' keyword
             # If there are multiple feature sections, we will error out here.
             if feature_management_keyword in config_data:
@@ -223,9 +247,11 @@ def __read_features_from_file(file_path, format_):
                 else:
                     raise CLIError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
 
-    except ValueError:
+    except ValueError as ex:
         raise CLIError(
-            'The feature management section of input is not a well formatted %s file.' % (format_))
+            'The feature management section of input is not a well formatted %s file.\nException: %s' % (format_, ex))
+    except yaml.YAMLError as ex:
+        raise CLIError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
         raise CLIError('File is not available.')
 
@@ -234,6 +260,10 @@ def __read_features_from_file(file_path, format_):
 
 
 def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False, naming_convention='pascal'):
+    if not key_values and not features:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
+        return
+
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
@@ -244,7 +274,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
-                yaml.safe_dump(exported_keyvalues, fp, sort_keys=False)
+                yaml.safe_dump(exported_keyvalues, fp, sort_keys=False, width=float('inf'))
             elif format_ == 'properties':
                 javaproperties.dump(exported_keyvalues, fp)
     except Exception as exception:
@@ -298,7 +328,7 @@ def __read_kv_from_config_store(azconfig_client,
 
     if cli_ctx:
         from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        keyvault_client = keyvault_data_plane_factory(cli_ctx, None)
+        keyvault_client = keyvault_data_plane_factory(cli_ctx)
     else:
         keyvault_client = None
 
@@ -315,7 +345,7 @@ def __read_kv_from_config_store(azconfig_client,
 
             if kv.content_type and kv.value:
                 # resolve key vault reference
-                if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                if keyvault_client and __is_key_vault_ref(kv):
                     __resolve_secret(keyvault_client, kv)
 
         # trim unwanted fields from kv object instead of leaving them as null.
@@ -339,6 +369,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
                                             preserve_labels=False,
                                             content_type=None):
     if not key_values and not features:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
         return
 
     # write all keyvalues to target store
@@ -350,24 +381,21 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if not preserve_labels:
             set_kv.label = label
 
-        # Don't overwrite the content type of feature flags
-        if content_type and not __is_feature_flag(set_kv):
+        # Don't overwrite the content type of feature flags or key vault references
+        if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
-        try:
-            azconfig_client.set_configuration_setting(set_kv)
-        except ResourceReadOnlyError:
-            logger.warning("Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.", set_kv.key, set_kv.label)
-        except HttpResponseError as exception:
-            logger.warning("Failed to set key-value with key '%s' and label '%s'. %s", set_kv.key, set_kv.label, str(exception))
-        except Exception as exception:
-            raise CLIError(str(exception))
+        __write_configuration_setting_to_config_store(azconfig_client, set_kv)
 
 
 def __is_feature_flag(kv):
-    if kv and kv.key and kv.content_type:
+    if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
+
+
+def __is_key_vault_ref(kv):
+    return kv and kv.content_type and isinstance(kv.content_type, str) and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE
 
 
 def __discard_features_from_retrieved_kv(src_kvs):
@@ -383,8 +411,9 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
     try:
         key_values = []
         from azure.cli.command_modules.appservice.custom import get_app_settings
+        slot = appservice_account.get('resource_name') if appservice_account.get('resource_type') == 'slots' else None
         settings = get_app_settings(
-            cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=None)
+            cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=slot)
         for item in settings:
             key = prefix_to_add + item['name']
             if validate_import_key(key):
@@ -409,7 +438,6 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             secret_version = appsvc_value_dict.get('secretversion')
                             secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
                         try:
-                            from azure.keyvault.key_vault_id import KeyVaultIdentifier
                             # this throws an exception for invalid format of secret identifier
                             KeyVaultIdentifier(uri=secret_identifier)
                             kv = KeyValue(key=key,
@@ -441,6 +469,10 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
+    if not key_values:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
+        return
+
     try:
         non_slot_settings = []
         slot_settings = []
@@ -448,7 +480,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             name = kv.key
             value = kv.value
             # If its a KeyVault ref, convert the format to AppService KeyVault ref format
-            if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+            if __is_key_vault_ref(kv):
                 try:
                     secret_uri = json.loads(value).get("uri")
                     if secret_uri:
@@ -465,9 +497,10 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             else:
                 non_slot_settings.append(name + '=' + value)
         # known issue 4/26: with in-place update, AppService could change slot-setting true/false incorrectly
+        slot = appservice_account.get('resource_name') if appservice_account.get('resource_type') == 'slots' else None
         from azure.cli.command_modules.appservice.custom import update_app_settings
         update_app_settings(cmd, resource_group_name=appservice_account["resource_group"],
-                            name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings)
+                            name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings, slot=slot)
     except Exception as exception:
         raise CLIError("Failed to write key-values to appservice: " + str(exception))
 
@@ -529,21 +562,27 @@ def __serialize_feature_list_to_comparable_json_object(features):
         feature_json['description'] = feature.description
         # conditions
         feature_json['conditions'] = feature.conditions
-        # key
-        res[feature.key] = feature_json
+        # name
+        res[feature.name] = feature_json
     return res
 
 
-def __serialize_kv_list_to_comparable_json_list(keyvalues):
+def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     res = []
     for kv in keyvalues:
         # value
-        kv_json = {'key': kv.key,
-                   'value': kv.value,
-                   'label': kv.label,
-                   'locked': kv.read_only,
-                   'last modified': kv.last_modified,
-                   'content type': kv.content_type}
+        if profile == ImportExportProfiles.KVSET:
+            kv_json = {'key': kv.key,
+                       'value': kv.value,
+                       'label': kv.label,
+                       'content_type': kv.content_type}
+        else:
+            kv_json = {'key': kv.key,
+                       'value': kv.value,
+                       'label': kv.label,
+                       'locked': kv.locked,
+                       'last modified': kv.last_modified,
+                       'content type': kv.content_type}
         # tags
         tag_json = {}
         if kv.tags:
@@ -554,9 +593,9 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues):
     return res
 
 
-def __print_features_preview(old_json, new_json):
-    logger.warning('\n---------------- Feature Flags Preview (Beta) -------------')
-    if not new_json:
+def __print_features_preview(old_json, new_json, strict=False):
+    logger.warning('\n---------------- Feature Flags Preview -------------')
+    if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
 
@@ -567,14 +606,20 @@ def __print_features_preview(old_json, new_json):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
-    if res == {} or (('update' not in keys) and ('insert' not in keys)):
+    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
         logger.warning('\nTarget configuration already contains all feature flags in source. No changes will be made.')
         return False
 
     # format result printing
     for action, changes in res.items():
         if action.label == 'delete':
-            continue  # we do not delete KVs while importing/exporting
+            if strict:
+                logger.warning('\nDeleting:')
+                for key in changes:
+                    record = {'key': key}
+                    logger.warning(json.dumps(record, ensure_ascii=False))
+            else:
+                continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
@@ -600,9 +645,9 @@ def __print_features_preview(old_json, new_json):
     return True
 
 
-def __print_preview(old_json, new_json):
-    logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
-    if not new_json:
+def __print_preview(old_json, new_json, strict=False):
+    logger.warning('\n---------------- Key Values Preview ----------------')
+    if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
 
@@ -613,14 +658,20 @@ def __print_preview(old_json, new_json):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
-    if res == {} or (('update' not in keys) and ('insert' not in keys)):
+    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
         logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
     # format result printing
     for action, changes in res.items():
         if action.label == 'delete':
-            continue  # we do not delete KVs while importing/exporting
+            if strict:
+                logger.warning('\nDeleting:')
+                for key in changes:
+                    record = {'key': key}
+                    logger.warning(json.dumps(record, ensure_ascii=False))
+            else:
+                continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
@@ -644,8 +695,26 @@ def __print_preview(old_json, new_json):
     return True
 
 
+def __export_kvset_to_file(file_path, keyvalues, yes):
+    kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, ImportExportProfiles.KVSET)
+    obj = {KVSetConstants.KVSETRootElementName: kvset}
+    json_string = json.dumps(obj, indent=2, ensure_ascii=False)
+    if not yes:
+        logger.warning('\n---------------- KVSet Preview ----------------')
+        if len(kvset) == 0:
+            logger.warning('\nSource configuration is empty. Nothing to export.')
+            return
+        __print_preview_json_diff(new_obj=obj)
+        user_confirmation('Do you want to continue? \n')
+    try:
+        with open(file_path, 'w', encoding='utf-8') as fp:
+            fp.write(json_string)
+    except Exception as exception:
+        raise FileOperationError("Failed to export key-values to file. " + str(exception))
+
+
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
-    logger.warning('\n---------------- Preview (Beta) ----------------')
+    logger.warning('\n---------------- Preview ----------------')
     if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
         logger.warning('\nNo records matching found to be restored. No changes will be made.')
         return False
@@ -854,7 +923,7 @@ def __export_features(retrieved_features, naming_convention):
                         feature_filter["Parameters"] = filter_.parameters
                     feature_state[feature_reserved_keywords.enabledfor].append(feature_filter)
 
-            feature_entry = {feature.key: feature_state}
+            feature_entry = {feature.name: feature_state}
 
             exported_dict[feature_reserved_keywords.featuremanagement].update(feature_entry)
 
@@ -978,6 +1047,178 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
     except Exception as exception:
         raise CLIError(str(exception))
+
+
+def __import_kvset_from_file(client, path, strict, yes):
+    new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
+    if KVSetConstants.KVSETRootElementName not in new_kvset:
+        raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
+
+    kvset_from_file = [ConfigurationSetting(key=kv.get('key', None),
+                                            label=kv.get('label', None),
+                                            content_type=kv.get('content_type', None),
+                                            value=kv.get('value', None),
+                                            tags=kv.get('tags', None))
+                       for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
+
+    kvset_to_import = []
+
+    for config_setting in kvset_from_file:
+        if __validate_import_config_setting(config_setting):
+            kvset_to_import.append(config_setting)
+
+    if strict or not yes:
+        existing_kvset = __read_kv_from_config_store(client,
+                                                     key=SearchFilterOptions.ANY_KEY,
+                                                     label=SearchFilterOptions.ANY_LABEL)
+    kvset_to_delete = []
+    if strict:
+        kvset_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
+                                                          for kv_import in kvset_to_import), existing_kvset))
+    if not yes:
+
+        # When strict mode is not enabled, we don't delete configurations if they are missing from the import file,
+        # so don't need to show them in the diff, so omit them from existing kvset
+        if not strict:
+            existing_kvset = list(filter(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
+                                                        for kv_import in kvset_to_import), existing_kvset))
+
+        existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
+        kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
+
+        logger.warning('\n---------------- KVSet Preview ----------------')
+        changes_detected = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
+        if not changes_detected:
+            logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
+            return
+
+        user_confirmation('Do you want to continue?\n')
+
+    if len(kvset_to_delete) > 0:
+        for config_setting in kvset_to_delete:
+            __delete_configuration_setting_from_config_store(client, config_setting)
+
+    for config_setting in kvset_to_import:
+        __write_configuration_setting_to_config_store(client, config_setting)
+
+
+def __validate_import_keyvault_ref(kv):
+    if kv and validate_import_key(kv.key):
+        try:
+            value = json.loads(kv.value)
+        except JSONDecodeError as exception:
+            logger.warning("The keyvault reference with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.key, str(exception))
+            return False
+
+        if 'uri' in value:
+            parsed_url = urlparse(value['uri'])
+            # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
+            if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
+                try:
+                    KeyVaultIdentifier(uri=value['uri'])
+                    return True
+                except Exception:  # pylint: disable=broad-except
+                    pass
+
+        logger.warning("Keyvault reference with key '{%s}' is not a valid keyvault reference. It will not be imported.", kv.key)
+    return False
+
+
+def __validate_import_feature_flag(kv):
+    if kv and validate_import_feature(kv.key):
+        try:
+            ff = json.loads(kv.value)
+            if FEATURE_FLAG_PROPERTIES == ff.keys():
+                return True
+            logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+        except JSONDecodeError as exception:
+            logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
+    return False
+
+
+def __validate_import_config_setting(config_setting):
+    if __is_key_vault_ref(kv=config_setting):
+        if not __validate_import_keyvault_ref(kv=config_setting):
+            return False
+    elif __is_feature_flag(kv=config_setting):
+        if not __validate_import_feature_flag(kv=config_setting):
+            return False
+    elif not validate_import_key(config_setting.key):
+        return False
+
+    if config_setting.value and not isinstance(config_setting.value, str):
+        logger.warning("The 'value' for the key '{%s}' is not a string. This key-value will not be imported.", config_setting.key)
+        return False
+    if config_setting.content_type and not isinstance(config_setting.content_type, str):
+        logger.warning("The 'content_type' for the key '{%s}' is not a string. This key-value will not be imported.", config_setting.key)
+        return False
+    if config_setting.label and not isinstance(config_setting.label, str):
+        logger.warning("The 'label' for the key '{%s}' is not a string. This key-value will not be imported.", config_setting.key)
+        return False
+
+    return __validate_import_tags(config_setting)
+
+
+def __validate_import_tags(kv):
+    if kv.tags and not isinstance(kv.tags, dict):
+        logger.warning("The format of 'tags' for key '%s' is not valid. This key-value will not be imported.", kv.key)
+        return False
+
+    if kv.tags:
+        for tag_key, tag_value in kv.tags.items():
+            if not isinstance(tag_value, str):
+                logger.warning("The value for the tag '{%s}' for key '{%s}' is not in a valid format. This key-value will not be imported.", tag_key, kv.key)
+                return False
+    return True
+
+
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
+    try:
+        azconfig_client.set_configuration_setting(configuration_setting)
+    except ResourceReadOnlyError:
+        logger.warning(
+            "Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.",
+            configuration_setting.key, configuration_setting.label)
+    except HttpResponseError as exception:
+        logger.warning(
+            "Failed to set key-value with key '%s' and label '%s'. %s",
+            configuration_setting.key, configuration_setting.label, str(exception))
+    except Exception as exception:
+        raise AzureInternalError(str(exception))
+
+
+def __delete_configuration_setting_from_config_store(azconfig_client, configuration_setting):
+    try:
+        azconfig_client.delete_configuration_setting(key=configuration_setting.key, label=configuration_setting.label)
+    except ResourceReadOnlyError:
+        logger.warning(
+            "Failed to delete read only key-value with key '%s' and label '%s'. Unlock the key-value before deleting it.",
+            configuration_setting.key, configuration_setting.label)
+    except HttpResponseError as exception:
+        logger.warning(
+            "Failed to delete key-value with key '%s' and label '%s'. %s",
+            configuration_setting.key, configuration_setting.label, str(exception))
+    except Exception as exception:
+        raise AzureInternalError(str(exception))
+
+
+def __print_preview_json_diff(old_obj=None, new_obj=None):
+    # prints the json diff if two objects differ, returns whether the diff was found.
+
+    old_json = "" if old_obj is None else json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True)
+    new_json = "" if new_obj is None else json.dumps(new_obj, indent=2, ensure_ascii=False).splitlines(True)
+
+    differ = Differ()
+    diff = list(differ.compare(old_json, new_json))
+
+    if not any(line.startswith('-') or line.startswith('+') for line in diff):
+        return False
+
+    # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
+    logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
+    # print newline for readability
+    logger.warning('\n')
+    return True
 
 
 class Undef:  # pylint: disable=too-few-public-methods

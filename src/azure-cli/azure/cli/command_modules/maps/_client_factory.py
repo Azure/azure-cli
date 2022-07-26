@@ -6,9 +6,17 @@
 
 def cf_maps(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.maps import MapsManagementClient
-    return get_mgmt_service_client(cli_ctx, MapsManagementClient)
+    from azure.mgmt.maps import AzureMapsManagementClient
+    return get_mgmt_service_client(cli_ctx, AzureMapsManagementClient)
 
 
 def cf_accounts(cli_ctx, *_):
     return cf_maps(cli_ctx).accounts
+
+
+def cf_map(cli_ctx, *_):
+    return cf_maps(cli_ctx).maps
+
+
+def cf_creator(cli_ctx, *_):
+    return cf_maps(cli_ctx).creators

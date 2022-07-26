@@ -3,10 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait, random_string
+from azure.mgmt.web.models import NameIdentifier
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -47,7 +49,17 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
         raise CLIError("Unable to get IP address")
 
     web_client = web_client_factory(cmd.cli_ctx)
-    hostname_availability = web_client.domains.check_availability(name=hostname)
+    hostname_availability = web_client.domains.check_availability(NameIdentifier(name=hostname))
+
+    if not hostname_availability.available:
+        raise ValidationError("Custom domain name '{}' is not available. Please try again "
+                              "with a new hostname.".format(hostname))
+
+    tld = '.'.join(hostname.split('.')[1:])
+    TopLevelDomainAgreementOption = cmd.get_models('TopLevelDomainAgreementOption')
+    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=bool(privacy), for_transfer=False)
+    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
+    agreement_keys = [agreement.agreement_key for agreement in agreements]
 
     if dryrun:
         logger.warning("Custom domain will be purchased with the below configuration. Re-run command "
@@ -58,6 +70,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
             "resource_group_name": resource_group_name,
             "privacy": bool(privacy),
             "auto_renew": bool(auto_renew),
+            "agreement_keys": agreement_keys,
             "accept_terms": bool(accept_terms),
             "hostname_available": bool(hostname_availability.available),
             "price": "$11.99 USD" if hostname_availability.available else "N/A"
@@ -84,19 +97,12 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                     "privacy": "%(privacy)s",
                     "auto_renew": "%(auto_renew)s",
                     "accepted_hostname_purchase_terms": "%(accept_terms)s",
+                    "agreement_keys": "%(agreement_keys)s",
                     "hostname_available": "%(hostname_available)s",
                     "price": "%(price)s"
                     }
                     """ % dry_run_params
         return json.loads(dry_run_str)
-
-    if not hostname_availability.available:
-        raise CLIError("Custom domain name '{}' is not available. Please try again "
-                       "with a new hostname.".format(hostname))
-
-    tld = '.'.join(hostname.split('.')[1:])
-    agreements = web_client.top_level_domains.list_agreements(name=tld, include_privacy=privacy)
-    agreement_keys = [agreement.agreement_key for agreement in agreements]
 
     dns_zone_id = "[resourceId('Microsoft.Network/dnszones', '{}')]".format(hostname)
 
@@ -136,30 +142,25 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
-    else:
-        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+    deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+        sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment))
 
     return deployment_result
 
 
 def show_domain_purchase_terms(cmd, hostname):
+    from azure.mgmt.web.models import TopLevelDomainAgreementOption
+    domain_identifier = NameIdentifier(name=hostname)
     web_client = web_client_factory(cmd.cli_ctx)
-    hostname_availability = None
-    try:
-        hostname_availability = web_client.domains.check_availability(name=hostname)
-    except Exception:  # pylint: disable=broad-except
-        raise CLIError("Invalid hostname: '{}'. Please enter a valid hostname".format(hostname))
+    hostname_availability = web_client.domains.check_availability(domain_identifier)
+    if not hostname_availability.available:  # api returns false
+        raise CLIError(" hostname: '{}' in not available. Please enter a valid hostname.".format(hostname))
 
     tld = '.'.join(hostname.split('.')[1:])
-    agreements = web_client.top_level_domains.list_agreements(name=tld, include_privacy=True)
+    domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=True, for_transfer=True)
+    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
 
     terms = {
         "hostname": hostname,

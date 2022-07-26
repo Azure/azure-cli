@@ -23,6 +23,7 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
         super(KeyVaultCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_KEYVAULT,
+            operation_group="vaults",
             custom_command_type=keyvault_custom,
             command_group_cls=KeyVaultCommandGroup,
             argument_context_cls=KeyVaultArgumentContext,

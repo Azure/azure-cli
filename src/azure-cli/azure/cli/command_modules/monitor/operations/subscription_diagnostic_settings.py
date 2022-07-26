@@ -14,7 +14,6 @@ def create_subscription_diagnostic_settings(cmd, client,
                                             service_bus_rule=None,
                                             workspace=None):
     from azure.mgmt.monitor.models import SubscriptionDiagnosticSettingsResource
-    from azure.cli.core.commands.client_factory import get_subscription_id
     parameters = SubscriptionDiagnosticSettingsResource(storage_account_id=storage_account,
                                                         workspace_id=workspace,
                                                         event_hub_name=event_hub_name,
@@ -22,7 +21,7 @@ def create_subscription_diagnostic_settings(cmd, client,
                                                         service_bus_rule_id=service_bus_rule,
                                                         logs=logs,
                                                         location=location)
-    return client.create_or_update(subscription_id=get_subscription_id(cmd.cli_ctx), parameters=parameters, name=name)
+    return client.create_or_update(parameters=parameters, name=name)
 
 
 def update_subscription_diagnostic_settings(cmd, instance, event_hub_name=None, logs=None,

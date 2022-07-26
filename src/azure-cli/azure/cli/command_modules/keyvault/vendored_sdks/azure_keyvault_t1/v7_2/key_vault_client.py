@@ -11,6 +11,7 @@
 # pylint: skip-file
 # flake8: noqa
 import json
+import time
 
 from msrest.service_client import SDKClient
 from msrest import Serializer, Deserializer
@@ -114,12 +115,16 @@ class KeyVaultClient(SDKClient):
         response = self._client.send(
             request, header_parameters, body_content, stream=False, **operation_config)
 
-        if response.status_code not in [200]:
+        # v7.2-preview and v7.2 will introduce a breaking change to make the operation change from Sync to Async
+        # 200: for compatability of response before the change (Sync Operation)
+        # 202: for the support of new response after the change (Async Operation)
+        if response.status_code not in [200, 202]:
             raise models.KeyVaultErrorException(self._deserialize, response)
 
         deserialized = None
 
-        if response.status_code == 200:
+        # for both old response and new response
+        if response.status_code in [200, 202]:
             deserialized = self._deserialize('SecurityDomainObject', response)
 
         if raw:
@@ -128,6 +133,58 @@ class KeyVaultClient(SDKClient):
 
         return deserialized
     download.metadata = {'url': '/securitydomain/download'}
+
+    def download_pending(self, vault_base_url, custom_headers=None, raw=False, **operation_config):
+        """Get Security domain upload operation status.
+        :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
+        :type vault_base_url: str
+        :keyword callable cls: A custom type or function that will be passed the direct response
+        :return: SecurityDomainOperationStatus, or the result of cls(response)
+        :rtype: ~key_vault_client.models.SecurityDomainOperationStatus
+        :raises: ~azure.core.exceptions.HttpResponseError
+        """
+
+        # Construct URL
+        url = self.upload_pending.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True)
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language",
+                                                                          self.config.accept_language, 'str')
+
+        # Construct and send request
+        request = self._client.get(url, query_parameters)
+        response = self._client.send(
+            request, header_parameters, stream=False, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.KeyVaultErrorException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
+            deserialized = self._deserialize('SecurityDomainOperationStatus', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+    download_pending.metadata = {'url': '/securitydomain/download/pending'}
 
     def transfer_key(self, vault_base_url, custom_headers=None, raw=False, **operation_config):
         """Retrieve security domain transfer key.

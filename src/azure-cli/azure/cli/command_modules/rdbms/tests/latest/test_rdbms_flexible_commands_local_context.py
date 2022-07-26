@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.local_context import AzCLILocalContext, ALL, LOCAL_CONTEXT_FILE
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import (
@@ -20,19 +20,6 @@ SERVER_NAME_MAX_LENGTH = 20
 
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
-    postgres_location = 'eastus2euap'
-    mysql_location = 'eastus2euap'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_local_context(self, resource_group):
-        self._test_flexible_server_local_context('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_local_context(self, resource_group):
-        self._test_flexible_server_local_context('mysql', resource_group)
-
     def _test_flexible_server_local_context(self, database_engine, resource_group):
         self.cmd('config param-persist on')
         if database_engine == 'mysql':
@@ -49,11 +36,11 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
         local_context_info = self.cmd('config param-persist show').get_output_in_json()
 
-        self.cmd('{} flexible-server show'.format(database_engine),
-                 checks=[JMESPathCheck('resourceGroup', local_context_info['all']['resource_group_name']),
-                         JMESPathCheck('location', 'East US 2 EUAP'),
-                         JMESPathCheck('name', local_context_info[database_engine + ' flexible-server']['server_name']),
-                         JMESPathCheck('administratorLogin', local_context_info[database_engine + ' flexible-server']['administrator_login'])])
+        show_result = self.cmd('{} flexible-server show'.format(database_engine),
+                               checks=[JMESPathCheck('resourceGroup', local_context_info['all']['resource_group_name']),
+                                       JMESPathCheck('name', local_context_info[database_engine + ' flexible-server']['server_name']),
+                                       JMESPathCheck('administratorLogin', local_context_info[database_engine + ' flexible-server']['administrator_login'])]).get_output_in_json()
+        self.assertEqual(''.join(show_result['location'].lower().split()), location)
 
         self.cmd('{} flexible-server show-connection-string'.format(database_engine),
                  checks=[StringContainCheck(local_context_info[database_engine + ' flexible-server']['administrator_login'])]).get_output_in_json()
@@ -63,6 +50,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('{} flexible-server delete --yes'.format(database_engine))
 
         delete_local_context_info = self.cmd('config param-persist show').get_output_in_json()
+
         self.assertNotIn(database_engine + ' flexible-server', delete_local_context_info)
         self.assertNotIn(local_context_info[database_engine + ' flexible-server']['server_name'], delete_local_context_info)
         self.assertNotIn(local_context_info[database_engine + ' flexible-server']['administrator_login'], delete_local_context_info)

@@ -48,7 +48,7 @@ def acr_token_create(cmd,
 
     Token = cmd.get_models('Token')
 
-    poller = client.create(
+    poller = client.begin_create(
         resource_group_name,
         registry_name,
         token_name,
@@ -100,7 +100,7 @@ def acr_token_delete(cmd,
             return None
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.delete(resource_group_name, registry_name, token_name)
+    return client.begin_delete(resource_group_name, registry_name, token_name)
 
 
 def acr_token_update(cmd,
@@ -122,7 +122,7 @@ def acr_token_update(cmd,
         arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
         scope_map_id = '{}/{}/{}'.format(arm_resource_id, SCOPE_MAPS, scope_map_name)
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         registry_name,
         token_name,
@@ -189,7 +189,7 @@ def acr_token_credential_generate(cmd,
 
     GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters')
 
-    return client.generate_credentials(
+    return client.begin_generate_credentials(
         resource_group_name,
         registry_name,
         GenerateCredentialsParameters(
@@ -239,7 +239,7 @@ def acr_token_credential_delete(cmd,
     TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
     TokenCredentialsProperties = cmd.get_models('TokenCredentialsProperties')
 
-    return client.update(
+    return client.begin_update(
         resource_group_name,
         registry_name,
         token_name,

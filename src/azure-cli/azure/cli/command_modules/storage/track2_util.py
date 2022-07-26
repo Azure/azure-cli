@@ -46,6 +46,12 @@ def _encode_bytes(b):
     return b
 
 
+def _str_to_bytearray(data):
+    if data is not None:
+        return bytearray(base64.b64decode(data))
+    return data
+
+
 def transform_dict_keys_to_hump(data_dict):
     new_dict = {}
     if not data_dict:
@@ -88,8 +94,7 @@ def url_quote(url):
 
 
 def encode_base64(data):
-    import six
-    if isinstance(data, six.text_type):
+    if isinstance(data, str):
         data = data.encode('utf-8')
     encoded = base64.b64encode(data)
     return encoded.decode('utf-8')

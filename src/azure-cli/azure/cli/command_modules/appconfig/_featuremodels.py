@@ -27,12 +27,13 @@ class FeatureState(Enum):
 class FeatureQueryFields(Enum):
     KEY = 0x001
     LABEL = 0x002
+    NAME = 0x004
     LAST_MODIFIED = 0x020
     LOCKED = 0x040
     STATE = 0x100
     DESCRIPTION = 0x200
     CONDITIONS = 0x400
-    ALL = KEY | LABEL | LAST_MODIFIED | LOCKED | STATE | DESCRIPTION | CONDITIONS
+    ALL = KEY | LABEL | NAME | LAST_MODIFIED | LOCKED | STATE | DESCRIPTION | CONDITIONS
 
 
 class FeatureFlagValue:
@@ -40,7 +41,7 @@ class FeatureFlagValue:
     Schema of Value inside KeyValue when key is a Feature Flag.
 
     :ivar str id:
-        ID (key) of the feature.
+        ID (name) of the feature.
     :ivar str description:
         Description of Feature Flag
     :ivar bool enabled:
@@ -57,7 +58,7 @@ class FeatureFlagValue:
         default_conditions = {'client_filters': []}
 
         self.id = id_
-        self.description = description
+        self.description = "" if description is None else description
         self.enabled = enabled if enabled else False
         self.conditions = conditions if conditions else default_conditions
 
@@ -76,10 +77,12 @@ class FeatureFlag:
     '''
     Feature Flag schema as displayed to the user.
 
+    :ivar str name:
+        Name (ID) of the feature flag.
     :ivar str key:
-        FeatureName (key) of the entry.
+        Key of the feature flag.
     :ivar str label:
-        Label of the entry.
+        Label of the feature flag.
     :ivar str state:
         Represents if the Feature flag is On/Off/Conditionally On
     :ivar str description:
@@ -95,13 +98,15 @@ class FeatureFlag:
     '''
 
     def __init__(self,
-                 key,
+                 name,
+                 key=None,
                  label=None,
                  state=None,
                  description=None,
                  conditions=None,
                  locked=None,
                  last_modified=None):
+        self.name = name
         self.key = key
         self.label = label
         self.state = state.name.lower()
@@ -112,6 +117,7 @@ class FeatureFlag:
 
     def __repr__(self):
         featureflag = {
+            "Feature Name": self.name,
             "Key": self.key,
             "Label": self.label,
             "State": self.state,
@@ -185,12 +191,12 @@ def map_featureflag_to_keyvalue(featureflag):
         if featureflag.state in ("on", "conditional"):
             enabled = True
 
-        feature_flag_value = FeatureFlagValue(id_=featureflag.key,
+        feature_flag_value = FeatureFlagValue(id_=featureflag.name,
                                               description=featureflag.description,
                                               enabled=enabled,
                                               conditions=featureflag.conditions)
 
-        set_kv = KeyValue(key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + featureflag.key,
+        set_kv = KeyValue(key=featureflag.key,
                           label=featureflag.label,
                           value=json.dumps(feature_flag_value,
                                            default=lambda o: o.__dict__,
@@ -223,8 +229,8 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
         Return:
             FeatureFlag object
     '''
-    feature_name = keyvalue.key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
     feature_flag_value = map_keyvalue_to_featureflagvalue(keyvalue)
+    feature_name = feature_flag_value.id
     state = FeatureState.OFF
     if feature_flag_value.enabled:
         state = FeatureState.ON
@@ -238,6 +244,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
         state = FeatureState.CONDITIONAL
 
     feature_flag = FeatureFlag(feature_name,
+                               keyvalue.key,
                                keyvalue.label,
                                state,
                                feature_flag_value.description,
@@ -269,7 +276,6 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
     try:
         # Make sure value string is a valid json
         feature_flag_dict = shell_safe_json_parse(keyvalue.value)
-        feature_name = keyvalue.key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
 
         # Make sure value json has all the fields we support in the backend
         valid_fields = {
@@ -278,8 +284,12 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             'enabled',
             'conditions'}
         if valid_fields != feature_flag_dict.keys():
-            logger.debug("'%s' feature flag is missing required values or it contains ", feature_name +
+            logger.debug("'%s' feature flag is missing required values or it contains ", keyvalue.key +
                          "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
+
+        feature_name = feature_flag_dict.get('id', '')
+        if not feature_name:
+            raise ValueError("Feature flag 'id' cannot be empty.")
 
         conditions = feature_flag_dict.get('conditions', None)
         if conditions:
@@ -300,10 +310,8 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             conditions['client_filters'] = client_filters_list
 
         feature_flag_value = FeatureFlagValue(id_=feature_name,
-                                              description=feature_flag_dict.get(
-                                                  'description', ''),
-                                              enabled=feature_flag_dict.get(
-                                                  'enabled', False),
+                                              description=feature_flag_dict.get('description', ''),
+                                              enabled=feature_flag_dict.get('enabled', False),
                                               conditions=conditions)
 
     except ValueError as exception:

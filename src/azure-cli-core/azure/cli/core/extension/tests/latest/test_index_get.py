@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import mock
+from unittest import mock
 import unittest
 from requests.exceptions import ConnectionError, HTTPError
 from azure.cli.core.util import CLIError

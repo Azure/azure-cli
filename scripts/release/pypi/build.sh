@@ -22,7 +22,7 @@ pip list
 
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
 
-if [[ "$branch" == "dev" ]]; then
+if [[ "$branch" != "release" ]]; then
     . $script_dir/../../ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
 fi
 

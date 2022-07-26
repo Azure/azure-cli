@@ -248,6 +248,8 @@ resource_group_name_type = CLIArgumentType(
 
 name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
 
+edge_zone_type = CLIArgumentType(options_list='--edge-zone', help='The name of edge zone.', is_preview=True)
+
 
 def get_location_type(cli_ctx):
     location_type = CLIArgumentType(

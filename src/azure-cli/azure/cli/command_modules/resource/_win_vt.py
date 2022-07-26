@@ -47,7 +47,7 @@ def _set_conout_mode(mode):
 def _update_conout_mode(mode):
     old_mode = _get_conout_mode()
     if old_mode & mode != mode:
-        mode = old_mode | mode
+        mode = old_mode | mode  # pylint: disable=unsupported-binary-operation
         _set_conout_mode(mode)
 
 

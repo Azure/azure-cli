@@ -152,6 +152,11 @@ def db_transform(result):
     result.edition = result.sku.tier
     result.elastic_pool_name = _last_segment(result.elastic_pool_id)
 
+    # rename ledger setting name
+    if hasattr(result, 'is_ledger_on'):
+        result.ledger_on = result.is_ledger_on
+        del result.is_ledger_on
+
     if hasattr(result, 'storage_account_type'):
         result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
         del result.storage_account_type
@@ -244,16 +249,15 @@ def elastic_pool_transform(result):
     '''
     Transforms the json response for an elastic pool.
     '''
-    from azure.mgmt.sql.models import ElasticPoolEdition
 
     # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
     result.storageMb = result.max_size_bytes / 1024 / 1024
 
     is_dtu = result.sku.tier in (
-        ElasticPoolEdition.basic.value,
-        ElasticPoolEdition.standard.value,
-        ElasticPoolEdition.premium.value)
+        'Basic',
+        'Standard',
+        'Premium')
 
     result.dtu = result.sku.capacity if is_dtu else None
     result.database_dtu_min = int(result.per_database_settings.min_capacity) if is_dtu else None
@@ -369,38 +373,26 @@ def firewall_rule_table_format(result):
     return _apply_format(result, _firewall_rule_table_format)
 
 
-###############################################
-#                sql mi             #
-###############################################
+########################################################
+#            sql server outbound-firewall-rule         #
+########################################################
 
 
-#####
-#           sql mi transformers for json
-#####
-
-def mi_list_transform(results):
+def outbound_firewall_rule_table_format(result):
     '''
-    Transforms the json response for a list of managed instances.
+    Formats a single or list of server outbound firewall rules as summary results for display with "-o table".
     '''
 
-    return [mi_transform(r) for r in results]
+    def _outbound_firewall_rule_table_format(result):
+        '''
+        Formats a server outbound firewall rule as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
 
+        return OrderedDict([
+            ('resourceGroupName', result['resourceGroupName']),
+            ('serverName', result['serverName']),
+            ('outboundRuleFqdn', result['outboundRuleFqdn'])
+        ])
 
-def mi_transform(result):
-    '''
-    Transforms the json response for a managed instance.
-    '''
-
-    if hasattr(result, 'storage_account_type'):
-        result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
-        del result.storage_account_type
-
-    return result
-
-
-def _get_external_backup_storage_redundancy(self):
-    return {
-        'lrs': 'Local',
-        'grs': 'Geo',
-        'zrs': 'Zone'
-    }.get(self.lower(), 'Invalid')
+    return _apply_format(result, _outbound_firewall_rule_table_format)

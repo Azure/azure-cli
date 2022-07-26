@@ -16,6 +16,6 @@ $testsdk = Get-ChildItem -Path $PSScriptRoot\..\..\..\artifacts\build\azure_cli_
 & 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install $PSScriptRoot\..\..\..\artifacts\build\$($testsdk.Name)
 
 $fulltest = Get-ChildItem -Path $PSScriptRoot\..\..\..\artifacts\build\azure_cli_fulltest*.whl | Select-Object Name
-& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install $PSScriptRoot\..\..\..\artifacts\build\$($fulltest.Name)
+& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install --no-deps $PSScriptRoot\..\..\..\artifacts\build\$($fulltest.Name)
 
 & 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' $PSScriptRoot\test_msi_package.py

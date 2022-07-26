@@ -8,44 +8,18 @@
 import os
 import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
 
 from knack.util import CLIError
 
 from msrestazure.tools import resource_id
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-
-
-class NetworkApplicationSecurityGroupScenario(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_asg')
-    def test_network_asg(self, resource_group):
-
-        self.kwargs.update({
-            'asg': 'asg1'
-        })
-
-        count1 = len(self.cmd('network asg list').get_output_in_json())
-        self.cmd('network asg create -g {rg} -n {asg} --tags foo=doo',
-                 checks=self.check('tags.foo', 'doo'))
-        self.cmd('network asg update -g {rg} -n {asg} --tags foo=bar',
-                 checks=self.check('tags.foo', 'bar'))
-        count2 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count2 == count1 + 1)
-        self.cmd('network asg show -g {rg} -n {asg}', checks=[
-            self.check('name', '{asg}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('tags.foo', 'bar')
-        ])
-        self.cmd('network asg delete -g {rg} -n {asg}')
-        count3 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count3 == count1)
 
 
 class NetworkLoadBalancerWithSku(ScenarioTest):
@@ -746,6 +720,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         self.cmd('network express-route auth list --resource-group {rg} --circuit-name {er}', checks=self.is_empty())
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route(self, resource_group):
 
@@ -803,6 +778,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
     def test_network_express_route_ipv6_peering(self, resource_group):
 
@@ -1072,7 +1048,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             'lgw2': 'lgw2',
             'rt': 'Microsoft.Network/localNetworkGateways'
         })
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --tags foo=doo')
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --local-address-prefixes 10.0.1.0/24 --tags foo=doo')
         self.cmd('network local-gateway update --resource-group {rg} --name {lgw1} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))
         self.cmd('network local-gateway show --resource-group {rg} --name {lgw1}', checks=[
@@ -1080,8 +1056,8 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{lgw1}')])
 
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.1.0/24',
-                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.1.0/24'))
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.2.0/24',
+                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.2.0/24'))
 
         self.cmd('network local-gateway list --resource-group {rg}',
                  checks=self.check('length(@)', 2))
@@ -1538,12 +1514,12 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet2_id': vnet2_id
         })
         # set up gateway sharing from vnet1 to vnet2
-        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet-id {vnet1_id} --allow-gateway-transit', checks=[
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --allow-gateway-transit', checks=[
             self.check('allowGatewayTransit', True),
             self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
             self.check('peeringState', 'Initiated')
         ])
-        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet-id {vnet2_id} --use-remote-gateways --allow-forwarded-traffic', checks=[
+        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet {vnet2_id} --use-remote-gateways --allow-forwarded-traffic', checks=[
             self.check('useRemoteGateways', True),
             self.check('remoteVirtualNetwork.id', '{vnet2_id}'),
             self.check('peeringState', 'Connected'),
@@ -1871,7 +1847,7 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
 # convert to ScenarioTest and re-record when #6009 is fixed
 class NetworkWatcherScenarioTest(LiveScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1

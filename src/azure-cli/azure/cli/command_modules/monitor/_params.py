@@ -110,6 +110,9 @@ def load_arguments(self, _):
         c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
         c.argument('offset', type=get_period_type(as_timedelta=True))
         c.argument('interval', arg_group='Time', type=get_period_type())
+
+    with self.argument_context('monitor metrics list-namespaces', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
     # endregion
 
     # region MetricAlerts
@@ -180,6 +183,9 @@ def load_arguments(self, _):
         c.argument('ignore_data_before', options_list=['--since'],
                    arg_type=get_datetime_type(
                        help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
+        c.argument('skip_metric_validation', options_list=['--skip-metric-validation'],
+                   arg_type=get_three_state_flag(),
+                   help='Cause the metric validation to be skipped. This allows to use a metric that has not been emitted yet.')
 
     # endregion
 
@@ -277,8 +283,10 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings create') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-        c.argument('logs', type=get_json_object)
-        c.argument('metrics', type=get_json_object)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file."
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings')
+        c.argument('metrics', type=get_json_object, help="JSON encoded list of metric settings. Use '@{file}' to load from a file. "
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings')
         c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
                    help='Indicate that the export to LA must be done to a resource specific table, '
                         'a.k.a. dedicated or fixed schema table, '
@@ -327,11 +335,10 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
+        c.argument('resource_provider', options_list=['--namespace'])
         c.argument('caller')
         c.argument('status')
     # endregion
@@ -410,6 +417,9 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
+    with self.argument_context('monitor log-analytics workspace update') as c:
+        c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace. Expected format is /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}.')
+
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
@@ -426,7 +436,7 @@ def load_arguments(self, _):
                    help="The optional function parameters if query serves as a function. "
                         "Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. "
                         "For more examples and proper syntax please refer to "
-                        "https://docs.microsoft.com/en-us/azure/kusto/query/functions/user-defined-functions.")
+                        "https://docs.microsoft.com/azure/kusto/query/functions/user-defined-functions.")
         c.argument('tags', tags_type)
     # endregion
 
@@ -434,7 +444,31 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace', type=int, required=True)
+        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace')
+        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
+
+    with self.argument_context('monitor log-analytics workspace table create') as c:
+        from azure.mgmt.loganalytics.models import TablePlanEnum
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('description', help='Schema description.')
+
+    with self.argument_context('monitor log-analytics workspace table search-job create') as c:
+        c.argument('search_query', options_list=['--search-query'], help='Search job query.')
+        c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
+        c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
+
+    with self.argument_context('monitor log-analytics workspace table restore create') as c:
+        c.argument('start_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('end_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('restore_source_table', help='The table to restore data from.')
+
+    with self.argument_context('monitor log-analytics workspace table update') as c:
+        from azure.mgmt.loganalytics.models import TablePlanEnum
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('description', help='Table description.')
     # endregion
 
     # region Log Analytics Workspace Data Export
@@ -470,11 +504,6 @@ def load_arguments(self, _):
                                         ' be in multiples of 100. If you want to increase the limit, please contact'
                                         ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
         c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
-
-    with self.argument_context('monitor log-analytics cluster update') as c:
-        c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
-        c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
-        c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
     # endregion
 
     # region Log Analytics Linked Storage Account
