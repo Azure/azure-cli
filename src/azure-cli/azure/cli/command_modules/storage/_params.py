@@ -148,9 +148,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
-             'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
-             'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
-             'docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'granted read (4), write (2), or execute (1) permission. Both symbolic (rwxrw-rw-) and 4-digit octal '
+             'notation (e.g. 0766) are supported. The sticky bit is also supported and in symbolic notation, '
+             'its represented either by the letter t or T in the final character-place depending on whether '
+             'the execution bit for the others category is set or unset respectively (e.g. rwxrw-rw- with sticky bit '
+             'is represented as rwxrw-rwT. A rwxrw-rwx with sticky bit is represented as rwxrw-rwt), absence of t or T '
+             'indicates sticky bit not set. In 4-digit octal notation, its represented by 1st digit (e.g. 1766 '
+             'represents rwxrw-rw- with sticky bit and 0766 represents rwxrw-rw- without sticky bit). For more '
+             'information, please refer to '
+             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -987,6 +993,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
         c.argument('metadata', arg_group="Additional Flags")
         c.argument('timeout', arg_group="Additional Flags")
+        c.extra('connection_timeout', options_list=('--socket-timeout'), type=int,
+                help='The socket timeout(secs), used by the service to regulate data flow.')
 
     # pylint: disable=line-too-long
     with self.argument_context('storage blob upload-batch', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
@@ -1189,14 +1197,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
         c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
-                   help='Name of the destination blob. If the exists, it will be overwritten.')
+                   help='Name of the destination blob. If it exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
     with self.argument_context('storage blob copy cancel') as c:
         c.extra('container_name', container_name_type, options_list=('--destination-container', '-c'),
                 required=True)
         c.extra('blob_name', blob_name_type, options_list=('--destination-blob', '-b'), required=True,
-                help='Name of the destination blob. If the exists, it will be overwritten.')
+                help='Name of the destination blob. If it exists, it will be overwritten.')
         c.extra('timeout', timeout_type)
         c.extra('lease', options_list='--lease-id',
                 help='Required if the destination blob has an active infinite lease.')
@@ -1217,7 +1225,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
 
         c.argument('blob_name', options_list=['--destination-blob', '-b'], required=True,
-                   help='Name of the destination blob. If the exists, it will be overwritten.')
+                   help='Name of the destination blob. If it exists, it will be overwritten.')
         c.argument('container_name', options_list=['--destination-container', '-c'], required=True,
                    help='The container name.')
         c.extra('destination_lease', options_list='--destination-lease-id',

@@ -1311,6 +1311,15 @@ def _enable_msi_for_trusted_launch(namespace):
             namespace.assign_identity.append(MSI_LOCAL_ID)
 
 
+def _validate_trusted_launch(namespace):
+    if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
+        return
+
+    if not namespace.enable_vtpm or not namespace.enable_secure_boot:
+        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-secure-boot True"'
+                       ' to receive the full suite of security features that comes with Trusted Launch.')
+
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
@@ -1382,6 +1391,7 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1553,6 +1563,12 @@ def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
+                                            ' available for VMSS with flexible orchestration mode')
+
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
         # The commentted parameters are also forbidden, but they have default values.
@@ -1580,6 +1596,7 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.vm_sku and not namespace.image:
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
+        _validate_trusted_launch(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1669,6 +1686,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace, cmd)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
