@@ -32,6 +32,7 @@ logger = get_logger(__name__)
 
 def load_arguments(self, _):
     signalr_name_type = CLIArgumentType(options_list='--signalr-name', help='Name of the SignalR.', id_part='name')
+    signalr_custom_domain_name_type = CLIArgumentType(help='Name of the custom domain.', id_part='child_name_1')
 
     with self.argument_context('signalr') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -99,3 +100,19 @@ def load_arguments(self, _):
     # Managed Identity
     with self.argument_context('signalr identity assign') as c:
         c.argument('identity', help="Assigns managed identities to the service. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. You can only assign either on of them.")
+
+    # Custom Domain
+    with self.argument_context('signalr custom-domain') as c:
+        c.argument('signalr_name', signalr_name_type,
+                   completer=get_resource_name_completion_list(SIGNALR_RESOURCE_TYPE),
+                   help='Name of signalr service.')
+        c.argument('name', signalr_custom_domain_name_type)
+
+    for scope in ['signalr custom-domain update',
+                  'signalr custom-domain create']:
+        with self.argument_context(scope) as c:
+            c.argument('domain_name', help="Custom domain name. For example, `contoso.com`.")
+            c.argument('certificate_resource_id', help="ResourceId of a previously created custom certificate.")
+    
+    with self.argument_context('signalr custom-domain list') as c:
+        c.argument('signalr_name', signalr_name_type, id_part=None)
