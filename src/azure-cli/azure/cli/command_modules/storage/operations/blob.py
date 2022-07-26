@@ -925,12 +925,12 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
         raise CLIError(error_template.format(source_path, destination_container, ex))
 
 
-def show_blob_v2(cmd, client, lease_id=None, **kwargs):
-    blob = client.get_blob_properties(lease=lease_id, **kwargs)
+def show_blob_v2(cmd, client, **kwargs):
+    blob = client.get_blob_properties(**kwargs)
 
     page_ranges = None
     if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(lease=lease_id, **kwargs)
+        page_ranges = client.get_page_ranges(**kwargs)
 
     blob.page_ranges = page_ranges
 
