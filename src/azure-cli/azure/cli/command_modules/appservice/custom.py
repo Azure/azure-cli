@@ -47,7 +47,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
                                        UnclassifiedUserFault, AzureResponseError, AzureInternalError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError, FileOperationError)
 
 from .tunnel import TunnelServer
 
@@ -64,7 +64,7 @@ from .utils import (_normalize_sku,
                     _get_location_from_webapp,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
-                    get_resource_if_exists)
+                    get_resource_if_exists, repo_url_to_name, get_token)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -75,7 +75,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
-from ._github_oauth import (get_github_access_token)
+from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 logger = get_logger(__name__)
@@ -5268,14 +5268,9 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
 
 
 def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None, runtime_version=None, token=None,  # pylint: disable=too-many-statements,too-many-branches
-                                   slot=None, branch='master', build_path=".", login_with_github=False, force=False):
-    if not token and not login_with_github:
-        raise_missing_token_suggestion()
-    elif not token:
-        scopes = ["admin:repo_hook", "repo", "workflow"]
-        token = get_github_access_token(cmd, scopes)
-    elif token and login_with_github:
-        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
+                                   slot=None, branch='master', build_path=".", force=False):
+    repo = repo_url_to_name(repo)
+    token = get_token(cmd, repo, token)
 
     # Verify resource group, app
     site_availability = get_site_availability(cmd, name)
@@ -5325,7 +5320,7 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
         error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
         if e.data and e.data['message']:
             error_msg += " Error: {}".format(e.data['message'])
-        raise CLIError(error_msg)
+        raise ValidationError(error_msg)
 
     # Verify runtime
     app_runtime_info = _get_functionapp_runtime_info(
@@ -5441,20 +5436,15 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
     _update_site_source_control_properties_for_gh_action(
         cmd=cmd, resource_group=resource_group, name=name, token=token, repo=repo, branch=branch, slot=slot)
 
+    cache_github_token(cmd, token, repo)
     github_actions_url = "https://github.com/{}/actions".format(repo)
     return github_actions_url
 
 
 def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=None, slot=None,  # pylint: disable=too-many-statements
-                                      branch='master', login_with_github=False):
-    if not token and not login_with_github:
-        raise_missing_token_suggestion()
-    elif not token:
-        scopes = ["admin:repo_hook", "repo", "workflow"]
-        token = get_github_access_token(cmd, scopes)
-    elif token and login_with_github:
-        logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
-
+                                      branch='master'):
+    repo = repo_url_to_name(repo)
+    token = get_token(cmd, repo, token)
     # Verify resource group, app
     site_availability = get_site_availability(cmd, name)
     if site_availability.name_available or (not site_availability.name_available and
@@ -5498,7 +5488,7 @@ def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=Non
         error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
         if e.data and e.data['message']:
             error_msg += " Error: {}".format(e.data['message'])
-        raise CLIError(error_msg)
+        raise ValidationError(error_msg)
 
     # Check if workflow exists in repo and remove
     file_name = "{}_{}({}).yml".format(
@@ -5518,7 +5508,7 @@ def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=Non
         error_msg = "Error when removing workflow file."
         if e.data and e.data['message']:
             error_msg += " Error: {}".format(e.data['message'])
-        raise CLIError(error_msg)
+        raise FileOperationError(error_msg)
 
     # Remove publish profile from GitHub
     if existing_publish_profile_name:
@@ -5884,6 +5874,8 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
     import re
 
     if is_linux:
+        if len(app_runtime.split('|')) < 2:
+            raise ValidationError(f"Runtime {app_runtime} is not supported.")
         app_runtime_version = app_runtime.split('|')[1]
         app_runtime = app_runtime.split('|')[0].lower()
 

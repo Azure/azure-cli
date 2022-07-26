@@ -227,3 +227,23 @@ def use_additional_properties(resource):
     resource.enable_additional_properties_sending()
     existing_properties = resource.serialize().get("properties")
     resource.additional_properties["properties"] = {} if existing_properties is None else existing_properties
+
+
+def repo_url_to_name(repo_url):
+    repo = None
+    repo = [s for s in repo_url.split('/') if s]
+    if len(repo) >= 2:
+        repo = '/'.join(repo[-2:])
+    return repo
+
+
+def get_token(cmd, repo, token):
+    from ._github_oauth import load_github_token_from_cache, get_github_access_token
+    if not repo:
+        return None
+    if token:
+        return token
+    token = load_github_token_from_cache(cmd, repo)
+    if not token:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    return token

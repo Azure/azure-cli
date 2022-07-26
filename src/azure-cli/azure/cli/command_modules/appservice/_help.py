@@ -619,7 +619,7 @@ examples:
         az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
   - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
     text: >
-        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp
 """
 
 helps['functionapp deployment github-actions remove'] = """
@@ -631,7 +631,7 @@ examples:
         az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
   - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
     text: >
-        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp
 """
 
 helps['functionapp function'] = """
