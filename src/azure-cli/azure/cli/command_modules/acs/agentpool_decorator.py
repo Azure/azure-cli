@@ -351,6 +351,21 @@ class AKSAgentPoolContext(BaseAKSContext):
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
+    def get_host_group_id(self) -> Union[str, None]:
+        return self._get_host_group_id()
+
+    def _get_host_group_id(self) -> Union[str, None]:
+        raw_value = self.raw_param.get("host_group_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "host_group_id"):
+            value_obtained_from_agentpool = self.agentpool.host_group_id
+        if value_obtained_from_agentpool is not None:
+            host_group_id = value_obtained_from_agentpool
+        else:
+            host_group_id = raw_value
+        return host_group_id
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
@@ -1325,6 +1340,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.os_sku = self.context.get_os_sku()
         return agentpool
 
+    def set_up_host_group_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up host group related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.host_group_id = self.context.get_host_group_id()
+        return agentpool
+
     def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up priority related properties for the AgentPool object.
 
@@ -1458,6 +1483,8 @@ class AKSAgentPoolAddDecorator:
         self._remove_defaults_in_agentpool(agentpool)
         # set up snapshot properties
         agentpool = self.set_up_snapshot_properties(agentpool)
+        # set up host group properties
+        agentpool = self.set_up_host_group_properties(agentpool)
         # set up node network properties
         agentpool = self.set_up_node_network_properties(agentpool)
         # set up auto scaler properties

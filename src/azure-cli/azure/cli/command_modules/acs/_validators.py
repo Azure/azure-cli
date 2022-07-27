@@ -442,6 +442,13 @@ def validate_snapshot_id(namespace):
             raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
 
 
+def validate_host_group_id(namespace):
+    if namespace.host_group_id:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.host_group_id):
+            raise InvalidArgumentValueError("--host-group-id is not a valid Azure resource ID.")
+
+
 def extract_comma_separated_string(
     raw_string,
     enable_strip=False,
