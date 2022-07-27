@@ -325,6 +325,7 @@ def load_arguments(self, _):
         c.argument('linux_os_config')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('http_proxy_config')
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -382,6 +383,7 @@ def load_arguments(self, _):
                    "--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
+        c.argument('http_proxy_config')
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
