@@ -23,7 +23,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL)
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_assign_identity, validate_assign_kubelet_identity,
     validate_create_parameters, validate_credential_format,
@@ -43,7 +44,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_vm_set_type, validate_vnet_subnet_id,
     validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_defender_disable_and_enable_parameters, validate_defender_config_parameter,
-    validate_host_group_id)
+    validate_host_group_id,
+    validate_azure_keyvault_kms_key_id, validate_azure_keyvault_kms_key_vault_resource_id)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -110,6 +112,8 @@ auto_upgrade_channels = [
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
+
+keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
 
 
 def load_arguments(self, _):
@@ -274,6 +278,10 @@ def load_arguments(self, _):
         c.argument('node_resource_group')
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
+        c.argument('enable_azure_keyvault_kms', action='store_true')
+        c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
+        c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
+        c.argument('azure_keyvault_kms_key_vault_resource_id', validator=validate_azure_keyvault_kms_key_vault_resource_id)
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
@@ -356,6 +364,11 @@ def load_arguments(self, _):
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
+        c.argument('enable_azure_keyvault_kms', action='store_true')
+        c.argument('disable_azure_keyvault_kms', action='store_true')
+        c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
+        c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
+        c.argument('azure_keyvault_kms_key_vault_resource_id', validator=validate_azure_keyvault_kms_key_vault_resource_id)
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)

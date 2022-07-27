@@ -537,3 +537,27 @@ def validate_defender_config_parameter(namespace):
 def validate_defender_disable_and_enable_parameters(namespace):
     if namespace.disable_defender and namespace.enable_defender:
         raise ArgumentUsageError('Providing both --disable-defender and --enable-defender flags is invalid')
+
+
+def validate_azure_keyvault_kms_key_id(namespace):
+    key_id = namespace.azure_keyvault_kms_key_id
+    if key_id:
+        # pylint:disable=line-too-long
+        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        https_prefix = "https://"
+        if not key_id.startswith(https_prefix):
+            raise InvalidArgumentValueError(err_msg)
+
+        segments = key_id[len(https_prefix):].split("/")
+        if len(segments) != 4 or segments[1] != "keys":
+            raise InvalidArgumentValueError(err_msg)
+
+
+def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
+    key_vault_resource_id = namespace.azure_keyvault_kms_key_vault_resource_id
+    if key_vault_resource_id is None or key_vault_resource_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(key_vault_resource_id):
+        raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
