@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "sql managed-instance",
+    "sql mi endpoint-certificate",
 )
 class __CMDGroup(AAZCommandGroup):
-    """az sql
+    """Returns information about one or more instance of endpoint certificate on an Azure SQL Managed Instance.
     """
     pass
 

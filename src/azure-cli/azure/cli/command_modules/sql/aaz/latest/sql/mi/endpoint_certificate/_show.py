@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql managed-instance endpoint-certificate show",
+    "sql mi endpoint-certificate show",
 )
 class Show(AAZCommand):
     """Gets a certificate used on the endpoint with the given id.
@@ -48,8 +48,8 @@ class Show(AAZCommand):
             id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--managed-instance-name"],
-            help="The name of the managed instance.",
+            options=["--instance-name", "--managed-instance-name"],
+            help="Name of the managed instance.",
             required=True,
             id_part="name",
         )
