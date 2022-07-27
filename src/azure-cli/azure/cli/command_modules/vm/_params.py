@@ -504,6 +504,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
+        c.argument('force_detach', action='store_true', min_api='2020-12-01', help='Force-detach managed data disks from a VM.')
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
