@@ -365,11 +365,11 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
   - name: --network-policy
     type: string
     short-summary: The Kubernetes network policy to use.
@@ -610,6 +610,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
   - name: create a kubernetes cluster with support of hostgroup id.
     text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.13 --location westus2 --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Create a kubernetes cluster with no CNI installed.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
 """
 
 helps['aks update'] = """
@@ -1009,7 +1011,7 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
