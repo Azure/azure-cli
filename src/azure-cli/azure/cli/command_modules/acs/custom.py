@@ -1533,6 +1533,10 @@ def aks_create(
     node_resource_group=None,
     enable_defender=False,
     defender_config=None,
+    enable_azure_keyvault_kms=False,
+    azure_keyvault_kms_key_id=None,
+    azure_keyvault_kms_key_vault_network_access=None,
+    azure_keyvault_kms_key_vault_resource_id=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -1639,6 +1643,11 @@ def aks_update(
     enable_defender=False,
     disable_defender=False,
     defender_config=None,
+    enable_azure_keyvault_kms=False,
+    disable_azure_keyvault_kms=False,
+    azure_keyvault_kms_key_id=None,
+    azure_keyvault_kms_key_vault_network_access=None,
+    azure_keyvault_kms_key_vault_resource_id=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,

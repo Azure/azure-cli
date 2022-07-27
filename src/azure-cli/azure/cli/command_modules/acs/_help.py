@@ -531,6 +531,20 @@ parameters:
   - name: --host-group-id
     type: string
     short-summary: The fully qualified dedicated host group id used to provision agent node pool.
+  - name: --enable-azure-keyvault-kms
+    type: bool
+    short-summary: Enable Azure KeyVault Key Management Service.
+  - name: --azure-keyvault-kms-key-id
+    type: string
+    short-summary: Identifier of Azure Key Vault key.
+  - name: --azure-keyvault-kms-key-vault-network-access
+    type: string
+    short-summary: Network Access of Azure Key Vault.
+    long-summary: Allowed values are "Public", "Private". If not set, defaults to type "Public". Requires --azure-keyvault-kms-key-id to be used.
+  - name: --azure-keyvault-kms-key-vault-resource-id
+    type: string
+    short-summary: Resource ID of Azure Key Vault.
+
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -758,6 +772,22 @@ parameters:
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+  - name: --enable-azure-keyvault-kms
+    type: bool
+    short-summary: Enable Azure KeyVault Key Management Service.
+  - name: --disable-azure-keyvault-kms
+    type: bool
+    short-summary: Disable Azure KeyVault Key Management Service.
+  - name: --azure-keyvault-kms-key-id
+    type: string
+    short-summary: Identifier of Azure Key Vault key.
+  - name: --azure-keyvault-kms-key-vault-network-access
+    type: string
+    short-summary: Network Access of Azure Key Vault.
+    long-summary: Allowed values are "Public", "Private". If not set, defaults to type "Public". Requires --azure-keyvault-kms-key-id to be used.
+  - name: --azure-keyvault-kms-key-vault-resource-id
+    type: string
+    short-summary: Resource ID of Azure Key Vault.
 
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
