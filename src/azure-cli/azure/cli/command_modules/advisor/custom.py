@@ -20,7 +20,7 @@ def disable_recommendations(client, ids=None, recommendation_name=None,
     if recommendation_name is None and ids is None:
         from knack.prompting import prompt_y_n
 
-        if not prompt_y_n("\nAre you sure you want to disabled all recommendation?"):
+        if not prompt_y_n("\nAre you sure you want to disabled all recommendations?"):
             return None
 
     recs = _get_recommendations(
