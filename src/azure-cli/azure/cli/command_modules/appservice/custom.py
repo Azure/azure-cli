@@ -2896,7 +2896,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 class _AbstractStackRuntimeHelper:
     def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
-        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
+        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-15")
         self._linux = linux
         self._windows = windows
         self._stacks = []
@@ -3091,7 +3091,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if default_java_version:
             container_settings = default_java_version.stack_settings.windows_container_settings
             # TODO get the API to return java versions in a more parseable way
-            for java_version in ["1.8", "11"]:
+            for java_version in ["1.8", "11", "17"]:
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
                 if container_version.upper() == "SE":
@@ -3099,7 +3099,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     if java_version == "1.8":
                         container_version = "8"
                     else:
-                        container_version = "11"
+                        container_version = java_version
                 runtime_name = "{}|{}|{}|{}".format("java",
                                                     java_version,
                                                     java_container,
@@ -3143,7 +3143,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         default_java_version_linux = next(iter(minor_java_versions), None)
         if default_java_version_linux:
             linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
-            runtimes = [(linux_container_settings.java11_runtime, "11"), (linux_container_settings.java8_runtime, "8")]
+            runtimes = [(linux_container_settings.additional_properties.get("java17Runtime"), "17"),
+                        (linux_container_settings.java11_runtime, "11"),
+                        (linux_container_settings.java8_runtime, "8")]
             for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
