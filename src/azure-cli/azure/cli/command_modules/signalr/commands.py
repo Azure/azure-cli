@@ -95,3 +95,10 @@ def load_command_table(self, _):
         g.command('delete', 'custom_domain_delete')
         g.generic_update_command('update', getter_name='get_custom_domain', setter_name='set_custom_domain', custom_func_name='update', custom_func_type=signalr_custom_domain_utils)
         g.command('list', 'custom_domain_list')
+
+    with self.command_group('signalr custom-certificate', signalr_custom_certificate_utils) as g:
+        g.show_command('show', 'custom_certificate_show', exception_handler=empty_on_404)
+        g.command('create', 'custom_certificate_create')
+        g.command('delete', 'custom_certificate_delete')
+        g.generic_update_command('update', getter_name='get_custom_certificate', setter_name='set_custom_certificate', custom_func_name='update', custom_func_type=signalr_custom_certificate_utils)
+        g.command('list', 'custom_certificate_list')
