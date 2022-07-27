@@ -5894,8 +5894,16 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
     app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
 
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
-    matched_runtime = helper.resolve(app_runtime, app_runtime_version, functionapp_version, is_linux,
-                                     disable_version_error=True)
+    try:
+        matched_runtime = helper.resolve(app_runtime, app_runtime_version, functionapp_version, is_linux)
+    except ValidationError as e:
+        if app_runtime == "dotnet":  # catch issue with dotnet 3.1/4
+            return {
+                "display_name": app_runtime,
+                "github_actions_version": None,
+                "functionapp_version": functionapp_version
+            }
+        raise e
     gh_props = None if not matched_runtime else matched_runtime.github_actions_properties
     if gh_props:
         if gh_props.supported_version:
@@ -5904,11 +5912,9 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
                 "github_actions_version": gh_props.supported_version,
                 "functionapp_version": functionapp_version
             }
-    return {
-        "display_name": app_runtime,
-        "github_actions_version": None,
-        "functionapp_version": functionapp_version
-    }
+    raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
+                          "on os %s." % (app_runtime, app_runtime_version,
+                                         "linux" if is_linux else "windows"))
 
 
 def _encrypt_github_actions_secret(public_key, secret_value):
