@@ -5326,56 +5326,45 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
             error_msg += " Error: {}".format(e.data['message'])
         raise ValidationError(error_msg)
 
-    # Verify runtime
+    # Get runtime info
     app_runtime_info = _get_functionapp_runtime_info(
         cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
 
-    app_runtime_string = None
-    if(app_runtime_info and app_runtime_info['display_name']):
-        app_runtime_string = app_runtime_info['display_name']
+    app_runtime_string = app_runtime_info['app_runtime']
+    github_actions_version = app_runtime_info['app_runtime_version']
 
-    github_actions_version = None
-    if (app_runtime_info and app_runtime_info['github_actions_version']):
-        github_actions_version = app_runtime_info['github_actions_version']
-
-    if runtime and app_runtime_string:
-        if app_runtime_string.lower() != runtime.lower():
+    if runtime:
+        if app_runtime_string and app_runtime_string.lower() != runtime.lower():
             logger.warning('The app runtime: %s does not match the runtime specified: '
                            '%s. Using the specified runtime %s.', app_runtime_string, runtime, runtime)
-            app_runtime_string = runtime
-    elif runtime:
         app_runtime_string = runtime
 
-    if runtime_version and github_actions_version:
-        if github_actions_version.lower() != runtime_version.lower():
+    if runtime_version:
+        if github_actions_version and github_actions_version.lower() != runtime_version.lower():
             logger.warning('The app runtime version: %s does not match the runtime version specified: '
                            '%s. Using the specified runtime %s.', github_actions_version, runtime_version,
                            runtime_version)
-            github_actions_version = runtime_version
-    elif runtime_version:
         github_actions_version = runtime_version
 
     if not app_runtime_string and not github_actions_version:
         raise ValidationError('Could not detect runtime or runtime version. Please specify'
                               'using the --runtime and --runtime-version flags.')
-
     if not app_runtime_string:
         raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
-
     if not github_actions_version:
         raise ValidationError('Could not detect runtime version. Please specify using the --runtime-version flag.')
 
-    # We only need to check if runtime_version is passed
-    if runtime_version:
-        functionapp_version = app_runtime_info['functionapp_version']
-        github_actions_version = _get_functionapp_runtime_version(cmd=cmd, runtime_string=app_runtime_string,
-                                                                  runtime_version=github_actions_version,
-                                                                  functionapp_version=functionapp_version,
-                                                                  is_linux=is_linux)
-        if not github_actions_version:
-            raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
-                                  "on os %s." % (app_runtime_string, runtime_version,
-                                                 "linux" if is_linux else "windows"))
+    # Verify runtime + gh actions support
+    functionapp_version = app_runtime_info['functionapp_version']
+    github_actions_version = _get_functionapp_runtime_version(cmd=cmd, runtime_string=app_runtime_string,
+                                                              runtime_version=github_actions_version,
+                                                              functionapp_version=functionapp_version,
+                                                              is_linux=is_linux)
+    if not github_actions_version:
+        runtime_version = runtime_version if runtime_version else app_runtime_info['app_runtime_version']
+        raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
+                              "on os %s." % (app_runtime_string, runtime_version,
+                                             "linux" if is_linux else "windows"))
 
     # Get workflow template
     logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
@@ -5756,8 +5745,18 @@ def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
 def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
     import re
     runtime_version = re.sub(r"[^\d\.]", "", runtime_version).rstrip('.')
+    matched_runtime = None
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
-    matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
+    try:
+        matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
+    except ValidationError as e:
+        if "Invalid version" in e.error_msg:
+            index = e.error_msg.index("Run 'az functionapp list-runtimes' for more details on supported runtimes.")
+            error_message = e.error_msg[0:index]
+            error_message += "Try passing --runtime-version with a supported version, or "
+            error_message += e.error_msg[index:].lower()
+            raise ValidationError(error_message)
+        raise e
     if not matched_runtime:
         return None
     if matched_runtime.github_actions_properties:
@@ -5806,10 +5805,11 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
         return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
 
 
-def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):
+def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  # pylint: disable=too-many-return-statements
     app_settings = None
     app_runtime = None
     functionapp_version = None
+    app_runtime_version = None
 
     app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
     for app_setting in app_settings:
@@ -5856,6 +5856,7 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):
         app_runtime_version = getattr(app_settings, 'power_shell_version', '').lower()
         return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
                                                     is_linux)
+    return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux)
 
 
 def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
@@ -5890,31 +5891,16 @@ def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, 
         app_runtime = app_runtime.split('|')[0].lower()
 
     # Normalize versions
+    functionapp_version = functionapp_version if functionapp_version else ""
+    app_runtime_version = app_runtime_version if app_runtime_version else ""
     functionapp_version = re.sub(r"[^\d\.]", "", functionapp_version)
     app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
 
-    helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
-    try:
-        matched_runtime = helper.resolve(app_runtime, app_runtime_version, functionapp_version, is_linux)
-    except ValidationError as e:
-        if app_runtime == "dotnet":  # catch issue with dotnet 3.1/4
-            return {
-                "display_name": app_runtime,
-                "github_actions_version": None,
-                "functionapp_version": functionapp_version
-            }
-        raise e
-    gh_props = None if not matched_runtime else matched_runtime.github_actions_properties
-    if gh_props:
-        if gh_props.supported_version:
-            return {
-                "display_name": app_runtime,
-                "github_actions_version": gh_props.supported_version,
-                "functionapp_version": functionapp_version
-            }
-    raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
-                          "on os %s." % (app_runtime, app_runtime_version,
-                                         "linux" if is_linux else "windows"))
+    return {
+        "app_runtime": app_runtime,
+        "app_runtime_version": app_runtime_version,
+        "functionapp_version": functionapp_version
+    }
 
 
 def _encrypt_github_actions_secret(public_key, secret_value):
