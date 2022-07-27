@@ -1200,7 +1200,7 @@ def load_command_table(self, _):
                          'set_nsg_flow_logging',
                          validator=process_nw_flow_log_set_namespace,
                          deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
-        g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
+        g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
     with self.command_group('network watcher flow-log',
                             network_watcher_flow_log_sdk,
