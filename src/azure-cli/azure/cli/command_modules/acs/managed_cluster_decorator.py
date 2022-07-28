@@ -91,6 +91,7 @@ logger = get_logger(__name__)
 ContainerServiceClient = TypeVar("ContainerServiceClient")
 Identity = TypeVar("Identity")
 ManagedCluster = TypeVar("ManagedCluster")
+ManagedClusterHTTPProxyConfig = TypeVar("ManagedClusterHTTPProxyConfig")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
@@ -1340,6 +1341,44 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return detach_acr
+
+    def get_http_proxy_config(self) -> Union[Dict, ManagedClusterHTTPProxyConfig, None]:
+        """Obtain the value of http_proxy_config.
+
+        :return: dictionary, ManagedClusterHTTPProxyConfig or None
+        """
+        # read the original value passed by the command
+        http_proxy_config = None
+        http_proxy_config_file_path = self.raw_param.get("http_proxy_config")
+        # validate user input
+        if http_proxy_config_file_path:
+            if not os.path.isfile(http_proxy_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        http_proxy_config_file_path
+                    )
+                )
+            http_proxy_config = get_file_json(http_proxy_config_file_path)
+            if not isinstance(http_proxy_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading Http Proxy Config from {}. "
+                    "Please see https://aka.ms/HttpProxyConfig for correct format.".format(
+                        http_proxy_config_file_path
+                    )
+                )
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "http_proxy_config") and
+                self.mc.http_proxy_config is not None
+            ):
+                http_proxy_config = self.mc.http_proxy_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return http_proxy_config
 
     def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
         """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
@@ -4954,6 +4993,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.identity_profile = identity_profile
         return mc
 
+    def set_up_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up http proxy config for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.http_proxy_config = self.context.get_http_proxy_config()
+        return mc
+
     def set_up_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up auto upgrade profile for the ManagedCluster object.
 
@@ -5071,6 +5120,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_defender(mc)
         # set up azure keyvalut kms
         mc = self.set_up_azure_keyvault_kms(mc)
+        mc = self.set_up_http_proxy_config(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -5677,6 +5727,16 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
         return mc
 
+    def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up http proxy config for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.http_proxy_config = self.context.get_http_proxy_config()
+        return mc
+
     def update_identity(self, mc: ManagedCluster) -> ManagedCluster:
         """Update identity for the ManagedCluster object.
 
@@ -6008,6 +6068,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_azure_keyvault_kms(mc)
         # update identity
         mc = self.update_identity_profile(mc)
+        # set up http proxy config
+        mc = self.update_http_proxy_config(mc)
         return mc
 
     # pylint: disable=unused-argument
