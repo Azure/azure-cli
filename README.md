@@ -155,7 +155,6 @@ You can download the latest builds by following the links below:
 | Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge |
 | Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge   |
 | Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |
-| Ubuntu Impish Deb | https://aka.ms/InstallAzureCliImpishEdge   |
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
