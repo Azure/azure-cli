@@ -6,6 +6,8 @@
 import ast
 import threading
 import time
+import re
+from xml.etree import ElementTree
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -5382,7 +5384,8 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
     completed_workflow_file = _fill_functionapp_workflow_template(content=workflow_template.decoded_content.decode(),
                                                                   name=name, build_path=build_path,
                                                                   version=github_actions_version,
-                                                                  publish_profile=publish_profile_name)
+                                                                  publish_profile=publish_profile_name,
+                                                                  repo=repo, branch=branch, token=token)
     completed_workflow_file = completed_workflow_file.encode()
 
     # Check if workflow exists in repo, otherwise push
@@ -5628,10 +5631,45 @@ def _fill_workflow_template(content, name, branch, slot, publish_profile, versio
     return content
 
 
-def _fill_functionapp_workflow_template(content, name, build_path, version, publish_profile):
+def _get_pom_xml_content(repo, branch, token, pom_path="."):
+    from github import Github
+    import requests
+
+    g = Github(token)
+    try:
+        r = g.get_repo(repo)
+        if not branch:
+            branch = r.default_branch
+    except Exception as e:
+        raise ValidationError(f"Could not find repo {repo}") from e
+    try:
+        files = r.get_contents(pom_path, ref=branch)
+    except Exception as e:
+        raise ValidationError(f"Could not find branch {branch}") from e
+    for f in files:
+        if f.path == "pom.xml" or f.path.endswith("/pom.xml"):
+            resp = requests.get(f.download_url)
+            if resp.ok and resp.content:
+                return resp.content.decode("utf-8")
+    raise ValidationError("Could not find pom.xml in Github repo/branch. Please ensure it is named 'pom.xml'. "
+                          "Set the path with --build-path if not in the root directory.")
+
+
+def _get_pom_functionapp_name(pom_content:str):
+    root = ElementTree.fromstring(pom_content)
+    m = re.match(r'\{.*\}', root.tag)
+    namespace = m.group(0) if m else ''
+    pom_properties = root.find(f"{namespace}properties")
+    if pom_properties:
+        return pom_properties.find(f"{namespace}functionAppName").text
+
+
+def _fill_functionapp_workflow_template(content, name, build_path, version, publish_profile, repo, branch, token):
     content = content.replace("AZURE_FUNCTIONAPP_PUBLISH_PROFILE", f"{publish_profile}")
     content = content.replace("AZURE_FUNCTIONAPP_NAME: your-app-name", f"AZURE_FUNCTIONAPP_NAME: '{name}'")
-    content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{name}'")
+    if "POM_FUNCTIONAPP_NAME" in content:
+        pom_app_name = _get_pom_functionapp_name(_get_pom_xml_content(repo, branch, token, build_path))
+        content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{pom_app_name}'")
     if "AZURE_FUNCTIONAPP_PACKAGE_PATH" not in content and "POM_XML_DIRECTORY" not in content:
         logger.warning("Runtime does not support --build-path, ignoring value.")
     content = content.replace("AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'", f"AZURE_FUNCTIONAPP_PACKAGE_PATH: '{build_path}'")
