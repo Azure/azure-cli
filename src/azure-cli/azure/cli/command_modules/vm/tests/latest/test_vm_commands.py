@@ -2747,6 +2747,69 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].lun', 0)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-force-detach')
+    def test_vm_disk_force_detach(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': 'vm-diskforcedetach-test',
+            'disk1': 'd1',
+            'disk2': 'd2'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image centos '
+                 '--admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[1].lun', 2),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[1].caching', 'None')
+        ])
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 1),
+            self.check('storageProfile.dataDisks[0].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[0].lun', 2)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --caching ReadWrite --sku standard_lrs')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[0].lun', 0)
+        ])
+
+        # detach a not existing disk
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2} --force-detach')
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2}')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --size-gb 1 --caching ReadOnly')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 1),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
     def test_vm_disk_attach_multiple_disks(self, resource_group):
 

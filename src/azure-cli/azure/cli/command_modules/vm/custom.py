@@ -1916,13 +1916,39 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     set_vm(cmd, vm)
 
 
-def detach_data_disk(cmd, resource_group_name, vm_name, disk_name):
-    # here we handle both unmanaged or managed disk
+def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
+    # here we handle unmanaged disk
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     # pylint: disable=no-member
     leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
     if len(vm.storage_profile.data_disks) == len(leftovers):
         raise CLIError("No disk with the name '{}' was found".format(disk_name))
+    vm.storage_profile.data_disks = leftovers
+    set_vm(cmd, vm)
+# endregion
+
+
+def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name, force_detach=None):
+    # here we handle managed disk
+    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    if not force_detach:
+        # pylint: disable=no-member
+        leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+        if len(vm.storage_profile.data_disks) == len(leftovers):
+            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+    else:
+        DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
+                                               operation_group='virtual_machines')
+        leftovers = vm.storage_profile.data_disks
+        is_contains = False
+        for d in leftovers:
+            if d.name.lower() == disk_name.lower():
+                d.to_be_detached = True
+                d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
+                is_contains = True
+                break
+        if not is_contains:
+            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
     vm.storage_profile.data_disks = leftovers
     set_vm(cmd, vm)
 # endregion
