@@ -544,6 +544,9 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -790,6 +793,9 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
