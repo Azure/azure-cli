@@ -54,8 +54,6 @@ BAD_ARGS_ERROR_MANIFEST = "You must provide either a fully qualified manifest sp
 
 def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
-
-
 def _get_referrers_path(repository, manifest):
     return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
 
