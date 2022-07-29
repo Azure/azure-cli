@@ -42,9 +42,9 @@ Release History
 * `az webapp list-runtimes`: Add Java 17 Support (#23353)
 * `az webapp create`: Add Java 17 Support (#23353)
 * `az webapp up`: Add Java 17 Support (#23353)
-* `functionapp deployment github-actions add`: Add command to create GitHub actions to deploy to a Function App (#23326)
-* `functionapp deployment github-actions remove`: Add command to remove Function App GitHub actions (#23326)
-* `webapp deployment github-actions`: Add validation to ensure app is Web App (#23326)
+* `az functionapp deployment github-actions add`: Add command to create GitHub actions to deploy to a Function App (#23326)
+* `az functionapp deployment github-actions remove`: Add command to remove Function App GitHub actions (#23326)
+* `az webapp deployment github-actions`: Add validation to ensure app is Web App (#23326)
 
 **ARM**
 
@@ -136,7 +136,7 @@ Release History
 
 * `az spring connection create eventhubs`: Add new param `--client-type kafka-springBoot` (#23136)
 * `az webapp connection create`: Add `--config-connstr` to support webapp connection strings (#23288)
-* `Az webapp connection create`: Use webapp name and rg from config (#23313)
+* `az webapp connection create`: Use webapp name and rg from config (#23313)
 
 **SQL**
 
@@ -148,7 +148,7 @@ Release History
 * Fix #23179: `az storage file upload/upload-batch`: Fix `--content-md5` for upload, ignore `--content-md5` for upload-batch (#23207)
 * `az storage file show`: Fix JSON error when content-md5 is not None (#23207)
 * `az storage blob/file update`: Fix `--content-md5` TypeError (#23253)
-* `az storage container policy create`: No longer uses default value for start and expiry time (#23259)
+* `az storage container policy create`: No longer use default value for start and expiry time (#23259)
 * `az storage blob upload`: Add back `--socket-timeout` which has been renamed by SDK (#23146)
 * Fix #23262: `az storage blob metadata`: Add `--lease-id` back (#23330)
 * `az storage blob download/download-batch`: Add `--overwrite` (#23329)
