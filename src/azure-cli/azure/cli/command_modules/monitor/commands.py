@@ -403,10 +403,6 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
         g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
-        g.custom_command('update', 'update_log_analytics_cluster', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:

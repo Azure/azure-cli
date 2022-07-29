@@ -792,43 +792,6 @@ examples:
     text: az monitor log-analytics cluster create -g MyResourceGroup -n MyCluster --sku-capacity 1000
 """
 
-helps['monitor log-analytics cluster update'] = """
-type: command
-short-summary: Update a cluster instance.
-examples:
-  - name: Update a cluster instance.
-    text: |
-        az monitor log-analytics cluster update -g MyResourceGroup -n MyCluster \\
-          --key-vault-uri https://myvault.vault.azure.net/ --key-name my-key \\
-          --key-version fe0adcedd8014aed9c22e9aefb81a1ds --sku-capacity 1000
-"""
-
-helps['monitor log-analytics cluster delete'] = """
-type: command
-short-summary: Delete a cluster instance.
-examples:
-  - name: Delete a cluster instance.
-    text: az monitor log-analytics cluster delete -g MyResourceGroup -n MyCluster
-"""
-
-helps['monitor log-analytics cluster show'] = """
-type: command
-short-summary: Show the properties of a cluster instance.
-examples:
-  - name: Show the properties of a cluster instance.
-    text: az monitor log-analytics cluster show -g MyResourceGroup -n MyCluster
-"""
-
-helps['monitor log-analytics cluster list'] = """
-type: command
-short-summary: Gets all cluster instances in a resource group or in current subscription.
-examples:
-  - name: Gets all cluster instances in a resource group.
-    text: az monitor log-analytics cluster list -g MyResourceGroup
-  - name: Gets all cluster instances in current subscription.
-    text: az monitor log-analytics cluster list
-"""
-
 helps['monitor log-analytics cluster wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the cluster is met.

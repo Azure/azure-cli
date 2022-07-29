@@ -59,3 +59,21 @@ class AAZInvalidShorthandSyntaxError(ValueError):
 
 class AAZInvalidValueError(ValueError):
     pass
+
+
+class AAZInvalidArgValueError(ValueError):
+
+    def __init__(self, msg, indexes=None):
+        super().__init__()
+        self.msg = msg
+        self.indexes = indexes or []
+
+    def __str__(self):
+        if self.indexes:
+            idx = self.indexes[0]
+            for i in self.indexes[1:]:
+                if not i.startswith('['):
+                    idx += '.'
+                idx += i
+            return f"InvalidArgumentValue: {idx}: {self.msg}"
+        return f"InvalidArgumentValue: {self.msg}"

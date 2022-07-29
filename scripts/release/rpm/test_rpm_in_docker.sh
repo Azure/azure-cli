@@ -5,22 +5,28 @@ set -exv
 
 export USERNAME=azureuser
 
-yum --nogpgcheck localinstall /mnt/rpm/$RPM_NAME -y
+dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
-yum install git gcc python3-devel -y
+dnf install git gcc $PYTHON_PACKAGE-devel findutils -y
 
-ln -s -f /usr/bin/python3 /usr/bin/python
-ln -s -f /usr/bin/pip3 /usr/bin/pip
+ln -s -f /usr/bin/$PYTHON_CMD /usr/bin/python
+ln -s -f /usr/bin/$PIP_CMD /usr/bin/pip
 time az self-test
 time az --version
 
 cd /azure-cli/
-pip3 install wheel
+pip install wheel
 ./scripts/ci/build.sh
-pip3 install pytest --prefix /usr/lib64/az
-pip3 install pytest-xdist --prefix /usr/lib64/az
 
-find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs pip3 install --prefix /usr/lib64/az --upgrade --ignore-installed
-find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs pip3 install --prefix /usr/lib64/az --upgrade --ignore-installed --no-deps
+# From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.
+# In order to keep the original installation path, I have to set RPM_BUILD_ROOT
+# Ref https://docs.fedoraproject.org/en-US/fedora/latest/release-notes/developers/Development_Python/#_pipsetup_py_installation_with_prefix
+export RPM_BUILD_ROOT=/
 
-python3 /azure-cli/scripts/release/rpm/test_rpm_package.py
+pip install pytest --prefix /usr/lib64/az
+pip install pytest-xdist --prefix /usr/lib64/az
+
+find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed
+find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed --no-deps
+
+python /azure-cli/scripts/release/rpm/test_rpm_package.py

@@ -622,3 +622,71 @@ class TestAAZField(unittest.TestCase):
                 }
             ]
         })
+
+    def test_aaz_types_process_patch_data(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZDictType, AAZListType, \
+            AAZIntType, AAZStrType, AAZBoolType, AAZFloatType
+        from azure.cli.core.aaz._field_value import AAZObject, AAZValuePatch
+
+        model_schema = AAZObjectType()
+        model_schema.tags = AAZDictType()
+        model_schema.tags.Element = AAZStrType()
+
+        model_schema.properties = AAZObjectType()
+        model_schema.properties.enabled = AAZBoolType()
+        model_schema.properties.closed = AAZBoolType()
+
+        model_schema.subnets = AAZListType()
+        model_schema.subnets.Element = AAZObjectType()
+        model_schema.subnets.Element.score = AAZFloatType()
+        model_schema.subnets.Element.count = AAZIntType()
+
+        v = AAZObject(schema=model_schema, data=AAZValuePatch.build(model_schema))
+        v_copy = AAZObject(schema=model_schema, data=AAZValuePatch.build(model_schema))
+
+        v.tags['a'] = "11"
+        _ = v.tags['b']
+        self.assertTrue(v.tags._is_patch and not v.tags['a']._is_patch)
+        self.assertTrue(v.tags['b']._is_patch)
+
+        data = model_schema.tags.process_data(v.tags)
+        self.assertTrue(isinstance(data, AAZValuePatch))
+        self.assertTrue(data.data['a'] == '11')
+        self.assertTrue(isinstance(data.data['b'], AAZValuePatch))
+        v_copy.tags = v.tags
+        self.assertTrue(v_copy.tags._is_patch and not v_copy.tags['a']._is_patch)
+        self.assertTrue(v_copy.tags['b']._is_patch)
+
+        v.properties.enabled = False
+        _ = v.properties.closed
+        self.assertTrue(v.properties._is_patch and not v.properties.enabled._is_patch)
+        self.assertTrue(v.properties.closed._is_patch)
+
+        data = model_schema.properties.process_data(v.properties)
+        self.assertTrue(isinstance(data, AAZValuePatch))
+        self.assertTrue(data.data['enabled'] is False)
+        self.assertTrue(isinstance(data.data['closed'], AAZValuePatch))
+        v_copy.properties = v.properties
+        self.assertTrue(v_copy.properties._is_patch and not v_copy.properties.enabled._is_patch)
+        self.assertTrue(v_copy.properties.closed._is_patch)
+
+        v.subnets[0].score = 1.1
+        v.subnets[0].count = 1
+        _ = v.subnets[1].score
+        _ = v.subnets[1].count
+        self.assertTrue(v.subnets[0]._is_patch and not v.subnets[0].score._is_patch and not v.subnets[0].count._is_patch)
+        self.assertTrue(v.subnets[1]._is_patch and v.subnets[1].score._is_patch and v.subnets[1].count._is_patch)
+
+        data = model_schema.subnets.process_data(v.subnets)
+        self.assertTrue(isinstance(data, AAZValuePatch))
+        self.assertTrue(isinstance(data.data[0], AAZValuePatch))
+        self.assertTrue(data.data[0].data['score'] == 1.1)
+        self.assertTrue(data.data[0].data['count'] == 1)
+        self.assertTrue(isinstance(data.data[1], AAZValuePatch))
+        self.assertTrue(isinstance(data.data[1].data['score'], AAZValuePatch))
+        self.assertTrue(isinstance(data.data[1].data['count'], AAZValuePatch))
+
+        v_copy.subnets = v.subnets
+
+        self.assertTrue(v_copy.subnets[0]._is_patch and not v_copy.subnets[0].score._is_patch and not v_copy.subnets[0].count._is_patch)
+        self.assertTrue(v_copy.subnets[1]._is_patch and v_copy.subnets[1].score._is_patch and v_copy.subnets[1].count._is_patch)

@@ -658,8 +658,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
         # content_md5 value to bytearray. And track2 SDK will serialize it into the right value with str type in header.
         if is_storagev2(prefix):
             if process_md5 and new_props.content_md5:
-                from .track2_util import _str_to_bytearray
-                new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
+                # During update, the content_md5 might be bytearray, we do not need to convert again.
+                if not isinstance(new_props.content_md5, bytearray):
+                    from .track2_util import _str_to_bytearray
+                    new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
 
         ns['content_settings'] = new_props
 
@@ -1304,6 +1306,8 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
     namespace.source = os.path.realpath(namespace.source)
     namespace.share_name = namespace.destination
+    # Ignore content_md5 for batch upload
+    namespace.content_md5 = None
 
 
 def process_file_download_batch_parameters(cmd, namespace):
@@ -2206,3 +2210,8 @@ def validate_blob_arguments(namespace):
     if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
         raise RequiredArgumentMissingError(
             "Please specify --blob-url or combination of blob name, container name and storage account arguments.")
+
+
+def encode_deleted_path(namespace):
+    from urllib.parse import quote
+    namespace.deleted_path_name = quote(namespace.deleted_path_name)

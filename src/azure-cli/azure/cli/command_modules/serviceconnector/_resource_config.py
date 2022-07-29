@@ -60,6 +60,7 @@ class AUTH_TYPE(Enum):
 # The dict defines the client types
 class CLIENT_TYPE(Enum):
     Dotnet = 'dotnet'
+    DotnetConnectionString = 'dotnet-connectionString'
     Java = 'java'
     Nodejs = 'nodejs'
     Python = 'python'
@@ -67,6 +68,7 @@ class CLIENT_TYPE(Enum):
     Php = 'php'
     Ruby = 'ruby'
     SpringBoot = 'springBoot'
+    KafkaSpringBoot = 'kafka-springBoot'
     Django = 'django'
     Blank = 'none'
 
@@ -79,6 +81,9 @@ SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
 
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
+
+# The target resources could be set to connection string
+TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
 
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
@@ -127,11 +132,13 @@ TARGET_RESOURCES = {
 SOURCE_RESOURCES_PARAMS = {
     RESOURCE.WebApp: {
         'source_resource_group': {
+            'configured_default': 'group',
             'options': ['--resource-group', '-g'],
             'help': 'The resource group which contains the webapp',
             'placeholder': 'WebAppRG'
         },
         'site': {
+            'configured_default': 'web',
             'options': ['--name', '-n'],
             'help': 'Name of the webapp',
             'placeholder': 'MyWebApp'
@@ -299,6 +306,7 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'SqlRG'
         },
         'server': {
+            'configured_default': 'sql-server',
             'options': ['--server'],
             'help': 'Name of the sql server',
             'placeholder': 'MyServer'
@@ -935,6 +943,7 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.KafkaSpringBoot,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.ServiceBus: [
@@ -963,143 +972,12 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Blank
-        ]
-    },
-    RESOURCE.SpringCloud: {
-        RESOURCE.Postgres: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.PostgresFlexible: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Mysql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.MysqlFlexible: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Sql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.Redis: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.RedisEnterprise: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosCassandra: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosGremlin: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosMongo: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosTable: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.CosmosSql: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageBlob: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageQueue: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageFile: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.StorageTable: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.KeyVault: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.AppConfig: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.EventHub: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.ServiceBus: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.SignalR: [
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.WebPubSub: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.Blank
-        ],
-        RESOURCE.ConfluentKafka: [
-            CLIENT_TYPE.Java,
-            CLIENT_TYPE.SpringBoot,
-            CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Blank
         ]
     }
 }
-SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud]
+
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

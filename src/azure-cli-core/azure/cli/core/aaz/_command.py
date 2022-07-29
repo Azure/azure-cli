@@ -127,7 +127,12 @@ class AAZCommand(CLICommand):
 
     def _handler(self, command_args):
         # command_args will be parsed by AAZCommandCtx
-        self.ctx = AAZCommandCtx(cli_ctx=self.cli_ctx, schema=self.get_arguments_schema(), command_args=command_args)
+        self.ctx = AAZCommandCtx(
+            cli_ctx=self.cli_ctx,
+            schema=self.get_arguments_schema(),
+            command_args=command_args,
+            no_wait_arg='no_wait' if self.supports_no_wait else None,
+        )
         self.ctx.format_args()
 
     def _cli_arguments_loader(self):
@@ -190,11 +195,15 @@ class AAZCommand(CLICommand):
 
         return value.to_serialized_data(processor=processor)
 
-    @staticmethod
-    def build_lro_poller(executor, extract_result):
+    def build_lro_poller(self, executor, extract_result):
         """ Build AAZLROPoller instance to support long running operation
         """
-        return AAZLROPoller(polling_generator=executor, result_callback=extract_result)
+        polling_generator = executor()
+        if self.ctx.lro_no_wait:
+            # run until yield the first polling
+            _ = next(polling_generator)
+            return None
+        return AAZLROPoller(polling_generator=polling_generator, result_callback=extract_result)
 
     def build_paging(self, executor, extract_result):
         """ Build AAZPaged instance to support paging
@@ -204,6 +213,26 @@ class AAZCommand(CLICommand):
             executor()
 
         return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
+
+
+class AAZWaitCommand(AAZCommand):
+    """Support wait command"""
+
+    def __init__(self, loader):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        super().__init__(loader)
+
+        # add wait args in commands
+        for param_name, argtype in WaitCommandOperation.wait_args().items():
+            self.arguments[param_name] = argtype
+
+    def __call__(self, *args, **kwargs):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        return WaitCommandOperation.wait(
+            *args, **kwargs,
+            cli_ctx=self.cli_ctx,
+            getter=lambda **command_args: self._handler(command_args)
+        )
 
 
 def register_command_group(

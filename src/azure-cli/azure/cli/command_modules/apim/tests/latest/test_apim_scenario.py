@@ -480,8 +480,71 @@ class ApimScenarioTest(ScenarioTest):
         final_count = len(self.cmd('apim list').get_output_in_json())
         self.assertEqual(final_count, count - 1)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-', parameter_name_for_location='resource_group_location')
+    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @AllowLargeResponse()
+    def test_apim_deletedservice(self, resource_group, resource_group_location, storage_account_for_backup):
+        service_name = self.create_random_name('cli-test-apim-deletedservice-', 35)
+        resource_group = self.create_random_name('cli-test-apim-deletedservice-rg', 35)
 
+        # try to use the injected location, but if the location is not known
+        # fall back to west us, otherwise we can't validate since the sdk returns displayName
+        if resource_group_location not in KNOWN_LOCS.keys():
+            resource_group_location = 'westus'
 
+        self.kwargs.update({
+            'service_name': service_name,
+            'rg': resource_group,
+            'rg_loc': resource_group_location,
+            'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
+            'notification_sender_email': 'notifications@contoso.com',
+            'publisher_email': 'publisher@contoso.com',
+            'publisher_name': 'Contoso',
+            'sku_name': 'Consumption',
+            'skucapacity': 1,
+            'enable_managed_identity': True,
+            'tag': "foo=boo"
+        })
+
+        self.cmd('group create -l {rg_loc} -n {rg}')
+
+        self.cmd('apim check-name -n {service_name} -o json',
+                 checks=[self.check('nameAvailable', True)])
+
+        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
+                 checks=[self.check('name', '{service_name}'),
+                         self.check('location', '{rg_loc_displayName}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.check('publisherName', '{publisher_name}'),
+                         self.check('publisherEmail', '{publisher_email}')])
+
+        self.cmd('apim check-name -n {service_name}',
+            checks=[self.check('nameAvailable', False),
+                    self.check('reason', 'AlreadyExists')])    
+
+        # wait for creation
+        self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
+
+        # delete rg and get apim into soft-deleted state
+        self.cmd('group delete -g {rg} -y', checks=[self.is_empty()])
+
+        # list deleted service
+        deletedservices = self.cmd('apim deletedservice list').get_output_in_json()
+        self.assertTrue(any(service['name'] == service_name for service in deletedservices))
+
+        # show deleted service
+        self.cmd('apim deletedservice show -l {rg_loc} -n {service_name}',
+                    checks=[self.check('name', '{service_name}'),
+                        self.check('location', '{rg_loc_displayName}'),
+                        self.check('type', 'Microsoft.ApiManagement/deletedservices')])
+
+        # purge deleted service
+        self.cmd('apim deletedservice purge -l {rg_loc} -n {service_name}', checks=[self.is_empty()])
+
+        deletedservices = self.cmd('apim deletedservice list').get_output_in_json()
+        self.assertFalse(any(service['name'] == service_name for service in deletedservices))
 
 KNOWN_LOCS = {'eastasia': 'East Asia',
               'southeastasia': 'Southeast Asia',

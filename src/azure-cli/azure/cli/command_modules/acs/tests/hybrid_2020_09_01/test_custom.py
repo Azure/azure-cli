@@ -597,9 +597,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resources', autospec=True)
-    def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)
+    def test_update_addons(self, rg_def, get_resource_groups_client, get_resources_client):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None

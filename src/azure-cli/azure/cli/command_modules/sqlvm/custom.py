@@ -510,14 +510,14 @@ def set_assessment_properties(cmd, instance, enable_assessment, enable_assessmen
         # In case workspace arguments provided by customer, verify they match with workspace associated with VM
         if workspace_name is None:
             workspace_name = workspace_name_found
-        elif workspace_name != workspace_name_found:
-            raise InvalidArgumentValueError(f"VM is already associated with worksapce '{workspace.id}'. "
+        elif workspace_name.lower() != workspace_name_found.lower():
+            raise InvalidArgumentValueError(f"VM is already associated with workspace '{workspace.id}'. "
                                             "Skip workspace arguments to continue with associated workspace or dissociate workspace using Azure Portal first.")
 
         if workspace_rg is None:
             workspace_rg = workspace_rg_found
-        elif workspace_rg != workspace_rg_found:
-            raise InvalidArgumentValueError(f"VM is already associated with worksapce {workspace.id}. "
+        elif workspace_rg.lower() != workspace_rg_found.lower():
+            raise InvalidArgumentValueError(f"VM is already associated with workspace {workspace.id}. "
                                             "Skip workspace arguments to continue with associated workspace or dissociate workspace from Azure Portal.")
 
         # Validate custom log definition on workspace

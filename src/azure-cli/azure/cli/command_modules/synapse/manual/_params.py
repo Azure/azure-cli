@@ -101,6 +101,7 @@ def load_arguments(self, _):
             c.argument('root_folder', arg_group=repository_arg_group, help='The name of the folder to the location of your Azure synapse JSON resources are imported. Default is /')
             c.argument('project_name', arg_group=repository_arg_group, help='The project name to which you are connecting.')
             c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
+            c.argument('last_commit_id', arg_group=repository_arg_group, help='The last commit ID.')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -226,6 +227,8 @@ def load_arguments(self, _):
                    arg_group=storage_arg_group,
                    help='The Storage Account Type.',
                    arg_type=get_enum_type(['GRS', 'LRS']))
+        c.argument('collation',
+                   help='Collation defines the rules that sort and compare data, and cannot be changed after SQL pool creation. The default collation is "SQL_Latin1_General_CP1_CI_AS".')
 
     with self.argument_context('synapse sql pool update') as c:
         c.argument('sku_name', options_list=['--performance-level'], help='The performance level.')
@@ -1098,3 +1101,43 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
         c.argument('output_folder', type=str, help='The name of the output folder')
         c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
+
+    for scope in ['enable', 'disable']:
+        with self.argument_context('synapse ad-only-auth ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('resource_group_name', resource_group_name_type)
+
+    # synapse link connections
+    with self.argument_context('synapse link-connection list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    for scope in ['show', 'delete', 'get-status', 'start', 'stop']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection list-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection edit-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('definition_file', arg_type=definition_file_arg_type, options_list=['--file', '-f'], type=shell_safe_json_parse,
+                   help='The Edit link-tables file path, The file format can be viewed using --help.')
+
+    with self.argument_context('synapse link-connection get-link-tables-status') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('max_segment_count', help='Max segment count to query table status.')
+        c.argument('continuation_token', help='Continuation token to query table status.')
+    with self.argument_context('synapse link-connection update-landing-zone-credential') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('sas_token', help='Value of secure string.')

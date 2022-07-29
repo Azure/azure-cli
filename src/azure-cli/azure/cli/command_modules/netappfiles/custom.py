@@ -44,19 +44,19 @@ def _update_mapper(existing, new, keys):
 
 
 # ---- ACCOUNT ----
-# pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
-def create_account(cmd, client, account_name, resource_group_name, location=None, tags=None, encryption=None):
+def create_account(cmd, client, account_name, resource_group_name, location=None, tags=None, encryption=None,
+                   no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
-    return client.begin_create_or_update(resource_group_name, account_name, body)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
 
-# pylint: disable=unused-argument, disable=too-many-locals
+# pylint: disable=too-many-locals
 # add an active directory to the netapp account
 # current limitation is 1 AD/subscription
-def add_active_directory(instance, account_name, resource_group_name, username, password, domain, dns,
+def add_active_directory(instance, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None, site=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                          security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
@@ -80,10 +80,10 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
     return body
 
 
-# pylint: disable=unused-argument, disable=too-many-locals, disable=too-many-statements
+# pylint: disable=too-many-locals, disable=too-many-statements
 # update an active directory on the netapp account
 # current limitation is 1 AD/subscription
-def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password,
+def update_active_directory(instance, active_directory_id, username, password,
                             domain, dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                             server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                             security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, site=None,
@@ -126,7 +126,7 @@ def list_active_directories(client, account_name, resource_group_name):
 # absence of an AD does not remove the ADs already present. To perform this a put request is required that
 # asserts exactly the content provided, replacing whatever is already present including removing it if none
 # are present
-def remove_active_directory(client, account_name, resource_group_name, active_directory):
+def remove_active_directory(client, account_name, resource_group_name, active_directory, no_wait=False):
     instance = client.get(resource_group_name, account_name)
 
     for ad in instance.active_directories:
@@ -136,11 +136,11 @@ def remove_active_directory(client, account_name, resource_group_name, active_di
     active_directories = instance.active_directories
     body = NetAppAccount(location=instance.location, tags=instance.tags, active_directories=active_directories)
 
-    return client.begin_create_or_update(resource_group_name, account_name, body)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
 
 # account update, active_directory is amended with subgroup commands
-def patch_account(instance, account_name, resource_group_name, tags=None, encryption=None):
+def patch_account(instance, tags=None, encryption=None):
     account_encryption = AccountEncryption(key_source=encryption)
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
     _update_mapper(instance, body, ['tags', 'encryption'])
@@ -155,9 +155,8 @@ def list_accounts(client, resource_group_name=None):
 
 
 # ---- POOL ----
-# pylint: disable=no-required-location-param
-def create_pool(cmd, client, account_name, pool_name, resource_group_name, service_level, size, location=None, tags=None,
-                qos_type=None, cool_access=None, encryption_type=None):
+def create_pool(cmd, client, account_name, pool_name, resource_group_name, service_level, size, location=None,
+                tags=None, qos_type=None, cool_access=None, encryption_type=None, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = CapacityPool(service_level=service_level,
                         size=int(size) * tib_scale,
@@ -166,7 +165,7 @@ def create_pool(cmd, client, account_name, pool_name, resource_group_name, servi
                         qos_type=qos_type,
                         cool_access=cool_access,
                         encryption_type=encryption_type)
-    return client.begin_create_or_update(resource_group_name, account_name, pool_name, body)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, pool_name, body)
 
 
 def patch_pool(instance, size=None, qos_type=None, tags=None):
@@ -192,7 +191,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
-                  default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None):
+                  default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None,
+                  zones=None, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subs_id = get_subscription_id(cmd.cli_ctx)
 
@@ -297,9 +297,10 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         default_group_quota_in_ki_bs=default_group_quota,
         avs_data_store=avs_data_store,
         network_features=network_features,
-        enable_subvolumes=enable_subvolumes)
+        enable_subvolumes=enable_subvolumes,
+        zones=zones)
 
-    return client.begin_create_or_update(resource_group_name, account_name, pool_name, volume_name, body)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # -- volume update
@@ -334,26 +335,28 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
 
 
 # -- volume revert
-def volume_revert(client, resource_group_name, account_name, pool_name, volume_name, snapshot_id):
+def volume_revert(client, resource_group_name, account_name, pool_name, volume_name, snapshot_id, no_wait=False):
     body = VolumeRevert(snapshot_id=snapshot_id)
-    return client.begin_revert(resource_group_name, account_name, pool_name, volume_name, body)
+    return sdk_no_wait(no_wait, client.begin_revert, resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # -- change pool
-def pool_change(client, resource_group_name, account_name, pool_name, volume_name, new_pool_resource_id):
+def pool_change(client, resource_group_name, account_name, pool_name, volume_name, new_pool_resource_id, no_wait=False):
     body = PoolChangeRequest(new_pool_resource_id=new_pool_resource_id)
-    return client.begin_pool_change(resource_group_name, account_name, pool_name, volume_name, body)
+    return sdk_no_wait(no_wait, client.begin_pool_change, resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # -- volume replication
-def authorize_replication(client, resource_group_name, account_name, pool_name, volume_name, remote_volume_resource_id=None):
+def authorize_replication(client, resource_group_name, account_name, pool_name, volume_name,
+                          remote_volume_resource_id=None, no_wait=False):
     body = AuthorizeRequest(remote_volume_resource_id=remote_volume_resource_id)
-    return client.begin_authorize_replication(resource_group_name, account_name, pool_name, volume_name, body)
+    return sdk_no_wait(no_wait, client.begin_authorize_replication, resource_group_name, account_name, pool_name, volume_name, body)
 
 
-def break_replication(client, resource_group_name, account_name, pool_name, volume_name, force_break_replication=None):
+def break_replication(client, resource_group_name, account_name, pool_name, volume_name, force_break_replication=None,
+                      no_wait=False):
     body = BreakReplicationRequest(force_break_replication=force_break_replication)
-    return client.begin_break_replication(resource_group_name, account_name, pool_name, volume_name, body)
+    return sdk_no_wait(no_wait, client.begin_break_replication, resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # ---- VOLUME EXPORT POLICY ----
@@ -425,19 +428,20 @@ def remove_export_policy_rule(instance, rule_index):
 
 
 # ---- SNAPSHOTS ----
-def create_snapshot(cmd, client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, location=None):
-    body = Snapshot(location=location)
+def create_snapshot(cmd, client, resource_group_name, account_name, pool_name, volume_name, snapshot_name,
+                    location=None, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    return client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+    body = Snapshot(location=location)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
 def snapshot_restore_files(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, file_paths,
-                           destination_path=None):
+                           destination_path=None, no_wait=False):
     body = SnapshotRestoreFiles(
         file_paths=file_paths,
         destination_path=destination_path
     )
-    return client.begin_restore_files(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+    return sdk_no_wait(no_wait, client.begin_restore_files, resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
 
 
 # ---- SNAPSHOT POLICIES ----
@@ -466,7 +470,7 @@ def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapsh
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
-                          enabled=False):
+                          enabled=False, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = SnapshotPolicyPatch(
         location=location,
@@ -477,26 +481,27 @@ def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapsh
         monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots, minute=monthly_minute,
                                          hour=monthly_hour, days_of_month=monthly_days),
         enabled=enabled)
-    return client.begin_update(resource_group_name, account_name, snapshot_policy_name, body)
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, account_name, snapshot_policy_name, body)
 
 
 # ---- VOLUME BACKUPS ----
 def create_backup(cmd, client, resource_group_name, account_name, pool_name, volume_name, backup_name, location=None,
-                  use_existing_snapshot=None):
+                  use_existing_snapshot=None, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = Backup(location=location, use_existing_snapshot=use_existing_snapshot)
-    return client.begin_create(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
-def update_backup(client, resource_group_name, account_name, pool_name, volume_name, backup_name, tags=None, label=None,
-                  use_existing_snapshot=None):
-    body = BackupPatch(tags=tags, label=label, use_existing_snapshot=use_existing_snapshot)
-    return client.begin_update(resource_group_name, account_name, pool_name, volume_name, backup_name, body)
+def update_backup(instance, label=None, use_existing_snapshot=None):
+    body = BackupPatch(label=label, use_existing_snapshot=use_existing_snapshot)
+    _update_mapper(instance, body, ['label', 'use_existing_snapshot'])
+    return body
 
 
 # ---- BACKUP POLICIES ----
 def create_backup_policy(cmd, client, resource_group_name, account_name, backup_policy_name, location=None,
-                         daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
+                         daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None,
+                         no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = BackupPolicy(
         location=location,
@@ -505,11 +510,11 @@ def create_backup_policy(cmd, client, resource_group_name, account_name, backup_
         monthly_backups_to_keep=monthly_backups,
         enabled=enabled,
         tags=tags)
-    return client.begin_create(resource_group_name, account_name, backup_policy_name, body)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, backup_policy_name, body)
 
 
-def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
-                        daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
+def patch_backup_policy(instance, location=None, daily_backups=None, weekly_backups=None, monthly_backups=None,
+                        enabled=False, tags=None):
     body = BackupPolicyPatch(
         location=location,
         daily_backups_to_keep=daily_backups,
@@ -517,27 +522,26 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         monthly_backups_to_keep=monthly_backups,
         enabled=enabled,
         tags=tags)
-    return client.begin_update(resource_group_name, account_name, backup_policy_name, body)
+    _update_mapper(instance, body, ['location', 'daily_backups_to_keep', 'weekly_backups_to_keep',
+                                    'monthly_backups_to_keep', 'enabled', 'tags'])
+    return body
 
 
 # ---- SUBVOLUME ----
 def create_subvolume(client, resource_group_name, account_name, pool_name, volume_name, subvolume_name, path=None,
-                     size=None, parent_path=None):
+                     size=None, parent_path=None, no_wait=False):
     body = SubvolumeInfo(
         path=path,
         size=size,
         parent_path=parent_path
     )
-    return client.begin_create(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
 
 
-def patch_subvolume(client, resource_group_name, account_name, pool_name, volume_name, subvolume_name, path=None,
-                    size=None):
-    body = SubvolumePatchRequest(
-        path=path,
-        size=size
-    )
-    return client.begin_update(resource_group_name, account_name, pool_name, volume_name, subvolume_name, body)
+def patch_subvolume(instance, path=None, size=None):
+    body = SubvolumePatchRequest(path=path, size=size)
+    _update_mapper(instance, body, ['path', 'size'])
+    return body
 
 
 # ---- VOLUME GROUPS ----

@@ -26,6 +26,11 @@ class APIVersionException(Exception):
 
 
 # Sentinel value for profile
+# If resource_type is set to PROFILE_TYPE, it means the name of the profile, such as 'latest', '2020-09-01-hybrid',
+# is used for supported_api_version check. For example,
+#     with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
+#                             min_api='2019-03-02-hybrid') as g:
+# This checks if the current cloud's profile name >= '2019-03-02-hybrid'.
 PROFILE_TYPE = object()
 
 
@@ -160,7 +165,7 @@ AZURE_API_PROFILES = {
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2021-11-01',
+            'virtual_machine_scale_sets': '2022-03-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -201,7 +206,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
-        ResourceType.MGMT_EVENTHUB: '2021-11-01',
+        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2021-09-01',
             'activity_log_alerts': '2017-04-01',
@@ -236,14 +241,14 @@ AZURE_API_PROFILES = {
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_MSI: '2021-09-30-preview',
-        ResourceType.MGMT_APPSERVICE: '2021-03-01',
+        ResourceType.MGMT_APPSERVICE: '2022-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-04-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-06-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })
@@ -289,7 +294,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2021-11-01',
+        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
@@ -336,7 +341,7 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2021-11-01',
+        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
