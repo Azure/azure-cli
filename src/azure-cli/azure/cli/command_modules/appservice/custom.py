@@ -1852,7 +1852,6 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                                              slot, source_control)
             return LongRunningOperation(cmd.cli_ctx)(poller)
         except Exception as ex:  # pylint: disable=broad-except
-            import re
             ex = ex_handler_factory(no_throw=True)(ex)
             # for non server errors(50x), just throw; otherwise retry 4 times
             if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
@@ -2977,7 +2976,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     def remove_delimiters(cls, runtime):
         if not runtime:
             return runtime
-        import re
         runtime = re.split("[{}]".format(cls.ALLOWED_DELIMETERS), runtime)
         return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
@@ -3060,7 +3058,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     # TODO get API to return more CLI-friendly display text for windows stacks
     @classmethod
     def _format_windows_display_text(cls, display_text):
-        import re
         t = display_text.upper()
         t = t.replace(".NET CORE", NETCORE_RUNTIME_NAME.upper())
         t = t.replace("ASP.NET", ASPDOTNET_RUNTIME_NAME.upper())
@@ -3278,7 +3275,6 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     # remove non-digit or non-"." chars
     @classmethod
     def _format_version_name(cls, name):
-        import re
         return re.sub(r"[^\d\.]", "", name)
 
     # format version names while maintaining uniqueness
@@ -3643,7 +3639,6 @@ def _convert_camel_to_snake_case(text):
 
 
 def _get_runtime_version_functionapp(version_string, is_linux):
-    import re
     windows_match = re.fullmatch(FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, version_string)
     if windows_match:
         return float(windows_match.group(1))
@@ -5528,7 +5523,6 @@ def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=Non
 
 
 def _get_publish_profile_from_workflow_file(workflow_file):
-    import re
     publish_profile = None
     regex = re.search(r'publish-profile: \$\{\{ secrets\..*?\}\}', workflow_file)
     if regex:
@@ -5645,7 +5639,7 @@ def _get_pom_xml_content(repo, branch, token, pom_path="."):
     try:
         files = r.get_contents(pom_path, ref=branch)
     except Exception as e:
-        raise ValidationError(f"Could not find branch {branch}") from e
+        raise ValidationError(f"Could not find path {pom_path} in branch {branch}") from e
     for f in files:
         if f.path == "pom.xml" or f.path.endswith("/pom.xml"):
             resp = requests.get(f.download_url)
@@ -5655,7 +5649,7 @@ def _get_pom_xml_content(repo, branch, token, pom_path="."):
                           "Set the path with --build-path if not in the root directory.")
 
 
-def _get_pom_functionapp_name(pom_content:str):
+def _get_pom_functionapp_name(pom_content: str):
     root = ElementTree.fromstring(pom_content)
     m = re.match(r'\{.*\}', root.tag)
     namespace = m.group(0) if m else ''
@@ -5783,7 +5777,6 @@ def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
 
 
 def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
-    import re
     runtime_version = re.sub(r"[^\d\.]", "", runtime_version).rstrip('.')
     matched_runtime = None
     helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
@@ -5926,8 +5919,6 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
 
 
 def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux):
-    import re
-
     if is_linux:
         if len(app_runtime.split('|')) < 2:
             raise ValidationError(f"Runtime {app_runtime} is not supported.")
