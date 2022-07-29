@@ -18,7 +18,7 @@ Release History
 
 **Advisor**
 
-* Fix #11070: Fix `az advisor recommendation disable` NoneType error (#23260)
+* Fix #11070: `az advisor recommendation disable`: Fix NoneType error (#23260)
 
 **AKS**
 
@@ -134,7 +134,7 @@ Release History
 
 **Service Connector**
 
-* `az spring connection create eventhubs`: Add new param `--client-type kafka-springBoot` (#23136)
+* `az spring connection create eventhubs`: Add new parameter `--client-type kafka-springBoot` (#23136)
 * `az webapp connection create`: Add `--config-connstr` to support webapp connection strings (#23288)
 * `az webapp connection create`: Use webapp name and rg from config (#23313)
 
