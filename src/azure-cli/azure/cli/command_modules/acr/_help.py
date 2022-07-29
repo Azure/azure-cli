@@ -636,7 +636,7 @@ examples:
 
 helps['acr manifest restore'] = """
 type: command
-short-summary: Restore a soft-deleted artifact in an Azure Container Registry.
+short-summary: Restore a soft-deleted artifact and tag in an Azure Container Registry.
 examples:
   - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
     text: az acr manifest restore -r MyRegistry -n hello-world:latest -d sha256:abc123
