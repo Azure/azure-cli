@@ -616,7 +616,7 @@ def validate_key_id(entity_type):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
-        # `keyvault key` command has been migrated to track2, `key_name` argument is renamed to `namek
+        # `keyvault key` command has been migrated to track2, `key_name` argument is renamed to `name`
         name_key = pure_entity_type + '_name' if pure_entity_type != 'key' else 'name'
         name = getattr(ns, name_key, None)
         vault = getattr(ns, 'vault_base_url', None)
