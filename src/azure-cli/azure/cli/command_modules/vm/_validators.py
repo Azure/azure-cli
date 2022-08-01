@@ -1316,8 +1316,12 @@ def _validate_trusted_launch(namespace):
         return
 
     if not namespace.enable_vtpm or not namespace.enable_secure_boot:
-        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-secure-boot True"'
-                       ' to receive the full suite of security features that comes with Trusted Launch.')
+        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-vtpm True" to receive'
+                       ' the full suite of security features that comes with Trusted Launch. Breaking change:'
+                       ' --enable-secure-boot will be enabled by default in Microsoft Build and Ignite')
+
+    if not namespace.enable_vtpm:
+        namespace.enable_vtpm = True
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
