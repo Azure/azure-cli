@@ -2477,9 +2477,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_expiry_option_type = self.get_models('_generated.models#PathExpiryOptions',
                                                resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
         c.argument('expiry_options', required=True, arg_type=get_enum_type(t_expiry_option_type))
-        c.argument('expires_on', type=get_datetime_type(False), help='The time to set the file to expiry. When expiry_options is '
-                                      'RelativeTo*, expires_on should be an int in milliseconds. If the '
-                                      'type of expires_on is datetime, it should be in UTC time.')
+        from ._validators import validate_fs_file_set_expiry
+        c.argument('expires_on', validator=validate_fs_file_set_expiry,
+                   help='The time to set the file to expiry. When expiry_options is '
+                        'RelativeTo*, expires_on should be an int in milliseconds. If the '
+                        'type of expires_on is datetime, it should be in UTC time.')
 
     for item in ['set', 'show']:
         with self.argument_context('storage fs access {}'.format(item)) as c:
