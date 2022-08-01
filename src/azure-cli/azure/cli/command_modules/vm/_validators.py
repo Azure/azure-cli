@@ -1317,8 +1317,8 @@ def _validate_trusted_launch(namespace):
 
     if not namespace.enable_vtpm or not namespace.enable_secure_boot:
         logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-vtpm True" to receive'
-                       ' the full suite of security features that comes with Trusted Launch. Breaking change:'
-                       ' --enable-secure-boot will be enabled by default in Microsoft Build and Ignite')
+                       ' the full suite of security features that comes with Trusted Launch. Please note that the'
+                       ' "--enable-secure-boot" will be enabled by default in Microsoft Ignite Event (around November)')
 
     if not namespace.enable_vtpm:
         namespace.enable_vtpm = True
