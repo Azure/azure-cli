@@ -2162,6 +2162,7 @@ def process_ppg_create_namespace(namespace):
 
 
 def process_image_version_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     process_gallery_image_version_namespace(cmd, namespace)
     process_image_resource_id_namespace(namespace)
 # endregion
