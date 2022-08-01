@@ -288,6 +288,13 @@ long-summary: Retrieve a list of the keys in the Vault or HSM as JSON Web Key st
     requires the keys/list permission.
 """
 
+helps['keyvault key list-versions'] = """
+type: command
+short-summary: Retrieves a list of individual key versions with the same key name.
+long-summary: The full key identifier, attributes, and tags are provided in the response. This operation
+    requires the keys/list permission.
+"""
+
 helps['keyvault key purge'] = """
 type: command
 short-summary: Permanently delete the specified key.
