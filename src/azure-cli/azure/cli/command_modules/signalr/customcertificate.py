@@ -14,7 +14,7 @@ from azure.mgmt.signalr._signal_rmanagement_client import (
 
 
 def custom_certificate_create(client: SignalRCustomCertificatesOperations, resource_group_name, signalr_name, name, keyvault_base_uri, keyvault_secret_name, keyvault_secret_version=None):
-    custom_certificate = CustomCertificate(key_vault_base_uri=keyvault_base_uri, keyvault_secret_name=keyvault_secret_name, keyvault_secret_version=keyvault_secret_version)
+    custom_certificate = CustomCertificate(key_vault_base_uri=keyvault_base_uri, key_vault_secret_name=keyvault_secret_name, keyvault_secret_version=keyvault_secret_version)
     
     return client.begin_create_or_update(resource_group_name, signalr_name, name, custom_certificate)
 
