@@ -103,7 +103,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.15'
+    vmImage: 'macOS-12'
 
   steps:
   - task: UsePythonVersion@0
@@ -531,7 +531,7 @@ jobs:
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.15'
+    vmImage: 'macOS-12'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -571,7 +571,7 @@ jobs:
   # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   condition: false
   pool:
-    vmImage: 'macOS-10.15'
+    vmImage: 'macOS-12'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -742,10 +742,6 @@ jobs:
         # 20.04
         deb_system: ubuntu
         distro: focal
-      Impish:
-        # 21.10
-        deb_system: ubuntu
-        distro: impish
       Jammy:
         # 22.04
         deb_system: ubuntu
