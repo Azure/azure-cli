@@ -663,7 +663,15 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         # File <--> AppConfig tests
 
         imported_file_path = os.path.join(TEST_DIR, 'import.json')
+        imported_json_array = os.path.join(TEST_DIR, 'import_json_array.json')
+        imported_invalid_json_array_file_path = os.path.join(TEST_DIR, 'import_invalid_anonymous_array.json')
+        imported_plain_string_file_path = os.path.join(TEST_DIR, 'import_invalid_plain_string.json')
+        imported_json_integer_keys = os.path.join(TEST_DIR, 'import_json_root_integer_keys.json')
+        exported_json_integer_keys = os.path.join(TEST_DIR, 'export_json_root_integer_keys.json')
         exported_file_path = os.path.join(TEST_DIR, 'export.json')
+        exported_json_object = os.path.join(TEST_DIR, 'export_changed_json.json')
+        exported_json_object_reference = os.path.join(TEST_DIR, 'export_changed_json_ref.json')
+ 
         self.kwargs.update({
             'import_source': 'file',
             'imported_format': 'json',
@@ -694,6 +702,69 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
+
+        # Error out when importing array.
+        self.kwargs.update({
+            'imported_file_path': imported_invalid_json_array_file_path,
+        })
+
+        with self.assertRaisesRegex(CLIError, "The input is not a well formatted json file.\nException: Json object required but type 'list' was given."):
+            self.cmd(
+                'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format}')
+
+        # Error out when importing plain string.
+        self.kwargs.update({
+            'imported_file_path': imported_plain_string_file_path
+        })
+
+        with self.assertRaisesRegex(CLIError, "The input is not a well formatted json file.\nException: Json object required but type 'str' was given."):
+            self.cmd(
+                'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format}')
+
+        '''
+        1. Import configuration from JSON file which has a key "arr" with array values. Assign label "array_test" and separator "/"
+        2. Add new value with the same prefix as the array data key but not continuous with array indices. (e.g., "arr/foo")
+        3. Export configurations with the same label to a JSON file.
+        4. Confirm that the value of "arr" is now a JSON object.
+        '''
+        self.kwargs.update({
+            'imported_file_path': imported_json_array,
+            'exported_file_path': exported_json_object,
+            'key': 'arr/foo',
+            'value': 'bar',
+            'label': 'array_test'
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
+        with open(exported_json_object) as json_file:
+            exported_kvs = json.load(json_file)
+        with open(exported_json_object_reference) as json_file:
+            expected_exported_kvs = json.load(json_file)
+        assert expected_exported_kvs == exported_kvs
+        os.remove(exported_json_object)
+
+        # key-values with integers as keys at the root are not converted to arrays.
+        self.kwargs.update({
+            'imported_file_path': imported_json_integer_keys,
+            'exported_file_path': exported_json_integer_keys,
+            'label': 'integer_keys_test'
+        })
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
+        with open(exported_json_integer_keys) as json_file:
+            exported_kvs = json.load(json_file)
+        with open(imported_json_integer_keys) as json_file:
+            imported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_json_integer_keys)
+
 
         # Feature flags test
         imported_file_path = os.path.join(TEST_DIR, 'import_features.json')

@@ -137,6 +137,9 @@ def __read_with_appropriate_encoding(file_path, format_):
         with io.open(file_path, 'r', encoding=default_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
+                # Only accept json objects
+                if not isinstance(config_data, dict):
+                    raise ValueError("Json object required but type '{}' was given.".format(type(config_data).__name__))
 
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
@@ -805,50 +808,20 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
         flattened_data[key] = str(value)
 
 
-def __export_keyvalue(key_segments, value, constructed_data, key):
+def __export_keyvalue(key_segments, value, constructed_data):
     first_key_segment = key_segments[0]
-    if isinstance(constructed_data, list):
-        if not first_key_segment.isdigit():
-            logger.debug(
-                "A key %s has been dropped as it can not be exported to a valid file!", key)
-            return
 
-        first_key_segment = int(first_key_segment)
-        if len(key_segments) == 1:
-            constructed_data.extend(
-                [Undef()] * (first_key_segment - len(constructed_data) + 1))
-            constructed_data[first_key_segment] = value
-        else:
-            if first_key_segment >= len(constructed_data):
-                constructed_data.extend(
-                    [Undef()] * (first_key_segment - len(constructed_data) + 1))
-            if isinstance(constructed_data[first_key_segment], Undef):
-                constructed_data[first_key_segment] = [
-                ] if key_segments[1].isdigit() else {}
-            __export_keyvalue(
-                key_segments[1:], value, constructed_data[first_key_segment], key)
-    elif isinstance(constructed_data, dict):
-        if first_key_segment.isdigit():
-            logger.debug(
-                "A key '%s' has been dropped as it can not be exported to a valid file!", key)
-            return
-
-        if len(key_segments) == 1:
-            constructed_data[first_key_segment] = value
-        else:
-            if first_key_segment not in constructed_data:
-                constructed_data[first_key_segment] = [
-                ] if key_segments[1].isdigit() else {}
-            __export_keyvalue(
-                key_segments[1:], value, constructed_data[first_key_segment], key)
+    if len(key_segments) == 1:
+        constructed_data[first_key_segment] = value
     else:
-        logger.debug(
-            "A key '%s' has been dropped as it can not be exported to a valid file!", key)
+        if first_key_segment not in constructed_data:
+            constructed_data[first_key_segment] = {}
+        __export_keyvalue(
+            key_segments[1:], value, constructed_data[first_key_segment])
 
 
 def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     exported_dict = {}
-    exported_list = []
 
     previous_kv = None
     try:
@@ -879,21 +852,28 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
                 continue
 
             key_segments = key.split(separator)
-            if key_segments[0].isdigit():
-                __export_keyvalue(key_segments,
-                                  kv.value, exported_list, key)
-
-            else:
-                __export_keyvalue(key_segments,
-                                  kv.value, exported_dict, key)
-
-        if exported_dict and exported_list:
-            logger.error("Can not export to a valid file! Some keys have been dropped. %s", json.dumps(
-                exported_dict, indent=2, ensure_ascii=False))
-
-        return __compact_key_values(exported_dict if not exported_list else exported_list)
+            __export_keyvalue(key_segments, kv.value, exported_dict)
+        
+        return __try_convert_to_arrays(exported_dict)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
+
+
+def __try_convert_to_arrays(constructed_data, is_root=True):
+    if not (isinstance(constructed_data, dict) and len(constructed_data) > 0):
+        return constructed_data
+
+    sorted_data_keys = sorted(constructed_data)
+
+    # If all keys are digits and in order starting from 0, we convert the dictionary to an array
+    # with indices corresponding to the keys.
+    # We do not try to convert key-values at the root of the object to an array even if they meet this criterion.
+    for index, key in enumerate(sorted_data_keys):
+        if is_root or not (key.isdigit() and str(index) == key):
+            return {data_key: __try_convert_to_arrays(data_value, False)
+                    for data_key, data_value in constructed_data.items()}
+
+    return [__try_convert_to_arrays(constructed_data[data_key], False) for data_key in sorted_data_keys]
 
 
 def __export_features(retrieved_features, naming_convention):
