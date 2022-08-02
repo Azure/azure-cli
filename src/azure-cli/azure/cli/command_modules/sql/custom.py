@@ -83,6 +83,7 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
+    get_sql_managed_database_restore_details_operations,
 )
 
 
@@ -5181,6 +5182,37 @@ def managed_db_log_replay_start(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
+
+
+def managed_db_log_replay_stop(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name):
+    '''
+    Stop log replay restore.
+    '''
+
+    restore_details_client = get_sql_managed_database_restore_details_operations(cmd.cli_ctx, None)
+
+    # Determine if managed DB was created using log replay service, raise exception if not
+    restore_details = restore_details_client.get(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        restore_details_name=RestoreDetailsName.DEFAULT)
+
+    # If type is present, it must be lrsrestore in order to proceed with stop-log-replay
+    if (hasattr(restore_details, 'type_properties_type') and restore_details.type_properties_type.lower() != 'lrsrestore'):
+        raise CLIError(
+            f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+            f'in the resource group {resource_group_name} was not created with log replay service.')
+
+    return client.begin_delete(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
 
 
 def managed_db_log_replay_complete_restore(

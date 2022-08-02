@@ -147,11 +147,11 @@ def validate_linux_host_name(namespace):
     in the CLI pre-flight.
     """
     # https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    rfc1123_regex = re.compile(r'^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$')  # pylint:disable=line-too-long
     found = rfc1123_regex.findall(namespace.name)
     if not found:
-        raise CLIError('--name cannot exceed 63 characters and can only contain '
-                       'letters, numbers, or dashes (-).')
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, underscores (_) or dashes (-).')
 
 
 def validate_snapshot_name(namespace):
@@ -442,6 +442,13 @@ def validate_snapshot_id(namespace):
             raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
 
 
+def validate_host_group_id(namespace):
+    if namespace.host_group_id:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.host_group_id):
+            raise InvalidArgumentValueError("--host-group-id is not a valid Azure resource ID.")
+
+
 def extract_comma_separated_string(
     raw_string,
     enable_strip=False,
@@ -530,3 +537,27 @@ def validate_defender_config_parameter(namespace):
 def validate_defender_disable_and_enable_parameters(namespace):
     if namespace.disable_defender and namespace.enable_defender:
         raise ArgumentUsageError('Providing both --disable-defender and --enable-defender flags is invalid')
+
+
+def validate_azure_keyvault_kms_key_id(namespace):
+    key_id = namespace.azure_keyvault_kms_key_id
+    if key_id:
+        # pylint:disable=line-too-long
+        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        https_prefix = "https://"
+        if not key_id.startswith(https_prefix):
+            raise InvalidArgumentValueError(err_msg)
+
+        segments = key_id[len(https_prefix):].split("/")
+        if len(segments) != 4 or segments[1] != "keys":
+            raise InvalidArgumentValueError(err_msg)
+
+
+def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
+    key_vault_resource_id = namespace.azure_keyvault_kms_key_vault_resource_id
+    if key_vault_resource_id is None or key_vault_resource_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(key_vault_resource_id):
+        raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")

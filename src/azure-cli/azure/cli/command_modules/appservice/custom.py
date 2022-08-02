@@ -47,7 +47,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
                                        UnclassifiedUserFault, AzureResponseError, AzureInternalError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError, FileOperationError)
 
 from .tunnel import TunnelServer
 
@@ -64,7 +64,7 @@ from .utils import (_normalize_sku,
                     _get_location_from_webapp,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
-                    get_resource_if_exists)
+                    get_resource_if_exists, repo_url_to_name, get_token)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -73,8 +73,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
-                         WINDOWS_OS_NAME)
-from ._github_oauth import (get_github_access_token)
+                         WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 logger = get_logger(__name__)
@@ -2896,7 +2897,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 class _AbstractStackRuntimeHelper:
     def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
-        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
+        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-15")
         self._linux = linux
         self._windows = windows
         self._stacks = []
@@ -3091,7 +3092,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if default_java_version:
             container_settings = default_java_version.stack_settings.windows_container_settings
             # TODO get the API to return java versions in a more parseable way
-            for java_version in ["1.8", "11"]:
+            for java_version in ["1.8", "11", "17"]:
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
                 if container_version.upper() == "SE":
@@ -3099,7 +3100,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     if java_version == "1.8":
                         container_version = "8"
                     else:
-                        container_version = "11"
+                        container_version = java_version
                 runtime_name = "{}|{}|{}|{}".format("java",
                                                     java_version,
                                                     java_container,
@@ -3143,7 +3144,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         default_java_version_linux = next(iter(minor_java_versions), None)
         if default_java_version_linux:
             linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
-            runtimes = [(linux_container_settings.java11_runtime, "11"), (linux_container_settings.java8_runtime, "8")]
+            runtimes = [(linux_container_settings.additional_properties.get("java17Runtime"), "17"),
+                        (linux_container_settings.java11_runtime, "11"),
+                        (linux_container_settings.java8_runtime, "8")]
             for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
@@ -3193,7 +3196,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
     class Runtime:
         def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
-                     app_settings_dict=None, site_config_dict=None, app_insights=False, default=False):
+                     app_settings_dict=None, site_config_dict=None, app_insights=False, default=False,
+                     github_actions_properties=None):
             self.name = name
             self.version = version
             self.is_preview = is_preview
@@ -3203,6 +3207,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             self.site_config_dict = dict() if not site_config_dict else site_config_dict
             self.app_insights = app_insights
             self.default = default
+            self.github_actions_properties = github_actions_properties
 
             self.display_name = "{}|{}".format(name, version) if version else name
 
@@ -3217,7 +3222,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def resolve(self, runtime, version=None, functions_version=None, linux=False):
+    def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
         runtimes = [r for r in stacks if r.linux == linux and runtime == r.name]
         os = LINUX_OS_NAME if linux else WINDOWS_OS_NAME
@@ -3233,12 +3238,17 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             # help convert previously acceptable versions into correct ones if match not found
             old_to_new_version = {
                 "11": "11.0",
-                "8": "8.0"
+                "8": "8.0",
+                "7": "7.0",
+                "6.0": "6",
+                "1.8": "8.0"
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
+            if disable_version_error:
+                return None
             raise ValidationError("Invalid version: {0} for runtime {1} and os {2}. Supported versions for runtime "
                                   "{1} and os {2} are: {3}. "
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
@@ -3304,6 +3314,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.APPLICATION_INSIGHTS: runtime_settings.app_insights_settings.is_supported,
                     self.KEYS.SITE_CONFIG_DICT: runtime_settings.site_config_properties_dictionary,
                     self.KEYS.IS_DEFAULT: bool(runtime_settings.is_default),
+                    self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
                 }
 
                 runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
@@ -3322,6 +3333,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                             app_settings_dict=version_properties[self.KEYS.APP_SETTINGS_DICT],
                             app_insights=version_properties[self.KEYS.APPLICATION_INSIGHTS],
                             default=version_properties[self.KEYS.IS_DEFAULT],
+                            github_actions_properties=version_properties[self.KEYS.GIT_HUB_ACTION_SETTINGS]
                             )
 
     def _parse_raw_stacks(self, stacks):
@@ -3415,7 +3427,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_source_branch='master', deployment_local_git=None,
                        docker_registry_server_password=None, docker_registry_server_user=None,
                        deployment_container_image_name=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3462,7 +3474,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
 
     plan_info = None
     if runtime is not None:
@@ -5259,6 +5271,259 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
     return "Disconnected successfully."
 
 
+def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None, runtime_version=None, token=None,  # pylint: disable=too-many-statements,too-many-branches
+                                   slot=None, branch='master', build_path=".", login_with_github=False, force=False):
+    if login_with_github:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    repo = repo_url_to_name(repo)
+    token = get_token(cmd, repo, token)
+
+    # Verify resource group, app
+    site_availability = get_site_availability(cmd, name)
+    if site_availability.name_available or (not site_availability.name_available and
+                                            site_availability.reason == 'Invalid'):
+        raise ResourceNotFoundError(
+            "The Resource 'Microsoft.Web/sites/%s' under resource group '%s' "
+            "was not found." % (name, resource_group))
+    app_details = get_app_details(cmd, name)
+    if app_details is None:
+        raise ResourceNotFoundError(
+            "Unable to retrieve details of the existing app %s. Please check that the app is a part of "
+            "the current subscription" % name)
+    current_rg = app_details.resource_group
+    if resource_group is not None and (resource_group.lower() != current_rg.lower()):
+        raise ResourceNotFoundError("The webapp %s exists in ResourceGroup %s and does not match the "
+                                    "value entered %s. Please re-run command with the correct "
+                                    "parameters." % (name, current_rg, resource_group))
+
+    app = show_app(cmd, resource_group, name, slot)
+    is_linux = app.reserved
+
+    # Verify github repo
+    from github import Github, GithubException
+    from github.GithubException import BadCredentialsException, UnknownObjectException
+
+    if repo.strip()[-1] == '/':
+        repo = repo.strip()[:-1]
+
+    g = Github(token)
+    github_repo = None
+    try:
+        github_repo = g.get_repo(repo)
+        try:
+            github_repo.get_branch(branch=branch)
+        except GithubException as e:
+            error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
+            if e.data and e.data['message']:
+                error_msg += " Error: {}".format(e.data['message'])
+            raise ValidationError(error_msg)
+        logger.warning('Verified GitHub repo and branch')
+    except BadCredentialsException:
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az functionapp deployment github-actions add --help' "
+                              "for more information.")
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise ValidationError(error_msg)
+
+    # Get runtime info
+    app_runtime_info = _get_functionapp_runtime_info(
+        cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
+
+    app_runtime_string = app_runtime_info['app_runtime']
+    github_actions_version = app_runtime_info['app_runtime_version']
+
+    if runtime:
+        if app_runtime_string and app_runtime_string.lower() != runtime.lower():
+            logger.warning('The app runtime: %s does not match the runtime specified: '
+                           '%s. Using the specified runtime %s.', app_runtime_string, runtime, runtime)
+        app_runtime_string = runtime
+
+    if runtime_version:
+        if github_actions_version and github_actions_version.lower() != runtime_version.lower():
+            logger.warning('The app runtime version: %s does not match the runtime version specified: '
+                           '%s. Using the specified runtime %s.', github_actions_version, runtime_version,
+                           runtime_version)
+        github_actions_version = runtime_version
+
+    if not app_runtime_string and not github_actions_version:
+        raise ValidationError('Could not detect runtime or runtime version. Please specify'
+                              'using the --runtime and --runtime-version flags.')
+    if not app_runtime_string:
+        raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
+    if not github_actions_version:
+        raise ValidationError('Could not detect runtime version. Please specify using the --runtime-version flag.')
+
+    # Verify runtime + gh actions support
+    functionapp_version = app_runtime_info['functionapp_version']
+    github_actions_version = _get_functionapp_runtime_version(cmd=cmd, runtime_string=app_runtime_string,
+                                                              runtime_version=github_actions_version,
+                                                              functionapp_version=functionapp_version,
+                                                              is_linux=is_linux)
+    if not github_actions_version:
+        runtime_version = runtime_version if runtime_version else app_runtime_info['app_runtime_version']
+        raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
+                              "on os %s." % (app_runtime_string, runtime_version,
+                                             "linux" if is_linux else "windows"))
+
+    # Get workflow template
+    logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
+    workflow_template = _get_functionapp_workflow_template(github=g, runtime_string=app_runtime_string,
+                                                           is_linux=is_linux)
+
+    # Fill workflow template
+    guid = str(uuid.uuid4()).replace('-', '')
+    publish_profile_name = "AZURE_FUNCTIONAPP_PUBLISH_PROFILE_{}".format(guid)
+    logger.warning(
+        'Filling workflow template with name: %s, branch: %s, version: %s, slot: %s, build_path: %s',
+        name, branch, github_actions_version, slot if slot else 'production', build_path)
+    completed_workflow_file = _fill_functionapp_workflow_template(content=workflow_template.decoded_content.decode(),
+                                                                  name=name, build_path=build_path,
+                                                                  version=github_actions_version,
+                                                                  publish_profile=publish_profile_name)
+    completed_workflow_file = completed_workflow_file.encode()
+
+    # Check if workflow exists in repo, otherwise push
+    if slot:
+        file_name = "{}_{}({}).yml".format(branch.replace('/', '-'), name.lower(), slot)
+    else:
+        file_name = "{}_{}.yml".format(branch.replace('/', '-'), name.lower())
+    dir_path = "{}/{}".format('.github', 'workflows')
+    file_path = "{}/{}".format(dir_path, file_name)
+    try:
+        existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
+        existing_publish_profile_name = _get_publish_profile_from_workflow_file(
+            workflow_file=str(existing_workflow_file.decoded_content))
+        if existing_publish_profile_name:
+            completed_workflow_file = completed_workflow_file.decode()
+            completed_workflow_file = completed_workflow_file.replace(
+                publish_profile_name, existing_publish_profile_name)
+            completed_workflow_file = completed_workflow_file.encode()
+            publish_profile_name = existing_publish_profile_name
+        logger.warning("Existing workflow file found")
+        if force:
+            logger.warning("Replacing the existing workflow file")
+            github_repo.update_file(path=file_path, message="Update workflow using Azure CLI",
+                                    content=completed_workflow_file, sha=existing_workflow_file.sha, branch=branch)
+        else:
+            option = prompt_y_n('Replace existing workflow file?')
+            if option:
+                logger.warning("Replacing the existing workflow file")
+                github_repo.update_file(path=file_path, message="Update workflow using Azure CLI",
+                                        content=completed_workflow_file, sha=existing_workflow_file.sha,
+                                        branch=branch)
+            else:
+                logger.warning("Use the existing workflow file")
+                if existing_publish_profile_name:
+                    publish_profile_name = existing_publish_profile_name
+    except UnknownObjectException:
+        logger.warning("Creating new workflow file: %s", file_path)
+        github_repo.create_file(path=file_path, message="Create workflow using Azure CLI",
+                                content=completed_workflow_file, branch=branch)
+
+    # Add publish profile to GitHub
+    logger.warning('Adding publish profile to GitHub')
+    _add_publish_profile_to_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo,
+                                   token=token, github_actions_secret_name=publish_profile_name,
+                                   slot=slot)
+
+    # Set site source control properties
+    _update_site_source_control_properties_for_gh_action(
+        cmd=cmd, resource_group=resource_group, name=name, token=token, repo=repo, branch=branch, slot=slot)
+
+    cache_github_token(cmd, token, repo)
+    github_actions_url = "https://github.com/{}/actions".format(repo)
+    return github_actions_url
+
+
+def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=None, slot=None,  # pylint: disable=too-many-statements
+                                      branch='master', login_with_github=False):
+    if login_with_github:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    repo = repo_url_to_name(repo)
+    token = get_token(cmd, repo, token)
+    # Verify resource group, app
+    site_availability = get_site_availability(cmd, name)
+    if site_availability.name_available or (not site_availability.name_available and
+                                            site_availability.reason == 'Invalid'):
+        raise ResourceNotFoundError("The Resource 'Microsoft.Web/sites/%s' under resource group '%s' was not found." %
+                                    (name, resource_group))
+    app_details = get_app_details(cmd, name)
+    if app_details is None:
+        raise ResourceNotFoundError("Unable to retrieve details of the existing app %s. "
+                                    "Please check that the app is a part of the current subscription" % name)
+    current_rg = app_details.resource_group
+    if resource_group is not None and (resource_group.lower() != current_rg.lower()):
+        raise ValidationError("The functionapp %s exists in ResourceGroup %s and does not match "
+                              "the value entered %s. Please re-run command with the correct "
+                              "parameters." % (name, current_rg, resource_group))
+
+    # Verify github repo
+    from github import Github, GithubException
+    from github.GithubException import BadCredentialsException, UnknownObjectException
+
+    if repo.strip()[-1] == '/':
+        repo = repo.strip()[:-1]
+
+    g = Github(token)
+    github_repo = None
+    try:
+        github_repo = g.get_repo(repo)
+        try:
+            github_repo.get_branch(branch=branch)
+        except GithubException as e:
+            error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
+            if e.data and e.data['message']:
+                error_msg += " Error: {}".format(e.data['message'])
+            raise ValidationError(error_msg)
+        logger.warning('Verified GitHub repo and branch')
+    except BadCredentialsException:
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az functionapp deployment github-actions remove --help' "
+                              "for more information.")
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise ValidationError(error_msg)
+
+    # Check if workflow exists in repo and remove
+    file_name = "{}_{}({}).yml".format(
+        branch.replace('/', '-'), name.lower(), slot) if slot else "{}_{}.yml".format(
+            branch.replace('/', '-'), name.lower())
+    dir_path = "{}/{}".format('.github', 'workflows')
+    file_path = "{}/{}".format(dir_path, file_name)
+    existing_publish_profile_name = None
+    try:
+        existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
+        existing_publish_profile_name = _get_publish_profile_from_workflow_file(
+            workflow_file=str(existing_workflow_file.decoded_content))
+        logger.warning("Removing the existing workflow file")
+        github_repo.delete_file(path=file_path, message="Removing workflow file, disconnecting github actions",
+                                sha=existing_workflow_file.sha, branch=branch)
+    except UnknownObjectException as e:
+        error_msg = "Error when removing workflow file."
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise FileOperationError(error_msg)
+
+    # Remove publish profile from GitHub
+    if existing_publish_profile_name:
+        logger.warning('Removing publish profile from GitHub')
+        _remove_publish_profile_from_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo, token=token,
+                                            github_actions_secret_name=existing_publish_profile_name, slot=slot)
+
+    # Remove site source control properties
+    delete_source_control(cmd=cmd,
+                          resource_group_name=resource_group,
+                          name=name,
+                          slot=slot)
+
+    return "Disconnected successfully."
+
+
 def _get_publish_profile_from_workflow_file(workflow_file):
     import re
     publish_profile = None
@@ -5326,6 +5591,27 @@ def _get_workflow_template(github, runtime_string, is_linux):
     return file_contents
 
 
+def _get_functionapp_workflow_template(github, runtime_string, is_linux):
+    from github import GithubException
+
+    file_contents = None
+    template_repo_path = 'Azure/actions-workflow-samples'
+    template_path_map = (LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH if is_linux else
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+    template_file_path = _get_functionapp_template_file_path(runtime_string=runtime_string,
+                                                             template_path_map=template_path_map)
+
+    try:
+        template_repo = github.get_repo(template_repo_path)
+        file_contents = template_repo.get_contents(template_file_path)
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when retrieving workflow template"
+        if e.data and e.data['message']:
+            error_msg += ": {}".format(e.data['message'])
+        raise CLIError(error_msg)
+    return file_contents
+
+
 def _fill_workflow_template(content, name, branch, slot, publish_profile, version):
     if not slot:
         slot = 'production'
@@ -5339,6 +5625,23 @@ def _fill_workflow_template(content, name, branch, slot, publish_profile, versio
     content = content.replace('${java-version}', version)
     content = content.replace('${node-version}', version)
     content = content.replace('${python-version}', version)
+    return content
+
+
+def _fill_functionapp_workflow_template(content, name, build_path, version, publish_profile):
+    content = content.replace("AZURE_FUNCTIONAPP_PUBLISH_PROFILE", f"{publish_profile}")
+    content = content.replace("AZURE_FUNCTIONAPP_NAME: your-app-name", f"AZURE_FUNCTIONAPP_NAME: '{name}'")
+    content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{name}'")
+    if "AZURE_FUNCTIONAPP_PACKAGE_PATH" not in content and "POM_XML_DIRECTORY" not in content:
+        logger.warning("Runtime does not support --build-path, ignoring value.")
+    content = content.replace("AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'", f"AZURE_FUNCTIONAPP_PACKAGE_PATH: '{build_path}'")
+    content = content.replace("POM_XML_DIRECTORY: '.'", f"POM_XML_DIRECTORY: '{build_path}'")
+    content = content.replace("runs-on: ubuntu-18.04", "")  # repair linux python yaml
+    if version:
+        content = content.replace("DOTNET_VERSION: '2.2.402'", f"DOTNET_VERSION: '{version}'")
+        content = content.replace("JAVA_VERSION: '1.8.x'", f"JAVA_VERSION: '{version}'")
+        content = content.replace("NODE_VERSION: '10.x'", f"NODE_VERSION: '{version}'")
+        content = content.replace("PYTHON_VERSION: '3.7'", f"PYTHON_VERSION: '{version}'")
     return content
 
 
@@ -5362,6 +5665,21 @@ def _get_template_file_path(runtime_string, is_linux):
                 elif java_container_split[2] == 'java se':
                     runtime_stack = 'java'
         template_file_path = WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH.get(runtime_stack, None)
+
+    if not template_file_path:
+        raise ResourceNotFoundError('Unable to retrieve workflow template.')
+    return template_file_path
+
+
+def _get_functionapp_template_file_path(runtime_string, template_path_map):
+    if not runtime_string:
+        raise ResourceNotFoundError('Unable to retrieve workflow template')
+
+    runtime_string = runtime_string.lower()
+    runtime_stack = runtime_string.split('|')[0]
+    template_file_path = None
+
+    template_file_path = template_path_map.get(runtime_stack)
 
     if not template_file_path:
         raise ResourceNotFoundError('Unable to retrieve workflow template.')
@@ -5426,6 +5744,33 @@ def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
     return False
 
 
+def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
+    import re
+    runtime_version = re.sub(r"[^\d\.]", "", runtime_version).rstrip('.')
+    matched_runtime = None
+    helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    try:
+        matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
+    except ValidationError as e:
+        if "Invalid version" in e.error_msg:
+            index = e.error_msg.index("Run 'az functionapp list-runtimes' for more details on supported runtimes.")
+            error_message = e.error_msg[0:index]
+            error_message += "Try passing --runtime-version with a supported version, or "
+            error_message += e.error_msg[index:].lower()
+            raise ValidationError(error_message)
+        raise e
+    if not matched_runtime:
+        return None
+    if matched_runtime.github_actions_properties:
+        gh_props = matched_runtime.github_actions_properties
+        if gh_props.is_supported:
+            if not is_linux and runtime_string.lower() == "powershell":
+                return runtime_version
+            # when stacks api is fixed, return supported_version if not null else runtime_verson
+            return gh_props.supported_version
+    return None
+
+
 def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
     app_settings = None
     app_runtime = None
@@ -5466,6 +5811,60 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
         return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
 
 
+def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  # pylint: disable=too-many-return-statements
+    app_settings = None
+    app_runtime = None
+    functionapp_version = None
+    app_runtime_version = None
+
+    app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+    for app_setting in app_settings:
+        if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_EXTENSION_VERSION':
+            functionapp_version = app_setting["value"]
+            break
+
+    if is_linux:
+        app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime = getattr(app_metadata, 'linux_fx_version', None)
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, None, functionapp_version, is_linux)
+
+    app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+    for app_setting in app_settings:
+        if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_WORKER_RUNTIME':
+            app_runtime = app_setting["value"]
+            break
+
+    if app_runtime and app_runtime.lower() == 'node':
+        app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        for app_setting in app_settings:
+            if 'name' in app_setting and app_setting['name'] == 'WEBSITE_NODE_DEFAULT_VERSION':
+                app_runtime_version = app_setting['value'] if 'value' in app_setting else None
+                if app_runtime_version:
+                    return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version,
+                                                                functionapp_version, is_linux)
+    elif app_runtime and app_runtime.lower() == 'python':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'python_version', '')
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    elif app_runtime and app_runtime.lower() == 'dotnet':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'net_framework_version', '')
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    elif app_runtime and app_runtime.lower() == 'java':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'java_version', '').lower()
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    elif app_runtime and app_runtime.lower() == 'powershell':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'power_shell_version', '').lower()
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux)
+
+
 def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
     helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
     if not is_linux:
@@ -5486,6 +5885,28 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
                     "github_actions_version": gh_props["github_actions_version"]
                 }
     return None
+
+
+def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux):
+    import re
+
+    if is_linux:
+        if len(app_runtime.split('|')) < 2:
+            raise ValidationError(f"Runtime {app_runtime} is not supported.")
+        app_runtime_version = app_runtime.split('|')[1]
+        app_runtime = app_runtime.split('|')[0].lower()
+
+    # Normalize versions
+    functionapp_version = functionapp_version if functionapp_version else ""
+    app_runtime_version = app_runtime_version if app_runtime_version else ""
+    functionapp_version = re.sub(r"[^\d\.]", "", functionapp_version)
+    app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
+
+    return {
+        "app_runtime": app_runtime,
+        "app_runtime_version": app_runtime_version,
+        "functionapp_version": functionapp_version
+    }
 
 
 def _encrypt_github_actions_secret(public_key, secret_value):
