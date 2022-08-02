@@ -538,8 +538,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
-    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
-    deployment_status_url = scm_url + '/api/deployments/latest'
+    zip_url = scm_url + '/api/zipdeploy?isAsync=true&trackDeploymentProgress=true'
+    # deployment_status_url = scm_url + '/api/deployments/latest'
 
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
@@ -558,26 +558,45 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
+    print(f"Deployment HTTP status code: {res.status_code}")
+    print("="*25)
+    print(f"Deployment HTTP headers: {res.headers}")
+    print("="*25)
+    deployment_status_id = res.headers.get("SCM-DEPLOYMENT-ID")
+    client = web_client_factory(cmd.cli_ctx)
+    try:
+        poller = client.web_apps.begin_get_production_site_deployment_status(resource_group_name=resource_group_name,
+                                                                    name=name, deployment_status_id=deployment_status_id)
+        return poller.result()  # TODO timeout
+    except Exception as e:
+        print(f"Received Error from deployment status API: \n{e}")
+        print("="*25)
+        print("Returning list of deployments from the deployment status API: ")
+        return client.web_apps.list_production_site_deployment_statuses(resource_group_name=resource_group_name,
+                                                                        name=name,)
+
+
+
     # check the status of async deployment
-    if res.status_code == 202:
-        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                authorization, timeout)
-        return response
+    # if res.status_code == 202:
+    #     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+    #                                             authorization, timeout)
+    #     return response
 
-    # check if there's an ongoing process
-    if res.status_code == 409:
-        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
-                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
-                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
-                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
-                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
-                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
-                                    "to delete them.".format(deployment_status_url))
+    # # check if there's an ongoing process
+    # if res.status_code == 409:
+    #     raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+    #                                 "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+    #                                 "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+    #                                 "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+    #                                 "MySubscription' to list app settings and 'az webapp config appsettings delete "
+    #                                 "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+    #                                 "to delete them.".format(deployment_status_url))
 
-    # check if an error occured during deployment
-    if res.status_code:
-        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
-                                 .format(res.status_code, res.text))
+    # # check if an error occured during deployment
+    # if res.status_code:
+    #     raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+    #                              .format(res.status_code, res.text))
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
