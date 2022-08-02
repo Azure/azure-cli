@@ -460,7 +460,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_payload = "--service-level 'Standard' --usage-threshold 200"
 
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
-
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         # add an export policy
         # there is already one default rule present
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
