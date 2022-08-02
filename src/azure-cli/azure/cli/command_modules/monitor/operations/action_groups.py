@@ -135,30 +135,11 @@ def post_notifications(client, alert_type, resource_group_name=None, action_grou
                                                    azure_function_receivers=AzureFunctionReceivers,
                                                    arm_role_receivers=ArmRoleReceivers,
                                                    event_hub_receivers=EventHubReceivers)
-
-    # begin_post_test_notifications
-    # begin_create_notifications_at_action_group_resource_level
-    # begin_create_notifications_at_resource_group_level
     from azure.cli.core.util import sdk_no_wait
     if action_group_name:
-        # return client.begin_create_notifications_at_action_group_resource_level(resource_group_name=resource_group_name,
-        #                                                                         action_group_name=action_group_name,
-        #                                                                         notification_request=notification_request)
-        return sdk_no_wait(no_wait, client.begin_create_notifications_at_action_group_resource_level, resource_group_name, action_group_name, notification_request)
+        return sdk_no_wait(no_wait, client.begin_create_notifications_at_action_group_resource_level,
+                           resource_group_name, action_group_name, notification_request)
     elif resource_group_name:
-        return sdk_no_wait(no_wait, client.begin_create_notifications_at_resource_group_level, resource_group_name, notification_request)
-        # return client.begin_create_notifications_at_resource_group_level(resource_group_name=resource_group_name,
-        #                                                                  notification_request=notification_request)
-    # return client.begin_post_test_notifications(notification_request=notification_request)
+        return sdk_no_wait(no_wait, client.begin_create_notifications_at_resource_group_level,
+                           resource_group_name, notification_request)
     return sdk_no_wait(no_wait, client.begin_post_test_notifications, notification_request)
-
-
-def get_notifications(client, notification_id, resource_group_name=None, action_group_name=None):
-    if action_group_name:
-        return client.get_test_notifications_at_action_group_resource_level(resource_group_name=resource_group_name,
-                                                                            action_group_name=action_group_name,
-                                                                            notification_id=notification_id)
-    elif resource_group_name:
-        return client.get_test_notifications_at_resource_group_level(resource_group_name=resource_group_name,
-                                                                     notification_id=notification_id)
-    return client.get_test_notifications(notification_id=notification_id)
