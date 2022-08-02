@@ -2,12 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 
 from azure.mgmt.signalr.models import (
     CustomDomain,
     ResourceReference
-    )
+)
 
 from azure.mgmt.signalr._signal_rmanagement_client import (
     SignalRCustomDomainsOperations
@@ -17,7 +18,7 @@ from azure.mgmt.signalr._signal_rmanagement_client import (
 def custom_domain_create(client: SignalRCustomDomainsOperations, resource_group_name, signalr_name, name, domain_name, certificate_resource_id):
     resource_reference = ResourceReference(id=certificate_resource_id)
     custom_domain = CustomDomain(domain_name=domain_name, custom_certificate=resource_reference)
-    
+
     return client.begin_create_or_update(resource_group_name, signalr_name, name, custom_domain)
 
 
@@ -47,5 +48,3 @@ def update(instance: CustomDomain, domain_name=None, certificate_resource_id=Non
     if certificate_resource_id is not None:
         instance.custom_certificate = ResourceReference(id=certificate_resource_id)
     return instance
-
-

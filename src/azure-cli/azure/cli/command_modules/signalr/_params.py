@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-statements
 
 
 from knack.arguments import CLIArgumentType
@@ -104,10 +105,10 @@ def load_arguments(self, _):
 
     # Custom Domain
     for scope in ['signalr custom-domain update',
-                   'signalr custom-domain create',
-                   'signalr custom-domain show',
-                   'signalr custom-domain delete',
-                   'signalr custom-domain list']:
+                  'signalr custom-domain create',
+                  'signalr custom-domain show',
+                  'signalr custom-domain delete',
+                  'signalr custom-domain list']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type, id_part=None)
             c.argument('name', signalr_custom_domain_name_type)
@@ -120,10 +121,10 @@ def load_arguments(self, _):
 
     # Custom Certificate
     for scope in ['signalr custom-certificate update',
-                   'signalr custom-certificate create',
-                   'signalr custom-certificate show',
-                   'signalr custom-certificate delete',
-                   'signalr custom-certificate list']:
+                  'signalr custom-certificate create',
+                  'signalr custom-certificate show',
+                  'signalr custom-certificate delete',
+                  'signalr custom-certificate list']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type, id_part=None)
             c.argument('name', signalr_custom_certificate_name_type)
