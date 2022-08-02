@@ -3,12 +3,7 @@
 # This script should be run in a docker to verify installing rpm package from the yum repository.
 
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sh -c 'echo -e "[azure-cli]
-name=Azure CLI
-baseurl=https://packages.microsoft.com/yumrepos/azure-cli
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
+dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
 
 counter=4
 
