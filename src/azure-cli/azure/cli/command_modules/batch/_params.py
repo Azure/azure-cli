@@ -230,6 +230,7 @@ def load_arguments(self, _):
             c.argument('pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
     with self.argument_context('batch pool create') as c:
+        c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
         c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5', '6']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('disk_encryption_targets',

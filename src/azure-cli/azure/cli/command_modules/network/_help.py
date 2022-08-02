@@ -4679,6 +4679,9 @@ parameters:
 examples:
   - name: Create a private endpoint.
     text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS" --connection-name tttt -l centralus
+  - name: Create a private endpoint with ASGs.
+    text: |
+        az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --asg id=MyAsgId --asg id=MyAsgId
 """
 
 helps['network private-endpoint delete'] = """
@@ -7077,12 +7080,58 @@ examples:
       --name MyFlowLog
       --nsg MyNetworkSecurityGroupName
       --storage-account account
+  - name: Create a flow log with VNet name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --vnet MyVNetName
+      --storage-account account
+  - name: Create a flow log with Subnet name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --vnet MyVNetName
+      --subnet MySubnetName
+      --storage-account account
+  - name: Create a flow log with NIC name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --nic MyNICName
+      --storage-account account
   - name: Create a flow log with Network Security Group ID (could be in other resource group)
     text: >
       az network watcher flow-log create
       --location westus
       --name MyFlowLog
       --nsg MyNetworkSecurityGroupID
+      --storage-account account
+  - name: Create a flow log with Virtual Network ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --vnet MyVNetID
+      --storage-account account
+  - name: Create a flow log with Subnet ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --subnet SubnetID
+      --storage-account account
+  - name: Create a flow log with Network Interface ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --nic MyNetworkInterfaceID
       --storage-account account
 """
 
@@ -7141,6 +7190,28 @@ examples:
       --resource-group MyAnotherResourceGroup
       --name MyFlowLog
       --nsg MyNSG
+  - name: Update Virtual Network on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --vnet MyVNet
+  - name: Update Subnet on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --vnet MyVNet
+      --subnet MySubnet
+  - name: Update Network Interface on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --nic MyNIC
   - name: Update Workspace on another resource group
     text: >
       az network watcher flow-log update

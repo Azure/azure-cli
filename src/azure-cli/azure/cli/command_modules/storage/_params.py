@@ -148,9 +148,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
-             'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
-             'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
-             'docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'granted read (4), write (2), or execute (1) permission. Both symbolic (rwxrw-rw-) and 4-digit octal '
+             'notation (e.g. 0766) are supported. The sticky bit is also supported and in symbolic notation, '
+             'its represented either by the letter t or T in the final character-place depending on whether '
+             'the execution bit for the others category is set or unset respectively (e.g. rwxrw-rw- with sticky bit '
+             'is represented as rwxrw-rwT. A rwxrw-rwx with sticky bit is represented as rwxrw-rwt), absence of t or T '
+             'indicates sticky bit not set. In 4-digit octal notation, its represented by 1st digit (e.g. 1766 '
+             'represents rwxrw-rw- with sticky bit and 0766 represents rwxrw-rw- without sticky bit). For more '
+             'information, please refer to '
+             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -942,7 +948,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.register_precondition_options()
             c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                      'specifies the blob snapshot to retrieve.')
-            c.argument('lease_id', help='Required if the blob has an active lease.')
+            c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     # pylint: disable=line-too-long
     with self.argument_context('storage blob upload', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
@@ -987,6 +993,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
         c.argument('metadata', arg_group="Additional Flags")
         c.argument('timeout', arg_group="Additional Flags")
+        c.extra('connection_timeout', options_list=('--socket-timeout'), type=int,
+                help='The socket timeout(secs), used by the service to regulate data flow.')
 
     # pylint: disable=line-too-long
     with self.argument_context('storage blob upload-batch', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
@@ -1046,6 +1054,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'if enabled, the memory-efficient algorithm will not be used because computing the MD5 hash '
                      'requires buffering entire blocks, and doing so defeats the purpose of the memory-efficient '
                      'algorithm.')
+        c.argument('overwrite', arg_type=get_three_state_flag(),
+                   help="Overwrite an existing file when specified. Default value is true.")
 
     with self.argument_context('storage blob download-batch') as c:
         c.ignore('source_container_name')
@@ -1054,6 +1064,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('no_progress', progress_type)
         c.extra('max_concurrency', options_list=['--max-connections'], type=int, default=2,
                 help='The number of parallel connections with which to download.')
+        c.argument('overwrite', arg_type=get_three_state_flag(),
+                   help="Overwrite an existing file when specified. Default value is false.")
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names

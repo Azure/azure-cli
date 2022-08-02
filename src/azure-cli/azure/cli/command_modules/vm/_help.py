@@ -363,19 +363,19 @@ parameters:
       - az vm image list
       - az vm image show
 examples:
-  - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version
+  - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version. Specify the staging resource group id as the image template that will be used to build the image.
     text: |
         scripts="https://my-script-url.net/customize_script.sh"
         imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201903060"
 
-        az image builder create --image-source $imagesource -n mytemplate -g my-group \\
+        az image builder create --image-source $imagesource -n myTemplate -g myGroup \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
             --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth \\
-            --identity myidentity
+            --identity myIdentity --staging-resource-group myStagingResourceGroup
 
   - name: Create an image builder template using an image template file.
     text: |
-        az image builder create -g my-group -n mytemplate --image-template filename
+        az image builder create -g my-group -n myTemplate --image-template filename
 
   - name: >
         [Advanced] Create an image template with multiple customizers and distributors using the CLI's object cache via --defer. Supports features such as: customizer and output names, powershell exit codes, inline scripts, windows restart, file customizers, artifact tags and vhd output distributors.
@@ -385,32 +385,32 @@ examples:
 
         # create and update template object in local cli cache. Defers put request to ARM
         # Cache object ttl set via az configure.
-        az image builder create --image-source $imagesource -n mytemplate \\
-            -g my-group --scripts $script --identity myidentity --defer
+        az image builder create --image-source $imagesource -n myTemplate \\
+            -g myGroup --scripts $script --identity myIdentity --defer
 
         # add customizers
-        az image builder customizer add -n mytemplate -g my-group  \\
-            --customizer-name my-pwsh-script --exit-codes 0 1 --inline-script \\
+        az image builder customizer add -n myTemplate -g myGroup  \\
+            --customizer-name myPwshScript --exit-codes 0 1 --inline-script \\
             "mkdir c:\\buildActions" "echo Azure-Image-Builder-Was-Here \\
              > c:\\buildActions\\Output.txt" --type powershell --defer
 
-        az image builder customizer add -n mytemplate -g my-group \\
-            --customizer-name my-file-customizer --type file \\
+        az image builder customizer add -n myTemplate -g myGroup \\
+            --customizer-name myFileCustomizer --type file \\
             --file-source "https://my-file-source.net/file.txt"  \\
             --dest-path "c:\\buildArtifacts\\file.txt" --defer
 
         # add distributors
-        az image builder output add -n mytemplate -g my-group --is-vhd \\
-            --output-name my-win-image-vhd --artifact-tags "is_vhd=True" --defer
+        az image builder output add -n myTemplate -g myGroup --is-vhd \\
+            --output-name myWinImageVhd --artifact-tags "is_vhd=True" --defer
 
-        az image builder output add -n mytemplate -g my-group \\
-            --output-name my-win-image-managed --managed-image winImage \\
+        az image builder output add -n myTemplate -g myGroup \\
+            --output-name myWinImageManaged --managed-image winImage \\
             --managed-image-location eastus \\
             --artifact-tags "is_vhd=False" --defer
 
         # Stop deferring put request to ARM. Create the template from the object cache.
         # Cache object will be deleted.
-        az image builder update -n mytemplate -g my-group
+        az image builder update -n myTemplate -g myGroup
 """
 
 helps['image builder customizer'] = """
@@ -425,28 +425,28 @@ long-summary: Must be used with --defer
 examples:
   - name: Add an inline shell customizer to an image template in the cli object cache
     text: |
-        az image builder customizer add -n mytemplate -g my-group \\
+        az image builder customizer add -n myTemplate -g myGroup \\
             --inline-script "sudo mkdir /buildArtifacts" \\
                             "sudo cp /tmp/index.html /buildArtifacts/index.html" \\
-            --customizer-name shell-script-inline --type shell --defer
+            --customizer-name shellScriptInline --type shell --defer
 
   - name: Add a file customizer to an image template in the cli object cache
     text: |
-        az image builder customizer add -n mytemplate -g my-group \\
-            --customizer-name my-file --type file \\
+        az image builder customizer add -n myTemplate -g myGroup \\
+            --customizer-name myFile --type file \\
             --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html" --defer
 
   - name: Add a windows restart customizer to an image template in the cli object cache
     text: |
-        az image builder customizer add -n mytemplate -g my-group \\
-        --customizer-name shell-script-url \\
+        az image builder customizer add -n myTemplate -g myGroup \\
+        --customizer-name shellScriptUrl \\
         --restart-check-command "echo Azure-Image-Builder-Restarted-the-VM  > \\
                                 c:\\buildArtifacts\\restart.txt" \\
             --type windows-restart --restart-timeout 10m --defer
 
   - name: Add a windows update customizer to an image template in the cli object cache.
     text: |
-        az image builder customizer add -n mytemplate -g my-group --customizer-name win_update --type windows-update --search-criteria IsInstalled=0 --filters "exclude:\\$_.Title -like \\'*Preview*\\'" "include:\\$true" --update-limit 20 --defer
+        az image builder customizer add -n myTemplate -g myGroup --customizer-name winUpdate --type windows-update --search-criteria IsInstalled=0 --filters "exclude:\\$_.Title -like \\'*Preview*\\'" "include:\\$true" --update-limit 20 --defer
 """
 
 helps['image builder customizer clear'] = """
@@ -459,6 +459,51 @@ helps['image builder customizer remove'] = """
 type: command
 short-summary: Remove an image builder customizer from an image builder template.
 long-summary: Must be used with --defer
+"""
+
+helps['image builder validator'] = """
+type: group
+short-summary: Manage image builder template validate.
+"""
+
+helps['image builder validator add'] = """
+type: command
+short-summary: Add validate to an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Add validate with continue distribute on failure set to true. If not specified, the default value of continue distribute on failure is false.
+        If validation fails and this field is set to false, output image(s) will not be distributed.
+    text: |
+        az image builder validator add -n myTemplate -g myGroup --continue-distribute-on-failure true --defer
+
+  - name: Add validate with source validation only set to true. If not specified, the default value of source validation only is false.
+        If this field is set to true, the image specified in the source section will directly be validated.
+    text: |
+        az image builder validator add -n myTemplate -g myGroup --source-validation-only true --defer
+
+  - name: Add validate with source validation only and continue distribute on failure set to false.
+    text: |
+        az image builder validator add -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder validator remove'] = """
+type: command
+short-summary: Remove validate from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove validate from an existing image builder template.
+    text: |
+        az image builder validator remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder validator show'] = """
+type: command
+short-summary: Show validate of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show validate of an existing image builder template.
+    text: |
+        az image builder validator show -n myTemplate -g myGroup --defer
 """
 
 helps['image builder delete'] = """
@@ -1776,6 +1821,9 @@ examples:
   - name: Detach a data disk from a VM.
     text: >
         az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name
+  - name: Force detach a data disk from a VM.
+    text: >
+        az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name --force-detach
 """
 
 helps['vm encryption'] = """
