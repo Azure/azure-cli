@@ -26,7 +26,7 @@ class AzureSignalRServiceCustomDomainScenarioTest(ScenarioTest):
             'kv_base_uri': 'https://azureclitestkv.vault.azure.net/',
             'kv_group': 'azureclitest',
             'kv_name': 'azureclitestkv',
-            'kv_secret': 'azureclitest',
+            'kv_s_name': 'azureclitest',
             'identity': '/subscriptions/9caf2a1e-9c49-49b6-89a2-56bdec7e3f97/resourcegroups/azureclitest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azureclitestmsi',
             'custom_cert_name': 'test-cert',
             'custom_domain_resource_name': 'test-domain',
@@ -42,14 +42,14 @@ class AzureSignalRServiceCustomDomainScenarioTest(ScenarioTest):
 
         self.cmd('az signalr identity assign --identity {identity} -n {signalr_name} -g {rg}')
 
-        self.cmd('az signalr custom-certificate create -g {rg} --signalr-name {signalr_name} --keyvault-base-uri {kv_base_uri} --keyvault-secret-name {kv_secret} --name {custom_cert_name}', checks=[
+        self.cmd('az signalr custom-certificate create -g {rg} --signalr-name {signalr_name} --keyvault-base-uri {kv_base_uri} --keyvault-secret-name {kv_s_name} --name {custom_cert_name}', checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
 
         cert = self.cmd('az signalr custom-certificate show -g {rg} --signalr-name {signalr_name} --name {custom_cert_name}', checks=[
             self.check('name', '{custom_cert_name}'),
             self.check('keyVaultBaseUri', '{kv_base_uri}'),
-            self.check('keyVaultSecretName', '{kv_secret}'),
+            self.check('keyVaultSecretName', '{kv_s_name}'),
             self.check('provisioningState', 'Succeeded'),
         ]).get_output_in_json()
 
@@ -58,7 +58,7 @@ class AzureSignalRServiceCustomDomainScenarioTest(ScenarioTest):
         self.cmd('az signalr custom-certificate list -g {rg} --signalr-name {signalr_name}', checks=[
             self.check('[0].name', '{custom_cert_name}'),
             self.check('[0].keyVaultBaseUri', '{kv_base_uri}'),
-            self.check('[0].keyVaultSecretName', '{kv_secret}'),
+            self.check('[0].keyVaultSecretName', '{kv_s_name}'),
             self.check('[0].provisioningState', 'Succeeded'),
         ])
 
