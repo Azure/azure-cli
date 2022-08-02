@@ -115,6 +115,11 @@ long-summary: >-
     The output includes credentials that you must protect. Be sure that you do not include these credentials
     in your code or check the credentials into your source control. As an alternative, consider using
     [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+    
+    **Note:** This command resets the credentials of the Service Principal, not the App Registration.
+    As such, the credential shown in the output will be different from the credential shown in the portal under the App Registration pane.
+    Credentials of a Service Principal are not visable in the portal, only via the az cli or Microsoft Graph API.
+    To act on the credentials of the App Registration, please use the az ad app family of commands.
 examples:
   - name: Append a certificate to the application with the certificate string.
     text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
