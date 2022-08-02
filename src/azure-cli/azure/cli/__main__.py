@@ -9,6 +9,7 @@ import timeit
 start_time = timeit.default_timer()
 
 import os
+import platform
 import sys
 import uuid
 
@@ -17,6 +18,7 @@ from azure.cli.core import get_default_cli
 from azure.cli.core._config import GLOBAL_SURVEY_NOTE_PATH
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
+from knack.util import is_modern_terminal
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.38.0"
@@ -134,15 +136,20 @@ finally:
             should_prompt_survey = False
 
         if should_prompt_survey:
-            from azure.cli.core.style import Style, print_styled_text
-            styled_text = [
-                (Style.SURVEY, "[Survey] Help us improve Azure CLI by sharing your experience. "
-                               "This survey should take about 3 minutes. Run "),
-                (Style.SURVEY_LINK, "az survey"),
-                (Style.SURVEY, " to open in browser. Learn more at "),
-                (Style.SURVEY_LINK, "htttps://go.microsoft.com/tbd")
-            ]
-            print_styled_text(styled_text)
+            if platform.system() == 'Windows' and not is_modern_terminal():
+                print("\n[Survey] Help us improve Azure CLI by sharing your experience. "
+                      "This survey should take about 3 minutes. "
+                      "Run az survey to open in browser. Learn more at htttps://go.microsoft.com/tbd\n")
+            else:
+                from azure.cli.core.style import Style, print_styled_text
+                styled_text = [
+                    (Style.SURVEY, "\n\n[Survey] Help us improve Azure CLI by sharing your experience. "
+                                   "This survey should take about 3 minutes. Run "),
+                    (Style.SURVEY_LINK, "az survey"),
+                    (Style.SURVEY, " to open in browser. Learn more at "),
+                    (Style.SURVEY_LINK, "htttps://go.microsoft.com/tbd\n")
+                ]
+                print_styled_text(styled_text)
     except Exception as ex:
         raise ex
 
