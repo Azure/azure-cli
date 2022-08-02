@@ -78,9 +78,12 @@ helps['signalr create'] = """
 type: command
 short-summary: Creates a SignalR Service.
 examples:
-  - name: Create a SignalR Service with the Standard SKU and serverless mode and enable messaging logs.
+  - name: Create a SignalR Service with the Premium SKU and default mode
     text: >
-        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-message-logs True
+        az signalr create -n MySignalR -g MyResourceGroup --sku Premium_P1
+  - name: Create a SignalR Service with the Premium SKU and serverless mode and enable messaging logs.
+    text: >
+        az signalr create -n MySignalR -g MyResourceGroup --sku Premium_P1 --unit-count 1 --service-mode Serverless --enable-message-logs True
 """
 
 helps['signalr delete'] = """

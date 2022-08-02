@@ -47,7 +47,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('signalr create') as c:
-        c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
+        c.argument('sku', help='The sku name of the signalr service. Allowed values: Premium_P1, Standard_S1, Free_F1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
         c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
         c.argument('enable_message_logs', help='The switch for messaging logs which signalr service will generate or not', arg_type=get_three_state_flag())
