@@ -18,7 +18,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists)
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp)
 
 logger = get_logger(__name__)
 
@@ -336,7 +336,7 @@ def validate_vnet_integration(cmd, namespace):
                                                      resource_group_name=namespace.resource_group_name)
 
         sku_name = plan_info.sku.name
-        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        disallowed_skus = {'FREE', 'SHARED', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
         if get_sku_tier(sku_name) in disallowed_skus:
             raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
                                      "Plan sku cannot be one of: {}. "
@@ -390,3 +390,33 @@ def validate_webapp_up(cmd, namespace):
         ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
         _validate_ase_is_v3(ase)
         _validate_ase_not_ilb(ase)
+
+
+def _get_app_name(namespace):
+    if hasattr(namespace, "name"):
+        return namespace.name
+    if hasattr(namespace, "webapp"):
+        return namespace.webapp
+    return None
+
+
+def validate_app_is_webapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = _get_app_name(namespace)
+    rg = namespace.resource_group
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_functionapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a function app.")
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+
+
+def validate_app_is_functionapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = _get_app_name(namespace)
+    rg = namespace.resource_group
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+    if is_webapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")

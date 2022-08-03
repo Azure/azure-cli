@@ -19,6 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -227,3 +228,41 @@ def use_additional_properties(resource):
     resource.enable_additional_properties_sending()
     existing_properties = resource.serialize().get("properties")
     resource.additional_properties["properties"] = {} if existing_properties is None else existing_properties
+
+
+def repo_url_to_name(repo_url):
+    repo = None
+    repo = [s for s in repo_url.split('/') if s]
+    if len(repo) >= 2:
+        repo = '/'.join(repo[-2:])
+    return repo
+
+
+def get_token(cmd, repo, token):
+    from ._github_oauth import load_github_token_from_cache, get_github_access_token
+    if not repo:
+        return None
+    if token:
+        return token
+    token = load_github_token_from_cache(cmd, repo)
+    if not token:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    return token
+
+
+def is_logicapp(app):
+    if app is None or app.kind is None:
+        return False
+    return LOGICAPP_KIND in app.kind
+
+
+def is_functionapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and FUNCTIONAPP_KIND in app.kind
+
+
+def is_webapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
