@@ -72,9 +72,7 @@ THEME_DARK = {
     Style.HYPERLINK: '\x1b[96m',  # Bright Foreground Cyan
     Style.ERROR: '\x1b[91m',  # Bright Foreground Red
     Style.SUCCESS: '\x1b[92m',  # Bright Foreground Green
-    Style.WARNING: '\x1b[93m',  # Bright Foreground Yellow
-    Style.SURVEY: '\x1b[0;38;2;255;255;255;48;2;0;120;212m',  # Default & Foreground #FFFFFF & Background #0078D4
-    Style.SURVEY_LINK: '\x1b[4;38;2;255;255;255;48;2;0;120;212m',  # Underline & Foreground #FFFFFF & Background #0078D4
+    Style.WARNING: '\x1b[93m'  # Bright Foreground Yellow
 }
 
 # Theme to be used in a light-themed terminal
@@ -86,9 +84,7 @@ THEME_LIGHT = {
     Style.HYPERLINK: '\x1b[36m',  # Foreground Cyan
     Style.ERROR: '\x1b[31m',  # Foreground Red
     Style.SUCCESS: '\x1b[32m',  # Foreground Green
-    Style.WARNING: '\x1b[33m',  # Foreground Yellow
-    Style.SURVEY: '\x1b[0;38;2;255;255;255;48;2;0;120;212m',  # Default & Foreground #FFFFFF & Background #0078D4
-    Style.SURVEY_LINK: '\x1b[4;38;2;255;255;255;48;2;0;120;212m',  # Underline & Foreground #FFFFFF & Background #0078D4
+    Style.WARNING: '\x1b[33m'  # Foreground Yellow
 }
 
 # Theme to be used in Cloud Shell
@@ -102,8 +98,6 @@ THEME_CLOUD_SHELL = {
     Style.ERROR: _rgb_hex('#f55d5c'),
     Style.SUCCESS: _rgb_hex('#70d784'),
     Style.WARNING: _rgb_hex('#fbd682'),
-    Style.SURVEY: '\x1b[0;38;2;255;255;255;48;2;0;120;212m',  # Default & Foreground #FFFFFF & Background #0078D4
-    Style.SURVEY_LINK: '\x1b[4;38;2;255;255;255;48;2;0;120;212m',  # Underline & Foreground #FFFFFF & Background #0078D4
 }
 
 
@@ -193,8 +187,7 @@ def format_styled_text(styled_text, theme=None):
             try:
                 escape_seq = theme[style]
             except KeyError:
-                from azure.cli.core.azclierror import CLIInternalError
-                raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
+                escape_seq = style
             # Replace blue in powershell.exe
             if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
                 escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]

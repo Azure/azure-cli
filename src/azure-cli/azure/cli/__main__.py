@@ -8,17 +8,13 @@ import timeit
 # Log the start time
 start_time = timeit.default_timer()
 
-import os
-import platform
 import sys
 import uuid
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
-from azure.cli.core._config import GLOBAL_SURVEY_NOTE_PATH
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
-from knack.util import is_modern_terminal
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.38.0"
@@ -122,36 +118,8 @@ finally:
         logger.warning("Auto upgrade failed. %s", str(ex))
         telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
 
-    try:
-        should_prompt_survey = True
-        if sys.argv[1] == 'survey':
-            should_prompt_survey = False
-
-        env_setting = os.getenv("AZURE_CORE_SURVEY_MESSAGE", default=True)
-        if (isinstance(env_setting, str) and env_setting.lower() == 'false') or (isinstance(env_setting, bool) and not env_setting):
-            should_prompt_survey = False
-
-        config_setting = az_cli.config.getboolean('core', 'survey_message', True)
-        if not config_setting:
-            should_prompt_survey = False
-
-        if should_prompt_survey:
-            if platform.system() == 'Windows' and not is_modern_terminal():
-                print("\n[Survey] Help us improve Azure CLI by sharing your experience. "
-                      "This survey should take about 3 minutes. "
-                      "Run az survey to open in browser. Learn more at htttps://go.microsoft.com/tbd\n")
-            else:
-                from azure.cli.core.style import Style, print_styled_text
-                styled_text = [
-                    (Style.SURVEY, "\n\n[Survey] Help us improve Azure CLI by sharing your experience. "
-                                   "This survey should take about 3 minutes. Run "),
-                    (Style.SURVEY_LINK, "az survey"),
-                    (Style.SURVEY, " to open in browser. Learn more at "),
-                    (Style.SURVEY_LINK, "htttps://go.microsoft.com/tbd\n")
-                ]
-                print_styled_text(styled_text)
-    except Exception as ex:
-        raise ex
+    from azure.cli.intercept_survey import prompt_survey_message
+    prompt_survey_message(az_cli)
 
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
