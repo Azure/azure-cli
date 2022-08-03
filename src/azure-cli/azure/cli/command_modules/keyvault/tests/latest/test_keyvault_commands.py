@@ -1115,6 +1115,10 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
 
         self.cmd('keyvault key create --vault-name {kv} -n {key}')
+        key = self.cmd('keyvault key show --vault-name {kv} -n {key}').get_output_in_json()
+        self.kwargs['kid'] = key['key']['kid']
+        self.cmd('keyvault key show --id {kid}', checks=self.check('key.kid', self.kwargs['kid']))
+        self.cmd('keyvault key backup --id {kid} --file ./kk.bak')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
         time.sleep(5)
         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
@@ -1123,9 +1127,15 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key recover --vault-name {kv} -n {key}')
         time.sleep(5)
         self.cmd('keyvault key list --vault-name {kv}', checks=self.check('length(@)', 1))
-        self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+        self.cmd('keyvault key delete --id {kid}')
+        self.cmd('keyvault key recover --id {kid}')
+        self.cmd('keyvault key delete --id {kid}')
+        time.sleep(1)
         self.cmd('keyvault key purge --vault-name {kv} -n {key}')
         self.cmd('keyvault key list-deleted --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault key restore --vault-name {kv} --file ./kk.bak')
+        self.cmd('keyvault key list --vault-name {kv}', checks=self.check('length(@)', 1))
+        os.remove('./kk.bak')
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
