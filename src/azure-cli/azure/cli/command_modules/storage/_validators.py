@@ -2215,3 +2215,10 @@ def validate_blob_arguments(namespace):
 def encode_deleted_path(namespace):
     from urllib.parse import quote
     namespace.deleted_path_name = quote(namespace.deleted_path_name)
+
+
+def validate_fs_file_set_expiry(namespace):
+    try:
+        namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
+    except ValueError:
+        pass
