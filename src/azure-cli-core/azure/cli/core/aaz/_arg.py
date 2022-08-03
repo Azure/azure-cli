@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import abc
+import copy
 
 from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
@@ -115,7 +116,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
             required=self._required if self._default == AAZUndefined else False,
             help=self._help.get('short-summary', None),
             id_part=self._id_part,
-            default=self._default,
+            default=self._default if self._default == AAZUndefined else copy.deepcopy(self._default),
         )
         if self._arg_group:
             arg.arg_group = self._arg_group
