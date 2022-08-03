@@ -37,8 +37,6 @@ class Style(str, Enum):
     ERROR = "error"
     SUCCESS = "success"
     WARNING = "warning"
-    SURVEY = "survey"
-    SURVEY_LINK = "survey_link"
 
 
 def _rgb_hex(rgb_hex: str):
