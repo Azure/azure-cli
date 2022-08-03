@@ -853,7 +853,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
 
             key_segments = key.split(separator)
             __export_keyvalue(key_segments, kv.value, exported_dict)
-        
+
         return __try_convert_to_arrays(exported_dict)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
