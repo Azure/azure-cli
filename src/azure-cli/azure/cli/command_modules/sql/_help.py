@@ -924,6 +924,14 @@ examples:
     text: az sql midb create -g mygroup --mi myinstance -n mymanageddb --collation Latin1_General_100_CS_AS_SC
 """
 
+helps['sql midb update'] = """
+type: command
+short-summary: Update a managed database.
+examples:
+  - name: Update a managed database with specified tags
+    text: az sql midb update -g mygroup --mi myinstance -n mymanageddb --tags tag1="value1"
+"""
+
 helps['sql midb delete'] = """
 type: command
 short-summary: Delete a managed database.
@@ -1491,7 +1499,7 @@ short-summary: Manage a server's virtual network rules.
 
 helps['sql server vnet-rule create'] = """
 type: command
-short-summary: Create a virtual network rule to allows access to an Azure SQL server.
+short-summary: Create a virtual network rule to allows access to an Azure SQL Server.
 
 examples:
   - name: Create a vnet rule by providing the subnet id.

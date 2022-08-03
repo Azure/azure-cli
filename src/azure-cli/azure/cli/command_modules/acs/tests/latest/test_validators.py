@@ -3,9 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+from types import SimpleNamespace
 
 from azure.cli.command_modules.acs import _validators as validators
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+)
 from azure.cli.core.util import CLIError
 
 
@@ -430,6 +434,45 @@ class TestValidateKubernetesVersion(unittest.TestCase):
         with self.assertRaises(CLIError) as cm:
             validators.validate_k8s_version(namespace)
         self.assertEqual(str(cm.exception), err)
+
+
+class TestKeyVaultSecretsProviderAddon(unittest.TestCase):
+    def test_invalid_keyvault_secret_provider_parameters(self):
+        namespace = SimpleNamespace(
+            **{
+                "disable_secret_rotation": True,
+                "enable_secret_rotation": True,
+            }
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(
+                namespace
+            )
+
+    def test_valid_keyvault_secret_provider_parameters(self):
+        namespace_1 = SimpleNamespace(
+            **{
+                "disable_secret_rotation": True,
+                "enable_secret_rotation": False,
+            }
+        )
+        validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_1)
+
+        namespace_2 = SimpleNamespace(
+            **{
+                "disable_secret_rotation": False,
+                "enable_secret_rotation": True,
+            }
+        )
+        validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_2)
+
+        namespace_3 = SimpleNamespace(
+            **{
+                "disable_secret_rotation": False,
+                "enable_secret_rotation": False,
+            }
+        )
+        validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_3)
 
 
 if __name__ == "__main__":

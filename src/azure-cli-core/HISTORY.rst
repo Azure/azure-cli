@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.38.0
+++++++
+* Shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)
+
 2.37.0
 ++++++
 * Codegen v2 support (#20967)

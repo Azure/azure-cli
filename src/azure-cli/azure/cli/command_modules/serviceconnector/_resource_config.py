@@ -60,6 +60,7 @@ class AUTH_TYPE(Enum):
 # The dict defines the client types
 class CLIENT_TYPE(Enum):
     Dotnet = 'dotnet'
+    DotnetConnectionString = 'dotnet-connectionString'
     Java = 'java'
     Nodejs = 'nodejs'
     Python = 'python'
@@ -67,6 +68,7 @@ class CLIENT_TYPE(Enum):
     Php = 'php'
     Ruby = 'ruby'
     SpringBoot = 'springBoot'
+    KafkaSpringBoot = 'kafka-springBoot'
     Django = 'django'
     Blank = 'none'
 
@@ -79,6 +81,9 @@ SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
 
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
+
+# The target resources could be set to connection string
+TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
 
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
@@ -969,6 +974,10 @@ SUPPORTED_CLIENT_TYPE = {
 }
 
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud][RESOURCE.EventHub].append(
+    CLIENT_TYPE.KafkaSpringBoot)
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated][RESOURCE.EventHub].append(
+    CLIENT_TYPE.KafkaSpringBoot)
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

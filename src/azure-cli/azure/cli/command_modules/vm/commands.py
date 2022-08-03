@@ -33,7 +33,7 @@ from azure.cli.command_modules.vm._validators import (
     process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
-    process_image_version_create_namespace, process_image_version_update_namespace)
+    process_image_version_create_namespace, process_image_version_update_namespace, process_ppg_create_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -271,6 +271,11 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
         g.command('list-associated-resources', 'list_associated_resources', min_api='2020-06-30')
+
+    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
+        g.custom_command('assign', 'assign_disk_encryption_set_identity')
+        g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
+        g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
@@ -546,6 +551,7 @@ def load_command_table(self, _):
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.command('show-community', 'get')
+        g.custom_command('list-community', 'sig_community_gallery_list')
 
     with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.command('show-community', 'get')
@@ -577,8 +583,8 @@ def load_command_table(self, _):
     )
     with self.command_group('sig', vm_shared_gallery) as g:
         g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
-                         is_experimental=True, operation_group='shared_galleries', min_api='2020-09-30')
-        g.command('show-shared', 'get', is_experimental=True, operation_group='shared_galleries', min_api='2020-09-30')
+                         operation_group='shared_galleries', min_api='2020-09-30')
+        g.command('show-shared', 'get', operation_group='shared_galleries', min_api='2020-09-30')
 
     vm_gallery_sharing_profile = CliCommandType(
         operations_tmpl=(
@@ -590,7 +596,7 @@ def load_command_table(self, _):
     with self.command_group('sig share', vm_gallery_sharing_profile,
                             client_factory=cf_gallery_sharing_profile,
                             operation_group='shared_galleries',
-                            is_experimental=True, min_api='2020-09-30') as g:
+                            min_api='2020-09-30') as g:
         g.custom_command('add', 'sig_share_update', supports_no_wait=True)
         g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
@@ -604,8 +610,8 @@ def load_command_table(self, _):
         operation_group='shared_galleries')
     with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
-        g.custom_command('list-shared', 'sig_shared_image_definition_list', is_experimental=True)
-        g.command('show-shared', 'get', is_experimental=True)
+        g.custom_command('list-shared', 'sig_shared_image_definition_list')
+        g.command('show-shared', 'get')
 
     vm_shared_gallery_image_version = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'
@@ -615,8 +621,8 @@ def load_command_table(self, _):
     with self.command_group('sig image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
                             operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
-        g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
-        g.command('show-shared', 'get', is_experimental=True)
+        g.custom_command('list-shared', 'sig_shared_image_version_list')
+        g.command('show-shared', 'get')
 
     with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.command('list', 'list_by_gallery')
@@ -635,9 +641,9 @@ def load_command_table(self, _):
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.show_command('show', 'get')
-        g.custom_command('create', 'create_proximity_placement_group')
+        g.custom_command('create', 'create_proximity_placement_group', validator=process_ppg_create_namespace)
         g.custom_command('list', 'list_proximity_placement_groups')
-        g.generic_update_command('update')
+        g.generic_update_command('update', setter_name='create_or_update', custom_func_name='update_ppg')
         g.command('delete', 'delete')
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:

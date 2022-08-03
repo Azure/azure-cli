@@ -402,6 +402,14 @@ examples:
     text: az eventhubs namespace network-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
+helps['eventhubs namespace network-rule update'] = """
+type: command
+short-summary: Updates network rule properties of the given Namespace.
+examples:
+  - name: Updates network rule properties of the given Namespace, can be used to update public network access, trusted service and default action.
+    text: az eventhubs namespace network-rule update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled
+"""
+
 helps['eventhubs namespace network-rule remove'] = """
 type: command
 short-summary: Remove network rule for a namespace
@@ -683,4 +691,68 @@ examples:
   - name: Deletes a schema group mySchemaGroup from a namespace
     text: |
         az eventhubs namespace schema-registry delete --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
+"""
+
+helps['eventhubs namespace application-group'] = """
+type: group
+short-summary: Manages Application Groups for premium eventhubs namespace.
+"""
+
+helps['eventhubs namespace application-group policy'] = """
+type: group
+short-summary: Append or Remove application group policies.
+"""
+
+helps['eventhubs namespace application-group create'] = """
+type: command
+short-summary: Creates an application group for an EventHub namespace
+examples:
+  - name: Create an application group myAppGroup for eventhub namespace mynamespace with 2 throttling policies. Maximum allowed throttling policies is 4.
+    text: |
+        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --client-app-group-identifier SASKeyName=keyname --throttling-policy-config name=policy1 metric-id=IncomingMessages rate-limit-threshold=10000 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+"""
+
+helps['eventhubs namespace application-group update'] = """
+type: command
+short-summary: Updates an application group in an EventHub namespace
+examples:
+  - name: Updates an application group myAppGroup for eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace application-group update --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --is-enabled false
+"""
+
+helps['eventhubs namespace application-group show'] = """
+type: command
+short-summary: Gets an application group in an EventHub namespace
+examples:
+  - name: Gets an application group myAppGroup for eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace application-group show --namespace-name mynamespace -g MyResourceGroup --name myAppGroup
+"""
+
+helps['eventhubs namespace application-group list'] = """
+type: command
+short-summary: Lists all application groups in an EventHub namespace
+examples:
+  - name: Lists all application groups in eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace application-group list --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace application-group policy add'] = """
+type: command
+short-summary: Appends an application group policy to the existing policy. This cmdlet can be used to append one or more throttling policies.
+examples:
+  - name: Append 2 throttling policies to an application group. Maximum allowed throttling policies is 4.
+    text: |
+        az eventhubs namespace application-group policy add --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+"""
+
+helps['eventhubs namespace application-group policy remove'] = """
+type: command
+short-summary: Removes an application group policy from the existing policies. This cmdlet can be used to remove one or more throttling policies.
+examples:
+  - name: Removes a throttling policy from an applicatin group myAppGroup.
+    text: |
+        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
 """

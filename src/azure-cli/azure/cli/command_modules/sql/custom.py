@@ -4692,6 +4692,16 @@ def managed_db_create(
         parameters=kwargs)
 
 
+def managed_db_update(
+        instance,
+        tags=None):
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+
 def managed_db_restore(
         cmd,
         client,

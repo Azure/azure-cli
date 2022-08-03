@@ -142,7 +142,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                      resource_type=ResourceType.DATA_STORAGE_BLOB)
     with self.command_group('storage account', resource_type=ResourceType.DATA_STORAGE_BLOB,
                             custom_command_type=account_blob_service_custom_sdk) as g:
-        g.storage_custom_command_oauth('generate-sas', 'generate_sas')
+        g.storage_custom_command('generate-sas', 'generate_sas')
 
     blob_inventory_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#BlobInventoryPoliciesOperations.{}',
@@ -490,18 +490,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature')
         g.storage_command_oauth('restore', 'undelete_container', min_api='2020-02-10')
 
-    with self.command_group('storage container', resource_type=ResourceType.DATA_STORAGE_BLOB,
+    with self.command_group('storage container policy', resource_type=ResourceType.DATA_STORAGE_BLOB,
                             custom_command_type=get_custom_sdk('access_policy', client_factory=cf_container_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
-        g.storage_custom_command_oauth('policy create', 'create_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth('policy delete', 'delete_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command_oauth('create', 'create_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command_oauth('delete', 'delete_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command_oauth(
-            'policy update', 'set_acl_policy', transform=transform_acl_edit)
+            'update', 'set_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command_oauth(
-            'policy show', 'get_acl_policy', transform=transform_acl_datetime, exception_handler=show_exception_handler)
+            'show', 'get_acl_policy', transform=transform_acl_datetime, exception_handler=show_exception_handler)
         g.storage_custom_command_oauth(
-            'policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
+            'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
 
     blob_container_mgmt_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#BlobContainersOperations.{}',
@@ -701,7 +701,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('copy cancel', 'abort_copy')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch', client_factory=cf_share_client)
 
-        g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler)
+        g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler,
+                                 resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
                                  custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
 

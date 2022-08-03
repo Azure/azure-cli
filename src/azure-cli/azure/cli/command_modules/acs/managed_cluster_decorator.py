@@ -2475,7 +2475,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if not azure_keyvault_secrets_provider_enabled:
                         raise InvalidArgumentValueError(
                             "--enable-secret-rotation can only be specified "
-                            "when azure-keyvault-secrets-provider is enabled"
+                            "when azure-keyvault-secrets-provider is enabled. "
+                            "Please use command 'az aks enable-addons' to enable it."
                         )
         return enable_secret_rotation
 
@@ -2522,7 +2523,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if not azure_keyvault_secrets_provider_enabled:
                         raise InvalidArgumentValueError(
                             "--disable-secret-rotation can only be specified "
-                            "when azure-keyvault-secrets-provider is enabled"
+                            "when azure-keyvault-secrets-provider is enabled. "
+                            "Please use command 'az aks enable-addons' to enable it."
                         )
         return disable_secret_rotation
 
@@ -2584,7 +2586,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if not azure_keyvault_secrets_provider_enabled:
                         raise InvalidArgumentValueError(
                             "--rotation-poll-interval can only be specified "
-                            "when azure-keyvault-secrets-provider is enabled"
+                            "when azure-keyvault-secrets-provider is enabled "
+                            "Please use command 'az aks enable-addons' to enable it."
                         )
         return rotation_poll_interval
 
@@ -4124,21 +4127,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             service_principal_profile = mc.service_principal_profile
             assign_identity = self.context.get_assign_identity()
             if service_principal_profile is None and not assign_identity:
-                msg = (
-                    "It is highly recommended to use USER assigned identity "
-                    "(option --assign-identity) when you want to bring your own"
-                    "subnet, which will have no latency for the role assignment to "
-                    "take effect. When using SYSTEM assigned identity, "
-                    "azure-cli will grant Network Contributor role to the "
-                    "system assigned identity after the cluster is created, and "
-                    "the role assignment will take some time to take effect, see "
-                    "https://docs.microsoft.com/azure/aks/use-managed-identity, "
-                    "proceed to create cluster with system assigned identity?"
-                )
-                if not self.context.get_yes() and not prompt_y_n(
-                    msg, default="n"
-                ):
-                    raise DecoratorEarlyExitException()
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id
@@ -5456,11 +5444,39 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.identity = identity
         return mc
 
+    def ensure_azure_keyvault_secrets_provider_addon_profile(
+        self,
+        azure_keyvault_secrets_provider_addon_profile: ManagedClusterAddonProfile,
+    ) -> ManagedClusterAddonProfile:
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+        if (
+            azure_keyvault_secrets_provider_addon_profile is None or
+            not azure_keyvault_secrets_provider_addon_profile.enabled
+        ):
+            raise InvalidArgumentValueError(
+                "Addon azure-keyvault-secrets-provider is not enabled. "
+                "Please use command 'az aks enable-addons' to enable it."
+            )
+        if azure_keyvault_secrets_provider_addon_profile.config is None:
+            # backfill to default
+            azure_keyvault_secrets_provider_addon_profile.config = {
+                CONST_SECRET_ROTATION_ENABLED: "false",
+                CONST_ROTATION_POLL_INTERVAL: "2m",
+            }
+        return azure_keyvault_secrets_provider_addon_profile
+
     def update_azure_keyvault_secrets_provider_addon_profile(
         self,
         azure_keyvault_secrets_provider_addon_profile: ManagedClusterAddonProfile,
-    ) -> None:
-        """Update azure keyvault secrets provider addon profile in-place.
+    ) -> ManagedClusterAddonProfile:
+        """Update azure keyvault secrets provider addon profile.
 
         :return: None
         """
@@ -5474,19 +5490,35 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         )
 
         if self.context.get_enable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile = (
+                self.ensure_azure_keyvault_secrets_provider_addon_profile(
+                    azure_keyvault_secrets_provider_addon_profile
+                )
+            )
             azure_keyvault_secrets_provider_addon_profile.config[
                 CONST_SECRET_ROTATION_ENABLED
             ] = "true"
 
         if self.context.get_disable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile = (
+                self.ensure_azure_keyvault_secrets_provider_addon_profile(
+                    azure_keyvault_secrets_provider_addon_profile
+                )
+            )
             azure_keyvault_secrets_provider_addon_profile.config[
                 CONST_SECRET_ROTATION_ENABLED
             ] = "false"
 
         if self.context.get_rotation_poll_interval() is not None:
+            azure_keyvault_secrets_provider_addon_profile = (
+                self.ensure_azure_keyvault_secrets_provider_addon_profile(
+                    azure_keyvault_secrets_provider_addon_profile
+                )
+            )
             azure_keyvault_secrets_provider_addon_profile.config[
                 CONST_ROTATION_POLL_INTERVAL
             ] = self.context.get_rotation_poll_interval()
+        return azure_keyvault_secrets_provider_addon_profile
 
     def update_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
         """Update addon profiles for the ManagedCluster object.
@@ -5539,8 +5571,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
             )
 
-        # update azure keyvault secrets provider profile in-place
-        self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
+        # update azure keyvault secrets provider profile
+        azure_keyvault_secrets_provider_addon_profile = (
+            self.update_azure_keyvault_secrets_provider_addon_profile(
+                azure_keyvault_secrets_provider_addon_profile
+            )
+        )
+        if azure_keyvault_secrets_provider_addon_profile:
+            # mc.addon_profiles should not be None if azure_keyvault_secrets_provider_addon_profile is not None
+            mc.addon_profiles[
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ] = azure_keyvault_secrets_provider_addon_profile
         return mc
 
     def update_defender(self, mc: ManagedCluster) -> ManagedCluster:

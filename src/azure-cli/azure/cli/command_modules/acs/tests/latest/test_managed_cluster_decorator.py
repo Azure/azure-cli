@@ -69,7 +69,6 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
-from knack.util import CLIError
 
 
 class AKSManagedClusterModelsTestCase(unittest.TestCase):
@@ -1698,6 +1697,21 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_2.get_network_plugin()
 
+        # custom
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                    "network_plugin": "azure"
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # overwrite warning
+        self.assertEqual(ctx_3.get_network_plugin(), "azure")
+
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
     ):
@@ -1999,23 +2013,23 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         ctx_3.set_intermediate("subscription_id", "test_subscription_id")
-        cf_resource_groups = Mock(check_existence=Mock(return_value=False))
+        get_resource_groups_client = Mock(check_existence=Mock(return_value=False))
         result = Mock(id="test_workspace_resource_id")
         async_poller = Mock(result=Mock(return_value=result), done=Mock(return_value=True))
-        cf_resources = Mock(begin_create_or_update_by_id=Mock(return_value=async_poller))
+        get_resources_client = Mock(begin_create_or_update_by_id=Mock(return_value=async_poller))
         with patch(
             "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            return_value=cf_resource_groups,
+            "azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client",
+            return_value=get_resource_groups_client,
         ), patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            return_value=cf_resources,
+            "azure.cli.command_modules.acs.addonconfiguration.get_resources_client",
+            return_value=get_resources_client,
         ):
             self.assertEqual(ctx_3.get_workspace_resource_id(), "/test_workspace_resource_id")
-        cf_resource_groups.check_existence.assert_called_once_with("DefaultResourceGroup-EUS")
-        cf_resource_groups.create_or_update.assert_called_once_with("DefaultResourceGroup-EUS", {"location": "eastus"})
+        get_resource_groups_client.check_existence.assert_called_once_with("DefaultResourceGroup-EUS")
+        get_resource_groups_client.create_or_update.assert_called_once_with("DefaultResourceGroup-EUS", {"location": "eastus"})
         default_workspace_resource_id = (
             "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}".format(
                 "test_subscription_id",
@@ -2024,7 +2038,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             )
         )
         # the return values are func_name, args and kwargs
-        _, args, _ = cf_resources.begin_create_or_update_by_id.mock_calls[0]
+        _, args, _ = get_resources_client.begin_create_or_update_by_id.mock_calls[0]
         # not interested in mocking generic_resource, so we only check the first two args
         self.assertEqual(args[:2], (default_workspace_resource_id, "2015-11-01-preview"))
 
@@ -4342,16 +4356,11 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.subnet_role_assignment_exists",
             return_value=False,
-        ), patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
-            return_value=False,
         ):
-            # fail on user does not confirm
-            with self.assertRaises(DecoratorEarlyExitException):
-                dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
+            dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
         self.assertEqual(
             dec_3.context.get_intermediate("need_post_creation_vnet_permission_granting"),
-            None,
+            True,
         )
 
         # custom value
@@ -7338,6 +7347,47 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(mc_5, ground_truth_mc_5)
 
+    def test_ensure_azure_keyvault_secrets_provider_addon_profile(self):
+        # custom
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on addon azure-keyvault-secrets-provider not provided
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_1.ensure_azure_keyvault_secrets_provider_addon_profile(None)
+
+        # custom
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        dec_azure_keyvault_secrets_provider_addon_profile_2 = (
+            dec_2.ensure_azure_keyvault_secrets_provider_addon_profile(
+                azure_keyvault_secrets_provider_addon_profile_2
+            )
+        )
+        ground_truth_azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "false",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        )
+        self.assertEqual(
+            dec_azure_keyvault_secrets_provider_addon_profile_2,
+            ground_truth_azure_keyvault_secrets_provider_addon_profile_2,
+        )
+
     def test_update_azure_keyvault_secrets_provider_addon_profile(self):
         # default
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -7430,6 +7480,71 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ground_truth_azure_keyvault_secrets_provider_addon_profile_3,
         )
 
+        # custom value
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_keyvault_secrets_provider_addon_profile_4 = self.models.ManagedClusterAddonProfile(enabled=False)
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: azure_keyvault_secrets_provider_addon_profile_4
+            },
+        )
+        dec_4.context.attach_mc(mc_4)
+        # fail on addon azure-keyvault-secrets-provider not enabled
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_4.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile_4)
+
+        # backfill nil config to default then update
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_keyvault_secrets_provider_addon_profile_5 = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: azure_keyvault_secrets_provider_addon_profile_5
+            },
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_azure_keyvault_secrets_provider_addon_profile_5 = (
+            dec_5.update_azure_keyvault_secrets_provider_addon_profile(
+                azure_keyvault_secrets_provider_addon_profile_5
+            )
+        )
+        ground_truth_azure_keyvault_secrets_provider_addon_profile_5 = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "true",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        )
+        self.assertEqual(
+            dec_azure_keyvault_secrets_provider_addon_profile_5,
+            ground_truth_azure_keyvault_secrets_provider_addon_profile_5,
+        )
+
     def test_update_addon_profiles(self):
         # default value in `aks_update`
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -7495,6 +7610,65 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_1.context.get_intermediate("monitoring_addon_enabled"), True)
         self.assertEqual(dec_1.context.get_intermediate("ingress_appgw_addon_enabled"), True)
         self.assertEqual(dec_1.context.get_intermediate("virtual_node_addon_enabled"), True)
+
+        # update addon azure_keyvault_secrets_provider with partial profile
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": "5m",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: azure_keyvault_secrets_provider_addon_profile_2
+            },
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_addon_profiles(mc_2)
+
+        ground_truth_azure_keyvault_secrets_provider_addon_profile_2 = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "true",
+                    CONST_ROTATION_POLL_INTERVAL: "5m",
+                },
+            )
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: ground_truth_azure_keyvault_secrets_provider_addon_profile_2,
+            },
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # update addon azure_keyvault_secrets_provider with no profile
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_secret_rotation": True,
+                "disable_secret_rotation": False,
+                "rotation_poll_interval": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_3.context.attach_mc(mc_3)
+        # fail on addon azure-keyvault-secrets-provider not enabled
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_3.update_addon_profiles(mc_3)
 
     def test_update_defender(self):
         dec_1 = AKSManagedClusterUpdateDecorator(

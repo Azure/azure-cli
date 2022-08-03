@@ -516,11 +516,12 @@ def _populate_sql_container_definition(sql_container_resource,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
     if all(arg is None for arg in
-           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy, analytical_storage_ttl]):
+           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, client_encryption_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
@@ -540,6 +541,9 @@ def _populate_sql_container_definition(sql_container_resource,
     if unique_key_policy is not None:
         sql_container_resource.unique_key_policy = unique_key_policy
 
+    if client_encryption_policy is not None:
+        sql_container_resource.client_encryption_policy = client_encryption_policy
+
     if conflict_resolution_policy is not None:
         sql_container_resource.conflict_resolution_policy = conflict_resolution_policy
 
@@ -558,6 +562,7 @@ def cli_cosmosdb_sql_container_create(client,
                                       partition_key_version=None,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
+                                      client_encryption_policy=None,
                                       throughput=None,
                                       max_throughput=None,
                                       unique_key_policy=None,
@@ -571,6 +576,7 @@ def cli_cosmosdb_sql_container_create(client,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl)
@@ -606,11 +612,13 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container_resource.default_ttl = sql_container.resource.default_ttl
     sql_container_resource.unique_key_policy = sql_container.resource.unique_key_policy
     sql_container_resource.conflict_resolution_policy = sql_container.resource.conflict_resolution_policy
+    sql_container_resource.client_encryption_policy = sql_container.resource.client_encryption_policy
 
     if _populate_sql_container_definition(sql_container_resource,
                                           None,
                                           default_ttl,
                                           indexing_policy,
+                                          None,
                                           None,
                                           None,
                                           None,
@@ -1959,7 +1967,8 @@ def cli_cosmosdb_collection_delete(client, database_id, collection_id):
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
                                     default_ttl=None,
-                                    indexing_policy=None):
+                                    indexing_policy=None,
+                                    client_encryption_policy=None):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
         return False
 
@@ -1977,6 +1986,9 @@ def _populate_collection_definition(collection,
     if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy
 
+    if client_encryption_policy is not None:
+        collection['clientEncryptionPolicy'] = client_encryption_policy
+
     return True
 
 
@@ -1986,7 +1998,8 @@ def cli_cosmosdb_collection_create(client,
                                    throughput=None,
                                    partition_key_path=None,
                                    default_ttl=None,
-                                   indexing_policy=DEFAULT_INDEXING_POLICY):
+                                   indexing_policy=DEFAULT_INDEXING_POLICY,
+                                   client_encryption_policy=None):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
 
@@ -1997,7 +2010,8 @@ def cli_cosmosdb_collection_create(client,
     _populate_collection_definition(collection,
                                     partition_key_path,
                                     default_ttl,
-                                    indexing_policy)
+                                    indexing_policy,
+                                    client_encryption_policy)
 
     created_collection = client.CreateContainer(_get_database_link(database_id), collection,
                                                 options)

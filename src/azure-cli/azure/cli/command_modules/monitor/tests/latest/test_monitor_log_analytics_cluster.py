@@ -37,9 +37,13 @@ class TestClusterScenarios(ScenarioTest):
                      self.check('sku.capacity', new_sku_capacity)
                  ])
 
+        self.cmd("monitor log-analytics cluster update -g {rg1} -n {new_cluster_name} "
+                 "--tags key=value1 --no-wait")
+
         self.cmd("monitor log-analytics cluster show -g {rg1} -n {new_cluster_name}", checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.capacity', new_sku_capacity)
+            self.check('sku.capacity', new_sku_capacity),
+            self.check('tags.key', "value1"),
         ])
 
         self.cmd("monitor log-analytics cluster list -g {rg1}", checks=[
@@ -52,7 +56,7 @@ class TestClusterScenarios(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-    # @record_only()
+    @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
         new_key_version = '903ca0dc34b44f0789e35488eaffc9f5'

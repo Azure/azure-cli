@@ -987,10 +987,10 @@ parameters:
     short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
-    short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+    short-summary: The Resource Id of a subnet in an existing VNet into which to deploy the cluster.
   - name: --pod-subnet-id
     type: string
-    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
+    short-summary: The Resource Id of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -1171,6 +1171,36 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+"""
+
+helps['aks nodepool stop'] = """
+    type: command
+    short-summary: Stop running agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Stop agent pool in the managed cluster
+          text: az aks nodepool stop --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
+"""
+
+helps['aks nodepool start'] = """
+    type: command
+    short-summary: Start stopped agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Start agent pool in the managed cluster
+          text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
 helps['aks remove-dev-spaces'] = """

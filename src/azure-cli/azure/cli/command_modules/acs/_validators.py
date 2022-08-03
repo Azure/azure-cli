@@ -12,8 +12,11 @@ from math import isclose, isnan
 
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
-    InvalidArgumentValueError, RequiredArgumentMissingError,
-    ArgumentUsageError)
+    ArgumentUsageError,
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
+)
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
@@ -144,11 +147,11 @@ def validate_linux_host_name(namespace):
     in the CLI pre-flight.
     """
     # https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    rfc1123_regex = re.compile(r'^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$')  # pylint:disable=line-too-long
     found = rfc1123_regex.findall(namespace.name)
     if not found:
-        raise CLIError('--name cannot exceed 63 characters and can only contain '
-                       'letters, numbers, or dashes (-).')
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, underscores (_) or dashes (-).')
 
 
 def validate_snapshot_name(namespace):
@@ -510,6 +513,13 @@ def validate_credential_format(namespace):
         namespace.credential_format.lower() != "azure" and \
             namespace.credential_format.lower() != "exec":
         raise InvalidArgumentValueError("--format can only be azure or exec.")
+
+
+def validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace):
+    if namespace.disable_secret_rotation and namespace.enable_secret_rotation:
+        raise MutuallyExclusiveArgumentError(
+            "Providing both --disable-secret-rotation and --enable-secret-rotation flags is invalid"
+        )
 
 
 def validate_defender_config_parameter(namespace):

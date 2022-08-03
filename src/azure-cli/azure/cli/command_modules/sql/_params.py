@@ -144,7 +144,7 @@ def get_location_type_with_default_from_resource_group(cli_ctx):
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
     configured_default='sql-server',
-    help='Name of the Azure SQL server. ' + server_configure_help,
+    help='Name of the Azure SQL Server. ' + server_configure_help,
     completer=get_resource_name_completion_list('Microsoft.SQL/servers'),
     # Allow --ids command line argument. id_part=name is 1st name in uri
     id_part='name')
@@ -2147,12 +2147,23 @@ def load_arguments(self, _):
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'collation',
+                'tags',
             ])
+
+        c.argument('tags', arg_type=tags_type)
 
         c.argument('collation',
                    required=False,
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
+
+    with self.argument_context('sql midb update') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'tags',
+            ])
+
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
