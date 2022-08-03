@@ -73,23 +73,23 @@ def load_arguments(self, _):
                         'Specifies the URLs where user tokens are sent for sign-in, or the redirect URIs '
                         'where OAuth 2.0 authorization codes and access tokens are sent.')
 
-        # keyCredentials
-        c.argument('start_date', arg_group='keyCredentials',
+        # keyCredential
+        c.argument('start_date', arg_group='keyCredential',
                    help="Date or datetime at which credentials become valid (e.g. '2017-01-01T01:00:00+00:00' or "
                         "'2017-01-01'). Default value is current time")
-        c.argument('end_date', arg_group='keyCredentials',
+        c.argument('end_date', arg_group='keyCredential',
                    help="Date or datetime after which credentials expire (e.g. '2017-12-31T11:59:59+00:00' or "
                         "'2017-12-31'). Default value is one year after current time")
-        c.argument('key_value', arg_group='keyCredentials',
+        c.argument('key_value', arg_group='keyCredential',
                    help='the value for the key credentials associated with the application')
-        c.argument('key_type', arg_group='keyCredentials',
+        c.argument('key_type', arg_group='keyCredential',
                    help='the type of the key credentials associated with the application',
                    arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'],
                                           default='AsymmetricX509Cert'))
-        c.argument('key_usage', arg_group='keyCredentials',
+        c.argument('key_usage', arg_group='keyCredential',
                    help='the usage of the key credentials associated with the application.',
                    arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
-        c.argument('key_display_name', arg_group='keyCredentials',
+        c.argument('key_display_name', arg_group='keyCredential',
                    help="Friendly name for the key.")
 
         # JSON properties
@@ -197,16 +197,16 @@ def load_arguments(self, _):
                        help="Finer grain of expiry time if '--years' is insufficient, e.g. '2020-12-31T11:59:59+00:00' "
                             "or '2299-12-31'")
 
-            # keyCredentials arguments
-            c.argument('cert', arg_group='keyCredentials', validator=validate_cert,
+            # keyCredential arguments
+            c.argument('cert', arg_group='keyCredential', validator=validate_cert,
                        help='Certificate to use for credentials. When used with `--keyvault,`, indicates the name of the '
                             'cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. '
                             'Use `@{path}` to load from a file. Do not include private key info.')
-            c.argument('create_cert', action='store_true', arg_group='keyCredentials',
+            c.argument('create_cert', arg_group='keyCredential', action='store_true',
                        help='Create a self-signed certificate to use for the credential. Only the current OS user has '
                             'read/write permission to this certificate. Use with `--keyvault` to create the certificate in '
                             'Key Vault. Otherwise, a certificate will be created locally.')
-            c.argument('keyvault', arg_group='keyCredentials',
+            c.argument('keyvault', arg_group='keyCredential',
                        help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
 
     # --display-name in `ad sp create-for-rbac` is for the sp, not credential, so we only apply it to `credential reset`
