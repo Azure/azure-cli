@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Deletes a cluster instance.
+    """Delete a cluster instance.
 
     :example: Delete a cluster instance.
         az monitor log-analytics cluster delete -g MyResourceGroup -n MyCluster
@@ -48,7 +48,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.cluster_name = AAZStrArg(
             options=["-n", "--name", "--cluster-name"],
-            help="The name of the Log Analytics cluster.",
+            help="Name of the Log Analytics Cluster.",
             required=True,
             id_part="name",
         )

@@ -62,6 +62,9 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Resource location",
             required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],

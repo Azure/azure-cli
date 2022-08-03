@@ -374,7 +374,7 @@ class Update(AAZCommand):
 
             tags = _builder.get(".properties.tags")
             if tags is not None:
-                tags.set_elements(AAZListType)
+                tags.set_elements(AAZListType, ".")
 
             _elements = _builder.get(".properties.tags{}")
             if _elements is not None:

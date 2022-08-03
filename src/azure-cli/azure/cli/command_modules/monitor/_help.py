@@ -848,27 +848,6 @@ type: group
 short-summary: Manage Azure log analytics.
 """
 
-helps['monitor log-analytics cluster'] = """
-type: group
-short-summary: Manage Azure log analytics cluster.
-"""
-
-helps['monitor log-analytics cluster create'] = """
-type: command
-short-summary: Create a cluster instance.
-examples:
-  - name: Create a cluster instance.
-    text: az monitor log-analytics cluster create -g MyResourceGroup -n MyCluster --sku-capacity 1000
-"""
-
-helps['monitor log-analytics cluster wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the cluster is met.
-examples:
-  - name: Pause executing next line of CLI script until the cluster is successfully provisioned.
-    text: az monitor log-analytics cluster wait -n MyCluster -g MyResourceGroup --created
-"""
-
 helps['monitor log-analytics workspace'] = """
 type: group
 short-summary: Manage Azure log analytics workspace

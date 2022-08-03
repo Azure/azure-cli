@@ -233,16 +233,6 @@ def load_command_table(self, _):
         client_factory=cf_log_analytics_workspace_data_exports,
         exception_handler=exception_handler)
 
-    log_analytics_cluster_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.loganalytics.operations#ClustersOperations.{}',
-        client_factory=cf_log_analytics_cluster,
-        exception_handler=exception_handler)
-
-    log_analytics_cluster_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_cluster#{}',
-        client_factory=cf_log_analytics_cluster,
-        exception_handler=exception_handler)
-
     log_analytics_linked_storage_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#LinkedStorageAccountsOperations.{}',
         client_factory=cf_log_analytics_linked_storage,
@@ -401,10 +391,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_workspace')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.wait_command('wait')
-
-    with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
-        g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:

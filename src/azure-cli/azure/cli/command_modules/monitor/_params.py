@@ -503,16 +503,6 @@ def load_arguments(self, _):
                                                     'require write access.')
     # endregion
 
-    # region Log Analytics Cluster
-    with self.argument_context('monitor log-analytics cluster') as c:
-        c.argument('cluster_name', name_arg_type, help='The name of the Log Analytics cluster.')
-        c.argument('sku_name', help="The name of the SKU. Currently only support 'CapacityReservation'")
-        c.argument('sku_capacity', help='The capacity of the SKU. It must be in the range of 1000-2000 per day and must'
-                                        ' be in multiples of 100. If you want to increase the limit, please contact'
-                                        ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
-        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
-    # endregion
-
     # region Log Analytics Linked Storage Account
     with self.argument_context('monitor log-analytics workspace linked-storage') as c:
         from azure.mgmt.loganalytics.models import DataSourceType

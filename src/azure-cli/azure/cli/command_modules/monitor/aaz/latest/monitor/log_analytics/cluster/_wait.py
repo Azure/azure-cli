@@ -12,17 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics cluster show",
+    "monitor log-analytics cluster wait",
 )
-class Show(AAZCommand):
-    """Show the properties of a cluster instance.
-
-    :example: Show the properties of a cluster instance.
-        az monitor log-analytics cluster show -g MyResourceGroup -n MyCluster
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2021-06-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2021-06-01"],
         ]
@@ -59,7 +55,7 @@ class Show(AAZCommand):
         self.ClustersGet(ctx=self.ctx)()
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class ClustersGet(AAZHttpOperation):
@@ -282,4 +278,4 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-__all__ = ["Show"]
+__all__ = ["Wait"]

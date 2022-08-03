@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor log-analytics cluster update",
 )
 class Update(AAZCommand):
-    """Create or update a Log Analytics cluster.
+    """Update a cluster instance.
 
     Update a cluster instance.
 
@@ -51,15 +51,51 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.cluster_name = AAZStrArg(
             options=["-n", "--name", "--cluster-name"],
-            help="The name of the Log Analytics cluster.",
+            help="Name of the Log Analytics Cluster.",
             required=True,
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.location = AAZResourceLocationArg(
+            help="The geo-location where the resource lives",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
 
         # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity_type = AAZStrArg(
+            options=["--identity-type"],
+            arg_group="Identity",
+            help="Type of managed service identity.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        )
+        _args_schema.user_assigned_identities = AAZDictArg(
+            options=["--user-assigned-identities"],
+            arg_group="Identity",
+            help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+            nullable=True,
+        )
+
+        user_assigned_identities = cls._args_schema.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectArg(
+            nullable=True,
+            blank={},
+        )
 
         # define Arg Group "Key Properties"
 
@@ -79,7 +115,7 @@ class Update(AAZCommand):
         _args_schema.key_vault_uri = AAZStrArg(
             options=["--key-vault-uri"],
             arg_group="Key Properties",
-            help="The Key Vault uri which holds the key associated with the Log Analytics cluster.",
+            help="The Key Vault uri which holds they key associated with the Log Analytics cluster.",
             nullable=True,
         )
         _args_schema.key_version = AAZStrArg(
@@ -98,17 +134,6 @@ class Update(AAZCommand):
             help="The cluster's billing type.",
             nullable=True,
             enum={"Cluster": "Cluster", "Workspaces": "Workspaces"},
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Properties",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
         )
 
         # define Arg Group "Sku"
@@ -339,9 +364,19 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+
+            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
+            if user_assigned_identities is not None:
+                user_assigned_identities.set_elements(AAZObjectType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -476,7 +511,9 @@ def _build_schema_cluster_read(_schema):
     )
 
     associated_workspaces = _schema_cluster_read.properties.associated_workspaces
-    associated_workspaces.Element = AAZObjectType()
+    associated_workspaces.Element = AAZObjectType(
+        flags={"read_only": True},
+    )
 
     _element = _schema_cluster_read.properties.associated_workspaces.Element
     _element.associate_date = AAZStrType(
