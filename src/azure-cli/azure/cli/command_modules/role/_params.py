@@ -171,8 +171,13 @@ def load_arguments(self, _):
         c.argument('display_name', options_list=['--display-name', '--name', '-n'],
                    help='Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S '
                         'where the suffix is the time of creation.')
-        c.argument('scopes', nargs='+')
-        c.argument('role', completer=get_role_definition_name_completion_list)
+        c.argument('scopes', nargs='+',
+                   help="Space-separated list of scopes the service principal's role assignment applies to. e.g., "
+                        "subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, "
+                        "/subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/"
+                        "Microsoft.Compute/virtualMachines/myVM")
+        c.argument('role', completer=get_role_definition_name_completion_list,
+                   help='Role of the service principal.')
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
                    deprecate_info=c.deprecate(target='--skip-assignment', hide=True), help='No-op.')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', deprecate_info=c.deprecate(target='--sdk-auth'),
@@ -181,30 +186,35 @@ def load_arguments(self, _):
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
 
-    for item in ['create-for-rbac', 'credential reset']:
-        with self.argument_context('ad sp {}'.format(item)) as c:
-            c.argument('cert', arg_group='Credential', validator=validate_cert)
-            c.argument('years', type=int, default=None, arg_group='Credential')
+    for item in ['ad app credential reset', 'ad sp credential reset', 'ad sp create-for-rbac']:
+        with self.argument_context(item) as c:
+            # general credential arguments
+            c.argument('years', type=int, default=None, arg_group='Credential',
+                       help='Number of years for which the credentials will be valid. Default: 1 year')
+            c.argument('append', action='store_true', arg_group='Credential',
+                       help='Append the new credential instead of overwriting.')
             c.argument('end_date', default=None, arg_group='Credential',
-                       help="Finer grain of expiry time if '--years' is insufficient, e.g. '2020-12-31T11:59:59+00:00' or '2299-12-31'")
-            c.argument('create_cert', action='store_true', arg_group='Credential')
-            c.argument('keyvault', arg_group='Credential')
-            c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+                       help="Finer grain of expiry time if '--years' is insufficient, e.g. '2020-12-31T11:59:59+00:00' "
+                            "or '2299-12-31'")
 
-    with self.argument_context('ad sp credential reset') as c:
-        c.argument('name', name_arg_type)
-        c.argument('display_name', help="Friendly name for the password.", arg_group='Credential')
-        c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                   help="If missing, CLI will generate a strong password")
+            # keyCredentials arguments
+            c.argument('cert', arg_group='keyCredentials', validator=validate_cert,
+                       help='Certificate to use for credentials. When used with `--keyvault,`, indicates the name of the '
+                            'cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. '
+                            'Use `@{path}` to load from a file. Do not include private key info.')
+            c.argument('create_cert', action='store_true', arg_group='keyCredentials',
+                       help='Create a self-signed certificate to use for the credential. Only the current OS user has '
+                            'read/write permission to this certificate. Use with `--keyvault` to create the certificate in '
+                            'Key Vault. Otherwise, a certificate will be created locally.')
+            c.argument('keyvault', arg_group='keyCredentials',
+                       help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
 
-    with self.argument_context('ad app credential reset') as c:
-        c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
-        c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
-        c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
-        c.argument('display_name', help="Friendly name for the password or key.")
-
-        c.argument('create_cert', action='store_true', arg_group='keyCredentials', help='Create a self-signed certificate to use for the credential')
-        c.argument('keyvault', arg_group='keyCredentials', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
+    # --display-name in `ad sp create-for-rbac` is for the sp, not credential, so we only apply it to `credential reset`
+    # commands.
+    for item in ['ad app credential reset', 'ad sp credential reset']:
+        with self.argument_context(item) as c:
+            c.argument('display_name', arg_group='Credential',
+                       help="Friendly name for the password or certificate credential.")
 
     with self.argument_context('ad app federated-credential') as c:
         c.argument('app_identifier', options_list=['--id'],
