@@ -274,3 +274,11 @@ def load_flexibleserver_command_table(self, _):
         g.command('create', 'put', transform=transform_backup)
         g.command('list', 'list_by_server', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
+
+    with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_servers) as g:
+        g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
+        g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True)
+        g.custom_show_command('show', 'flexible_server_identity_show')
+        g.custom_command('list', 'flexible_server_identity_list')

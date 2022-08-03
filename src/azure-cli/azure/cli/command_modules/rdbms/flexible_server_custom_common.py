@@ -17,8 +17,9 @@ from urllib.request import urlretrieve
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import send_raw_request
-from azure.cli.core.util import user_confirmation
+from azure.cli.core.util import sdk_no_wait, user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
+from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from ._client_factory import cf_mysql_flexible_replica
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
@@ -401,3 +402,42 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             parameters=parameters),
         cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
     )
+
+
+# Custom functions for identity
+def flexible_server_identity_assign(client, resource_group_name, server_name, identities, no_wait=False):
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = {}
+
+    parameters = mysql_flexibleservers.models.ServerForUpdate(
+        identity=mysql_flexibleservers.models.Identity(user_assigned_identities=identities_map, type="UserAssigned")
+    )
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, parameters)
+
+
+def flexible_server_identity_remove(client, resource_group_name, server_name, identities, no_wait=False):
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = None
+
+    parameters = mysql_flexibleservers.models.ServerForUpdate(
+        identity=mysql_flexibleservers.models.Identity(user_assigned_identities=identities_map, type="UserAssigned")
+    )
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, parameters)
+
+
+def flexible_server_identity_list(client, resource_group_name, server_name):
+    server = client.get(resource_group_name, server_name)
+    return server.identity
+
+
+def flexible_server_identity_show(client, resource_group_name, server_name, identity):
+    server = client.get(resource_group_name, server_name)
+
+    if identity not in server.identity.user_assigned_identities:
+        raise CLIError("Identity '{}' does not exist in server {}.".format(identity, server_name))
+
+    return server.identity.user_assigned_identities[identity]

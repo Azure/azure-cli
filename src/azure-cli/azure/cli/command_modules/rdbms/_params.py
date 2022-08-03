@@ -668,6 +668,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
+        # identity
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
+                c.argument('identities', nargs='+', help='Space-separated identities to assign.')
+                c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+            with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
+                c.argument('identities', nargs='+', help='Space-separated identities to remove.')
+                c.argument('server_name', id_part=None, help='Identity to show.')
+
+            with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
+                c.argument('server_name', id_part=None, help='Identity to show.')
+
+            with self.argument_context('{} flexible-server identity list'.format(command_group)) as c:
+                c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
