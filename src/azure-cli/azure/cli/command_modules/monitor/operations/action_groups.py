@@ -74,8 +74,9 @@ def enable_receiver(client, resource_group_name, action_group_name, receiver_nam
                                   enable_request=enable_request)
 
 
-def post_notifications(client, alert_type, resource_group_name=None, action_group_name=None, add_receivers=None, no_wait=False):
-    from azure.mgmt.monitor.v2022_06_01.models import NotificationRequestBody
+def post_notifications(client, alert_type, resource_group_name=None, action_group_name=None, add_receivers=None,
+                       no_wait=False):
+    from azure.mgmt.monitor.models import NotificationRequestBody
     EmailReceivers = []
     SmsReceivers = []
     WebhookReceivers = []
@@ -88,7 +89,7 @@ def post_notifications(client, alert_type, resource_group_name=None, action_grou
     ArmRoleReceivers = []
     EventHubReceivers = []
     for r in add_receivers:
-        from azure.mgmt.monitor.v2022_06_01.models import EmailReceiver, SmsReceiver, WebhookReceiver, ItsmReceiver, \
+        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, ItsmReceiver, \
             AzureAppPushReceiver, AutomationRunbookReceiver, VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, \
             ArmRoleReceiver, EventHubReceiver
         if isinstance(r, EmailReceiver):
@@ -115,23 +116,30 @@ def post_notifications(client, alert_type, resource_group_name=None, action_grou
         elif isinstance(r, VoiceReceiver):
             VoiceReceivers.append(VoiceReceiver(name=r.name, country_code=r.country_code, phone_number=r.phone_number))
         elif isinstance(r, LogicAppReceiver):
-            LogicAppReceivers.append(LogicAppReceiver(name=r.name, resource_id=r.resource_id, callback_url=r.callback_url))
+            LogicAppReceivers.append(LogicAppReceiver(name=r.name, resource_id=r.resource_id,
+                                                      callback_url=r.callback_url))
         elif isinstance(r, AzureFunctionReceiver):
-            AzureFunctionReceivers.append(AzureFunctionReceiver(name=r.name, function_app_resource_id=r.function_app_resource_id,
-                                          function_name=r.function_name, http_trigger_url=r.http_trigger_url,
-                                          use_common_alert_schema=r.use_common_alert_schema))
+            AzureFunctionReceivers.append(AzureFunctionReceiver(name=r.name,
+                                                                function_app_resource_id=r.function_app_resource_id,
+                                                                function_name=r.function_name,
+                                                                http_trigger_url=r.http_trigger_url,
+                                                                use_common_alert_schema=r.use_common_alert_schema))
         elif isinstance(r, ArmRoleReceiver):
-            ArmRoleReceivers.append(ArmRoleReceiver(name=r.name, role_id=r.role_id, use_common_alert_schema=r.use_common_alert_schema))
+            ArmRoleReceivers.append(ArmRoleReceiver(name=r.name, role_id=r.role_id,
+                                                    use_common_alert_schema=r.use_common_alert_schema))
         elif isinstance(r, EventHubReceiver):
-            EventHubReceivers.append(EventHubReceiver(name=r.name, event_hub_name_space=r.event_hub_name_space,
-                                                      event_hub_name=r.event_hub_name, subscription_id=r.subscription_id))
+            EventHubReceivers.append(EventHubReceiver(name=r.name,
+                                                      event_hub_name_space=r.event_hub_name_space,
+                                                      event_hub_name=r.event_hub_name,
+                                                      subscription_id=r.subscription_id))
 
     notification_request = NotificationRequestBody(alert_type=alert_type, email_receivers=EmailReceivers,
                                                    sms_receivers=SmsReceivers, webhook_receivers=WebhookReceivers,
                                                    itsm_receivers=ItsmReceivers,
                                                    azure_app_push_receivers=AzureAppPushReceivers,
                                                    automation_runbook_receivers=AutomationRunbookReceivers,
-                                                   voice_receivers=VoiceReceivers, logic_app_receivers=LogicAppReceivers,
+                                                   voice_receivers=VoiceReceivers,
+                                                   logic_app_receivers=LogicAppReceivers,
                                                    azure_function_receivers=AzureFunctionReceivers,
                                                    arm_role_receivers=ArmRoleReceivers,
                                                    event_hub_receivers=EventHubReceivers)

@@ -85,7 +85,7 @@ class TestActionGroupScenarios(ScenarioTest):
             'ag': action_group_name
         })
         self.cmd('monitor action-group test-notifications create '
-                 '-a email alice alice@example.com usecommonalertsChema'
+                 '-a email alice alice@example.com usecommonalertsChema '
                  '-a sms alice_sms 1 5551234567 '
                  '-a webhook alice_web https://www.example.com/alert?name=alice usecommonalertsChema '
                  '-a itsm alice_itsm 5def922a-3ed4-49c1-b9fd-05ec533819a3|55dfd1f8-7e59-4f89-bf56-4c82f5ace23c a3b9076c-ce8e-434e-85b4-aff10cb3c8f1 {{\"PayloadRevision\":0,\"WorkItemType\":\"Incident\",\"UseTemplate\":false,\"WorkItemData\":\"{{}}\",\"CreateOneWIPerCI\":false}} westcentralus '
