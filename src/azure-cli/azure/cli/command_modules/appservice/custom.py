@@ -530,6 +530,10 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
+    from azure.core.exceptions import ResourceNotFoundError as Error404
+    from time import sleep
+
+    start_time = datetime.datetime.utcnow()
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
@@ -558,24 +562,58 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
-    print(f"Deployment HTTP status code: {res.status_code}")
-    print("="*25)
-    print(f"Deployment HTTP headers: {res.headers}")
-    print("="*25)
+    # TODO handle 409s
+
     deployment_status_id = res.headers.get("SCM-DEPLOYMENT-ID")
     client = web_client_factory(cmd.cli_ctx)
-    try:
+
+    status = None
+    while status is None:  # TODO timeout?
+        try:
+            poller = client.web_apps.begin_get_production_site_deployment_status(resource_group_name=resource_group_name,
+                                                                        name=name, deployment_status_id=deployment_status_id)
+            status = poller.result()
+        except Error404:
+            sleep(1)
+
+    # non_terminal_statuses = ["BuildRequestReceived", "BuildPending", "BuildInProgress", "BuildSuccessful", ]
+
+
+    # return status
+    # TODO make constants / enums / classes
+    # TODO pull enum values from SDK if possible s
+    # TODO may be misleading to start with the status "build request recieved" when
+    states = ["BuildRequestReceived", "BuildPending", "BuildInProgress"]
+    states_sequence = ["BuildAborted", #
+                       "BuildRequestReceived",
+                       "BuildPending",
+                       "BuildInProgress",
+                       "BuildFailed",
+                       "BuildSuccessful",
+                       "PostBuildRestartRequired",
+                       "RuntimeStarting",
+                       "RuntimeFailed",
+                       "RuntimeSuccessful"]
+    failure_states = {"BuildAborted", "BuildFailed", "RuntimeFailed"}
+    # terminal_states = {"PostBuildRestartRequired", "RuntimeSuccessful"}
+    state = 0
+    print(f"{states[state]}... ", end="")
+    while True:
         poller = client.web_apps.begin_get_production_site_deployment_status(resource_group_name=resource_group_name,
-                                                                    name=name, deployment_status_id=deployment_status_id)
-        return poller.result()  # TODO timeout
-    except Exception as e:
-        print(f"Received Error from deployment status API: \n{e}")
-        print("="*25)
-        print("Returning list of deployments from the deployment status API: ")
-        return client.web_apps.list_production_site_deployment_statuses(resource_group_name=resource_group_name,
-                                                                        name=name,)
-
-
+                                                                        name=name, deployment_status_id=deployment_status_id)
+        status = poller.result()
+        if states_sequence.index(status.status) > state and state < len(states) - 1:
+            print("Success! ")
+            state += 1
+            print(f"{states[state]}...{(len('BuildRequestReceived... ') - (len(states[state]) + 3))*' '}", end="")
+        else:
+            if status.status in failure_states:
+                print("\n")
+                raise UnclassifiedUserFault(f"Build failed with status {status.status}") # TODO fill with human-friendly message
+            print("Success!\n")
+            print(f"Build completed with status {status.status}")  # TODO fill with human-friendly message
+            return
+        sleep(1)
 
     # check the status of async deployment
     # if res.status_code == 202:
