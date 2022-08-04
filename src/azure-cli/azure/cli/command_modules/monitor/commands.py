@@ -337,12 +337,6 @@ def load_command_table(self, _):
                          validator=validate_metrics_alert_condition, is_preview=True)
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
-        g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_log_analytics_workspace')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('list', 'list_log_analytics_workspace')
-        g.custom_command('list-deleted-workspaces', 'list_deleted_log_analytics_workspaces', custom_command_type=log_analytics_deleted_workspace_custom)
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
         g.command('get-schema', 'get', command_type=log_analytics_workspace_schema_sdk)
         g.command('list-usages', 'list', command_type=log_analytics_workspace_usage_sdk)

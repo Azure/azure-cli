@@ -30,7 +30,6 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 100)
         ])
 
-
         self.cmd("monitor log-analytics workspace list-usages -g {rg} -n {name}")
         self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
             self.check('length(@)', 1),

@@ -11,60 +11,6 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from knack.util import CLIError
 
 
-def create_log_analytics_workspace(client, resource_group_name, workspace_name, location=None, tags=None,
-                                   sku=WorkspaceSkuNameEnum.per_gb2018.value, capacity_reservation_level=None,
-                                   retention_time=None, daily_quota_gb=None,
-                                   public_network_access_for_query=None, public_network_access_for_ingestion=None,
-                                   no_wait=False):
-    if sku.lower() == WorkspaceSkuNameEnum.capacity_reservation.value.lower() and capacity_reservation_level is None:
-        raise CLIError('--capacity-reservation-level must be set when sku is CapacityReservation.')
-    if sku.lower() != WorkspaceSkuNameEnum.capacity_reservation.value.lower() and capacity_reservation_level:
-        raise CLIError('--capacity-reservation-level can be set only when sku is CapacityReservation.')
-
-    workspace_client = client
-    sku = WorkspaceSku(name=sku, capacity_reservation_level=capacity_reservation_level)
-    workspace_capping = WorkspaceCapping(daily_quota_gb=daily_quota_gb)
-    workspace_instance = Workspace(location=location,
-                                   tags=tags,
-                                   sku=sku,
-                                   workspace_capping=workspace_capping,
-                                   retention_in_days=retention_time,
-                                   public_network_access_for_query=public_network_access_for_query,
-                                   public_network_access_for_ingestion=public_network_access_for_ingestion)
-    return sdk_no_wait(no_wait, workspace_client.begin_create_or_update, resource_group_name,
-                       workspace_name, workspace_instance)
-
-
-def update_log_analytics_workspace(instance, tags=None, capacity_reservation_level=None,
-                                   retention_time=None, daily_quota_gb=None,
-                                   public_network_access_for_query=None, public_network_access_for_ingestion=None,
-                                   default_data_collection_rule_resource_id=None):
-    if tags is not None:
-        instance.tags = tags
-    if capacity_reservation_level is not None:
-        if instance.sku.name.lower() != WorkspaceSkuNameEnum.capacity_reservation.value.lower():
-            raise CLIError('--capacity-reservation-level can be set only when sku is CapacityReservation.')
-        instance.sku.capacity_reservation_level = capacity_reservation_level
-    if retention_time is not None:
-        instance.retention_in_days = retention_time
-    if daily_quota_gb is not None:
-        instance.workspace_capping.daily_quota_gb = daily_quota_gb
-    if public_network_access_for_query is not None:
-        instance.public_network_access_for_query = public_network_access_for_query
-    if public_network_access_for_ingestion is not None:
-        instance.public_network_access_for_ingestion = public_network_access_for_ingestion
-    if default_data_collection_rule_resource_id is not None:
-        instance.default_data_collection_rule_resource_id = default_data_collection_rule_resource_id
-    return instance
-
-
-def list_log_analytics_workspace(client, resource_group_name=None):
-    workspace_client = client
-    if resource_group_name:
-        return workspace_client.list_by_resource_group(resource_group_name)
-    return workspace_client.list()
-
-
 def list_deleted_log_analytics_workspaces(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
