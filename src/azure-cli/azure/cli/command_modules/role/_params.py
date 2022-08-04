@@ -287,7 +287,7 @@ def load_arguments(self, _):
         c.argument('object_type', options_list=['--type', '-t'], help='object type filter, e.g. "application", "servicePrincipal"  "group", etc')
 
     with self.argument_context('role') as c:
-        c.argument('scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
+        c.argument('scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM without trailing slash.')
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='use it only if the role or assignment was added at the level of a resource group')
 
     with self.argument_context('role assignment') as c:
