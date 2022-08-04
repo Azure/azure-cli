@@ -698,7 +698,7 @@ parameters:
     short-summary: Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
   - name: --zones
     short-summary: Availability Zone
-  - name: --key-vault-private-endpoint-resource-id
+  - name: --kv-private-endpoint-id
     short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
 
 examples:
@@ -1572,7 +1572,7 @@ parameters:
     short-summary: Replication Schedule for log backup volume
   - name: --log-backup-src-id
     short-summary: ResourceId of the log backup source volume
-  - name: --key-vault-private-endpoint-resource-id
+  - name: --kv-private-endpoint-id
     short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
 examples:
   - name: Create ANF volume group
