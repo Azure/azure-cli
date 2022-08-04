@@ -1770,7 +1770,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         # Create a application gateway without enable --enable-private-link
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
-                 '--public-ip-address {appgw_public_ip}')
+                 '--public-ip-address {appgw_public_ip} --priority 1001')
 
         # Add one private link
         # These will fail because application-gateway feature cannot be enabled for selected sku
