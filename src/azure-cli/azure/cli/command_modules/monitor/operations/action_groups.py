@@ -108,14 +108,14 @@ def post_notifications(client, alert_type, resource_group_name=None, action_grou
         elif isinstance(r, AzureAppPushReceiver):
             AzureAppPushReceivers.append(AzureAppPushReceiver(name=r.name, email_address=r.email_address))
         elif isinstance(r, AutomationRunbookReceiver):
-            AutomationRunbookReceivers.append(AutomationRunbookReceiver(automation_account_id=r.automation_account_id,
-                                                                        runbook_name=r.runbook_name,
-                                                                        webhook_resource_id=r.webhook_resource_id,
-                                                                        is_global_runbook=r.is_global_runbook,
-                                                                        name=r.name,
-                                                                        service_uri=r.service_uri,
-                                                                        use_common_alert_schema=
-                                                                        r.use_common_alert_schema))
+            AutomationRunbookReceivers\
+                .append(AutomationRunbookReceiver(automation_account_id=r.automation_account_id,
+                                                  runbook_name=r.runbook_name,
+                                                  webhook_resource_id=r.webhook_resource_id,
+                                                  is_global_runbook=r.is_global_runbook,
+                                                  name=r.name,
+                                                  service_uri=r.service_uri,
+                                                  use_common_alert_schema=r.use_common_alert_schema))
         elif isinstance(r, VoiceReceiver):
             VoiceReceivers.append(VoiceReceiver(name=r.name, country_code=r.country_code, phone_number=r.phone_number))
         elif isinstance(r, LogicAppReceiver):
