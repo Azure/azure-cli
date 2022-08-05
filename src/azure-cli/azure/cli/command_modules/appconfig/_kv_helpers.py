@@ -10,6 +10,7 @@ import json
 from difflib import Differ
 from itertools import filterfalse
 from json import JSONDecodeError
+from types import TracebackType
 from urllib.parse import urlparse
 
 import chardet
@@ -863,17 +864,23 @@ def __try_convert_to_arrays(constructed_data, is_root=True):
     if not (isinstance(constructed_data, dict) and len(constructed_data) > 0):
         return constructed_data
 
-    sorted_data_keys = sorted(constructed_data)
+    # Object cannot be an array if not all keys are numeric
+    if False not in (key.isdigit() for key in constructed_data):
+        is_array = True
+        sorted_data_keys = sorted(int(key) for key in constructed_data)
 
-    # If all keys are digits and in order starting from 0, we convert the dictionary to an array
-    # with indices corresponding to the keys.
-    # We do not try to convert key-values at the root of the object to an array even if they meet this criterion.
-    for index, key in enumerate(sorted_data_keys):
-        if is_root or not (key.isdigit() and str(index) == key):
-            return {data_key: __try_convert_to_arrays(data_value, False)
-                    for data_key, data_value in constructed_data.items()}
+        # If all keys are digits and in order starting from 0, we convert the dictionary to an array
+        # with indices corresponding to the keys.
+        # We do not try to convert key-values at the root of the object to an array even if they meet this criterion.
+        for index, key in enumerate(sorted_data_keys):
+            if is_root or index != key:
+                is_array = False
+                break
 
-    return [__try_convert_to_arrays(constructed_data[data_key], False) for data_key in sorted_data_keys]
+        if is_array:
+            return [__try_convert_to_arrays(constructed_data[str(data_key)], False) for data_key in sorted_data_keys]
+
+    return {data_key: __try_convert_to_arrays(data_value, False) for data_key, data_value in constructed_data.items()}
 
 
 def __export_features(retrieved_features, naming_convention):
