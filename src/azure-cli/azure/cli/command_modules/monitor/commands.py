@@ -363,10 +363,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_data_exports')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
-        g.command('list', 'list')
-        g.command('enable', 'enable')
-        g.command('disable', 'disable')
+    # with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
+    #     g.command('list', 'list')
+    #     g.command('enable', 'enable')
+    #     g.command('disable', 'disable')
 
     with self.command_group('monitor log-analytics workspace saved-search', log_analytics_workspace_saved_search_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
