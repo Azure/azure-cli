@@ -1901,7 +1901,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             '--servers 10.0.0.4 10.0.0.5')
         self.cmd('network {res} create -g {rg} --gateway-name {appgw} '
                  '--name {appgw_routing_rule} --listener {appgw_listener1} --rule-type {appgw_rule_type} '
-                 '--address-pool {appgw_address_pool} --settings {appgw_settings}')
+                 '--address-pool {appgw_address_pool} --settings {appgw_settings} --priority 1002')
 
         self.cmd('network {res} show -g {rg} --gateway-name {appgw} -n {appgw_routing_rule}',
                  checks=(self.check('name', '{appgw_routing_rule}')))
