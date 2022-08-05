@@ -10,7 +10,6 @@ import json
 from difflib import Differ
 from itertools import filterfalse
 from json import JSONDecodeError
-from types import TracebackType
 from urllib.parse import urlparse
 
 import chardet
