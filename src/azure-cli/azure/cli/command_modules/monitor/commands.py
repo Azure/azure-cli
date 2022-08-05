@@ -340,13 +340,8 @@ def load_command_table(self, _):
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
 
     with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
-        g.command('list', 'list_by_workspace')
-        g.show_command('show', 'get')
         g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
-        g.command('migrate', 'migrate')
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
-        g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace table search-job', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
@@ -356,40 +351,18 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:
-        g.command('list', 'list_by_workspace')
-        g.show_command('show', 'get')
         g.custom_command('create', 'create_log_analytics_workspace_data_exports',
                          client_factory=cf_log_analytics_workspace_data_exports)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_data_exports')
-        g.command('delete', 'delete', confirmation=True)
-
-    # with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
-    #     g.command('list', 'list')
-    #     g.command('enable', 'enable')
-    #     g.command('disable', 'disable')
 
     with self.command_group('monitor log-analytics workspace saved-search', log_analytics_workspace_saved_search_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
-        g.command('delete', 'delete', confirmation=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_workspace')
-
-    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom) as g:
-        g.custom_command('create', 'create_log_analytics_workspace_linked_service', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_log_analytics_workspace_linked_service', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_workspace')
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
-        g.command('delete', 'delete', confirmation=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_workspace')
 
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom) as g:
         g.custom_command('clone', 'clone_existed_settings', is_preview=True)
