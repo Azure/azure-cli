@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor log-analytics workspace update",
 )
 class Update(AAZCommand):
-    """Create or update a workspace.
+    """Update a workspace instance.
 
     :example: Update a workspace instance.
         az monitor log-analytics workspace update --resource-group myresourcegroup --retention-time 30 --workspace-name myworkspace

@@ -338,10 +338,6 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
-        g.command('get-schema', 'get', command_type=log_analytics_workspace_schema_sdk)
-        g.command('list-usages', 'list', command_type=log_analytics_workspace_usage_sdk)
-        g.command('list-management-groups', 'list', command_type=log_analytics_workspace_management_groups_sdk)
-        g.command('get-shared-keys', 'get_shared_keys', command_type=log_analytics_workspace_shared_keys_sdk)
 
     with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
         g.command('list', 'list_by_workspace')
