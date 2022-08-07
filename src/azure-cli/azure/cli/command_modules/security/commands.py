@@ -503,7 +503,7 @@ def load_command_table(self, _):
                             client_factory=cf_security_automations) as g:
         g.custom_command('create', 'create_security_automation_action_workspace')
 
-    with self.command_group('security security_solutions',
+    with self.command_group('security security-solutions',
                             security_solutions_sdk,
                             client_factory=cf_security_security_solutions) as g:
         g.custom_command('list', 'list_security_security_solutions')

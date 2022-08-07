@@ -11,8 +11,8 @@ class SecuritySoluytionsTests(ScenarioTest):
 
     def test_security_security_solutions(self):
 
-        security_solutions = self.cmd('az security security_solutions list').get_output_in_json()
+        security_solutions = self.cmd('az security security-solutions list').get_output_in_json()
 
         assert len(security_solutions) >= 0
 
-        self.cmd('az security security_solutions list')
+        self.cmd('az security security-solutions list')
