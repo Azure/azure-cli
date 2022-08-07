@@ -388,7 +388,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
         g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
-        g.custom_command('detach', 'detach_data_disk')
+        g.custom_command('detach', 'detach_managed_data_disk')
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
@@ -430,7 +430,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_nics')
 
     with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
-        g.custom_command('invoke', 'vm_run_command_invoke')
+        g.custom_command('invoke', 'vm_run_command_invoke', supports_no_wait=True)
         g.custom_command('list', 'vm_run_command_list')
         g.custom_show_command('show', 'vm_run_command_show')
         g.custom_command('create', 'vm_run_command_create', supports_no_wait=True)
@@ -446,7 +446,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm unmanaged-disk', compute_vm_sdk) as g:
         g.custom_command('attach', 'attach_unmanaged_data_disk')
-        g.custom_command('detach', 'detach_data_disk')
+        g.custom_command('detach', 'detach_unmanaged_data_disk')
         g.custom_command('list', 'list_unmanaged_disks')
 
     with self.command_group('vm user', compute_vm_sdk, supports_no_wait=True) as g:

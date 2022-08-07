@@ -14,7 +14,7 @@ SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 def signalr_msi_assign(client, resource_group_name, signalr_name, identity):
     msiType, user_identity = _analyze_identity(identity)
 
-    identity = ManagedIdentity(type=msiType, userAssignedidentity={user_identity, None} if user_identity else None)
+    identity = ManagedIdentity(type=msiType, user_assigned_identities={user_identity: {}} if user_identity else None)
     parameter = SignalRResource(identity=identity)
     return client.begin_update(resource_group_name, signalr_name, parameter)
 

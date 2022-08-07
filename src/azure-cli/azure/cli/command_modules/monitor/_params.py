@@ -449,7 +449,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
-        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Schema description.')
 
@@ -466,7 +466,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
-        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Table description.')
     # endregion
