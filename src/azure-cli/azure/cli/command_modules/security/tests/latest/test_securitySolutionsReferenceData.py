@@ -11,8 +11,8 @@ class securitySolutionsReferenceDataTests(ScenarioTest):
 
     def test_security_securitySolutionsReferenceData(self):
 
-        SolutionsReferenceData = self.cmd('az security security_solutions_reference_data list').get_output_in_json()
+        SolutionsReferenceData = self.cmd('az security security-solutions-reference-data list').get_output_in_json()
 
         assert len(SolutionsReferenceData) >= 0
 
-        self.cmd('az security security_solutions_reference_data list')
+        self.cmd('az security security-solutions-reference-data list')

@@ -261,7 +261,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_regulatory_compliance_standards')
         g.custom_show_command('show', 'get_regulatory_compliance_standard')
 
-    with self.command_group('security security_solutions_reference_data',
+    with self.command_group('security security-solutions-reference-data',
                             security_security_solutions_reference_data_sdk,
                             client_factory=cf_security_security_solutions_reference_data) as g:
         g.custom_command('list', 'list_security_solutions_reference_data')
