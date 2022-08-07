@@ -1821,6 +1821,9 @@ examples:
   - name: Detach a data disk from a VM.
     text: >
         az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name
+  - name: Force detach a data disk from a VM.
+    text: >
+        az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name --force-detach
 """
 
 helps['vm encryption'] = """
