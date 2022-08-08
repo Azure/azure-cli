@@ -4836,6 +4836,11 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('timeoutInSeconds', 3600),
             self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
             ])
+
+        message = 'Please specify --location or specify --vm-name and --resource-group'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm run-command list')
+
         self.cmd('vm run-command list --vm-name {vm} -g {rg}', checks=[
             self.check('[0].resourceGroup', '{rg}'),
             self.check('[0].name', '{run_cmd}'),
@@ -4843,6 +4848,11 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('[0].asyncExecution', False),
             self.check('[0].timeoutInSeconds', 3600)
         ])
+
+        message = 'Please specify --location and --command-id or specify --vm-name, --resource-group and --run-command-name'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm run-command show --vm-name {vm} --name {run_cmd}')
+
         self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
