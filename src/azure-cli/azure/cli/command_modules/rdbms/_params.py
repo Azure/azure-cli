@@ -294,7 +294,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         version_arg_type = CLIArgumentType(
             options_list=['--version'],
-            help='Server major version.'
+            help='Server major version. https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions'
         )
 
         iops_arg_type = CLIArgumentType(
