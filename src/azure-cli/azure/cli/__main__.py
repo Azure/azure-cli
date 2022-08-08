@@ -118,8 +118,11 @@ finally:
         logger.warning("Auto upgrade failed. %s", str(ex))
         telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
 
-    from azure.cli.intercept_survey import prompt_survey_message
-    prompt_survey_message(az_cli)
+    try:
+        from azure.cli.intercept_survey import prompt_survey_message
+        prompt_survey_message(az_cli)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug("Intercept survey prompt failed. %s", str(ex))
 
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))

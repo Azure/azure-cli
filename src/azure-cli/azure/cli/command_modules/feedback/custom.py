@@ -597,11 +597,23 @@ def handle_feedback(cmd):
 
 
 def handle_survey(cmd):
+    import json
+    from datetime import datetime
     from azure.cli.core import __version__ as core_version
     from azure.cli.core._profile import Profile
+    from azure.cli.intercept_survey import GLOBAL_SURVEY_NOTE_PATH
+
+    use_duration = None
+    if os.path.isfile(GLOBAL_SURVEY_NOTE_PATH):
+        with open(GLOBAL_SURVEY_NOTE_PATH, 'r') as f:
+            survey_note = json.load(f)
+        if survey_note['last_prompt_time']:
+            last_prompt_time = datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S')
+            use_duration = datetime.utcnow() - last_prompt_time
+
     url = _CLI_SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
                                  version=core_version,
-                                 day=1)
+                                 day=use_duration.days if use_duration else -1)
     if can_launch_browser() and not in_cloud_console():
         open_page_in_browser(url)
         print("A new tab of {} has been launched in your browser, thanks for taking the survey!".format(url))
