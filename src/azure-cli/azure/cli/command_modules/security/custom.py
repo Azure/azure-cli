@@ -326,6 +326,15 @@ def get_security_discovered_security_solution(client, resource_name, resource_gr
 
 
 # --------------------------------------------------------------------------------------------
+# Security Solutions
+# --------------------------------------------------------------------------------------------
+
+def list_security_security_solutions(client):
+
+    return client.security_solutions.list()
+
+
+# --------------------------------------------------------------------------------------------
 # External Security Solutions
 # --------------------------------------------------------------------------------------------
 

@@ -156,3 +156,7 @@ def cf_security_security_solutions_reference_data(cli_ctx, _):
 
 def cf_security_automations(cli_ctx, _):
     return _cf_security(cli_ctx).automations
+
+
+def cf_security_security_solutions(cli_ctx, _):
+    return _cf_security(cli_ctx)
