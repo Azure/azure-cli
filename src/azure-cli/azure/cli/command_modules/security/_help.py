@@ -1225,6 +1225,20 @@ type: group
 short-summary: Creates security automation event hub action.
 """
 
+helps['security security-solutions'] = """
+type: group
+short-summary: Display all security solutions at the subscription level.
+"""
+
+helps['security security-solutions list'] = """
+type: command
+short-summary: Display all security solutions at the subscription level.
+examples:
+  - name: Display all security solutions.
+    text: >
+        az security security-solutions list
+"""
+
 helps['security automation-action-event-hub create'] = """
 type: command
 short-summary: Creates security automation event hub action.
