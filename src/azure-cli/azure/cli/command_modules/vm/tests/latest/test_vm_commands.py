@@ -1561,6 +1561,29 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l eastus --query "[?name==\'Standard_M64m\']"').get_output_in_json()
         self.assertTrue(result and result[0]["restrictions"] and result[0]["restrictions"][0]["reasonCode"] == 'NotAvailableForSubscription')
 
+    @AllowLargeResponse(size_kb=99999)
+    def test_list_compute_skus_partially_unavailable2(self):
+        results = self.cmd('vm list-skus').get_output_in_json()
+        for result in results:
+            if 'restrictions' not in result:
+                continue
+            is_available = True
+            is_restrict_zone = False
+            is_restrict_location = False
+            for restriction in result['restrictions']:
+                if restriction['reasonCode'] != 'NotAvailableForSubscription':
+                    break
+                if restriction['type'] == 'Zone' \
+                        and not (set(result['locationInfo'][0]['zones'] or []) -
+                                 set(restriction['restrictionInfo']['zones'] or [])):
+                    is_restrict_zone = True
+                if restriction['type'] == 'Location' and (
+                        result['locationInfo'][0]['location'] in (restriction['restrictionInfo']['locations'] or [])):
+                    is_restrict_location = True
+                if is_restrict_zone and is_restrict_location:
+                    is_available = False
+            self.assertTrue(is_available)
+
 
 class VMExtensionScenarioTest(ScenarioTest):
 
