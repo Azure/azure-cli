@@ -12,6 +12,7 @@
     <xsl:element name="ComponentGroup">
       <xsl:copy-of select="@*" />
       <!-- Use the Muenchian Method of grouping. -->
+      <!-- TODO: To increase likelihood we're generating consistent component IDs, we should really select the primary component for each directory using the algorithm for the `keyPath` variable below. -->
       <xsl:for-each select="wix:Component[generate-id() = generate-id(key('componentDirectory', @Directory)[1])]">
         <xsl:sort select="@Directory" />
         <xsl:sort select="wix:File/@Source" />
