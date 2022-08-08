@@ -175,9 +175,7 @@ class Show(AAZCommand):
             properties.data_export_id = AAZStrType(
                 serialized_name="dataExportId",
             )
-            properties.destination = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.destination = AAZObjectType()
             properties.enable = AAZBoolType()
             properties.last_modified_date = AAZStrType(
                 serialized_name="lastModifiedDate",

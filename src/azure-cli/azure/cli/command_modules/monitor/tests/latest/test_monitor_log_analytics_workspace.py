@@ -39,9 +39,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check("contains(keys(@), 'secondarySharedKey')", True)
         ])
 
-        self.cmd("monitor log-analytics workspace get-schema -g {rg} -n {name}", checks=[
-            self.check('__metadata.resultType', 'schema')
-        ])
+        self.cmd("monitor log-analytics workspace get-schema -g {rg} -n {name}")
 
         self.cmd("monitor log-analytics workspace pack enable -g {rg} --workspace-name {name} -n AzureSecurityOfThings")
         self.cmd("monitor log-analytics workspace pack list -g {rg} --workspace-name {name}", checks=[
@@ -279,42 +277,45 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 30)
         ])
 
-        # not supported in api_version = 2021-12-01-preview
-        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-        #     self.check('length(@)', 0)
-        # ])
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
-        # not supported in api_version = 2021-12-01-preview
-        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-        #     self.check('length(@)', 1)
-        # ])
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 1)
+        ])
 
-        # self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('retentionInDays', 30),
-        #     self.check('sku.name', 'capacityreservation'),
-        #     self.check('sku.capacityReservationLevel', 200),
-        #     self.check('workspaceCapping.dailyQuotaGb', 2.0)
-        # ])
+        self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
 
-        # self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('retentionInDays', 30),
-        #     self.check('sku.name', 'capacityreservation'),
-        #     self.check('sku.capacityReservationLevel', 200),
-        #     self.check('workspaceCapping.dailyQuotaGb', 2.0)
-        # ])
+        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
 
-        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-        #     self.check('length(@)', 0)
-        # ])
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} --force -y")
 
-        with self.assertRaisesRegex(SystemExit, '3'):
-            self.cmd('monitor log-analytics workspace show -g {rg} -n {name}')
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
+
+        self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_saved_search', location='eastus')
     def test_monitor_log_analytics_workspace_saved_search(self, resource_group):
@@ -378,8 +379,9 @@ class TestLogProfileScenarios(ScenarioTest):
             ])
 
         self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}')
+        self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
+            self.check('length(@)', 0)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
     @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
@@ -421,7 +423,7 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
@@ -431,7 +433,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError, 'Table ABC does not exist in the workspace'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
@@ -473,8 +475,9 @@ class TestLogProfileScenarios(ScenarioTest):
             ])
 
         self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
+        self.cmd('monitor log-analytics workspace data-export list -g {rg} --workspace-name {workspace_name}', checks=[
+            self.check('length(@)', 0)
+        ])
 
     @record_only()
     def test_monitor_log_analytics_workspace_data_collection_rules(self):

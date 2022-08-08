@@ -56,6 +56,7 @@ class TestClusterScenarios(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
+    # tofix
     @record_only()
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
