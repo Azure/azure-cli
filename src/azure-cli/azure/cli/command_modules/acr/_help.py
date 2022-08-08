@@ -93,7 +93,7 @@ examples:
         az acr config authentication-as-arm update -r MyRegistry --status Disabled
   - name: Enable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, it will allow both ACR and ARM audienced tokens to be used for authentication
     text: >
-        az acr config authentication-as-arm update -r MyRegistry --status Enable
+        az acr config authentication-as-arm update -r MyRegistry --status Enabled
 """
 
 helps['acr config content-trust show'] = """
