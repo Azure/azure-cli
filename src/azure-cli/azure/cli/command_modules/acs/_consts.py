@@ -73,6 +73,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
+CONST_NETWORK_PLUGIN_NONE = "none"
 
 # consts for addons
 # http application routing
@@ -112,6 +113,10 @@ CONST_OPEN_SERVICE_MESH_ADDON_NAME = "openServiceMesh"
 CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = "azureKeyvaultSecretsProvider"
 CONST_SECRET_ROTATION_ENABLED = "enableSecretRotation"
 CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
+
+# azure keyvault kms
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
 
 # all supported addons
 ADDONS = {

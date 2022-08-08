@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.38.0"
+VERSION = "2.39.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -122,7 +122,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.0.0',
     'azure-mgmt-servicefabric~=1.0.0',
-    'azure-mgmt-signalr==1.0.0b2',
+    'azure-mgmt-signalr==1.1.0',
     'azure-mgmt-sqlvirtualmachine==1.0.0b3',
     'azure-mgmt-sql==4.0.0b2',
     'azure-mgmt-storage~=20.0.0',
