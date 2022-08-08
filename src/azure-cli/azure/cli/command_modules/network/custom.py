@@ -8190,7 +8190,8 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None,
+                        no_wait=False):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -8214,9 +8215,10 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                    scale_units=scale_units,
                                    sku=sku,
                                    tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         bastion_host_name=bastion_host_name,
-                                         parameters=bastion_host)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                                resource_group_name=resource_group_name,
+                                bastion_host_name=bastion_host_name,
+                                parameters=bastion_host)
 
 
 def list_bastion_host(cmd, resource_group_name=None):
