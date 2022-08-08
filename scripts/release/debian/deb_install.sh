@@ -60,7 +60,7 @@ setup() {
         if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
             DIST=$(lsb_release -is)
             if [[ $DIST =~ "Ubuntu" ]]; then
-                CLI_REPO="focal"
+                CLI_REPO="jammy"
             elif [[ $DIST =~ "Debian" ]]; then
                 CLI_REPO="bullseye"
             elif [[ $DIST =~ "LinuxMint" ]]; then
