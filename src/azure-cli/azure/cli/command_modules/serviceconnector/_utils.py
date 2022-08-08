@@ -17,6 +17,7 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
+# pylint: disable=unused-argument, not-an-iterable, too-many-statements
 
 
 logger = get_logger(__name__)
@@ -322,8 +323,10 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         identity = None
         if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
             identity = get_springcloud_identity(source_id, source_type)
-        if source_type in {RESOURCE.WebApp}:
+        elif source_type in {RESOURCE.WebApp}:
             identity = get_webapp_identity(source_id)
+        elif source_type in {RESOURCE.ContainerApp}:
+            identity = get_containerapp_identity(source_id)
         object_id = identity.get('principalId')
         client_id = run_cli_cmd(
             'az ad sp show --id {0}'.format(object_id)).get('appId')
@@ -342,7 +345,8 @@ def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_typ
         # create an aad user in db
         aaduser = generate_random_string(
             prefix="aad_" + target_type.value + '_')
-        create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, client_id)
+        create_aad_user_in_pg_single(
+            cli_ctx, target_id, target_type, aaduser, client_id)
 
         return {
             'auth_type': 'secret',
@@ -359,7 +363,8 @@ def set_user_admin_if_not(target_id, account_user, user_object_id):
     rg = target_segments.get('resource_group')
     server = target_segments.get('name')
     # pylint: disable=not-an-iterable
-    admins = run_cli_cmd('az postgres server ad-admin list --ids {}'.format(target_id))
+    admins = run_cli_cmd(
+        'az postgres server ad-admin list --ids {}'.format(target_id))
     is_admin = any(ad.get('sid') == user_object_id for ad in admins)
     if not is_admin:
         logger.warning('Setting current user as database server AAD admin:'
@@ -367,7 +372,7 @@ def set_user_admin_if_not(target_id, account_user, user_object_id):
         run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
                     ' --subscription {}'.format(rg, server, account_user, user_object_id, sub)).get('objectId')
 
-# pylint: disable=unused-argument, not-an-iterable, too-many-statements
+
 def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_public_access=False):
     if target_type == RESOURCE.Postgres:
         target_segments = parse_resource_id(target_id)
@@ -397,7 +402,8 @@ def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_publi
 def create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, client_id):
     import pkg_resources
     installed_packages = pkg_resources.working_set
-    psyinstalled = any(('psycopg2') in d.key.lower() for d in installed_packages)
+    psyinstalled = any(('psycopg2') in d.key.lower()
+                       for d in installed_packages)
     if not psyinstalled:
         _install_deps_for_psycopg2()
         import pip
@@ -509,6 +515,24 @@ def get_webapp_identity(source_id):
         cnt = 0
         while (identity is None and cnt < 5):
             identity = run_cli_cmd('az webapp identity show --ids {}'.format(source_id)).get('identity')
+            time.sleep(3)
+            cnt += 1
+    return identity
+
+
+def get_containerapp_identity(source_id):
+    logger.warning('Checking if Container App enables System Identity...')
+    identity = run_cli_cmd(
+        'az containerapp show --ids {}'.format(source_id)).get('identity')
+    if (identity is None or "SystemAssigned" not in identity.get('type')):
+        # assign system identity for spring-cloud
+        logger.warning('Enabling Container App System Identity...')
+        run_cli_cmd(
+            'az containerapp identity assign --ids {} --system-assigned'.format(source_id))
+        cnt = 0
+        while (identity is None and cnt < 5):
+            identity = run_cli_cmd(
+                'az containerapp identity show --ids {}'.format(source_id)).get('identity')
             time.sleep(3)
             cnt += 1
     return identity
