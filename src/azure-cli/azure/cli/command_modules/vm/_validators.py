@@ -1320,7 +1320,7 @@ def _validate_trusted_launch(namespace):
                        ' the full suite of security features that comes with Trusted Launch. Please note that the'
                        ' "--enable-secure-boot" will be enabled by default in Microsoft Ignite Event (around November)')
 
-    if not namespace.enable_vtpm:
+    if namespace.enable_vtpm is None:
         namespace.enable_vtpm = True
 
 
