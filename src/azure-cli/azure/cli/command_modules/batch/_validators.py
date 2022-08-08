@@ -305,7 +305,7 @@ def validate_client_parameters(cmd, namespace):
 
     # Simple validation for account_endpoint
     if namespace.account_endpoint and not (namespace.account_endpoint.startswith('https://') or
-                                                                     namespace.account_endpoint.startswith('http://')):
+           namespace.account_endpoint.startswith('http://')):
         namespace.account_endpoint = 'https://' + namespace.account_endpoint
         namespace.account_endpoint = namespace.account_endpoint.rstrip('/')
     # if account name is specified but no key, attempt to query if we use shared key auth
