@@ -17,11 +17,7 @@ https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequen
 For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """
 
-import os
 import sys
-import msvcrt
-import ctypes
-from ctypes import wintypes
 from enum import Enum
 
 from knack.log import get_logger
@@ -35,9 +31,13 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
 
 
 def set_conout_mode(new_mode, mask=0xffffffff):
+    import os
+    import msvcrt
+    import ctypes
+    from ctypes import wintypes
     kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
 
-    def _check_bool(result, func, args):
+    def _check_bool(result, func, args):  # pylint: disable=unused-argument
         if not result:
             raise ctypes.WinError(ctypes.get_last_error())
         return args
@@ -64,6 +64,8 @@ def set_conout_mode(new_mode, mask=0xffffffff):
 
 # Ref: https://github.com/python/cpython/issues/74261#issuecomment-1093745755
 def windows_enable_vt_mode():
+    if sys.platform != 'win32':
+        return
     mode = mask = ENABLE_VIRTUAL_TERMINAL_PROCESSING
     try:
         return set_conout_mode(mode, mask)

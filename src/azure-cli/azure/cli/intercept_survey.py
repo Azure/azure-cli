@@ -20,7 +20,6 @@ EXPERIENCE_PERIOD_IN_DAYS = 1
 PROMPT_INTERVAL_IN_DAYS = 180
 
 SURVEY_STYLE = '\x1b[0;38;2;255;255;255;48;2;0;120;212m'  # Default & Foreground #FFFFFF & Background #0078D4
-SURVEY_BOLD_STYLE = '\x1b[1;38;2;255;255;255;48;2;0;120;212m'  # Underline & Foreground #FFFFFF & Background #0078D4
 NEW_LINE = '\x1b[1L'
 ERASE_IN_LINE = '\x1b[0K'
 
@@ -90,7 +89,7 @@ def prompt_survey_message(cli):
 
     # If CLI enables colorama, which means it's running in windows with legacy terminal
     # we should enable VT mode first to print styled text using ANSI Escape Sequences
-    if cli._should_init_colorama:
+    if cli._should_init_colorama:  # pylint: disable=protected-access
         try:
             windows_enable_vt_mode()
         except Exception as ex:  # pylint: disable=broad-except

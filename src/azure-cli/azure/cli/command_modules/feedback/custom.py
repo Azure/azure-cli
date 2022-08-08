@@ -598,7 +598,6 @@ def handle_feedback(cmd):
 
 def handle_survey(cmd):
     import json
-    from datetime import datetime
     from azure.cli.core import __version__ as core_version
     from azure.cli.core._profile import Profile
     from azure.cli.intercept_survey import GLOBAL_SURVEY_NOTE_PATH
@@ -608,8 +607,8 @@ def handle_survey(cmd):
         with open(GLOBAL_SURVEY_NOTE_PATH, 'r') as f:
             survey_note = json.load(f)
         if survey_note['last_prompt_time']:
-            last_prompt_time = datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S')
-            use_duration = datetime.utcnow() - last_prompt_time
+            last_prompt_time = datetime.datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S')
+            use_duration = datetime.datetime.utcnow() - last_prompt_time
 
     url = _CLI_SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
                                  version=core_version,

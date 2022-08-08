@@ -683,7 +683,7 @@ class Profile:
                     import json
                     content = json.load(f)
                     installation_id = content[_INSTALLATION_ID]
-            except Exception as ex:
+            except Exception as ex:  # pylint: disable=broad-except
                 logger.debug('Failed to load installationId from AzureRmSurvey.json. %s', str(ex))
                 import uuid
                 installation_id = str(uuid.uuid1())

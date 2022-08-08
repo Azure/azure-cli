@@ -13,6 +13,7 @@ import uuid
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
+from azure.cli.intercept_survey import prompt_survey_message
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
@@ -119,7 +120,6 @@ finally:
         telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
 
     try:
-        from azure.cli.intercept_survey import prompt_survey_message
         prompt_survey_message(az_cli)
     except Exception as ex:  # pylint: disable=broad-except
         logger.debug("Intercept survey prompt failed. %s", str(ex))
