@@ -530,10 +530,14 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
+    logger.handle()
     from azure.core.exceptions import ResourceNotFoundError as Error404
     from time import sleep
+    from azure.mgmt.web.models import DeploymentBuildStatus as StatusEnum
+
 
     start_time = datetime.datetime.utcnow()
+    timeout = timeout or (4 * 60 * 60)
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
@@ -562,79 +566,70 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
-    # TODO handle 409s
+    if res.status_code == 202:
+        deployment_status_id = res.headers.get("SCM-DEPLOYMENT-ID")
+        client = web_client_factory(cmd.cli_ctx)
 
-    deployment_status_id = res.headers.get("SCM-DEPLOYMENT-ID")
-    client = web_client_factory(cmd.cli_ctx)
+        status = None
+        while status is None and ((datetime.datetime.utcnow() - start_time).seconds < timeout):  # TODO timeout?
+            try:
+                poller = client.web_apps.begin_get_production_site_deployment_status(resource_group_name=resource_group_name,
+                                                                            name=name, deployment_status_id=deployment_status_id)
+                status = poller.result()
+            except Error404:
+                sleep(1)
 
-    status = None
-    while status is None:  # TODO timeout?
-        try:
+        # TODO may be misleading to start with the status "build request recieved" when it hasn't necessarily
+        states = [StatusEnum.BUILD_REQUEST_RECEIVED, StatusEnum.BUILD_PENDING, StatusEnum.BUILD_IN_PROGRESS]
+        states_sequence = [StatusEnum.BUILD_ABORTED,
+                        StatusEnum.BUILD_REQUEST_RECEIVED,
+                        StatusEnum.BUILD_PENDING,
+                        StatusEnum.BUILD_IN_PROGRESS,
+                        StatusEnum.BUILD_FAILED,
+                        StatusEnum.BUILD_SUCCESSFUL,
+                        StatusEnum.POST_BUILD_RESTART_REQUIRED,
+                        StatusEnum.RUNTIME_STARTING,
+                        StatusEnum.RUNTIME_FAILED,
+                        StatusEnum.RUNTIME_SUCCESSFUL]
+        failure_states = {StatusEnum.BUILD_ABORTED, StatusEnum.BUILD_FAILED, StatusEnum.RUNTIME_FAILED}
+        state = 0
+        # TODO use logging statements if possible
+        print(f"{states[state]}...{(30 - (len(states[state]) + 3))*' '}", end="")
+        while (datetime.datetime.utcnow() - start_time).seconds < timeout:
             poller = client.web_apps.begin_get_production_site_deployment_status(resource_group_name=resource_group_name,
-                                                                        name=name, deployment_status_id=deployment_status_id)
+                                                                            name=name, deployment_status_id=deployment_status_id)
             status = poller.result()
-        except Error404:
+            if states_sequence.index(status.status) > state and state < len(states) - 1:
+                print("Success! ")
+                state += 1
+                print(f"{states[state]}...{(30 - (len(states[state]) + 3))*' '}", end="")
+            else:
+                if status.status in failure_states:
+                    print("\n")
+                    raise UnclassifiedUserFault(f"Build failed with status {status.status}") # TODO fill with human-friendly message
+                print("Success!\n")
+                print(f"Build completed with status {status.status}")  # TODO fill with human-friendly message
+                return status
             sleep(1)
 
-    # non_terminal_statuses = ["BuildRequestReceived", "BuildPending", "BuildInProgress", "BuildSuccessful", ]
+        # TODO include final status
+        raise UnclassifiedUserFault("Timeout reached by the command, however, the deployment operation is still "
+                                    "on-going. Navigate to your scm site to check the deployment status")
 
+    # check if there's an ongoing process
+    if res.status_code == 409:
+        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
+                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+                                    "to delete them.".format(scm_url + '/api/deployments/latest'))
 
-    # return status
-    # TODO make constants / enums / classes
-    # TODO pull enum values from SDK if possible s
-    # TODO may be misleading to start with the status "build request recieved" when
-    states = ["BuildRequestReceived", "BuildPending", "BuildInProgress"]
-    states_sequence = ["BuildAborted", #
-                       "BuildRequestReceived",
-                       "BuildPending",
-                       "BuildInProgress",
-                       "BuildFailed",
-                       "BuildSuccessful",
-                       "PostBuildRestartRequired",
-                       "RuntimeStarting",
-                       "RuntimeFailed",
-                       "RuntimeSuccessful"]
-    failure_states = {"BuildAborted", "BuildFailed", "RuntimeFailed"}
-    # terminal_states = {"PostBuildRestartRequired", "RuntimeSuccessful"}
-    state = 0
-    print(f"{states[state]}... ", end="")
-    while True:
-        poller = client.web_apps.begin_get_production_site_deployment_status(resource_group_name=resource_group_name,
-                                                                        name=name, deployment_status_id=deployment_status_id)
-        status = poller.result()
-        if states_sequence.index(status.status) > state and state < len(states) - 1:
-            print("Success! ")
-            state += 1
-            print(f"{states[state]}...{(len('BuildRequestReceived... ') - (len(states[state]) + 3))*' '}", end="")
-        else:
-            if status.status in failure_states:
-                print("\n")
-                raise UnclassifiedUserFault(f"Build failed with status {status.status}") # TODO fill with human-friendly message
-            print("Success!\n")
-            print(f"Build completed with status {status.status}")  # TODO fill with human-friendly message
-            return
-        sleep(1)
-
-    # check the status of async deployment
-    # if res.status_code == 202:
-    #     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-    #                                             authorization, timeout)
-    #     return response
-
-    # # check if there's an ongoing process
-    # if res.status_code == 409:
-    #     raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
-    #                                 "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
-    #                                 "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
-    #                                 "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
-    #                                 "MySubscription' to list app settings and 'az webapp config appsettings delete "
-    #                                 "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
-    #                                 "to delete them.".format(deployment_status_url))
-
-    # # check if an error occured during deployment
-    # if res.status_code:
-    #     raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
-    #                              .format(res.status_code, res.text))
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
