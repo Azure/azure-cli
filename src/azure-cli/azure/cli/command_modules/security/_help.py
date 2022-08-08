@@ -1094,7 +1094,7 @@ short-summary: Display all security solutions reference data at the subscription
 examples:
   - name: Display all security solutions reference data.
     text: >
-        az security security_solutions_reference_data list
+        az security security-solutions-reference-data list
 """
 
 helps['security automation'] = """
