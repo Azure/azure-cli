@@ -675,8 +675,18 @@ class Profile:
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
         if not installation_id:
-            import uuid
-            installation_id = str(uuid.uuid1())
+            try:
+                # We share the same installationId with Azure Powershell. So try to load installationId from PSH file
+                # Contact: DEV@Nanxiang Liu, PM@Damien Caro
+                shared_installation_id_file = os.path.join(self.cli_ctx.config.config_dir, 'AzureRmSurvey.json')
+                with open(shared_installation_id_file, 'r', encoding='utf-8-sig') as f:
+                    import json
+                    content = json.load(f)
+                    installation_id = content[_INSTALLATION_ID]
+            except Exception as ex:
+                logger.debug('Failed to load installationId from AzureRmSurvey.json. %s', str(ex))
+                import uuid
+                installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 

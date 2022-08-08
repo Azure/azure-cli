@@ -51,7 +51,7 @@ def should_prompt(cli):
             json.dump(survey_note, f)
         return False
 
-    with open(GLOBAL_SURVEY_NOTE_PATH, 'r') as f:
+    with open(GLOBAL_SURVEY_NOTE_PATH, 'r', encoding='utf-8-sig') as f:
         survey_note = json.load(f)
         next_prompt_time = datetime.strptime(survey_note['next_prompt_time'], '%Y-%m-%dT%H:%M:%S')
         if datetime.utcnow() < next_prompt_time:
