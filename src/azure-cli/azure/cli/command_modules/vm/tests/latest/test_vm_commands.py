@@ -1591,13 +1591,18 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         restrictions = [restriction_zone]
         np.restrictions = restrictions
         is_available = is_sku_available(cmd, np)
+        self.assertFalse(is_available)
+
+        # not all zones are restricted
+        restriction_info_zone.zones = [1, 2]
+        is_available = is_sku_available(cmd, np)
         self.assertTrue(is_available)
 
         # regional restriction but not zonal restriction
         restrictions = [restriction_location]
         np.restrictions = restrictions
         is_available = is_sku_available(cmd, np)
-        self.assertTrue(is_available)
+        self.assertFalse(is_available)
 
         # regional restriction and zonal restriction
         restrictions = [restriction_location, restriction_zone]
