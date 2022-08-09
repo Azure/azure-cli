@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
 from dateutil import parser
+from azure.cli.testsdk.checkers import JMESPathCheckExists
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
@@ -113,6 +114,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_georestore_mgmt(self, resource_group):
         self._test_flexible_server_georestore_mgmt('mysql', resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westus')
+    def test_mysql_flexible_server_byok_mgmt(self, resource_group):
+        self._test_flexible_server_byok_mgmt('mysql', resource_group)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -506,6 +512,247 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
+
+    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group):
+        vault_name = self.create_random_name('rdbmsvault', 24)
+        key_name = self.create_random_name('rdbmskey', 32)
+        identity_name = self.create_random_name('identity', 32)
+        backup_vault_name = self.create_random_name('rdbmsvault', 24)
+        backup_key_name = self.create_random_name('rdbmskey', 32)
+        backup_identity_name = self.create_random_name('identity', 32)
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        replica_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        tier = 'GeneralPurpose'
+        sku_name = 'Standard_D2ds_v4'
+        location = 'northeurope'
+        backup_location = 'westeurope'
+
+        self.cmd(
+            'keyvault create -g {} -n {} --location {} --enable-soft-delete true --enable-purge-protection true'
+            .format(resource_group, vault_name, location))
+
+        self.cmd(
+            'keyvault create -g {} -n {} --location {} --enable-soft-delete true --enable-purge-protection true'
+            .format(resource_group, backup_vault_name, backup_location))
+
+        key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
+
+        backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(backup_key_name, backup_vault_name)).get_output_in_json()
+
+        identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+
+        backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, identity['principalId']))
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, backup_vault_name, backup_identity['principalId']))
+
+        def invalid_input():
+            # key or identity only
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {}'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                key['key']['kid']
+            ), expect_failure=True)
+
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --identity {}'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                identity['id'],
+            ), expect_failure=True)
+
+            # backup key or backup identity only
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-key {} --geo-redundant-backup Enabled'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                key['key']['kid'],
+                identity['id'],
+                backup_key['key']['kid']
+            ), expect_failure=True)
+
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-identity {} --geo-redundant-backup Enabled'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                key['key']['kid'],
+                identity['id'],
+                backup_identity['id'],
+            ), expect_failure=True)
+
+            # backup key without principal key
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --backup-key {} --backup-identity {}'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                backup_key['key']['kid'],
+                backup_identity['id']
+            ), expect_failure=True)
+
+            # geo-redundant server without backup-key
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                key['key']['kid'],
+                identity['id'],
+            ), expect_failure=True)
+
+            # data encryption with geo-redundant-backup not supported
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-key {} --backup-identity {} --geo-redundant-backup Enabled'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                tier,
+                sku_name,
+                key['key']['kid'],
+                identity['id'],
+                backup_key['key']['kid'],
+                backup_identity['id']
+            ), expect_failure=True)
+
+        def no_geo_redundant_backup():
+            # create primary flexible server with data encryption
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --location {}'.format(
+                        database_engine,
+                        resource_group,
+                        server_name,
+                        tier,
+                        sku_name,
+                        key['key']['kid'],
+                        identity['id'],
+                        location
+                    ))
+
+            result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                    checks=[
+                        JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                        JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                        JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
+                    ]).get_output_in_json()
+
+            # should fail because disable-data-encryption and key for data encryption are provided at the same time
+            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} --disable-data-encryption'.format(
+                database_engine,
+                resource_group,
+                server_name,
+                key['key']['kid'],
+                identity['id']
+            ), expect_failure=True)
+
+            # disable data encryption in primary server
+            self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('dataEncryption', None)])
+
+            # create replica 1, it shouldn't have data encryption
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
+                        database_engine,
+                        resource_group,
+                        replica_1_name,
+                        server_name
+            ), checks=[
+                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('dataEncryption', None),
+                JMESPathCheck('replicationRole', 'Replica')
+            ])
+
+            # enable data encryption again in primary server
+            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {}'.format(
+                        database_engine,
+                        resource_group,
+                        server_name,
+                        key['key']['kid'],
+                        identity['id']
+            ), checks=[
+                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
+            ])
+
+            # replica 1 now should have data encryption as well
+            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
+                checks=[
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                    JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                    JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
+                ])
+
+            # create replica 2
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
+                        database_engine,
+                        resource_group,
+                        replica_2_name,
+                        server_name
+            ), checks=[
+                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id']),
+                JMESPathCheck('replicationRole', 'Replica')
+            ])
+
+            # should fail because modifying data encryption on replica server is not allowed
+            self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'
+                     .format(database_engine, resource_group, replica_2_name),
+                expect_failure=True)
+
+            # restore backup
+            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+            earliest_restore_time = result['backup']['earliestRestoreDate']
+            date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
+
+            if current_time < earliest_restore_time:
+                sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time, date_format)).total_seconds())
+
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'.format(
+                     database_engine,
+                     resource_group,
+                     backup_name,
+                     server_name
+            ), checks=[
+                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
+            ])
+
+            # disable data encryption in primary server
+            self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('dataEncryption', None)])
+
+            # none of the replica servers should have data encryption now
+            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
+                checks=[JMESPathCheck('dataEncryption', None)])
+
+            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_2_name),
+                checks=[JMESPathCheck('dataEncryption', None)])
+
+            # delete all the servers
+            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_1_name))
+            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_2_name))
+            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, backup_name))
+            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+        invalid_input()
+        no_geo_redundant_backup()
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

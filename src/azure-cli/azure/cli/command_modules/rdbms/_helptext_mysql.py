@@ -93,6 +93,82 @@ examples:
          --name testserver --location testLocation \\
         --subnet /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/virtualNetworks/tesetVnet/subnets/testSubnet \\
         --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.mysql.database.azure.com
+  - name: >
+      Create a MySQL flexible server with data encryption.
+    text: >
+      # create keyvault
+
+      az keyvault create -g testGroup -n testVault --location testLocation --enable-soft-delete true --enable-purge-protection true
+
+
+      # create key in keyvault
+
+      az keyvault key create --name testKey -p software --vault-name testVault
+
+
+      # create identity
+
+      az identity create -g testGroup --name testIdentity --location testLocation
+
+
+      # add testIdentity as an access policy with key permissions 'Get' and 'List' inside testVault
+
+      az keyvault set-policy -g testGroup -n testVault --object-id '<principalID of testIdentity>' --key-permissions wrapKey unwrapKey get list
+
+
+      # create flexible server with data encryption enabled
+
+      az mysql flexible-server create -g testGroup -n testServer --location testLocation \\
+        --key '<key identifier of testKey>' --identity testIdentity
+  - name: >
+      Create a MySQL flexible server with geo redundant backup and data encryption.
+    text: >
+      # create keyvault
+
+      az keyvault create -g testGroup -n testVault --location testLocation --enable-soft-delete true --enable-purge-protection true
+
+
+      # create key in keyvault
+
+      az keyvault key create --name testKey -p software --vault-name testVault
+
+
+      # create identity
+
+      az identity create -g testGroup --name testIdentity --location testLocation
+
+
+      # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
+
+      az keyvault set-policy -g testGroup -n testVault --object-id '<principalID of testIdentity>' --key-permissions wrapKey unwrapKey get list
+
+
+      # create backup keyvault
+
+      az keyvault create -g testGroup -n testBackupVault --location testBackupLocation --enable-soft-delete true --enable-purge-protection true
+
+
+      # create backup key in backup keyvault
+
+      az keyvault key create --name testBackupKey -p software --vault-name testBackupVault
+
+
+      # create backup identity
+
+      az identity create -g testGroup --name testBackupIdentity --location testBackupLocation
+
+
+      # add testBackupIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testBackupVault
+
+      az keyvault set-policy -g testGroup -n testBackupVault --object-id '<principalID of testBackupIdentity>' --key-permissions wrapKey unwrapKey get list
+
+
+      # create flexible server with geo redundant backup and data encryption enabled
+
+      az mysql flexible-server create -g testGroup -n testServer --location testLocation \\
+        --geo-redundant-backup Enabled \\
+        --key '<key identifier of testKey>' --identity testIdentity \\
+        --backup-key '<key identifier of testBackupKey>' --backup-identity testBackupIdentity
 """
 
 helps['mysql flexible-server show'] = """
@@ -125,6 +201,17 @@ examples:
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
     crafted: true
+  - name: Set or change key and identity for data encryption.
+    text: >
+      az mysql flexible-server update --resource-group testGroup --name testserver \\
+        --key '<key identifier of newKey>' --identity newIdentity
+  - name: Set or change key, identity, backup key and backup identity for data encryption with geo redundant backup.
+    text: >
+      az mysql flexible-server update --resource-group testGroup --name testserver \\
+        --key '<key identifier of newKey>' --identity newIdentity \\
+        --backup-key '<key identifier of newBackupKey>' --backup-identity newBackupIdentity
+  - name: Disable data encryption for flexible server.
+    text: az mysql flexible-server update --resource-group testGroup --name testserver --disable-data-encryption
 """
 
 helps['mysql flexible-server delete'] = """

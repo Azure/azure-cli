@@ -274,7 +274,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         sku_name_arg_type = CLIArgumentType(
             options_list=['--sku-name'],
-            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3'
+            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms'
         )
 
         storage_gb_arg_type = CLIArgumentType(
@@ -408,6 +408,32 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Whether or not geo redundant backup is enabled.'
         )
 
+        identity_arg_type = CLIArgumentType(
+            options_list=['--identity'],
+            help='The resource ID of the user assigned identity for data encryption.'
+        )
+
+        backup_identity_arg_type = CLIArgumentType(
+            options_list=['--backup-identity'],
+            help='The resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.'
+        )
+
+        key_arg_type = CLIArgumentType(
+            options_list=['--key'],
+            help='The resource ID of the primary keyvault key for data encryption.'
+        )
+
+        backup_key_arg_type = CLIArgumentType(
+            options_list=['--backup-key'],
+            help='The resource ID of the geo backup keyvault key for data encryption. The key needs to be in the same region as the backup region.'
+        )
+
+        disable_data_encryption_arg_type = CLIArgumentType(
+            options_list=['--disable-data-encryption'],
+            arg_type=get_three_state_flag(),
+            help='Disable data encryption by removing key(s).'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -429,6 +455,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
                 c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -493,6 +523,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The replication role of the server.')
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+                c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
 
