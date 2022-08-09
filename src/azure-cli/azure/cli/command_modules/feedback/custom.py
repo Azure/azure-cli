@@ -600,7 +600,7 @@ def handle_survey(cmd):
     import json
     from azure.cli.core import __version__ as core_version
     from azure.cli.core._profile import Profile
-    from azure.cli.intercept_survey import GLOBAL_SURVEY_NOTE_PATH
+    from azure.cli.core.intercept_survey import GLOBAL_SURVEY_NOTE_PATH
 
     use_duration = None
     if os.path.isfile(GLOBAL_SURVEY_NOTE_PATH):
