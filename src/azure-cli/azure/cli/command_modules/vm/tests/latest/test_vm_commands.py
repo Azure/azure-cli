@@ -1556,33 +1556,54 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus --resource-type disks').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['resourceType'] == 'disks']))
 
-    @AllowLargeResponse(size_kb=99999)
-    def test_list_compute_skus_partially_unavailable(self):
-        result = self.cmd('vm list-skus -l eastus --query "[?name==\'Standard_M64m\']"').get_output_in_json()
-        self.assertTrue(result and result[0]["restrictions"] and result[0]["restrictions"][0]["reasonCode"] == 'NotAvailableForSubscription')
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_list_compute_skus_partially_unavailable(self, client_factory_mock):
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.command_modules.vm._vm_utils import is_sku_available
+        compute_client = mock.MagicMock()
 
-    @AllowLargeResponse(size_kb=99999)
-    def test_list_compute_skus_partially_unavailable2(self):
-        results = self.cmd('vm list-skus').get_output_in_json()
-        for result in results:
-            if 'restrictions' not in result:
-                continue
-            is_available = True
-            is_restrict_zone = False
-            is_restrict_location = False
-            for restriction in result['restrictions']:
-                if restriction['reasonCode'] != 'NotAvailableForSubscription':
-                    break
-                if restriction['type'] == 'Zone' \
-                        and not (set(result['locationInfo'][0]['zones'] or []) -
-                                 set(restriction['restrictionInfo']['zones'] or [])):
-                    is_restrict_zone = True
-                if restriction['type'] == 'Location' and (
-                        result['locationInfo'][0]['location'] in (restriction['restrictionInfo']['locations'] or [])):
-                    is_restrict_location = True
-                if is_restrict_zone and is_restrict_location:
-                    is_available = False
-            self.assertTrue(is_available)
+        cmd = mock.Mock()
+        cmd.supported_api_version = mock.Mock(return_value=False)
+        cmd.cli_ctx = DummyCli()
+
+        client_factory_mock.return_value = compute_client
+
+        np = mock.MagicMock()
+        location_info0 = mock.MagicMock()
+        location_info0.zones = [1, 2, 3]
+        location_info0.location = 'location'
+        location_info = [location_info0]
+        np.location_info = location_info
+        restriction_info_zone = mock.MagicMock()
+        restriction_info_zone.zones = [1, 2, 3]
+        restriction_zone = mock.MagicMock()
+        restriction_zone.reason_code = 'NotAvailableForSubscription'
+        restriction_zone.type = 'Zone'
+        restriction_zone.restriction_info = restriction_info_zone
+        restriction_info_location = mock.MagicMock()
+        restriction_info_location.locations = ['location']
+        restriction_location = mock.MagicMock()
+        restriction_location.reason_code = 'NotAvailableForSubscription'
+        restriction_location.type = 'Location'
+        restriction_location.restriction_info = restriction_info_location
+
+        # zonal restriction but not regional restriction
+        restrictions = [restriction_zone]
+        np.restrictions = restrictions
+        is_available = is_sku_available(cmd, np)
+        self.assertTrue(is_available)
+
+        # regional restriction but not zonal restriction
+        restrictions = [restriction_location]
+        np.restrictions = restrictions
+        is_available = is_sku_available(cmd, np)
+        self.assertTrue(is_available)
+
+        # regional restriction and zonal restriction
+        restrictions = [restriction_location, restriction_zone]
+        np.restrictions = restrictions
+        is_available = is_sku_available(cmd, np)
+        self.assertFalse(is_available)
 
 
 class VMExtensionScenarioTest(ScenarioTest):
