@@ -18,7 +18,7 @@ jobs:
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
     - bash: |
@@ -38,7 +38,7 @@ jobs:
   condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
     - bash: |
@@ -48,7 +48,6 @@ jobs:
 - job: CredScan
   displayName: "Credential Scan"
   pool:
-    name: 'azure-cli-pool-windows-2019'
     vmImage: 'windows-2019'
   steps:
     - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
@@ -72,7 +71,7 @@ jobs:
 
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
@@ -92,7 +91,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
 
   steps:
@@ -123,7 +122,6 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-windows-2019'
     vmImage: 'windows-2019'
 
   steps:
@@ -142,7 +140,7 @@ jobs:
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
@@ -163,7 +161,6 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-windows-2019'
     vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -197,7 +194,6 @@ jobs:
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-windows-2019'
     vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -263,7 +259,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
@@ -290,7 +286,7 @@ jobs:
   dependsOn: BuildDockerImage
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -326,7 +322,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
@@ -361,7 +357,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -415,7 +411,7 @@ jobs:
   displayName: Unit Test for Core
   timeoutInMinutes: 10
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -435,7 +431,7 @@ jobs:
   displayName: Unit Test for Telemetry
   timeoutInMinutes: 10
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -458,7 +454,7 @@ jobs:
   timeoutInMinutes: 20
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -482,7 +478,7 @@ jobs:
   displayName: Automation Test (Profile Latest)
   timeoutInMinutes: 120
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -502,7 +498,7 @@ jobs:
   displayName: Automation Test (Profile 2020-09-01)
   timeoutInMinutes: 120
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -522,7 +518,7 @@ jobs:
   displayName: Automation Test (Profile 2019-03-01)
   timeoutInMinutes: 120
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -542,7 +538,7 @@ jobs:
   displayName: Automation Test (Profile 2018-03-01)
   timeoutInMinutes: 120
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -564,7 +560,7 @@ jobs:
   timeoutInMinutes: 40
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -586,7 +582,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -707,7 +703,7 @@ jobs:
   displayName: Build Rpm Package Mariner
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -744,7 +740,7 @@ jobs:
   # Uncomment this line to disable this job on Pull Requests
   # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
@@ -773,7 +769,7 @@ jobs:
   # Do not run this job for Pull Requests due to the slowness
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
@@ -800,7 +796,7 @@ jobs:
   dependsOn: BuildRpmPackageCentOS7
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -836,7 +832,7 @@ jobs:
   displayName: Build Deb Packages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
@@ -908,7 +904,7 @@ jobs:
         deb_system: debian
         distro: bullseye
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
@@ -941,7 +937,7 @@ jobs:
   displayName: "Check CLI Style"
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
@@ -958,7 +954,7 @@ jobs:
   displayName: "Check License, History, and DocMap"
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
@@ -984,7 +980,7 @@ jobs:
       Python310:
         python.version: '3.10'
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
@@ -1008,7 +1004,7 @@ jobs:
   displayName: "Check CLI Linter"
 
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
@@ -1031,7 +1027,7 @@ jobs:
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
   pool:
-    name: 'azure-cli-pool-ubuntu-2004'
+    name: 'test-pool-200'
     vmImage: 'ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
