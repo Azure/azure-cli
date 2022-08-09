@@ -599,6 +599,32 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr create --name {registry_2_name} --resource-group {rg} --sku premium --public-network-enabled false --allow-trusted-services false',
                  checks=[self.check('publicNetworkAccess', 'Disabled'),
                          self.check('networkRuleBypassOptions', 'None')])
+        
+        
+    @ResourceGroupPreparer()
+    def test_acr_with_public_network_access_disabled(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+        })
+
+        # test defaults
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium',
+                 checks=[self.check('publicNetworkAccess', 'Enabled'),
+                         self.check('networkRuleBypassOptions', 'AzureServices'),
+                         self.check('networkRuleSet.defaultAction', 'Allow')])
+
+        # public network access disabled
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false',
+                 checks=[self.check('publicNetworkAccess', 'Disabled'),
+                         self.check('networkRuleBypassOptions', 'AzureServices'),
+                         self.check('networkRuleSet.defaultAction', 'Deny')])
+
+        # public network access enabled
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled true',
+                 checks=[self.check('publicNetworkAccess', 'Enabled'),
+                         self.check('networkRuleBypassOptions', 'AzureServices'),
+                         self.check('networkRuleSet.defaultAction', 'Deny')])
+
 
     @ResourceGroupPreparer()
     def test_acr_with_anonymous_pull(self, resource_group, resource_group_location):

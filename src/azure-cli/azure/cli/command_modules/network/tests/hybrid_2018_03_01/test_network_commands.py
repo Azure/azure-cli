@@ -22,32 +22,6 @@ from msrestazure.tools import resource_id
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-class NetworkApplicationSecurityGroupScenario(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_asg')
-    def test_network_asg(self, resource_group):
-
-        self.kwargs.update({
-            'asg': 'asg1'
-        })
-
-        count1 = len(self.cmd('network asg list').get_output_in_json())
-        self.cmd('network asg create -g {rg} -n {asg} --tags foo=doo',
-                 checks=self.check('tags.foo', 'doo'))
-        self.cmd('network asg update -g {rg} -n {asg} --tags foo=bar',
-                 checks=self.check('tags.foo', 'bar'))
-        count2 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count2 == count1 + 1)
-        self.cmd('network asg show -g {rg} -n {asg}', checks=[
-            self.check('name', '{asg}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('tags.foo', 'bar')
-        ])
-        self.cmd('network asg delete -g {rg} -n {asg}')
-        count3 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count3 == count1)
-
-
 class NetworkLoadBalancerWithSku(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
@@ -1074,7 +1048,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             'lgw2': 'lgw2',
             'rt': 'Microsoft.Network/localNetworkGateways'
         })
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --tags foo=doo')
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw1} --gateway-ip-address 10.1.1.1 --local-address-prefixes 10.0.1.0/24 --tags foo=doo')
         self.cmd('network local-gateway update --resource-group {rg} --name {lgw1} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))
         self.cmd('network local-gateway show --resource-group {rg} --name {lgw1}', checks=[
@@ -1082,8 +1056,8 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{lgw1}')])
 
-        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.1.0/24',
-                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.1.0/24'))
+        self.cmd('network local-gateway create --resource-group {rg} --name {lgw2} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.2.0/24',
+                 checks=self.check('localNetworkAddressSpace.addressPrefixes[0]', '10.0.2.0/24'))
 
         self.cmd('network local-gateway list --resource-group {rg}',
                  checks=self.check('length(@)', 2))

@@ -18,11 +18,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._graph import ensure_aks_service_principal
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
@@ -65,6 +66,7 @@ from azure.cli.command_modules.acs.base_decorator import (
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
+    ArgumentUsageError,
     AzCLIError,
     CLIInternalError,
     InvalidArgumentValueError,
@@ -89,6 +91,7 @@ logger = get_logger(__name__)
 ContainerServiceClient = TypeVar("ContainerServiceClient")
 Identity = TypeVar("Identity")
 ManagedCluster = TypeVar("ManagedCluster")
+ManagedClusterHTTPProxyConfig = TypeVar("ManagedClusterHTTPProxyConfig")
 ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
@@ -96,6 +99,7 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -241,7 +245,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
             external_functions["ensure_aks_acr"] = ensure_aks_acr
-            external_functions["ensure_aks_service_principal"] = ensure_aks_service_principal
             external_functions[
                 "ensure_cluster_identity_permission_on_kubelet_identity"
             ] = ensure_cluster_identity_permission_on_kubelet_identity
@@ -1048,19 +1051,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
-        self, read_only: bool = False
+        self, enable_validation: bool = False, read_only: bool = False
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Internal function to dynamically obtain the values of service_principal and client_secret according to the
         context.
 
-        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
-        completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
-        the request.
-        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
-        CLIError.
+        This function supports the option of enable_validation.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
 
@@ -1103,37 +1099,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         if read_only:
             return service_principal, client_secret
 
-        # dynamic completion for service_principal and client_secret
-        dynamic_completion = False
-        # check whether the parameter meet the conditions of dynamic completion
-        enable_managed_identity = self._get_enable_managed_identity(read_only=True)
-        if not (
-            enable_managed_identity and
-            not service_principal and
-            not client_secret
-        ):
-            dynamic_completion = True
-        # disable dynamic completion if the value is read from `mc`
-        dynamic_completion = (
-            dynamic_completion and
-            not sp_read_from_mc and
-            not secret_read_from_mc
-        )
-        if dynamic_completion:
-            principal_obj = self.external_functions.ensure_aks_service_principal(
-                cli_ctx=self.cmd.cli_ctx,
-                service_principal=service_principal,
-                client_secret=client_secret,
-                subscription_id=self.get_subscription_id(),
-                dns_name_prefix=self._get_dns_name_prefix(enable_validation=False),
-                fqdn_subdomain=self._get_fqdn_subdomain(enable_validation=False),
-                location=self.get_location(),
-                name=self.get_name(),
-            )
-            service_principal = principal_obj.get("service_principal")
-            client_secret = principal_obj.get("client_secret")
+        # these parameters do not need dynamic completion
 
-        # these parameters do not need validation
+        # validation
+        if enable_validation:
+            # only one of service_principal and client_secret is provided, not both
+            if (service_principal or client_secret) and not (service_principal and client_secret):
+                raise RequiredArgumentMissingError(
+                    "Please provide both --service-principal and --client-secret to use sp as the cluster identity. "
+                    "An sp can be created using the 'az ad sp create-for-rbac' command."
+                )
         return service_principal, client_secret
 
     def get_service_principal_and_client_secret(
@@ -1141,19 +1116,10 @@ class AKSManagedClusterContext(BaseAKSContext):
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the values of service_principal and client_secret according to the context.
 
-        When service_principal and client_secret are not assigned and enable_managed_identity is True, dynamic
-        completion will not be triggered. For other cases, dynamic completion will be triggered.
-        When client_secret is given but service_principal is not, dns_name_prefix or fqdn_subdomain will be used to
-        create a service principal. The parameters subscription_id, location and name (cluster) are also required when
-        calling function "ensure_aks_service_principal", which internally used GraphRbacManagementClient to send
-        the request.
-        When service_principal is given but client_secret is not, function "ensure_aks_service_principal" would raise
-        CLIError.
-
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
         string type or None
         """
-        return self._get_service_principal_and_client_secret()
+        return self._get_service_principal_and_client_secret(enable_validation=True)
 
     def _get_enable_managed_identity(
         self, enable_validation: bool = False, read_only: bool = False
@@ -1375,6 +1341,44 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return detach_acr
+
+    def get_http_proxy_config(self) -> Union[Dict, ManagedClusterHTTPProxyConfig, None]:
+        """Obtain the value of http_proxy_config.
+
+        :return: dictionary, ManagedClusterHTTPProxyConfig or None
+        """
+        # read the original value passed by the command
+        http_proxy_config = None
+        http_proxy_config_file_path = self.raw_param.get("http_proxy_config")
+        # validate user input
+        if http_proxy_config_file_path:
+            if not os.path.isfile(http_proxy_config_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        http_proxy_config_file_path
+                    )
+                )
+            http_proxy_config = get_file_json(http_proxy_config_file_path)
+            if not isinstance(http_proxy_config, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading Http Proxy Config from {}. "
+                    "Please see https://aka.ms/HttpProxyConfig for correct format.".format(
+                        http_proxy_config_file_path
+                    )
+                )
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "http_proxy_config") and
+                self.mc.http_proxy_config is not None
+            ):
+                http_proxy_config = self.mc.http_proxy_config
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return http_proxy_config
 
     def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
         """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
@@ -2514,7 +2518,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if not azure_keyvault_secrets_provider_enabled:
                         raise InvalidArgumentValueError(
                             "--enable-secret-rotation can only be specified "
-                            "when azure-keyvault-secrets-provider is enabled"
+                            "when azure-keyvault-secrets-provider is enabled. "
+                            "Please use command 'az aks enable-addons' to enable it."
                         )
         return enable_secret_rotation
 
@@ -2561,7 +2566,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if not azure_keyvault_secrets_provider_enabled:
                         raise InvalidArgumentValueError(
                             "--disable-secret-rotation can only be specified "
-                            "when azure-keyvault-secrets-provider is enabled"
+                            "when azure-keyvault-secrets-provider is enabled. "
+                            "Please use command 'az aks enable-addons' to enable it."
                         )
         return disable_secret_rotation
 
@@ -2623,7 +2629,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if not azure_keyvault_secrets_provider_enabled:
                         raise InvalidArgumentValueError(
                             "--rotation-poll-interval can only be specified "
-                            "when azure-keyvault-secrets-provider is enabled"
+                            "when azure-keyvault-secrets-provider is enabled "
+                            "Please use command 'az aks enable-addons' to enable it."
                         )
         return rotation_poll_interval
 
@@ -3674,18 +3681,20 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_no_uptime_sla(enable_validation=True)
 
-    def get_defender_config(self) -> Union[TypeVar("ManagedClusterSecurityProfileAzureDefender"), None]:
+    def get_defender_config(self) -> Union[ManagedClusterSecurityProfileDefender, None]:
         """Obtain the value of defender.
 
-        :return: string or None
+        :return: ManagedClusterSecurityProfileDefender or None
         """
         disable_defender = self.raw_param.get("disable_defender")
         if disable_defender:
-            return self.models.ManagedClusterSecurityProfileAzureDefender(enabled=False)
+            return self.models.ManagedClusterSecurityProfileDefender(
+                security_monitoring=self.models.ManagedClusterSecurityProfileDefenderSecurityMonitoring(
+                    enabled=False
+                )
+            )
 
-        # read the original value passed by the command
         enable_defender = self.raw_param.get("enable_defender")
-
         if not enable_defender:
             return None
 
@@ -3708,11 +3717,265 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.get_subscription_id(),
                 self.get_resource_group_name())
 
-        azure_defender = self.models.ManagedClusterSecurityProfileAzureDefender(enabled=enable_defender)
-        if enable_defender:
-            azure_defender.log_analytics_workspace_resource_id = workspace
-
+        azure_defender = self.models.ManagedClusterSecurityProfileDefender(
+            log_analytics_workspace_resource_id=workspace,
+            security_monitoring=self.models.ManagedClusterSecurityProfileDefenderSecurityMonitoring(
+                enabled=enable_defender
+            ),
+        )
         return azure_defender
+
+    def _get_enable_azure_keyvault_kms(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_azure_keyvault_kms.
+
+        This function supports the option of enable_validation. When enabled, if azure_keyvault_kms_key_id is empty,
+        raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_azure_keyvault_kms = self.raw_param.get("enable_azure_keyvault_kms")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "security_profile") and  # backward compatibility
+                self.mc.security_profile and
+                self.mc.security_profile.azure_key_vault_kms
+            ):
+                enable_azure_keyvault_kms = self.mc.security_profile.azure_key_vault_kms.enabled
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if bool(enable_azure_keyvault_kms) != bool(self._get_azure_keyvault_kms_key_id(enable_validation=False)):
+                raise RequiredArgumentMissingError(
+                    'You must set "--enable-azure-keyvault-kms" and "--azure-keyvault-kms-key-id" at the same time.'
+                )
+
+        return enable_azure_keyvault_kms
+
+    def get_enable_azure_keyvault_kms(self) -> bool:
+        """Obtain the value of enable_azure_keyvault_kms.
+
+        This function will verify the parameter by default. When enabled, if azure_keyvault_kms_key_id is empty,
+        raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_enable_azure_keyvault_kms(enable_validation=True)
+
+    def _get_disable_azure_keyvault_kms(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_azure_keyvault_kms.
+
+        This function supports the option of enable_validation. When enabled,
+        if both enable_azure_keyvault_kms and disable_azure_keyvault_kms are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_azure_keyvault_kms = self.raw_param.get("disable_azure_keyvault_kms")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_azure_keyvault_kms and self._get_enable_azure_keyvault_kms(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-azure-keyvault-kms and --disable-azure-keyvault-kms at the same time."
+                )
+
+        return disable_azure_keyvault_kms
+
+    def get_disable_azure_keyvault_kms(self) -> bool:
+        """Obtain the value of disable_azure_keyvault_kms.
+
+        This function will verify the parameter by default. If both enable_azure_keyvault_kms and
+        disable_azure_keyvault_kms are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_azure_keyvault_kms(enable_validation=True)
+
+    def _get_azure_keyvault_kms_key_id(self, enable_validation: bool = False) -> Union[str, None]:
+        """Internal function to obtain the value of azure_keyvault_kms_key_id according to the context.
+
+        This function supports the option of enable_validation. When enabled, it will check if
+        azure_keyvault_kms_key_id is assigned but enable_azure_keyvault_kms is not specified,
+        if so, raise a RequiredArgumentMissingError.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        azure_keyvault_kms_key_id = self.raw_param.get("azure_keyvault_kms_key_id")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "security_profile") and  # backward compatibility
+                self.mc.security_profile and
+                self.mc.security_profile.azure_key_vault_kms and
+                self.mc.security_profile.azure_key_vault_kms.key_id is not None
+            ):
+                azure_keyvault_kms_key_id = self.mc.security_profile.azure_key_vault_kms.key_id
+
+        if enable_validation:
+            enable_azure_keyvault_kms = self._get_enable_azure_keyvault_kms(
+                enable_validation=False)
+            if (
+                azure_keyvault_kms_key_id and
+                (
+                    enable_azure_keyvault_kms is None or
+                    enable_azure_keyvault_kms is False
+                )
+            ):
+                raise RequiredArgumentMissingError(
+                    '"--azure-keyvault-kms-key-id" requires "--enable-azure-keyvault-kms".')
+
+        return azure_keyvault_kms_key_id
+
+    def get_azure_keyvault_kms_key_id(self) -> Union[str, None]:
+        """Obtain the value of azure_keyvault_kms_key_id.
+
+        This function will verify the parameter by default. When enabled, if enable_azure_keyvault_kms is False,
+        raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_azure_keyvault_kms_key_id(enable_validation=True)
+
+    def _get_azure_keyvault_kms_key_vault_network_access(self, enable_validation: bool = False) -> Union[str, None]:
+        """Internal function to obtain the value of azure_keyvault_kms_key_vault_network_access according to the
+        context.
+
+        This function supports the option of enable_validation. When enabled, it will check if
+        azure_keyvault_kms_key_vault_network_access is assigned but enable_azure_keyvault_kms is not specified, if so,
+        raise a RequiredArgumentMissingError.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        azure_keyvault_kms_key_vault_network_access = self.raw_param.get(
+            "azure_keyvault_kms_key_vault_network_access"
+        )
+
+        # validation
+        if enable_validation:
+            enable_azure_keyvault_kms = self._get_enable_azure_keyvault_kms(
+                enable_validation=False)
+            if azure_keyvault_kms_key_vault_network_access is None:
+                raise RequiredArgumentMissingError(
+                    '"--azure-keyvault-kms-key-vault-network-access" is required.')
+
+            if (
+                azure_keyvault_kms_key_vault_network_access and
+                (
+                    enable_azure_keyvault_kms is None or
+                    enable_azure_keyvault_kms is False
+                )
+            ):
+                raise RequiredArgumentMissingError(
+                    '"--azure-keyvault-kms-key-vault-network-access" requires "--enable-azure-keyvault-kms".')
+
+            if azure_keyvault_kms_key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE:
+                key_vault_resource_id = self._get_azure_keyvault_kms_key_vault_resource_id(
+                    enable_validation=False)
+                if (
+                    key_vault_resource_id is None or
+                    key_vault_resource_id == ""
+                ):
+                    raise RequiredArgumentMissingError(
+                        '"--azure-keyvault-kms-key-vault-resource-id" is required '
+                        'when "--azure-keyvault-kms-key-vault-network-access" is Private.'
+                    )
+
+        return azure_keyvault_kms_key_vault_network_access
+
+    def get_azure_keyvault_kms_key_vault_network_access(self) -> Union[str, None]:
+        """Obtain the value of azure_keyvault_kms_key_vault_network_access.
+
+        This function will verify the parameter by default. When enabled, if enable_azure_keyvault_kms is False,
+        raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_azure_keyvault_kms_key_vault_network_access(enable_validation=True)
+
+    def _get_azure_keyvault_kms_key_vault_resource_id(self, enable_validation: bool = False) -> Union[str, None]:
+        """Internal function to obtain the value of azure_keyvault_kms_key_vault_resource_id according to the context.
+
+        This function supports the option of enable_validation. When enabled, it will do validation, and raise a
+        RequiredArgumentMissingError.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        azure_keyvault_kms_key_vault_resource_id = self.raw_param.get(
+            "azure_keyvault_kms_key_vault_resource_id"
+        )
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "security_profile") and  # backward compatibility
+                self.mc.security_profile and
+                self.mc.security_profile.azure_key_vault_kms and
+                self.mc.security_profile.azure_key_vault_kms.key_vault_resource_id is not None
+            ):
+                azure_keyvault_kms_key_vault_resource_id = (
+                    self.mc.security_profile.azure_key_vault_kms.key_vault_resource_id
+                )
+
+        # validation
+        if enable_validation:
+            enable_azure_keyvault_kms = self._get_enable_azure_keyvault_kms(
+                enable_validation=False)
+            if (
+                azure_keyvault_kms_key_vault_resource_id and
+                (
+                    enable_azure_keyvault_kms is None or
+                    enable_azure_keyvault_kms is False
+                )
+            ):
+                raise RequiredArgumentMissingError(
+                    '"--azure-keyvault-kms-key-vault-resource-id" requires "--enable-azure-keyvault-kms".'
+                )
+
+            key_vault_network_access = self._get_azure_keyvault_kms_key_vault_network_access(
+                enable_validation=False)
+            if (
+                key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE and
+                (
+                    azure_keyvault_kms_key_vault_resource_id is None or
+                    azure_keyvault_kms_key_vault_resource_id == ""
+                )
+            ):
+                raise ArgumentUsageError(
+                    '"--azure-keyvault-kms-key-vault-resource-id" can not be empty if '
+                    '"--azure-keyvault-kms-key-vault-network-access" is "Private".'
+                )
+            if (
+                key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC and
+                (
+                    azure_keyvault_kms_key_vault_resource_id is not None and
+                    azure_keyvault_kms_key_vault_resource_id != ""
+                )
+            ):
+                raise ArgumentUsageError(
+                    '"--azure-keyvault-kms-key-vault-resource-id" must be empty if '
+                    '"--azure-keyvault-kms-key-vault-network-access" is "Public".'
+                )
+
+        return azure_keyvault_kms_key_vault_resource_id
+
+    def get_azure_keyvault_kms_key_vault_resource_id(self) -> Union[str, None]:
+        """Obtain the value of azure_keyvault_kms_key_vault_resource_id.
+
+        This function will verify the parameter by default. When enabled, if enable_azure_keyvault_kms is False,
+        raise a RequiredArgumentMissingError.
+
+        :return: bool
+        """
+        return self._get_azure_keyvault_kms_key_vault_resource_id(enable_validation=True)
 
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_local_accounts.
@@ -3989,7 +4252,32 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()
 
-            mc.security_profile.azure_defender = defender
+            mc.security_profile.defender = defender
+
+        return mc
+
+    def set_up_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up security profile azureKeyVaultKms for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_azure_keyvault_kms():
+            key_id = self.context.get_azure_keyvault_kms_key_id()
+            if key_id:
+                if mc.security_profile is None:
+                    mc.security_profile = self.models.ManagedClusterSecurityProfile()
+                mc.security_profile.azure_key_vault_kms = self.models.AzureKeyVaultKms(
+                    enabled=True,
+                    key_id=key_id,
+                )
+                key_vault_network_access = self.context.get_azure_keyvault_kms_key_vault_network_access()
+                mc.security_profile.azure_key_vault_kms.key_vault_network_access = key_vault_network_access
+                if key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE:
+                    mc.security_profile.azure_key_vault_kms.key_vault_resource_id = (
+                        self.context.get_azure_keyvault_kms_key_vault_resource_id()
+                    )
 
         return mc
 
@@ -4103,9 +4391,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
 
-        The function "ensure_aks_service_principal" will be called if the user provides an incomplete sp and secret
-        pair, which internally used GraphRbacManagementClient to send the request to create sp.
-
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
@@ -4166,21 +4451,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             service_principal_profile = mc.service_principal_profile
             assign_identity = self.context.get_assign_identity()
             if service_principal_profile is None and not assign_identity:
-                msg = (
-                    "It is highly recommended to use USER assigned identity "
-                    "(option --assign-identity) when you want to bring your own"
-                    "subnet, which will have no latency for the role assignment to "
-                    "take effect. When using SYSTEM assigned identity, "
-                    "azure-cli will grant Network Contributor role to the "
-                    "system assigned identity after the cluster is created, and "
-                    "the role assignment will take some time to take effect, see "
-                    "https://docs.microsoft.com/azure/aks/use-managed-identity, "
-                    "proceed to create cluster with system assigned identity?"
-                )
-                if not self.context.get_yes() and not prompt_y_n(
-                    msg, default="n"
-                ):
-                    raise DecoratorEarlyExitException()
                 need_post_creation_vnet_permission_granting = True
             else:
                 scope = vnet_subnet_id
@@ -4723,6 +4993,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.identity_profile = identity_profile
         return mc
 
+    def set_up_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up http proxy config for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.http_proxy_config = self.context.get_http_proxy_config()
+        return mc
+
     def set_up_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up auto upgrade profile for the ManagedCluster object.
 
@@ -4838,6 +5118,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group(mc)
         # set up defender
         mc = self.set_up_defender(mc)
+        # set up azure keyvalut kms
+        mc = self.set_up_azure_keyvault_kms(mc)
+        mc = self.set_up_http_proxy_config(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -5444,6 +5727,16 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
         return mc
 
+    def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up http proxy config for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.http_proxy_config = self.context.get_http_proxy_config()
+        return mc
+
     def update_identity(self, mc: ManagedCluster) -> ManagedCluster:
         """Update identity for the ManagedCluster object.
 
@@ -5498,11 +5791,39 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.identity = identity
         return mc
 
+    def ensure_azure_keyvault_secrets_provider_addon_profile(
+        self,
+        azure_keyvault_secrets_provider_addon_profile: ManagedClusterAddonProfile,
+    ) -> ManagedClusterAddonProfile:
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+        if (
+            azure_keyvault_secrets_provider_addon_profile is None or
+            not azure_keyvault_secrets_provider_addon_profile.enabled
+        ):
+            raise InvalidArgumentValueError(
+                "Addon azure-keyvault-secrets-provider is not enabled. "
+                "Please use command 'az aks enable-addons' to enable it."
+            )
+        if azure_keyvault_secrets_provider_addon_profile.config is None:
+            # backfill to default
+            azure_keyvault_secrets_provider_addon_profile.config = {
+                CONST_SECRET_ROTATION_ENABLED: "false",
+                CONST_ROTATION_POLL_INTERVAL: "2m",
+            }
+        return azure_keyvault_secrets_provider_addon_profile
+
     def update_azure_keyvault_secrets_provider_addon_profile(
         self,
         azure_keyvault_secrets_provider_addon_profile: ManagedClusterAddonProfile,
-    ) -> None:
-        """Update azure keyvault secrets provider addon profile in-place.
+    ) -> ManagedClusterAddonProfile:
+        """Update azure keyvault secrets provider addon profile.
 
         :return: None
         """
@@ -5516,19 +5837,35 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         )
 
         if self.context.get_enable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile = (
+                self.ensure_azure_keyvault_secrets_provider_addon_profile(
+                    azure_keyvault_secrets_provider_addon_profile
+                )
+            )
             azure_keyvault_secrets_provider_addon_profile.config[
                 CONST_SECRET_ROTATION_ENABLED
             ] = "true"
 
         if self.context.get_disable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile = (
+                self.ensure_azure_keyvault_secrets_provider_addon_profile(
+                    azure_keyvault_secrets_provider_addon_profile
+                )
+            )
             azure_keyvault_secrets_provider_addon_profile.config[
                 CONST_SECRET_ROTATION_ENABLED
             ] = "false"
 
         if self.context.get_rotation_poll_interval() is not None:
+            azure_keyvault_secrets_provider_addon_profile = (
+                self.ensure_azure_keyvault_secrets_provider_addon_profile(
+                    azure_keyvault_secrets_provider_addon_profile
+                )
+            )
             azure_keyvault_secrets_provider_addon_profile.config[
                 CONST_ROTATION_POLL_INTERVAL
             ] = self.context.get_rotation_poll_interval()
+        return azure_keyvault_secrets_provider_addon_profile
 
     def update_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
         """Update addon profiles for the ManagedCluster object.
@@ -5581,8 +5918,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
             )
 
-        # update azure keyvault secrets provider profile in-place
-        self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
+        # update azure keyvault secrets provider profile
+        azure_keyvault_secrets_provider_addon_profile = (
+            self.update_azure_keyvault_secrets_provider_addon_profile(
+                azure_keyvault_secrets_provider_addon_profile
+            )
+        )
+        if azure_keyvault_secrets_provider_addon_profile:
+            # mc.addon_profiles should not be None if azure_keyvault_secrets_provider_addon_profile is not None
+            mc.addon_profiles[
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ] = azure_keyvault_secrets_provider_addon_profile
         return mc
 
     def update_defender(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5596,7 +5942,54 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()
 
-            mc.security_profile.azure_defender = defender
+            mc.security_profile.defender = defender
+
+        return mc
+
+    def update_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update security profile azureKeyvaultKms for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_azure_keyvault_kms():
+            # get kms profile
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            azure_key_vault_kms_profile = mc.security_profile.azure_key_vault_kms
+            if azure_key_vault_kms_profile is None:
+                azure_key_vault_kms_profile = self.models.AzureKeyVaultKms()
+                mc.security_profile.azure_key_vault_kms = azure_key_vault_kms_profile
+
+            # set enabled
+            azure_key_vault_kms_profile.enabled = True
+            # set key id
+            azure_key_vault_kms_profile.key_id = self.context.get_azure_keyvault_kms_key_id()
+            # set network access, should never be None for now, can be safely assigned, temp fix for rp
+            # the value is obtained from user input or backfilled from existing mc or to default value
+            azure_key_vault_kms_profile.key_vault_network_access = (
+                self.context.get_azure_keyvault_kms_key_vault_network_access()
+            )
+            # set key vault resource id
+            if azure_key_vault_kms_profile.key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE:
+                azure_key_vault_kms_profile.key_vault_resource_id = (
+                    self.context.get_azure_keyvault_kms_key_vault_resource_id()
+                )
+            else:
+                azure_key_vault_kms_profile.key_vault_resource_id = ""
+
+        if self.context.get_disable_azure_keyvault_kms():
+            # get kms profile
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            azure_key_vault_kms_profile = mc.security_profile.azure_key_vault_kms
+            if azure_key_vault_kms_profile is None:
+                azure_key_vault_kms_profile = self.models.AzureKeyVaultKms()
+                mc.security_profile.azure_key_vault_kms = azure_key_vault_kms_profile
+
+            # set enabled to False
+            azure_key_vault_kms_profile.enabled = False
 
         return mc
 
@@ -5671,8 +6064,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_addon_profiles(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update azure keyvalut kms
+        mc = self.update_azure_keyvault_kms(mc)
         # update identity
         mc = self.update_identity_profile(mc)
+        # set up http proxy config
+        mc = self.update_http_proxy_config(mc)
         return mc
 
     # pylint: disable=unused-argument

@@ -326,6 +326,15 @@ def get_security_discovered_security_solution(client, resource_name, resource_gr
 
 
 # --------------------------------------------------------------------------------------------
+# Security Solutions
+# --------------------------------------------------------------------------------------------
+
+def list_security_security_solutions(client):
+
+    return client.security_solutions.list()
+
+
+# --------------------------------------------------------------------------------------------
 # External Security Solutions
 # --------------------------------------------------------------------------------------------
 
@@ -386,6 +395,15 @@ def get_security_location(client, resource_name):
     client._config.asc_location = resource_name  # pylint: disable=protected-access
 
     return client.get()
+
+
+# --------------------------------------------------------------------------------------------
+# securitySolutionsReferenceData
+# --------------------------------------------------------------------------------------------
+
+def list_security_solutions_reference_data(client):
+
+    return client.list()
 
 
 # --------------------------------------------------------------------------------------------
@@ -457,18 +475,29 @@ def delete_security_workspace_setting(client, resource_name):
 # Security ATP
 # --------------------------------------------------------------------------------------------
 
-def get_atp_setting(cmd, client, resource_group_name, storage_account_name):
+def get_storage_atp_setting(cmd, client, resource_group_name, storage_account_name):
 
-    return client.get(_construct_resource_id(cmd, resource_group_name, storage_account_name))
+    return client.get(_construct_storage_resource_id(cmd, resource_group_name, storage_account_name))
 
 
-def update_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
+def get_cosmosdb_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name):
 
-    return client.create(_construct_resource_id(cmd, resource_group_name, storage_account_name),
+    return client.get(_construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name))
+
+
+def update_storage_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
+
+    return client.create(_construct_storage_resource_id(cmd, resource_group_name, storage_account_name),
                          AdvancedThreatProtectionSetting(is_enabled=is_enabled))
 
 
-def _construct_resource_id(cmd, resource_group_name, storage_account_name):
+def update_cosmosdb_atp_setting(cmd, client, resource_group_name, cosmos_db_account_name, is_enabled):
+
+    return client.create(_construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name),
+                         AdvancedThreatProtectionSetting(is_enabled=is_enabled))
+
+
+def _construct_storage_resource_id(cmd, resource_group_name, storage_account_name):
 
     return resource_id(
         subscription=get_subscription_id(cmd.cli_ctx),
@@ -476,6 +505,16 @@ def _construct_resource_id(cmd, resource_group_name, storage_account_name):
         namespace='Microsoft.Storage',
         type='storageAccounts',
         name=storage_account_name)
+
+
+def _construct_cosmosdb_resource_id(cmd, resource_group_name, cosmos_db_account_name):
+
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.DocumentDb',
+        type='databaseAccounts',
+        name=cosmos_db_account_name)
 
 
 # --------------------------------------------------------------------------------------------

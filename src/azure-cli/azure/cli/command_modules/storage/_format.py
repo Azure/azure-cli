@@ -123,3 +123,7 @@ def transform_file_directory_result(result):
         return_list.append(each)
 
     return return_list
+
+
+def transform_metadata_show(result):
+    return result.metadata

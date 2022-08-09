@@ -28,7 +28,6 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles pool create -g {rg} -a {acc} -p {pool} -l {loc} --service-level {service_level} "
                  "--size {pool_size} --qos-type {qos}")
 
-    @serial_test()
     def test_create_get_list_delete_volume_group(self):
         # Create Volume Group with defaults
         self.prepare_for_volume_group_creation()

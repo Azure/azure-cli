@@ -3678,13 +3678,15 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         args += ["--outdir", outdir]
     if outfile:
         args += ["--outfile", outfile]
-    if stdout:
-        args += ["--stdout"]
     if no_restore:
         args += ["--no-restore"]
-        print(run_bicep_command(args))
-        return
-    run_bicep_command(args)
+    if stdout:
+        args += ["--stdout"]
+
+    output = run_bicep_command(args)
+
+    if stdout:
+        print(output)
 
 
 def publish_bicep_file(cmd, file, target):
@@ -3723,6 +3725,29 @@ def show_bicep_cli_version(cmd):
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
+
+
+def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.7.4"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["generate-params", file]
+        if no_restore:
+            args += ["--no-restore"]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+
+        output = run_bicep_command(args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep generate-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def create_resourcemanager_privatelink(

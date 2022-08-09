@@ -46,7 +46,7 @@ class AAZSimpleValue(AAZBaseValue):
             other = other._data
         return self._data >= other
 
-    def to_serialized_data(self, processor=None):
+    def to_serialized_data(self, processor=None, **kwargs):
         result = self._data
         if processor:
             result = processor(self._schema, result)
@@ -57,7 +57,7 @@ class AAZObject(AAZBaseValue):
 
     def __init__(self, schema, data):
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
     def __getitem__(self, key):
         attr_schema, name = self._get_attr_schema_and_name(key)
@@ -115,25 +115,30 @@ class AAZObject(AAZBaseValue):
     def __ne__(self, other):
         return not self == other
 
-    def to_serialized_data(self, processor=None):
-        result = {}
-        schemas = [self._schema]
+    def to_serialized_data(self, processor=None, **kwargs):
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
+            result = None
+        else:
+            result = {}
+            schemas = [self._schema]
 
-        disc_schema = self._schema.get_discriminator(self._data)
-        if disc_schema:
-            schemas.append(disc_schema)
+            disc_schema = self._schema.get_discriminator(self._data)
+            if disc_schema:
+                schemas.append(disc_schema)
 
-        for schema in schemas:
-            for name, field_schema in schema._fields.items():
-                v = self[name].to_serialized_data(processor=processor)
-                if v == AAZUndefined:
-                    continue
-                if field_schema._serialized_name:   # pylint: disable=protected-access
-                    name = field_schema._serialized_name  # pylint: disable=protected-access
-                result[name] = v
+            for schema in schemas:
+                for name, field_schema in schema._fields.items():
+                    v = self[name].to_serialized_data(processor=processor, **kwargs)
+                    if v == AAZUndefined:
+                        continue
+                    if field_schema._serialized_name:   # pylint: disable=protected-access
+                        name = field_schema._serialized_name  # pylint: disable=protected-access
+                    result[name] = v
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
 
         if processor:
             result = processor(self._schema, result)
@@ -158,7 +163,7 @@ class AAZDict(AAZBaseValue):
         from ._field_type import AAZDictType
         assert isinstance(schema, AAZDictType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
     def __getitem__(self, key) -> AAZBaseValue:
         item_schema = self._schema.Element
@@ -218,15 +223,22 @@ class AAZDict(AAZBaseValue):
         for key in self._data:
             yield key, self[key]
 
-    def to_serialized_data(self, processor=None):
-        result = {}
-        for key, v in self.items():
-            v = v.to_serialized_data(processor=processor)
-            if v == AAZUndefined:
-                continue
-            result[key] = v
+    def to_serialized_data(self, processor=None, **kwargs):
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
+            result = None
+        else:
+            result = {}
+            for key, v in self.items():
+                v = v.to_serialized_data(processor=processor, **kwargs)
+                if v == AAZUndefined:
+                    continue
+                result[key] = v
+
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result
@@ -238,9 +250,9 @@ class AAZList(AAZBaseValue):
         from ._field_type import AAZListType
         assert isinstance(schema, AAZListType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None  # the key is the idx
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined  # the key is the idx
         self._len = 0
-        if self._data is not None:
+        if self._data is not None and self._data != AAZUndefined:
             for idx in self._data:
                 if idx + 1 > self._len:
                     self._len = idx + 1
@@ -335,13 +347,31 @@ class AAZList(AAZBaseValue):
         self._data.clear()
         self._len = 0
 
-    def to_serialized_data(self, processor=None):
-        result = []
-        for v in self:
-            v = v.to_serialized_data(processor=processor)
-            result.append(v)
+    def to_serialized_data(self, processor=None, keep_undefined_in_list=False,  # pylint: disable=arguments-differ
+                           **kwargs):
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
+            result = None
+        else:
+            result = []
+            has_valid = False
+            for v in self:
+                v = v.to_serialized_data(
+                    processor=processor, keep_undefined_in_list=keep_undefined_in_list, **kwargs)
+                if v == AAZUndefined and not keep_undefined_in_list:
+                    # When AAZUndefined is ignore it, the index of the following value will be changed.
+                    continue
+                if v != AAZUndefined:
+                    has_valid = True
+                result.append(v)
+            if not has_valid:
+                # when elements are all undefined, the result will be empty.
+                result = []
+
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result

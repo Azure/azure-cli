@@ -204,6 +204,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
                                 JMESPathCheck('properties.lease.state', 'leased'),
                                 JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage blob metadata update -n {} -c {} --metadata key1=value1 --lease-id {}',
+                         account_info, b, c, new_lease_id)
+        self.storage_cmd('storage blob show -n {} -c {} --lease-id {}', account_info, b, c, new_lease_id)\
+            .assert_with_checks(JMESPathCheck('metadata.key1', 'value1'))
         self.storage_cmd('storage blob lease break -b {} -c {} --lease-break-period 30',
                          account_info, b, c)
         self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
@@ -451,6 +455,9 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('minuteMetrics.enabled', True),
                                 JMESPathCheck('minuteMetrics.includeApis', True),
                                 JMESPathCheck('logging.delete', True))
+        self.storage_cmd('storage blob service-properties delete-policy update --days 2', account_info)
+        self.storage_cmd('storage blob service-properties delete-policy show', account_info) \
+            .assert_with_checks(JMESPathCheck('days', 2))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -462,8 +469,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
-        from azure.common import AzureException
-        with self.assertRaisesRegex(AzureException, "NoPendingCopyOperation"):
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegex(ResourceExistsError, "There is currently no pending copy operation"):
             self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
 
     @ResourceGroupPreparer()
@@ -594,6 +601,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_name = self.create_random_name(prefix='blob', length=24)
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --content-md5 {}', account_info,
                          container, local_file, blob_name, md5_base64_encode)
+        self.storage_cmd('storage blob update -c {} -n {} --content-md5 0000', account_info, container, blob_name)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -655,6 +663,22 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                              container, blob_name).\
                 assert_with_checks(JMESPathCheck("properties.contentSettings.contentType", contentType))
             os.remove(path)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_upload_socket_timeout_scenarios(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        container = self.create_container(account_info)
+        local_file = self.create_temp_file(128)
+
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --socket-timeout 50', account_info,
+                         container, local_file, blob_name)
+        self.storage_cmd('storage blob exists -c {} -n {}', account_info,
+                         container, blob_name).\
+            assert_with_checks(JMESPathCheck("exists", True))
+
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
@@ -781,6 +805,7 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
     def test_storage_blob_list_scenarios(self, resource_group, storage_account):
+        import time
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info, prefix="con")
 
@@ -849,6 +874,7 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir'))
 
+        time.sleep(5)
         # Test secondary location
         account_name = account_info[0] + '-secondary'
         account_key = account_info[1]

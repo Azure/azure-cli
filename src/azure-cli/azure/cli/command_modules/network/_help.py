@@ -1787,62 +1787,6 @@ examples:
     text: az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
-helps['network asg'] = """
-type: group
-short-summary: Manage application security groups (ASGs).
-long-summary: >
-    You can configure network security as a natural extension of an application's structure, ASG allows
-    you to group virtual machines and define network security policies based on those groups. You can specify an
-    application security group as the source and destination in a NSG security rule. For more information
-    visit https://docs.microsoft.com/azure/virtual-network/create-network-security-group-preview
-"""
-
-helps['network asg create'] = """
-type: command
-short-summary: Create an application security group.
-parameters:
-  - name: --name -n
-    short-summary: Name of the new application security group resource.
-examples:
-  - name: Create an application security group.
-    text: az network asg create -g MyResourceGroup -n MyAsg --tags MyWebApp, CostCenter=Marketing
-"""
-
-helps['network asg delete'] = """
-type: command
-short-summary: Delete an application security group.
-examples:
-  - name: Delete an application security group.
-    text: az network asg delete -g MyResourceGroup -n MyAsg
-"""
-
-helps['network asg list'] = """
-type: command
-short-summary: List all application security groups in a subscription.
-examples:
-  - name: List all application security groups in a subscription.
-    text: az network asg list
-"""
-
-helps['network asg show'] = """
-type: command
-short-summary: Get details of an application security group.
-examples:
-  - name: Get details of an application security group.
-    text: az network asg show -g MyResourceGroup -n MyAsg
-"""
-
-helps['network asg update'] = """
-type: command
-short-summary: Update an application security group.
-long-summary: >
-    This command can only be used to update the tags for an application security group.
-    Name and resource group are immutable and cannot be updated.
-examples:
-  - name: Update an application security group with a modified tag value.
-    text: az network asg update -g MyResourceGroup -n MyAsg --set tags.CostCenter=MyBusinessGroup
-"""
-
 helps['network ddos-protection'] = """
 type: group
 short-summary: Manage DDoS Protection Plans.
@@ -4735,6 +4679,9 @@ parameters:
 examples:
   - name: Create a private endpoint.
     text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS" --connection-name tttt -l centralus
+  - name: Create a private endpoint with ASGs.
+    text: |
+        az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --asg id=MyAsgId --asg id=MyAsgId
 """
 
 helps['network private-endpoint delete'] = """
@@ -5923,6 +5870,15 @@ examples:
     text: |
         az network vnet subnet list-available-delegations --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network vnet subnet list-available-ips'] = """
+type: command
+short-summary: List some available ips in the subnet.
+examples:
+  - name: List some available ips in the subnet.
+    text: |
+        az network vnet subnet list-available-ips --resource-group MyResourceGroup --vnet-name MyVNet -n MySubnet
 """
 
 helps['network vnet subnet show'] = """
@@ -7124,12 +7080,58 @@ examples:
       --name MyFlowLog
       --nsg MyNetworkSecurityGroupName
       --storage-account account
+  - name: Create a flow log with VNet name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --vnet MyVNetName
+      --storage-account account
+  - name: Create a flow log with Subnet name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --vnet MyVNetName
+      --subnet MySubnetName
+      --storage-account account
+  - name: Create a flow log with NIC name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --nic MyNICName
+      --storage-account account
   - name: Create a flow log with Network Security Group ID (could be in other resource group)
     text: >
       az network watcher flow-log create
       --location westus
       --name MyFlowLog
       --nsg MyNetworkSecurityGroupID
+      --storage-account account
+  - name: Create a flow log with Virtual Network ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --vnet MyVNetID
+      --storage-account account
+  - name: Create a flow log with Subnet ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --subnet SubnetID
+      --storage-account account
+  - name: Create a flow log with Network Interface ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --nic MyNetworkInterfaceID
       --storage-account account
 """
 
@@ -7188,6 +7190,28 @@ examples:
       --resource-group MyAnotherResourceGroup
       --name MyFlowLog
       --nsg MyNSG
+  - name: Update Virtual Network on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --vnet MyVNet
+  - name: Update Subnet on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --vnet MyVNet
+      --subnet MySubnet
+  - name: Update Network Interface on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --nic MyNIC
   - name: Update Workspace on another resource group
     text: >
       az network watcher flow-log update
@@ -7479,14 +7503,14 @@ examples:
 
 helps['network bastion'] = """
 type: group
-short-summary: Manage Azure bastion host.
+short-summary: Manage Azure Bastion host.
 """
 
 helps['network bastion create'] = """
 type: command
-short-summary: Create a Azure bastion host machine.
+short-summary: Create a Azure Bastion host machine.
 examples:
-  - name: Create a Azure bastion host machine. (autogenerated)
+  - name: Create a Azure Bastion host machine. (autogenerated)
     text: |
         az network bastion create --location westus2 --name MyBastionHost --public-ip-address MyPublicIpAddress --resource-group MyResourceGroup --vnet-name MyVnet
     crafted: true
@@ -7494,9 +7518,9 @@ examples:
 
 helps['network bastion delete'] = """
 type: command
-short-summary: Delete a Azure bastion host machine.
+short-summary: Delete a Azure Bastion host machine.
 examples:
-  - name: Delete a Azure bastion host machine. (autogenerated)
+  - name: Delete a Azure Bastion host machine. (autogenerated)
     text: |
         az network bastion delete --name MyBastionHost --resource-group MyResourceGroup
     crafted: true
@@ -7504,14 +7528,14 @@ examples:
 
 helps['network bastion list'] = """
 type: command
-short-summary: List all Azure bastion host machines.
+short-summary: List all Azure Bastion host machines.
 """
 
 helps['network bastion show'] = """
 type: command
-short-summary: Show a Azure bastion host machine.
+short-summary: Show a Azure Bastion host machine.
 examples:
-  - name: Show a Azure bastion host machine.
+  - name: Show a Azure Bastion host machine.
     text: |
         az network bastion show --name MyBastionHost --resource-group MyResourceGroup
     crafted: true
@@ -7543,41 +7567,11 @@ examples:
 
 helps['network bastion tunnel'] = """
 type: command
-short-summary: Open a tunnel through Azure bastion to a target virtual machine.
+short-summary: Open a tunnel through Azure Bastion to a target virtual machine.
 examples:
-  - name: Open a tunnel through Azure bastion to a target virtual machine.
+  - name: Open a tunnel through Azure Bastion to a target virtual machine.
     text: |
         az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 22 --port 50022
-"""
-
-helps['network security-partner-provider'] = """
-type: group
-short-summary: Manage Azure security partner provider.
-"""
-
-helps['network security-partner-provider create'] = """
-type: command
-short-summary: Create a Azure security partner provider.
-"""
-
-helps['network security-partner-provider update'] = """
-type: command
-short-summary: Update a Azure security partner provider.
-"""
-
-helps['network security-partner-provider delete'] = """
-type: command
-short-summary: Delete a Azure security partner provider.
-"""
-
-helps['network security-partner-provider list'] = """
-type: command
-short-summary: List all Azure security partner provider.
-"""
-
-helps['network security-partner-provider show'] = """
-type: command
-short-summary: Show a Azure security partner provider.
 """
 
 helps['network virtual-appliance'] = """

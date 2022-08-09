@@ -63,7 +63,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
-            c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
+            c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 5120.')
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
             c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
@@ -83,7 +83,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
             c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
-            c.argument('storage_mb', default=51200, options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
+            c.argument('storage_mb', default=5120, options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 5120.')
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
             c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
@@ -603,6 +603,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server deploy run'.format(command_group)) as c:
             c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
             c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
+
+        # logs
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server server-logs download'.format(command_group)) as c:
+                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the Server.')
+                c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
+
+            with self.argument_context('{} flexible-server server-logs list'.format(command_group)) as c:
+                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the Server.')
+                c.argument('filename_contains', help='The pattern that file name should match.')
+                c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
+                c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 

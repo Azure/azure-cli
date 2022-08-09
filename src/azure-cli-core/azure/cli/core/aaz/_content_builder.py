@@ -68,9 +68,15 @@ class AAZContentBuilder:
                     if isinstance(value[prop_name], AAZSimpleValue):
                         value[prop_name] = sub_arg.data
                     elif isinstance(value[prop_name], AAZList):
-                        value[prop_name] = []
+                        if sub_arg.data is None:
+                            value[prop_name] = None
+                        else:
+                            value[prop_name] = []
                     elif isinstance(value[prop_name], (AAZDict, AAZObject)):
-                        value[prop_name] = {}
+                        if sub_arg.data is None:
+                            value[prop_name] = None
+                        else:
+                            value[prop_name] = {}
                     else:
                         raise NotImplementedError()
                 sub_values.append(value[prop_name])
@@ -102,9 +108,15 @@ class AAZContentBuilder:
                             if isinstance(value[key], AAZSimpleValue):
                                 value[key] = sub_arg.data
                             elif isinstance(value[key], AAZList):
-                                value[key] = []
+                                if sub_arg.data is None:
+                                    value[key] = None
+                                else:
+                                    value[key] = []
                             elif isinstance(value[key], (AAZDict, AAZObject)):
-                                value[key] = {}
+                                if sub_arg.data is None:
+                                    value[key] = None
+                                else:
+                                    value[key] = {}
                             else:
                                 raise NotImplementedError()
                         sub_values.append(value[key])

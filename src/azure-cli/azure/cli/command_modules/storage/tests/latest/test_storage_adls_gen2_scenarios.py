@@ -500,6 +500,36 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_adls_file_set_expiry_scenarios(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        file = self.create_random_name(prefix="file", length=12)
+
+        self.storage_cmd('storage fs file create -p {} -f {} --content-type "application/json"',
+                         account_info, file, filesystem)
+        expiry = (datetime.utcnow() + timedelta(seconds=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        self.storage_cmd("storage fs file set-expiry --expiry-options Absolute --expires-on {} -p {} -f {}",
+                         account_info, expiry, file, filesystem)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
+            .assert_with_checks(JMESPathCheck('exists', True))
+        time.sleep(7)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage fs file create -p {} -f {} --content-type "application/json"',
+                         account_info, file, filesystem)
+        expiry = 5000
+        self.storage_cmd("storage fs file set-expiry --expiry-options RelativeToCreation --expires-on {} -p {} -f {}",
+                         account_info, expiry, file, filesystem)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+        time.sleep(7)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_metadata_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)

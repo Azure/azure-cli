@@ -2,6 +2,10 @@
 
 Release History
 ===============
+1.0.7
++++++
+* Support specifying `telemetry.push_interval_in_hours` to force push telemetry cache file
+
 1.0.6
 +++++
 * Add `__version__` in `__init__.py`

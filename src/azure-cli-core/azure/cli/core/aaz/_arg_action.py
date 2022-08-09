@@ -5,15 +5,15 @@
 
 # pylint: disable=protected-access
 
+import copy
 import os
-import re
 from argparse import Action
 from collections import OrderedDict
 
 from knack.log import get_logger
 
 from azure.cli.core import azclierror
-from ._base import AAZUndefined
+from ._base import AAZUndefined, AAZBlankArgValue
 from ._help import AAZShowHelp
 from ._utils import AAZShortHandSyntaxParser
 from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
@@ -58,7 +58,9 @@ class AAZArgAction(Action):
     _str_parser = AAZShortHandSyntaxParser()  # support to parse normal string or short hand syntax string
 
     def __call__(self, parser, namespace, values, option_string=None):
-        if getattr(namespace, self.dest) is None or getattr(namespace, self.dest) == AAZUndefined:
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+            # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
+            # especially the default value of argument.
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:
@@ -92,9 +94,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if prefix_keys is None:
             prefix_keys = []
         if values is None:
-            if cls._schema._blank == AAZUndefined:
-                raise AAZInvalidValueError("argument cannot be blank")
-            data = cls._schema._blank  # use blank data when values string is None
+            data = AAZBlankArgValue  # use blank data when values string is None
         else:
             if isinstance(values, list):
                 assert prefix_keys  # the values will be input as an list when parse singular option of a list argument
@@ -110,11 +110,16 @@ class AAZSimpleTypeArgAction(AAZArgAction):
                     raise aaz_help
             else:
                 data = values
-            data = cls.format_data(data)
+        data = cls.format_data(data)
         dest_ops.add(data, *prefix_keys)
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
         if isinstance(data, str):
             # transfer string into correct data
             if cls._schema.enum:
@@ -134,10 +139,6 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 
 class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
 
-    key_pattern = re.compile(
-        r'^(((\[-?[0-9]+])|(([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?)*)=(.*)$'
-    )   # 'Partial Value' format
-
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
         if prefix_keys is None:
@@ -145,7 +146,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
-            dest_ops.add(cls._schema._blank, *prefix_keys)
+            dest_ops.add(copy.deepcopy(cls._schema._blank), *prefix_keys)
         else:
             assert isinstance(values, list)
             for _, key_parts, value in cls.decode_values(values):
@@ -159,37 +160,9 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     @classmethod
     def decode_values(cls, values):
         for v in values:
-            key, key_parts, v = cls._split_value_str(v)
+            key, key_parts, v = cls._str_parser.split_partial_value(v)
             v = cls._decode_value(key, key_parts, v)
             yield key, key_parts, v
-
-    @classmethod
-    def _split_value_str(cls, v):
-        """ split 'Partial Value' format """
-        assert isinstance(v, str)
-        match = cls.key_pattern.fullmatch(v)
-        if not match:
-            key = None
-        else:
-            key = match[1]
-            v = match[len(match.regs) - 1]
-        key_parts = cls._split_key(key)
-        return key, key_parts, v
-
-    @staticmethod
-    def _split_key(key):
-        """ split index key of 'Partial Value' format """
-        if key is None:
-            return tuple()
-        key_items = []
-        key = key[0] + key[1:].replace('[', '.[')  # transform 'ab[2]' to 'ab.[2]', keep '[1]' unchanged
-        for part in key.split('.'):
-            assert part
-            if part.startswith('['):
-                assert part.endswith(']')
-                part = int(part[1:-1])
-            key_items.append(part)
-        return tuple(key_items)
 
     @classmethod
     def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
@@ -202,7 +175,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
 
         if len(value) == 0:
             # the express "a=" will return the blank value of schema 'a'
-            return schema._blank
+            return AAZBlankArgValue
 
         try:
             if isinstance(schema, AAZSimpleTypeArg):
@@ -234,6 +207,11 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
         if data is None:
             if cls._schema._nullable:
                 return data
@@ -256,6 +234,11 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
         if data is None:
             if cls._schema._nullable:
                 return data
@@ -277,7 +260,9 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        if getattr(namespace, self.dest) is None or getattr(namespace, self.dest) == AAZUndefined:
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+            # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
+            # especially the default value of argument.
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:
@@ -300,7 +285,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
-            dest_ops.add(cls._schema._blank, *prefix_keys)
+            dest_ops.add(copy.deepcopy(cls._schema._blank), *prefix_keys)
         else:
             assert isinstance(values, list)
             ops = []
@@ -323,7 +308,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 #       --args [val1,val2,val3]
 
                 for value in values:
-                    key, _, _ = cls._split_value_str(value)
+                    key, _, _ = cls._str_parser.split_partial_value(value)
                     if key is not None:
                         # key should always be None
                         raise ex
@@ -353,6 +338,11 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
         if data is None:
             if cls._schema._nullable:
                 return data
@@ -371,7 +361,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
 
 
-class AAZGenericUpdateAction(Action):
+class AAZGenericUpdateAction(Action):  # pylint: disable=too-few-public-methods
     DEST = '_generic_update_args'
 
     def __call__(self, parser, namespace, values, option_string=None):

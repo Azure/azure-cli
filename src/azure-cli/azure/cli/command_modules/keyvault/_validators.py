@@ -221,7 +221,7 @@ def process_key_release_policy(cmd, ns):
         del ns.immutable
 
     if not ns.release_policy and not default_cvm_policy:
-        if immutable:
+        if immutable is not None:
             raise InvalidArgumentValueError('Please provide policy when setting `--immutable`')
         return
 
@@ -309,7 +309,7 @@ def validate_policy_permissions(ns):
     cert_perms = ns.certificate_permissions
     storage_perms = ns.storage_permissions
 
-    if not any([key_perms, secret_perms, cert_perms, storage_perms]):
+    if key_perms is None and secret_perms is None and cert_perms is None and storage_perms is None:
         raise argparse.ArgumentError(
             None,
             'specify at least one: --key-permissions, --secret-permissions, '

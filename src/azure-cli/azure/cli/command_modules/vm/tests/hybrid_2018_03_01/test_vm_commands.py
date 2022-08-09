@@ -1816,6 +1816,7 @@ class VMSSILBTest(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
 class VMSSLoadBalancerWithSku(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
     def test_vmss_lb_sku(self, resource_group):
 

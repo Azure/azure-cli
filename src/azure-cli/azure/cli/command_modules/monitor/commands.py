@@ -266,6 +266,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
         g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
                                  table_transformer=action_group_list_table)
+        g.custom_command('test-notifications create', 'post_notifications', table_transformer=action_group_list_table, supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)
@@ -403,10 +405,6 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
         g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
-        g.custom_command('update', 'update_log_analytics_cluster', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:

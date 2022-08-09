@@ -72,8 +72,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
     if enabled is not None:
         instance.enabled = enabled
 
-    if any([count, min_count, max_count]):
-
+    if count is not None or min_count is not None or max_count is not None:
         # resolve the interrelated aspects of capacity
         default_profile, _ = build_autoscale_profile(instance)
         curr_count = default_profile.capacity.default

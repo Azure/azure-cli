@@ -365,11 +365,11 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
   - name: --network-policy
     type: string
     short-summary: The Kubernetes network policy to use.
@@ -528,6 +528,25 @@ parameters:
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+  - name: --host-group-id
+    type: string
+    short-summary: The fully qualified dedicated host group id used to provision agent node pool.
+  - name: --enable-azure-keyvault-kms
+    type: bool
+    short-summary: Enable Azure KeyVault Key Management Service.
+  - name: --azure-keyvault-kms-key-id
+    type: string
+    short-summary: Identifier of Azure Key Vault key.
+  - name: --azure-keyvault-kms-key-vault-network-access
+    type: string
+    short-summary: Network Access of Azure Key Vault.
+    long-summary: Allowed values are "Public", "Private". If not set, defaults to type "Public". Requires --azure-keyvault-kms-key-id to be used.
+  - name: --azure-keyvault-kms-key-vault-resource-id
+    type: string
+    short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -583,7 +602,7 @@ examples:
   - name: Create a kubernetes cluster with custom tags
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
   - name: Create a kubernetes cluster with custom headers
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd
   - name: Create a kubernetes cluster with FIPS-enabled OS
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
   - name: Create a kubernetes cluster with enabling Windows gmsa and with setting DNS server in the vnet used by the cluster.
@@ -592,6 +611,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-windows-gmsa --gmsa-dns-server "10.240.0.4" --gmsa-root-domain-name "contoso.com"
   - name: create a kubernetes cluster with a snapshot id.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
+  - name: create a kubernetes cluster with support of hostgroup id.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.13 --location westus2 --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Create a kubernetes cluster with no CNI installed.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
 """
 
 helps['aks update'] = """
@@ -754,6 +777,25 @@ parameters:
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+  - name: --enable-azure-keyvault-kms
+    type: bool
+    short-summary: Enable Azure KeyVault Key Management Service.
+  - name: --disable-azure-keyvault-kms
+    type: bool
+    short-summary: Disable Azure KeyVault Key Management Service.
+  - name: --azure-keyvault-kms-key-id
+    type: string
+    short-summary: Identifier of Azure Key Vault key.
+  - name: --azure-keyvault-kms-key-vault-network-access
+    type: string
+    short-summary: Network Access of Azure Key Vault.
+    long-summary: Allowed values are "Public", "Private". If not set, defaults to type "Public". Requires --azure-keyvault-kms-key-id to be used.
+  - name: --azure-keyvault-kms-key-vault-resource-id
+    type: string
+    short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
@@ -975,7 +1017,7 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
@@ -987,10 +1029,10 @@ parameters:
     short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
-    short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+    short-summary: The Resource Id of a subnet in an existing VNet into which to deploy the cluster.
   - name: --pod-subnet-id
     type: string
-    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
+    short-summary: The Resource Id of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -999,7 +1041,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2022 for Windows Server 2022.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -1054,6 +1096,9 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --host-group-id
+    type: string
+    short-summary: The fully qualified dedicated host group id used to provision agent node pool.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1067,6 +1112,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-fips-image
   - name: create a kubernetes cluster with a snapshot id.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
+  - name: create a nodepool in an existing AKS cluster with host group id
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
 """
 
 helps['aks nodepool delete'] = """
@@ -1171,6 +1218,36 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+"""
+
+helps['aks nodepool stop'] = """
+    type: command
+    short-summary: Stop running agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Stop agent pool in the managed cluster
+          text: az aks nodepool stop --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
+"""
+
+helps['aks nodepool start'] = """
+    type: command
+    short-summary: Start stopped agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Start agent pool in the managed cluster
+          text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
 helps['aks remove-dev-spaces'] = """

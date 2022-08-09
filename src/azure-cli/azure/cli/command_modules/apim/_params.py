@@ -316,9 +316,9 @@ def load_arguments(self, _):
             'legal_terms',
             help="Product terms of use. Developers trying to subscribe to the product will be presented and required to accept these terms before they can complete the subscription process.")
         c.argument(
-            'subscription_required', options_list=['--subscription-required', '-s'],
+            'subscription_required', options_list=['--subscription-required', '-s'], arg_type=get_three_state_flag(),
             help="Whether a product subscription is required for accessing APIs included in this product.")
-        c.argument('approval_required', help="whether subscription approval is required. If false, new subscriptions will be approved automatically enabling developers to call the product’s APIs immediately after subscribing. If true, administrators must manually approve the subscription before the developer can any of the product’s APIs. Can be present only if subscriptionRequired property is present and has a value of false.")
+        c.argument('approval_required', arg_type=get_three_state_flag(), help="whether subscription approval is required. If false, new subscriptions will be approved automatically enabling developers to call the product’s APIs immediately after subscribing. If true, administrators must manually approve the subscription before the developer can any of the product’s APIs. Can be present only if subscriptionRequired property is present and has a value of false.")
         c.argument('subscriptions_limit', help="Whether the number of subscriptions a user can have to this product at the same time. Set to null or omit to allow unlimited per user subscriptions. Can be present only if subscriptionRequired property is present and has a value of false.")
         c.argument(
             'state', arg_type=get_enum_type(ProductState),
@@ -400,3 +400,14 @@ def load_arguments(self, _):
             'version_header_name',
             help="Name of HTTP header parameter that indicates the API Version if versioningScheme is set to `header`.")
         c.argument('if_match', help='ETag of the Entity.')
+
+    with self.argument_context('apim deletedservice show') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help="The name of the soft deleted API Management service instance.")
+
+    with self.argument_context('apim deletedservice purge') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument(
+            'service_name', options_list=['--service-name', '-n'],
+            help="The name of the soft deleted API Management service instance.")

@@ -6,11 +6,11 @@
 import time
 import json
 import tempfile
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.base import execute
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.exceptions import CliTestError
-from .preparers import (SqlVirtualMachinePreparer, LogAnalyticsWorkspacePreparer)
+from .preparers import (SqlVirtualMachinePreparer)
 
 
 class VulnerabilityAssessmentForSqlTests(LiveScenarioTest):
