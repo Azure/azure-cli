@@ -1728,3 +1728,48 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         # upgrade primary server
         result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version)).get_output_in_json()
         self.assertTrue(result['version'].startswith(new_version))
+
+
+class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+    mysql_location = 'northeurope'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_backups_mgmt(self, resource_group, server):
+        self._test_backups_mgmt('postgres', resource_group, server)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    @ServerPreparer(engine_type='mysql', location=mysql_location)
+    def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
+        self._test_backups_mgmt('mysql', resource_group, server)
+
+    def _test_backups_mgmt(self, database_engine, resource_group, server):
+        backups = self.cmd('{} flexible-server backup list -g {} -n {}'
+                       .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(len(backups) == 1)
+
+        automatic_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
+                                 .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
+
+        self.assertDictEqual(automatic_backup, backups[0])
+        
+        if database_engine == 'mysql':
+            backup_name = self.create_random_name('backup', 20)
+            self.cmd('{} flexible-server backup create -g {} -n {} --backup-name {}'
+                     .format(database_engine, resource_group, server, backup_name))
+
+            backups = self.cmd('{} flexible-server backup list -g {} -n {}'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+
+            backups = sorted(backups, key=lambda x: x['completedTime'], reverse=True)
+            self.assertTrue(len(backups) == 2)
+
+            customer_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
+                                        .format(database_engine, resource_group, server, backup_name)).get_output_in_json()
+
+            self.assertEqual(backup_name, customer_backup['name'])
+            self.assertDictEqual(customer_backup, backups[0])

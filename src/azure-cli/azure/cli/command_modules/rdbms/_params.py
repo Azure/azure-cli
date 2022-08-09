@@ -622,14 +622,25 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         # logs
         if command_group == 'mysql':
             with self.argument_context('{} flexible-server server-logs download'.format(command_group)) as c:
-                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the Server.')
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
 
             with self.argument_context('{} flexible-server server-logs list'.format(command_group)) as c:
-                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the Server.')
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('filename_contains', help='The pattern that file name should match.')
                 c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time.', default=72)
                 c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
+
+        # backups
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server backup create'.format(command_group)) as c:
+                c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+
+        with self.argument_context('{} flexible-server backup show'.format(command_group)) as c:
+            c.argument('backup_name', id_part='child_name_1', options_list=['--backup-name', '-b'], help='The name of the backup.')
+
+        with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
