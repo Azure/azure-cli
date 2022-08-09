@@ -605,9 +605,9 @@ parameters:
   - name: --file-path
     short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target delegate subnet
   - name: --vnet
-    short-summary: The ARM Id or name of the vnet for the volume
+    short-summary: Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.
   - name: --subnet
-    short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
+    short-summary: The name of the subnet for the volume.
   - name: --protocol-types
     short-summary: Space separated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
