@@ -30,6 +30,7 @@ ERROR_INVALID_PARAMETER = 0x0057
 ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
 
 
+# pylint: disable=import-error
 def set_conout_mode(new_mode, mask=0xffffffff):
     import os
     import msvcrt
@@ -69,7 +70,7 @@ def windows_enable_vt_mode():
     mode = mask = ENABLE_VIRTUAL_TERMINAL_PROCESSING
     try:
         return set_conout_mode(mode, mask)
-    except WindowsError as e:
+    except WindowsError as e:  # pylint: disable=undefined-variable
         if e.winerror == ERROR_INVALID_PARAMETER:
             raise NotImplementedError
         raise
