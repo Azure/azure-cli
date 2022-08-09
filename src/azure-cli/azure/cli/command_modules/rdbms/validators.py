@@ -558,3 +558,28 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
         raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
+
+
+def _validate_identity(cmd, namespace, identity):
+    if is_valid_resource_id(identity):
+        return identity
+
+    if _is_resource_name(identity):
+        return resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.ManagedIdentity',
+            type='userAssignedIdentities',
+            name=identity)
+
+    raise ValidationError('Invalid identity name or ID.')
+
+
+def validate_identity(cmd, namespace):
+    if namespace.identity:
+        namespace.identity = _validate_identity(cmd, namespace, namespace.identity)
+
+
+def validate_identities(cmd, namespace):
+    if namespace.identities:
+        namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]

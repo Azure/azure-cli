@@ -586,3 +586,87 @@ examples:
   - name: Create a backup for 'testsvr' with backup name 'testbackup'.
     text: az mysql flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
 """
+
+helps['mysql flexible-server identity'] = """
+type: group
+short-summary: Manage server user assigned identities.
+"""
+
+helps['mysql flexible-server identity assign'] = """
+type: command
+short-summary: Add user asigned managed identities to the server.
+examples:
+  - name: Add identities 'test-identity' and 'test-identity-2' to server 'testsvr'.
+    text: az mysql flexible-server identity assign -g testgroup -s testsvr --identity test-identity test-identity-2
+"""
+
+helps['mysql flexible-server identity remove'] = """
+type: command
+short-summary: Remove user asigned managed identites from the server.
+examples:
+  - name: Remove identity 'test-identity' from server 'testsvr'.
+    text: az mysql flexible-server identity remove -g testgroup -s testsvr --identity test-identity
+"""
+
+helps['mysql flexible-server identity show'] = """
+type: command
+short-summary: Get an user assigned managed identity from the server.
+examples:
+  - name: Get identity 'test-identity' from server 'testsvr'.
+    text: az mysql flexible-server identity show -g testgroup -s testsvr --identity test-identity
+"""
+
+helps['mysql flexible-server identity list'] = """
+type: command
+short-summary: List all user assigned managed identities from the server.
+examples:
+  - name: List all identities from server 'testsvr'.
+    text: az mysql flexible-server identity list -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin'] = """
+type: group
+short-summary: Manage server Active Directory administrator.
+"""
+
+helps['mysql flexible-server ad-admin create'] = """
+type: command
+short-summary: Create an Active Directory administrator.
+examples:
+  - name: Create Active Directory administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and identity 'test-identity'.
+    text: az mysql flexible-server ad-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 --identity test-identity
+"""
+
+helps['mysql flexible-server ad-admin delete'] = """
+type: command
+short-summary: Delete an Active Directory administrator.
+examples:
+  - name: Delete Active Directory administrator.
+    text: az mysql flexible-server ad-admin delete -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin list'] = """
+type: command
+short-summary: List all Active Directory administrators.
+examples:
+  - name: List Active Directory administrators.
+    text: az mysql flexible-server ad-admin list -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin show'] = """
+type: command
+short-summary: Get an Active Directory administrator.
+examples:
+  - name: Get Active Directory administrator.
+    text: az mysql flexible-server ad-admin show -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin wait'] = """
+type: command
+short-summary: Wait for the Active Directory administrator to satisfy certain conditions.
+examples:
+  - name: Wait until the Active Directory administrator exists.
+    text: az mysql flexible-server ad-admin wait -g testgroup -s testsvr --exists
+  - name: Wait for the Active Directory administrator to be deleted.
+    text: az mysql flexible-server ad-admin wait -g testgroup -s testsvr --deleted
+"""
