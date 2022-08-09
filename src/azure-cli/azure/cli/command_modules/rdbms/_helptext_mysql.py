@@ -409,16 +409,16 @@ examples:
 
 helps['mysql flexible-server deploy'] = """
 type: group
-short-summary: Enable and run github action workflow for MySQL server
+short-summary: Enable and run GitHub Actions workflow for MySQL server
 """
 
 helps['mysql flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for MySQL server.
+short-summary: Create GitHub Actions workflow file for MySQL server.
 examples:
-  - name: Create github action workflow file for MySQL server.
+  - name: Create GitHub Actions workflow file for MySQL server.
     text: az mysql flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
-  - name: Create github action workflow file for MySQL server and push it to the remote repository
+  - name: Create GitHub Actions workflow file for MySQL server and push it to the remote repository
     text: az mysql flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
 """
 
