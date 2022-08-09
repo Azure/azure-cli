@@ -92,7 +92,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             if command_group == 'postgres':
                 c.argument('version', default=11,
                            help='Server major version. https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
-            elif command_group == 'mysql':
+            else:
                 c.argument('version', help='Server major version.')
 
         with self.argument_context('{} server update'.format(command_group)) as c:
