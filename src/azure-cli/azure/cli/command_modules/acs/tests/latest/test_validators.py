@@ -474,10 +474,11 @@ class TestKeyVaultSecretsProviderAddon(unittest.TestCase):
         )
         validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_3)
 
-class HostGroupIDNamespace:
-     def __init__(self, host_group_id):
 
-         self.host_group_id = host_group_id
+class HostGroupIDNamespace:
+    def __init__(self, host_group_id):
+        self.host_group_id = host_group_id
+
 
 class TestValidateHostGroupID(unittest.TestCase):
     def test_invalid_host_group_id(self):
@@ -494,6 +495,7 @@ class AzureKeyVaultKmsKeyIdNamespace:
 
     def __init__(self, azure_keyvault_kms_key_id):
         self.azure_keyvault_kms_key_id = azure_keyvault_kms_key_id
+
 
 class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
     def test_invalid_azure_keyvault_kms_key_id_without_https(self):

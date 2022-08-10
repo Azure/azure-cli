@@ -119,14 +119,12 @@ def _validate_nodepool_name(nodepool_name):
 
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
-    nodepool_name = namespace.nodepool_name
-    _validate_nodepool_name(nodepool_name)
+    _validate_nodepool_name(namespace.nodepool_name)
 
 
 def validate_agent_pool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
-    nodepool_name = namespace.agent_pool_name
-    _validate_nodepool_name(nodepool_name)
+    _validate_nodepool_name(namespace.agent_pool_name)
 
 
 def validate_kubectl_version(namespace):
