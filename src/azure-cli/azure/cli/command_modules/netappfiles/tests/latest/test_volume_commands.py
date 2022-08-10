@@ -10,12 +10,12 @@ import time
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-RG_LOCATION = "southcentralusstage"
-DP_RG_LOCATION = "eastus2euap"
-VNET_LOCATION = "southcentralus"
-#RG_LOCATION = "westus2"
-#DP_RG_LOCATION = "eastus"
-#VNET_LOCATION = "westus2"
+#RG_LOCATION = "southcentralusstage"
+#DP_RG_LOCATION = "eastus2euap"
+#VNET_LOCATION = "southcentralus"
+RG_LOCATION = "westus2"
+DP_RG_LOCATION = "eastus"
+VNET_LOCATION = "westus2"
 GIB_SCALE = 1024 * 1024 * 1024
 
 # No tidy up of tests required. The resource group is automatically removed
