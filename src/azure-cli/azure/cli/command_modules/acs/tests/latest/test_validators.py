@@ -584,7 +584,7 @@ class TestValidateNodepoolName(unittest.TestCase):
                 namespace
             )
 
-    def test_invalid_nodepool_name_not_alnum(self):
+    def test_invalid_agent_pool_name_not_alnum(self):
         namespace = SimpleNamespace(
             **{
                 "agent_pool_name": "invalid-np*",
