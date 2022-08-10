@@ -26,9 +26,14 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE)
 from azure.cli.command_modules.acs._validators import (
-    validate_acr, validate_assign_identity, validate_assign_kubelet_identity,
+    validate_acr, validate_agent_pool_name, validate_assign_identity,
+    validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
+    validate_azure_keyvault_kms_key_vault_resource_id,
     validate_create_parameters, validate_credential_format,
-    validate_eviction_policy, validate_ip_ranges, validate_k8s_version,
+    validate_defender_config_parameter,
+    validate_defender_disable_and_enable_parameters, validate_eviction_policy,
+    validate_host_group_id, validate_ip_ranges, validate_k8s_version,
+    validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_kubectl_version, validate_kubelogin_version,
     validate_linux_host_name, validate_list_of_integers,
     validate_load_balancer_idle_timeout,
@@ -41,11 +46,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_nodes_count, validate_pod_subnet_id, validate_ppg,
     validate_priority, validate_snapshot_id, validate_snapshot_name,
     validate_spot_max_price, validate_ssh_key, validate_taints,
-    validate_vm_set_type, validate_vnet_subnet_id,
-    validate_keyvault_secrets_provider_disable_and_enable_parameters,
-    validate_defender_disable_and_enable_parameters, validate_defender_config_parameter,
-    validate_host_group_id,
-    validate_azure_keyvault_kms_key_id, validate_azure_keyvault_kms_key_vault_resource_id)
+    validate_vm_set_type, validate_vnet_subnet_id)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -454,7 +455,7 @@ def load_arguments(self, _):
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('cluster_name', help='The cluster name.')
         # the following argument is declared for the wait command
-        c.argument('agent_pool_name', options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_nodepool_name, help='The node pool name.')
+        c.argument('agent_pool_name', options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_agent_pool_name, help='The node pool name.')
 
     for sub_command in ['add', 'update', 'upgrade', 'scale', 'show', 'list', 'delete']:
         with self.argument_context('aks nodepool ' + sub_command) as c:

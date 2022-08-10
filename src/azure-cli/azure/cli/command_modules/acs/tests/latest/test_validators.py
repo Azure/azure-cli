@@ -474,10 +474,11 @@ class TestKeyVaultSecretsProviderAddon(unittest.TestCase):
         )
         validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_3)
 
-class HostGroupIDNamespace:
-     def __init__(self, host_group_id):
 
-         self.host_group_id = host_group_id
+class HostGroupIDNamespace:
+    def __init__(self, host_group_id):
+        self.host_group_id = host_group_id
+
 
 class TestValidateHostGroupID(unittest.TestCase):
     def test_invalid_host_group_id(self):
@@ -494,6 +495,7 @@ class AzureKeyVaultKmsKeyIdNamespace:
 
     def __init__(self, azure_keyvault_kms_key_id):
         self.azure_keyvault_kms_key_id = azure_keyvault_kms_key_id
+
 
 class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
     def test_invalid_azure_keyvault_kms_key_id_without_https(self):
@@ -548,6 +550,72 @@ class TestValidateAzureKeyVaultKmsKeyVaultResourceId(unittest.TestCase):
         namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id=valid_azure_keyvault_kms_key_vault_resource_id)
 
         validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+
+
+class TestValidateNodepoolName(unittest.TestCase):
+    def test_invalid_nodepool_name_too_long(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_name": "tooLongNodepoolName",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nodepool_name(
+                namespace
+            )
+
+    def test_invalid_agent_pool_name_too_long(self):
+        namespace = SimpleNamespace(
+            **{
+                "agent_pool_name": "tooLongNodepoolName",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_agent_pool_name(
+                namespace
+            )
+
+    def test_invalid_nodepool_name_not_alnum(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_name": "invalid-np*",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nodepool_name(
+                namespace
+            )
+
+    def test_invalid_agent_pool_name_not_alnum(self):
+        namespace = SimpleNamespace(
+            **{
+                "agent_pool_name": "invalid-np*",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_agent_pool_name(
+                namespace
+            )
+
+    def test_valid_nodepool_name(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_name": "np100",
+            }
+        )
+        validators.validate_nodepool_name(
+            namespace
+        )
+
+    def test_valid_agent_pool_name(self):
+        namespace = SimpleNamespace(
+            **{
+                "agent_pool_name": "np100",
+            }
+        )
+        validators.validate_agent_pool_name(
+            namespace
+        )
 
 
 if __name__ == "__main__":
