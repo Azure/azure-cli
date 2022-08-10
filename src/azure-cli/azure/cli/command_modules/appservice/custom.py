@@ -2584,11 +2584,19 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 def _get_log(url, user_name, password, log_file=None):
     import urllib3
+    
     try:
-        import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_urllib3()
+        import ssl
     except ImportError:
-        pass
+        ssl = None
+
+    if not getattr(ssl, "HAS_SNI", False):
+        try:
+            from urllib3.contrib import pyopenssl
+            pyopenssl.inject_into_urllib3()
+        except ImportError:
+            pass
+        
 
     http = get_pool_manager(url)
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
