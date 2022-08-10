@@ -1274,7 +1274,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     if not show_all:
         available_skus = []
         for sku_info in result:
-            if is_sku_available(cmd, sku_info):
+            if is_sku_available(cmd, sku_info, zone):
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:

@@ -122,7 +122,7 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def is_sku_available(cmd, sku_info):
+def is_sku_available(cmd, sku_info, zone):
     is_available = True
     is_restrict_zone = False
     is_restrict_location = False
@@ -143,7 +143,7 @@ def is_sku_available(cmd, sku_info):
                     sku_info.location_info[0].location in (restriction.restriction_info.locations or [])):
                 is_restrict_location = True
 
-            if is_restrict_location or is_restrict_zone:
+            if is_restrict_location or (is_restrict_zone and zone):
                 is_available = False
                 break
     return is_available
