@@ -1317,6 +1317,10 @@ def update_resource_group(instance, tags=None):
     return instance
 
 
+def get_resource_group(cmd, resource_group_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+
+
 def export_group_as_template(
         cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False):
     """Captures a resource group as a template.
