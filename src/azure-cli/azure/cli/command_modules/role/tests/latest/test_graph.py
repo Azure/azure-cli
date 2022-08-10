@@ -322,9 +322,21 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
                 self.check('length(requiredResourceAccess)', 2)
             ]).get_output_in_json()
 
-        # Update with generic update
+        # Update with --set
+        # Value is a JSON
         self.cmd('ad app update --id {app_id} --set isDeviceOnlyAuthSupported=true')
         self.cmd('ad app show --id {app_id}', checks=self.check('isDeviceOnlyAuthSupported', True))
+
+        # Value is raw string
+        self.cmd('ad app update --id {app_id} --set groupMembershipClaims=All')
+        self.cmd('ad app show --id {app_id}', checks=self.check('groupMembershipClaims', 'All'))
+
+        # Update with --parameters
+        self.cmd('ad app update --id {app_id} --parameters \'{{"isDeviceOnlyAuthSupported": false}}\'')
+        self.cmd('ad app show --id {app_id}', checks=self.check('isDeviceOnlyAuthSupported', False))
+
+        self.cmd('ad app update --id {app_id} --parameters \'{{"groupMembershipClaims": "SecurityGroup"}}\'')
+        self.cmd('ad app show --id {app_id}', checks=self.check('groupMembershipClaims', 'SecurityGroup'))
 
         self.cmd('ad app delete --id {app_id}')
         self.cmd('ad app show --id {app_id}', expect_failure=True)
@@ -681,6 +693,9 @@ class ServicePrincipalScenarioTest(GraphScenarioTestBase):
         # Update with generic update
         self.cmd('ad sp update --id {id} --set appRoleAssignmentRequired=true')
         self.cmd('ad sp show --id {id}', checks=self.check('appRoleAssignmentRequired', True))
+
+        self.cmd('ad sp update --id {id} --parameters \'{{"appRoleAssignmentRequired": false}}\'')
+        self.cmd('ad sp show --id {id}', checks=self.check('appRoleAssignmentRequired', False))
 
         self.cmd('ad sp delete --id {app_id}')
         self.cmd('ad app delete --id {app_id}')

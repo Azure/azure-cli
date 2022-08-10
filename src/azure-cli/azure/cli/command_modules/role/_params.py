@@ -219,6 +219,14 @@ def load_arguments(self, _):
             c.argument('key_id', help='credential key id')
             c.argument('cert', action='store_true', help='a certificate based credential')
 
+    # Generic Update
+    for item in ['ad app update', 'ad sp update']:
+        with self.argument_context(item) as c:
+            c.argument('properties_to_set', arg_group='Generic Update', options_list=['--set'], nargs='+',
+                       help='Set properties. Space-separated list of {name}={string or JSON}.')
+            c.argument('parameters', arg_group='Generic Update', type=validate_file_or_dict, is_experimental=True,
+                       help='Parameters for update operation. ' + JSON_PROPERTY_HELP)
+
     with self.argument_context('ad') as c:
         c.argument('display_name', help='object\'s display name or its prefix')
         c.argument('identifier_uri', help='graph application identifier, must be in uri format')

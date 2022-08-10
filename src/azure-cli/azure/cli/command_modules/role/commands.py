@@ -81,6 +81,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_application')
         g.custom_command('delete', 'delete_application')
         g.custom_command('list', 'list_applications', table_transformer=get_graph_object_transformer('app'))
+        g.custom_command('update', 'update_application')
         g.custom_show_command('show', 'show_application')
         g.custom_command('permission grant', 'grant_application')
         g.custom_command('permission list', 'list_permissions')
@@ -88,9 +89,6 @@ def load_command_table(self, _):
         g.custom_command('permission delete', 'delete_permission')
         g.custom_command('permission list-grants', 'list_permission_grants')
         g.custom_command('permission admin-consent', 'admin_consent')
-        g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
-                                 getter_name='show_application', getter_type=role_custom,
-                                 custom_func_name='update_application', custom_func_type=role_custom)
         g.custom_command('credential reset', 'reset_application_credential')
         g.custom_command('credential list', 'list_application_credentials')
         g.custom_command('credential delete', 'delete_application_credential')
@@ -112,9 +110,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_service_principal')
         g.custom_command('list', 'list_service_principals', table_transformer=get_graph_object_transformer('sp'))
         g.custom_show_command('show', 'show_service_principal')
-        g.generic_update_command('update', getter_name='show_service_principal', getter_type=role_custom,
-                                 setter_name='patch_service_principal', setter_type=role_custom,
-                                 custom_func_name='update_service_principal', custom_func_type=role_custom)
+        g.custom_command('update', 'update_service_principal')
 
     with self.command_group('ad sp owner', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_service_principal_owners')
