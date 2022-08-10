@@ -27,14 +27,17 @@ def create_identity(client, resource_group_name, resource_name, location, tags=N
                                    parameters=parameters)
 
 
-def create_or_update_federated_credential(client, resource_group_name, identity_name, federated_credential_name,
+def create_or_update_federated_credential(cmd, client, resource_group_name, identity_name, federated_credential_name,
                                           issuer=None, subject=None, audiences=None):
     _default_audiences = ['api://AzureADTokenExchange']
     audiences = _default_audiences if not audiences else audiences
     # if not issuer or not subject:
     #     raise RequiredArgumentMissingError('usage error: please provide both --issuer and --subject parameters')
 
-    parameters = {'issuer': issuer, 'subject': subject, 'audiences': audiences}
+    FederatedIdentityCredential = cmd.get_models('FederatedIdentityCredential', resource_type=ResourceType.MGMT_MSI,
+                                                 operation_group='federated_identity_credentials')
+    parameters = FederatedIdentityCredential(issuer=issuer, subject=subject, audiences=audiences)
+    # parameters = {'issuer': issuer, 'subject': subject, 'audiences': audiences}
     # parameters = {'properties': properties}
 
     return client.create_or_update(resource_group_name=resource_group_name, resource_name=identity_name,
