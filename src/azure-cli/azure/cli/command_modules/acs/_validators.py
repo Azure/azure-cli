@@ -108,13 +108,25 @@ def validate_k8s_version(namespace):
                            'such as "1.7.12" or "1.7"')
 
 
+def _validate_nodepool_name(nodepool_name):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    if nodepool_name != "":
+        if len(nodepool_name) > 12:
+            raise InvalidArgumentValueError('--nodepool-name can contain at most 12 characters')
+        if not nodepool_name.isalnum():
+            raise InvalidArgumentValueError('--nodepool-name should contain only alphanumeric characters')
+
+
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
-    if namespace.nodepool_name != "":
-        if len(namespace.nodepool_name) > 12:
-            raise CLIError('--nodepool-name can contain at most 12 characters')
-        if not namespace.nodepool_name.isalnum():
-            raise CLIError('--nodepool-name should contain only alphanumeric characters')
+    nodepool_name = namespace.nodepool_name
+    _validate_nodepool_name(nodepool_name)
+
+
+def validate_agent_pool_name(namespace):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    nodepool_name = namespace.agent_pool_name
+    _validate_nodepool_name(nodepool_name)
 
 
 def validate_kubectl_version(namespace):
