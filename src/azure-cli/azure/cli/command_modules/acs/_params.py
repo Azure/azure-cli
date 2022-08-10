@@ -24,7 +24,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
-    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE)
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -115,6 +118,14 @@ auto_upgrade_channels = [
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
+
+gpu_instance_profiles = [
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G,
+]
 
 
 def load_arguments(self, _):
@@ -327,6 +338,7 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('http_proxy_config')
+        c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -493,6 +505,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[

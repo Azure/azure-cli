@@ -1581,6 +1581,7 @@ def aks_create(
     yes=False,
     aks_custom_headers=None,
     host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2985,6 +2986,7 @@ def aks_agentpool_add(
     no_wait=False,
     aks_custom_headers=None,
     host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

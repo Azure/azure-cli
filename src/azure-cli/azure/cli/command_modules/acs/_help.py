@@ -547,6 +547,9 @@ parameters:
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --gpu-instance-profile
+    type: string
+    short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -1099,6 +1102,9 @@ parameters:
   - name: --host-group-id
     type: string
     short-summary: The fully qualified dedicated host group id used to provision agent node pool.
+  - name: --gpu-instance-profile
+    type: string
+    short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48

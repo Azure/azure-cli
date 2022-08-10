@@ -1267,6 +1267,26 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_no_wait(), False)
 
+    def common_set_up_gpu_propertes(self):
+        ctx1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gpu_instance_profile": "test_gpu_instance_profile"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            ctx1.set_up_gpu_properties(None)
+
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        ctx1.context.attach_agentpool(agentpool_1)
+        agentpool_2 = ctx1.set_up_gpu_properties(agentpool_1)
+        agentpool_2 = self._restore_defaults_in_agentpool(agentpool_2)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            gpu_instance_profile="test_gpu_instance_profile",
+        )
+        self.assertEqual(agentpool_2, ground_truth_agentpool_1)
 
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
