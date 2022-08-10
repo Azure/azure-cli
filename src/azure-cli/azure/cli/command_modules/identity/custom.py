@@ -34,8 +34,8 @@ def create_or_update_federated_credential(client, resource_group_name, identity_
     # if not issuer or not subject:
     #     raise RequiredArgumentMissingError('usage error: please provide both --issuer and --subject parameters')
 
-    properties = {'issuer': issuer, 'subject': subject, 'audiences': audiences}
-    parameters = {'properties': properties}
+    parameters = {'issuer': issuer, 'subject': subject, 'audiences': audiences}
+    # parameters = {'properties': properties}
 
     return client.create_or_update(resource_group_name=resource_group_name, resource_name=identity_name,
                                    federated_identity_credential_resource_name=federated_credential_name,
