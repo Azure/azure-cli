@@ -84,10 +84,16 @@ class TunnelServer:
         import urllib3
 
         try:
-            import urllib3.contrib.pyopenssl
-            urllib3.contrib.pyopenssl.inject_into_urllib3()
+            import ssl
         except ImportError:
-            pass
+            ssl = None
+
+        if not getattr(ssl, "HAS_SNI", False):
+            try:
+                from urllib3.contrib import pyopenssl
+                pyopenssl.inject_into_urllib3()
+            except ImportError:
+                pass
 
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
