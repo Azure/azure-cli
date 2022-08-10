@@ -398,16 +398,16 @@ examples:
 
 helps['postgres flexible-server deploy'] = """
 type: group
-short-summary: Enable and run github action workflow for PostgreSQL server
+short-summary: Enable and run GitHub Actions workflow for PostgreSQL server
 """
 
 helps['postgres flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for PostgreSQL server.
+short-summary: Create GitHub Actions workflow file for PostgreSQL server.
 examples:
-  - name: Create github action workflow file for PostgreSQL server.
+  - name: Create GitHub Actions workflow file for PostgreSQL server.
     text: az postgres flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
-  - name: Create github action workflow file for PostgreSQL server and push it to the remote repository
+  - name: Create GitHub Actions workflow file for PostgreSQL server and push it to the remote repository
     text: az postgres flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
 """
 
