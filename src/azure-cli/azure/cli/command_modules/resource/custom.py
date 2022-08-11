@@ -1318,7 +1318,16 @@ def update_resource_group(instance, tags=None):
 
 
 def get_resource_group(cmd, resource_group_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    from azure.core.exceptions import ResourceNotFoundError
+    try:
+        rcf = _resource_client_factory(cmd.cli_ctx)
+        return rcf.resource_groups.get(resource_group_name=resource_group_name)
+    except ResourceNotFoundError as e:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        raise ResourceNotFoundError("Resource group '{}' could not be found in subscription '{}'."
+                                    .format(resource_group_name, subscription_id))
 
 
 def export_group_as_template(
