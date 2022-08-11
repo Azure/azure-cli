@@ -2035,7 +2035,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
-            {"gpu_instance_profile": "test_gpu_instance_profile", "workload_runtime": "test_workload_runtime"},
+            {"gpu_instance_profile": "test_gpu_instance_profile"},
             self.resource_type,
             self.agentpool_decorator_mode,
         )
@@ -2048,7 +2048,6 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             gpu_instance_profile="test_gpu_instance_profile",
-            workload_runtime="test_workload_runtime",
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
