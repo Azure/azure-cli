@@ -92,6 +92,9 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
 
+    with self.argument_context('netappfiles volume create') as c:
+        c.argument('zones', nargs="+")
+
     with self.argument_context('netappfiles volume delete') as c:
         c.argument('force_delete', arg_type=get_three_state_flag())
 
