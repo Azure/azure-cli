@@ -104,12 +104,12 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
     def test_show_not_existing_resource_group(self):
         self.kwargs.update({
-            'group': self.create_random_name('not_exist_group_', 30),
-            'subscriptionId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590'
+            'group': self.create_random_name('not_exist_group_', 30)
         })
-        from azure.cli.core.azclierror import ResourceNotFoundError
+        subscriptionId = self.get_subscription_id()
+        from azure.core.exceptions import ResourceNotFoundError
         message = "Resource group '{}' could not be found in subscription '{}'." \
-            .format(self.kwargs['group'], self.kwargs['subscriptionId'])
+            .format(self.kwargs['group'], subscriptionId)
         with self.assertRaisesRegex(ResourceNotFoundError, message):
             self.cmd('group show -n {group}')
 
