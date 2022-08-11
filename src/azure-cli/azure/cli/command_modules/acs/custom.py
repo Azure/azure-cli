@@ -2368,8 +2368,6 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
-    if not acr.endswith(CONST_ACR_DOMAIN_NAME):
-        acr = acr + CONST_ACR_DOMAIN_NAME
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
