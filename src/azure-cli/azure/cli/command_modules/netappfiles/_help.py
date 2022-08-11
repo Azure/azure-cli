@@ -706,7 +706,7 @@ examples:
     text: >
         az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4.1
 
-  - name: Create an ANF volume with zones (Availability Zone) specified 
+  - name: Create an ANF volume with zones (Availability Zone) specified
     text: >
         az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --zones zone1
 """
