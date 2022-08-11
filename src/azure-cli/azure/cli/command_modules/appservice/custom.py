@@ -609,6 +609,30 @@ def _get_scm_deployment_status_poller(client, resource_group_name, name, scm_dep
     return poller
 
 
+def _handle_deployment_status_stuck(cmd, rg_name, name, deployment_status_url, authorization):
+    logger.warning("weird case")
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    res_dict = {}
+    try:
+        response = requests.get(deployment_status_url, headers=authorization,
+                                verify=not should_disable_connection_verify())
+        res_dict = response.json()
+    except Exception:
+        # TODO do something here?
+        pass
+
+
+    if res_dict.get('status', 0) == 3:
+        raise UnclassifiedUserFault("Zip deployment failed. {}. Please run the command az webapp log deployment "
+                                    "show -n {} -g {}".format(res_dict, name, rg_name))
+    if res_dict.get('status', 0) == 4:
+        return
+    logger.warning("Deployment complete. "
+                       "Please check your SCM site for the status of the deployment.")
+
+
 # pylint: disable=too-many-statements
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     from azure.core.exceptions import ResourceNotFoundError as Error404
@@ -682,6 +706,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         state_idx = 0
         space_buffer = int(max([len(s) for s in states_sequence]) * 1.25)
         format_status = lambda s: f"{s}...{(space_buffer - (len(s))) * ' '}"  # noqa: E731
+        runtime_start_time = None
+        runtime_start_timeout = (5*60)  # 5 minutes
 
         ticker.prefix = format_status(states[state_idx])
         ticker.suffix = ""
@@ -689,6 +715,16 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         while not poller.done() and (datetime.datetime.utcnow() - start_time).seconds < timeout:
             ticker.tick()
             status = poller.polling_method().resource().status
+            # TODO remove this section once the related bug is fixed on the back end
+            if status == StatusEnum.RUNTIME_STARTING:
+                if runtime_start_time is None:
+                    runtime_start_time = datetime.datetime.utcnow()
+                elif (runtime_start_time - datetime.datetime.utcnow()).seconds >= runtime_start_timeout:
+                    # check status from SCM if possible
+                    logger.info(f"Deployment status stuck on {status} for {runtime_start_timeout} seconds. Attempting to check the status via SCM...")
+                    _handle_deployment_status_stuck(cmd, resource_group_name, name, f"{scm_url}/api/deployments/latest", authorization)
+                    ticker.flush()
+                    break
             if ((status in states_sequence) and
                     (states_sequence.index(status) > state_idx and state_idx < len(states) - 1)):
                 ticker.flush()
@@ -700,7 +736,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
             sleep(polling_period)
 
         status = poller.polling_method().resource().status
-        if poller.done():
+        if poller.done() or runtime_start_time is not None:
+            if runtime_start_time is not None:  # status got stuck, but deployment was complete
+                status = StatusEnum.RUNTIME_SUCCESSFUL
             human_readable_status = _get_human_readable_status(status, logs_url, app_url)
             if status in failure_states:
                 print("\n")

@@ -1664,12 +1664,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
-            JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'ZipDeploy'),
-            JMESPathCheck('message', 'Created via a push deployment'),
-            JMESPathCheck('complete', True)
-        ])
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
 
 class WebappImplictIdentityTest(ScenarioTest):
