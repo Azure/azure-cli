@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import time
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
@@ -35,7 +36,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
             self.cmd("netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION))
             self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s %s %s" %
                      (account_name, pool_name, LOCATION, POOL_DEFAULT, tag))
-
+        if self.is_live or self.in_recording:
+            time.sleep(60)
         if snapshot_id:
             return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
                             "--subnet %s %s --snapshot-id %s" %
