@@ -133,7 +133,6 @@ ADDONS = {
 
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
-CONST_ACR_DOMAIN_NAME = ".azurecr.io"
 
 
 # consts for decorator pattern

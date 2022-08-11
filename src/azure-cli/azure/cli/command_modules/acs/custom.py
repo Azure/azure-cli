@@ -46,7 +46,6 @@ from azure.cli.command_modules.acs._client_factory import (
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_ACR_DOMAIN_NAME,
     CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_CANIPULL_IMAGE,
     CONST_CONFCOM_ADDON_NAME,
