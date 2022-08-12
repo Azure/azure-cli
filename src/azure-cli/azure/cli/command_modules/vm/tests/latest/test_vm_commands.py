@@ -5655,8 +5655,9 @@ class VMGalleryImage(ScenarioTest):
             'vmss2': 'vmss2'
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true"', checks=[
-            self.check('osState', 'Specialized')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true" --tags tag=test', checks=[
+            self.check('osState', 'Specialized'),
+            self.check('tags', {'tag': 'test'})
         ])
         self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
         disk = self.cmd('vm show -g {rg} -n {vm1}').get_output_in_json()['storageProfile']['osDisk']['name']
