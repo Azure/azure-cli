@@ -553,8 +553,8 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
 
     # check the status of async deployment
     if res.status_code == 202:
-        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                authorization, timeout)
+        response = _check_scm_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                    authorization, timeout)
         return response
 
     # check if there's an ongoing process
@@ -609,8 +609,7 @@ def _get_scm_deployment_status_poller(client, resource_group_name, name, scm_dep
     return poller
 
 
-def _handle_deployment_status_stuck(cmd, rg_name, name, deployment_status_url, authorization):
-    logger.warning("weird case")
+def _handle_deployment_status_stuck(rg_name, name, deployment_status_url, authorization):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -619,36 +618,25 @@ def _handle_deployment_status_stuck(cmd, rg_name, name, deployment_status_url, a
         response = requests.get(deployment_status_url, headers=authorization,
                                 verify=not should_disable_connection_verify())
         res_dict = response.json()
-    except Exception:
-        # TODO do something here?
-        pass
-
+    except Exception:  # pylint: disable=broad-except
+        logger.info("Failed to fetch status from SCM site")
 
     if res_dict.get('status', 0) == 3:
         raise UnclassifiedUserFault("Zip deployment failed. {}. Please run the command az webapp log deployment "
                                     "show -n {} -g {}".format(res_dict, name, rg_name))
     if res_dict.get('status', 0) == 4:
         return
-    logger.warning("Deployment complete. "
-                       "Please check your SCM site for the status of the deployment.")
 
 
 # pylint: disable=too-many-statements
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
-    from azure.core.exceptions import ResourceNotFoundError as Error404
-    from time import sleep
-    from azure.mgmt.web.models import DeploymentBuildStatus as StatusEnum
-
-    start_time = datetime.datetime.utcnow()
-    timeout = timeout or (4 * 60 * 60)
-    polling_period = 1
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
     try:
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     except ValueError:
-        raise ResourceNotFoundError('Failed to fetch scm url for function app')
+        raise ResourceNotFoundError('Failed to fetch scm url for app')
 
     zip_url = scm_url + '/api/zipdeploy?isAsync=true&trackDeploymentProgress=true'
 
@@ -669,102 +657,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
-    if res.status_code == 202:
-        deployment_status_id = res.headers.get("SCM-DEPLOYMENT-ID")
-        client = web_client_factory(cmd.cli_ctx)
-
-        poller = None
-        ticker = PollingAnimation()
-        while poller is None and ((datetime.datetime.utcnow() - start_time).seconds < timeout):
-            ticker.tick()
-            try:
-                poller = _get_scm_deployment_status_poller(client, resource_group_name,
-                                                           name, deployment_status_id, slot)
-            except Error404:
-                ticker.flush()
-                sleep(polling_period)
-        ticker.flush()
-
-        app_url = _get_url(cmd, resource_group_name, name, slot)
-        logs_url = f'{scm_url}/api/deployments/{deployment_status_id}/log'
-        states = [StatusEnum.BUILD_REQUEST_RECEIVED, StatusEnum.BUILD_PENDING, StatusEnum.BUILD_IN_PROGRESS]
-        states_sequence = [StatusEnum.BUILD_ABORTED,
-                           StatusEnum.BUILD_REQUEST_RECEIVED,
-                           StatusEnum.BUILD_PENDING,
-                           StatusEnum.BUILD_IN_PROGRESS,
-                           StatusEnum.BUILD_FAILED,
-                           StatusEnum.BUILD_SUCCESSFUL,
-                           StatusEnum.POST_BUILD_RESTART_REQUIRED,
-                           StatusEnum.RUNTIME_STARTING,
-                           StatusEnum.RUNTIME_FAILED,
-                           StatusEnum.RUNTIME_SUCCESSFUL]
-        failure_states = {StatusEnum.BUILD_ABORTED,
-                          StatusEnum.BUILD_FAILED,
-                          StatusEnum.RUNTIME_FAILED,
-                          StatusEnum.TIMED_OUT}
-        status = None
-        state_idx = 0
-        space_buffer = int(max([len(s) for s in states_sequence]) * 1.25)
-        format_status = lambda s: f"{s}...{(space_buffer - (len(s))) * ' '}"  # noqa: E731
-        runtime_start_time = None
-        runtime_start_timeout = (5*60)  # 5 minutes
-
-        ticker.prefix = format_status(states[state_idx])
-        ticker.suffix = ""
-        print(format_status(states[state_idx]), end="")
-        while not poller.done() and (datetime.datetime.utcnow() - start_time).seconds < timeout:
-            ticker.tick()
-            status = poller.polling_method().resource().status
-            # TODO remove this section once the related bug is fixed on the back end
-            if status == StatusEnum.RUNTIME_STARTING:
-                if runtime_start_time is None:
-                    runtime_start_time = datetime.datetime.utcnow()
-                elif (runtime_start_time - datetime.datetime.utcnow()).seconds >= runtime_start_timeout:
-                    # check status from SCM if possible
-                    logger.info(f"Deployment status stuck on {status} for {runtime_start_timeout} seconds. Attempting to check the status via SCM...")
-                    _handle_deployment_status_stuck(cmd, resource_group_name, name, f"{scm_url}/api/deployments/latest", authorization)
-                    ticker.flush()
-                    break
-            if ((status in states_sequence) and
-                    (states_sequence.index(status) > state_idx and state_idx < len(states) - 1)):
-                ticker.flush()
-                print(f"{format_status(states[state_idx])}Success! ")
-                state_idx += 1
-                print(format_status(states[state_idx]), end="")
-                ticker.prefix = format_status(states[state_idx])
-            ticker.flush()
-            sleep(polling_period)
-
-        status = poller.polling_method().resource().status
-        if poller.done() or runtime_start_time is not None:
-            if runtime_start_time is not None:  # status got stuck, but deployment was complete
-                status = StatusEnum.RUNTIME_SUCCESSFUL
-            human_readable_status = _get_human_readable_status(status, logs_url, app_url)
-            if status in failure_states:
-                print("\n")
-                raise UnclassifiedUserFault(human_readable_status)
-            print(f"{format_status(states[state_idx])}Success! \n")
-            print(human_readable_status, end="\n\n")
-            return poller.polling_method().resource()
-
-        raise UnclassifiedUserFault("Timeout reached by the command, however, the deployment operation is still "
-                                    "on-going. Navigate to your scm site to check the deployment status. "
-                                    f"The current status is '{status}'.")
-
-    # check if there's an ongoing process
-    if res.status_code == 409:
-        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
-                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
-                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
-                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
-                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
-                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
-                                    "to delete them.".format(scm_url + '/api/deployments/latest'))
-
-    # check if an error occured during deployment
-    if res.status_code:
-        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
-                                 .format(res.status_code, res.text))
+    return _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_url, authorization, timeout)
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
@@ -3962,7 +3855,7 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
+def _check_scm_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
     total_trials = (int(timeout) // 2) if timeout else 450
@@ -3993,6 +3886,115 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
+
+
+def _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_url, authorization, timeout=None):
+    from azure.core.exceptions import ResourceNotFoundError as Error404
+    from time import sleep
+    from azure.mgmt.web.models import DeploymentBuildStatus as StatusEnum
+
+    start_time = datetime.datetime.utcnow()
+    timeout = timeout or (4 * 60 * 60)
+    polling_period = 1
+
+    if res.status_code == 202 or res.status_code == 200:  # TODO
+        deployment_status_id = res.headers.get("SCM-DEPLOYMENT-ID")
+        client = web_client_factory(cmd.cli_ctx)
+
+        poller = None
+        ticker = PollingAnimation()
+        while poller is None and ((datetime.datetime.utcnow() - start_time).seconds < timeout):
+            ticker.tick()
+            try:
+                poller = _get_scm_deployment_status_poller(client, resource_group_name,
+                                                           name, deployment_status_id, slot)
+            except Error404:
+                ticker.flush()
+                sleep(polling_period)
+        ticker.flush()
+
+        app_url = _get_url(cmd, resource_group_name, name, slot)
+        logs_url = f'{scm_url}/api/deployments/{deployment_status_id}/log'
+        states = [StatusEnum.BUILD_REQUEST_RECEIVED, StatusEnum.BUILD_PENDING, StatusEnum.BUILD_IN_PROGRESS]
+        states_sequence = [StatusEnum.BUILD_ABORTED,
+                           StatusEnum.BUILD_REQUEST_RECEIVED,
+                           StatusEnum.BUILD_PENDING,
+                           StatusEnum.BUILD_IN_PROGRESS,
+                           StatusEnum.BUILD_FAILED,
+                           StatusEnum.BUILD_SUCCESSFUL,
+                           StatusEnum.POST_BUILD_RESTART_REQUIRED,
+                           StatusEnum.RUNTIME_STARTING,
+                           StatusEnum.RUNTIME_FAILED,
+                           StatusEnum.RUNTIME_SUCCESSFUL]
+        failure_states = {StatusEnum.BUILD_ABORTED,
+                          StatusEnum.BUILD_FAILED,
+                          StatusEnum.RUNTIME_FAILED,
+                          StatusEnum.TIMED_OUT}
+        status = None
+        state_idx = 0
+        space_buffer = int(max([len(s) for s in states_sequence]) * 1.25)
+        format_status = lambda s: f"{s}...{(space_buffer - (len(s))) * ' '}"  # noqa: E731
+        runtime_start_time = None
+        runtime_start_timeout = (5 * 60)  # 5 minutes
+
+        ticker.prefix = format_status(states[state_idx])
+        ticker.suffix = ""
+        print(format_status(states[state_idx]), end="")
+        while not poller.done() and (datetime.datetime.utcnow() - start_time).seconds < timeout:
+            ticker.tick()
+            status = poller.polling_method().resource().status
+            # TODO remove this section once the related bug is fixed on the back end
+            if status == StatusEnum.RUNTIME_STARTING:
+                if runtime_start_time is None:
+                    runtime_start_time = datetime.datetime.utcnow()
+                elif (datetime.datetime.utcnow() - runtime_start_time).seconds >= runtime_start_timeout:
+                    # check status from SCM if possible
+                    logger.info("Deployment status stuck on %s for %s seconds. "
+                                "Attempting to check the status via SCM...", status, runtime_start_timeout)
+                    _handle_deployment_status_stuck(resource_group_name, name, f"{scm_url}/api/deployments/latest",
+                                                    authorization)
+                    ticker.flush()
+                    break
+            if ((status in states_sequence) and
+                    (states_sequence.index(status) > state_idx and state_idx < len(states) - 1)):
+                ticker.flush()
+                print(f"{format_status(states[state_idx])}Success! ")
+                state_idx += 1
+                print(format_status(states[state_idx]), end="")
+                ticker.prefix = format_status(states[state_idx])
+            ticker.flush()
+            sleep(polling_period)
+
+        status = poller.polling_method().resource().status
+        if poller.done() or runtime_start_time is not None:
+            human_readable_status = _get_human_readable_status(status, logs_url, app_url)
+            if runtime_start_time is not None:
+                human_readable_status = "Deployment complete. Please check your SCM site for the status."
+            if status in failure_states:
+                print("\n")
+                raise UnclassifiedUserFault(human_readable_status)
+            print(f"{format_status(states[state_idx])}Success! \n")
+            print(human_readable_status, end="\n\n")
+            return poller.polling_method().resource()
+
+        raise UnclassifiedUserFault("Timeout reached by the command, however, the deployment operation is still "
+                                    "on-going. Navigate to your scm site to check the deployment status. "
+                                    f"The current status is '{status}'.")
+
+    # check if there's an ongoing process
+    if res.status_code == 409:
+        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
+                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+                                    "to delete them.".format(scm_url + '/api/deployments/latest'))
+
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
@@ -4862,6 +4864,7 @@ class OneDeployParams:
 def _build_onedeploy_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
+    deploy_url = deploy_url + "&trackDeploymentProgress=true"
 
     if params.is_async_deployment is not None:
         deploy_url = deploy_url + '&async=' + str(params.is_async_deployment)
@@ -4948,7 +4951,7 @@ def _update_artifact_type(params):
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
 
-def _make_onedeploy_request(params):
+def _make_onedeploy_request(params: OneDeployParams):
     import requests
 
     from azure.cli.core.util import (
@@ -4959,39 +4962,18 @@ def _make_onedeploy_request(params):
     body = _get_onedeploy_request_body(params)
     headers = _get_basic_headers(params)
     deploy_url = _build_onedeploy_url(params)
-    deployment_status_url = _get_onedeploy_status_url(params)
+    # deployment_status_url = _get_onedeploy_status_url(params)
+    try:
+        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    except ValueError:
+        raise ResourceNotFoundError('Failed to fetch scm url for app')
 
     logger.info("Deployment API: %s", deploy_url)
     response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
 
-    # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
-    # For that, set poll_async_deployment_for_debugging=True
-    poll_async_deployment_for_debugging = True
-
     # check the status of async deployment
-    if response.status_code == 202 or response.status_code == 200:
-        response_body = None
-        if poll_async_deployment_for_debugging:
-            logger.info('Polling the status of async deployment')
-            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, headers, params.timeout)
-            logger.info('Async deployment complete. Server response: %s', response_body)
-        return response_body
-
-    # API not available yet!
-    if response.status_code == 404:
-        raise ResourceNotFoundError("This API isn't available in this environment yet!")
-
-    # check if there's an ongoing process
-    if response.status_code == 409:
-        raise ValidationError("Another deployment is in progress. Please wait until that process is complete before "
-                              "starting a new deployment. You can track the ongoing deployment at {}"
-                              .format(deployment_status_url))
-
-    # check if an error occured during deployment
-    if response.status_code:
-        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
-                       .format(response.status_code, response.text))
+    return _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name, params.slot,
+                                        response, scm_url, headers, timeout=None)
 
 
 # OneDeploy
