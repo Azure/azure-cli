@@ -487,7 +487,7 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
     compute_client = compute_client_factory(cli_ctx)
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
-    if node_types is None:
+    if node_types is None or len(node_types) == 0:
         raise CLIError("Failed to find the node type in the cluster")
 
     node_type = node_types[0]
