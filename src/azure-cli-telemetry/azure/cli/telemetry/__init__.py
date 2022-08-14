@@ -10,7 +10,9 @@ import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
+
+DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 
 def _start(config_dir):
@@ -46,9 +48,22 @@ def _start(config_dir):
 
 def save(config_dir, payload):
     from azure.cli.telemetry.util import should_upload
+    from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
-    if save_payload(config_dir, payload) and should_upload(config_dir):
+    import json
+    events = json.loads(payload)
+
+    cli_events = {}
+    client = CliTelemetryClient()
+    for key, event in events.items():
+        if key == DEFAULT_INSTRUMENTATION_KEY:
+            cli_events[key] = event
+        else:
+            client.add(event, flush=True)
+    client.flush(force=True)
+
+    if save_payload(config_dir, json.dumps(cli_events)) and should_upload(config_dir):
         logger = get_logger('main')
         logger.info('Begin creating telemetry upload process.')
         _start(config_dir)
