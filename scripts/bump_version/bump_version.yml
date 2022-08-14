@@ -42,6 +42,7 @@ jobs:
             exit 1
           fi
           sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
+          sed -i "s/'$(PACKAGE)~=.*'/'$(PACKAGE)~=$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
           sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
           sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
           sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
