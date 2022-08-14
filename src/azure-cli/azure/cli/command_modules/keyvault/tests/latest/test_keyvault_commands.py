@@ -420,6 +420,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+        # test clear policy with set
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions',
+                 checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 0))
         # test policy for compound identity set
         result = self.cmd('ad app create --display-name {kv}').get_output_in_json()
         self.kwargs['app_id'] = result['appId']

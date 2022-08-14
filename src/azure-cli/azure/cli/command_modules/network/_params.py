@@ -630,11 +630,6 @@ def load_arguments(self, _):
         c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
     # region
 
-    # region ApplicationSecurityGroups
-    with self.argument_context('network asg') as c:
-        c.argument('application_security_group_name', name_arg_type, id_part='name', help='The name of the application security group.')
-    # endregion
-
     # region DDoS Protection Plans
     with self.argument_context('network ddos-protection') as c:
         for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
@@ -1728,6 +1723,9 @@ def load_arguments(self, _):
         c.argument('retention', type=int, help='Number of days to retain logs')
         c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
                                            'Must be in the same region of flow log.')
+        c.argument('vnet', options_list=['--vnet'], help='Name or ID of the Virtual Network Resource.')
+        c.argument('subnet', options_list=['--subnet'], help='Name or ID of Subnet')
+        c.argument('nic', options_list=['--nic'], help='Name or ID of the Network Interface (NIC) Resource.')
 
     # temporary solution for compatible with old show command's parameter
     # after old show command's parameter is deprecated and removed,
@@ -2009,7 +2007,7 @@ def load_arguments(self, _):
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
         c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
         c.argument('delegations', nargs='+', min_api='2017-08-01', help='Space-separated list of services to whom the subnet should be delegated. (e.g. Microsoft.Sql/servers)', validator=validate_delegations)
-        c.argument('disable_private_endpoint_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private endpoint network policies on the subnet.')
+        c.argument('disable_private_endpoint_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private endpoint network policies on the subnet, the policy is disabled by default.')
         c.argument('disable_private_link_service_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private link service network policies on the subnet.')
 
     with self.argument_context('network vnet subnet create') as c:
@@ -2268,14 +2266,6 @@ def load_arguments(self, _):
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
-    # endregion
-
-    # region security partner provider
-    with self.argument_context('network security-partner-provider') as c:
-        SecurityProviderName = self.get_models('SecurityProviderName')
-        c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
-        c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
-        c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection

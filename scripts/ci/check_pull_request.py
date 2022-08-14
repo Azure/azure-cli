@@ -121,7 +121,7 @@ def check_line(line):
                 logger.error(' ' * idx + '↑')
                 error_flag = True
         # az xxx commands must be enclosed in `, e.g., `az vm`
-        if i == 'a' and line[idx + 1] == 'z' and line[idx + 2] == ' ':
+        if idx + 2 < len(line) and i == 'a' and line[idx + 1] == 'z' and line[idx + 2] == ' ':
             command = 'az '
             index = idx + 3
             while index < len(line) and line[index] != ':':

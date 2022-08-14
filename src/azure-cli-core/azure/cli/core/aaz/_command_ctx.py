@@ -6,16 +6,18 @@
 # pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
+from .exceptions import AAZInvalidArgValueError
 
 
 class AAZCommandCtx:
 
-    def __init__(self, cli_ctx, schema, command_args):
+    def __init__(self, cli_ctx, schema, command_args, no_wait_arg=None):
         self._cli_ctx = cli_ctx
         self._profile = Profile(cli_ctx=cli_ctx)
         self._subscription_id = None
@@ -31,12 +33,19 @@ class AAZCommandCtx:
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
+        # support no wait
+        self.lro_no_wait = command_args.get(no_wait_arg, False) if no_wait_arg else False
+        # support paging
+        self.next_link = AAZUndefined
 
-        self.next_link = AAZUndefined  # support paging
+        self._aux_subscriptions = set()
+        self._aux_tenants = set()
 
     def format_args(self):
-        # TODO: apply format for argument values
-        pass
+        try:
+            self.args._schema._fmt(ctx=self, value=self.args)
+        except AAZInvalidArgValueError as err:
+            raise InvalidArgumentValueError(str(err))
 
     def get_login_credential(self):
         credential, _, _ = self._profile.get_login_credentials(
@@ -82,11 +91,39 @@ class AAZCommandCtx:
         return self._subscription_id
 
     @property
+    def profile(self):
+        return self._profile
+
+    def update_aux_subscriptions(self, subscription_id):
+        if subscription_id == self._subscription_id:
+            return
+        self._aux_subscriptions.add(subscription_id)
+
+    def update_aux_tenants(self, tenant_id):
+        self._aux_tenants.add(tenant_id)
+
+    @property
     def aux_subscriptions(self):
-        # TODO: fetch aux_subscription base on args
-        return None
+        return list(self._aux_subscriptions) or None
 
     @property
     def aux_tenants(self):
-        # TODO: fetch aux_subscription base on args
-        return None
+        return list(self._aux_tenants) or None
+
+
+def get_subscription_locations(ctx: AAZCommandCtx):
+    from azure.cli.core.commands.parameters import get_subscription_locations as _get_subscription_locations
+    return _get_subscription_locations(ctx._cli_ctx)
+
+
+def get_resource_group_location(ctx: AAZCommandCtx, rg_name: str):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    from azure.core.exceptions import ResourceNotFoundError
+
+    resource_client = get_mgmt_service_client(ctx._cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    try:
+        rg = resource_client.resource_groups.get(rg_name)
+    except ResourceNotFoundError:
+        return AAZUndefined
+    return rg.location
