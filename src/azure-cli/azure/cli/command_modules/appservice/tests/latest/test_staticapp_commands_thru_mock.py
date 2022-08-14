@@ -13,7 +13,7 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_app_settings, delete_staticsite_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
     reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function, \
-    assign_identity, remove_identity, show_identity
+    assign_identity, remove_identity, show_identity, enable_staticwebapp_enterprise_edge, disable_staticwebapp_enterprise_edge, show_staticwebapp_enterprise_edge_status
 from azure.core.exceptions import ResourceNotFoundError
 
 
@@ -611,6 +611,26 @@ class TestStaticAppCommands(unittest.TestCase):
         get_user_function(self.mock_cmd, self.name1, self.rg1)
 
         self.staticapp_client.get_user_provided_function_apps_for_static_site.assert_called_once()
+
+    def test_enterprise_edge(self):
+        self.staticapp_client.get_static_site.return_value = self.app1
+
+        enable_staticwebapp_enterprise_edge(self.mock_cmd, self.name1, self.rg1, no_register=True)
+        self.staticapp_client.update_static_site.assert_called_once()
+        arg_list = self.staticapp_client.update_static_site.call_args[1]
+        self.assertEqual(self.name1, arg_list["name"])
+        self.assertEqual("enabled", arg_list["static_site_envelope"].enterprise_grade_cdn_status)
+
+        disable_staticwebapp_enterprise_edge(self.mock_cmd, self.name1, self.rg1)
+        self.assertEqual(self.staticapp_client.update_static_site.call_count, 2)
+        arg_list = self.staticapp_client.update_static_site.call_args[1]
+        self.assertEqual(self.name1, arg_list["name"])
+        self.assertEqual("disabled", arg_list["static_site_envelope"].enterprise_grade_cdn_status)
+
+        self.app1.enterprise_grade_cdn_status = "disabling"
+        status = show_staticwebapp_enterprise_edge_status(self.mock_cmd, self.name1, self.rg1)
+        self.assertEqual(status.get("enterpriseGradeCdnStatus"), "disabling")
+
 
 def _set_up_client_mock(self):
     self.mock_cmd = mock.MagicMock()

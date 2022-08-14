@@ -899,3 +899,25 @@ def apim_api_vs_delete(client, resource_group_name, service_name, version_set_id
         service_name=service_name,
         version_set_id=version_set_id,
         if_match="*" if if_match is None else if_match)
+
+
+def apim_ds_get(client, location, service_name):
+    """Get specific soft-deleted Api Management Service."""
+
+    return client.deleted_services.get_by_name(service_name, location)
+
+
+def apim_ds_list(client):
+    """List soft-deleted Api Management Service."""
+
+    return client.deleted_services.list_by_subscription()
+
+
+def apim_ds_purge(client, service_name, location, no_wait=False):
+    """Purge soft-deleted Api Management Service."""
+
+    return sdk_no_wait(
+        no_wait,
+        client.deleted_services.begin_purge,
+        service_name=service_name,
+        location=location)

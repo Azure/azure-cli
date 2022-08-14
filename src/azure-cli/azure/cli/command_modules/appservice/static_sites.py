@@ -8,12 +8,13 @@ from azure.cli.core.util import sdk_no_wait
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, RequiredArgumentMissingError,
-                                       InvalidArgumentValueError)
+                                       InvalidArgumentValueError, UnauthorizedError)
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
 from .custom import show_app, _build_identities_info
+from ._client_factory import providers_client_factory
 
 
 logger = get_logger(__name__)
@@ -596,3 +597,59 @@ def unlink_user_function(cmd, name, resource_group_name):
 def get_user_function(cmd, name, resource_group_name):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
+
+
+def _enterprise_edge_warning():
+    logger.warning("For optimal experience and availability please check our documentation https://aka.ms/swaedge")
+
+
+def _update_enterprise_edge(cmd, name, resource_group_name, enable: bool):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    site = client.get_static_site(resource_group_name, name)
+    site.enterprise_grade_cdn_status = "enabled" if enable else "disabled"
+    return client.update_static_site(resource_group_name=resource_group_name, name=name, static_site_envelope=site)
+
+
+def _register_cdn_provider(cmd):
+    from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
+
+    namespace = "Microsoft.CDN"
+    properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(
+        consent_to_authorization=True))
+
+    client = providers_client_factory(cmd.cli_ctx)
+    try:
+        client.register(namespace, properties=properties)
+    except Exception as e:
+        msg = "Server responded with error message : {} \n"\
+              "Enabling enterprise-grade edge requires reregistration for the Azure Front "\
+              "Door Microsoft.CDN resource provider. We were unable to perform that reregistration on your "\
+              "behalf. Please check with your admin on permissions and review the documentation available at "\
+              "https://go.microsoft.com/fwlink/?linkid=2185350. "\
+              "Or try running registration manually with: az provider register --wait --namespace Microsoft.CDN"
+        raise UnauthorizedError(msg.format(e.args)) from e
+
+
+def enable_staticwebapp_enterprise_edge(cmd, name, resource_group_name, no_register=False):
+    _enterprise_edge_warning()
+    if not no_register:
+        _register_cdn_provider(cmd)
+    _update_enterprise_edge(cmd, name, resource_group_name, enable=True)
+    return _get_enterprise_edge_status(cmd, name, resource_group_name)
+
+
+def disable_staticwebapp_enterprise_edge(cmd, name, resource_group_name):
+    _enterprise_edge_warning()
+    _update_enterprise_edge(cmd, name, resource_group_name, enable=False)
+    return _get_enterprise_edge_status(cmd, name, resource_group_name)
+
+
+def _get_enterprise_edge_status(cmd, name, resource_group_name):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    site = client.get_static_site(resource_group_name, name)
+    return {"enterpriseGradeCdnStatus": site.enterprise_grade_cdn_status}
+
+
+def show_staticwebapp_enterprise_edge_status(cmd, name, resource_group_name):
+    _enterprise_edge_warning()
+    return _get_enterprise_edge_status(cmd, name, resource_group_name)

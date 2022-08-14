@@ -17,6 +17,7 @@ from ._resource_config import (
     SOURCE_RESOURCES_PARAMS,
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
+    TARGET_RESOURCES_CONNECTION_STRING,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
@@ -39,7 +40,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         required_args = []
         for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
             id_arg = '\'--id\'' if enable_id else '\'--source-id\''
-            context.argument(arg, options_list=content.get('options'), type=str,
+            context.argument(arg, configured_default=content.get('configured_default'),
+                             options_list=content.get('options'), type=str,
                              help='{}. Required if {} is not specified.'.format(content.get('help'), id_arg))
             required_args.append(content.get('options')[0])
 
@@ -147,6 +149,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                              help='Connect target service by private endpoint. '
                              'The private endpoint in source virtual network must be created ahead.')
 
+    def add_connection_string_argument(context, source, target):
+        if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
+            context.argument('store_in_connection_string', options_list=['--config-connstr'],
+                             arg_type=get_three_state_flag(), default=False, is_preview=True,
+                             help='Store configuration into connection strings, '
+                                  'only could be used together with dotnet client_type')
+        else:
+            context.ignore('store_in_connection_string')
+
     def add_confluent_kafka_argument(context):
         context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')
         context.argument('kafka_key', options_list=['--kafka-key'], help='Kafka API-Key (key)')
@@ -194,6 +205,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_new_addon_argument(c, source, target)
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
+                add_connection_string_argument(c, source, target)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
@@ -201,6 +213,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_auth_block(c, source, target)
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
+                add_connection_string_argument(c, source, target)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
