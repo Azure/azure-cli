@@ -51,20 +51,31 @@ def save(config_dir, payload):
     from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
-    import json
-    events = json.loads(payload)
+    logger = get_logger('main')
+    try:
+        # Split payload to cli events and extra events by instrumentation key
+        # cli events should be stored in local cache and sent together
+        # extra events can be sent immediately
+        import json
+        events = json.loads(payload)
 
-    cli_events = {}
-    client = CliTelemetryClient()
-    for key, event in events.items():
-        if key == DEFAULT_INSTRUMENTATION_KEY:
-            cli_events[key] = event
-        else:
-            client.add(event, flush=True)
-    client.flush(force=True)
+        logger.info('Begin splitting cli events and extra events, total events: {}'.format(len(events)))
+        cli_events = {}
+        client = CliTelemetryClient()
+        for key, event in events.items():
+            if key == DEFAULT_INSTRUMENTATION_KEY:
+                cli_events[key] = event
+            else:
+                extra_event = {key: event}
+                client.add(json.dumps(extra_event), flush=True)
+        client.flush(force=True)
+        cli_payload = json.dumps(cli_events) if cli_events else None
+        logger.info('Finish splitting cli events and extra events, cli events: {}'.format(len(cli_events)))
+    except Exception as ex:
+        logger.info("Split cli events and extra events failure: {}".format(str(ex)))
+        cli_payload = payload
 
-    if save_payload(config_dir, json.dumps(cli_events)) and should_upload(config_dir):
-        logger = get_logger('main')
+    if save_payload(config_dir, cli_payload) and should_upload(config_dir):
         logger.info('Begin creating telemetry upload process.')
         _start(config_dir)
         logger.info('Finish creating telemetry upload process.')
