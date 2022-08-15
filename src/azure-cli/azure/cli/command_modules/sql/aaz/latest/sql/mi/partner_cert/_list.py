@@ -41,7 +41,7 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--managed-instance-name"],
+            options=["--instance-name", "--managed-instance-name"],
             help="The name of the managed instance.",
             required=True,
         )

@@ -48,7 +48,7 @@ class Show(AAZCommand):
             id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--managed-instance-name"],
+            options=["--instance-name", "--managed-instance-name"],
             help="The name of the managed instance.",
             required=True,
             id_part="name",
