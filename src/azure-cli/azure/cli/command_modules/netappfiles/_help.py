@@ -468,6 +468,8 @@ parameters:
     short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes
 examples:
   - name: Update specific values for an ANF pool
     text: >
@@ -696,10 +698,17 @@ parameters:
     short-summary: Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
   - name: --zones
     short-summary: Availability Zone
+  - name: --kv-private-endpoint-id
+    short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
+
 examples:
   - name: Create an ANF volume
     text: >
         az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4.1
+
+  - name: Create an ANF volume with zones (Availability Zone) specified
+    text: >
+        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --zones zone1
 """
 
 helps['netappfiles volume delete'] = """
@@ -1022,6 +1031,10 @@ parameters:
     short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume
   - name: --unix-permissions
     short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes
+  - name: --coolness-period
+    short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
 examples:
   - name: Update an ANF volume
     text: >
@@ -1563,6 +1576,8 @@ parameters:
     short-summary: Replication Schedule for log backup volume
   - name: --log-backup-src-id
     short-summary: ResourceId of the log backup source volume
+  - name: --kv-private-endpoint-id
+    short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
 examples:
   - name: Create ANF volume group
     text: >
