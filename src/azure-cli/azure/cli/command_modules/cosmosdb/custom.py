@@ -64,7 +64,10 @@ from azure.mgmt.cosmosdb.models import (
     CommandPostBody,
     DataCenterResource,
     DataCenterResourceProperties,
-    ManagedCassandraManagedServiceIdentity
+    ManagedCassandraManagedServiceIdentity,
+    ServiceResourceCreateUpdateParameters,
+    ServiceSize,
+    ServiceType
 )
 
 logger = get_logger(__name__)
@@ -2463,3 +2466,32 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
     )
 
     return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
+    
+
+# Create function for CosmosDB ComputeV2 services
+def cli_cosmosdb_service_create(client,
+                                account_name,
+                                resource_group_name,
+                                service_kind,
+                                service_name,
+                                instance_count=1,
+                                instance_size="Cosmos.D4s"):
+    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
+                                                   instance_count=instance_count,
+                                                   instance_size=instance_size)
+
+    return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
+
+
+def cli_cosmosdb_service_update(client,
+                                account_name,
+                                resource_group_name,
+                                service_name,
+                                service_kind,
+                                instance_count,
+                                instance_size=None):
+    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
+                                                   instance_count=instance_count,
+                                                   instance_size=instance_size)
+
+    return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)

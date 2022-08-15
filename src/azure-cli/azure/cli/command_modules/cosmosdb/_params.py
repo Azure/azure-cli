@@ -514,3 +514,12 @@ def load_arguments(self, _):
     # Managed Cassandra Datacenter
     with self.argument_context('managed-cassandra datacenter list') as c:
         c.argument('cluster_name', options_list=['--cluster-name', '-c'], help="Cluster Name", required=True)
+
+    # ComputeV2 Services
+    with self.argument_context('cosmosdb service') as c:
+        c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the Cosmos DB database account.', id_part=None)
+        c.argument('resource_group_name', completer=None, options_list=['--resource-group-name', '-g'], help='Name of the resource group of the database account.', id_part=None)
+        c.argument('service_kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['SqlDedicatedGateway']), help="Service kind")
+        c.argument('service_name', options_list=['--name', '-n'], help="Service Name.")
+        c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
+        c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")

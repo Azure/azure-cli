@@ -1339,3 +1339,46 @@ examples:
     text: |
       az managed-cassandra datacenter list --resource-group MyResourceGroup --cluster-name MyCluster
 """
+
+helps['cosmosdb service'] = """
+type: group
+short-summary: Commands to perform operations on Service.
+"""
+
+helps['cosmosdb service create'] = """
+type: command
+short-summary: Create a cosmosdb service resource.
+examples:
+  - name: Create a cosmosdb service resource.
+    text: |
+      az cosmosdb service create --resource-group MyResourceGroup --account-name MyAccount --name "graphApiCompute" --kind "GraphApiCompute" --count 1 --size "Cosmos.D4s"
+      az cosmosdb service create --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 3 --size "Cosmos.D4s"
+"""
+
+helps['cosmosdb service update'] = """
+type: command
+short-summary: Update a cosmosdb service resource.
+examples:
+  - name: Update a cosmosdb service resource.
+    text: |
+      az cosmosdb service update --resource-group MyResourceGroup --account-name MyAccount --name "graphApiCompute" --kind "GraphApiCompute" --count 1
+      az cosmosdb service update --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 3
+"""
+
+helps['cosmosdb service list'] = """
+type: command
+short-summary: List all cosmosdb service resource under an account.
+examples:
+  - name: List all cosmosdb service resource under an account.
+    text: |
+      az cosmosdb service list --resource-group MyResourceGroup --account-name MyAccount
+"""
+
+helps['cosmosdb service delete'] = """
+type: command
+short-summary: Delete the given cosmosdb service resource.
+examples:
+  - name: Delete the given cosmosdb service resource.
+    text: |
+      az cosmosdb service delete --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway"
+"""
