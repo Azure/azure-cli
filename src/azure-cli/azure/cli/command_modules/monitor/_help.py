@@ -152,6 +152,75 @@ short-summary: Enable a receiver in an action group.
 long-summary: This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
 """
 
+helps['monitor action-group wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state.
+"""
+
+helps['monitor action-group test-notifications'] = """
+type: group
+short-summary: Manage action groups test-notifications
+"""
+
+helps['monitor action-group test-notifications create'] = """
+type: command
+short-summary: Create an action group test-notifications
+parameters:
+  - name: --add-action -a
+    short-summary: Add receivers to the action group test-notifications
+    long-summary: |
+        Usage:   --add-action TYPE NAME [ARG ...]
+        Email:
+            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
+            Example:    --add-action email bob bob@contoso.com
+        SMS:
+            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action sms charli 1 5551234567
+        Webhook:
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
+        Arm Role:
+            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
+        Azure App Push:
+            Format:     --add-action azureapppush NAME EMAIL_ADDRESS
+            Example:    --add-action azureapppush test_apppush bob@contoso.com
+        ITSM:
+            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
+            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast
+        Automation runbook:
+            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
+            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
+        Voice:
+            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action voice charli 1 4441234567
+        Logic App:
+            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
+        Azure Function:
+            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
+            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
+        Multiple actions can be specified by using more than one `--add-action` argument.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
+examples:
+  - name: Create an action group test-notifications with action group
+    text: |
+        az monitor action-group test-notifications create --action-group MyActionGroup \\
+        --resource-group MyResourceGroup -a email alice alice@example.com usecommonalertsChema --alert-type budget
+  - name: Create an action group test-notifications with resource-group
+    text: |
+        az monitor action-group test-notifications create --resource-group MyResourceGroup \\
+        -a email alice alice@example.com usecommonalertsChema --alert-type budget
+  - name: Create an action group test-notifications
+    text: |
+        az monitor action-group test-notifications create -a email alice alice@example.com usecommonalertsChema \\
+        --alert-type budget
+"""
+
 helps['monitor activity-log'] = """
 type: group
 short-summary: Manage activity logs.
@@ -375,149 +444,6 @@ examples:
 helps['monitor activity-log list-categories'] = """
 type: command
 short-summary: List the event categories of activity logs.
-"""
-
-helps['monitor alert'] = """
-type: group
-short-summary: Manage classic metric-based alert rules.
-"""
-
-helps['monitor alert create'] = """
-type: command
-short-summary: Create a classic metric-based alert rule.
-parameters:
-  - name: --action -a
-    short-summary: Add an action to fire when the alert is triggered.
-    long-summary: |
-        Usage:   --action TYPE KEY [ARG ...]
-        Email:   --action email bob@contoso.com ann@contoso.com
-        Webhook: --action webhook https://www.contoso.com/alert apiKey=value
-        Webhook: --action webhook https://www.contoso.com/alert?apiKey=value
-        Multiple actions can be specified by using more than one `--action` argument.
-  - name: --description
-    short-summary: Free-text description of the rule. Defaults to the condition expression.
-  - name: --disabled
-    short-summary: Create the rule in a disabled state.
-  - name: --condition
-    short-summary: The condition which triggers the rule.
-    long-summary: >
-        The form of a condition is "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD".
-        Values for METRIC and appropriate THRESHOLD values can be obtained from `az monitor metric` commands,
-        and PERIOD is of the form "##h##m##s".
-  - name: --email-service-owners
-    short-summary: Email the service owners if an alert is triggered.
-examples:
-  - name: Create a high CPU usage alert on a VM with no actions.
-    text: >
-        az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} --condition "Percentage CPU > 90 avg 5m"
-  - name: Create a high CPU usage alert on a VM with email and webhook actions.
-    text: |
-        az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} \\
-            --condition "Percentage CPU > 90 avg 5m" \\
-            --action email bob@contoso.com ann@contoso.com --email-service-owners \\
-            --action webhook https://www.contoso.com/alerts?type=HighCPU \\
-            --action webhook https://alerts.contoso.com apiKey={APIKey} type=HighCPU
-"""
-
-helps['monitor alert delete'] = """
-type: command
-short-summary: Delete an alert rule.
-examples:
-  - name: Delete an alert rule. (autogenerated)
-    text: |
-        az monitor alert delete --name MyAlertRule --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['monitor alert list'] = """
-type: command
-short-summary: List alert rules in a resource group.
-examples:
-  - name: List alert rules in a resource group. (autogenerated)
-    text: |
-        az monitor alert list --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['monitor alert list-incidents'] = """
-type: command
-short-summary: List all incidents for an alert rule.
-examples:
-  - name: List all incidents for an alert rule. (autogenerated)
-    text: |
-        az monitor alert list-incidents --resource-group MyResourceGroup --rule-name MyRule
-    crafted: true
-"""
-
-helps['monitor alert show'] = """
-type: command
-short-summary: Show an alert rule.
-examples:
-  - name: Show an alert rule. (autogenerated)
-    text: |
-        az monitor alert show --name MyAlertRule --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['monitor alert show-incident'] = """
-type: command
-short-summary: Get the details of an alert rule incident.
-"""
-
-helps['monitor alert update'] = """
-type: command
-short-summary: Update a classic metric-based alert rule.
-parameters:
-  - name: --description
-    short-summary: Description of the rule.
-  - name: --condition
-    short-summary: The condition which triggers the rule.
-    long-summary: >
-        The form of a condition is "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD".
-        Values for METRIC and appropriate THRESHOLD values can be obtained from `az monitor metric` commands,
-        and PERIOD is of the form "##h##m##s".
-  - name: --add-action -a
-    short-summary: Add an action to fire when the alert is triggered.
-    long-summary: |
-        Usage:   --add-action TYPE KEY [ARG ...]
-        Email:   --add-action email bob@contoso.com ann@contoso.com
-        Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
-        Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
-        Multiple actions can be specified by using more than one `--add-action` argument.
-  - name: --remove-action -r
-    short-summary: Remove one or more actions.
-    long-summary: |
-        Usage:   --remove-action TYPE KEY [KEY ...]
-        Email:   --remove-action email bob@contoso.com ann@contoso.com
-        Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com
-  - name: --email-service-owners
-    short-summary: Email the service owners if an alert is triggered.
-  - name: --metric
-    short-summary: Name of the metric to base the rule on.
-    populator-commands:
-      - az monitor metrics list-definitions
-  - name: --operator
-    short-summary: How to compare the metric against the threshold.
-  - name: --threshold
-    short-summary: Numeric threshold at which to trigger the alert.
-  - name: --aggregation
-    short-summary: Type of aggregation to apply based on --period.
-  - name: --period
-    short-summary: >
-        Time span over which to apply --aggregation, in nDnHnMnS shorthand or full ISO8601 format.
-examples:
-  - name: Update a classic metric-based alert rule. (autogenerated)
-    text: |
-        az monitor alert update --email-service-owners true --name MyAlertRule --resource-group MyResourceGroup
-    crafted: true
-  - name: Update a classic metric-based alert rule. (autogenerated)
-    text: |
-        az monitor alert update --name MyAlertRule --remove-action email bob@contoso.com --resource-group MyResourceGroup
-    crafted: true
-  - name: Update a classic metric-based alert rule. (autogenerated)
-    text: |
-        az monitor alert update --name MyAlertRule --resource-group MyResourceGroup --set retentionPolicy.days=365
-    crafted: true
 """
 
 helps['monitor autoscale'] = """
@@ -783,21 +709,6 @@ examples:
     crafted: true
 """
 
-helps['monitor autoscale-settings'] = """
-type: group
-short-summary: Manage autoscale settings.
-"""
-
-helps['monitor autoscale-settings update'] = """
-type: command
-short-summary: Updates an autoscale setting.
-examples:
-  - name: Updates an autoscale setting. (autogenerated)
-    text: |
-        az monitor autoscale-settings update --name MyAutoscaleSetting --resource-group MyResourceGroup --set retentionPolicy.days=365
-    crafted: true
-"""
-
 helps['monitor diagnostic-settings'] = """
 type: group
 short-summary: Manage service diagnostic settings.
@@ -948,43 +859,6 @@ short-summary: Create a cluster instance.
 examples:
   - name: Create a cluster instance.
     text: az monitor log-analytics cluster create -g MyResourceGroup -n MyCluster --sku-capacity 1000
-"""
-
-helps['monitor log-analytics cluster update'] = """
-type: command
-short-summary: Update a cluster instance.
-examples:
-  - name: Update a cluster instance.
-    text: |
-        az monitor log-analytics cluster update -g MyResourceGroup -n MyCluster \\
-          --key-vault-uri https://myvault.vault.azure.net/ --key-name my-key \\
-          --key-version fe0adcedd8014aed9c22e9aefb81a1ds --sku-capacity 1000
-"""
-
-helps['monitor log-analytics cluster delete'] = """
-type: command
-short-summary: Delete a cluster instance.
-examples:
-  - name: Delete a cluster instance.
-    text: az monitor log-analytics cluster delete -g MyResourceGroup -n MyCluster
-"""
-
-helps['monitor log-analytics cluster show'] = """
-type: command
-short-summary: Show the properties of a cluster instance.
-examples:
-  - name: Show the properties of a cluster instance.
-    text: az monitor log-analytics cluster show -g MyResourceGroup -n MyCluster
-"""
-
-helps['monitor log-analytics cluster list'] = """
-type: command
-short-summary: Gets all cluster instances in a resource group or in current subscription.
-examples:
-  - name: Gets all cluster instances in a resource group.
-    text: az monitor log-analytics cluster list -g MyResourceGroup
-  - name: Gets all cluster instances in current subscription.
-    text: az monitor log-analytics cluster list
 """
 
 helps['monitor log-analytics cluster wait'] = """

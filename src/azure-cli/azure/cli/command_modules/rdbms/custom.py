@@ -141,6 +141,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
                 public_network_access=public_network_access,
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,

@@ -158,6 +158,8 @@ short-summary: Validate an ACR is accessible from an AKS cluster.
 parameters:
   - name: --acr
     short-summary: The FQDN of the ACR.
+  - name: --node-name
+    short-summary: The name of a specific node to perform acr pull test checks. If not specified, it will be checked on a random node.
 examples:
   - name: Validate the ACR is accessible from the AKS cluster.
     text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
@@ -363,11 +365,11 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
   - name: --network-policy
     type: string
     short-summary: The Kubernetes network policy to use.
@@ -517,6 +519,35 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --node-resource-group
+    type: string
+    short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
+  - name: --enable-defender
+    type: bool
+    short-summary: Enable Microsoft Defender security profile.
+  - name: --defender-config
+    type: string
+    short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+  - name: --host-group-id
+    type: string
+    short-summary: The fully qualified dedicated host group id used to provision agent node pool.
+  - name: --enable-azure-keyvault-kms
+    type: bool
+    short-summary: Enable Azure KeyVault Key Management Service.
+  - name: --azure-keyvault-kms-key-id
+    type: string
+    short-summary: Identifier of Azure Key Vault key.
+  - name: --azure-keyvault-kms-key-vault-network-access
+    type: string
+    short-summary: Network Access of Azure Key Vault.
+    long-summary: Allowed values are "Public", "Private". If not set, defaults to type "Public". Requires --azure-keyvault-kms-key-id to be used.
+  - name: --azure-keyvault-kms-key-vault-resource-id
+    type: string
+    short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
+
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -571,7 +602,7 @@ examples:
   - name: Create a kubernetes cluster with custom tags
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
   - name: Create a kubernetes cluster with custom headers
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd
   - name: Create a kubernetes cluster with FIPS-enabled OS
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
   - name: Create a kubernetes cluster with enabling Windows gmsa and with setting DNS server in the vnet used by the cluster.
@@ -580,6 +611,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-windows-gmsa --gmsa-dns-server "10.240.0.4" --gmsa-root-domain-name "contoso.com"
   - name: create a kubernetes cluster with a snapshot id.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
+  - name: create a kubernetes cluster with support of hostgroup id.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.13 --location westus2 --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
+  - name: Create a kubernetes cluster with no CNI installed.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
 """
 
 helps['aks update'] = """
@@ -682,6 +717,9 @@ parameters:
   - name: --assign-identity
     type: string
     short-summary: Specify an existing user assigned identity to manage cluster resource group.
+  - name: --assign-kubelet-identity
+    type: string
+    short-summary: Update cluster's kubelet identity to an existing user assigned identity. Please note this operation will recreate all agent nodes in the cluster.
   - name: --enable-azure-rbac
     type: bool
     short-summary: Enable Azure RBAC to control authorization checks on cluster.
@@ -730,6 +768,35 @@ parameters:
     long-summary: |-
         You do not need to set this if you have set DNS server in the VNET used by the cluster.
         You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
+  - name: --enable-defender
+    type: bool
+    short-summary: Enable Microsoft Defender security profile.
+  - name: --disable-defender
+    type: bool
+    short-summary: Disable defender profile.
+  - name: --defender-config
+    type: string
+    short-summary: Path to JSON file containing Microsoft Defender profile configurations.
+  - name: --enable-azure-keyvault-kms
+    type: bool
+    short-summary: Enable Azure KeyVault Key Management Service.
+  - name: --disable-azure-keyvault-kms
+    type: bool
+    short-summary: Disable Azure KeyVault Key Management Service.
+  - name: --azure-keyvault-kms-key-id
+    type: string
+    short-summary: Identifier of Azure Key Vault key.
+  - name: --azure-keyvault-kms-key-vault-network-access
+    type: string
+    short-summary: Network Access of Azure Key Vault.
+    long-summary: Allowed values are "Public", "Private". If not set, defaults to type "Public". Requires --azure-keyvault-kms-key-id to be used.
+  - name: --azure-keyvault-kms-key-vault-resource-id
+    type: string
+    short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
+
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -855,7 +922,7 @@ examples:
     text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
     crafted: true
   - name: Enable ingress-appgw addon with subnet prefix.
-    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.225.0.0/16 --appgw-name gateway
     crafted: true
   - name: Enable open-service-mesh addon.
     text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons open-service-mesh
@@ -950,7 +1017,7 @@ parameters:
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
-    long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+    long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
@@ -962,10 +1029,10 @@ parameters:
     short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
   - name: --vnet-subnet-id
     type: string
-    short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+    short-summary: The Resource Id of a subnet in an existing VNet into which to deploy the cluster.
   - name: --pod-subnet-id
     type: string
-    short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
+    short-summary: The Resource Id of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -974,16 +1041,16 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner.
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2022 for Windows Server 2022.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -1029,6 +1096,9 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --host-group-id
+    type: string
+    short-summary: The fully qualified dedicated host group id used to provision agent node pool.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1042,6 +1112,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-fips-image
   - name: create a kubernetes cluster with a snapshot id.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
+  - name: create a nodepool in an existing AKS cluster with host group id
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
 """
 
 helps['aks nodepool delete'] = """
@@ -1096,10 +1168,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
   - name: --scale-down-mode
     type: string
     short-summary: "Describe how VMs are added to or removed from nodepools."
@@ -1146,6 +1218,36 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+"""
+
+helps['aks nodepool stop'] = """
+    type: command
+    short-summary: Stop running agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Stop agent pool in the managed cluster
+          text: az aks nodepool stop --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
+"""
+
+helps['aks nodepool start'] = """
+    type: command
+    short-summary: Start stopped agent pool in the managed Kubernetes cluster.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Start agent pool in the managed cluster
+          text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
 helps['aks remove-dev-spaces'] = """
@@ -1414,136 +1516,4 @@ helps['aks nodepool snapshot create'] = """
 helps['aks nodepool snapshot delete'] = """
     type: command
     short-summary: Delete a nodepool snapshot.
-"""
-
-helps['openshift'] = """
-type: group
-short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-"""
-
-helps['openshift create'] = """
-type: command
-short-summary: Create a new Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.
-parameters:
-  - name: --compute-vm-size -s
-    type: string
-    short-summary: Size of Virtual Machines to create as OpenShift nodes.
-  - name: --compute-count -c
-    type: int
-    short-summary: Number of nodes in the OpenShift node pool.
-  - name: --aad-client-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.
-  - name: --aad-client-app-secret
-    type: string
-    short-summary: The secret of an Azure Active Directory client application.
-  - name: --aad-tenant-id
-    type: string
-    short-summary: The ID of an Azure Active Directory tenant.
-  - name: --vnet-peer
-    type: string
-    short-summary: The ID or the name of a subnet in an existing VNet into which to peer the cluster.
-  - name: --vnet-prefix
-    type: string
-    short-summary: The CIDR used on the VNet into which to deploy the cluster.
-  - name: --subnet-prefix
-    type: string
-    short-summary: The CIDR used on the Subnet into which to deploy the cluster.
-  - name: --customer-admin-group-id
-    type: string
-    short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
-  - name: --workspace-id
-    type: string
-    short-summary: The resource id of an existing Log Analytics Workspace to use for storing monitoring data.
-
-
-examples:
-  - name: Create an OpenShift cluster and auto create an AAD Client
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster
-  - name: Create an OpenShift cluster and auto create an AAD Client and setup cluster admin group
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --customer-admin-group-id {GROUP_ID}
-  - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
-  - name: Create an Openshift cluster using a custom vnet
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
-  - name: Create an Openshift cluster with Log Analytics monitoring enabled
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
-"""
-
-helps['openshift delete'] = """
-type: command
-short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Delete an Azure Red Hat OpenShift 3.11 cluster.
-    text: az openshift delete --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['openshift list'] = """
-type: command
-short-summary: List Azure Red Hat OpenShift 3.11 clusters.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-"""
-
-helps['openshift scale'] = """
-type: command
-short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-parameters:
-  - name: --compute-count -c
-    type: int
-    short-summary: Number of nodes in the OpenShift compute pool.
-examples:
-  - name: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-    text: az openshift scale --compute-count 5 --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['openshift show'] = """
-type: command
-short-summary: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
-    text: az openshift show --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['openshift wait'] = """
-type: command
-short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
-    text: |-
-        az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
-"""
-
-helps['openshift monitor'] = """
-type: group
-short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-"""
-
-helps['openshift monitor enable'] = """
-type: command
-short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Enable Log Analytics monitoring.
-    text: |-
-        az openshift monitor enable -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
-"""
-
-helps['openshift monitor disable'] = """
-type: command
-short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
-examples:
-  - name: Disable Log Analytics monitoring.
-    text: |-
-        az openshift monitor disable -g MyResourceGroup -n MyManagedCluster
 """

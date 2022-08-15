@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 vnet_name = "cli-vnet-lefr-02"
 subnet_name = "default"

@@ -1,0 +1,1131 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad sp create-for-rbac
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --create-cert --keyvault --cert -n
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=displayName%20eq%20'cli_test_sp_with_kv_new_cert000001'
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '92'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:12 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - cf501b5f-9c5f-4469-bacd-3d602a119f51
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A31"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/create?api-version=7.0
+  response:
+    body:
+      string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
+        a Bearer or PoP token."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '97'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://vault.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: '{"policy": {"key_props": {"exportable": true, "kty": "RSA", "key_size":
+      2048, "reuse_key": true}, "secret_props": {"contentType": "application/x-pkcs12"},
+      "x509_props": {"subject": "CN=KeyVault Generated", "key_usage": ["cRLSign",
+      "dataEncipherment", "digitalSignature", "keyEncipherment", "keyAgreement", "keyCertSign"],
+      "validity_months": 12}, "lifetime_actions": [{"trigger": {"days_before_expiry":
+      90}, "action": {"action_type": "AutoRenew"}}], "issuer": {"name": "Self"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '477'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/create?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending","issuer":{"name":"Self"},"csr":"MIICrTCCAZUCAQAwHTEbMBkGA1UEAxMSS2V5VmF1bHQgR2VuZXJhdGVkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Es18kn4nqSQvJve75Zokv0FmcuSybh+rKU0d+xNAovrKSUZHjAQh6DyCfDsXAOHdSjPPw0HVNk2vzbm/qIJ1AqYKpVopKg9Amfv4vTYLFxVemolXBh5alUGJhDt5cgm2jmeLADFgbjseitGaEHV6Wwd0+NtaJ+ieIuTh73GeBmL39fxjfFq76Qr/7q6/Zh+Ok4Rr/eJkQzCpQJIpp1WFQP80MpmGO8pS/DLe0n109DQ7+ole7ELDalm02lzUcQLrKXlaVodRuRHH6PX5Mm8i4w/9j12CJXmbCSX4ZwyjPT6Et5j/MmXvOnFULpJtclFzUUcFw2nTb38FprxMVdmAQIDAQABoEswSQYJKoZIhvcNAQkOMTwwOjAOBgNVHQ8BAf8EBAMCAb4wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJfMgVHbPM0cOX27YLc+GVoMp0xCSDjAdQ60NtPnjwj7WooJNQJPpSJ/L5IE++k9cIbZoJ5ZoJ+H4h6dtp7Uqk8hXoYOU4LV57L9MJEevUUkedm3O1szGZcO5FzexDswnvpHjcz6J+RJ0/lUcRSAOQyhdZ52+uEa0gjSPn+s7tEZKaDxVLXkVZqQExIhG9cXZsDUmP6VBvh8ZcZpESli2xKVO3L1oPG6jCM2qyiwOQj2oMg5GpPh7JVlBaz7OK/mFpGcJX4bxlgVWThKVnP4ZoXF5Ng8SAKsz8kCFYMp/U16p9XxPb7+gGtfOi+4et7RMy56AEXxqzP39x/E2x0P7T0=","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+        certificate created. Certificate request is in progress. This may take some
+        time based on the issuer provider. Please check again later.","request_id":"e0f704a102f74bcd92824621b43b801e"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1301'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:14 GMT
+      expires:
+      - '-1'
+      location:
+      - https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending?api-version=7.0&request_id=e0f704a102f74bcd92824621b43b801e
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending","issuer":{"name":"Self"},"csr":"MIICrTCCAZUCAQAwHTEbMBkGA1UEAxMSS2V5VmF1bHQgR2VuZXJhdGVkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Es18kn4nqSQvJve75Zokv0FmcuSybh+rKU0d+xNAovrKSUZHjAQh6DyCfDsXAOHdSjPPw0HVNk2vzbm/qIJ1AqYKpVopKg9Amfv4vTYLFxVemolXBh5alUGJhDt5cgm2jmeLADFgbjseitGaEHV6Wwd0+NtaJ+ieIuTh73GeBmL39fxjfFq76Qr/7q6/Zh+Ok4Rr/eJkQzCpQJIpp1WFQP80MpmGO8pS/DLe0n109DQ7+ole7ELDalm02lzUcQLrKXlaVodRuRHH6PX5Mm8i4w/9j12CJXmbCSX4ZwyjPT6Et5j/MmXvOnFULpJtclFzUUcFw2nTb38FprxMVdmAQIDAQABoEswSQYJKoZIhvcNAQkOMTwwOjAOBgNVHQ8BAf8EBAMCAb4wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJfMgVHbPM0cOX27YLc+GVoMp0xCSDjAdQ60NtPnjwj7WooJNQJPpSJ/L5IE++k9cIbZoJ5ZoJ+H4h6dtp7Uqk8hXoYOU4LV57L9MJEevUUkedm3O1szGZcO5FzexDswnvpHjcz6J+RJ0/lUcRSAOQyhdZ52+uEa0gjSPn+s7tEZKaDxVLXkVZqQExIhG9cXZsDUmP6VBvh8ZcZpESli2xKVO3L1oPG6jCM2qyiwOQj2oMg5GpPh7JVlBaz7OK/mFpGcJX4bxlgVWThKVnP4ZoXF5Ng8SAKsz8kCFYMp/U16p9XxPb7+gGtfOi+4et7RMy56AEXxqzP39x/E2x0P7T0=","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+        certificate created. Certificate request is in progress. This may take some
+        time based on the issuer provider. Please check again later.","request_id":"e0f704a102f74bcd92824621b43b801e"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1301'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending","issuer":{"name":"Self"},"csr":"MIICrTCCAZUCAQAwHTEbMBkGA1UEAxMSS2V5VmF1bHQgR2VuZXJhdGVkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Es18kn4nqSQvJve75Zokv0FmcuSybh+rKU0d+xNAovrKSUZHjAQh6DyCfDsXAOHdSjPPw0HVNk2vzbm/qIJ1AqYKpVopKg9Amfv4vTYLFxVemolXBh5alUGJhDt5cgm2jmeLADFgbjseitGaEHV6Wwd0+NtaJ+ieIuTh73GeBmL39fxjfFq76Qr/7q6/Zh+Ok4Rr/eJkQzCpQJIpp1WFQP80MpmGO8pS/DLe0n109DQ7+ole7ELDalm02lzUcQLrKXlaVodRuRHH6PX5Mm8i4w/9j12CJXmbCSX4ZwyjPT6Et5j/MmXvOnFULpJtclFzUUcFw2nTb38FprxMVdmAQIDAQABoEswSQYJKoZIhvcNAQkOMTwwOjAOBgNVHQ8BAf8EBAMCAb4wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJfMgVHbPM0cOX27YLc+GVoMp0xCSDjAdQ60NtPnjwj7WooJNQJPpSJ/L5IE++k9cIbZoJ5ZoJ+H4h6dtp7Uqk8hXoYOU4LV57L9MJEevUUkedm3O1szGZcO5FzexDswnvpHjcz6J+RJ0/lUcRSAOQyhdZ52+uEa0gjSPn+s7tEZKaDxVLXkVZqQExIhG9cXZsDUmP6VBvh8ZcZpESli2xKVO3L1oPG6jCM2qyiwOQj2oMg5GpPh7JVlBaz7OK/mFpGcJX4bxlgVWThKVnP4ZoXF5Ng8SAKsz8kCFYMp/U16p9XxPb7+gGtfOi+4et7RMy56AEXxqzP39x/E2x0P7T0=","cancellation_requested":false,"status":"completed","target":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1","request_id":"e0f704a102f74bcd92824621b43b801e"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1213'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/ea6fc68241d14a09bf07c24c3da1dd7b","kid":"https://test-rbac-new-kv000002.vault.azure.net/keys/cert1/ea6fc68241d14a09bf07c24c3da1dd7b","sid":"https://test-rbac-new-kv000002.vault.azure.net/secrets/cert1/ea6fc68241d14a09bf07c24c3da1dd7b","x5t":"YnG-BL5MB2qTUkjewvC2Wk6Cj7g","cer":"MIIDQDCCAiigAwIBAgIQUsf7g8/IQ6ubkxGyoXeJcjANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwHhcNMjIwNTA3MDY0NzE5WhcNMjMwNTA3MDY1NzE5WjAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUSzXySfiepJC8m97vlmiS/QWZy5LJuH6spTR37E0Ci+spJRkeMBCHoPIJ8OxcA4d1KM8/DQdU2Ta/Nub+ognUCpgqlWikqD0CZ+/i9NgsXFV6aiVcGHlqVQYmEO3lyCbaOZ4sAMWBuOx6K0ZoQdXpbB3T421on6J4i5OHvcZ4GYvf1/GN8WrvpCv/urr9mH46ThGv94mRDMKlAkimnVYVA/zQymYY7ylL8Mt7SfXT0NDv6iV7sQsNqWbTaXNRxAuspeVpWh1G5Ecfo9fkybyLjD/2PXYIleZsJJfhnDKM9PoS3mP8yZe86cVQukm1yUXNRRwXDadNvfwWmvExV2YBAgMBAAGjfDB6MA4GA1UdDwEB/wQEAwIBvjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBQ/KyTpr1PZZASRJeM6XpnyB6Yz6jAdBgNVHQ4EFgQUPysk6a9T2WQEkSXjOl6Z8gemM+owDQYJKoZIhvcNAQELBQADggEBAFBIP25LPY9JLTv34vLEIdS9CmYrZMfpxqZACoKPieG/ijVxkfu1LFrAmxZ7EGpWcPjnq0D1xxXu92oUwY6BAFko+i2QTf/xN9QcqPqPl5TJfTvc+Kd7U/kdv2rfmhbPyKWV14HuNziJuRNHG2IDHH92YQnBmjtrR4uPZrs1Ov7WWvacaAAIgnRkZtXVVqQ9q1usEZAuU5eCUMoqKFMxaB5goNnJU4Q4OSOXvmNfaB+46Rm0grMKxMD67/KRYBlxBWpzVMNtsTkc1i5AKQf1Hpj4JKN3bx566zpF4C7EWv/HT9OjNPfCiY1RbPStpKy0AGur2SIi9v61HX1yD7esdW4=","attributes":{"enabled":true,"nbf":1651906039,"exp":1683442639,"created":1651906639,"updated":1651906639,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"policy":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=KeyVault
+        Generated","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1651906635,"updated":1651906635}},"pending":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2394'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad sp create-for-rbac
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --create-cert --keyvault --cert -n
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/applications?$filter=startswith(displayName,'cli_test_sp_with_kv_new_cert000001')
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#applications","value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '87'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:24 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - daa7a0dc-b605-4b52-ab9e-d278f9ab46ff
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00007865"}}'
+      x-ms-resource-unit:
+      - '2'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"displayName": "cli_test_sp_with_kv_new_cert000001", "keyCredentials":
+      [{"@odata.type": "#microsoft.graph.keyCredential", "displayName": null, "endDateTime":
+      "2023-05-07T06:57:13Z", "key": "MIIDQDCCAiigAwIBAgIQUsf7g8/IQ6ubkxGyoXeJcjANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwHhcNMjIwNTA3MDY0NzE5WhcNMjMwNTA3MDY1NzE5WjAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUSzXySfiepJC8m97vlmiS/QWZy5LJuH6spTR37E0Ci+spJRkeMBCHoPIJ8OxcA4d1KM8/DQdU2Ta/Nub+ognUCpgqlWikqD0CZ+/i9NgsXFV6aiVcGHlqVQYmEO3lyCbaOZ4sAMWBuOx6K0ZoQdXpbB3T421on6J4i5OHvcZ4GYvf1/GN8WrvpCv/urr9mH46ThGv94mRDMKlAkimnVYVA/zQymYY7ylL8Mt7SfXT0NDv6iV7sQsNqWbTaXNRxAuspeVpWh1G5Ecfo9fkybyLjD/2PXYIleZsJJfhnDKM9PoS3mP8yZe86cVQukm1yUXNRRwXDadNvfwWmvExV2YBAgMBAAGjfDB6MA4GA1UdDwEB/wQEAwIBvjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBQ/KyTpr1PZZASRJeM6XpnyB6Yz6jAdBgNVHQ4EFgQUPysk6a9T2WQEkSXjOl6Z8gemM+owDQYJKoZIhvcNAQELBQADggEBAFBIP25LPY9JLTv34vLEIdS9CmYrZMfpxqZACoKPieG/ijVxkfu1LFrAmxZ7EGpWcPjnq0D1xxXu92oUwY6BAFko+i2QTf/xN9QcqPqPl5TJfTvc+Kd7U/kdv2rfmhbPyKWV14HuNziJuRNHG2IDHH92YQnBmjtrR4uPZrs1Ov7WWvacaAAIgnRkZtXVVqQ9q1usEZAuU5eCUMoqKFMxaB5goNnJU4Q4OSOXvmNfaB+46Rm0grMKxMD67/KRYBlxBWpzVMNtsTkc1i5AKQf1Hpj4JKN3bx566zpF4C7EWv/HT9OjNPfCiY1RbPStpKy0AGur2SIi9v61HX1yD7esdW4=",
+      "keyId": "88888888-0000-0000-0000-000000000001", "startDateTime": "2022-05-07T06:57:13Z",
+      "type": "AsymmetricX509Cert", "usage": "Verify"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad sp create-for-rbac
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1450'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --create-cert --keyvault --cert -n
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: POST
+    uri: https://graph.microsoft.com/v1.0/applications
+  response:
+    body:
+      string: '{"@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications/$entity",
+        "id": "d7a3939d-a7c7-4f08-93e1-83de016a9a09", "deletedDateTime": null, "appId":
+        "51c80b1f-9382-4b21-b653-ba07fc09715f", "applicationTemplateId": null, "disabledByMicrosoftStatus":
+        null, "createdDateTime": "2022-05-07T06:57:25.444897Z", "displayName": "cli_test_sp_with_kv_new_cert000001",
+        "description": null, "groupMembershipClaims": null, "identifierUris": [],
+        "isDeviceOnlyAuthSupported": null, "isFallbackPublicClient": null, "notes":
+        null, "publisherDomain": "AzureSDKTeam.onmicrosoft.com", "serviceManagementReference":
+        null, "signInAudience": "AzureADandPersonalMicrosoftAccount", "tags": [],
+        "tokenEncryptionKeyId": null, "defaultRedirectUri": null, "certification":
+        null, "optionalClaims": null, "addIns": [], "api": {"acceptMappedClaims":
+        null, "knownClientApplications": [], "requestedAccessTokenVersion": 2, "oauth2PermissionScopes":
+        [], "preAuthorizedApplications": []}, "appRoles": [], "info": {"logoUrl":
+        null, "marketingUrl": null, "privacyStatementUrl": null, "supportUrl": null,
+        "termsOfServiceUrl": null}, "keyCredentials": [{"customKeyIdentifier": "6271BE04BE4C076A935248DEC2F0B65A4E828FB8",
+        "displayName": "CN=KeyVault Generated", "endDateTime": "2023-05-07T06:57:13Z",
+        "key": null, "keyId": "88888888-0000-0000-0000-000000000001", "startDateTime":
+        "2022-05-07T06:57:13Z", "type": "AsymmetricX509Cert", "usage": "Verify"}],
+        "parentalControlSettings": {"countriesBlockedForMinors": [], "legalAgeGroupRule":
+        "Allow"}, "passwordCredentials": [], "publicClient": {"redirectUris": []},
+        "requiredResourceAccess": [], "verifiedPublisher": {"displayName": null, "verifiedPublisherId":
+        null, "addedDateTime": null}, "web": {"homePageUrl": null, "logoutUrl": null,
+        "redirectUris": [], "implicitGrantSettings": {"enableAccessTokenIssuance":
+        false, "enableIdTokenIssuance": false}}, "spa": {"redirectUris": []}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1906'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:26 GMT
+      location:
+      - https://graph.microsoft.com/v2/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/d7a3939d-a7c7-4f08-93e1-83de016a9a09/Microsoft.DirectoryServices.Application
+      odata-version:
+      - '4.0'
+      request-id:
+      - 49fdfe34-aac5-4f32-873a-4b564114e5d4
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A30"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"appId": "51c80b1f-9382-4b21-b653-ba07fc09715f", "accountEnabled": true}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad sp create-for-rbac
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --create-cert --keyvault --cert -n
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: POST
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals/$entity","id":"05ebf99f-cdd4-4ad7-85b7-f3d43dbe8e8d","deletedDateTime":null,"accountEnabled":true,"alternativeNames":[],"appDisplayName":"cli_test_sp_with_kv_new_cert000001","appDescription":null,"appId":"51c80b1f-9382-4b21-b653-ba07fc09715f","applicationTemplateId":null,"appOwnerOrganizationId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"createdDateTime":"2022-05-07T06:57:27Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"cli_test_sp_with_kv_new_cert000001","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["51c80b1f-9382-4b21-b653-ba07fc09715f"],"servicePrincipalType":"Application","signInAudience":"AzureADandPersonalMicrosoftAccount","tags":[],"tokenEncryptionKeyId":null,"samlSingleSignOnSettings":null,"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"addIns":[],"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1350'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:26 GMT
+      location:
+      - https://graph.microsoft.com/v2/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/05ebf99f-cdd4-4ad7-85b7-f3d43dbe8e8d/Microsoft.DirectoryServices.ServicePrincipal
+      odata-version:
+      - '4.0'
+      request-id:
+      - 0d9ab825-41ad-448b-940a-4dbfb4ebdef2
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00007868"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/ea6fc68241d14a09bf07c24c3da1dd7b","kid":"https://test-rbac-new-kv000002.vault.azure.net/keys/cert1/ea6fc68241d14a09bf07c24c3da1dd7b","sid":"https://test-rbac-new-kv000002.vault.azure.net/secrets/cert1/ea6fc68241d14a09bf07c24c3da1dd7b","x5t":"YnG-BL5MB2qTUkjewvC2Wk6Cj7g","cer":"MIIDQDCCAiigAwIBAgIQUsf7g8/IQ6ubkxGyoXeJcjANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwHhcNMjIwNTA3MDY0NzE5WhcNMjMwNTA3MDY1NzE5WjAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUSzXySfiepJC8m97vlmiS/QWZy5LJuH6spTR37E0Ci+spJRkeMBCHoPIJ8OxcA4d1KM8/DQdU2Ta/Nub+ognUCpgqlWikqD0CZ+/i9NgsXFV6aiVcGHlqVQYmEO3lyCbaOZ4sAMWBuOx6K0ZoQdXpbB3T421on6J4i5OHvcZ4GYvf1/GN8WrvpCv/urr9mH46ThGv94mRDMKlAkimnVYVA/zQymYY7ylL8Mt7SfXT0NDv6iV7sQsNqWbTaXNRxAuspeVpWh1G5Ecfo9fkybyLjD/2PXYIleZsJJfhnDKM9PoS3mP8yZe86cVQukm1yUXNRRwXDadNvfwWmvExV2YBAgMBAAGjfDB6MA4GA1UdDwEB/wQEAwIBvjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBQ/KyTpr1PZZASRJeM6XpnyB6Yz6jAdBgNVHQ4EFgQUPysk6a9T2WQEkSXjOl6Z8gemM+owDQYJKoZIhvcNAQELBQADggEBAFBIP25LPY9JLTv34vLEIdS9CmYrZMfpxqZACoKPieG/ijVxkfu1LFrAmxZ7EGpWcPjnq0D1xxXu92oUwY6BAFko+i2QTf/xN9QcqPqPl5TJfTvc+Kd7U/kdv2rfmhbPyKWV14HuNziJuRNHG2IDHH92YQnBmjtrR4uPZrs1Ov7WWvacaAAIgnRkZtXVVqQ9q1usEZAuU5eCUMoqKFMxaB5goNnJU4Q4OSOXvmNfaB+46Rm0grMKxMD67/KRYBlxBWpzVMNtsTkc1i5AKQf1Hpj4JKN3bx566zpF4C7EWv/HT9OjNPfCiY1RbPStpKy0AGur2SIi9v61HX1yD7esdW4=","attributes":{"enabled":true,"nbf":1651906039,"exp":1683442639,"created":1651906639,"updated":1651906639,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"policy":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=KeyVault
+        Generated","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1651906635,"updated":1651906635}},"pending":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2394'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app credential reset
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --create-cert --keyvault --cert
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/applications?$filter=appId%20eq%20'51c80b1f-9382-4b21-b653-ba07fc09715f'
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#applications","value":[{"id":"d7a3939d-a7c7-4f08-93e1-83de016a9a09","deletedDateTime":null,"appId":"51c80b1f-9382-4b21-b653-ba07fc09715f","applicationTemplateId":null,"disabledByMicrosoftStatus":null,"createdDateTime":"2022-05-07T06:57:25Z","displayName":"cli_test_sp_with_kv_new_cert000001","description":null,"groupMembershipClaims":null,"identifierUris":[],"isDeviceOnlyAuthSupported":null,"isFallbackPublicClient":null,"notes":null,"publisherDomain":"AzureSDKTeam.onmicrosoft.com","serviceManagementReference":null,"signInAudience":"AzureADandPersonalMicrosoftAccount","tags":[],"tokenEncryptionKeyId":null,"defaultRedirectUri":null,"certification":null,"optionalClaims":null,"addIns":[],"api":{"acceptMappedClaims":null,"knownClientApplications":[],"requestedAccessTokenVersion":2,"oauth2PermissionScopes":[],"preAuthorizedApplications":[]},"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[{"customKeyIdentifier":"6271BE04BE4C076A935248DEC2F0B65A4E828FB8","displayName":"CN=KeyVault
+        Generated","endDateTime":"2023-05-07T06:57:13Z","key":null,"keyId":"88888888-0000-0000-0000-000000000001","startDateTime":"2022-05-07T06:57:13Z","type":"AsymmetricX509Cert","usage":"Verify"}],"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[],"publicClient":{"redirectUris":[]},"requiredResourceAccess":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"web":{"homePageUrl":null,"logoutUrl":null,"redirectUris":[],"implicitGrantSettings":{"enableAccessTokenIssuance":false,"enableIdTokenIssuance":false}},"spa":{"redirectUris":[]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1783'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:28 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 9be3b6cd-debd-4582-aa0a-c2a76f5ed68f
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF0000812E"}}'
+      x-ms-resource-unit:
+      - '2'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app credential reset
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --create-cert --keyvault --cert
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/applications/d7a3939d-a7c7-4f08-93e1-83de016a9a09
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#applications/$entity","id":"d7a3939d-a7c7-4f08-93e1-83de016a9a09","deletedDateTime":null,"appId":"51c80b1f-9382-4b21-b653-ba07fc09715f","applicationTemplateId":null,"disabledByMicrosoftStatus":null,"createdDateTime":"2022-05-07T06:57:25Z","displayName":"cli_test_sp_with_kv_new_cert000001","description":null,"groupMembershipClaims":null,"identifierUris":[],"isDeviceOnlyAuthSupported":null,"isFallbackPublicClient":null,"notes":null,"publisherDomain":"AzureSDKTeam.onmicrosoft.com","serviceManagementReference":null,"signInAudience":"AzureADandPersonalMicrosoftAccount","tags":[],"tokenEncryptionKeyId":null,"defaultRedirectUri":null,"certification":null,"optionalClaims":null,"addIns":[],"api":{"acceptMappedClaims":null,"knownClientApplications":[],"requestedAccessTokenVersion":2,"oauth2PermissionScopes":[],"preAuthorizedApplications":[]},"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[{"customKeyIdentifier":"6271BE04BE4C076A935248DEC2F0B65A4E828FB8","displayName":"CN=KeyVault
+        Generated","endDateTime":"2023-05-07T06:57:13Z","key":null,"keyId":"88888888-0000-0000-0000-000000000001","startDateTime":"2022-05-07T06:57:13Z","type":"AsymmetricX509Cert","usage":"Verify"}],"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[],"publicClient":{"redirectUris":[]},"requiredResourceAccess":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"web":{"homePageUrl":null,"logoutUrl":null,"redirectUris":[],"implicitGrantSettings":{"enableAccessTokenIssuance":false,"enableIdTokenIssuance":false}},"spa":{"redirectUris":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1779'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:29 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 2cd0e50a-45ae-4cec-a89f-7465efcfd832
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00008136"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"policy": {"key_props": {"exportable": true, "kty": "RSA", "key_size":
+      2048, "reuse_key": true}, "secret_props": {"contentType": "application/x-pkcs12"},
+      "x509_props": {"subject": "CN=KeyVault Generated", "key_usage": ["cRLSign",
+      "dataEncipherment", "digitalSignature", "keyEncipherment", "keyAgreement", "keyCertSign"],
+      "validity_months": 12}, "lifetime_actions": [{"trigger": {"days_before_expiry":
+      90}, "action": {"action_type": "AutoRenew"}}], "issuer": {"name": "Self"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '477'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/create?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending","issuer":{"name":"Self"},"csr":"MIICrTCCAZUCAQAwHTEbMBkGA1UEAxMSS2V5VmF1bHQgR2VuZXJhdGVkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Es18kn4nqSQvJve75Zokv0FmcuSybh+rKU0d+xNAovrKSUZHjAQh6DyCfDsXAOHdSjPPw0HVNk2vzbm/qIJ1AqYKpVopKg9Amfv4vTYLFxVemolXBh5alUGJhDt5cgm2jmeLADFgbjseitGaEHV6Wwd0+NtaJ+ieIuTh73GeBmL39fxjfFq76Qr/7q6/Zh+Ok4Rr/eJkQzCpQJIpp1WFQP80MpmGO8pS/DLe0n109DQ7+ole7ELDalm02lzUcQLrKXlaVodRuRHH6PX5Mm8i4w/9j12CJXmbCSX4ZwyjPT6Et5j/MmXvOnFULpJtclFzUUcFw2nTb38FprxMVdmAQIDAQABoEswSQYJKoZIhvcNAQkOMTwwOjAOBgNVHQ8BAf8EBAMCAb4wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJfMgVHbPM0cOX27YLc+GVoMp0xCSDjAdQ60NtPnjwj7WooJNQJPpSJ/L5IE++k9cIbZoJ5ZoJ+H4h6dtp7Uqk8hXoYOU4LV57L9MJEevUUkedm3O1szGZcO5FzexDswnvpHjcz6J+RJ0/lUcRSAOQyhdZ52+uEa0gjSPn+s7tEZKaDxVLXkVZqQExIhG9cXZsDUmP6VBvh8ZcZpESli2xKVO3L1oPG6jCM2qyiwOQj2oMg5GpPh7JVlBaz7OK/mFpGcJX4bxlgVWThKVnP4ZoXF5Ng8SAKsz8kCFYMp/U16p9XxPb7+gGtfOi+4et7RMy56AEXxqzP39x/E2x0P7T0=","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+        certificate created. Certificate request is in progress. This may take some
+        time based on the issuer provider. Please check again later.","request_id":"ab263a2c60e64a03991e09ca1259b6d5"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1301'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending?api-version=7.0&request_id=ab263a2c60e64a03991e09ca1259b6d5
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending","issuer":{"name":"Self"},"csr":"MIICrTCCAZUCAQAwHTEbMBkGA1UEAxMSS2V5VmF1bHQgR2VuZXJhdGVkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Es18kn4nqSQvJve75Zokv0FmcuSybh+rKU0d+xNAovrKSUZHjAQh6DyCfDsXAOHdSjPPw0HVNk2vzbm/qIJ1AqYKpVopKg9Amfv4vTYLFxVemolXBh5alUGJhDt5cgm2jmeLADFgbjseitGaEHV6Wwd0+NtaJ+ieIuTh73GeBmL39fxjfFq76Qr/7q6/Zh+Ok4Rr/eJkQzCpQJIpp1WFQP80MpmGO8pS/DLe0n109DQ7+ole7ELDalm02lzUcQLrKXlaVodRuRHH6PX5Mm8i4w/9j12CJXmbCSX4ZwyjPT6Et5j/MmXvOnFULpJtclFzUUcFw2nTb38FprxMVdmAQIDAQABoEswSQYJKoZIhvcNAQkOMTwwOjAOBgNVHQ8BAf8EBAMCAb4wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJfMgVHbPM0cOX27YLc+GVoMp0xCSDjAdQ60NtPnjwj7WooJNQJPpSJ/L5IE++k9cIbZoJ5ZoJ+H4h6dtp7Uqk8hXoYOU4LV57L9MJEevUUkedm3O1szGZcO5FzexDswnvpHjcz6J+RJ0/lUcRSAOQyhdZ52+uEa0gjSPn+s7tEZKaDxVLXkVZqQExIhG9cXZsDUmP6VBvh8ZcZpESli2xKVO3L1oPG6jCM2qyiwOQj2oMg5GpPh7JVlBaz7OK/mFpGcJX4bxlgVWThKVnP4ZoXF5Ng8SAKsz8kCFYMp/U16p9XxPb7+gGtfOi+4et7RMy56AEXxqzP39x/E2x0P7T0=","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+        certificate created. Certificate request is in progress. This may take some
+        time based on the issuer provider. Please check again later.","request_id":"ab263a2c60e64a03991e09ca1259b6d5"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1301'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending","issuer":{"name":"Self"},"csr":"MIICrTCCAZUCAQAwHTEbMBkGA1UEAxMSS2V5VmF1bHQgR2VuZXJhdGVkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Es18kn4nqSQvJve75Zokv0FmcuSybh+rKU0d+xNAovrKSUZHjAQh6DyCfDsXAOHdSjPPw0HVNk2vzbm/qIJ1AqYKpVopKg9Amfv4vTYLFxVemolXBh5alUGJhDt5cgm2jmeLADFgbjseitGaEHV6Wwd0+NtaJ+ieIuTh73GeBmL39fxjfFq76Qr/7q6/Zh+Ok4Rr/eJkQzCpQJIpp1WFQP80MpmGO8pS/DLe0n109DQ7+ole7ELDalm02lzUcQLrKXlaVodRuRHH6PX5Mm8i4w/9j12CJXmbCSX4ZwyjPT6Et5j/MmXvOnFULpJtclFzUUcFw2nTb38FprxMVdmAQIDAQABoEswSQYJKoZIhvcNAQkOMTwwOjAOBgNVHQ8BAf8EBAMCAb4wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJfMgVHbPM0cOX27YLc+GVoMp0xCSDjAdQ60NtPnjwj7WooJNQJPpSJ/L5IE++k9cIbZoJ5ZoJ+H4h6dtp7Uqk8hXoYOU4LV57L9MJEevUUkedm3O1szGZcO5FzexDswnvpHjcz6J+RJ0/lUcRSAOQyhdZ52+uEa0gjSPn+s7tEZKaDxVLXkVZqQExIhG9cXZsDUmP6VBvh8ZcZpESli2xKVO3L1oPG6jCM2qyiwOQj2oMg5GpPh7JVlBaz7OK/mFpGcJX4bxlgVWThKVnP4ZoXF5Ng8SAKsz8kCFYMp/U16p9XxPb7+gGtfOi+4et7RMy56AEXxqzP39x/E2x0P7T0=","cancellation_requested":false,"status":"completed","target":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1","request_id":"ab263a2c60e64a03991e09ca1259b6d5"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1213'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/05ee662732114bf197569bfc9bc46294","kid":"https://test-rbac-new-kv000002.vault.azure.net/keys/cert1/05ee662732114bf197569bfc9bc46294","sid":"https://test-rbac-new-kv000002.vault.azure.net/secrets/cert1/05ee662732114bf197569bfc9bc46294","x5t":"HP1e0_1bYXZdQpnfZjlPiA_DUfM","cer":"MIIDQDCCAiigAwIBAgIQCVDYsrdzRi6K2xr+OtTZUzANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwHhcNMjIwNTA3MDY0NzMzWhcNMjMwNTA3MDY1NzMzWjAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUSzXySfiepJC8m97vlmiS/QWZy5LJuH6spTR37E0Ci+spJRkeMBCHoPIJ8OxcA4d1KM8/DQdU2Ta/Nub+ognUCpgqlWikqD0CZ+/i9NgsXFV6aiVcGHlqVQYmEO3lyCbaOZ4sAMWBuOx6K0ZoQdXpbB3T421on6J4i5OHvcZ4GYvf1/GN8WrvpCv/urr9mH46ThGv94mRDMKlAkimnVYVA/zQymYY7ylL8Mt7SfXT0NDv6iV7sQsNqWbTaXNRxAuspeVpWh1G5Ecfo9fkybyLjD/2PXYIleZsJJfhnDKM9PoS3mP8yZe86cVQukm1yUXNRRwXDadNvfwWmvExV2YBAgMBAAGjfDB6MA4GA1UdDwEB/wQEAwIBvjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBQ/KyTpr1PZZASRJeM6XpnyB6Yz6jAdBgNVHQ4EFgQUPysk6a9T2WQEkSXjOl6Z8gemM+owDQYJKoZIhvcNAQELBQADggEBACFiLQdCKEwknu5xnOMV/dwowF5KXZ2992HeC9vt/IUiTWQR8nxcWTiStm0Wp9vaYPVshIjAH2SFohFstclS73BaQ6XRuyyKerLDiLbzxzEGhAL2CqVcSNSfyeZ76b92LA+h/XwhiqX9kZys0iUL3BLacSrisr6tWCbc5oOlUCiI0xHlH6cgkVHMbfIUBqAUljHcX0PiX/gB0NniEPYd9ReE6AaEqFxDJG2AAC34wVg+sriKx5JaGDIikZ14ynDdHYyEzpw/oHH151m79cF6F0+yTy0H3zsXxXLBxDkfoCG3od9SP5F/xVAkmWXMtlh2BJo5LXH8m58mqUz6td8c+kw=","attributes":{"enabled":true,"nbf":1651906053,"exp":1683442653,"created":1651906654,"updated":1651906654,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"policy":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=KeyVault
+        Generated","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1651906635,"updated":1651906651}},"pending":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2394'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"keyCredentials": [{"@odata.type": "#microsoft.graph.keyCredential", "displayName":
+      null, "endDateTime": "2023-05-07T06:57:29Z", "key": "MIIDQDCCAiigAwIBAgIQCVDYsrdzRi6K2xr+OtTZUzANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwHhcNMjIwNTA3MDY0NzMzWhcNMjMwNTA3MDY1NzMzWjAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUSzXySfiepJC8m97vlmiS/QWZy5LJuH6spTR37E0Ci+spJRkeMBCHoPIJ8OxcA4d1KM8/DQdU2Ta/Nub+ognUCpgqlWikqD0CZ+/i9NgsXFV6aiVcGHlqVQYmEO3lyCbaOZ4sAMWBuOx6K0ZoQdXpbB3T421on6J4i5OHvcZ4GYvf1/GN8WrvpCv/urr9mH46ThGv94mRDMKlAkimnVYVA/zQymYY7ylL8Mt7SfXT0NDv6iV7sQsNqWbTaXNRxAuspeVpWh1G5Ecfo9fkybyLjD/2PXYIleZsJJfhnDKM9PoS3mP8yZe86cVQukm1yUXNRRwXDadNvfwWmvExV2YBAgMBAAGjfDB6MA4GA1UdDwEB/wQEAwIBvjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBQ/KyTpr1PZZASRJeM6XpnyB6Yz6jAdBgNVHQ4EFgQUPysk6a9T2WQEkSXjOl6Z8gemM+owDQYJKoZIhvcNAQELBQADggEBACFiLQdCKEwknu5xnOMV/dwowF5KXZ2992HeC9vt/IUiTWQR8nxcWTiStm0Wp9vaYPVshIjAH2SFohFstclS73BaQ6XRuyyKerLDiLbzxzEGhAL2CqVcSNSfyeZ76b92LA+h/XwhiqX9kZys0iUL3BLacSrisr6tWCbc5oOlUCiI0xHlH6cgkVHMbfIUBqAUljHcX0PiX/gB0NniEPYd9ReE6AaEqFxDJG2AAC34wVg+sriKx5JaGDIikZ14ynDdHYyEzpw/oHH151m79cF6F0+yTy0H3zsXxXLBxDkfoCG3od9SP5F/xVAkmWXMtlh2BJo5LXH8m58mqUz6td8c+kw=",
+      "keyId": "88888888-0000-0000-0000-000000000002", "startDateTime": "2022-05-07T06:57:29Z",
+      "type": "AsymmetricX509Cert", "usage": "Verify"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app credential reset
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1397'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --create-cert --keyvault --cert
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: PATCH
+    uri: https://graph.microsoft.com/v1.0/applications/d7a3939d-a7c7-4f08-93e1-83de016a9a09
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Sat, 07 May 2022 06:57:41 GMT
+      request-id:
+      - a8c1be8c-f072-42cd-bb76-6bed6d13c929
+      strict-transport-security:
+      - max-age=31536000
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A4A"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) msrest/0.6.21 msrest_azure/0.6.4
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/?api-version=7.0
+  response:
+    body:
+      string: '{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/05ee662732114bf197569bfc9bc46294","kid":"https://test-rbac-new-kv000002.vault.azure.net/keys/cert1/05ee662732114bf197569bfc9bc46294","sid":"https://test-rbac-new-kv000002.vault.azure.net/secrets/cert1/05ee662732114bf197569bfc9bc46294","x5t":"HP1e0_1bYXZdQpnfZjlPiA_DUfM","cer":"MIIDQDCCAiigAwIBAgIQCVDYsrdzRi6K2xr+OtTZUzANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwHhcNMjIwNTA3MDY0NzMzWhcNMjMwNTA3MDY1NzMzWjAdMRswGQYDVQQDExJLZXlWYXVsdCBHZW5lcmF0ZWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUSzXySfiepJC8m97vlmiS/QWZy5LJuH6spTR37E0Ci+spJRkeMBCHoPIJ8OxcA4d1KM8/DQdU2Ta/Nub+ognUCpgqlWikqD0CZ+/i9NgsXFV6aiVcGHlqVQYmEO3lyCbaOZ4sAMWBuOx6K0ZoQdXpbB3T421on6J4i5OHvcZ4GYvf1/GN8WrvpCv/urr9mH46ThGv94mRDMKlAkimnVYVA/zQymYY7ylL8Mt7SfXT0NDv6iV7sQsNqWbTaXNRxAuspeVpWh1G5Ecfo9fkybyLjD/2PXYIleZsJJfhnDKM9PoS3mP8yZe86cVQukm1yUXNRRwXDadNvfwWmvExV2YBAgMBAAGjfDB6MA4GA1UdDwEB/wQEAwIBvjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBQ/KyTpr1PZZASRJeM6XpnyB6Yz6jAdBgNVHQ4EFgQUPysk6a9T2WQEkSXjOl6Z8gemM+owDQYJKoZIhvcNAQELBQADggEBACFiLQdCKEwknu5xnOMV/dwowF5KXZ2992HeC9vt/IUiTWQR8nxcWTiStm0Wp9vaYPVshIjAH2SFohFstclS73BaQ6XRuyyKerLDiLbzxzEGhAL2CqVcSNSfyeZ76b92LA+h/XwhiqX9kZys0iUL3BLacSrisr6tWCbc5oOlUCiI0xHlH6cgkVHMbfIUBqAUljHcX0PiX/gB0NniEPYd9ReE6AaEqFxDJG2AAC34wVg+sriKx5JaGDIikZ14ynDdHYyEzpw/oHH151m79cF6F0+yTy0H3zsXxXLBxDkfoCG3od9SP5F/xVAkmWXMtlh2BJo5LXH8m58mqUz6td8c+kw=","attributes":{"enabled":true,"nbf":1651906053,"exp":1683442653,"created":1651906654,"updated":1651906654,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"policy":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=KeyVault
+        Generated","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1651906635,"updated":1651906651}},"pending":{"id":"https://test-rbac-new-kv000002.vault.azure.net/certificates/cert1/pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2394'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:57:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.91;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.378.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/applications?$filter=appId%20eq%20'51c80b1f-9382-4b21-b653-ba07fc09715f'
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#applications","value":[{"id":"d7a3939d-a7c7-4f08-93e1-83de016a9a09","deletedDateTime":null,"appId":"51c80b1f-9382-4b21-b653-ba07fc09715f","applicationTemplateId":null,"disabledByMicrosoftStatus":null,"createdDateTime":"2022-05-07T06:57:25Z","displayName":"cli_test_sp_with_kv_new_cert000001","description":null,"groupMembershipClaims":null,"identifierUris":[],"isDeviceOnlyAuthSupported":null,"isFallbackPublicClient":null,"notes":null,"publisherDomain":"AzureSDKTeam.onmicrosoft.com","serviceManagementReference":null,"signInAudience":"AzureADandPersonalMicrosoftAccount","tags":[],"tokenEncryptionKeyId":null,"defaultRedirectUri":null,"certification":null,"optionalClaims":null,"addIns":[],"api":{"acceptMappedClaims":null,"knownClientApplications":[],"requestedAccessTokenVersion":2,"oauth2PermissionScopes":[],"preAuthorizedApplications":[]},"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[{"customKeyIdentifier":"1CFD5ED3FD5B61765D4299DF66394F880FC351F3","displayName":"CN=KeyVault
+        Generated","endDateTime":"2023-05-07T06:57:29Z","key":null,"keyId":"88888888-0000-0000-0000-000000000002","startDateTime":"2022-05-07T06:57:29Z","type":"AsymmetricX509Cert","usage":"Verify"}],"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[],"publicClient":{"redirectUris":[]},"requiredResourceAccess":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"web":{"homePageUrl":null,"logoutUrl":null,"redirectUris":[],"implicitGrantSettings":{"enableAccessTokenIssuance":false,"enableIdTokenIssuance":false}},"spa":{"redirectUris":[]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1783'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:58:02 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 0eb61727-b069-48f9-80c0-a231af52d4cd
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00006468"}}'
+      x-ms-resource-unit:
+      - '2'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/applications/d7a3939d-a7c7-4f08-93e1-83de016a9a09
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#applications/$entity","id":"d7a3939d-a7c7-4f08-93e1-83de016a9a09","deletedDateTime":null,"appId":"51c80b1f-9382-4b21-b653-ba07fc09715f","applicationTemplateId":null,"disabledByMicrosoftStatus":null,"createdDateTime":"2022-05-07T06:57:25Z","displayName":"cli_test_sp_with_kv_new_cert000001","description":null,"groupMembershipClaims":null,"identifierUris":[],"isDeviceOnlyAuthSupported":null,"isFallbackPublicClient":null,"notes":null,"publisherDomain":"AzureSDKTeam.onmicrosoft.com","serviceManagementReference":null,"signInAudience":"AzureADandPersonalMicrosoftAccount","tags":[],"tokenEncryptionKeyId":null,"defaultRedirectUri":null,"certification":null,"optionalClaims":null,"addIns":[],"api":{"acceptMappedClaims":null,"knownClientApplications":[],"requestedAccessTokenVersion":2,"oauth2PermissionScopes":[],"preAuthorizedApplications":[]},"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[{"customKeyIdentifier":"1CFD5ED3FD5B61765D4299DF66394F880FC351F3","displayName":"CN=KeyVault
+        Generated","endDateTime":"2023-05-07T06:57:29Z","key":null,"keyId":"88888888-0000-0000-0000-000000000002","startDateTime":"2022-05-07T06:57:29Z","type":"AsymmetricX509Cert","usage":"Verify"}],"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[],"publicClient":{"redirectUris":[]},"requiredResourceAccess":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"web":{"homePageUrl":null,"logoutUrl":null,"redirectUris":[],"implicitGrantSettings":{"enableAccessTokenIssuance":false,"enableIdTokenIssuance":false}},"spa":{"redirectUris":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1779'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:58:02 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - ef5df80c-1d7c-458f-b6bf-fe5f0460c003
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A2F"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/applications?$filter=appId%20eq%20'51c80b1f-9382-4b21-b653-ba07fc09715f'
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#applications","value":[{"id":"d7a3939d-a7c7-4f08-93e1-83de016a9a09","deletedDateTime":null,"appId":"51c80b1f-9382-4b21-b653-ba07fc09715f","applicationTemplateId":null,"disabledByMicrosoftStatus":null,"createdDateTime":"2022-05-07T06:57:25Z","displayName":"cli_test_sp_with_kv_new_cert000001","description":null,"groupMembershipClaims":null,"identifierUris":[],"isDeviceOnlyAuthSupported":null,"isFallbackPublicClient":null,"notes":null,"publisherDomain":"AzureSDKTeam.onmicrosoft.com","serviceManagementReference":null,"signInAudience":"AzureADandPersonalMicrosoftAccount","tags":[],"tokenEncryptionKeyId":null,"defaultRedirectUri":null,"certification":null,"optionalClaims":null,"addIns":[],"api":{"acceptMappedClaims":null,"knownClientApplications":[],"requestedAccessTokenVersion":2,"oauth2PermissionScopes":[],"preAuthorizedApplications":[]},"appRoles":[],"info":{"logoUrl":null,"marketingUrl":null,"privacyStatementUrl":null,"supportUrl":null,"termsOfServiceUrl":null},"keyCredentials":[{"customKeyIdentifier":"1CFD5ED3FD5B61765D4299DF66394F880FC351F3","displayName":"CN=KeyVault
+        Generated","endDateTime":"2023-05-07T06:57:29Z","key":null,"keyId":"88888888-0000-0000-0000-000000000002","startDateTime":"2022-05-07T06:57:29Z","type":"AsymmetricX509Cert","usage":"Verify"}],"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[],"publicClient":{"redirectUris":[]},"requiredResourceAccess":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null},"web":{"homePageUrl":null,"logoutUrl":null,"redirectUris":[],"implicitGrantSettings":{"enableAccessTokenIssuance":false,"enableIdTokenIssuance":false}},"spa":{"redirectUris":[]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1783'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sat, 07 May 2022 06:58:04 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 70812c75-b15c-41e6-b8ca-826d0bdc90e5
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A47"}}'
+      x-ms-resource-unit:
+      - '2'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad app delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: DELETE
+    uri: https://graph.microsoft.com/v1.0/applications/d7a3939d-a7c7-4f08-93e1-83de016a9a09
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Sat, 07 May 2022 06:58:05 GMT
+      request-id:
+      - be111cc6-a6a1-4256-9fa2-69736aac1e94
+      strict-transport-security:
+      - max-age=31536000
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00005AD4"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - rest
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --method --url
+      User-Agent:
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
+    method: DELETE
+    uri: https://graph.microsoft.com/v1.0/directory/deletedItems/d7a3939d-a7c7-4f08-93e1-83de016a9a09
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Sat, 07 May 2022 06:58:06 GMT
+      request-id:
+      - 1750a6cb-f13e-4a7a-8c45-8b37fe67681a
+      strict-transport-security:
+      - max-age=31536000
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00006468"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 204
+      message: No Content
+version: 1

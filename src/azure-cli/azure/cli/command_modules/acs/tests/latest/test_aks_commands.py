@@ -26,15 +26,6 @@ from knack.util import CLIError
 # flake8: noqa
 
 
-# The RoleBasedServicePrincipalPreparer returns sp name and needs to be turned
-# into Application ID URI. Based on the recording files, some Application ID (GUID)
-# is set with the environment varibale for sp_name. This method is compatible with
-# both cases.
-def _process_sp_name(sp_name):
-    from azure.cli.core.util import is_guid
-    return sp_name if is_guid(sp_name) else 'http://{}'.format(sp_name)
-
-
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
@@ -212,7 +203,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'tags': tags,
             'nodepool_labels': nodepool_labels,
             'nodepool_tags': nodepool_tags,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'ssh_key_value': self.generate_ssh_keys(),
@@ -415,6 +406,95 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_and_update_with_http_proxy_config(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'http_proxy_path': get_test_data_file_path('httpproxyconfig.json'),
+            'custom_data_path': get_test_data_file_path('setup_proxy.sh'),
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_vnet_cmd = 'network vnet create \
+            --resource-group={resource_group} \
+            --name={name} \
+            --address-prefixes 10.42.0.0/16 \
+            --subnet-name aks-subnet \
+            --subnet-prefix 10.42.1.0/24'
+
+        create_subnet_cmd = 'network vnet subnet create \
+            --resource-group={resource_group} \
+            --vnet-name={name} \
+            --name proxy-subnet \
+            --address-prefix 10.42.3.0/24'
+
+        show_subnet_cmd = 'network vnet subnet show \
+            --resource-group={resource_group} \
+            --vnet-name={name} \
+            --name aks-subnet'
+
+        # name below MUST match the name used in testcerts for httpproxyconfig.json.
+        # otherwise the VM will not present a cert with correct hostname
+        # else, change the cert to have the correct hostname (harder)
+        create_vm_cmd = 'vm create \
+            --resource-group={resource_group} \
+            --name=cli-proxy-vm \
+            --image Canonical:0001-com-ubuntu-server-focal:20_04-lts:latest \
+            --ssh-key-values @{ssh_key_value} \
+            --public-ip-address "" \
+            --custom-data {custom_data_path} \
+            --vnet-name {name} \
+            --subnet proxy-subnet'
+
+        self.cmd(create_vnet_cmd, checks=[
+            self.check('newVNet.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd(create_subnet_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        subnet_output = self.cmd(show_subnet_cmd).get_output_in_json()
+        subnet_id = subnet_output["id"]
+        assert subnet_id is not None
+
+        self.cmd(create_vm_cmd)
+
+        self.kwargs.update({
+            'vnet_subnet_id': subnet_id,
+        })
+
+        # use custom feature so it does not require subscription to regiter the feature
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --http-proxy-config={http_proxy_path} ' \
+                     '--ssh-key-value={ssh_key_value} --enable-managed-identity --yes --vnet-subnet-id {vnet_subnet_id} -o json'
+
+        self.cmd(create_cmd, checks=[
+            self.check('httpProxyConfig.httpProxy',
+                       'http://cli-proxy-vm:3128/'),
+            self.check('httpProxyConfig.httpsProxy',
+                       'https://cli-proxy-vm:3129/'),
+            self.check('httpProxyConfig.trustedCa', 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZHekNDQXdPZ0F3SUJBZ0lVT1FvajhDTFpkc2Vscjk3cnZJd3g1T0xEc3V3d0RRWUpLb1pJaHZjTkFRRUwKQlFBd0Z6RVZNQk1HQTFVRUF3d01ZMnhwTFhCeWIzaDVMWFp0TUI0WERUSXlNRE13T0RFMk5EUTBOMW9YRFRNeQpNRE13TlRFMk5EUTBOMW93RnpFVk1CTUdBMVVFQXd3TVkyeHBMWEJ5YjNoNUxYWnRNSUlDSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUEvTVB0VjVCVFB0NmNxaTRSZE1sbXIzeUlzYTJ1anpjaHh2NGgKanNDMUR0blJnb3M1UzQxUEgwcmkrM3RUU1ZYMzJ5cndzWStyRDFZUnVwbTZsbUU3R2hVNUkwR2k5b3prU0YwWgpLS2FKaTJveXBVL0ZCK1FQcXpvQ1JzTUV3R0NibUtGVmw4VnVoeW5kWEs0YjRrYmxyOWJsL2V1d2Q3TThTYnZ6CldVam5lRHJRc2lJc3J6UFQ0S0FaTHFjdHpEZTRsbFBUN1lLYTMzaGlFUE9mdldpWitkcWthUUE5UDY0eFhTeW4KZkhYOHVWQUozdUJWSmVHeEQwcGtOSjdqT3J5YVV1SEh1Y1U4UzltSWpuS2pBQjVhUGpMSDV4QXM2bG1iMzEyMgp5KzF0bkVBbVhNNTBEK1VvRWpmUzZIT2I1cmRpcVhHdmMxS2JvS2p6a1BDUnh4MmE3MmN2ZWdVajZtZ0FKTHpnClRoRTFsbGNtVTRpemd4b0lNa1ZwR1RWT0xMbjFWRkt1TmhNWkN2RnZLZ25Lb0F2M0cwRlVuZldFYVJSalNObUQKTFlhTURUNUg5WnQycERJVWpVR1N0Q2w3Z1J6TUVuWXdKTzN5aURwZzQzbzVkUnlzVXlMOUpmRS9OaDdUZzYxOApuOGNKL1c3K1FZYllsanVyYXA4cjdRRlNyb2wzVkNoRkIrT29yNW5pK3ZvaFNBd0pmMFVsTXBHM3hXbXkxVUk0ClRGS2ZGR1JSVHpyUCs3Yk53WDVoSXZJeTVWdGd5YU9xSndUeGhpL0pkeHRPcjJ0QTVyQ1c3K0N0Z1N2emtxTkUKWHlyN3ZrWWdwNlk1TFpneTR0VWpLMEswT1VnVmRqQk9oRHBFenkvRkY4dzFGRVZnSjBxWS9yV2NMa0JIRFQ4Ugp2SmtoaW84Q0F3RUFBYU5mTUYwd0Z3WURWUjBSQkJBd0RvSU1ZMnhwTFhCeWIzaDVMWFp0TUJJR0ExVWRFd0VCCi93UUlNQVlCQWY4Q0FRQXdEd1lEVlIwUEFRSC9CQVVEQXdmbmdEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0QKQWdZSUt3WUJCUVVIQXdFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFBb21qQ3lYdmFRT3hnWUs1MHNYTEIyKwp3QWZkc3g1bm5HZGd5Zmc0dXJXMlZtMTVEaEd2STdDL250cTBkWXkyNE4vVWJHN1VEWHZseUxJSkZxMVhQN25mCnBaRzBWQ2paNjlibXhLbTNaOG0wL0F3TXZpOGU5ZWR5OHY5a05CQ3dMR2tIYkE4WW85Q0lpUWdlbGZwcDF2VWgKYm5OQmhhRCtpdTZDZmlDTHdnSmIvaXc3ZW8vQ3lvWnF4K3RqWGFPMnpYdm00cC8rUUlmQU9ndEdRTEZVOGNmWgovZ1VyVHE1Z0ZxMCtQOUd5V3NBVEpGNnE3TDZXWlpqME91VHNlN2Y0Q1NpajZNbk9NTXhBK0pvYWhKejdsc1NpClRKSEl3RXA1ci9SeWhweWVwUXhGWWNVSDVKSmY5cmFoWExXWmkrOVRqeFNNMll5aHhmUlBzaVVFdUdEb2s3OFEKbS9RUGlDaTlKSmIxb2NtVGpBVjh4RFNob2NpdlhPRnlobjZMbjc3dkxqWStBYXZ0V0RoUXRocHVQeHNMdFZ6bQplMFNIMTFkRUxSdGI3NG1xWE9yTzdmdS8rSUJzM0pxTEUvVSt4dXhRdHZHOHZHMXlES0hIU1pxUzJoL1dzNGw0Ck5pQXNoSGdlaFFEUEJjWTl3WVl6ZkJnWnBPVU16ZERmNTB4K0ZTbFk0M1dPSkp6U3VRaDR5WjArM2t5Z3VDRjgKcm5NTFNjZXlTNGNpNExtSi9LQ1N1R2RmNlhWWXo4QkU5Z2pqanBDUDZxeTBVbFJlZldzL2lnL3djSysyYkYxVApuL1l2KzZnWGVDVEhKNzVxRElQbHA3RFJVVWswZmJNajRiSWthb2dXV2s0emYydThteFpMYTBsZVBLTktaTi9tCkdDdkZ3cjNlaSt1LzhjenA1RjdUCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K')
+        ])
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'http_proxy_path': get_test_data_file_path('httpproxyconfig_update.json'),
+        })
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --http-proxy-config={http_proxy_path}'
+
+        self.cmd(update_cmd, checks=[
+            self.check('httpProxyConfig.httpProxy',
+                       'http://cli-proxy-vm:3128/'),
+            self.check('httpProxyConfig.httpsProxy',
+                       'https://cli-proxy-vm:3129/'),
+            self.check('httpProxyConfig.trustedCa', 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZERENDQXZTZ0F3SUJBZ0lVQlJ3cGs1eTh5ckdrNmtYTjhkSHlMRUNvaHBrd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0VqRVFNQTRHQTFVRUF3d0habTl2TFdKaGNqQWVGdzB5TVRFd01UTXdNekU1TlRoYUZ3MHpNVEV3TVRFdwpNekU1TlRoYU1CSXhFREFPQmdOVkJBTU1CMlp2YnkxaVlYSXdnZ0lpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElDCkR3QXdnZ0lLQW9JQ0FRRFcwRE9sVC9yci9xUEZIUU9lNndBNDkyVGh3VWxZaDhCQkszTW9VWVZLNjEvL2xXekEKeFkrYzlmazlvckUrZXhMSVpwdUg1VnNZR21MNUFyc05sVmNBMkU4MWgwSlBPYUo1eEpiZG40YldpZG9vdXRVVwpXeDNhYUJLSEt0RWdZbUNmTjliWXlZMlNWRWQvNS9HeGh0akVabHJ1aEtRdkZVa3hwR0xKK1JRQ25oNklZakQwCnNpQ0YyTjJhVUJ4RE5KaUdmeHlHSVIrY2p4Vlcrd01md05CQ0l6QVkxMnY4WmpzUXdmUWlhOE5oWEx3M0tuRm0KdzUrcHN2bU1HL1FFUUtZMXNOTnk2dS9DZkI3cmIxQ0EwcjdNNnFsNFMrWHJjZUVRcXpDUWR6NWJueGNYbmFkbwp5MDlhdm5OSGRqbmpvcHNPSkxhd2hzb3RGNWFrL1FLdjYzdU9yVFFlOHlPSWlCZ3JSUzdwejcxbVlhRGNMcXFtCmtmdDVLYnFnMHNZYmo0M09LSm5aZ3crTUtackhoSFJKNi9BcWxOclZML3pFUytHU0ozQ1lSaE5nYXdDQ0Nqd1gKanZYZnkycWFEV2NQbWZaSWVVMVNzdE05THBVRWFQNjJzUVNmb3NEdnZFbUFyUVgwcmd1WGhvZ3pRUFdGWVlEKwo4SUNFYkNFc21hVnN3MzhVUzgzbFlGVCtyTHh3cm5UK1JXSUZ2WFRXbHhCNm5JeWpsOXBhNzlkdU5ocjJxN2RzCjVOU3ZWWHg5UGNqVTQ2VUZ6QnVTbUl0Q0M0Y1NadFRWc3l6ZnpMd2hKbGlqV0czTkp5TnpHUkZQcUpQdTNJUzEKZ3VtKytqdWx4bXZNWm1vM1RqSE5JRm90a0kyd3d3ZUtIcWpYcW9STmwvVnZobE5CaXZRR2gxeGovd0lEQVFBQgpvMW93V0RBU0JnTlZIUkVFQ3pBSmdnZG1iMjh0WW1GeU1CSUdBMVVkRXdFQi93UUlNQVlCQWY4Q0FRQXdEd1lEClZSMFBBUUgvQkFVREF3Zm5nREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQWdZSUt3WUJCUVVIQXdFd0RRWUoKS29aSWh2Y05BUUVMQlFBRGdnSUJBTDF3RlpTdUw4NTM3aHpUTXhSUWJjcWdEU2F4RUd0ZDJaNTVCcnVWQVloagpxQjR6STd1UVZ2SkNpeXdmQm5BNnZmejh2UDBzdGJJbkVtajh1dS9CSS81NzZqR0tWUWRQSDhqMnQvN1NQWjFKClhBWk9wc1hoVll2RmtpQlhVeW1RMnAvRjFqb2ZRRE1JQ0htdHhRUSthakJQNjBpcnFnVnpsRi95NlQySUgzOHYKbGordndIam52WW5vVmhGNEY0TlE5amp6S3Y1NUhVTk0xUEJKZkFaOTJqeXovczdPMmN2cjhNWlNkT2s5QVk1RQp5RXRlQjBTSjdLS0tUZklBVmVMQzdrRnBHR3FsRkRBNzhPSS9YakNZViswRjk4MHdNOVkxTEVUa3ZMamVSMEFyCnVzZDNIS1Vtd2EwTVEwUTNZNGxma0ZtNjJTclhvcjJURC9WZHpFZWNOTnVmV1VJTVNuaEJDNTVHWjBOTVYvR0QKRXhGZTVWQkhUZEZVNlIwb3JCOVFjVll1Mzk0MEt5NXhkbHNaUHZlMmRJNS9WOXhzY0Zad3cxWWs4K21RK3NVeQp2UVBoL2ZmK0tTQjdVVkdvTVNXUlg3YjFFMGVzZSs4QzZlaVV2OXpDR0VRbkVCcnFIQWxSUDJ2ZzQ0bXFJSnRzCjN2NUt1NW0ySmJoeWNsQVR3VUNQZkN3a2tLRTg0MzZGRitDK0ZUVTJ1OWVpL2t5QTAxYi9zRFl2cWdsS2FWK3MKbEVHRkhjd05Ea2VrS1BFUEZxNkpnZ3R0WlNidE5SMnFadzl3cExIbDVuVlVXdnBGa2hvcW1KVkphK0VBSTQ1LwpqRkh4VG9PMHp1NlBxc1p5SnM2TC84Z3BhbTcwMDV6b0VETVRjcFltMlduMFBKcEg3NE9zUHJVRDVJWVA5ZEt5Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K')
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_private_dns_zone(self, resource_group, resource_group_location):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
@@ -488,7 +568,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'tags': tags,
             'nodepool_labels': nodepool_labels,
@@ -586,7 +666,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'k8s_version': create_version,
             'vm_size': 'Standard_DS2_v2'
@@ -671,7 +751,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'k8s_version': create_version,
             'nodepool_name': self.create_random_name('np', 12)
@@ -730,7 +810,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
@@ -775,7 +855,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
@@ -820,7 +900,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--nat-gateway-managed-outbound-ip-count=2 ' \
-                     '--nat-gateway-idle-timeout=30 ' 
+                     '--nat-gateway-idle-timeout=30 '
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.outboundType', 'managedNATGateway'),
@@ -866,7 +946,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -965,7 +1045,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'subnet_id': subnet_id
@@ -1055,7 +1135,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1129,7 +1209,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1220,7 +1300,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1325,7 +1405,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1431,7 +1511,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1539,7 +1619,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'tags': tags,
@@ -1664,7 +1744,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'tags': tags,
@@ -1781,7 +1861,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'nodepool1_name': nodepool1_name,
@@ -1855,7 +1935,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1939,7 +2019,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -1973,7 +2053,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'windows_admin_username': 'azureuser1',
@@ -2027,7 +2107,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'windows_admin_username': 'azureuser1',
@@ -2442,7 +2522,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
@@ -2778,6 +2858,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+        # clean up nsg set by policy, otherwise would block creating appgw
+        update_subnet = 'network vnet subnet update -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
+                        '--nsg ""'
+        self.cmd(update_subnet, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkSecurityGroup', None),
+        ])
+
         vnet_id = vnet['newVNet']["id"]
         assert vnet_id is not None
         self.kwargs.update({
@@ -2792,8 +2880,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # create app gateway
+        # add priority since this is a mandatory parameter since 2021-08-01 API version for network operations
         create_appgw = 'network application-gateway create -n appgw -g {resource_group} ' \
-                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet'
+                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet --priority 1001'
         self.cmd(create_appgw)
 
         # construct group id
@@ -4735,7 +4824,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'windows_admin_username': 'azureuser1',
@@ -4784,7 +4873,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'ssh_key_value': self.generate_ssh_keys()
         })
@@ -4817,7 +4906,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'ssh_key_value': self.generate_ssh_keys()
         })
@@ -4879,11 +4968,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         control_plane_identity_name = self.create_random_name('cliakstest', 16)
         kubelet_identity_name = self.create_random_name('cliakstest', 16)
+        new_kubelet_identity_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'control_plane_identity_name': control_plane_identity_name,
             'kubelet_identity_name': kubelet_identity_name,
+            "new_kubelet_identity_name": new_kubelet_identity_name,
             'ssh_key_value': self.generate_ssh_keys()
         })
 
@@ -4919,6 +5010,26 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('identityProfile'),
             self.check('provisioningState', 'Succeeded'),
             self.check('identityProfile.kubeletidentity.resourceId', kubelet_identity_resource_id),
+        ])
+
+        # create new kubelet identity
+        new_kubelet_identity = 'identity create --resource-group={resource_group} --name={new_kubelet_identity_name}'
+        new_identity = self.cmd(new_kubelet_identity, checks=[
+            self.check('name', new_kubelet_identity_name)
+        ]).get_output_in_json()
+        new_kubelet_identity_resource_id = new_identity["id"]
+        assert new_kubelet_identity_resource_id is not None
+        self.kwargs.update({
+            'new_kubelet_identity_resource_id': new_kubelet_identity_resource_id,
+        })
+
+        # update to new kubelet identity
+        self.cmd('aks update --resource-group={resource_group} --name={name} --assign-kubelet-identity {new_kubelet_identity_resource_id} --yes', checks=[
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identityProfile.kubeletidentity.resourceId',
+                       new_kubelet_identity_resource_id),
         ])
 
         # delete
@@ -5075,14 +5186,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --tags {tags} ' \
                      '--ssh-key-value={ssh_key_value} --enable-cluster-autoscaler ' \
-                     '--min-count 1 --max-count 3 --cluster-autoscaler-profile scan-interval=30s expander=least-waste'
+                     '-c 1 --min-count 1 --max-count 5 ' \
+                     '--cluster-autoscaler-profile scan-interval=30s expander=least-waste'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoScalerProfile.scanInterval', '30s'),
             self.check('autoScalerProfile.expander', 'least-waste'),
             self.check('agentPoolProfiles[0].enableAutoScaling', True),
             self.check('agentPoolProfiles[0].minCount', 1),
-            self.check('agentPoolProfiles[0].maxCount', 3),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].maxCount', 5),
             self.check('tags.tag1', 'v1'),
             self.check('tags.tag2', 'v2'),
         ])
@@ -5126,14 +5239,88 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # update autoscaler
         update_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                                '--update-cluster-autoscaler --min-count 3 --max-count 3'
+                                '--update-cluster-autoscaler --min-count 3 --max-count 101'
         self.cmd(update_autoscaler_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].minCount', 3),
-            self.check('agentPoolProfiles[0].maxCount', 3)
+            self.check('agentPoolProfiles[0].maxCount', 101)
         ])
 
         # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_autoscaler_then_update(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        np_name = self.create_random_name('clinp', 12)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'nodepool_name': np_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} -c 1'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].count', 1),
+        ])
+
+        add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                     '--mode user --enable-cluster-autoscaler -c 0 --min-count 0 --max-count 3'
+        self.cmd(add_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('count', 0),
+            self.check('minCount', 0),
+            self.check('maxCount', 3),
+        ])
+
+        update_nodepool_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                     '--update-cluster-autoscaler --min-count 1 --max-count 101'
+        self.cmd(update_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('minCount', 1),
+            self.check('maxCount', 101),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
+    def test_aks_nodepool_stop_and_start(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_name = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'nodepool_name' : nodepool_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create aks cluster
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+        # add nodepool
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool_name} --node-count=2', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+        # stop nodepool
+        self.cmd('aks nodepool stop --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name}', checks=[ 
+            self.check('powerState.code', 'Stopped')
+        ])
+        #start nodepool
+        self.cmd('aks nodepool start --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name}', checks=[
+            self.check('powerState.code', 'Running')
+        ])
+        # delete AKS cluster
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
@@ -5248,7 +5435,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'resource_group': resource_group,
             'ssh_key_value': self.generate_ssh_keys(),
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'acr_name': acr_name
         })
@@ -5285,11 +5472,40 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             json.dump(test_hook_data, f)
 
         try:
-           # check acr
-            check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
-            self.cmd(check_cmd, checks=[
-                StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-            ])
+            # get credential
+            fd, browse_path = tempfile.mkstemp()
+            self.kwargs.update(
+                {
+                    "browse_path": browse_path,
+                }
+            )
+            try:
+                get_credential_cmd = "aks get-credentials -n {name} -g {resource_group} -f {browse_path}"
+                self.cmd(get_credential_cmd)
+            finally:
+                os.close(fd)
+            # get node name
+            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_output = subprocess.check_output(
+                k_get_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            node_names = k_get_node_output.split("\n")
+            node_name = node_names[0].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
+                    "node_name": node_name,
+                }
+            )
+            # check acr
+            check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
+            self.cmd(
+                check_cmd,
+                checks=[
+                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+                ],
+            )
         # clean up test hook file even if test failed
         finally:
             if os.path.exists(hook_file_path):
@@ -5321,7 +5537,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'vnet_name': vnet_name,
             'aks_subnet_name': aks_subnet_name,
@@ -5626,6 +5842,63 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # live only due to workspace is not mocked correctly
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_defender(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} --enable-defender'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.defender.securityMonitoring.enabled', True)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only due to workspace is not mocked correctly
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_with_defender(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to enable defender
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-defender', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.defender.securityMonitoring.enabled', True)
+        ])
+
+         # update to disable defender
+        self.cmd('aks update --resource-group={resource_group} --name={name} --disable-defender', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.defender.securityMonitoring.enabled', False)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_custom_monitoring_workspace(self, resource_group, resource_group_location):
@@ -5677,7 +5950,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'resource_group': resource_group,
             'ssh_key_value': self.generate_ssh_keys(),
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'acr_name': acr_name
         })
@@ -5734,7 +6007,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'resource_group': resource_group,
             'ssh_key_value': self.generate_ssh_keys(),
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
         })
 
@@ -6006,7 +6279,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'ssh_key_value': self.generate_ssh_keys(),
             'nodepool_labels': nodepool_labels,
@@ -6386,14 +6659,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
 
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
@@ -6459,14 +6732,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
 
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2019-11-01-preview'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
@@ -6513,7 +6786,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             # check that the DCR was created
             dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2019-11-01-preview'
+            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
             self.cmd(get_cmd, checks=[
                 self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
             ])
@@ -6570,7 +6843,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # use custom feature so it does not require subscription to regiter the feature
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                     '--kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
@@ -6582,7 +6855,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool add
         nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
-                       '--name=nodepool2 --node-count=1 --kubelet-config={kc_path} --linux-os-config={oc_path} ' \
+                       '--name=nodepool2 --node-count=1 --kubelet-config=\'{kc_path}\' --linux-os-config=\'{oc_path}\' ' \
                        '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview'
         self.cmd(nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6597,7 +6870,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        kubernetes_version = "1.20.7"
+        kubernetes_version = "1.23.5"
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -6634,6 +6907,627 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('kubernetesVersion', '{kubernetes_version}')
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_node_resource_group(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_resource_group_name = self.create_random_name('cliaksnrg', 17)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'node_resource_group': node_resource_group_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-resource-group {node_resource_group}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('nodeResourceGroup', '{node_resource_group}')
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_create_with_azurekeyvaultkms_public_key_vault(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            "kv_name": kv_name,
+            "identity_name": identity_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create user-assigned identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name} -o json'
+        identity = self.cmd(create_identity).get_output_in_json()
+        identity_id = identity['id']
+        identity_object_id = identity['principalId']
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} -o json'
+        kv = self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id_0 = key['key']['kid']
+        assert key_id_0 is not None
+        self.kwargs.update({
+            'key_id': key_id_0,
+        })
+
+        # assign access policy
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        policy = self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} --azure-keyvault-kms-key-vault-network-access=Public ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_0),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', 'Public')
+        ])
+
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id_1 = key['key']['kid']
+        assert key_id_1 is not None
+        self.kwargs.update({
+            'key_id': key_id_1,
+        })
+
+        # Rotate key
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} --azure-keyvault-kms-key-vault-network-access=Public ' \
+                     '-o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_1),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', 'Public')
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_update_with_azurekeyvaultkms_public_key_vault(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            "kv_name": kv_name,
+            "identity_name": identity_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create user-assigned identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name} -o json'
+        identity = self.cmd(create_identity).get_output_in_json()
+        identity_id = identity['id']
+        identity_object_id = identity['principalId']
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} -o json'
+        kv = self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id = key['key']['kid']
+        assert key_id is not None
+        self.kwargs.update({
+            'key_id': key_id,
+        })
+
+        # assign access policy
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        policy = self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('securityProfile.azureKeyVaultKms')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} --azure-keyvault-kms-key-vault-network-access=Public ' \
+                     '-o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', 'Public')
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    def test_aks_create_with_azurekeyvaultkms_private_key_vault(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            "kv_name": kv_name,
+            "identity_name": identity_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create user-assigned identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name} -o json'
+        identity = self.cmd(create_identity).get_output_in_json()
+        identity_id = identity['id']
+        identity_object_id = identity['principalId']
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} -o json'
+        kv = self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+        kv_resource_id = kv['id']
+        assert kv_resource_id is not None
+        self.kwargs.update({
+            'kv_resource_id': kv_resource_id,
+        })
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id_0 = key['key']['kid']
+        assert key_id_0 is not None
+        self.kwargs.update({
+            'key_id': key_id_0,
+        })
+
+        # assign access policy
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        policy = self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        # allow the identity approve private endpoint connection (Microsoft.KeyVault/vaults/privateEndpointConnectionsApproval/action)
+        create_role_assignment = 'role assignment create --role f25e0fa2-a7c8-4377-a976-54943a77a395 ' \
+                     '--assignee-object-id {identity_object_id} --assignee-principal-type "ServicePrincipal" ' \
+                     '--scope {kv_resource_id}'
+        role_assignment = self.cmd(create_role_assignment).get_output_in_json()
+
+        # disable public network access
+        disable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Disabled" -o json'
+        kv = self.cmd(disable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Private --azure-keyvault-kms-key-vault-resource-id {kv_resource_id} ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_0),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', "Private"),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultResourceId', kv_resource_id)
+        ])
+
+        # enable public network access
+        enable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Enabled" -o json'
+        kv = self.cmd(enable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id_1 = key['key']['kid']
+        assert key_id_1 is not None
+        self.kwargs.update({
+            'key_id': key_id_1,
+        })
+
+        # disable public network access
+        disable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Disabled" -o json'
+        kv = self.cmd(disable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        # Rotate key
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Private --azure-keyvault-kms-key-vault-resource-id {kv_resource_id} ' \
+                     '-o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_1),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', "Private"),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultResourceId', kv_resource_id)
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    def test_aks_update_with_azurekeyvaultkms_private_key_vault(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            "kv_name": kv_name,
+            "identity_name": identity_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create user-assigned identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name} -o json'
+        identity = self.cmd(create_identity).get_output_in_json()
+        identity_id = identity['id']
+        identity_object_id = identity['principalId']
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} -o json'
+        kv = self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+        kv_resource_id = kv['id']
+        assert kv_resource_id is not None
+        self.kwargs.update({
+            'kv_resource_id': kv_resource_id,
+        })
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id = key['key']['kid']
+        assert key_id is not None
+        self.kwargs.update({
+            'key_id': key_id,
+        })
+
+        # assign access policy
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        policy = self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        # allow the identity approve private endpoint connection (Microsoft.KeyVault/vaults/privateEndpointConnectionsApproval/action)
+        create_role_assignment = 'role assignment create --role f25e0fa2-a7c8-4377-a976-54943a77a395 ' \
+                     '--assignee-object-id {identity_object_id} --assignee-principal-type "ServicePrincipal" ' \
+                     '--scope {kv_resource_id}'
+        role_assignment = self.cmd(create_role_assignment).get_output_in_json()
+
+        # disable public network access
+        disable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Disabled" -o json'
+        kv = self.cmd(disable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('securityProfile.azureKeyVaultKms')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Private --azure-keyvault-kms-key-vault-resource-id {kv_resource_id} ' \
+                     '-o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', "Private"),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultResourceId', kv_resource_id)
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    def test_aks_create_with_azurekeyvaultkms_private_cluster_v1_private_key_vault(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            "kv_name": kv_name,
+            "identity_name": identity_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create user-assigned identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name} -o json'
+        identity = self.cmd(create_identity).get_output_in_json()
+        identity_id = identity['id']
+        identity_object_id = identity['principalId']
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} -o json'
+        kv = self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+        kv_resource_id = kv['id']
+        assert kv_resource_id is not None
+        self.kwargs.update({
+            'kv_resource_id': kv_resource_id,
+        })
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id_0 = key['key']['kid']
+        assert key_id_0 is not None
+        self.kwargs.update({
+            'key_id': key_id_0,
+        })
+
+        # assign access policy
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        policy = self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        # allow the identity approve private endpoint connection (Microsoft.KeyVault/vaults/privateEndpointConnectionsApproval/action)
+        create_role_assignment = 'role assignment create --role f25e0fa2-a7c8-4377-a976-54943a77a395 ' \
+                     '--assignee-object-id {identity_object_id} --assignee-principal-type "ServicePrincipal" ' \
+                     '--scope {kv_resource_id}'
+        role_assignment = self.cmd(create_role_assignment).get_output_in_json()
+
+        # disable public network access
+        disable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Disabled" -o json'
+        kv = self.cmd(disable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} --enable-private-cluster ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Private --azure-keyvault-kms-key-vault-resource-id {kv_resource_id} ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('apiServerAccessProfile.enablePrivateCluster', 'True'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_0),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', "Private"),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultResourceId', kv_resource_id)
+        ])
+
+        # enable public network access
+        enable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Enabled" -o json'
+        kv = self.cmd(enable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id_1 = key['key']['kid']
+        assert key_id_1 is not None
+        self.kwargs.update({
+            'key_id': key_id_1,
+        })
+
+        # disable public network access
+        disable_public_network_access = 'keyvault update --resource-group={resource_group} --name={kv_name} --public-network-access "Disabled" -o json'
+        kv = self.cmd(disable_public_network_access, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        # Rotate key
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Private --azure-keyvault-kms-key-vault-resource-id {kv_resource_id} ' \
+                     '-o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_1),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', "Private"),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultResourceId', kv_resource_id)
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_disable_azurekeyvaultkms(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            "kv_name": kv_name,
+            "identity_name": identity_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create user-assigned identity
+        create_identity = 'identity create --resource-group={resource_group} --name={identity_name} -o json'
+        identity = self.cmd(create_identity).get_output_in_json()
+        identity_id = identity['id']
+        identity_object_id = identity['principalId']
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} -o json'
+        kv = self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        key_id = key['key']['kid']
+        assert key_id is not None
+        self.kwargs.update({
+            'key_id': key_id,
+        })
+
+        # assign access policy
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        policy = self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} --azure-keyvault-kms-key-vault-network-access=Public ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id),
+            self.check('securityProfile.azureKeyVaultKms.keyVaultNetworkAccess', "Public")
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--disable-azure-keyvault-kms ' \
+                     '-o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', False),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_network_plugin_none(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --network-plugin=none'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.networkPlugin', 'none'),
         ])
 
         # delete

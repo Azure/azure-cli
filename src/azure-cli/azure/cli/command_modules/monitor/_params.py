@@ -335,11 +335,10 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
+        c.argument('resource_provider', options_list=['--namespace'])
         c.argument('caller')
         c.argument('status')
     # endregion
@@ -362,6 +361,11 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor action-group enable-receiver') as c:
         c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
+        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+
+    with self.argument_context('monitor action-group test-notifications create') as c:
+        c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
+        c.argument('alert_type', type=str, help='The name of the supported alert type.')
         c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
@@ -450,7 +454,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
-        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Schema description.')
 
@@ -467,7 +471,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
-        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Table description.')
     # endregion
@@ -505,11 +509,6 @@ def load_arguments(self, _):
                                         ' be in multiples of 100. If you want to increase the limit, please contact'
                                         ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
         c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
-
-    with self.argument_context('monitor log-analytics cluster update') as c:
-        c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
-        c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
-        c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
     # endregion
 
     # region Log Analytics Linked Storage Account

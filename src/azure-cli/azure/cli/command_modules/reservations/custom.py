@@ -5,6 +5,8 @@
 
 from azure.mgmt.reservations.models import (Patch,
                                             PurchaseRequest,
+                                            SplitRequest,
+                                            MergeRequest,
                                             SkuName,
                                             PurchaseRequestPropertiesReservedResourceProperties)
 
@@ -19,7 +21,7 @@ def cli_reservation_update_reservation(client, reservation_order_id, reservation
     else:
         patch = Patch(applied_scope_type=applied_scope_type,
                       instance_flexibility=instance_flexibility)
-    return client.update(reservation_order_id, reservation_id, patch)
+    return client.begin_update(reservation_order_id, reservation_id, patch)
 
 
 def create_resource_id(reservation_order_id, reservation_id):
@@ -29,15 +31,18 @@ def create_resource_id(reservation_order_id, reservation_id):
 
 def cli_reservation_split_reservation(client, reservation_order_id,
                                       reservation_id, quantity_1, quantity_2):
-    reservationToSplit = create_resource_id(reservation_order_id, reservation_id)
-    return client.split(reservation_order_id, [quantity_1, quantity_2], reservationToSplit)
+    reservationToSplit = create_resource_id(
+        reservation_order_id, reservation_id)
+    body = SplitRequest(
+        quantities=[quantity_1, quantity_2], reservation_id=reservationToSplit)
+    return client.begin_split(reservation_order_id, body)
 
 
 def cli_reservation_merge_reservation(client, reservation_order_id,
                                       reservation_id_1, reservation_id_2):
-    return client.merge(reservation_order_id,
-                        [create_resource_id(reservation_order_id, reservation_id_1),
-                         create_resource_id(reservation_order_id, reservation_id_2)])
+    body = MergeRequest(sources=[create_resource_id(reservation_order_id, reservation_id_1),
+                                 create_resource_id(reservation_order_id, reservation_id_2)])
+    return client.begin_merge(reservation_order_id, body)
 
 
 def cli_calculate(client, sku, reserved_resource_type, billing_scope_id, term,
@@ -48,7 +53,8 @@ def cli_calculate(client, sku, reserved_resource_type, billing_scope_id, term,
         applied_scopes = [applied_scope]
     else:
         applied_scopes = None
-    properties = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=instance_flexibility)
+    properties = PurchaseRequestPropertiesReservedResourceProperties(
+        instance_flexibility=instance_flexibility)
     body = PurchaseRequest(sku=sku_name, location=location, reserved_resource_type=reserved_resource_type,
                            billing_scope_id=billing_scope_id, term=term, quantity=quantity,
                            display_name=display_name,
@@ -66,10 +72,11 @@ def cli_purchase(client, reservation_order_id, sku, reserved_resource_type, bill
         applied_scopes = [applied_scope]
     else:
         applied_scopes = None
-    properties = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=instance_flexibility)
+    properties = PurchaseRequestPropertiesReservedResourceProperties(
+        instance_flexibility=instance_flexibility)
     body = PurchaseRequest(sku=sku_name, location=location, reserved_resource_type=reserved_resource_type,
                            billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
                            applied_scope_type=applied_scope_type, applied_scopes=applied_scopes,
                            billing_plan=billing_plan,
                            renew=renew, reserved_resource_properties=properties)
-    return client.purchase(reservation_order_id, body)
+    return client.begin_purchase(reservation_order_id, body)

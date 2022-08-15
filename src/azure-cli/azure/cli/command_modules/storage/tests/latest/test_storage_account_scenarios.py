@@ -222,7 +222,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
-            JMESPathCheck("contains(connectionString, 'https')", False),
+            JMESPathCheck("contains(connectionString, 'https')", True),
             JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
 
         self.cmd('storage account update -g {} -n {} --tags foo=bar cat'
@@ -637,6 +637,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('blob.retentionPolicy.days', 1)
         ])
 
+        self.cmd('storage logging update --services b --log r --retention 0 '
+                 '--service b --connection-string {}'.format(connection_string))
+
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.read', True),
+            JMESPathCheck('blob.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.retentionPolicy.days', None)
+        ])
+
         self.cmd('storage logging off --connection-string {}'.format(connection_string))
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
@@ -723,7 +732,17 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
             JMESPathCheck('file.hour.enabled', True),
-            JMESPathCheck('file.minute.enabled', True))
+            JMESPathCheck('file.minute.enabled', True),
+            JMESPathCheck('file.hour.retentionPolicy.days', 1))
+
+        self.storage_cmd('storage metrics update --services b --api true --hour false --minute true --retention 0 ',
+                         storage_account_info)
+
+        self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
+            JMESPathCheck('blob.hour.enabled', False),
+            JMESPathCheck('blob.minute.enabled', True),
+            JMESPathCheck('blob.hour.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.hour.retentionPolicy.days', None),)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
@@ -1829,7 +1848,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(name_prefix='cli_file_smb')
     @StorageAccountPreparer(parameter_name='storage_account1', name_prefix='filesmb1', kind='FileStorage',
-                            sku='Premium_LRS', location='centraluseuap')
+                            sku='Premium_LRS', location='centralus')
     @StorageAccountPreparer(parameter_name='storage_account2', name_prefix='filesmb2', kind='StorageV2')
     def test_storage_account_file_smb_multichannel(self, resource_group, storage_account1, storage_account2):
 
@@ -1868,7 +1887,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(name_prefix='cli_file_smb')
-    @StorageAccountPreparer(name_prefix='filesmb', kind='FileStorage', sku='Premium_LRS', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='filesmb', kind='FileStorage', sku='Premium_LRS', location='centralus')
     def test_storage_account_file_secured_smb(self, resource_group, storage_account):
         self.kwargs.update({
             'sa': storage_account,

@@ -3,7 +3,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -13,50 +13,35 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.10.1
-      accept-language:
-      - en-US
+      - python/3.10.4 (Windows-10-10.0.19044-SP0) AZURECLI/2.35.0
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27non-exist-sp-name%27%29&api-version=1.6
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames/any(c:c%20eq%20'non-exist-sp-name')
   response:
     body:
-      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[]}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[]}'
     headers:
-      access-control-allow-origin:
-      - '*'
       cache-control:
       - no-cache
       content-length:
-      - '121'
+      - '92'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
       date:
-      - Fri, 21 Aug 2020 06:26:17 GMT
-      duration:
-      - '2339834'
-      expires:
-      - '-1'
-      ocp-aad-diagnostics-server-name:
-      - 26JYzEj1KAujzamlU8eWwpzZ/9HTI+y7gakRbWjTnUk=
-      ocp-aad-session-key:
-      - 1DMdXu0GDJRfE_Rpv-oFXpfo5cfF3y-2iVqXfXPpGRIS_jNVcK-fK81ztlb0irQ9FIhPgymxhsaVw8EcgX3Daq_yVhFCNjBwVAkLvvAlwVcDpSkWYTfoovThibALJKk81LtDNncfXTbFHViWVAHilVuE4YmDefpWJJ4KjSa3OeI.VYpNwh_6SpopVEIwmmrWsLXOnoN6Ig-jOM6Ak6h-X08
-      pragma:
-      - no-cache
+      - Sat, 07 May 2022 06:53:26 GMT
+      odata-version:
+      - '4.0'
       request-id:
-      - 7b6276dc-7bd0-46ee-8e75-3e3579f74449
+      - 398ede86-19d0-4daa-92d8-fbddcf2439b6
       strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-ms-dirapi-data-contract-version:
-      - '1.6'
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF00000BCF"}}'
       x-ms-resource-unit:
       - '1'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK

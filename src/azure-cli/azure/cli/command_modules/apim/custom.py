@@ -179,12 +179,14 @@ def apim_restore(client, resource_group_name, name, backup_name, storage_account
 
 
 def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):
-    """Update the Microsoft.ApiManagement resource running in the Virtual network to pick the updated DNS changes. """
+    """Update the API Management resource running in the virtual network to pick the updated network settings. """
     properties = {}
     if location is not None:
         properties['location'] = location
 
-    return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
+    return client.api_management_service.begin_apply_network_configuration_updates(resource_group_name,
+                                                                                   name,
+                                                                                   properties)
 
 
 # Schema operations
@@ -408,6 +410,8 @@ def apim_api_import(
 
     if api_revision is not None and api_id is not None:
         api_id = api_id + ";rev=" + api_revision
+    if api_revision is not None and api_id is None:
+        api_id = uuid.uuid4().hex + ";rev=" + api_revision
     elif api_id is None:
         api_id = uuid.uuid4().hex
 
@@ -895,3 +899,25 @@ def apim_api_vs_delete(client, resource_group_name, service_name, version_set_id
         service_name=service_name,
         version_set_id=version_set_id,
         if_match="*" if if_match is None else if_match)
+
+
+def apim_ds_get(client, location, service_name):
+    """Get specific soft-deleted Api Management Service."""
+
+    return client.deleted_services.get_by_name(service_name, location)
+
+
+def apim_ds_list(client):
+    """List soft-deleted Api Management Service."""
+
+    return client.deleted_services.list_by_subscription()
+
+
+def apim_ds_purge(client, service_name, location, no_wait=False):
+    """Purge soft-deleted Api Management Service."""
+
+    return sdk_no_wait(
+        no_wait,
+        client.deleted_services.begin_purge,
+        service_name=service_name,
+        location=location)

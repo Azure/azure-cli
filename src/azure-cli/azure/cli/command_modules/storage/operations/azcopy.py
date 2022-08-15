@@ -28,7 +28,7 @@ def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=No
         flags.append('--exclude-pattern=' + exclude_pattern)
     if include_path is not None:
         flags.append('--include-path=' + include_path)
-    if exclude_pattern is not None:
+    if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
     if content_type is not None:
         flags.append('--content-type=' + content_type)

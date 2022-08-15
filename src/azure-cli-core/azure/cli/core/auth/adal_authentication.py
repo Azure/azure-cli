@@ -16,12 +16,29 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
     # pylint: disable=line-too-long
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
-        logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
+        logger.debug("MSIAuthenticationWrapper.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
         if 'data' in kwargs:
-            from azure.cli.core.azclierror import AuthenticationError
-            raise AuthenticationError("VM SSH currently doesn't support managed identity or Cloud Shell.")
+            from azure.cli.core.util import in_cloud_console
+            if in_cloud_console():
+                # Use MSAL to get VM SSH certificate
+                import msal
+                from .util import check_result, build_sdk_access_token
+                from .identity import AZURE_CLI_CLIENT_ID
+                app = msal.PublicClientApplication(
+                    AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
+                    # TODO: This PoC does not currently maintain a token cache;
+                    #   Ideally we should reuse the real MSAL app object which has cache configured.
+                    # token_cache=...,
+                )
+                result = app.acquire_token_interactive(list(scopes), prompt="none", data=kwargs["data"])
+                check_result(result, scopes=scopes)
+                return build_sdk_access_token(result)
 
+            from azure.cli.core.azclierror import AuthenticationError
+            raise AuthenticationError("VM SSH currently doesn't support managed identity.")
+
+        # Use msrestazure to get access token
         resource = scopes_to_resource(_normalize_scopes(scopes))
         if resource:
             # If available, use resource provided by SDK
@@ -55,7 +72,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         import traceback
         from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
         try:
-            super(MSIAuthenticationWrapper, self).set_token()
+            super().set_token()
         except requests.exceptions.ConnectionError as err:
             logger.debug('throw requests.exceptions.ConnectionError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())

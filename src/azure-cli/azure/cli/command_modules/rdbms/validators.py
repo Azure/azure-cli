@@ -192,8 +192,8 @@ def _mysql_sku_name_validator(sku_name, sku_info, tier, instance):
         if sku_name not in skus:
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match tier selection. '
                            'Default value for --tier is Burstable. '
-                           'For Memory Optimized and General Purpose you need to specify --tier value explicitly. '
-                           'Allowed values for {} tier: {}'.format(tier, skus))
+                           'For Business Critical and General Purpose you need to specify --tier value explicitly. '
+                           'Allowed values for given tier: {}'.format(skus))
 
 
 def _mysql_version_validator(version, sku_info, tier, instance):
@@ -212,7 +212,7 @@ def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, i
         replication_role = instance.replication_role if replication_role is None else replication_role
         high_availability = instance.high_availability.mode if high_availability is None else high_availability
     # if replica, cannot be disabled
-    if replication_role != 'None' and auto_grow.lower() == 'disabled':
+    if replication_role not in ('None', None) and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for replica server cannot be disabled.")
     # if ha, cannot be disabled
     if high_availability in ['Enabled', 'ZoneRedundant'] and auto_grow.lower() == 'disabled':

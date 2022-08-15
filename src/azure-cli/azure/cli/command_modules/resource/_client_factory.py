@@ -69,6 +69,12 @@ def _resource_deploymentstacks_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS)
 
 
+def _resource_privatelinks_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_PRIVATELINKS)
+
+
 def cf_resource_groups(cli_ctx, _):
     return _resource_client_factory(cli_ctx).resource_groups
 
@@ -158,3 +164,9 @@ def cf_resource_templatespecs(cli_ctx, _):
 
 def cf_resource_deploymentstacks(cli_ctx, _):
     return _resource_deploymentstacks_client_factory(cli_ctx).deployment_stacks
+
+def cf_resource_privatelinkassociations(cli_ctx, _):
+    return _resource_privatelinks_client_factory(cli_ctx).private_link_association
+
+def cf_resource_resourcemanagementprivatelinks(cli_ctx, _):
+    return _resource_privatelinks_client_factory(cli_ctx).resource_management_private_link

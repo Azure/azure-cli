@@ -56,9 +56,12 @@ CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
 CONST_PRIVATE_DNS_ZONE_NONE = "none"
 
-# used to set identity profile (for kubelet)
+# role assignment for kubelet
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE = 'Managed Identity Operator'
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'
+
+# role assignment for vnet subnet
+CONST_NETWORK_CONTRIBUTOR_ROLE_ID = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 
 # upgrade channel
 CONST_RAPID_UPGRADE_CHANNEL = "rapid"
@@ -70,6 +73,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
+CONST_NETWORK_PLUGIN_NONE = "none"
 
 # consts for addons
 # http application routing
@@ -110,6 +114,10 @@ CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = "azureKeyvaultSecretsProvider
 CONST_SECRET_ROTATION_ENABLED = "enableSecretRotation"
 CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 
+# azure keyvault kms
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -124,7 +132,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
 
 
 # consts for decorator pattern

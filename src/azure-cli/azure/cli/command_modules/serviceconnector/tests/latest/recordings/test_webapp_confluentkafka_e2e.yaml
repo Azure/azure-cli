@@ -1,7 +1,9 @@
 interactions:
 - request:
-    body: '{"properties": {"targetId": "xxx.eastus.azure.confluent.cloud:9092", "authInfo":
-      {"authType": "secret", "name": "Name", "secret": "Secret"}, "clientType": "python"}}'
+    body: '{"properties": {"targetService": {"type": "ConfluentBootstrapServer", "endpoint":
+      "xxx.eastus.azure.confluent.cloud:9092"}, "authInfo": {"authType": "secret",
+      "name": "Name", "secretInfo": {"secretType": "rawValue", "value": "Secret"}},
+      "clientType": "python", "secretStore": {}}}'
     headers:
       Accept:
       - application/json
@@ -12,40 +14,44 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '165'
+      - '280'
       Content-Type:
       - application/json
       ParameterSetName:
       - --connection --source-id --bootstrap-server --kafka-key --kafka-secret --schema-registry
         --schema-key --schema-secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:26:36.032855Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2021-10-28T06:26:36.032855Z"}, "properties": {"targetId":
-        "xxx.eastus.azure.confluent.cloud:9092", "authInfo": {"name": "Name", "authType":
-        "secret"}, "clientType": "python", "provisioningState": "Accepted"}}'
+        "2022-04-27T05:18:24.8770083Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2022-04-27T05:18:24.8770083Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "vNetSolution": null, "clientType":
+        "python", "secretStore": {"keyVaultId": null}, "scope": null}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0ace1e46-c018-473d-95ba-65782898a61a*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/97b2a2f2-a1f8-44d6-bc7a-e2e5e1713dfb*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '663'
+      - '865'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:26:36 GMT
+      - Wed, 27 Apr 2022 05:18:25 GMT
       etag:
-      - '"310657d9-0000-0500-0000-617a429c0000"'
+      - '"6a00a04d-0000-0100-0000-6268d2210000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 896440e6-26d9-48ad-a16c-eee794932d07
       pragma:
       - no-cache
       strict-transport-security:
@@ -74,27 +80,27 @@ interactions:
       - --connection --source-id --bootstrap-server --kafka-key --kafka-secret --schema-registry
         --schema-key --schema-secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0ace1e46-c018-473d-95ba-65782898a61a*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/97b2a2f2-a1f8-44d6-bc7a-e2e5e1713dfb*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/0ace1e46-c018-473d-95ba-65782898a61a*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757",
-        "name": "0ace1e46-c018-473d-95ba-65782898a61a*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:26:36.1776404Z", "endTime":
-        "2021-10-28T06:26:39.4152786Z", "properties": {"message": ""}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/97b2a2f2-a1f8-44d6-bc7a-e2e5e1713dfb*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "name": "97b2a2f2-a1f8-44d6-bc7a-e2e5e1713dfb*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:18:25.8421402Z", "endTime":
+        "2022-04-27T05:18:29.5437341Z", "properties": {"message": ""}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '694'
+      - '707'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:06 GMT
+      - Wed, 27 Apr 2022 05:18:56 GMT
       etag:
-      - '"05001404-0000-0500-0000-617a429f0000"'
+      - '"1500fed7-0000-0400-0000-6268d2250000"'
       expires:
       - '-1'
       pragma:
@@ -125,32 +131,32 @@ interactions:
       - --connection --source-id --bootstrap-server --kafka-key --kafka-secret --schema-registry
         --schema-key --schema-secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:26:36.032855Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:26:39.2432412Z"},
-        "properties": {"targetId": "xxx.eastus.azure.confluent.cloud:9092", "authInfo":
-        {"name": "Name", "authType": "secret"}, "clientType": "python", "provisioningState":
-        "Succeeded"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "clientType": "python",
+        "scope": null, "vNetSolution": null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '690'
+      - '625'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:06 GMT
+      - Wed, 27 Apr 2022 05:18:56 GMT
       etag:
-      - '"310644da-0000-0500-0000-617a429f0000"'
+      - '"0200a99a-0000-0400-0000-6268d2250000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - ba4e069c-245c-41be-914a-707ccbbc8142
       pragma:
       - no-cache
       strict-transport-security:
@@ -158,7 +164,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -167,9 +173,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"targetId": "https://xxx.eastus.azure.confluent.cloud",
-      "authInfo": {"authType": "secret", "name": "Name", "secret": "Secret"}, "clientType":
-      "python"}}'
+    body: '{"properties": {"targetService": {"type": "ConfluentSchemaRegistry", "endpoint":
+      "https://xxx.eastus.azure.confluent.cloud"}, "authInfo": {"authType": "secret",
+      "name": "Name", "secretInfo": {"secretType": "rawValue", "value": "Secret"}},
+      "clientType": "python", "secretStore": {}}}'
     headers:
       Accept:
       - application/json
@@ -180,40 +187,44 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '168'
+      - '282'
       Content-Type:
       - application/json
       ParameterSetName:
       - --connection --source-id --bootstrap-server --kafka-key --kafka-secret --schema-registry
         --schema-key --schema-secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn_schema?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn_schema?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
         "name": "testconn_schema", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:27:07.8751941Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2021-10-28T06:27:07.8751941Z"}, "properties": {"targetId":
-        "https://xxx.eastus.azure.confluent.cloud", "authInfo": {"name": "Name", "authType":
-        "secret"}, "clientType": "python", "provisioningState": "Accepted"}}'
+        "2022-04-27T02:58:55.8321652Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2022-04-27T05:18:57.6897497Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"endpoint": "https://xxx.eastus.azure.confluent.cloud",
+        "type": "ConfluentSchemaRegistry"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "vNetSolution": null, "clientType":
+        "python", "secretStore": {"keyVaultId": null}, "scope": null}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/76fb61fb-ca85-4b51-bd9c-1e41476cec36*CB13725C73CF94C4D5D394D645EC2E2CCB07A0C6C5C09CB740424D8DB825C9DF?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/f69fedbd-e93e-4025-afe4-81f7aacc5382*B57182BA5988C3A1561A6FA2B596D239ED4EEEE3830B5FF74B5303074A8F9735?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '881'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:08 GMT
+      - Wed, 27 Apr 2022 05:18:57 GMT
       etag:
-      - '"310656e4-0000-0500-0000-617a42bc0000"'
+      - '"6a00e24d-0000-0100-0000-6268d2420000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 9d3053cd-b650-45b8-ba19-3db016341fb1
       pragma:
       - no-cache
       strict-transport-security:
@@ -242,27 +253,27 @@ interactions:
       - --connection --source-id --bootstrap-server --kafka-key --kafka-secret --schema-registry
         --schema-key --schema-secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/76fb61fb-ca85-4b51-bd9c-1e41476cec36*CB13725C73CF94C4D5D394D645EC2E2CCB07A0C6C5C09CB740424D8DB825C9DF?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/f69fedbd-e93e-4025-afe4-81f7aacc5382*B57182BA5988C3A1561A6FA2B596D239ED4EEEE3830B5FF74B5303074A8F9735?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/76fb61fb-ca85-4b51-bd9c-1e41476cec36*CB13725C73CF94C4D5D394D645EC2E2CCB07A0C6C5C09CB740424D8DB825C9DF",
-        "name": "76fb61fb-ca85-4b51-bd9c-1e41476cec36*CB13725C73CF94C4D5D394D645EC2E2CCB07A0C6C5C09CB740424D8DB825C9DF",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
-        "status": "Succeeded", "startTime": "2021-10-28T06:27:08.1318833Z", "endTime":
-        "2021-10-28T06:27:11.6398822Z", "properties": {"message": ""}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/f69fedbd-e93e-4025-afe4-81f7aacc5382*B57182BA5988C3A1561A6FA2B596D239ED4EEEE3830B5FF74B5303074A8F9735",
+        "name": "f69fedbd-e93e-4025-afe4-81f7aacc5382*B57182BA5988C3A1561A6FA2B596D239ED4EEEE3830B5FF74B5303074A8F9735",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
+        "status": "Succeeded", "startTime": "2022-04-27T05:18:57.8729119Z", "endTime":
+        "2022-04-27T05:19:01.5078048Z", "properties": {"message": ""}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '701'
+      - '714'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:39 GMT
+      - Wed, 27 Apr 2022 05:19:28 GMT
       etag:
-      - '"11004a75-0000-0100-0000-617a42bf0000"'
+      - '"130050fd-0000-0100-0000-6268d2450000"'
       expires:
       - '-1'
       pragma:
@@ -293,32 +304,32 @@ interactions:
       - --connection --source-id --bootstrap-server --kafka-key --kafka-secret --schema-registry
         --schema-key --schema-secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn_schema?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn_schema?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
-        "name": "testconn_schema", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:27:07.8751941Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:27:11.3057864Z"},
-        "properties": {"targetId": "https://xxx.eastus.azure.confluent.cloud", "authInfo":
-        {"name": "Name", "authType": "secret"}, "clientType": "python", "provisioningState":
-        "Succeeded"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
+        "name": "testconn_schema", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "https://xxx.eastus.azure.confluent.cloud",
+        "type": "ConfluentSchemaRegistry"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "clientType": "python",
+        "scope": null, "vNetSolution": null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '708'
+      - '641'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:39 GMT
+      - Wed, 27 Apr 2022 05:19:28 GMT
       etag:
-      - '"20008dc7-0000-0100-0000-617a42bf0000"'
+      - '"6a00ea4d-0000-0100-0000-6268d2450000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 362722a8-7d4a-45af-b10e-8efc306e61aa
       pragma:
       - no-cache
       strict-transport-security:
@@ -326,7 +337,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -348,35 +359,205 @@ interactions:
       ParameterSetName:
       - --source-id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers?api-version=2022-05-01
   response:
     body:
-      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:26:36.032855Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:26:39.2432412Z"},
-        "properties": {"targetId": "xxx.eastus.azure.confluent.cloud:9092", "authInfo":
-        {"name": "Name", "authType": "secret"}, "clientType": "python", "provisioningState":
-        "Succeeded"}}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
-        "name": "testconn_schema", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:27:07.8751941Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:27:11.3057864Z"},
-        "properties": {"targetId": "https://xxx.eastus.azure.confluent.cloud", "authInfo":
-        {"name": "Name", "authType": "secret"}, "clientType": "python", "provisioningState":
-        "Succeeded"}}]}'
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "clientType": "python",
+        "scope": null, "vNetSolution": null, "secretStore": {"keyVaultId": null}}},
+        {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn_schema",
+        "name": "testconn_schema", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "https://xxx.eastus.azure.confluent.cloud",
+        "type": "ConfluentSchemaRegistry"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "clientType": "python",
+        "scope": null, "vNetSolution": null, "secretStore": {"keyVaultId": null}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1411'
+      - '1281'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:50 GMT
+      - Wed, 27 Apr 2022 05:19:35 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 7bcd7e66-6cb5-4b31-a9c6-cee9eacab7ac
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update confluent-cloud
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --client-type --kafka-secret
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        {"secretType": "rawValue"}, "authType": "secret"}, "clientType": "python",
+        "scope": null, "vNetSolution": null, "secretStore": {"keyVaultId": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '625'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:19:35 GMT
+      etag:
+      - '"0200a99a-0000-0400-0000-6268d2250000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - af204ae8-4d21-42f5-b9f7-b8335f00f8ff
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"targetService": {"type": "ConfluentBootstrapServer", "endpoint":
+      "xxx.eastus.azure.confluent.cloud:9092"}, "authInfo": {"authType": "secret",
+      "name": "Name"}, "clientType": "dotnet", "secretStore": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update confluent-cloud
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '219'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --connection --source-id --client-type --kafka-secret
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
+        "2022-04-27T05:18:24.8770083Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2022-04-27T05:19:36.9059878Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        null, "authType": "secret"}, "vNetSolution": null, "clientType": "dotnet",
+        "secretStore": {"keyVaultId": null}, "scope": null}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/44150c32-49a9-44d1-9cbf-0efff7338bc5*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '843'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:19:36 GMT
+      etag:
+      - '"6a004f4e-0000-0100-0000-6268d2690000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - e0ec44bb-c303-4500-aa2b-bfd13d8eb19e
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update confluent-cloud
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --client-type --kafka-secret
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/44150c32-49a9-44d1-9cbf-0efff7338bc5*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/44150c32-49a9-44d1-9cbf-0efff7338bc5*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "name": "44150c32-49a9-44d1-9cbf-0efff7338bc5*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:19:37.0904111Z", "endTime":
+        "2022-04-27T05:19:40.287826Z", "properties": {"message": ""}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '706'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:20:08 GMT
+      etag:
+      - '"1500c5db-0000-0400-0000-6268d26c0000"'
       expires:
       - '-1'
       pragma:
@@ -387,6 +568,59 @@ interactions:
       - chunked
       vary:
       - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection update confluent-cloud
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --client-type --kafka-secret
+      User-Agent:
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        null, "authType": "secret"}, "clientType": "dotnet", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '603'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Apr 2022 05:20:08 GMT
+      etag:
+      - '"0200e29a-0000-0400-0000-6268d26c0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 12a522c0-2922-480b-b5e3-aa148faa740b
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -410,25 +644,27 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2022-05-01
   response:
     body:
       string: '{"configurations": [{"name": "CONFLUENTCLOUD_KAFKA_BOOTSTRAPSERVER",
-        "value": "xxx.eastus.azure.confluent.cloud:9092"}, {"name": "CONFLUENTCLOUD_KAFKA_SASLCONFIG",
-        "value": "hidden"}]}'
+        "value": "xxx.eastus.azure.confluent.cloud:9092"}, {"name": "CONFLUENTCLOUD_KAFKA_SASLUSERNAME",
+        "value": "Name"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '269'
+      - '184'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:53 GMT
+      - Wed, 27 Apr 2022 05:20:11 GMT
       expires:
       - '-1'
+      mise-correlation-id:
+      - b72e0eef-7eac-412a-9ac3-7fa3a9c1ccf0
       pragma:
       - no-cache
       strict-transport-security:
@@ -442,7 +678,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -460,32 +696,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:26:36.032855Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:26:39.2432412Z"},
-        "properties": {"targetId": "xxx.eastus.azure.confluent.cloud:9092", "authInfo":
-        {"name": "Name", "authType": "secret"}, "clientType": "python", "provisioningState":
-        "Succeeded"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        null, "authType": "secret"}, "clientType": "dotnet", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '690'
+      - '603'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:55 GMT
+      - Wed, 27 Apr 2022 05:20:11 GMT
       etag:
-      - '"310644da-0000-0500-0000-617a429f0000"'
+      - '"0200e29a-0000-0400-0000-6268d26c0000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 9648b011-4a6a-49f7-9f34-aab31024f410
       pragma:
       - no-cache
       strict-transport-security:
@@ -493,7 +729,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -517,15 +753,15 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2022-05-01
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fb18b222-8ee9-4981-a63f-e626403b52dc*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/d77e2973-15f2-492c-bc8b-42c41d25a1c4*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
@@ -533,11 +769,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:56 GMT
+      - Wed, 27 Apr 2022 05:20:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fb18b222-8ee9-4981-a63f-e626403b52dc*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/d77e2973-15f2-492c-bc8b-42c41d25a1c4*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
+      mise-correlation-id:
+      - 4d6bac45-46f3-40ad-804d-4eb4af89d605
       pragma:
       - no-cache
       strict-transport-security:
@@ -547,7 +785,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 202
       message: Accepted
@@ -565,29 +803,29 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fb18b222-8ee9-4981-a63f-e626403b52dc*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/d77e2973-15f2-492c-bc8b-42c41d25a1c4*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/fb18b222-8ee9-4981-a63f-e626403b52dc*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757",
-        "name": "fb18b222-8ee9-4981-a63f-e626403b52dc*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:27:56.0168424Z", "endTime":
-        "2021-10-28T06:27:58.4244348Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/d77e2973-15f2-492c-bc8b-42c41d25a1c4*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "name": "d77e2973-15f2-492c-bc8b-42c41d25a1c4*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:20:12.3696076Z", "endTime":
+        "2022-04-27T05:20:19.6827869Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
         target existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
-        configured values is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2021-10-28T06:27:57.516482Z\",\"ReportEndTimeUtc\":\"2021-10-28T06:27:58.3076434Z\",\"SourceId\":null,\"TargetId\":\"xxx.eastus.azure.confluent.cloud:9092\",\"AuthType\":4}"}}'
+        configured values is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2022-04-27T05:20:13.6641773Z\",\"ReportEndTimeUtc\":\"2022-04-27T05:20:19.6199445Z\",\"SourceId\":null,\"TargetId\":\"xxx.eastus.azure.confluent.cloud:9092\",\"AuthType\":4}"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1145'
+      - '1159'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:28:26 GMT
+      - Wed, 27 Apr 2022 05:20:42 GMT
       etag:
-      - '"11005676-0000-0100-0000-617a42ee0000"'
+      - '"1300f1fd-0000-0100-0000-6268d2930000"'
       expires:
       - '-1'
       pragma:
@@ -617,32 +855,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:26:36.032855Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:26:39.2432412Z"},
-        "properties": {"targetId": "xxx.eastus.azure.confluent.cloud:9092", "authInfo":
-        {"name": "Name", "authType": "secret"}, "clientType": "python", "provisioningState":
-        "Succeeded"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "properties":
+        {"provisioningState": "Succeeded", "targetService": {"endpoint": "xxx.eastus.azure.confluent.cloud:9092",
+        "type": "ConfluentBootstrapServer"}, "authInfo": {"name": "Name", "secretInfo":
+        null, "authType": "secret"}, "clientType": "dotnet", "scope": null, "vNetSolution":
+        null, "secretStore": {"keyVaultId": null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '690'
+      - '603'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:28:29 GMT
+      - Wed, 27 Apr 2022 05:20:43 GMT
       etag:
-      - '"310644da-0000-0500-0000-617a429f0000"'
+      - '"0200e29a-0000-0400-0000-6268d26c0000"'
       expires:
       - '-1'
+      mise-correlation-id:
+      - 33f95628-79c9-42fb-b4dc-a3118cfc3da9
       pragma:
       - no-cache
       strict-transport-security:
@@ -650,7 +888,7 @@ interactions:
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-providerhub-traffic:
@@ -674,15 +912,15 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-05-01
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/55d2ae54-797a-4ac9-b112-6ffa9e72b4a7*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/cfd590c7-c4d7-441d-8e35-b90fcbb1ea27*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
@@ -690,13 +928,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:28:35 GMT
+      - Wed, 27 Apr 2022 05:20:46 GMT
       etag:
-      - '"32061703-0000-0500-0000-617a43140000"'
+      - '"6a002f4f-0000-0100-0000-6268d2af0000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/55d2ae54-797a-4ac9-b112-6ffa9e72b4a7*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/cfd590c7-c4d7-441d-8e35-b90fcbb1ea27*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
+      mise-correlation-id:
+      - 8b7a001f-2c8a-4eb8-9ac7-c57cea85f998
       pragma:
       - no-cache
       strict-transport-security:
@@ -706,7 +946,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -724,27 +964,27 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-servicelinker/1.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/55d2ae54-797a-4ac9-b112-6ffa9e72b4a7*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757?api-version=2021-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/cfd590c7-c4d7-441d-8e35-b90fcbb1ea27*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C?api-version=2022-05-01
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/55d2ae54-797a-4ac9-b112-6ffa9e72b4a7*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757",
-        "name": "55d2ae54-797a-4ac9-b112-6ffa9e72b4a7*86A72CF79E7C840C104E0702E5A7A7221C9708FCFAEA08B71E6428083FDCD757",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:28:35.8902783Z", "endTime":
-        "2021-10-28T06:28:39.4484099Z", "properties": null}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/cfd590c7-c4d7-441d-8e35-b90fcbb1ea27*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "name": "cfd590c7-c4d7-441d-8e35-b90fcbb1ea27*9887C5AAC7B00E59759F8101142E918AF02389009398EC03D6BE5D72A5C93A8C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-kafka-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-04-27T05:20:47.365895Z", "endTime":
+        "2022-04-27T05:20:50.6553974Z", "properties": null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:29:06 GMT
+      - Wed, 27 Apr 2022 05:21:17 GMT
       etag:
-      - '"05002504-0000-0500-0000-617a43170000"'
+      - '"1500a9e4-0000-0400-0000-6268d2b20000"'
       expires:
       - '-1'
       pragma:

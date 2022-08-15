@@ -16,9 +16,27 @@ from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
+class RedisCacheCredentialReplacer(RecordingProcessor):
+    def process_response(self, response):
+        import json
+        KEY_REPLACEMENT = "replaced-access-key"
+
+        if is_text_payload(response) and response["body"]["string"]:
+            try:
+                props = json.loads(response["body"]["string"])
+                if "accessKeys" in props["properties"]:
+                    props["properties"]["accessKeys"]["primaryKey"] = KEY_REPLACEMENT
+                    props["properties"]["accessKeys"]["secondaryKey"] = KEY_REPLACEMENT
+                response["body"]["string"] = json.dumps(props)
+            except (TypeError, KeyError):
+                pass
+        return response
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
@@ -863,9 +881,9 @@ class NetworkResourceManagementPrivateLinksTest(ScenarioTest):
                       '--group-id ResourceManagement').get_output_in_json()
         self.kwargs['pe_id'] = result['id']
 
-        result = self.cmd('az network private-endpoint-connection list -g {rg} -n {rmplname} --type Microsoft.Authorization/resourceManagementPrivateLinks', checks=[
-                          self.check('length(@)', 1)]).get_output_in_json()
-        self.kwargs['pe'] = result[0]['name']
+        result = self.cmd('az rest --method "GET" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.Authorization/resourceManagementPrivateLinks/{rmplname}?api-version=2020-05-01"').get_output_in_json()
+        self.kwargs['pe'] = result['properties']['privateEndpointConnections'][0]['name']
 
         # Show
         self.cmd('az network private-endpoint-connection show --resource-name {rmplname} --name {pe} --resource-group {rg} --type Microsoft.Authorization/resourceManagementPrivateLinks',
@@ -953,6 +971,95 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
             self.check('length(@)', 1)
         ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+
+class NetworkPrivateLinkKustoClusterScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    def test_private_link_resource_kusto_cluster(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('clikusto', 12),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'sku': 'Standard_D12_v2'
+        })
+
+        self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}')
+
+        self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'cluster')])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_kusto_pe')
+    def test_private_endpoint_connection_kusto_cluster(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('clikusto', 12),
+            'loc': 'eastus',
+            'rg': resource_group,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'sku': 'Standard_D11_v2'
+        })
+
+        # Prepare kusto cluster and network
+        account = self.cmd('az kusto cluster create -l {loc} -n {acc} -g {rg} --sku {sku}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+            '--group-id cluster').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        list_private_endpoint_conn = self.cmd(
+            "az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters",
+            checks=[self.check('length(@)', 1)]
+        ).get_output_in_json()
+        self.kwargs.update({"pec_id": list_private_endpoint_conn[0]["id"]})
+
+        self.kwargs.update({"pec_name": self.kwargs["pec_id"].split("/")[-1]})
+        self.cmd(
+            "az network private-endpoint-connection show --id {pec_id}",
+            checks=self.check("id", "{pec_id}"),
+        )
+
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} --name {pec_name} --resource-group {rg} --type Microsoft.Kusto/clusters',
+            checks=self.check('name', '{pec_name}'))
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} -n {pec_name} -g {rg} --type Microsoft.Kusto/clusters',
+            checks=self.check('name', '{pec_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pec_name} --type Microsoft.Kusto/clusters '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd(
+            'az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.Kusto/clusters',
+            checks=[
+                self.check('length(@)', 1)
+            ])
 
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
@@ -1341,7 +1448,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
                  '--sku Standard_v2 '
                  '--public-ip-address {appgw_ip} '
-                 '--enable-private-link')
+                 '--enable-private-link '
+                 '--priority 1001')
 
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
 
@@ -1430,7 +1538,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--enable-private-link '
                  '--private-link-subnet YetAnotherSubnetName '
                  '--private-link-primary true '
-                 '--private-link-subnet-prefix 10.0.2.0/24')
+                 '--private-link-subnet-prefix 10.0.2.0/24 '
+                 '--priority 1001')
 
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
 
@@ -2224,8 +2333,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
             'extra_create': '-l eastus --public-network-access Disabled',
         })
 
-        # Private Endpoint Connection of batch account doesn't have delete operation.
-        _test_private_endpoint(self, approve=False, rejected=False, delete=False)
+        _test_private_endpoint(self, approve=False, rejected=False)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_media_service")
     @StorageAccountPreparer(name_prefix="testams")
@@ -2376,7 +2484,7 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
             '--group-ids {group_ids}').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
-        
+
         # List powerbi private link connection
         list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
 
@@ -2397,20 +2505,20 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
             'approval_desc': 'You are approved!',
             'rejection_desc': 'You are rejected!'
         })
-        
+
         self.cmd(
             'network private-endpoint-connection approve --resource-name {powerbi_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
-            '--description "{approval_desc}"', 
+            '--description "{approval_desc}"',
                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
             ])
-        
+
         # Reject the private endpoint connection
         if reject: self.cmd(
             'network private-endpoint-connection reject --resource-name {powerbi_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
             '--description "{rejection_desc}"',
                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
             ])
-        
+
         self.cmd(
             'network private-endpoint-connection list --name {powerbi_resource_name} --resource-group {rg} --type {resource_type}',
             checks=[
@@ -2419,7 +2527,7 @@ class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
 
         # Delete the private endpoint connection
         self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
-        
+
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_powerbi", location="eastus2")
     @unittest.skip('Test account subscription not registered')
     def test_private_endpoint_connection_powerbi(self, resource_group):
@@ -2448,7 +2556,7 @@ class NetworkPrivateLinkBotServiceScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
-        result = self.cmd('bot create -g {rg} -n {bot_name} -k registration --appid {app_id}').get_output_in_json()
+        result = self.cmd('bot create -g {rg} -n {bot_name} --app-type MultiTenant --appid {app_id}').get_output_in_json()
         self.kwargs['bot_id'] = result['id']
 
         # Add an endpoint that gets auto approved
@@ -2554,6 +2662,12 @@ class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
+    def __init__(self, method_name):
+        super().__init__(
+            method_name,
+            recording_processors=[RedisCacheCredentialReplacer()]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_acfr_plr')
     def test_private_link_resource_acfr(self, resource_group):
         self.kwargs.update({
@@ -2563,8 +2677,8 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Basic --vm-size c0')
 
         self.cmd('network private-link-resource list --name {cache_name} -g {rg} --type Microsoft.Cache/Redis' , checks=[
-            self.check('length(@)', 1)]) #####
-    
+            self.check('length(@)', 1)])
+
     @ResourceGroupPreparer(name_prefix='cli_test_acfr_pe')
     def test_private_endpoint_connection_acfr(self,resource_group):
         self.kwargs.update({
@@ -2578,28 +2692,28 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
 
         # Prepare Redis Cache and network
         cache = self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Standard --vm-size c1').get_output_in_json()
-        self.kwargs['acfr_id'] = cache['id'] 
-    
+        self.kwargs['acfr_id'] = cache['id']
+
         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
-        
+
         self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-        
+
         # Waiting for Cache creation
         if self.is_live:
             time.sleep(25 * 60)
 
         # Creating Private Endpoint
-        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} --connection-name {pe_connection} --private-connection-resource-id {acfr_id} --group-id redisCache').get_output_in_json() 
+        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} --connection-name {pe_connection} --private-connection-resource-id {acfr_id} --group-id redisCache').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
         # Test get details of private endpoint
         results = self.kwargs['pe_id'].split('/')
         self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/privateEndpoints/{2}'.format(results[2], results[4], results[-1])
-        
+
         self.cmd('az network private-endpoint show --id {pec_id}',
                  checks=self.check('id', '{pec_id}'))
 
@@ -2607,7 +2721,7 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
             'az network private-endpoint show --resource-group {rg} --name {pe_name}',
             checks=self.check('name', '{pe_name}'))
 
-    
+
         # Show the connection at azure cache for redis
 
         redis = self.cmd('az redis show -n {cache_name} -g {rg}').get_output_in_json()
@@ -2620,11 +2734,11 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
             self.check('length(@)', '1'),
         ])
-        
+
         self.cmd('az network private-endpoint-connection show --id {red_pec_id}', checks=self.check('id', '{red_pec_id}'))
 
         self.cmd('az network private-endpoint-connection reject --id {red_pec_id}', checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
-        
+
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {red_pec_id} -y')
 
@@ -2802,7 +2916,7 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
                  expect_failure=True)
 
-        
+
 class NetworkHybridComputePrivateLinkScopesTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_hybridcompute_pe', random_name_length=40)
@@ -2895,7 +3009,7 @@ class NetworkHybridComputePrivateLinkScopesTest(ScenarioTest):
         ])
         self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {scope} -n {private_endpoint_connection} --type Microsoft.HybridCompute/privateLinkScopes -y')
 
-        
+
 class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='test_databricks_private_endpoint', random_name_length=40, location="westus")
@@ -3125,6 +3239,154 @@ class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
             ]
         )
         self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request1} --type {type} --yes')
+
+class NetworkKubernetesConfigurationPrivateLinkScopesTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_kubernetesconfiguration_pe', random_name_length=40)
+    def test_kubernetesconfiguration_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'scopename': self.create_random_name('clitestscopename', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'private_endpoint': self.create_random_name('cli-pe-', 24),
+            'private_endpoint2': self.create_random_name('cli-pe-', 24),
+            'private_endpoint_connection': self.create_random_name('cli-pec-', 24),
+            'private_endpoint_connection2': self.create_random_name('cli-pec-', 24),
+            'location': 'eastus2euap',
+            'approve_desc': 'ApprovedByTest',
+            'reject_desc': 'RejectedByTest',
+            'rg': resource_group,
+            'sub': self.get_subscription_id(),
+            'body': '{\\"location\\":\\"eastus2euap\\",\\"properties\\":{\\"clusterResourceId\\":\\"non-existing-resource\\"\\}\\}'
+        })
+
+
+        # Test create Private Link Scope create 
+        self.cmd('az rest --method "PUT" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.KubernetesConfiguration/privateLinkScopes/{scopename}?api-version=2022-04-02-preview" \
+                        --body "{body}"')
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {location} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test private link resource list
+        pr = self.cmd('network private-link-resource list --name {scope} -g {rg} --type microsoft.KubernetesConfiguration/privateLinkScopes', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+
+        # Add an endpoint that gets auto approved
+        self.kwargs['group_id'] = pr[0]['groupId']
+        self.kwargs['scope_id'] = '/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.KubernetesConfiguration/privateLinkScopes/{scopename}'
+
+        result = self.cmd('network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} --private-connection-resource-id {scope_id} '
+        '--connection-name {private_endpoint_connection} --group-id {group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint_connection'].lower() in result['name'].lower())
+
+        # Add an endpoint and approve it
+        result = self.cmd('network private-endpoint create -g {rg} -n {private_endpoint2} --vnet-name {vnet} --subnet {subnet} --private-connection-resource-id {scope_id} '
+        '--connection-name {private_endpoint_connection2} --group-id {group_id} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint_connection2'].lower() in result['name'].lower())
+
+        self.cmd('network private-endpoint-connection approve -g {rg} -n {private_endpoint_connection2} --resource-name {scope} --type Microsoft.KubernetesConfiguration/privateLinkScopes --description {approve_desc}',
+        checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{approve_desc}')
+        ])
+
+        # Reject previous approved endpoint
+        self.cmd('network private-endpoint-connection reject -g {rg} -n {private_endpoint_connection2} --resource-name {scope} --type Microsoft.KubernetesConfiguration/privateLinkScopes --description {reject_desc}',
+        checks= [
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{reject_desc}')
+        ])
+
+        # List endpoints
+        self.cmd('network private-endpoint-connection list -g {rg} --name {scope} --type Microsoft.KubernetesConfiguration/privateLinkScopes', checks=[
+            self.check('length(@)', '2')
+        ])
+        # Remove endpoints
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {scope} -n {private_endpoint_connection2} --type Microsoft.KubernetesConfiguration/privateLinkScopes -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list -g {rg} --name {scope} --type Microsoft.KubernetesConfiguration/privateLinkScopes', checks=[
+            self.check('length(@)', '1')
+        ])
+        # Show endpoint
+        self.cmd('az network private-endpoint-connection show -g {rg} --type Microsoft.KubernetesConfiguration/privateLinkScopes --resource-name {scope} -n {private_endpoint_connection}', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', 'Auto-Approved')
+        ])
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {scope} -n {private_endpoint_connection} --type Microsoft.KubernetesConfiguration/privateLinkScopes -y')
+
+
+
+class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_grafana_private_endpoint_', random_name_length=40)
+    def test_private_endpoint_connection_grafana(self, resource_group):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'service_name': self.create_random_name('cli-test-srv-', 22),
+            'vnet_name': self.create_random_name('cli-test-vnet-', 22),
+            'subnet_name': self.create_random_name('cli-test-subnet-', 22),
+            'endpoint_name': self.create_random_name('cli-test-pe-', 22),
+            'endpoint_conn_name': self.create_random_name('cli-test-pec-', 22),
+            'location': "eastus2euap",
+        })
+
+        # Install extension for Azure Managed Grafana Service
+        self.cmd('extension add -n amg')
+
+        # Create Azure Managed Grafana Service
+        service_created = self.cmd(
+            'grafana create -g {resource_group} -n {service_name} --l {location}').get_output_in_json()
+        self.kwargs['service_id'] = service_created['id']
+
+        # Check private link resource is available
+        self.cmd('network private-link-resource list --id {service_id}', checks=[
+            self.check('length(@)', 1),
+        ])
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        result = self.cmd(
+            'network vnet subnet show -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} ').get_output_in_json()
+
+        # Create private endpoint
+        result = self.cmd(
+            'network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--connection-name {endpoint_conn_name} --private-connection-resource-id {service_id} '
+            '--group-id Gateway').get_output_in_json()
+        self.assertTrue(
+            self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd(
+            'network private-endpoint-connection list -g {resource_group} -n {service_name} --type Microsoft.Dashboard/grafana',
+            checks=[self.check('length(@)', 1), ]).get_output_in_json()
+        self.kwargs.update({
+            "endpoint_request": result[0]['name'],
+            "pec_id": result[0]['id'],
+            "pec_name": result[0]['id'].split('/')[-1]
+        })
+
+        # Show the private endpoint connection
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+
+        self.cmd('az network private-endpoint-connection show --resource-name {service_name} -n {pec_name} -g {resource_group} --type Microsoft.Dashboard/grafana',
+                 checks=self.check('id', '{pec_id}'))
+
+        # Remove private endpoint
+        self.cmd(
+            'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.Dashboard/grafana -y')
 
 
 if __name__ == '__main__':

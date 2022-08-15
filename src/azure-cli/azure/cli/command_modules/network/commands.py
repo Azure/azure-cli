@@ -21,14 +21,14 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
+    cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
     cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
@@ -48,8 +48,8 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
-    process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
+    process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
+    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
     process_nw_cm_create_namespace,
@@ -85,11 +85,6 @@ def load_command_table(self, _):
     network_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network._util#{}',
         client_factory=None
-    )
-
-    network_asg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ApplicationSecurityGroupsOperations.{}',
-        client_factory=cf_application_security_groups
     )
 
     network_ddos_sdk = CliCommandType(
@@ -420,12 +415,6 @@ def load_command_table(self, _):
         min_api='2019-11-01'
     )
 
-    network_security_partner_provider_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SecurityPartnerProvidersOperations.{}',
-        client_factory=cf_security_partner_providers,
-        min_api='2020-03-01'
-    )
-
     network_virtual_appliances_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkVirtualAppliancesOperations.{}',
         client_factory=cf_network_virtual_appliances,
@@ -499,7 +488,7 @@ def load_command_table(self, _):
         {'prop': 'frontend_ports', 'name': 'frontend-port'},
         {'prop': 'backend_address_pools', 'name': 'address-pool'},
         {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
-        {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_listener_create_namespace},
+        {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'probes', 'name': 'probe'},
         {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace},
@@ -507,6 +496,10 @@ def load_command_table(self, _):
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
+    if self.supported_api_version(min_api='2021-08-01'):
+        subresource_properties.append({'prop': 'backend_settings_collection', 'name': 'settings', 'validator': process_ag_settings_create_namespace})
+        subresource_properties.append({'prop': 'listeners', 'name': 'listener', 'validator': process_ag_listener_create_namespace})
+        subresource_properties.append({'prop': 'routing_rules', 'name': 'routing-rule', 'validator': process_ag_routing_rule_create_namespace})
 
     def _make_singular(value):
         try:
@@ -686,29 +679,20 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_waf_exclusion_rule_set')
         g.custom_command('list', 'list_waf_exclusion_rule_set')
 
-    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01') as g:
         g.custom_command('add', 'add_trusted_client_certificate')
         g.custom_command('remove', 'remove_trusted_client_certificate')
         g.custom_command('list', 'list_trusted_client_certificate')
         g.custom_show_command('show', 'show_trusted_client_certificate')
         g.custom_command('update', 'update_trusted_client_certificate')
 
-    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
+    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01') as g:
         g.custom_command('add', 'add_ssl_profile')
         g.custom_command('remove', 'remove_ssl_profile')
         g.custom_command('list', 'list_ssl_profile')
         g.custom_show_command('show', 'show_ssl_profile')
         g.custom_command('update', 'update_ssl_profile')
 
-    # endregion
-
-    # region ApplicationSecurityGroups
-    with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
-        g.custom_command('create', 'create_asg')
-        g.show_command('show', 'get')
-        g.command('list', 'list_all')
-        g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_asg')
     # endregion
 
     # region DdosProtectionPlans
@@ -1216,7 +1200,7 @@ def load_command_table(self, _):
                          'set_nsg_flow_logging',
                          validator=process_nw_flow_log_set_namespace,
                          deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
-        g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
+        g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
     with self.command_group('network watcher flow-log',
                             network_watcher_flow_log_sdk,
@@ -1381,6 +1365,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters',
                                  custom_func_name='update_subnet')
         g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
+        g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
     # endregion
 
     # region VirtualNetworkGateways
@@ -1538,15 +1523,6 @@ def load_command_table(self, _):
         g.custom_command('ssh', 'ssh_bastion_host')
         g.custom_command('rdp', 'rdp_bastion_host')
         g.custom_command('tunnel', 'create_bastion_tunnel')
-        g.command('delete', 'begin_delete')
-    # endregion
-
-    # region Security Partner Provider
-    with self.command_group('network security-partner-provider', network_security_partner_provider_sdk, is_preview=True) as g:
-        g.custom_command('create', 'create_security_partner_provider')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_security_partner_provider')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_security_partner_provider')
         g.command('delete', 'begin_delete')
     # endregion
 

@@ -36,3 +36,11 @@ def disaster_recovery_mgmt_client_factory(cli_ctx, _):
 
 def migration_mgmt_client_factory(cli_ctx, _):
     return cf_servicebus(cli_ctx).migration_configs
+
+
+def private_endpoint_connections_mgmt_client_factory(cli_ctx, _):
+    return cf_servicebus(cli_ctx).private_endpoint_connections
+
+
+def private_link_mgmt_client_factory(cli_ctx, _):
+    return cf_servicebus(cli_ctx).private_link_resources

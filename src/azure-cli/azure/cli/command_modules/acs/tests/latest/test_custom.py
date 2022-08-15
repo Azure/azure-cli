@@ -7,8 +7,6 @@ import os
 import shutil
 import tempfile
 import unittest
-
-# pylint: skip-file
 from unittest import mock
 
 import requests
@@ -19,62 +17,41 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
 )
-from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
+from azure.cli.command_modules.acs._params import (
+    regions_in_preview,
+    regions_in_prod,
+)
 from azure.cli.command_modules.acs.custom import (
     _acs_browse_internal,
     _add_role_assignment,
     _get_command_context,
     _get_default_dns_prefix,
     _update_addons,
-    create_application,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     list_acs_locations,
     merge_kubernetes_configurations,
 )
-from azure.cli.command_modules.acs.tests.latest.mocks import MockUrlretrieveUrlValidator
-from azure.cli.command_modules.acs.tests.latest.utils import create_kubelogin_zip, get_test_data_file_path
-from azure.cli.core._config import ENV_VAR_PREFIX, GLOBAL_CONFIG_DIR
-from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.command_modules.acs.tests.latest.mocks import (
+    MockCLI,
+    MockCmd,
+    MockUrlretrieveUrlValidator,
+)
+from azure.cli.command_modules.acs.tests.latest.utils import (
+    create_kubelogin_zip,
+    get_test_data_file_path,
+)
 from azure.cli.core.util import CLIError
-from azure.graphrbac.models import GraphErrorException
 from azure.mgmt.containerservice.models import (
     ContainerService,
     ContainerServiceOrchestratorProfile,
     ContainerServiceOrchestratorTypes,
 )
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
-from knack import CLI
+from azure.mgmt.containerservice.v2020_03_01.models import (
+    ManagedClusterAddonProfile,
+)
 from msrestazure.azure_exceptions import CloudError
 
-
-class MockCLI(CLI):
-    def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
-                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
-        self.cloud = get_active_cloud(self)
-
-
-class MockLoader(object):
-    def __init__(self, ctx):
-        self.ctx = ctx
-
-    def get_models(self, *attr_args, **_):
-        from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAddonProfile',
-                       mod='models', operation_group='managed_clusters')
-
-
-class MockCmd(object):
-    def __init__(self, ctx, arguments={}):
-        self.cli_ctx = ctx
-        self.loader = MockLoader(self.cli_ctx)
-        self.arguments = arguments
-
-    def get_models(self, *attr_args, **kwargs):
-        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAddonProfile',
-                       mod='models', operation_group='managed_clusters')
 
 class AcsCustomCommandTest(unittest.TestCase):
     def setUp(self):
@@ -607,31 +584,10 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
-    def test_acs_sp_create_failed_with_polished_error_if_due_to_permission(self):
-
-        class FakedError(object):
-            def __init__(self, message):
-                self.message = message
-
-        def _test_deserializer(resp_type, response):
-            err = FakedError('Insufficient privileges to complete the operation')
-            return err
-
-        client = mock.MagicMock()
-        client.create.side_effect = GraphErrorException(_test_deserializer, None)
-
-        # action
-        with self.assertRaises(CLIError) as context:
-            create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
-
-        # assert we handled such error
-        self.assertTrue(
-            'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
-
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resources', autospec=True)
-    def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)
+    def test_update_addons(self, rg_def, get_resource_groups_client, get_resources_client):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None

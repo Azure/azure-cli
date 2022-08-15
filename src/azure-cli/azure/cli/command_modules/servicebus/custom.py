@@ -8,7 +8,7 @@
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
 # pylint: disable=too-many-locals
-
+# pylint: disable=too-many-return-statements
 import re
 from azure.cli.core.profiles import ResourceType
 
@@ -87,34 +87,36 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
     return instance
 
 
-def cli_namespace_list(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
+def cli_namespace_list(cmd, client, resource_group_name=None):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        if resource_group_name:
+            return client.list_by_resource_group(resource_group_name=resource_group_name)
 
-    return client.list()
-
-
-def cli_namespace_exists(client, name):
-
-    return client.check_name_availability(parameters={'name': name})
+        return client.list()
 
 
-# Namespace Authorization rule:
-def cli_namespaceautho_create(client, resource_group_name, namespace_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
+def cli_namespace_exists(cmd, client, name):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.check_name_availability(parameters={'name': name})
 
 
 # Namespace Authorization rule:
-def cli_namespaceautho_update(instance, rights):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    instance.rights = accessrights_converter(rights)
-    return instance
+def cli_namespaceautho_create(cmd, client, resource_group_name, namespace_name, name, rights=None):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        from azure.cli.command_modules.servicebus._utils import accessrights_converter
+        return client.create_or_update_authorization_rule(
+            resource_group_name=resource_group_name,
+            namespace_name=namespace_name,
+            authorization_rule_name=name,
+            parameters={'rights': accessrights_converter(rights)})
+
+
+# Namespace Authorization rule:
+def cli_namespaceautho_update(cmd, instance, rights):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        from azure.cli.command_modules.servicebus._utils import accessrights_converter
+        instance.rights = accessrights_converter(rights)
+        return instance
 
 
 def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key=None):
@@ -140,22 +142,31 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
         cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
 
     queue_params = SBQueue(
-        lock_duration=return_valid_duration_create(lock_duration),
         max_size_in_megabytes=max_size_in_megabytes,
         requires_duplicate_detection=requires_duplicate_detection,
         requires_session=requires_session,
-        default_message_time_to_live=return_valid_duration_create(default_message_time_to_live),
         dead_lettering_on_message_expiration=dead_lettering_on_message_expiration,
-        duplicate_detection_history_time_window=return_valid_duration_create(duplicate_detection_history_time_window),
         max_delivery_count=max_delivery_count,
         status=status,
-        auto_delete_on_idle=return_valid_duration_create(auto_delete_on_idle),
         enable_partitioning=enable_partitioning,
         enable_express=enable_express,
         forward_to=forward_to,
         forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
         enable_batched_operations=enable_batched_operations
     )
+
+    if lock_duration:
+        queue_params.lock_duration = return_valid_duration(lock_duration)
+
+    if default_message_time_to_live:
+        queue_params.default_message_time_to_live = return_valid_duration(default_message_time_to_live)
+
+    if duplicate_detection_history_time_window:
+        queue_params.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window)
+
+    if auto_delete_on_idle:
+        queue_params.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle)
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -170,23 +181,35 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
-    instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
+    from datetime import timedelta
+    from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
+
+    if lock_duration:
+        instance.lock_duration = return_valid_duration(lock_duration, instance.lock_duration)
+    elif instance.lock_duration > timedelta(days=DURATION_LIMIT):
+        instance.lock_duration = None
 
     if max_size_in_megabytes:
         instance.max_size_in_megabytes = max_size_in_megabytes
 
-    if requires_duplicate_detection:
+    if requires_duplicate_detection is not None:
         instance.requires_duplicate_detection = requires_duplicate_detection
 
-    if requires_session:
+    if requires_session is not None:
         instance.requires_session = requires_session
 
-    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
+    if default_message_time_to_live:
+        instance.default_message_time_to_live = return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
+    elif instance.default_message_time_to_live > timedelta(days=DURATION_LIMIT):
+        instance.default_message_time_to_live = None
 
-    if dead_lettering_on_message_expiration:
+    if dead_lettering_on_message_expiration is not None:
         instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
-    instance.duplicate_detection_history_time_window = return_valid_duration(instance.duplicate_detection_history_time_window, duplicate_detection_history_time_window)
+    if duplicate_detection_history_time_window:
+        instance.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window, instance.duplicate_detection_history_time_window)
+    elif instance.duplicate_detection_history_time_window > timedelta(days=DURATION_LIMIT):
+        instance.duplicate_detection_history_time_window = None
 
     if max_delivery_count:
         instance.max_delivery_count = max_delivery_count
@@ -194,12 +217,15 @@ def cli_sbqueue_update(instance, lock_duration=None,
     if status:
         instance.status = status
 
-    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
+    if auto_delete_on_idle:
+        instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
+    elif instance.auto_delete_on_idle > timedelta(days=DURATION_LIMIT):
+        instance.auto_delete_on_idle = None
 
-    if enable_partitioning:
+    if enable_partitioning is not None:
         instance.enable_partitioning = enable_partitioning
 
-    if enable_express:
+    if enable_express is not None:
         instance.enable_express = enable_express
 
     if forward_to:
@@ -208,33 +234,32 @@ def cli_sbqueue_update(instance, lock_duration=None,
     if forward_dead_lettered_messages_to:
         instance.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
 
-    if enable_batched_operations:
+    if enable_batched_operations is not None:
         instance.enable_batched_operations = enable_batched_operations
 
     return instance
 
 
 # Queue Authorization rule:
-def cli_queueautho_create(client, resource_group_name, namespace_name, queue_name, name, rights=None):
+def cli_queueautho_create(cmd, client, resource_group_name, namespace_name, queue_name, name, rights=None):
     from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        queue_name=queue_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.create_or_update_authorization_rule(
+            resource_group_name=resource_group_name,
+            namespace_name=namespace_name,
+            queue_name=queue_name,
+            authorization_rule_name=name,
+            parameters={'rights': accessrights_converter(rights)})
 
 
-def cli_queueauthokey_renew(client, resource_group_name, namespace_name, queue_name, name, key_type=None, key=None):
-
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        queue_name=queue_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
+def cli_queueauthokey_renew(cmd, client, resource_group_name, namespace_name, queue_name, name, key_type=None, key=None):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.regenerate_keys(
+            resource_group_name=resource_group_name,
+            namespace_name=namespace_name,
+            queue_name=queue_name,
+            authorization_rule_name=name,
+            parameters={'key_type': key_type, 'key': key})
 
 
 # Topic Region
@@ -249,17 +274,24 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
         cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
 
     topic_params = SBTopic(
-        default_message_time_to_live=return_valid_duration_create(default_message_time_to_live),
         max_size_in_megabytes=max_size_in_megabytes,
         requires_duplicate_detection=requires_duplicate_detection,
-        duplicate_detection_history_time_window=return_valid_duration_create(duplicate_detection_history_time_window),
         enable_batched_operations=enable_batched_operations,
         status=status,
         support_ordering=support_ordering,
-        auto_delete_on_idle=return_valid_duration_create(auto_delete_on_idle),
         enable_partitioning=enable_partitioning,
         enable_express=enable_express
     )
+
+    if default_message_time_to_live:
+        topic_params.default_message_time_to_live = return_valid_duration(update_value=default_message_time_to_live)
+
+    if duplicate_detection_history_time_window:
+        topic_params.duplicate_detection_history_time_window = return_valid_duration(update_value=duplicate_detection_history_time_window)
+
+    if auto_delete_on_idle:
+        topic_params.auto_delete_on_idle = return_valid_duration(update_value=auto_delete_on_idle)
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -273,57 +305,68 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
 
-    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
+    from datetime import timedelta
+    from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
+
+    if default_message_time_to_live:
+        instance.default_message_time_to_live = default_message_time_to_live
+    elif instance.default_message_time_to_live > timedelta(days=DURATION_LIMIT):
+        instance.default_message_time_to_live = None
 
     if max_size_in_megabytes:
         instance.max_size_in_megabytes = max_size_in_megabytes
 
-    if requires_duplicate_detection:
+    if requires_duplicate_detection is not None:
         instance.requires_duplicate_detection = requires_duplicate_detection
 
-    instance.duplicate_detection_history_time_window = return_valid_duration(instance.duplicate_detection_history_time_window, duplicate_detection_history_time_window)
+    if duplicate_detection_history_time_window:
+        instance.duplicate_detection_history_time_window = return_valid_duration(duplicate_detection_history_time_window, instance.duplicate_detection_history_time_window)
+    elif instance.duplicate_detection_history_time_window > timedelta(days=DURATION_LIMIT):
+        instance.duplicate_detection_history_time_window = None
 
-    if enable_batched_operations:
+    if enable_batched_operations is not None:
         instance.enable_batched_operations = enable_batched_operations
 
     if status:
         instance.status = status
 
-    if support_ordering:
+    if support_ordering is not None:
         instance.support_ordering = support_ordering
 
-    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
+    if auto_delete_on_idle:
+        instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
+    elif instance.auto_delete_on_idle > timedelta(days=DURATION_LIMIT):
+        instance.auto_delete_on_idle = None
 
-    if enable_partitioning:
+    if enable_partitioning is not None:
         instance.enable_partitioning = enable_partitioning
 
-    if enable_express:
+    if enable_express is not None:
         instance.enable_express = enable_express
 
     return instance
 
 
 # Topic Authorization rule
-def cli_topicautho_create(client, resource_group_name, namespace_name, topic_name, name, rights=None):
+def cli_topicautho_create(cmd, client, resource_group_name, namespace_name, topic_name, name, rights=None):
     from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        topic_name=topic_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.create_or_update_authorization_rule(
+            resource_group_name=resource_group_name,
+            namespace_name=namespace_name,
+            topic_name=topic_name,
+            authorization_rule_name=name,
+            parameters={'rights': accessrights_converter(rights)})
 
 
-def cli_topicauthokey_renew(client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
-
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        topic_name=topic_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
+def cli_topicauthokey_renew(cmd, client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.regenerate_keys(
+            resource_group_name=resource_group_name,
+            namespace_name=namespace_name,
+            topic_name=topic_name,
+            authorization_rule_name=name,
+            parameters={'key_type': key_type, 'key': key})
 
 
 # Subscription Region
@@ -334,18 +377,24 @@ def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, 
 
     SBSubscription = cmd.get_models('SBSubscription', resource_type=ResourceType.MGMT_SERVICEBUS)
     subscription_params = SBSubscription(
-        lock_duration=return_valid_duration_create(lock_duration),
         requires_session=requires_session,
-        default_message_time_to_live=return_valid_duration_create(default_message_time_to_live),
         dead_lettering_on_message_expiration=dead_lettering_on_message_expiration,
         max_delivery_count=max_delivery_count,
         status=status,
         enable_batched_operations=enable_batched_operations,
-        auto_delete_on_idle=return_valid_duration_create(auto_delete_on_idle),
         forward_to=forward_to,
         forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
         dead_lettering_on_filter_evaluation_exceptions=dead_lettering_on_filter_evaluation_exceptions
     )
+
+    if default_message_time_to_live:
+        subscription_params.default_message_time_to_live = return_valid_duration(update_value=default_message_time_to_live)
+
+    if lock_duration:
+        subscription_params.lock_duration = return_valid_duration(update_value=lock_duration)
+
+    if auto_delete_on_idle:
+        subscription_params.auto_delete_on_idle = return_valid_duration(update_value=auto_delete_on_idle)
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -361,14 +410,23 @@ def cli_sbsubscription_update(instance, lock_duration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
 
-    instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
+    from datetime import timedelta
+    from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
 
-    if requires_session:
+    if lock_duration:
+        instance.lock_duration = return_valid_duration(lock_duration, instance.lock_duration)
+    elif instance.lock_duration > timedelta(days=DURATION_LIMIT):
+        instance.lock_duration = None
+
+    if requires_session is not None:
         instance.requires_session = requires_session
 
-    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
+    if default_message_time_to_live:
+        instance.default_message_time_to_live = return_valid_duration(default_message_time_to_live, instance.default_message_time_to_live)
+    elif instance.default_message_time_to_live > timedelta(days=DURATION_LIMIT):
+        instance.default_message_time_to_live = None
 
-    if dead_lettering_on_message_expiration:
+    if dead_lettering_on_message_expiration is not None:
         instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
     if max_delivery_count:
@@ -377,10 +435,13 @@ def cli_sbsubscription_update(instance, lock_duration=None,
     if status:
         instance.status = status
 
-    if enable_batched_operations:
+    if enable_batched_operations is not None:
         instance.enable_batched_operations = enable_batched_operations
 
-    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
+    if auto_delete_on_idle:
+        instance.auto_delete_on_idle = return_valid_duration(auto_delete_on_idle, instance.auto_delete_on_idle)
+    elif instance.auto_delete_on_idle > timedelta(days=DURATION_LIMIT):
+        instance.auto_delete_on_idle = None
 
     if forward_to:
         instance.forward_to = forward_to
@@ -413,8 +474,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
     if filter_type == 'SqlFilter' or filter_type is None:
         parameters.sql_filter = SqlFilter(
             sql_expression=filter_sql_expression,
-            requires_preprocessing=filter_requires_preprocessing
-        )
+            requires_preprocessing=filter_requires_preprocessing)
 
     if filter_type == 'CorrelationFilter':
         parameters.correlation_filter = CorrelationFilter(
@@ -426,8 +486,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
             session_id=session_id,
             reply_to_session_id=reply_to_session_id,
             content_type=content_type,
-            requires_preprocessing=requires_preprocessing
-        )
+            requires_preprocessing=requires_preprocessing)
 
     if action_sql_expression or action_compatibility_level or action_requires_preprocessing:
         parameters.action = Action(
@@ -446,25 +505,26 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
 
 
 # Rule Region
-def cli_rules_update(instance,
+def cli_rules_update(cmd, instance,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
                      content_type=None, requires_preprocessing=None):
 
-    if action_sql_expression:
-        instance.action.sql_expression = action_sql_expression
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        if action_sql_expression:
+            instance.action.sql_expression = action_sql_expression
 
-    if action_compatibility_level:
-        instance.action.compatibility_level = action_compatibility_level
+        if action_compatibility_level:
+            instance.action.compatibility_level = action_compatibility_level
 
-    if action_requires_preprocessing:
+    if action_requires_preprocessing is not None:
         instance.action.requires_preprocessing = action_requires_preprocessing
 
     if filter_sql_expression:
         instance.sql_filter.sql_expression = filter_sql_expression
 
-    if filter_requires_preprocessing:
+    if filter_requires_preprocessing is not None:
         instance.sql_filter.requires_preprocessing = filter_requires_preprocessing
 
     if correlation_id:
@@ -491,62 +551,62 @@ def cli_rules_update(instance,
     if content_type:
         instance.correlation_filter.content_type = content_type
 
-    if requires_preprocessing:
+    if requires_preprocessing is not None:
         instance.correlation_filter.requires_preprocessing = requires_preprocessing
 
     return instance
 
 
 # DisasterRecoveryConfigs Region
-def cli_georecovery_alias_create(client, resource_group_name, namespace_name, alias,
+def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_name, alias,
                                  partner_namespace, alternate_name=None):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        parameters = {
+            'partner_namespace': partner_namespace,
+            'alternate_name': alternate_name,
+        }
+        return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
+                                       alias=alias, parameters=parameters)
 
-    parameters = {
-        'partner_namespace': partner_namespace,
-        'alternate_name': alternate_name,
-    }
-    return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                   alias=alias, parameters=parameters)
 
-
-def cli_georecovery_alias_exists(client, resource_group_name, namespace_name, name):
-
-    return client.check_name_availability(resource_group_name=resource_group_name,
-                                          namespace_name=namespace_name,
-                                          parameters={'name': name})
+def cli_georecovery_alias_exists(cmd, client, resource_group_name, namespace_name, name):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.check_name_availability(resource_group_name=resource_group_name,
+                                              namespace_name=namespace_name,
+                                              parameters={'name': name})
 
 
 # MigrationConfigs Region
-def cli_migration_start(client, resource_group_name, namespace_name,
+def cli_migration_start(cmd, client, resource_group_name, namespace_name,
                         target_namespace, post_migration_name, config_name="$default"):
-    import time
-    parameters = {
-        'target_namespace': target_namespace,
-        'post_migration_name': post_migration_name
-    }
-    client.begin_create_and_start_migration(resource_group_name, namespace_name, config_name, parameters)
-    getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-    # pool till Provisioning state is succeeded
-    while getresponse.provisioning_state != 'Succeeded':
-        time.sleep(30)
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        import time
+        parameters = {
+            'target_namespace': target_namespace,
+            'post_migration_name': post_migration_name
+        }
+        client.begin_create_and_start_migration(resource_group_name, namespace_name, config_name, parameters)
         getresponse = client.get(resource_group_name, namespace_name, config_name)
 
-    # poll on the 'pendingReplicationOperationsCount' to be 0 or none
-    while getresponse.pending_replication_operations_count != 0 and getresponse.pending_replication_operations_count is not None:
-        time.sleep(30)
-        getresponse = client.get(resource_group_name, namespace_name, config_name)
+        # pool till Provisioning state is succeeded
+        while getresponse.provisioning_state != 'Succeeded':
+            time.sleep(30)
+            getresponse = client.get(resource_group_name, namespace_name, config_name)
 
-    return client.get(resource_group_name, namespace_name, config_name)
+        # poll on the 'pendingReplicationOperationsCount' to be 0 or none
+        while getresponse.pending_replication_operations_count != 0 and getresponse.pending_replication_operations_count is not None:
+            time.sleep(30)
+            getresponse = client.get(resource_group_name, namespace_name, config_name)
+
+        return client.get(resource_group_name, namespace_name, config_name)
 
 
-def cli_migration_show(client, resource_group_name, namespace_name, config_name="$default"):
-
-    return client.get(resource_group_name, namespace_name, config_name)
+def cli_migration_show(cmd, client, resource_group_name, namespace_name, config_name="$default"):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
+        return client.get(resource_group_name, namespace_name, config_name)
 
 
 def cli_migration_complete(client, resource_group_name, namespace_name, config_name="$default"):
-
     return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 
@@ -554,18 +614,32 @@ iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
 
-def return_valid_duration(instance_value, update_value):
+def return_valid_duration(update_value, current_value=None):
     from datetime import timedelta
     from isodate import parse_duration
+    from isodate import Duration
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         value_toreturn = update_value
     else:
-        value_toreturn = str(instance_value)
+        return current_value
 
     if iso8601pattern.match(value_toreturn):
-        if parse_duration(value_toreturn) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+        try:
+            time_duration = parse_duration(value_toreturn)
+        except:
+            raise InvalidArgumentValueError("Unable to parse provided ISO 8601 format duration %r" % value_toreturn)
+
+        if isinstance(time_duration, timedelta):
+            if time_duration <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+                return time_duration
             return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+
+        if isinstance(time_duration, Duration):
+            # for some reason 2 duration objects cannot be compared, must find a fix
+            return time_duration
+
         return value_toreturn
 
     if timedeltapattern.match(value_toreturn):
@@ -575,6 +649,8 @@ def return_valid_duration(instance_value, update_value):
                                                                                             seconds=DURATION_SECS):
             return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
         return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+
+    return update_value
 
 
 # to check the timespan value
@@ -602,7 +678,6 @@ def return_valid_duration_create(update_value):
 
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
-
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_SERVICEBUS)
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -653,9 +728,8 @@ def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, sub
 
 def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes):
     from knack.util import CLIError
-    from azure.mgmt.servicebus import ServiceBusManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    nsclient = get_mgmt_service_client(cmd.cli_ctx, ServiceBusManagementClient).namespaces
+    nsclient = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_SERVICEBUS).namespaces
     getnamespace = nsclient.get(resource_group_name=resource_group_name, namespace_name=namespace_name)
     if getnamespace.sku.name == 'Standard' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120]:
         raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GB')
@@ -664,6 +738,56 @@ def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_me
                                                                             40960, 81920]:
         raise CLIError(
             '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
+
+
+# Private Endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, namespace_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):
+    from azure.core.exceptions import HttpResponseError
+    import time
+
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateLinkConnectionStatus')
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    old_status = private_endpoint_connection.private_link_service_connection_state.status
+    if description:
+        private_endpoint_connection.private_link_service_connection_state.description = description
+
+    if old_status != "Approved" or not is_approved:
+        private_endpoint_connection.private_link_service_connection_state.status = PrivateEndpointServiceConnectionStatus.APPROVED\
+            if is_approved else PrivateEndpointServiceConnectionStatus.REJECTED
+        try:
+            private_endpoint_connection = client.create_or_update(resource_group_name=resource_group_name,
+                                                                  namespace_name=namespace_name,
+                                                                  private_endpoint_connection_name=private_endpoint_connection_name,
+                                                                  parameters=private_endpoint_connection)
+        except HttpResponseError as ex:
+            if 'Operation returned an invalid status ''Accepted''' in ex.message:
+                time.sleep(30)
+                private_endpoint_connection = client.get(resource_group_name=resource_group_name,
+                                                         namespace_name=namespace_name,
+                                                         private_endpoint_connection_name=private_endpoint_connection_name)
+
+    return private_endpoint_connection
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, namespace_name,
+                                        private_endpoint_connection_name, description=None):
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=True,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, namespace_name, private_endpoint_connection_name,
+                                       description=None):
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
+    )
 
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
