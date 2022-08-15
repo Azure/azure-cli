@@ -8,7 +8,7 @@ import sys
 import json
 from datetime import datetime, timedelta
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
-from azure.cli.core.style import windows_enable_vt_mode, print_styled_text
+from azure.cli.core.style import print_styled_text
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -59,21 +59,21 @@ def should_prompt(cli):
     return True
 
 
-def print_and_log(styled=True):
-    if not styled:
-        print("[Survey] Help us improve Azure CLI by sharing your experience. "
-              "This survey should take about 3 minutes. Run 'az survey' to open in browser. "
-              "Learn more at https://go.microsoft.com/fwlink/?linkid=2203309")
-    else:
-        print_styled_text((SURVEY_STYLE, NEW_LINE))
-        print_styled_text([
-            (SURVEY_STYLE, "[Survey] Help us improve Azure CLI by sharing your experience. "
-                           "This survey should take about 3 minutes. Run 'az survey' to open in browser. "
-                           "Learn more at https://go.microsoft.com/fwlink/?linkid=2203309"),
-            (SURVEY_STYLE, ERASE_IN_LINE)
-        ])
-        print_styled_text((SURVEY_STYLE, NEW_LINE))
+def prompt_survey_message(cli):
+    if not should_prompt(cli):
+        return
 
+    # prompt message
+    print_styled_text((SURVEY_STYLE, NEW_LINE))
+    print_styled_text([
+        (SURVEY_STYLE, "[Survey] Help us improve Azure CLI by sharing your experience. "
+                       "This survey should take about 3 minutes. Run 'az survey' to open in browser. "
+                       "Learn more at https://go.microsoft.com/fwlink/?linkid=2203309"),
+        (SURVEY_STYLE, ERASE_IN_LINE)
+    ])
+    print_styled_text((SURVEY_STYLE, NEW_LINE))
+
+    # log prompt time
     next_prompt_time = datetime.utcnow() + timedelta(days=PROMPT_INTERVAL_IN_DAYS)
     survey_note = {
         'last_prompt_time': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),
@@ -81,19 +81,3 @@ def print_and_log(styled=True):
     }
     with open(GLOBAL_SURVEY_NOTE_PATH, 'w') as f:
         json.dump(survey_note, f)
-
-
-def prompt_survey_message(cli):
-    if not should_prompt(cli):
-        return
-
-    # If CLI enables colorama, which means it's running in windows with legacy terminal
-    # we should enable VT mode first to print styled text using ANSI Escape Sequences
-    if cli._should_init_colorama:  # pylint: disable=protected-access
-        try:
-            windows_enable_vt_mode()
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.debug("Failed to enable vt mode for windows. %s", str(ex))
-            print_and_log(styled=False)
-
-    print_and_log(styled=True)
