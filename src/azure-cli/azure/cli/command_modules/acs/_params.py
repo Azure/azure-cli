@@ -46,7 +46,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_nodes_count, validate_pod_subnet_id, validate_ppg,
     validate_priority, validate_snapshot_id, validate_snapshot_name,
     validate_spot_max_price, validate_ssh_key, validate_taints,
-    validate_vm_set_type, validate_vnet_subnet_id)
+    validate_vm_set_type, validate_vnet_subnet_id, validate_registry_name)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -449,7 +449,7 @@ def load_arguments(self, _):
         c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
 
     with self.argument_context('aks check-acr', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
-        c.argument('acr')
+        c.argument('acr', validator=validate_registry_name)
         c.argument('node_name')
 
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
