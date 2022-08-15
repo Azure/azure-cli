@@ -417,10 +417,15 @@ def set_raw_command_name(command):
 
 
 @decorators.suppress_all_exceptions()
-def add_dedicated_instrumentation_key(dedicated_instrumentation_key: set):
+def add_dedicated_instrumentation_key(dedicated_instrumentation_key):
     if not dedicated_instrumentation_key:
         return
-    _session.instrumentation_key.update(dedicated_instrumentation_key)
+
+    from collections import Iterable
+    if isinstance(dedicated_instrumentation_key, str):
+        _session.instrumentation_key.add(dedicated_instrumentation_key)
+    elif isinstance(dedicated_instrumentation_key, Iterable):
+        _session.instrumentation_key.update(dedicated_instrumentation_key)
 
 
 @decorators.suppress_all_exceptions()
