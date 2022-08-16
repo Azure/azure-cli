@@ -117,7 +117,7 @@ class MonitorTests(ScenarioTest):
         self.kwargs.update({
             'alert': 'alert1',
         })
-        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1 --priority 1001')
         gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
         self.kwargs.update({
             'ag_id': gateway_json['id'],
