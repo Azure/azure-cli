@@ -90,6 +90,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
+    
+    # To run this test live, make sure that your role excludes the permission 'Microsoft.DBforMySQL/locations/checkNameAvailability/action'
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_check_name_availability_fallback_mgmt(self, resource_group):
+        self._test_flexible_server_check_name_availability_fallback_mgmt('mysql', resource_group)
 
     @live_only()
     @AllowLargeResponse()
@@ -207,6 +212,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
 
+    def _test_flexible_server_check_name_availability_fallback_mgmt(self, database_engine, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} --public-access None --tier GeneralPurpose --sku-name Standard_D2ds_v4'
+                 .format(database_engine, resource_group, server_name))
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+    
     def _test_flexible_server_iops_mgmt(self, database_engine, resource_group):
 
         if self.cli_ctx.local_context.is_on:
