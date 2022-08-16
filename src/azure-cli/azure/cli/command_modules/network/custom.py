@@ -6827,6 +6827,7 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
     return instance
 # endregion
 
+
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
