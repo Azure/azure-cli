@@ -145,14 +145,13 @@ def _is_v2_sku(sku):
 
 
 # pylint: disable=too-many-statements
-def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
+def create_application_gateway(cmd, application_gateway_name, resource_group_name, priority, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
-                               sku=None, priority=None,
-                               private_ip_address=None, public_ip_address=None,
+                               sku=None, private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1427,10 +1426,9 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
     return parent
 
 
-def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
+def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None,
-                                   priority=None):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1483,10 +1481,9 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
+def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
                            address_pool=None, settings=None, listener=None,
-                           rule_type='Basic', no_wait=False,
-                           priority=None):
+                           rule_type='Basic', no_wait=False):
     ApplicationGatewayRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
