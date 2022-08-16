@@ -40,8 +40,7 @@ from azure.cli.command_modules.network._validators import (
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
-    get_sdk_completer)
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
     SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest)
@@ -1876,26 +1875,6 @@ def load_arguments(self, _):
         c.argument('next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
         c.argument('address_prefix', help='The destination CIDR to which the route applies.')
 
-    # endregion
-
-    # region ServiceEndpoint
-    service_endpoint_policy_name = CLIArgumentType(options_list='--policy-name', id_part='name', help='Name of the service endpoint policy.', completer=get_resource_name_completion_list('Microsoft.Network/serviceEndpointPolicies'))
-
-    with self.argument_context('network service-endpoint policy') as c:
-        c.argument('service_endpoint_policy_name', service_endpoint_policy_name, options_list=['--name', '-n'])
-
-    with self.argument_context('network service-endpoint policy show') as c:
-        c.ignore('expand')
-
-    with self.argument_context('network service-endpoint policy-definition') as c:
-        c.argument('service_endpoint_policy_name', service_endpoint_policy_name)
-        c.argument('service_endpoint_policy_definition_name', name_arg_type, help='Name of the service endpoint policy definition', id_part='child_name_1')
-        c.argument('description', help='Description of the policy definition.')
-        c.argument('service', help='Service name the policy definition applies to.', completer=service_endpoint_completer)
-        c.argument('service_resources', help='Space-separated list of service resources the definition applies to.', nargs='+')
-
-    with self.argument_context('network service-endpoint policy-definition list') as c:
-        c.argument('service_endpoint_policy_name', service_endpoint_policy_name, id_part=None)
     # endregion
 
     # region TrafficManagers
