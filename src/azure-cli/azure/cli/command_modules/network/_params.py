@@ -1878,25 +1878,6 @@ def load_arguments(self, _):
 
     # endregion
 
-    # region ServiceEndpoint
-    service_endpoint_policy_name = CLIArgumentType(options_list='--policy-name', id_part='name', help='Name of the service endpoint policy.', completer=get_resource_name_completion_list('Microsoft.Network/serviceEndpointPolicies'))
-
-    with self.argument_context('network service-endpoint policy') as c:
-        c.argument('service_endpoint_policy_name', service_endpoint_policy_name, options_list=['--name', '-n'])
-
-    with self.argument_context('network service-endpoint policy show') as c:
-        c.ignore('expand')
-
-    with self.argument_context('network service-endpoint policy-definition') as c:
-        c.argument('service_endpoint_policy_name', service_endpoint_policy_name)
-        c.argument('service_endpoint_policy_definition_name', name_arg_type, help='Name of the service endpoint policy definition', id_part='child_name_1')
-        c.argument('description', help='Description of the policy definition.')
-        c.argument('service', help='Service name the policy definition applies to.', completer=service_endpoint_completer)
-        c.argument('service_resources', help='Space-separated list of service resources the definition applies to.', nargs='+')
-
-    with self.argument_context('network service-endpoint policy-definition list') as c:
-        c.argument('service_endpoint_policy_name', service_endpoint_policy_name, id_part=None)
-    # endregion
 
     # region TrafficManagers
     monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))

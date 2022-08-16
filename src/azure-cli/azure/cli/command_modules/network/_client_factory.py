@@ -156,14 +156,6 @@ def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
 
 
-def cf_service_endpoint_policies(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_endpoint_policies
-
-
-def cf_service_endpoint_policy_definitions(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_endpoint_policy_definitions
-
-
 def cf_service_tags(cli_ctx, _):
     return network_client_factory(cli_ctx).service_tags
 

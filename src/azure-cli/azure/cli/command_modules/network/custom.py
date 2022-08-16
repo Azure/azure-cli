@@ -6828,53 +6828,6 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
 # endregion
 
 
-# region ServiceEndpoints
-def create_service_endpoint_policy(cmd, resource_group_name, service_endpoint_policy_name, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    ServiceEndpointPolicy = cmd.get_models('ServiceEndpointPolicy')
-    policy = ServiceEndpointPolicy(tags=tags, location=location)
-    return client.begin_create_or_update(resource_group_name, service_endpoint_policy_name, policy)
-
-
-def list_service_endpoint_policies(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
-def update_service_endpoint_policy(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-
-    return instance
-
-
-def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
-                                              service_endpoint_policy_definition_name, service, service_resources,
-                                              description=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policy_definitions
-    ServiceEndpointPolicyDefinition = cmd.get_models('ServiceEndpointPolicyDefinition')
-    policy_def = ServiceEndpointPolicyDefinition(description=description, service=service,
-                                                 service_resources=service_resources)
-    return client.begin_create_or_update(resource_group_name, service_endpoint_policy_name,
-                                         service_endpoint_policy_definition_name, policy_def)
-
-
-def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
-    if service is not None:
-        instance.service = service
-
-    if service_resources is not None:
-        instance.service_resources = service_resources
-
-    if description is not None:
-        instance.description = description
-
-    return instance
-# endregion
-
-
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
