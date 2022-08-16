@@ -3545,7 +3545,12 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         if ip_configurations:
             PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
             for prop in ip_configurations:
-                ip_config = PrivateEndpointIPConfiguration(**prop)
+                ip_config = PrivateEndpointIPConfiguration(
+                    name=prop['name'],
+                    group_id=prop['group_id'],
+                    member_name=prop['member_name'],
+                    private_ip_address=prop['private_ip_address']
+                )
                 try:
                     private_endpoint.ip_configurations.append(ip_config)
                 except AttributeError:
@@ -3553,7 +3558,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         if application_security_groups:
             ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
             for prop in application_security_groups:
-                asg = ApplicationSecurityGroup(**prop)
+                asg = ApplicationSecurityGroup(id=prop["id"])
                 try:
                     private_endpoint.application_security_groups.append(asg)
                 except AttributeError:
