@@ -174,7 +174,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd(
             "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
             "--ip-config name={ipconfig1} group-id={group_id} member-name=blob private-ip-address=10.0.0.4 "
-            "--ip-config name={ipconfig2} group-id={group_id} member-name=blob2 private-ip-address=10.0.0.6",
+            "--ip-config name={ipconfig2} private-ip-address=10.0.0.6",
             checks=[
                 self.check("length(ipConfigurations)", 2),
                 self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
