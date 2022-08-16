@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Delete(AAZCommand):
     """Delete a service endpoint policy definition.
 
-    :example: Delete a service endpoint policy definition
+    :example: Delete a service endpoint policy definition.
         az network service-endpoint policy-definition delete --name myserviceendpointpolicydefinition --policy-name mypolicy --resource-group myresourcegroup
     """
 

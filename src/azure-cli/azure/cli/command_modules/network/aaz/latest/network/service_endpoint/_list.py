@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List what values of endpoint services are available for use.
+
+    :example: List available endpoint services.
+        az network service-endpoint list -l MyLocation
     """
 
     _aaz_info = {

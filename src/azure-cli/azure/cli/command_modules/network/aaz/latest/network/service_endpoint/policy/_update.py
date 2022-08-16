@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a service endpoint policy.
+
+    :example: Update a service endpoint policy.
+        az network service-endpoint policy update -g MyResourceGroup -n MyPolicy --tags test=nest
     """
 
     _aaz_info = {

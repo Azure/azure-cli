@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a service endpoint policy definition.
+
+    :example: Create a service endpoint policy definition.
+        az network service-endpoint policy-definition create -g MyResourceGroup --policy-name MyPolicy -n MyPolicyDefinition --service Microsoft.Storage --description "Test Def" --service-resources MyServiceResources
     """
 
     _aaz_info = {
