@@ -22,8 +22,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
-    cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
-    cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
+    cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
@@ -329,18 +328,6 @@ def load_command_table(self, _):
     network_watcher_pc_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
         client_factory=cf_packet_capture
-    )
-
-    network_sepd_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ServiceEndpointPolicyDefinitionsOperations.{}',
-        client_factory=cf_service_endpoint_policy_definitions,
-        min_api='2018-07-01'
-    )
-
-    network_sepp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ServiceEndpointPoliciesOperations.{}',
-        client_factory=cf_service_endpoint_policies,
-        min_api='2018-07-01'
     )
 
     network_virtual_hub_sdk = CliCommandType(
@@ -1294,27 +1281,6 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='route_parameters', custom_func_name='update_route')
 
-    # endregion
-
-    # region ServiceEndpoint
-    with self.command_group('network service-endpoint', network_endpoint_service_sdk) as g:
-        g.command('list', 'list')
-
-    with self.command_group('network service-endpoint policy', network_sepp_sdk) as g:
-        g.custom_command('create', 'create_service_endpoint_policy')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_service_endpoint_policies')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_service_endpoint_policy')
-
-    with self.command_group('network service-endpoint policy-definition', network_sepd_sdk) as g:
-        g.custom_command('create', 'create_service_endpoint_policy_definition')
-        g.command('delete', 'begin_delete')
-        g.command('list', 'list_by_resource_group')
-        g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_service_endpoint_policy_definition',
-                                 setter_name='begin_create_or_update',
-                                 setter_arg_name='service_endpoint_policy_definitions')
     # endregion
 
     # region TrafficManagers
