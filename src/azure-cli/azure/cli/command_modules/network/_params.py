@@ -40,8 +40,7 @@ from azure.cli.command_modules.network._validators import (
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
-    get_sdk_completer)
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
     SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest)
