@@ -11,14 +11,14 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --intent-vm-sizes --zone
+      - -n -g --intent-vm-sizes --zone --tags
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_intent_vm_sizes_and_zone_000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-07-12T08:32:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-16T06:12:29Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:36 GMT
+      - Tue, 16 Aug 2022 06:12:47 GMT
       expires:
       - '-1'
       pragma:
@@ -42,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "tags": {}, "zones": ["2"], "properties": {"intent":
-      {"vmSizes": ["Standard_E64s_v4", "Standard_M416ms_v2"]}}}'
+    body: '{"location": "eastus2", "tags": {"tag": "test"}, "zones": ["2"], "properties":
+      {"intent": {"vmSizes": ["Standard_E64s_v4", "Standard_M416ms_v2"]}}}'
     headers:
       Accept:
       - application/json
@@ -54,32 +54,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '134'
+      - '147'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g --intent-vm-sizes --zone
+      - -n -g --intent-vm-sizes --zone --tags
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\",\r\n
         \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
-        \"Standard\",\r\n    \"intent\": {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\",\r\n
-        \       \"Standard_M416ms_v2\"\r\n      ]\r\n    }\r\n  },\r\n  \"zones\":
-        [\r\n    \"2\"\r\n  ]\r\n}"
+        \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\":
+        {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\",\r\n        \"Standard_M416ms_v2\"\r\n
+        \     ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '524'
+      - '547'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:43 GMT
+      - Tue, 16 Aug 2022 06:12:56 GMT
       expires:
       - '-1'
       pragma:
@@ -112,12 +112,12 @@ interactions:
       ParameterSetName:
       - -n -g --intent-vm-sizes
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_intent_vm_sizes_and_zone_000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-07-12T08:32:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-16T06:12:29Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -126,7 +126,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:44 GMT
+      - Tue, 16 Aug 2022 06:12:57 GMT
       expires:
       - '-1'
       pragma:
@@ -159,7 +159,7 @@ interactions:
       ParameterSetName:
       - -n -g --intent-vm-sizes
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_2?api-version=2022-03-01
   response:
@@ -177,7 +177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:52 GMT
+      - Tue, 16 Aug 2022 06:13:04 GMT
       expires:
       - '-1'
       pragma:
@@ -210,27 +210,28 @@ interactions:
       ParameterSetName:
       - -n -g --intent-vm-sizes
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\",\r\n
         \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
-        \"Standard\",\r\n    \"intent\": {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\",\r\n
-        \       \"Standard_M416ms_v2\"\r\n      ]\r\n    },\r\n    \"virtualMachines\":
-        [],\r\n    \"virtualMachineScaleSets\": [],\r\n    \"availabilitySets\": []\r\n
-        \ },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
+        \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\":
+        {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\",\r\n        \"Standard_M416ms_v2\"\r\n
+        \     ]\r\n    },\r\n    \"virtualMachines\": [],\r\n    \"virtualMachineScaleSets\":
+        [],\r\n    \"availabilitySets\": []\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n
+        \ ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '617'
+      - '640'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:53 GMT
+      - Tue, 16 Aug 2022 06:13:06 GMT
       expires:
       - '-1'
       pragma:
@@ -252,8 +253,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "tags": {}, "zones": ["2"], "properties": {"proximityPlacementGroupType":
-      "Standard", "intent": {"vmSizes": ["Standard_E64s_v4"]}}}'
+    body: '{"location": "eastus2", "tags": {"tag": "test"}, "zones": ["2"], "properties":
+      {"proximityPlacementGroupType": "Standard", "intent": {"vmSizes": ["Standard_E64s_v4"]}}}'
     headers:
       Accept:
       - application/json
@@ -264,31 +265,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '155'
+      - '168'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --intent-vm-sizes
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\",\r\n
         \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
-        \"Standard\",\r\n    \"intent\": {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\"\r\n
-        \     ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
+        \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\":
+        {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\"\r\n      ]\r\n    }\r\n
+        \ },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '493'
+      - '516'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:57 GMT
+      - Tue, 16 Aug 2022 06:13:11 GMT
       expires:
       - '-1'
       pragma:
@@ -307,7 +309,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/PutDeletePPG3Min;97,Microsoft.Compute/PutDeletePPG30Min;497
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -325,27 +327,27 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2022-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\",\r\n
         \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
-        \"Standard\",\r\n    \"intent\": {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\"\r\n
-        \     ]\r\n    },\r\n    \"virtualMachines\": [],\r\n    \"virtualMachineScaleSets\":
-        [],\r\n    \"availabilitySets\": []\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n
-        \ ]\r\n}"
+        \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\":
+        {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\"\r\n      ]\r\n    },\r\n
+        \   \"virtualMachines\": [],\r\n    \"virtualMachineScaleSets\": [],\r\n    \"availabilitySets\":
+        []\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '586'
+      - '609'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Jul 2022 08:32:58 GMT
+      - Tue, 16 Aug 2022 06:13:14 GMT
       expires:
       - '-1'
       pragma:
