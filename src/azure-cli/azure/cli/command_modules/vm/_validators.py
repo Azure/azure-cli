@@ -2151,6 +2151,7 @@ def _disk_encryption_set_format(cmd, namespace, name):
 
 
 def process_ppg_create_namespace(namespace):
+    validate_tags(namespace)
     """
     The availability zone can be provided only when an intent is provided
     """
