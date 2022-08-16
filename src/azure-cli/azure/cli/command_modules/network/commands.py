@@ -1283,27 +1283,6 @@ def load_command_table(self, _):
 
     # endregion
 
-    # region ServiceEndpoint
-    # with self.command_group('network service-endpoint', network_endpoint_service_sdk) as g:
-    #     g.command('list', 'list')
-
-    # with self.command_group('network service-endpoint policy', network_sepp_sdk) as g:
-        # g.custom_command('create', 'create_service_endpoint_policy')
-        # g.command('delete', 'begin_delete')
-        # g.custom_command('list', 'list_service_endpoint_policies')
-        # g.show_command('show')
-        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_service_endpoint_policy')
-
-    # with self.command_group('network service-endpoint policy-definition', network_sepd_sdk) as g:
-        # g.custom_command('create', 'create_service_endpoint_policy_definition')
-        # g.command('delete', 'begin_delete')
-        # g.command('list', 'list_by_resource_group')
-        # g.show_command('show')
-        # g.generic_update_command('update', custom_func_name='update_service_endpoint_policy_definition',
-        #                          setter_name='begin_create_or_update',
-        #                          setter_arg_name='service_endpoint_policy_definitions')
-    # endregion
-
     # region TrafficManagers
     with self.command_group('network traffic-manager profile', network_tmp_sdk) as g:
         g.custom_command('check-dns', 'check_traffic_manager_name', client_factory=cf_traffic_manager_mgmt_profiles)

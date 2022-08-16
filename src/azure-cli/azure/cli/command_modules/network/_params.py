@@ -1878,7 +1878,6 @@ def load_arguments(self, _):
 
     # endregion
 
-
     # region TrafficManagers
     monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
     with self.argument_context('network traffic-manager profile') as c:
