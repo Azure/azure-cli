@@ -8216,9 +8216,9 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                    sku=sku,
                                    tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
-                                resource_group_name=resource_group_name,
-                                bastion_host_name=bastion_host_name,
-                                parameters=bastion_host)
+                       resource_group_name=resource_group_name,
+                       bastion_host_name=bastion_host_name,
+                       parameters=bastion_host)
 
 
 def list_bastion_host(cmd, resource_group_name=None):
