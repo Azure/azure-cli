@@ -6121,11 +6121,12 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         })
 
         # test creating proximity placement group with intent vm size and available zone
-        self.cmd('ppg create -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2} --zone {zone}',
+        self.cmd('ppg create -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2} --zone {zone} --tags tag=test',
                  checks=[
                      self.check('name', '{ppg1}'),
                      self.check('length(intent.vmSizes)', '2'),
-                     self.check('zones[0]', '{zone}')
+                     self.check('zones[0]', '{zone}'),
+                     self.check('tags', {'tag': 'test'})
                  ])
 
         # test creating proximity placement group with intent vm size
