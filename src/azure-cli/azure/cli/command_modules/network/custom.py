@@ -6753,30 +6753,6 @@ def update_public_ip_prefix(instance, tags=None):
 # endregion
 
 
-# region RouteFilters
-def create_route_filter(cmd, client, resource_group_name, route_filter_name, location=None, tags=None):
-    RouteFilter = cmd.get_models('RouteFilter')
-    return client.begin_create_or_update(resource_group_name, route_filter_name,
-                                         RouteFilter(location=location, tags=tags))
-
-
-def list_route_filters(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-
-    return client.list()
-
-
-def create_route_filter_rule(cmd, client, resource_group_name, route_filter_name, rule_name, access, communities,
-                             location=None):
-    RouteFilterRule = cmd.get_models('RouteFilterRule')
-    return client.begin_create_or_update(resource_group_name, route_filter_name, rule_name,
-                                         RouteFilterRule(access=access, communities=communities,
-                                                         location=location))
-
-# endregion
-
-
 # region RouteTables
 def create_route_table(cmd, resource_group_name, route_table_name, location=None, tags=None,
                        disable_bgp_route_propagation=None):
