@@ -20,7 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
+    cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
