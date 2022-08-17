@@ -609,6 +609,9 @@ def _get_scm_deployment_status_poller(client, resource_group_name, name, scm_dep
     return poller
 
 
+def _force_poller_exit(poller):
+    return poller.result(10)
+
 def _handle_deployment_status_stuck(rg_name, name, deployment_status_url, authorization):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -3939,6 +3942,7 @@ def _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_
 
         ticker.prefix = format_status(states[state_idx])
         ticker.suffix = ""
+        status_indeterminate = False
         print(format_status(states[state_idx]), end="")
         while not poller.done() and (datetime.datetime.utcnow() - start_time).seconds < timeout:
             ticker.tick()
@@ -3949,10 +3953,12 @@ def _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_
                     runtime_start_time = datetime.datetime.utcnow()
                 elif (datetime.datetime.utcnow() - runtime_start_time).seconds >= runtime_start_timeout:
                     # check status from SCM if possible
+                    status_indeterminate = True
                     logger.info("Deployment status stuck on %s for %s seconds. "
                                 "Attempting to check the status via SCM...", status, runtime_start_timeout)
                     _handle_deployment_status_stuck(resource_group_name, name, f"{scm_url}/api/deployments/latest",
                                                     authorization)
+                    _force_poller_exit(poller)
                     ticker.flush()
                     break
             if ((status in states_sequence) and
@@ -3966,9 +3972,9 @@ def _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_
             sleep(polling_period)
 
         status = poller.polling_method().resource().status
-        if poller.done() or runtime_start_time is not None:
+        if poller.done() or status_indeterminate:
             human_readable_status = _get_human_readable_status(status, logs_url, app_url)
-            if runtime_start_time is not None:
+            if status_indeterminate:
                 human_readable_status = "Deployment complete. Please check your SCM site for the status."
             if status in failure_states:
                 print("\n")
