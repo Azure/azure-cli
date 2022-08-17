@@ -6,9 +6,9 @@ set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
 
-# IMAGE should be one of 'centos7', 'ubi8' or 'fedora'
+# IMAGE should be one of 'centos7', 'ubi8', 'ubi9' or 'fedora'
 : "${IMAGE:?IMAGE environment variable not set.}"
-# TAG should be 'centos7', '8.4' or Fedora version number
+# TAG should be RHEL image tag or Fedora version number
 : "${TAG:?TAG environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
