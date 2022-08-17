@@ -134,9 +134,8 @@ def is_sku_available(cmd, sku_info, zone):
             if cmd.supported_api_version(max_api='2017-03-30'):
                 is_available = False
                 break
-            # This SKU is not available only if zonal restriction and all zones are restricted
-            # and skus supporting availability zones are required to show
-            # or regional restriction and the region is restricted
+            # This SKU is only unavailable if all zones are restricted and showing skus supporting availability zones
+            # are enabled or regional restriction and the region is restricted
             if restriction.type == 'Zone' and not (
                     set(sku_info.location_info[0].zones or []) - set(restriction.restriction_info.zones or [])):
                 is_restrict_zone = True
