@@ -4870,7 +4870,6 @@ class OneDeployParams:
 def _build_onedeploy_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
-    deploy_url = deploy_url + "&trackDeploymentProgress=true"
 
     if params.is_async_deployment is not None:
         deploy_url = deploy_url + '&async=' + str(params.is_async_deployment)
@@ -4968,18 +4967,39 @@ def _make_onedeploy_request(params: OneDeployParams):
     body = _get_onedeploy_request_body(params)
     headers = _get_basic_headers(params)
     deploy_url = _build_onedeploy_url(params)
-    # deployment_status_url = _get_onedeploy_status_url(params)
-    try:
-        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
-    except ValueError:
-        raise ResourceNotFoundError('Failed to fetch scm url for app')
+    deployment_status_url = _get_onedeploy_status_url(params)
 
     logger.info("Deployment API: %s", deploy_url)
     response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
 
+    # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
+    # For that, set poll_async_deployment_for_debugging=True
+    poll_async_deployment_for_debugging = True
+
     # check the status of async deployment
-    return _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name, params.slot,
-                                        response, scm_url, headers, timeout=None)
+    if response.status_code == 202 or response.status_code == 200:
+        response_body = None
+        if poll_async_deployment_for_debugging:
+            logger.info('Polling the status of async deployment')
+            response_body = _check_scm_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
+                                                             deployment_status_url, headers, params.timeout)
+            logger.info('Async deployment complete. Server response: %s', response_body)
+        return response_body
+
+    # API not available yet!
+    if response.status_code == 404:
+        raise ResourceNotFoundError("This API isn't available in this environment yet!")
+
+    # check if there's an ongoing process
+    if response.status_code == 409:
+        raise ValidationError("Another deployment is in progress. Please wait until that process is complete before "
+                              "starting a new deployment. You can track the ongoing deployment at {}"
+                              .format(deployment_status_url))
+
+    # check if an error occured during deployment
+    if response.status_code:
+        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
+                       .format(response.status_code, response.text))
 
 
 # OneDeploy
