@@ -1351,7 +1351,6 @@ short-summary: Create a cosmosdb service resource.
 examples:
   - name: Create a cosmosdb service resource.
     text: |
-      az cosmosdb service create --resource-group MyResourceGroup --account-name MyAccount --name "graphApiCompute" --kind "GraphApiCompute" --count 1 --size "Cosmos.D4s"
       az cosmosdb service create --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 3 --size "Cosmos.D4s"
 """
 
@@ -1361,7 +1360,6 @@ short-summary: Update a cosmosdb service resource.
 examples:
   - name: Update a cosmosdb service resource.
     text: |
-      az cosmosdb service update --resource-group MyResourceGroup --account-name MyAccount --name "graphApiCompute" --kind "GraphApiCompute" --count 1
       az cosmosdb service update --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 3
 """
 

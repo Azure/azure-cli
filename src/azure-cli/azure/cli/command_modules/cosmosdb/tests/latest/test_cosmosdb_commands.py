@@ -2189,3 +2189,22 @@ class CosmosDBTests(ScenarioTest):
         assert locations_show['properties']['backupStorageRedundancies'] != None
         assert locations_show['properties']['isResidencyRestricted'] != None
         assert locations_show['properties']['supportsAvailabilityZone'] != None
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_service', location='eastus2')
+    def test_cosmosdb_service(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15)
+        })
+
+        acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
+
+        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
+        assert service_create["name"] == "sqlDedicatedGateway"
+
+        service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()
+        assert service_update["name"] == "sqlDedicatedGateway"
+
+        self.cmd('az cosmosdb service show --name "sqlDedicatedGateway" -a {acc} -g {rg}')
+
+        service_list = self.cmd('az cosmosdb service list -a {acc} -g {rg}').get_output_in_json()
+        assert len(service_list) == 1

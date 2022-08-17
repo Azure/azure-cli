@@ -419,7 +419,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
 
     # ComputeV2 services
-    with self.command_group('cosmosdb service', cosmosdb_service_sdk, client_factory=cf_service, is_preview=True) as g:
+    with self.command_group('cosmosdb service', cosmosdb_service_sdk, client_factory=cf_service) as g:
         g.custom_command('create', 'cli_cosmosdb_service_create', supports_no_wait=True)
         g.custom_command('update', 'cli_cosmosdb_service_update', supports_no_wait=True)
         g.command('list', 'list')

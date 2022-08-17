@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.39.1
+++++++
+
+**CosmosDB**
+
+* Added Service code for CosmosDB
+
 2.39.0
 ++++++
 
