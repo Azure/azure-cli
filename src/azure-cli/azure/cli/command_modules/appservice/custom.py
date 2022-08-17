@@ -508,8 +508,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,
     # it can take a couple of tries before it gets the plan
     for _ in range(5):
-        plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
-                                                 parse_plan_id['name'])
+        try:
+            plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
+                                                     parse_plan_id['name'])
+        except:
+            pass
         if plan_info is not None:
             break
         time.sleep(retry_delay)

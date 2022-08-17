@@ -117,6 +117,64 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[JMESPathCheck('httpsOnly', False)])
 
 
+class LogicAppDeployTest(LiveScenarioTest):
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_logicapp_zip_deploy_e2e(self, resource_group):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
+        storage = self.create_random_name(prefix='logic', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('logicapp create -g {} -n {} -p {} -s {} --os-type windows'.format(resource_group, logicapp_name, plan, storage))
+
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('site_name', logicapp_name),
+        ])
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_linux_logicapp_zip_deploy_e2e(self, resource_group):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
+        storage = self.create_random_name(prefix='logic', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku WS1 --is-linux'.format(resource_group, plan))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('logicapp create -g {} -n {} -p {} -s {} --os-type linux'.format(resource_group, logicapp_name, plan, storage))
+
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('site_name', logicapp_name),
+        ])
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_consumption_logicapp_zip_deploy_e2e(self, resource_group):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
+        storage = self.create_random_name(prefix='logic', length=24)
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type windows'.format(resource_group, logicapp_name, DEFAULT_LOCATION, storage))
+
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('site_name', logicapp_name),
+        ])
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_linux_consumption_logicapp_zip_deploy_e2e(self, resource_group):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
+        storage = self.create_random_name(prefix='logic', length=24)
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type linux'.format(resource_group, logicapp_name, DEFAULT_LOCATION, storage))
+
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('site_name', logicapp_name),
+        ])
+
+
 class LogicAppPlanTest(ScenarioTest):
     def _create_app_service_plan(self, sku, resource_group, plan_name=None, expect_failure=False):
         if plan_name == None:

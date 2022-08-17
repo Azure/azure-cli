@@ -503,3 +503,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)
+        g.custom_command('scale', 'scale_logicapp', exception_handler=ex_handler_factory())
+
+    with self.command_group('logicapp config appsettings', custom_command_type=logicapp_custom) as g:
+        g.custom_command('list', 'get_logicapp_app_settings', exception_handler=empty_on_404)
+        g.custom_command('set', 'update_logicapp_app_settings', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_logicapp_app_settings', exception_handler=ex_handler_factory())
+
+    with self.command_group('logicapp deployment source') as g:
+        g.custom_command('config-zip', 'enable_zip_deploy_functionapp')

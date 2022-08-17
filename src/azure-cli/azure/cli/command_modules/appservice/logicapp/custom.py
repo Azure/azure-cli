@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 from binascii import hexlify
 from os import urandom
 
@@ -11,7 +12,7 @@ from knack.util import CLIError
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
-from azure.cli.core.util import sdk_no_wait, shell_safe_json_parse, get_json_object, ConfiguredDefaultSetter
+from azure.cli.core.util import get_json_object, get_az_user_agent
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
@@ -35,7 +36,13 @@ from azure.cli.command_modules.appservice.custom import (
     _generic_site_operation,
     update_app_settings,
     delete_app_settings,
-    )
+    get_app_settings,
+    is_plan_consumption,
+    upload_zip_to_storage,
+    add_remote_build_app_settings,
+    remove_remote_build_app_settings,
+    _check_zip_deployment_status,
+    show_webapp)
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
@@ -279,7 +286,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if linux_fx_version.strip().lower().startswith('docker|'):
             update_app_settings_new(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
         else:
-            delete_app_settings_new(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
+            delete_logicapp_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])  # test
 
     if pre_warmed_instance_count is not None:
         pre_warmed_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', pre_warmed_instance_count,
@@ -340,9 +347,27 @@ def update_app_settings_new(cmd, resource_group_name, name, settings=None, slot=
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
-def delete_app_settings_new(cmd, resource_group_name, name, setting_names, slot=None):
+def get_logicapp_app_settings(cmd, resource_group_name, name, slot=None):
+    return get_app_settings(cmd, resource_group_name, name, slot)
+
+
+def update_logicapp_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+    settings = settings or []
+    slot_settings = slot_settings or []
+
+    if type(settings) is not list:
+        settings = [settings]
+
+    if type(slot_settings) is not list:
+        slot_settings = [slot_settings]
+
+    return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
+
+
+def delete_logicapp_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     setting_names = setting_names or []
     if type(setting_names) is not list:
         setting_names = [setting_names]
 
     return delete_app_settings(cmd, resource_group_name, name, setting_names, slot)
+
