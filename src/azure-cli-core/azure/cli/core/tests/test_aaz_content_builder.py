@@ -14,41 +14,48 @@ class TestAAZContentBuilder(unittest.TestCase):
         _schema = AAZArgumentsSchema()
 
         # str
-        _schema.name = AAZStrArg()
+        _schema.name = AAZStrArg(nullable=True)
+
+        # object
+        _schema.obj = AAZObjectArg(nullable=True)
+        _schema.obj.prop1 = AAZStrArg()
+
+        _schema.h_obj = AAZObjectArg(nullable=True)
+        _schema.h_obj.prop1 = AAZStrArg()
 
         # dict<str, str>
-        _schema.tags = AAZDictArg()
+        _schema.tags = AAZDictArg(nullable=True)
         _schema.tags.Element = AAZStrArg()
 
         # dict<str, str>
-        _schema.h_tags = AAZDictArg()
+        _schema.h_tags = AAZDictArg(nullable=True)
         _schema.h_tags.Element = AAZStrArg()
 
         # list<str>
-        _schema.permissions = AAZListArg()
+        _schema.permissions = AAZListArg(nullable=True)
         _schema.permissions.Element = AAZStrArg()
 
-        _schema.h_permissions = AAZListArg()
+        _schema.h_permissions = AAZListArg(nullable=True)
         _schema.h_permissions.Element = AAZStrArg()
 
         # list<object>
         _schema.subnets = AAZListArg()
-        _schema.subnets.Element = AAZObjectArg()
+        _schema.subnets.Element = AAZObjectArg(nullable=True)
         _schema.subnets.Element.name = AAZStrArg()
 
         # list<list<str>>
         _schema.adds = AAZListArg()
-        _schema.adds.Element = AAZListArg()
+        _schema.adds.Element = AAZListArg(nullable=True)
         _schema.adds.Element.Element = AAZStrArg()
 
         # dict<str, object>
         _schema.domains = AAZDictArg()
-        _schema.domains.Element = AAZObjectArg()
+        _schema.domains.Element = AAZObjectArg(nullable=True)
         _schema.domains.Element.name = AAZStrArg()
 
         # dict<str, dict<str, str>>
         _schema.conns = AAZDictArg()
-        _schema.conns.Element = AAZDictArg()
+        _schema.conns.Element = AAZDictArg(nullable=True)
         _schema.conns.Element.Element = AAZStrArg()
 
         _schema.actions = AAZListArg()
@@ -76,6 +83,9 @@ class TestAAZContentBuilder(unittest.TestCase):
         _args_schema = self._define_args_schema()
         arg_value = _args_schema(data={
             "name": "a",
+            "obj": {
+                "prop1": "pp1",
+            },
             "tags": {
                 "tag_a": "a",
                 "tag_b": "b",
@@ -118,7 +128,7 @@ class TestAAZContentBuilder(unittest.TestCase):
                 }
             }
         })
-        arg_data = arg_value.to_serialized_data()
+        arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
         schema = AAZObjectType()
         _value = AAZObjectType._ValueCls(
             schema=schema,
@@ -136,6 +146,22 @@ class TestAAZContentBuilder(unittest.TestCase):
             _value.to_serialized_data()['name'] == 'a'
         )
 
+        _builder.set_prop('obj', AAZObjectType, '.obj')
+        _builder.set_prop('hideObj', AAZObjectType, '.h_obj')
+
+        obj = _builder.get('.obj')
+        if obj is not None:
+            obj.set_prop('prop1', AAZStrType, '.prop1')
+
+        hide_obj = _builder.get('.hideObj')
+        if hide_obj:
+            hide_obj.set_prop('prop1', AAZStrType, '.prop1')
+
+        self.assertEqual(
+            _value.to_serialized_data()['obj'], {'prop1': "pp1"}
+        )
+        self.assertTrue('hideObj' not in _value.to_serialized_data())
+
         _builder.set_prop('tags', AAZDictType, '.tags')
         _builder.set_prop('hideTags', AAZDictType, '.h_tags')
 
@@ -147,7 +173,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if hide_tags:
             hide_tags.set_elements(AAZStrType, '.')
 
-        self.assertTrue(_value.to_serialized_data()['tags'] == {'tag_a': 'a', 'tag_b': 'b'})
+        self.assertEqual(_value.to_serialized_data()['tags'], {'tag_a': 'a', 'tag_b': 'b'})
         self.assertTrue('hideTags' not in _value.to_serialized_data())
 
         _builder.set_prop('permissions', AAZListType, '.permissions')
@@ -180,7 +206,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.name')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['subnets'] == [
+        self.assertEqual(_value.to_serialized_data()['properties']['subnets'], [
             {'name': 'net1'},
             {'name': 'net2'}
         ])
@@ -201,7 +227,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['adds'] == [
+        self.assertEqual(_value.to_serialized_data()['properties']['adds'], [
             [{'name': '0'}],
             [{'name': '0'}, {'name': '1'}, {'name': '2'}],
             [{'name': '2'}, {'name': '3'}]
@@ -219,7 +245,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.name')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['domains'] == {
+        self.assertEqual(_value.to_serialized_data()['properties']['domains'], {
             'a': {'name': '0'},
             'b': {'name': '1'},
             'c': {'name': '2'}
@@ -252,18 +278,21 @@ class TestAAZContentBuilder(unittest.TestCase):
             }
         })
 
-        self.assertTrue(_value.to_serialized_data() == {'name': 'a', 'tags': {'tag_a': 'a', 'tag_b': 'b'},
-                                                        'permissions': ['read', 'write'],
-                                                        'properties': {'subnets': [{'name': 'net1'}, {'name': 'net2'}],
-                                                                       'adds': [[{'name': '0'}],
-                                                                                [{'name': '0'}, {'name': '1'},
-                                                                                 {'name': '2'}],
-                                                                                [{'name': '2'}, {'name': '3'}]],
-                                                                       'domains': {'a': {'name': '0'},
-                                                                                   'b': {'name': '1'},
-                                                                                   'c': {'name': '2'}}, 'conns': {
-                                                                'a': {'a1': {'name': '0'}, 'a2': {'name': '1'}},
-                                                                'b': {'b1': {'name': '3'}, 'b2': {'name': '6'}}}}})
+        self.assertEqual(_value.to_serialized_data(),
+                         {'name': 'a',
+                          'obj': {'prop1': 'pp1'},
+                          'tags': {'tag_a': 'a', 'tag_b': 'b'},
+                          'permissions': ['read', 'write'],
+                          'properties': {'subnets': [{'name': 'net1'}, {'name': 'net2'}],
+                                         'adds': [[{'name': '0'}],
+                                                  [{'name': '0'}, {'name': '1'},
+                                                   {'name': '2'}],
+                                                  [{'name': '2'}, {'name': '3'}]],
+                                         'domains': {'a': {'name': '0'},
+                                                     'b': {'name': '1'},
+                                                     'c': {'name': '2'}}, 'conns': {
+                                  'a': {'a1': {'name': '0'}, 'a2': {'name': '1'}},
+                                  'b': {'b1': {'name': '3'}, 'b2': {'name': '6'}}}}})
 
     def _define_instance_value(self):
         from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
@@ -272,24 +301,29 @@ class TestAAZContentBuilder(unittest.TestCase):
         _schema = AAZObjectType()
 
         _schema.name = AAZStrType()
+        _schema.obj = AAZObjectType()
+        _schema.obj.prop1 = AAZStrType()
+        _schema.hideObj = AAZObjectType(nullable=True)
+        _schema.hideObj.prop1 = AAZStrType()
+
         _schema.tags = AAZDictType()
         _schema.tags.Element = AAZStrType()
-        _schema.hideTags = AAZDictType()
+        _schema.hideTags = AAZDictType(nullable=True)
         _schema.hideTags.Element = AAZStrType()
         _schema.permissions = AAZListType()
         _schema.permissions.Element = AAZStrType()
-        _schema.hidePermissions = AAZListType()
+        _schema.hidePermissions = AAZListType(nullable=True)
         _schema.hidePermissions.Element = AAZStrType()
         _schema.properties = AAZObjectType()
         _schema.properties.subnets = AAZListType()
-        _schema.properties.subnets.Element = AAZObjectType()
+        _schema.properties.subnets.Element = AAZObjectType(nullable=True)
         _schema.properties.subnets.Element.name = AAZStrType()
         _schema.properties.adds = AAZListType()
         _schema.properties.adds.Element = AAZListType()
         _schema.properties.adds.Element.Element = AAZObjectType()
         _schema.properties.adds.Element.Element.name = AAZStrType()
         _schema.properties.domains = AAZDictType()
-        _schema.properties.domains.Element = AAZObjectType()
+        _schema.properties.domains.Element = AAZObjectType(nullable=True)
         _schema.properties.domains.Element.name = AAZStrType()
         _schema.properties.conns = AAZDictType()
         _schema.properties.conns.Element = AAZDictType()
@@ -298,6 +332,8 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         value = AAZObject(_schema, data=_schema.process_data({
             'name': 'a',
+            'obj': {'prop1': 'pp1'},
+            'hideObj': {'prop1': 'hp1'},
             'tags': {'tag_a': 'a', 'tag_b': 'b'},
             'hideTags': {'h_tag_a': 'a', 'h_tag_b': 'b'},
             'permissions': ['read', 'write'],
@@ -323,6 +359,9 @@ class TestAAZContentBuilder(unittest.TestCase):
         _args_schema = self._define_args_schema()
         arg_value = _args_schema(data={})
         arg_value.name = 'b'
+
+        arg_value.obj.prop1 = 'p2'
+        arg_value.h_obj.prop1 = 'hh'
 
         arg_value.tags = {
             'tag_a': '2'
@@ -352,12 +391,31 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         _builder = AAZContentBuilder(
             values=[_value],
-            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_value.to_serialized_data())]
+            args=[AAZArgBrowser(
+                arg_value=arg_value, arg_data=arg_value.to_serialized_data(keep_undefined_in_list=True))]
         )
 
         _builder.set_prop('name', AAZStrType, '.name')
 
         self.assertTrue(_value.to_serialized_data()['name'] == 'b')
+
+        _builder.set_prop('obj', AAZObjectType, '.obj')
+        _builder.set_prop('hideObj', AAZObjectType, '.h_obj')
+
+        obj = _builder.get('.obj')
+        if obj is not None:
+            obj.set_prop('prop1', AAZStrType, '.prop1')
+
+        hide_obj = _builder.get('.hideObj')
+        if hide_obj:
+            hide_obj.set_prop('prop1', AAZStrType, '.prop1')
+
+        self.assertEqual(
+            _value.to_serialized_data()['obj'], {'prop1': "p2"}
+        )
+        self.assertEqual(
+            _value.to_serialized_data()['hideObj'], {'prop1': "hh"}
+        )
 
         _builder.set_prop('tags', AAZDictType, '.tags')
         _builder.set_prop('hideTags', AAZDictType, '.h_tags')
@@ -401,7 +459,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.name')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['subnets'] == [
+        self.assertEqual(_value.to_serialized_data()['properties']['subnets'], [
             {'name': 'net'},
             {'name': 'net2'},
             {'name': 'net3'},
@@ -423,7 +481,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['adds'] == [
+        self.assertEqual(_value.to_serialized_data()['properties']['adds'], [
             [{'name': '0'}, {'name': '1'}],
             [{'name': '1'}, {'name': '2'}],
             [{'name': '2'}, {'name': '3'}],
@@ -442,7 +500,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.name')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['domains'] == {
+        self.assertEqual(_value.to_serialized_data()['properties']['domains'], {
             'a': {'name': 'a'},
             'b': {'name': '1'},
             'c': {'name': '2'},
@@ -465,7 +523,7 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
-        self.assertTrue(_value.to_serialized_data()['properties']['conns'] == {
+        self.assertEqual(_value.to_serialized_data()['properties']['conns'], {
             'a': {
                 'f1': {'name': 'f1'},
             },
@@ -478,8 +536,10 @@ class TestAAZContentBuilder(unittest.TestCase):
             }
         })
 
-        self.assertTrue(_value.to_serialized_data() == {
+        self.assertEqual(_value.to_serialized_data(), {
             'name': 'b',
+            'obj': {'prop1': 'p2'},
+            'hideObj': {'prop1': 'hh'},
             'tags': {'tag_a': '2'},
             'hideTags': {'h_tag_a': '2', 'h_tag_b': 'b'},
             'permissions': ['write'],
@@ -494,10 +554,184 @@ class TestAAZContentBuilder(unittest.TestCase):
             }
         })
 
+    def test_aaz_content_builder_for_update_with_nullable(self):
+        from azure.cli.core.aaz._content_builder import AAZContentBuilder
+        from azure.cli.core.aaz._arg_browser import AAZArgBrowser
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZUndefined
+
+        _value = self._define_instance_value()
+
+        _args_schema = self._define_args_schema()
+        arg_value = _args_schema(data={})
+
+        arg_value.name = None
+        arg_value.obj = None
+        arg_value.h_obj = None
+        arg_value.tags = None
+        arg_value.h_tags = None
+        arg_value.permissions = None
+        arg_value.h_permissions = None
+
+        arg_value.subnets[0] = None
+        arg_value.domains['a'] = None
+
+        arg_value.adds[0] = None
+        arg_value.adds[4] = None
+
+        arg_value.conns['a'] = None
+        arg_value.conns['d'] = None
+
+        _builder = AAZContentBuilder(
+            values=[_value],
+            args=[AAZArgBrowser(
+                arg_value=arg_value,
+                arg_data=arg_value.to_serialized_data(keep_undefined_in_list=True))
+            ]
+        )
+
+        _builder.set_prop('name', AAZStrType, '.name')
+        self.assertTrue('name' not in _value.to_serialized_data())
+
+        _builder.set_prop('obj', AAZObjectType, '.obj')
+        _builder.set_prop('hideObj', AAZObjectType, '.h_obj')
+
+        obj = _builder.get('.obj')
+        if obj is not None:
+            obj.set_prop('prop1', AAZStrType, '.prop1')
+
+        hide_obj = _builder.get('.hideObj')
+        if hide_obj:
+            hide_obj.set_prop('prop1', AAZStrType, '.prop1')
+
+        self.assertTrue('obj' not in _value.to_serialized_data())
+        self.assertTrue(_value.to_serialized_data()['hideObj'] is None)
+
+        _builder.set_prop('tags', AAZDictType, '.tags')
+        _builder.set_prop('hideTags', AAZDictType, '.h_tags')
+
+        tags = _builder.get('.tags')
+        if tags is not None:
+            tags.set_elements(AAZStrType, '.')
+
+        hide_tags = _builder.get('.hideTags')
+        if hide_tags:
+            hide_tags.set_elements(AAZStrType, '.')
+
+        self.assertTrue('tags' not in _value.to_serialized_data())
+        self.assertTrue(_value.to_serialized_data()['hideTags'] is None)
+
+        _builder.set_prop('permissions', AAZListType, '.permissions')
+        _builder.set_prop('hidePermissions', AAZListType, '.h_permissions')
+
+        permissions = _builder.get('.permissions')
+        if permissions:
+            permissions.set_elements(AAZStrType, '.')
+
+        hide_permissions = _builder.get('.hidePermissions')
+        if hide_permissions:
+            hide_permissions.set_elements(AAZStrType, '.')
+
+        self.assertTrue('permissions' not in _value.to_serialized_data())
+        self.assertTrue(_value.to_serialized_data()['hidePermissions'] is None)
+
+        _builder.set_prop('properties', AAZObjectType)
+
+        properties = _builder.get('.properties')
+        if properties:
+            properties.set_prop('subnets', AAZListType, '.subnets')
+
+        subnets = _builder.get('.properties.subnets')
+        if subnets:
+            subnets.set_elements(AAZObjectType, '.')
+
+        elements = _builder.get('.properties.subnets[]')
+        if elements:
+            elements.set_prop('name', AAZStrType, '.name')
+
+        self.assertEqual(_value.to_serialized_data()['properties']['subnets'], [
+            None,
+            {'name': 'net2'},
+        ])
+
+        properties = _builder.get('.properties')
+        if properties:
+            properties.set_prop('domains', AAZDictType, '.domains')
+
+        domains = _builder.get('.properties.domains')
+        if domains:
+            domains.set_elements(AAZObjectType, '.')
+
+        elements = _builder.get('.properties.domains{}')
+        if elements:
+            elements.set_prop('name', AAZStrType, '.name')
+
+        self.assertEqual(_value.to_serialized_data()['properties']['domains'], {
+            'a': None,
+            'b': {'name': '1'},
+            'c': {'name': '2'}
+        })
+
+        properties = _builder.get('.properties')
+        if properties:
+            properties.set_prop('adds', AAZListType, '.adds')
+
+        adds = _builder.get('.properties.adds')
+        if adds:
+            adds.set_elements(AAZListType, '.')
+
+        elements = _builder.get('.properties.adds[]')
+        if elements:
+            elements.set_elements(AAZObjectType)
+
+        elements = _builder.get('.properties.adds[][]')
+        if elements:
+            elements.set_prop('name', AAZStrType, '.')
+
+        self.assertEqual(_value.to_serialized_data(keep_undefined_in_list=True)['properties']['adds'], [
+            AAZUndefined,
+            [{'name': '0'}, {'name': '1'}, {'name': '2'}],
+            [{'name': '2'}, {'name': '3'}],
+            AAZUndefined,
+            AAZUndefined,
+        ])
+
+        self.assertEqual(_value.to_serialized_data()['properties']['adds'], [
+            [{'name': '0'}, {'name': '1'}, {'name': '2'}],
+            [{'name': '2'}, {'name': '3'}],
+        ])
+
+        properties = _builder.get('.properties')
+        if properties:
+            properties.set_prop('conns', AAZDictType, '.conns')
+
+        conns = _builder.get('.properties.conns')
+        if conns:
+            conns.set_elements(AAZDictType, '.')
+
+        elements = _builder.get('.properties.conns{}')
+        if elements:
+            elements.set_elements(AAZObjectType)
+
+        elements = _builder.get('.properties.conns{}{}')
+        if elements:
+            elements.set_prop('name', AAZStrType, '.')
+
+        self.assertEqual(_value.to_serialized_data()['properties']['conns'], {
+            'b': {'b1': {'name': '3'}}
+        })
+
+        self.assertEqual(_value.to_serialized_data(), {
+            'hideObj': None, 'hideTags': None, 'hidePermissions': None,
+            'properties': {
+                'subnets': [None, {'name': 'net2'}],
+                'adds': [[{'name': '0'}, {'name': '1'}, {'name': '2'}], [{'name': '2'}, {'name': '3'}]],
+                'domains': {'a': None, 'b': {'name': '1'}, 'c': {'name': '2'}}, 'conns': {'b': {'b1': {'name': '3'}}}}
+        })
+
     def test_aaz_content_builder_for_polymorphism(self):
         from azure.cli.core.aaz._content_builder import AAZContentBuilder
         from azure.cli.core.aaz._arg_browser import AAZArgBrowser
-        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType
 
         _args_schema = self._define_args_schema()
         arg_value = _args_schema(data={
@@ -537,7 +771,7 @@ class TestAAZContentBuilder(unittest.TestCase):
                 }
             ]
         })
-        arg_data = arg_value.to_serialized_data()
+        arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
         schema = AAZObjectType()
         _value = AAZObjectType._ValueCls(
             schema=schema,

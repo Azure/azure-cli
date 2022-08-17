@@ -2,14 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import time
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "eastus2"
+VNET_LOCATION = "eastus2"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -35,7 +36,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
             self.cmd("netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION))
             self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s %s %s" %
                      (account_name, pool_name, LOCATION, POOL_DEFAULT, tag))
-
+        if self.is_live or self.in_recording:
+            time.sleep(60)
         if snapshot_id:
             return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
                             "--subnet %s %s --snapshot-id %s" %
@@ -46,7 +48,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                             "--subnet %s %s" % (account_name, pool_name, volume_name1, LOCATION, VOLUME_DEFAULT,
                                                 file_path, vnet_name, subnet_name, tag)).get_output_in_json()
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_snapshots(self):
         # create volume
@@ -73,7 +74,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 0
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_create_volume_from_snapshot(self):
         # create volume
@@ -102,7 +102,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                              snapshot_id=snapshot["snapshotId"], volume_only=volume_only)
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_revert_volume_from_snapshot(self):
         # create volume
@@ -131,7 +130,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 1
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_list_snapshots(self):
         # create volume
@@ -153,7 +151,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
                                  (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 2
 
-    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', additional_tags={'owner': 'cli_test'})
     def test_get_snapshot(self):
         # create volume

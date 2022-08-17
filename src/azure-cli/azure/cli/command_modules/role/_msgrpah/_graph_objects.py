@@ -48,7 +48,6 @@ _group_property_map = {
     'description': 'description'
 }
 
-
 _object_type_to_property_map = {
     'application': _application_property_map,
     'user': _user_property_map,

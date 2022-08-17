@@ -73,6 +73,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
+CONST_NETWORK_PLUGIN_NONE = "none"
 
 # consts for addons
 # http application routing
@@ -113,6 +114,10 @@ CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = "azureKeyvaultSecretsProvider
 CONST_SECRET_ROTATION_ENABLED = "enableSecretRotation"
 CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 
+# azure keyvault kms
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -127,8 +132,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
-CONST_ACR_DOMAIN_NAME = ".azurecr.io"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
 
 
 # consts for decorator pattern

@@ -226,7 +226,8 @@ def cf_blob_service(cli_ctx, kwargs):
         account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
 
-    return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
+    return t_blob_service(account_url=account_url, credential=credential,
+                          connection_timeout=kwargs.pop('connection_timeout', None), **client_kwargs)
 
 
 def get_credential(kwargs):
@@ -250,7 +251,8 @@ def cf_blob_client(cli_ctx, kwargs):
         kwargs.pop('blob_name')
         return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
                                            credential=credential,
-                                           snapshot=kwargs.pop('snapshot', None))
+                                           snapshot=kwargs.pop('snapshot', None),
+                                           connection_timeout=kwargs.pop('connection_timeout', None))
     if 'blob_url' in kwargs:
         kwargs.pop('blob_url')
 
@@ -402,4 +404,5 @@ def cf_share_directory_client(cli_ctx, kwargs):
 
 
 def cf_share_file_client(cli_ctx, kwargs):
-    return cf_share_client(cli_ctx, kwargs).get_file_client(file_path=kwargs.pop('file_path'))
+    return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_name')).\
+        get_file_client(file_name=kwargs.pop('file_name'))

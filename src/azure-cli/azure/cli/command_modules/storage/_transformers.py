@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from uuid import UUID
 
+from uuid import UUID
 from dateutil import parser
 from knack.log import get_logger
 from knack.util import todict, to_camel_case
@@ -471,3 +471,24 @@ def transform_share_list_handle(result):
         item["handleId"] = item.id
         delattr(item, "id")
     return result
+
+
+def transform_file_show_result(result):
+    result = todict(result)
+    new_result = {
+        "content": result.pop('content', ""),
+        "properties": {
+            "contentLength": result.pop('contentLength', None),
+            "contentRange": result.pop('contentRange', None),
+            "contentSettings": result.pop('contentSettings', None),
+            "copy": result.pop('copy', None),
+            "etag": result.pop('etag', None),
+            "lastModified": result.pop('lastModified', None),
+            "serverEncrypted": result.pop('serverEncrypted', None)
+        }
+    }
+    if new_result['properties']['contentSettings'] and new_result['properties']['contentSettings']['contentMd5']:
+        new_result['properties']['contentSettings']['contentMd5'] = _encode_bytes(new_result['properties']
+                                                                                  ['contentSettings']['contentMd5'])
+    new_result.update(result)
+    return new_result

@@ -117,9 +117,9 @@ examples:
 
 helps['sql vm start-assessment'] = """
 type: command
-short-summary: Starts SQL Best Practice Assessment on SQL virtual machine
+short-summary: Starts SQL best practice assessment on SQL virtual machine
 examples:
-  - name: Starts SQL Best Practice Assessment.
+  - name: Starts SQL best practice assessment.
     text: >
         az sql vm start-assessment -n sqlvm -g myresourcegroup
 """
@@ -158,16 +158,19 @@ examples:
   - name: Update a SQL virtual machine billing tag to DR.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --license-type DR
-  - name: Update a SQL virtual machine to disable SQL Best Practice Assessment.
+  - name: Update a SQL virtual machine to disable SQL best practice assessment.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --enable-assessment false
-  - name: Update a SQL virtual machine to disable schedule for SQL Best Practice Assessment.
+  - name: Update a SQL virtual machine to disable schedule for SQL best practice assessment.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --enable-assessment-schedule false
-  - name: Update a SQL virtual machine to enable schedule with weekly interval for SQL Best Practice Assessment.
+  - name: Update a SQL virtual machine to enable schedule with weekly interval for SQL best practice assessment when VM is already associated with a Log Analytics workspace.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --enable-assessment-schedule true --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL Best Practice Assessment.
+        az sql vm update -n sqlvm -g myresourcegroup --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --enable-assessment-schedule true --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true
 """

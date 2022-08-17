@@ -520,6 +520,8 @@ examples:
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Standard -c 100
   - name: Create an elastic pool with GeneralPurpose edition, Gen4 hardware and 1 vcore.
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
+  - name: Create an elastic pool with Hyperscale edition, Gen5 hardware, 4 vcore and 2 high availability replicas.
+    text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 4 --ha-replicas 2
 """
 
 helps['sql elastic-pool list-editions'] = """
@@ -557,6 +559,8 @@ examples:
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z
   - name: Update elastic pool with zone redundancy explicitly disabled
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
+  - name: Update elastic pool with 2 high availability replicas
+    text: az sql elastic-pool update -g mygroup -s myserver -n mypool --ha-replicas 2
 """
 
 helps['sql failover-group'] = """
@@ -738,12 +742,12 @@ short-summary: Updates an existing managed instance Active Directory administrat
 
 helps['sql mi ad-only-auth'] = """
 type: group
-short-summary: Manage a Managed Instance's Azure Active Directly only settings.
+short-summary: Manage a Managed Instance's Azure Active Directory only settings.
 """
 
 helps['sql mi ad-only-auth enable'] = """
 type: command
-short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
+short-summary: Enable Azure Active Directory only Authentication for this Managed Instance.
 examples:
   - name: Enable Active Directory only authentication for a managed instance
     text: az sql mi ad-only-auth enable --resource-group mygroup --name myMI
@@ -751,7 +755,7 @@ examples:
 
 helps['sql mi ad-only-auth disable'] = """
 type: command
-short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
+short-summary: Disable Azure Active Directory only Authentication for this Managed Instance.
 examples:
   - name: Disable Active Directory only authentication for a managed instance
     text: az sql mi ad-only-auth disable --resource-group mygroup --name myMI
@@ -759,7 +763,7 @@ examples:
 
 helps['sql mi ad-only-auth get'] = """
 type: command
-short-summary: Get a specific Azure Active Directly only Authentication property.
+short-summary: Get a specific Azure Active Directory only Authentication property.
 examples:
   - name: Get Active Directory only authentication status for a managed instance
     text: az sql mi ad-only-auth get --resource-group mygroup --name myMI
@@ -918,6 +922,14 @@ short-summary: Create a managed database.
 examples:
   - name: Create a managed database with specified collation
     text: az sql midb create -g mygroup --mi myinstance -n mymanageddb --collation Latin1_General_100_CS_AS_SC
+"""
+
+helps['sql midb update'] = """
+type: command
+short-summary: Update a managed database.
+examples:
+  - name: Update a managed database with specified tags
+    text: az sql midb update -g mygroup --mi myinstance -n mymanageddb --tags tag1="value1"
 """
 
 helps['sql midb delete'] = """
@@ -1138,12 +1150,12 @@ short-summary: Update an existing server Active Directory administrator.
 
 helps['sql server ad-only-auth'] = """
 type: group
-short-summary: Manage Azure Active Directly only Authentication settings for this Server.
+short-summary: Manage Azure Active Directory only Authentication settings for this Server.
 """
 
 helps['sql server ad-only-auth enable'] = """
 type: command
-short-summary: Enable Azure Active Directly only Authentication for this Server.
+short-summary: Enable Azure Active Directory only Authentication for this Server.
 examples:
   - name: Enable Active Directory only authentication for a sql server
     text: az sql server ad-only-auth enable --resource-group mygroup --name myServer
@@ -1151,7 +1163,7 @@ examples:
 
 helps['sql server ad-only-auth disable'] = """
 type: command
-short-summary: Disable Azure Active Directly only Authentication for this Server.
+short-summary: Disable Azure Active Directory only Authentication for this Server.
 examples:
   - name: Disable Active Directory only authentication for a sql server
     text: az sql server ad-only-auth disable --resource-group mygroup --name myServer
@@ -1159,7 +1171,7 @@ examples:
 
 helps['sql server ad-only-auth get'] = """
 type: command
-short-summary: Get a specific Azure Active Directly only Authentication property.
+short-summary: Get a specific Azure Active Directory only Authentication property.
 examples:
   - name: Get Active Directory only authentication status for a sql server
     text: az sql server ad-only-auth get --resource-group mygroup --name myServer
@@ -1487,7 +1499,7 @@ short-summary: Manage a server's virtual network rules.
 
 helps['sql server vnet-rule create'] = """
 type: command
-short-summary: Create a virtual network rule to allows access to an Azure SQL server.
+short-summary: Create a virtual network rule to allows access to an Azure SQL Server.
 
 examples:
   - name: Create a vnet rule by providing the subnet id.

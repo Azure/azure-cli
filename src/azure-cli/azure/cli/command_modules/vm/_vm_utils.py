@@ -419,6 +419,18 @@ def parse_shared_gallery_image_id(image_reference):
     return image_info.group(1), image_info.group(2)
 
 
+def is_compute_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    compute_gallery_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                            r'galleries/[^/]*/images/.*$', re.IGNORECASE)
+    if compute_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
 def is_community_gallery_image_id(image_reference):
     if not image_reference:
         return False

@@ -15,7 +15,8 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
                                                       _parse_image_argument,
-                                                      process_disk_or_snapshot_create_namespace,
+                                                      process_disk_create_namespace,
+                                                      process_snapshot_create_namespace,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi,
@@ -86,15 +87,24 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
+        self.assertFalse(src_restore_point)
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(None, 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
+        self.assertFalse(src_restore_point)
+        self.assertFalse(src_blob_uri)
+
+        test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/qinkaiwu-test/providers/Microsoft.Compute/restorePointCollections/vm_rpc/restorePoints/vm_rp'
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(None, 'tg1', test_data)
+        self.assertFalse(src_disk)
+        self.assertFalse(src_snapshot)
+        self.assertEqual(src_restore_point, test_data)
         self.assertFalse(src_blob_uri)
 
     def test_source_storage_account_err_case(self):
@@ -108,11 +118,13 @@ class TestActions(unittest.TestCase):
         # action (should throw)
         kwargs = {'namespace': np}
         with self.assertRaises(CLIError):
-            process_disk_or_snapshot_create_namespace(cmd, **kwargs)
+            process_disk_create_namespace(cmd, **kwargs)
+            process_snapshot_create_namespace(cmd, **kwargs)
 
         # with blob uri, should be fine
         np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
-        process_disk_or_snapshot_create_namespace(cmd, **kwargs)
+        process_disk_create_namespace(cmd, **kwargs)
+        process_snapshot_create_namespace(cmd, **kwargs)
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long

@@ -17,10 +17,12 @@ from ._resource_config import (
     SOURCE_RESOURCES_PARAMS,
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
+    TARGET_RESOURCES_CONNECTION_STRING,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
     TARGET_SUPPORT_SERVICE_ENDPOINT,
+    TARGET_SUPPORT_PRIVATE_ENDPOINT
 )
 from ._addon_factory import AddonFactory
 
@@ -38,7 +40,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         required_args = []
         for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
             id_arg = '\'--id\'' if enable_id else '\'--source-id\''
-            context.argument(arg, options_list=content.get('options'), type=str,
+            context.argument(arg, configured_default=content.get('configured_default'),
+                             options_list=content.get('options'), type=str,
                              help='{}. Required if {} is not specified.'.format(content.get('help'), id_arg))
             required_args.append(content.get('options')[0])
 
@@ -129,11 +132,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     def add_secret_store_argument(context):
         context.argument('key_vault_id', options_list=['--vault-id'], help='The id of key vault to store secret value')
 
-    def add_service_endpoint_argument(context):
-        context.argument('service_endpoint', options_list=['--service-endpoint'], arg_type=get_three_state_flag(),
-                         default=None, help='Connect target service by service endpoint. '
-                         'Source resource must be in the VNet and target SKU must support service endpoint feature. '
-                         'More virtual network solution(private link) for connection can be found on Azure Portal.')
+    def add_vnet_block(context, target):
+        if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
+            c.ignore('service_endpoint')
+        else:
+            context.argument('service_endpoint', options_list=['--service-endpoint'], arg_type=get_three_state_flag(),
+                             default=None, arg_group='NetworkSolution',
+                             help='Connect target service by service endpoint. Source resource must be in the VNet'
+                             ' and target SKU must support service endpoint feature.')
+
+        if target not in TARGET_SUPPORT_PRIVATE_ENDPOINT:
+            c.ignore('private_endpoint')
+        else:
+            context.argument('private_endpoint', options_list=['--private-endpoint'], arg_type=get_three_state_flag(),
+                             default=None, arg_group='NetworkSolution',
+                             help='Connect target service by private endpoint. '
+                             'The private endpoint in source virtual network must be created ahead.')
+
+    def add_connection_string_argument(context, source, target):
+        if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
+            context.argument('store_in_connection_string', options_list=['--config-connstr'],
+                             arg_type=get_three_state_flag(), default=False, is_preview=True,
+                             help='Store configuration into connection strings, '
+                                  'only could be used together with dotnet client_type')
+        else:
+            context.ignore('store_in_connection_string')
 
     def add_confluent_kafka_argument(context):
         context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')
@@ -181,18 +204,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
                 add_secret_store_argument(c)
-                add_service_endpoint_argument(c)
-                if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
-                    c.ignore('service_endpoint')
+                add_vnet_block(c, target)
+                add_connection_string_argument(c, source, target)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
                 add_source_resource_block(c, source)
                 add_auth_block(c, source, target)
                 add_secret_store_argument(c)
-                add_service_endpoint_argument(c)
-                if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
-                    c.ignore('service_endpoint')
+                add_vnet_block(c, target)
+                add_connection_string_argument(c, source, target)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka

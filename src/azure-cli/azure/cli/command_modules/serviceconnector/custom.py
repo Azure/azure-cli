@@ -13,6 +13,7 @@ from azure.cli.core.azclierror import (
     AzureResponseError
 )
 from ._resource_config import (
+    CLIENT_TYPE,
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
     TARGET_RESOURCES
@@ -66,14 +67,15 @@ def connection_list_support_types(cmd, client,
     for target in supported_target_resources:
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target)
-        auth_types = [item.value for item in auth_types]
-        client_types = [item.value for item in client_types]
-        results.append({
-            'source': source.value,
-            'target': target.value,
-            'auth_types': auth_types,
-            'client_types': client_types
-        })
+        if auth_types and client_types:
+            auth_types = [item.value for item in auth_types]
+            client_types = [item.value for item in client_types]
+            results.append({
+                'source': source.value,
+                'target': target.value,
+                'auth_types': auth_types,
+                'client_types': client_types
+            })
 
     return results
 
@@ -146,7 +148,7 @@ def connection_validate(cmd, client,
     return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
-def connection_create(cmd, client,  # pylint: disable=too-many-locals
+def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=too-many-statements
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None,
                       target_resource_group=None, target_id=None,
@@ -155,6 +157,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       service_endpoint=None,
+                      private_endpoint=None,
+                      store_in_connection_string=False,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None,                                             # Resource.WebApp
@@ -188,6 +192,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
 
+    if store_in_connection_string:
+        if client_type == CLIENT_TYPE.Dotnet.value:
+            client_type = CLIENT_TYPE.DotnetConnectionString.value
+        else:
+            logger.warning('client_type is not dotnet, ignore "--config-connstr"')
+
     parameters = {
         'target_service': {
             "type": "AzureResource",
@@ -219,6 +229,11 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         parameters['v_net_solution'] = {
             'type': 'serviceEndpoint'
         }
+    if private_endpoint:
+        client = set_user_token_header(client, cmd.cli_ctx)
+        parameters['v_net_solution'] = {
+            'type': 'privateLink'
+        }
 
     if enable_csi:
         parameters['target_service']['resource_properties'] = {
@@ -228,12 +243,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
 
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
-        target_id, auth_info = addon.provision()
+        target_id, default_auth_info = addon.provision()
         parameters['target_service'] = {
             "type": "AzureResource",
             "id": target_id
         }
-        parameters['auth_info'] = auth_info
+        parameters['auth_info'] = auth_info or default_auth_info
         logger.warning('Start creating the connection')
 
         try:
@@ -263,6 +278,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       key_vault_id=None,
                       service_endpoint=None,
+                      private_endpoint=None,
+                      store_in_connection_string=False,
                       no_wait=False,
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
@@ -303,13 +320,20 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
 
+    client_type = client_type or linker.get('clientType')
+    if store_in_connection_string:
+        if client_type == CLIENT_TYPE.Dotnet.value:
+            client_type = CLIENT_TYPE.DotnetConnectionString.value
+        else:
+            logger.warning('client_type is not dotnet, ignore "--config-connstr"')
+
     parameters = {
         'target_service': linker.get('targetService'),
         'auth_info': auth_info,
         'secret_store': {
             'key_vault_id': key_vault_id,
         },
-        'client_type': client_type or linker.get('clientType'),
+        'client_type': client_type,
         # scope can be updated in container app while cannot be updated in aks due to some limitations
         'scope': scope or linker.get('scope')
     }
@@ -332,7 +356,13 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         parameters['v_net_solution'] = {
             'type': 'serviceEndpoint'
         }
+    if private_endpoint:
+        parameters['v_net_solution'] = {
+            'type': 'privateLink'
+        }
     elif service_endpoint is False and linker.get('vNetSolution').get('type') == 'serviceEndpoint':
+        parameters['v_net_solution'] = None
+    elif private_endpoint is False and linker.get('vNetSolution').get('type') == 'privateLink':
         parameters['v_net_solution'] = None
 
     return auto_register(sdk_no_wait, no_wait,

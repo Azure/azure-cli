@@ -6,10 +6,13 @@
 from ctypes import POINTER, Structure, Union, byref, c_ulong, create_unicode_buffer, sizeof, windll
 from ctypes.wintypes import BOOL, DWORD, FILETIME, LPVOID, WCHAR
 
-from .proxy import Proxy
+from azure.cli.command_modules.acs.proxy import Proxy
 
 LPWSTR = POINTER(WCHAR)
 HINTERNET = LPVOID
+
+# TODO: this file is deprecated, will remove this after container service commands (acs) are removed during
+# the next breaking change window.
 
 
 class WinProxy(Proxy):
