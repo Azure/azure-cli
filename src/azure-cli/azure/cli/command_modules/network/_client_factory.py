@@ -224,14 +224,6 @@ def cf_dns_mgmt_record_sets(cli_ctx, _):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
 
 
-def cf_route_filters(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_filters
-
-
-def cf_route_filter_rules(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_filter_rules
-
-
 def cf_service_community(cli_ctx, _):
     return network_client_factory(cli_ctx).bgp_service_communities
 
