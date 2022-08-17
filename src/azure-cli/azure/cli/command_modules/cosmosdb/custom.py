@@ -824,7 +824,8 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
                                        partition_key_path,
                                        default_ttl,
                                        indexing_policy,
-                                       conflict_resolution_policy):
+                                       conflict_resolution_policy,
+                                       analytical_storage_ttl):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
         return False
 
@@ -843,6 +844,9 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
     if conflict_resolution_policy is not None:
         gremlin_graph_resource.conflict_resolution_policy = conflict_resolution_policy
 
+    if analytical_storage_ttl is not None:
+        gremlin_graph_resource.analytical_storage_ttl = analytical_storage_ttl
+
     return True
 
 
@@ -856,7 +860,8 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
                                       throughput=None,
                                       max_throughput=None,
-                                      conflict_resolution_policy=None):
+                                      conflict_resolution_policy=None,
+                                      analytical_storage_ttl=None):
     """Creates an Azure Cosmos DB Gremlin graph """
     gremlin_graph_resource = GremlinGraphResource(id=graph_name)
 
@@ -864,7 +869,8 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                        partition_key_path,
                                        default_ttl,
                                        indexing_policy,
-                                       conflict_resolution_policy)
+                                       conflict_resolution_policy,
+                                       analytical_storage_ttl)
 
     options = _get_options(throughput, max_throughput)
 
@@ -885,7 +891,8 @@ def cli_cosmosdb_gremlin_graph_update(client,
                                       database_name,
                                       graph_name,
                                       default_ttl=None,
-                                      indexing_policy=None):
+                                      indexing_policy=None,
+                                      analytical_storage_ttl=None):
     """Updates an Azure Cosmos DB Gremlin graph """
     logger.debug('reading Gremlin graph')
     gremlin_graph = client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
@@ -896,12 +903,14 @@ def cli_cosmosdb_gremlin_graph_update(client,
     gremlin_graph_resource.default_ttl = gremlin_graph.resource.default_ttl
     gremlin_graph_resource.unique_key_policy = gremlin_graph.resource.unique_key_policy
     gremlin_graph_resource.conflict_resolution_policy = gremlin_graph.resource.conflict_resolution_policy
+    gremlin_graph_resource.analytical_storage_ttl = gremlin_graph.resource.analytical_storage_ttl
 
     if _populate_gremlin_graph_definition(gremlin_graph_resource,
                                           None,
                                           default_ttl,
                                           indexing_policy,
-                                          None):
+                                          None,
+                                          analytical_storage_ttl):
         logger.debug('replacing Gremlin graph')
 
     gremlin_graph_create_update_resource = GremlinGraphCreateUpdateParameters(
