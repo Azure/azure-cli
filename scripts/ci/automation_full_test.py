@@ -107,10 +107,16 @@ jobs = {
         }
 
 
-def run_git_command(cmd):
-    out = subprocess.run(cmd)
-    if out.returncode:
-        raise RuntimeError(f"{cmd} failed")
+def run_command(cmd, check_return_code=False):
+    error_flag = False
+    logger.info(cmd)
+    try:
+        out = subprocess.run(cmd, check=True)
+        if check_return_code and out.returncode:
+            raise RuntimeError(f"{cmd} failed")
+    except subprocess.CalledProcessError:
+        error_flag = True
+    return error_flag
 
 
 def git_restore(file_path):
@@ -131,16 +137,16 @@ def git_push(message):
     if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
-        run_git_command(["git", "add", "*/command_modules/*"])
-        run_git_command(["git", "commit", "-m", message])
+        run_command(["git", "add", "*/command_modules/*"], check_return_code=True)
+        run_command(["git", "commit", "-m", message], check_return_code=True)
     except RuntimeError as ex:
         raise ex
     retry = 3
     while retry >= 0:
         try:
-            run_git_command(["git", "fetch", "azclibot"])
-            run_git_command(["git", "pull", "--rebase"])
-            run_git_command(["git", "push"])
+            run_command(["git", "fetch", "azclibot"], check_return_code=True)
+            run_command(["git", "pull", "--rebase"], check_return_code=True)
+            run_command(["git", "push"], check_return_code=True)
 
             logger.info("git push all recording files")
             break
@@ -149,16 +155,6 @@ def git_push(message):
                 raise ex
             retry -= 1
             time.sleep(10)
-
-
-def run_azdev(cmd):
-    error_flag = False
-    logger.info(cmd)
-    try:
-        subprocess.run(cmd, check=True)
-    except subprocess.CalledProcessError:
-        error_flag = True
-    return error_flag
 
 
 def get_failed_tests(test_result_fp):
@@ -180,12 +176,12 @@ def get_failed_tests(test_result_fp):
 
 
 def process_test(cmd, azdev_test_result_fp, live_rerun=False):
-    error_flag = run_azdev(cmd)
+    error_flag = run_command(cmd)
     if not error_flag or not live_rerun:
         return error_flag
     # drop the original `--pytest-args` and add new arguments
     cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
-    error_flag = run_azdev(cmd)
+    error_flag = run_command(cmd)
     # restore original recording yaml file for failed test in live run
     if error_flag:
         failed_tests = get_failed_tests(azdev_test_result_fp)
