@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Show the detail of an Azure network virtual appliance sku.
+
+    :example: Show the detail of an Azure network virtual appliance sku.
+        az network virtual-appliance sku show --name "barracudasdwanrelease"
     """
 
     _aaz_info = {

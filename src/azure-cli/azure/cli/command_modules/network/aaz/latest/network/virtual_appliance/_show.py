@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Show the detail of an Azure network virtual appliance.
+
+    :example: Show the detail of an Azure network virtual appliance.
+        az network virtual-appliance show -n MyName -g MyRG
     """
 
     _aaz_info = {

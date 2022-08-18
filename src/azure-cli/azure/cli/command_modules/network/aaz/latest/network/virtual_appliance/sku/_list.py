@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all Azure network virtual appliance sku.
+
+    :example: List all Azure network virtual appliance sku.
+        az network virtual-appliance sku list
     """
 
     _aaz_info = {

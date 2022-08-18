@@ -18,6 +18,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an Azure network virtual appliance site.
+
+    :example: Delete an Azure network virtual appliance site.
+        az network virtual-appliance site delete -n MySite -g MyRG --appliance-name MyName -y
     """
 
     _aaz_info = {

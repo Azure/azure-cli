@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all Azure network virtual appliance.
+
+    :example: List all Azure network virtual appliances.
+        az network virtual-appliance list -g MyRG
     """
 
     _aaz_info = {
