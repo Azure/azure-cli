@@ -218,7 +218,7 @@ AZURE_API_PROFILES = {
             'autoscale_settings': '2015-04-01',
             'baseline': '2018-09-01',
             'baselines': '2019-03-01',
-            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings': '2021-05-01-preview',
             'diagnostic_settings_category': '2017-05-01-preview',
             'event_categories': '2015-04-01',
             'guest_diagnostics_settings': '2018-06-01-preview',
