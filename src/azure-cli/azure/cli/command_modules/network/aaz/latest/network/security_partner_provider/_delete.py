@@ -14,6 +14,7 @@ from azure.cli.core.aaz import *
 @register_command(
     "network security-partner-provider delete",
     is_preview=True,
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an Azure security partner provider.

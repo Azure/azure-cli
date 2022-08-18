@@ -4873,35 +4873,6 @@ def _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight):
         else:
             raise CLIError(
                 'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
-
-
-def create_local_gateway(cmd, resource_group_name, local_network_gateway_name, gateway_ip_address,
-                         location=None, tags=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, no_wait=False):
-    AddressSpace, LocalNetworkGateway, BgpSettings = cmd.get_models(
-        'AddressSpace', 'LocalNetworkGateway', 'BgpSettings')
-    client = network_client_factory(cmd.cli_ctx).local_network_gateways
-    local_gateway = LocalNetworkGateway(
-        local_network_address_space=AddressSpace(address_prefixes=(local_address_prefix or [])),
-        location=location, tags=tags, gateway_ip_address=gateway_ip_address)
-    if bgp_peering_address or asn or peer_weight:
-        local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
-                                                 peer_weight=peer_weight)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, local_network_gateway_name, local_gateway)
-
-
-def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, tags=None):
-    _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
-
-    if gateway_ip_address is not None:
-        instance.gateway_ip_address = gateway_ip_address
-    if local_address_prefix is not None:
-        instance.local_network_address_space.address_prefixes = local_address_prefix
-    if tags is not None:
-        instance.tags = tags
-    return instance
 # endregion
 
 

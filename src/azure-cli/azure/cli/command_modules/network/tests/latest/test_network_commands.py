@@ -4624,7 +4624,7 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         ])
         # test vpn connection show-device-config-script
         self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"', checks=[
-                self.check('length(@)', 10581)
+                self.check('length(@)', 10588)
             ])
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
