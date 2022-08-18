@@ -2,9 +2,10 @@ ARG tag=35
 
 FROM fedora:${tag} AS build-env
 ARG cli_version=dev
+ARG devel_package=python3-devel
 
 RUN dnf update -y
-RUN dnf install -y wget rpm-build gcc libffi-devel python3-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
+RUN dnf install -y wget rpm-build gcc libffi-devel $devel_package openssl-devel make bash coreutils diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 

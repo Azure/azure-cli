@@ -6,10 +6,12 @@ set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
 
-# IMAGE should be one of 'centos7', 'ubi8', 'ubi9' or 'fedora'
+# IMAGE should be one of 'centos7', 'ubi' or 'fedora'
 : "${IMAGE:?IMAGE environment variable not set.}"
 # TAG should be RHEL image tag or Fedora version number
 : "${TAG:?TAG environment variable not set.}"
+# DEVEL_PACKAGE should be python-devel package name
+: "${DEVEL_PACKAGE:?DEVEL_PACKAGE environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
@@ -18,6 +20,7 @@ docker build \
     --target build-env \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg tag=${TAG} \
+    --build-arg devel_package=${DEVEL_PACKAGE} \
     -f ./scripts/release/rpm/${IMAGE}.dockerfile \
     -t azure/azure-cli:${IMAGE}-builder \
     .
@@ -26,6 +29,7 @@ docker build \
 docker build \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg tag=${TAG} \
+    --build-arg devel_package=${DEVEL_PACKAGE} \
     -f ./scripts/release/rpm/${IMAGE}.dockerfile \
     -t azure/azure-cli:${IMAGE} \
     .

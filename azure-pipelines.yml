@@ -637,21 +637,25 @@ jobs:
   strategy:
     matrix:
       Red Hat Universal Base Image 8:
-        image: ubi8
+        image: ubi
         tag: 8.4
         artifact: rpm-ubi8
+        devel_package: python39-devel
       Red Hat Universal Base Image 9:
-        image: ubi9
-        tag: 9.0.0-1604
+        image: ubi
+        tag: 9.0.0
         artifact: rpm-ubi9
+        devel_package: python3-devel
       Fedora35:
         image: fedora
         tag: 35
         artifact: rpm-fedora35
+        devel_package: python3-devel
       Fedora36:
         image: fedora
         tag: 36
         artifact: rpm-fedora36
+        devel_package: python3-devel
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
@@ -691,7 +695,7 @@ jobs:
       Red Hat Universal Base Image 9:
         artifact: rpm-ubi9
         distro: el9
-        image: registry.access.redhat.com/ubi9/ubi:9.0.0-1604
+        image: registry.access.redhat.com/ubi9/ubi:9.0.0
         python_package: python3
         python_cmd: python3
         pip_cmd: pip3
