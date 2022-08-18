@@ -3929,7 +3929,6 @@ def _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_
                 sleep(polling_period)
         ticker.flush()
 
-        app_url = _get_url(cmd, resource_group_name, name, slot)
         logs_url = f'{scm_url}/api/deployments/{deployment_status_id}/log'
         states = [StatusEnum.BUILD_REQUEST_RECEIVED, StatusEnum.BUILD_PENDING, StatusEnum.BUILD_IN_PROGRESS]
         states_sequence = [StatusEnum.BUILD_ABORTED,
