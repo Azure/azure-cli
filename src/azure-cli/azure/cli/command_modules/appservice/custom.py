@@ -577,7 +577,7 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
 
 
-def _get_human_readable_status(status: str, logs_url, app_url):
+def _get_human_readable_status(status: str, logs_url):
     from azure.mgmt.web.models import DeploymentBuildStatus as StatusEnum
     status_map = {
         StatusEnum.BUILD_ABORTED: "Request to build the application was aborted, please try again",
@@ -590,7 +590,7 @@ def _get_human_readable_status(status: str, logs_url, app_url):
                                                 "restart your web app for it to take effect",
         StatusEnum.RUNTIME_STARTING: "Your application is starting…",
         StatusEnum.RUNTIME_FAILED: f"Your application failed to start. Build logs: {logs_url} ",
-        StatusEnum.RUNTIME_SUCCESSFUL: f"Your application is running {app_url}",
+        StatusEnum.RUNTIME_SUCCESSFUL: f"Your application is running.",
     }
 
     return status_map.get(status) or f"Status: {status}"
@@ -641,7 +641,15 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for app')
 
-    zip_url = scm_url + '/api/zipdeploy?isAsync=true&trackDeploymentProgress=true'
+    app = get_webapp(cmd, resource_group_name, name, slot)
+    if not app:
+        raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+    is_linux = app.reserved
+
+    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
+
+    if is_linux:
+        zip_url = zip_url + '&trackDeploymentProgress=true'
 
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
@@ -660,7 +668,12 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
-    return _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_url, authorization, timeout)
+    if is_linux:
+        return _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_url, authorization, timeout)
+    else:
+        deployment_status_url = scm_url + '/api/deployments/latest'
+        return _check_scm_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                authorization, timeout)
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
@@ -3973,7 +3986,7 @@ def _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_
 
         status = poller.polling_method().resource().status
         if poller.done() or status_indeterminate:
-            human_readable_status = _get_human_readable_status(status, logs_url, app_url)
+            human_readable_status = _get_human_readable_status(status, logs_url)
             if status_indeterminate:
                 human_readable_status = "Deployment complete. Please check your SCM site for the status."
             if status in failure_states:
