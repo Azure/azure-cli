@@ -590,7 +590,7 @@ def _get_human_readable_status(status: str, logs_url):
                                                 "restart your web app for it to take effect",
         StatusEnum.RUNTIME_STARTING: "Your application is starting…",
         StatusEnum.RUNTIME_FAILED: f"Your application failed to start. Build logs: {logs_url} ",
-        StatusEnum.RUNTIME_SUCCESSFUL: f"Your application is running.",
+        StatusEnum.RUNTIME_SUCCESSFUL: "Your application is running.",
     }
 
     return status_map.get(status) or f"Status: {status}"
@@ -611,6 +611,7 @@ def _get_scm_deployment_status_poller(client, resource_group_name, name, scm_dep
 
 def _force_poller_exit(poller):
     return poller.result(10)
+
 
 def _handle_deployment_status_stuck(rg_name, name, deployment_status_url, authorization):
     import requests
@@ -665,15 +666,22 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
-        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        try:
+            res = requests.post(zip_url,
+                                data=zip_content,
+                                headers=headers,
+                                verify=not should_disable_connection_verify())
+        except requests.exceptions.ConnectionError as e:
+            err_msg = (f"Failed to complete zip deploy with error: \n{str(e)}. \n\nPlease check your app's "
+                       "networking restrictions or consider using a different deployment method.")
+            raise UnclassifiedUserFault(err_msg) from e
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     if is_linux:
         return _check_zip_deployment_status(cmd, resource_group_name, name, slot, res, scm_url, authorization, timeout)
-    else:
-        deployment_status_url = scm_url + '/api/deployments/latest'
-        return _check_scm_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                authorization, timeout)
+    deployment_status_url = scm_url + '/api/deployments/latest'
+    return _check_scm_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                            authorization, timeout)
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
