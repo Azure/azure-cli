@@ -103,7 +103,7 @@ type: command
 short-summary: Scale a logic app.
 examples:
   - name: Scale a logic app.
-    text: az logicapp scale --name {myAppName} --resource-group {myRG} --subscription {mySubscription} --min-instances 2 --max-instances 
+    text: az logicapp scale --name {myAppName} --resource-group {myRG} --subscription {mySubscription} --min-instances 2 --max-instances 4
     crafted: true
 """
 
