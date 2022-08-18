@@ -3213,9 +3213,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
         # used for displaying stacks
         def to_dict(self):
-            return {"runtime": self.name,
-                    "version": self.version,
-                    "supported_functions_versions": self.supported_func_versions}
+            d = {"runtime": self.name,
+                 "version": self.version,
+                 "supported_functions_versions": self.supported_func_versions}
+            if self.linux:
+                d["linux_fx_version"] = self.site_config_dict.linux_fx_version
+            return d
 
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2"}
