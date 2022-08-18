@@ -511,7 +511,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         try:
             plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
                                                      parse_plan_id['name'])
-        except:
+        except:  # pylint: disable=bare-except
             pass
         if plan_info is not None:
             break
@@ -1989,9 +1989,10 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
     if elastic_scale is not None or max_elastic_worker_count is not None:
         if sku is None:
             sku = instance.sku.name
-        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
-            raise ValidationError("--number-of-workers and --elastic-scale can only be used on premium V2/V3 SKUs. "
-                                  "Use command help to see all available SKUs")
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3", "WorkflowStandard"]:
+            raise ValidationError("--number-of-workers and --elastic-scale can only "
+                                  "be used on premium V2/V3 or workflow SKUs. "
+                                  "Use command help to see all available SKUs.")
 
     if elastic_scale is not None:
         # TODO use instance.elastic_scale_enabled once the ASP client factories are updated

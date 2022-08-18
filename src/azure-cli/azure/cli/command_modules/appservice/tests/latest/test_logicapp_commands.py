@@ -116,6 +116,71 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd(f'logicapp create -g {resource_group} -n {logicapp_name} -p {plan} -s {storage_account} --https-only', checks=[JMESPathCheck('httpsOnly', True)])
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[JMESPathCheck('httpsOnly', False)])
 
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_logicapp_config_appsettings_e2e(self, resource_group):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        storage = self.create_random_name(prefix='logicstorage', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('appservice plan list -g {}'.format(resource_group))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+
+        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
+                 checks=[
+                         JMESPathCheck('state', 'Running'),
+                         JMESPathCheck('name', logicapp_name),
+                         JMESPathCheck('hostNames[0]', logicapp_name + '.azurewebsites.net')
+                 ]
+        )
+
+        # update through key value pairs
+        self.cmd('logicapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, logicapp_name)).assert_with_checks([
+            JMESPathCheck("length([?name=='s1'])", 1),
+            JMESPathCheck("length([?name=='s2'])", 1),
+            JMESPathCheck("length([?name=='s3'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1),
+            JMESPathCheck("length([?value=='bar'])", 1),
+            JMESPathCheck("length([?value=='bar2'])", 1)
+        ])
+
+        # show
+        result = self.cmd('logicapp config appsettings list -g {} -n {}'.format(
+            resource_group, logicapp_name)).get_output_in_json()
+        s2 = next((x for x in result if x['name'] == 's2'))
+        self.assertEqual(s2['name'], 's2')
+        self.assertEqual(s2['slotSetting'], False)
+        self.assertEqual(s2['value'], 'bar')
+        # delete
+        self.cmd('logicapp config appsettings delete -g {} -n {} --setting-names s1 s2'
+                 .format(resource_group, logicapp_name)).assert_with_checks([
+                     JMESPathCheck("length([?name=='s3'])", 1),
+                     JMESPathCheck("length([?name=='s1'])", 0),
+                     JMESPathCheck("length([?name=='s2'])", 0)])
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_logicapp_scale_e2e(self, resource_group):
+        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        storage = self.create_random_name(prefix='logicstorage', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('appservice plan update -g {} -n {} --m 5 --elastic-scale'.format(resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(resource_group))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+
+        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
+                 checks=[
+                         JMESPathCheck('state', 'Running'),
+                         JMESPathCheck('name', logicapp_name),
+                         JMESPathCheck('hostNames[0]', logicapp_name + '.azurewebsites.net')
+                 ]
+        )
+
+        # update through key value pairs
+        self.cmd('logicapp scale -g {} -n {} --min-instances 2 --max-instances 4'.format(resource_group, logicapp_name)).assert_with_checks([
+            JMESPathCheck("functionAppScaleLimit", 4),
+            JMESPathCheck("minimumElasticInstanceCount", 2),
+        ])
+
 
 class LogicAppDeployTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
@@ -302,7 +367,6 @@ class LogicAppOnLinux(ScenarioTest):
 
 
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
-
 
 
 if __name__ == '__main__':

@@ -2,17 +2,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-import time
+# pylint: disable=unused-argument
 from binascii import hexlify
 from os import urandom
 
 from knack.log import get_logger
-from knack.util import CLIError
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
-from azure.cli.core.util import get_json_object, get_az_user_agent
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
@@ -30,19 +27,11 @@ from azure.cli.command_modules.appservice.custom import (
     try_create_application_insights,
     _set_remote_or_local_git, show_app,
     create_app_service_plan,
-    validate_range_of_int_flag,
     get_site_configs,
-    validate_and_convert_to_int,
     _generic_site_operation,
     update_app_settings,
     delete_app_settings,
-    get_app_settings,
-    is_plan_consumption,
-    upload_zip_to_storage,
-    add_remote_build_app_settings,
-    remove_remote_build_app_settings,
-    _check_zip_deployment_status,
-    show_webapp)
+    get_app_settings)
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
@@ -262,88 +251,34 @@ def show_logicapp(cmd, resource_group_name, name):
     return show_app(cmd, resource_group_name=resource_group_name, name=name)
 
 
-def scale_logicapp(cmd, resource_group_name, name, instance_count, slot=None):
-    return update_site_configs(cmd, resource_group_name, name,
-                               number_of_workers=instance_count, slot=slot)
+def scale_logicapp(cmd, resource_group_name, name, minimum_instance_count=None, maximum_instance_count=None, slot=None):
+    return update_logicapp_scale(cmd=cmd,
+                                 resource_group_name=resource_group_name,
+                                 name=name,
+                                 slot=slot,
+                                 function_app_scale_limit=maximum_instance_count,
+                                 minimum_elastic_instance_count=minimum_instance_count)
 
 
-def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
-                        windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
-                        python_version=None, net_framework_version=None,
-                        java_version=None, java_container=None, java_container_version=None,
-                        remote_debugging_enabled=None, web_sockets_enabled=None,
-                        always_on=None, auto_heal_enabled=None,
-                        use32_bit_worker_process=None,
-                        min_tls_version=None,
-                        http20_enabled=None,
-                        app_command_line=None,
-                        ftps_state=None,
-                        generic_configurations=None):
+def update_logicapp_scale(cmd, resource_group_name, name, slot=None,
+                          function_app_scale_limit=None,
+                          minimum_elastic_instance_count=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
-    if linux_fx_version:
-        if linux_fx_version.strip().lower().startswith('docker|'):
-            update_app_settings_new(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
-        else:
-            delete_logicapp_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])  # test
-
-    if pre_warmed_instance_count is not None:
-        pre_warmed_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', pre_warmed_instance_count,
-                                                               min_val=0, max_val=20)
     import inspect
     frame = inspect.currentframe()
-    bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
-    int_flags = ['pre_warmed_instance_count', 'number_of_workers']
+
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
 
     for arg in args[3:]:
-        if arg in int_flags and values[arg] is not None:
-            values[arg] = validate_and_convert_to_int(arg, values[arg])
-        if arg != 'generic_configurations' and values.get(arg, None):
-            setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
-
-    generic_configurations = generic_configurations or []
-
-    # https://github.com/Azure/azure-cli/issues/14857
-    updating_ip_security_restrictions = False
-
-    result = {}
-    for s in generic_configurations:
-        try:
-            json_object = get_json_object(s)
-            for config_name in json_object:
-                if config_name.lower() == 'ip_security_restrictions':
-                    updating_ip_security_restrictions = True
-            result.update(json_object)
-        except CLIError:
-            config_name, value = s.split('=', 1)
-            result[config_name] = value
-
-    for config_name, value in result.items():
-        if config_name.lower() == 'ip_security_restrictions':
-            updating_ip_security_restrictions = True
-        setattr(configs, config_name, value)
-
-    if not updating_ip_security_restrictions:
-        setattr(configs, 'ip_security_restrictions', None)
+        if values.get(arg, None):
+            setattr(configs, arg, values[arg])
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
 
 def update_app_settings_new(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
-    settings = settings or []
-    slot_settings = slot_settings or []
-
-    if type(settings) is not list:
-        settings = [settings]
-
-    if type(slot_settings) is not list:
-        slot_settings = [slot_settings]
-
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
@@ -352,22 +287,8 @@ def get_logicapp_app_settings(cmd, resource_group_name, name, slot=None):
 
 
 def update_logicapp_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
-    settings = settings or []
-    slot_settings = slot_settings or []
-
-    if type(settings) is not list:
-        settings = [settings]
-
-    if type(slot_settings) is not list:
-        slot_settings = [slot_settings]
-
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
 def delete_logicapp_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
-    setting_names = setting_names or []
-    if type(setting_names) is not list:
-        setting_names = [setting_names]
-
     return delete_app_settings(cmd, resource_group_name, name, setting_names, slot)
-
