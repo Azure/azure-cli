@@ -5965,6 +5965,30 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_update_gallery_permissions_', location='eastus2euap')
+    def test_update_gallery_permissions(self, resource_group):
+        self.kwargs.update({
+            'gallery1': self.create_random_name('gallery1', 15),
+            'gallery2': self.create_random_name('gallery2', 15)
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery1} --permissions Community '
+                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+                 checks=[
+                     self.check('sharingProfile.permissions', 'Community')
+                 ])
+        # update gallery from community to private
+        self.cmd('sig share reset --gallery-name {gallery1} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
+        # update gallery from private to community
+        self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
+                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+                 checks=[
+                     self.check('sharingProfile.permissions', 'Community')
+                 ])
+
 
 class VMGalleryApplication(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
