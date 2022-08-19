@@ -24,6 +24,7 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
+# pylint: disable=unused-argument, not-an-iterable, too-many-statements
 
 
 logger = get_logger(__name__)
@@ -346,8 +347,10 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     identity = None
     if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
         identity = get_springcloud_identity(source_id, source_type.value)
-    if source_type in {RESOURCE.WebApp}:
+    elif source_type in {RESOURCE.WebApp}:
         identity = get_webapp_identity(source_id)
+    elif source_type in {RESOURCE.ContainerApp}:
+        identity = get_containerapp_identity(source_id)
     object_id = identity.get('principalId')
     identity_info = run_cli_cmd(
         'az ad sp show --id {0}'.format(object_id))
@@ -630,6 +633,24 @@ def get_webapp_identity(source_id):
         while (identity is None and cnt < 5):
             identity = run_cli_cmd(
                 'az webapp identity show --ids {}'.format(source_id)).get('identity')
+            time.sleep(3)
+            cnt += 1
+    return identity
+
+
+def get_containerapp_identity(source_id):
+    logger.warning('Checking if Container App enables System Identity...')
+    identity = run_cli_cmd(
+        'az containerapp show --ids {}'.format(source_id)).get('identity')
+    if (identity is None or "SystemAssigned" not in identity.get('type')):
+        # assign system identity for spring-cloud
+        logger.warning('Enabling Container App System Identity...')
+        run_cli_cmd(
+            'az containerapp identity assign --ids {} --system-assigned'.format(source_id))
+        cnt = 0
+        while (identity is None and cnt < 5):
+            identity = run_cli_cmd(
+                'az containerapp identity show --ids {}'.format(source_id)).get('identity')
             time.sleep(3)
             cnt += 1
     return identity
