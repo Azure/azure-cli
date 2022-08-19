@@ -20,8 +20,9 @@ from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
+from ._client_factory import cf_mysql_flexible_replica
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
-    GITHUB_ACTION_PATH
+    resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
 
 logger = get_logger(__name__)
@@ -354,3 +355,49 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         files.append(f)
 
     return files
+
+
+def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
+    if not yes:
+        user_confirmation(
+            "Updating major version in server {} is irreversible. The action you're about to take can't be undone. "
+            "Going further will initiate major version upgrade to the selected version on this server."
+            .format(server_name), yes=yes)
+
+    instance = client.get(resource_group_name, server_name)
+    if instance.sku.tier == 'Burstable':
+        raise CLIError("Major version update is not supported for the Burstable pricing tier.")
+
+    current_version = int(instance.version.split('.')[0])
+    if current_version >= int(version):
+        raise CLIError("The version to upgrade to must be greater than the current version.")
+
+    if isinstance(client, MySqlServersOperations):
+        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+        mysql_version_map = {
+            '8': '8.0.21',
+        }
+        version_mapped = mysql_version_map[version]
+    else:
+        # pending postgres
+        version_mapped = version
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        current_replica_version = int(replica.version.split('.')[0])
+        if current_replica_version < int(version):
+            raise CLIError("Primary server version must not be greater than replica server version. "
+                           "First upgrade {} server version to {} and try again."
+                           .format(replica.name, version))
+
+    parameters = {
+        'version': version_mapped
+    }
+
+    return resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
+    )

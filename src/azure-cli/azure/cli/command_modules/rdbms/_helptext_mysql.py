@@ -454,3 +454,11 @@ examples:
   - name: List log files for 'testsvr' less than 30Kb in size.
     text: az mysql flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
 """
+
+helps['mysql flexible-server upgrade'] = """
+type: command
+short-summary: Upgrade the major version of a flexible server.
+examples:
+  - name: Upgrade server 'testsvr' to MySQL major version 8.
+    text: az mysql flexible-server upgrade -g testgroup -n testsvr -v 8
+"""
