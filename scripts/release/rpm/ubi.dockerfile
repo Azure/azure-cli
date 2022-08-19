@@ -1,10 +1,10 @@
 # Red Hat Universal Base Image 8: https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e
 # Red Hat Universal Base Image 9: https://catalog.redhat.com/software/containers/ubi9/ubi/615bcf606feffc5384e8452e
 
-ARG tag=8.4
+ARG image=registry.access.redhat.com/ubi8/ubi:8.4
 ARG devel_package=python39-devel
 
-FROM registry.access.redhat.com/ubi8/ubi:${tag} AS build-env
+FROM ${image} AS build-env
 ARG cli_version=dev
 
 RUN yum update -y
@@ -21,7 +21,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 
-FROM registry.access.redhat.com/ubi8/ubi:${tag} AS execution-env
+FROM ${image} AS execution-env
 
 RUN yum update -y
 RUN yum install -y python39

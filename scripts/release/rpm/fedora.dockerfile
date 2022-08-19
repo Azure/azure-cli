@@ -1,6 +1,6 @@
-ARG tag=35
+ARG image=fedora:35
 
-FROM fedora:${tag} AS build-env
+FROM ${image} AS build-env
 ARG cli_version=dev
 ARG devel_package=python3-devel
 
@@ -16,7 +16,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 
-FROM fedora:${tag} AS execution-env
+FROM ${image} AS execution-env
 
 COPY --from=build-env /azure-cli-dev.rpm ./
 RUN rpm -i ./azure-cli-dev.rpm && \

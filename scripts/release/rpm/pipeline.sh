@@ -6,10 +6,10 @@ set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
 
-# IMAGE should be one of 'centos7', 'ubi' or 'fedora'
+# DOCKER_FILE should be one of 'ubi' or 'fedora'
+: "${DOCKER_FILE:?DOCKER_FILE environment variable not set.}"
+# IMAGE should be RHEL or Fedora image url
 : "${IMAGE:?IMAGE environment variable not set.}"
-# TAG should be RHEL image tag or Fedora version number
-: "${TAG:?TAG environment variable not set.}"
 # DEVEL_PACKAGE should be python-devel package name
 : "${DEVEL_PACKAGE:?DEVEL_PACKAGE environment variable not set.}"
 
@@ -19,19 +19,19 @@ CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/
 docker build \
     --target build-env \
     --build-arg cli_version=${CLI_VERSION} \
-    --build-arg tag=${TAG} \
+    --build-arg image=${IMAGE} \
     --build-arg devel_package=${DEVEL_PACKAGE} \
-    -f ./scripts/release/rpm/${IMAGE}.dockerfile \
-    -t azure/azure-cli:${IMAGE}-builder \
+    -f ./scripts/release/rpm/${DOCKER_FILE}.dockerfile \
+    -t azure/azure-cli:${DOCKER_FILE}-builder \
     .
 
 # Continue the previous build, and create a container that has the current azure-cli build but not the source code.
 docker build \
     --build-arg cli_version=${CLI_VERSION} \
-    --build-arg tag=${TAG} \
+    --build-arg image=${IMAGE} \
     --build-arg devel_package=${DEVEL_PACKAGE} \
-    -f ./scripts/release/rpm/${IMAGE}.dockerfile \
-    -t azure/azure-cli:${IMAGE} \
+    -f ./scripts/release/rpm/${DOCKER_FILE}.dockerfile \
+    -t azure/azure-cli:${DOCKER_FILE} \
     .
 
 # Extract the built RPM so that it can be distributed independently.

@@ -637,23 +637,23 @@ jobs:
   strategy:
     matrix:
       Red Hat Universal Base Image 8:
-        image: ubi
-        tag: 8.4
+        docker_file: ubi
+        image: registry.access.redhat.com/ubi8/ubi:8.4
         artifact: rpm-ubi8
         devel_package: python39-devel
       Red Hat Universal Base Image 9:
-        image: ubi
-        tag: 9.0.0
+        docker_file: ubi
+        image: registry.access.redhat.com/ubi9/ubi:9.0.0
         artifact: rpm-ubi9
         devel_package: python3.9-devel
       Fedora35:
-        image: fedora
-        tag: 35
+        docker_file: ubi
+        image: fedora:35
         artifact: rpm-fedora35
         devel_package: python3-devel
       Fedora36:
-        image: fedora
-        tag: 36
+        docker_file: ubi
+        image: fedora:36
         artifact: rpm-fedora36
         devel_package: python3-devel
   steps:
