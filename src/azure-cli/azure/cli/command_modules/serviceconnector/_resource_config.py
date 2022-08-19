@@ -645,7 +645,7 @@ AUTH_TYPE_PARAMS = {
 SUPPORTED_AUTH_TYPE = {
     RESOURCE.WebApp: {
         RESOURCE.Postgres: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
-        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],
@@ -673,7 +673,7 @@ SUPPORTED_AUTH_TYPE = {
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
-        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],
@@ -728,8 +728,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.ContainerApp: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
-        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Postgres: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],

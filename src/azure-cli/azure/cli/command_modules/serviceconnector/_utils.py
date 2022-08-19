@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+from unittest import skip
 from knack.log import get_logger
 from knack.util import todict
 from msrestazure.tools import parse_resource_id
@@ -12,6 +13,12 @@ from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core._profile import Profile
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.util import random_string
+from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 from ._resource_config import (
     SOURCE_RESOURCES_USERTOKEN,
     TARGET_RESOURCES_USERTOKEN,
@@ -93,7 +100,6 @@ def run_cli_cmd(cmd, retry=0):
 
 def set_user_token_header(client, cli_ctx):
     '''Set user token header to work around OBO'''
-    from azure.cli.core._profile import Profile
 
     # pylint: disable=protected-access
     # HACK: set custom header to work around OBO
@@ -314,60 +320,169 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
     return auth_info
 
 
-def enable_mi_for_db_linker(cli_ctx, source_id, target_id, auth_info, source_type, target_type):
-    from azure.cli.core._profile import Profile
+def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type):
+    cli_ctx = cmd.cli_ctx
+    tenant_id = Profile(cli_ctx=cli_ctx).get_subscription().get("tenantId")
+    login_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
+    # Get login user info
+    user_info = run_cli_cmd('az ad user show --id {}'.format(login_user))
+    user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
+        else user_info.get('id')
+    if user_object_id is None:
+        raise Exception(
+            "no object id found for user {}".format(login_user))
 
-    if(target_type in {RESOURCE.Postgres} and auth_info['auth_type'] == 'systemAssignedIdentity'):
-        # enable source mi
-        identity = None
-        if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
-            identity = get_springcloud_identity(source_id, source_type)
-        if source_type in {RESOURCE.WebApp}:
-            identity = get_webapp_identity(source_id)
-        object_id = identity.get('principalId')
-        client_id = run_cli_cmd(
-            'az ad sp show --id {0}'.format(object_id)).get('appId')
+    # return if connection is not for db mi
+    if auth_info['auth_type'] not in {'systemAssignedIdentity'} \
+        or target_type not in {
+            RESOURCE.Postgres,
+            RESOURCE.PostgresFlexible,
+            # RESOURCE.Mysql,
+            # RESOURCE.MysqlFlexible,
+            # RESOURCE.Sql
+    }:
+        return
+    # enable source mi
+    identity = None
+    if source_type in {RESOURCE.SpringCloudDeprecated, RESOURCE.SpringCloud}:
+        identity = get_springcloud_identity(source_id, source_type.value)
+    if source_type in {RESOURCE.WebApp}:
+        identity = get_webapp_identity(source_id)
+    object_id = identity.get('principalId')
+    identity_info = run_cli_cmd(
+        'az ad sp show --id {0}'.format(object_id))
+    client_id = identity_info.get('appId')
+    aad_user = identity_info.get('displayName') or generate_random_string(
+        prefix="aad_" + target_type.value + '_')
 
-        # Get login user info
-        account_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
-        user_info = run_cli_cmd('az ad user show --id {}'.format(account_user))
-        user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
-            else user_info.get('id')
-        if user_object_id is None:
-            raise Exception(
-                "no object id found for user {}".format(account_user))
-        # Set login user as db aad admin
-        set_user_admin_if_not(target_id, account_user, user_object_id)
+    # enable target aad authentication
+    enable_target_aad_auth(cmd, target_id, target_type, tenant_id)
 
-        # create an aad user in db
-        aaduser = generate_random_string(
-            prefix="aad_" + target_type.value + '_')
-        create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, client_id)
+    # Set login user as db aad admin
+    if target_type == RESOURCE.Postgres:
+        set_user_admin_if_not(target_id, target_type,
+                              login_user, user_object_id)
+    elif target_type == RESOURCE.PostgresFlexible:
+        set_user_admin_pg_flex(cmd, target_id, target_type,
+                               login_user, user_object_id, tenant_id)
 
-        return {
-            'auth_type': 'secret',
-            'name': aaduser,
-            'secret_info': {
-                'secret_type': 'rawValue'
-            }
+    # create an aad user in db
+    if(target_type in {RESOURCE.Postgres, RESOURCE.PostgresFlexible} and auth_info['auth_type'] == 'systemAssignedIdentity'):
+        create_aad_user_in_pg(cli_ctx, target_id,
+                              target_type, aad_user, client_id)
+
+    return {
+        'auth_type': 'secret',
+        'name': aad_user,
+        'secret_info': {
+            'secret_type': 'rawValue'
         }
+    }
 
 
-def set_user_admin_if_not(target_id, account_user, user_object_id):
+def enable_target_aad_auth(cmd, target_id, target_type, tenant_id):
+    if target_type == RESOURCE.PostgresFlexible:
+        # enable pg aad auth
+        # location: "Southeast Asia"
+
+        target_segments = parse_resource_id(target_id)
+        sub = target_segments.get('subscription')
+        rg = target_segments.get('resource_group')
+        server = target_segments.get('name')
+        master_template = ArmTemplateBuilder()
+        master_template.add_resource({
+            'type': "Microsoft.DBforPostgreSQL/flexibleServers",
+            'apiVersion': '2022-03-08-privatepreview',
+            'name': server,
+            'location': "East US",
+            'properties': {
+                'authConfig': {
+                    'activeDirectoryAuthEnabled': True,
+                    'tenantId': tenant_id
+                },
+                'createMode': "Update"
+            },
+        })
+
+        template = master_template.build()
+        # parameters = master_template.build_parameters()
+
+        # deploy ARM template
+        deployment_name = 'pg_deploy_' + random_string(32)
+        client = get_mgmt_service_client(
+            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+        DeploymentProperties = cmd.get_models(
+            'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        properties = DeploymentProperties(
+            template=template, parameters={}, mode='incremental')
+        Deployment = cmd.get_models(
+            'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        LongRunningOperation(cmd.cli_ctx)(
+            client.begin_create_or_update(rg, deployment_name, deployment))
+
+
+def set_user_admin_pg_flex(cmd, target_id, target_type, login_user, user_object_id, tenant_id):
+
+    if target_type == RESOURCE.PostgresFlexible:
+        target_segments = parse_resource_id(target_id)
+        sub = target_segments.get('subscription')
+        rg = target_segments.get('resource_group')
+        server = target_segments.get('name')
+        master_template = ArmTemplateBuilder()
+        master_template.add_resource({
+            'type': "Microsoft.DBforPostgreSQL/flexibleServers/administrators",
+            'apiVersion': '2022-03-08-privatepreview',
+            'name': server+"/"+user_object_id,
+            'location': "East US",
+            'properties': {
+                'principalName': login_user,
+                'principalType': 'User',
+                'tenantId': tenant_id,
+                'createMode': "Update"
+            },
+        })
+
+        template = master_template.build()
+        # parameters = master_template.build_parameters()
+
+        # deploy ARM template
+        deployment_name = 'pg_addAdmins_' + random_string(32)
+        client = get_mgmt_service_client(
+            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+        DeploymentProperties = cmd.get_models(
+            'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        properties = DeploymentProperties(
+            template=template, parameters={}, mode='incremental')
+        Deployment = cmd.get_models(
+            'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        LongRunningOperation(cmd.cli_ctx)(
+            client.begin_create_or_update(rg, deployment_name, deployment))
+
+
+def set_user_admin_if_not(target_id, target_type, login_user, user_object_id):
     target_segments = parse_resource_id(target_id)
     sub = target_segments.get('subscription')
     rg = target_segments.get('resource_group')
     server = target_segments.get('name')
+    is_admin = True
     # pylint: disable=not-an-iterable
-    admins = run_cli_cmd('az postgres server ad-admin list --ids {}'.format(target_id))
+
+    admins = run_cli_cmd(
+        'az postgres server ad-admin list --ids {}'.format(target_id))
     is_admin = any(ad.get('sid') == user_object_id for ad in admins)
     if not is_admin:
         logger.warning('Setting current user as database server AAD admin:'
-                       ' user=%s object id=%s', account_user, user_object_id)
+                       ' user=%s object id=%s', login_user, user_object_id)
         run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
-                    ' --subscription {}'.format(rg, server, account_user, user_object_id, sub)).get('objectId')
+                    ' --subscription {}'.format(rg, server, login_user, user_object_id, sub)).get('objectId')
 
 # pylint: disable=unused-argument, not-an-iterable, too-many-statements
+
+
 def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_public_access=False):
     if target_type == RESOURCE.Postgres:
         target_segments = parse_resource_id(target_id)
@@ -394,17 +509,17 @@ def set_target_firewall(target_id, target_type, add_new_rule, ipname, deny_publi
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
 
-def create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, client_id):
+def create_aad_user_in_pg(cli_ctx, target_id, target_type, aad_user, client_id):
     import pkg_resources
     installed_packages = pkg_resources.working_set
-    psyinstalled = any(('psycopg2') in d.key.lower() for d in installed_packages)
+    psyinstalled = any(('psycopg2') in d.key.lower()
+                       for d in installed_packages)
     if not psyinstalled:
         _install_deps_for_psycopg2()
         import pip
         pip.main(['install', 'psycopg2-binary'])
 
     import psycopg2
-    from azure.cli.core._profile import Profile
 
     # pylint: disable=protected-access
     profile = Profile(cli_ctx=cli_ctx)
@@ -414,7 +529,8 @@ def create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, clien
     dbserver = target_segments.get('name')
     host = "{0}.postgres.database.azure.com".format(dbserver)
     dbname = target_segments.get('child_name_1')
-    user = profile.get_current_account_user() + '@' + dbserver
+    user = profile.get_current_account_user() + '@' + \
+        dbserver if target_type == RESOURCE.Postgres else profile.get_current_account_user()
     password = run_cli_cmd(
         'az account get-access-token --resource-type oss-rdbms').get('accessToken')
     sslmode = "require"
@@ -438,26 +554,30 @@ def create_aad_user_in_pg_single(cli_ctx, target_id, target_type, aaduser, clien
             raise e
     conn.autocommit = True
     cursor = conn.cursor()
-
     try:
-        logger.warning("Adding new AAD user %s to database...", aaduser)
-        cursor.execute("SET aad_validate_oids_in_tenant = off;")
-        cursor.execute("CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
-            aaduser, client_id))
-    except psycopg2.Error as e:  # role "aaduser" already exists
+        logger.warning("Adding new AAD user %s to database...", aad_user)
+        if target_type == RESOURCE.Postgres:
+            cursor.execute(
+                "SET aad_validate_oids_in_tenant = off; \
+                drop role IF EXISTS \"{}\"; \
+                CREATE ROLE \"{}\" WITH LOGIN PASSWORD '{}' IN ROLE azure_ad_user;".format(aad_user, aad_user, client_id))
+        elif target_type == RESOURCE.PostgresFlexible:
+            cursor.execute("drop role IF EXISTS \"{}\"; \
+            select * from pgaadauth_create_principal_with_oid('{}', '{}', 'ServicePrincipal', false, false);".format(aad_user, aad_user, client_id))
+    except psycopg2.Error as e:  # role "aad_user" already exists
         logger.warning(e)
         conn.commit()
 
-    try:
-        logger.warning(
-            "Grant read and write privileges of database %s to %s ...", dbname, aaduser)
-        cursor.execute(
-            "GRANT ALL PRIVILEGES ON DATABASE {} TO {};".format(dbname, aaduser))
-        cursor.execute(
-            'GRANT ALL ON ALL TABLES IN SCHEMA "public" TO {};'.format(aaduser))
-    except psycopg2.Error as e:
-        logger.warning(e)
-        conn.commit()
+    if target_type == RESOURCE.Postgres:
+        try:
+            logger.warning(
+                "Grant read and write privileges of database %s to %s ...", dbname, aad_user)
+            cursor.execute(
+                "GRANT ALL PRIVILEGES ON DATABASE {} TO \"{}\"; \
+                GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{}\";".format(dbname, aad_user, aad_user))
+        except psycopg2.Error as e:
+            logger.warning(e)
+            conn.commit()
 
     # Clean up
     conn.commit()
@@ -508,7 +628,8 @@ def get_webapp_identity(source_id):
         run_cli_cmd('az webapp identity assign --ids {}'.format(source_id))
         cnt = 0
         while (identity is None and cnt < 5):
-            identity = run_cli_cmd('az webapp identity show --ids {}'.format(source_id)).get('identity')
+            identity = run_cli_cmd(
+                'az webapp identity show --ids {}'.format(source_id)).get('identity')
             time.sleep(3)
             cnt += 1
     return identity
