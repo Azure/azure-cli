@@ -181,7 +181,7 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
                                  ' skip validation and manually verify service endpoint.')
 
     vnet_client = network_client_factory(cli_ctx, api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
-                                         ['appservice_ensure_subnet'])
+                                         ['appservice_network'])
     subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
     subnet_obj.service_endpoints = subnet_obj.service_endpoints or []
     service_endpoint_exists = False
