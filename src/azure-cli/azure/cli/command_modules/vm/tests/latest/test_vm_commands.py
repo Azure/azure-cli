@@ -5968,43 +5968,25 @@ class VMGalleryImage(ScenarioTest):
     def test_update_gallery_permissions(self, resource_group):
         self.kwargs.update({
             'gallery1': self.create_random_name('gallery1', 15),
-            'gallery2': self.create_random_name('gallery2', 15),
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
-            'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
+            'gallery2': self.create_random_name('gallery2', 15)
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery1} --permissions Community '
-                 '--publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname',
+                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
                  checks=[
                      self.check('sharingProfile.permissions', 'Community')
                  ])
         # update gallery from community to private
-        self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Private', checks=[
+        self.cmd('sig share reset --gallery-name {gallery1} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
             self.check('sharingProfile.permissions', 'Private')
         ])
-        # self.cmd('sig share reset --gallery-name {gallery1} -g {rg}')
-        # self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
-        #     self.check('sharingProfile.permissions', 'Private')
-        # ])
 
         # update gallery from private to community
         self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
-                 '--publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname',
+                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
                  checks=[
                      self.check('sharingProfile.permissions', 'Community')
                  ])
-
-        self.cmd('sig create -g {rg} --gallery-name {gallery2} --permissions Groups', checks=[
-            self.check('sharingProfile.permissions', 'Groups')
-        ])
-        self.cmd('sig share add --gallery-name {gallery2} -g {rg} --subscription-ids {subId} --tenant-ids {tenantId}')
-        # update gallery from groups to private
-        self.cmd('sig update -g {rg} --gallery-name {gallery2} --permissions Private', checks=[
-            self.check('sharingProfile.permissions', 'Private')
-        ])
-        # update gallery from private to groups
-        self.cmd('sig update -g {rg} --gallery-name {gallery2} --permissions Groups', checks=[
-            self.check('sharingProfile.permissions', 'Groups')
-        ])
 
 
 class VMGalleryApplication(ScenarioTest):
