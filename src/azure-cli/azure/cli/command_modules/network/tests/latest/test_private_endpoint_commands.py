@@ -5,7 +5,6 @@
 
 import os
 import time
-from urllib import response
 import uuid
 import unittest
 
@@ -860,7 +859,7 @@ class NetworkResourceManagementPrivateLinksTest(ScenarioTest):
             'pe_connection': self.create_random_name('cli-pec-', 24),
             'rg': resource_group,
             'sub': self.get_subscription_id(),
-            'body': ''
+            'body': '{\\"location\\":\\"eastus\\"}'
         })
 
         # prepare network
