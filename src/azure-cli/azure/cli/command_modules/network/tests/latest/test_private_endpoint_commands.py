@@ -3201,7 +3201,7 @@ class NetworkPrivateLinkEnergyServicesScenarioTest(ScenarioTest):
             'approve_description_msg': 'Approved!',
             'reject_description_msg': 'Rejected!',
             'body': '{\\"location\\":\\"centraluseuap\\",\\"properties\\":{\\"authAppId\\":\\"2f59abbc-7b40-4d0e-91b2-22ca3084bc84\\",\\"dataPartitionNames\\":[{\\"name\\":\\"dp1\\"}]},\\"tags\\":{\\"environment\\":\\"test\\",\\"program\\":\\"exploration\\"}}',
-            'api_version': '2022-04-04-preview'
+            'api_version': '2022-07-21-preview'
         })
 
         # Create energy services resource
