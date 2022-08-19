@@ -889,6 +889,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
+    @unittest.skip('Failure due to service behavior change')
     @ResourceGroupPreparer(location='eastus2euap')
     @KeyVaultPreparer(location='eastus2euap')
     def test_user_assigned_identity(self, resource_group, key_vault):
@@ -2194,10 +2195,11 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
-        # Update ORS policy
-        result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
-            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
-        self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
+        # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
+        # # Update ORS policy
+        # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
+        #     resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
+        # self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
 
         # Delete policy from destination and source account
         self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')
