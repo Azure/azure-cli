@@ -161,12 +161,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
 
-        if database_engine == 'postgres':
-            tier = 'Burstable'
-            sku_name = 'Standard_B1ms'
-        elif database_engine == 'mysql':
-            tier = 'MemoryOptimized'
-            sku_name = 'Standard_E2ds_v4'
+        tier = 'MemoryOptimized'
+        sku_name = 'Standard_E2ds_v4'
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
                  .format(database_engine, resource_group, server_name, tier, sku_name),
                  checks=[JMESPathCheck('sku.tier', tier),
@@ -652,7 +648,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
+    postgres_location = 'eastus'
     mysql_location = 'westus'
 
     @AllowLargeResponse()
@@ -910,7 +906,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
+    postgres_location = 'eastus'
     mysql_location = 'westus2'
 
     @AllowLargeResponse()
@@ -1340,7 +1336,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  resource_group, location, vnet_name, vnet_prefix))
 
         self.cmd('postgres flexible-server create -g {} -l {} --vnet {} --yes'.format(
-                 resource_group, 'eastus', vnet_name), # location of vnet and server are different
+                 resource_group, 'westus', vnet_name), # location of vnet and server are different
                  expect_failure=True)
 
         # delegated to different service
@@ -1367,8 +1363,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'eastus2euap'
-    mysql_location = 'westus2'
+    postgres_location = 'eastus'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1378,8 +1374,8 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='vnet_resource_group')
     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
 
@@ -1392,9 +1388,9 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='dns_resource_group')
     def test_mysql_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
         self._test_flexible_server_new_private_dns_zone('mysql', server_resource_group, vnet_resource_group, dns_resource_group)
 
@@ -1747,6 +1743,12 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         self._test_backups_mgmt('mysql', resource_group, server)
 
     def _test_backups_mgmt(self, database_engine, resource_group, server):
+        server_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server)).get_output_in_json()
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = server_info['backup']['earliestRestoreDate']
+        date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
+        sleep(max(0, (datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time, date_format)).total_seconds() + 30))
+
         backups = self.cmd('{} flexible-server backup list -g {} -n {}'
                        .format(database_engine, resource_group, server)).get_output_in_json()
 
@@ -1756,7 +1758,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
                                  .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
 
         self.assertDictEqual(automatic_backup, backups[0])
-        
+
         if database_engine == 'mysql':
             backup_name = self.create_random_name('backup', 20)
             self.cmd('{} flexible-server backup create -g {} -n {} --backup-name {}'

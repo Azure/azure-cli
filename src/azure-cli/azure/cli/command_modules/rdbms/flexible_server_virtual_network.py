@@ -172,9 +172,11 @@ def _create_subnet_delegation(cmd, nw_client, resource_client, delegation_servic
 def prepare_private_dns_zone(db_context, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
     cmd = db_context.cmd
     dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
-    private_dns_zone_suffix = dns_suffix_client.execute()
     if db_context.command_group == 'mysql':
+        private_dns_zone_suffix = dns_suffix_client.execute()
         private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
+    elif db_context.command_group == 'postgres':
+        private_dns_zone_suffix = dns_suffix_client.execute(api_version='2021-06-01')
 
     # suffix should start with .
     if private_dns_zone_suffix[0] != '.':
