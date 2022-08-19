@@ -3183,7 +3183,7 @@ class NetworkPrivateLinkRecoveryServicesScenarioTest(ScenarioTest):
 class NetworkPrivateLinkEnergyServicesScenarioTest(ScenarioTest):
 
     @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_energyservices_pe', random_name_length=40, location="westeurope")
+    @ResourceGroupPreparer(name_prefix='cli_energyservices_pe', random_name_length=40, location="centraluseuap")
     def test_energyservices_private_endpoint(self, resource_group):
 
         # Currently create energy services resource not supported in OAK
@@ -3197,10 +3197,10 @@ class NetworkPrivateLinkEnergyServicesScenarioTest(ScenarioTest):
             'subnet': self.create_random_name('cli-energyservices-subnet-', 40),
             'private_endpoint': self.create_random_name('cli-energyservices-pe-', 40),
             'private_endpoint_connection': self.create_random_name('cli-energyservices-pec-', 40),
-            'location': 'westeurope',
+            'location': 'centraluseuap',
             'approve_description_msg': 'Approved!',
             'reject_description_msg': 'Rejected!',
-            'body': '{\\"location\\":\\"westeurope\\",\\"properties\\":{\\"authAppId\\":\\"2f59abbc-7b40-4d0e-91b2-22ca3084bc84\\",\\"dataPartitionNames\\":[{\\"name\\":\\"dp1\\"}]},\\"tags\\":{\\"environment\\":\\"test\\",\\"program\\":\\"exploration\\"}}',
+            'body': '{\\"location\\":\\"centraluseuap\\",\\"properties\\":{\\"authAppId\\":\\"2f59abbc-7b40-4d0e-91b2-22ca3084bc84\\",\\"dataPartitionNames\\":[{\\"name\\":\\"dp1\\"}]},\\"tags\\":{\\"environment\\":\\"test\\",\\"program\\":\\"exploration\\"}}',
             'api_version': '2022-04-04-preview'
         })
 
