@@ -59,7 +59,7 @@ def save(config_dir, payload):
         import json
         events = json.loads(payload)
 
-        logger.info('Begin splitting cli events and extra events, total events: {}'.format(len(events)))
+        logger.info('Begin splitting cli events and extra events, total events: %s', len(events))
         cli_events = {}
         client = CliTelemetryClient()
         for key, event in events.items():
@@ -70,9 +70,9 @@ def save(config_dir, payload):
                 client.add(json.dumps(extra_event), flush=True)
         client.flush(force=True)
         cli_payload = json.dumps(cli_events) if cli_events else None
-        logger.info('Finish splitting cli events and extra events, cli events: {}'.format(len(cli_events)))
-    except Exception as ex:
-        logger.info("Split cli events and extra events failure: {}".format(str(ex)))
+        logger.info('Finish splitting cli events and extra events, cli events: %s', len(cli_events))
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Split cli events and extra events failure: %s", str(ex))
         cli_payload = payload
 
     if save_payload(config_dir, cli_payload) and should_upload(config_dir):

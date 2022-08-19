@@ -421,7 +421,7 @@ def add_dedicated_instrumentation_key(dedicated_instrumentation_key):
     if not dedicated_instrumentation_key:
         return
 
-    from collections import Iterable
+    from collections.abc import Iterable
     if isinstance(dedicated_instrumentation_key, str):
         _session.instrumentation_key.add(dedicated_instrumentation_key)
     elif isinstance(dedicated_instrumentation_key, Iterable):
