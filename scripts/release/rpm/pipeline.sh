@@ -10,8 +10,8 @@ set -exv
 : "${DOCKER_FILE:?DOCKER_FILE environment variable not set.}"
 # IMAGE should be RHEL or Fedora image url
 : "${IMAGE:?IMAGE environment variable not set.}"
-# DEVEL_PACKAGE should be python-devel package name
-: "${DEVEL_PACKAGE:?DEVEL_PACKAGE environment variable not set.}"
+# PYTHON_PACKAGE should be python package name
+: "${PYTHON_PACKAGE:?PYTHON_PACKAGE environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
@@ -20,7 +20,7 @@ docker build \
     --target build-env \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg image=${IMAGE} \
-    --build-arg devel_package=${DEVEL_PACKAGE} \
+    --build-arg python_package=${PYTHON_PACKAGE} \
     -f ./scripts/release/rpm/${DOCKER_FILE}.dockerfile \
     -t azure/azure-cli:${DOCKER_FILE}-builder \
     .
@@ -29,14 +29,14 @@ docker build \
 docker build \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg image=${IMAGE} \
-    --build-arg devel_package=${DEVEL_PACKAGE} \
+    --build-arg python_package=${PYTHON_PACKAGE} \
     -f ./scripts/release/rpm/${DOCKER_FILE}.dockerfile \
     -t azure/azure-cli:${DOCKER_FILE} \
     .
 
 # Extract the built RPM so that it can be distributed independently.
 # The RPM file looks like azure-cli-2.32.0-1.el7.x86_64.rpm
-id=$(docker create azure/azure-cli:${IMAGE}-builder)
+id=$(docker create azure/azure-cli:${DOCKER_FILE}-builder)
 # https://docs.docker.com/engine/reference/commandline/cp/
 # Append /. so that the x86_64 folder's content is copied, instead of x86_64 folder itself.
 docker cp $id:/root/rpmbuild/RPMS/x86_64/. ${BUILD_STAGINGDIRECTORY}

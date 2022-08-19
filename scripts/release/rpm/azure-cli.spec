@@ -14,8 +14,6 @@
 %define python_package %{getenv:PYTHON_PACKAGE}
 # The Python executable name, such as python3.9, python3
 %define python_cmd %{getenv:PYTHON_CMD}
-# The Python devel package name, such as python3.9-devel, python3-devel
-%define python_devel %{getenv:DEVEL-PACKAGE}
 
 %define name           azure-cli
 %define release        1%{?dist}
@@ -35,7 +33,7 @@ Prefix:         /usr
 Prefix:         /etc
 
 BuildRequires:  gcc, libffi-devel, openssl-devel, perl
-BuildRequires:  %{python_devel}
+BuildRequires:  %{python_package}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 

@@ -2,13 +2,13 @@
 # Red Hat Universal Base Image 9: https://catalog.redhat.com/software/containers/ubi9/ubi/615bcf606feffc5384e8452e
 
 ARG image=registry.access.redhat.com/ubi8/ubi:8.4
-ARG devel_package=python39-devel
 
 FROM ${image} AS build-env
 ARG cli_version=dev
+ARG python_package=python39
 
 RUN yum update -y
-RUN yum install -y wget rpm-build gcc libffi-devel $devel_package openssl-devel make bash diffutils patch dos2unix perl
+RUN yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 
@@ -17,7 +17,7 @@ COPY . .
 # RHEL 8's 'python3' is Python 3.6. RHEL 9's 'python3' is Python 3.9.
 # We have to explicitly specify 'python39' to install Python 3.9.
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
-    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python39 PYTHON_CMD=python3.9 DEVEL_PACKAGE=$devel_package \
+    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=$python_package PYTHON_CMD=python3.9 \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 

@@ -2,17 +2,17 @@ ARG image=fedora:35
 
 FROM ${image} AS build-env
 ARG cli_version=dev
-ARG devel_package=python3-devel
+ARG python_package=python3
 
 RUN dnf update -y
-RUN dnf install -y wget rpm-build gcc libffi-devel $devel_package openssl-devel make bash coreutils diffutils patch dos2unix perl
+RUN dnf install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 
 COPY . .
 
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
-    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python3 PYTHON_CMD=python3 DEVEL_PACKAGE=$devel_package \
+    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=$python_package PYTHON_CMD=python3 \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 
