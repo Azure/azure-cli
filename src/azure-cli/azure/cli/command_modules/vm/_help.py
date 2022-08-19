@@ -573,7 +573,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show -n mytemplate -g my-group
 """
@@ -606,7 +606,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show-runs -n mytemplate -g my-group
 """
@@ -646,7 +646,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show -n mytemplate -g my-group
 """
