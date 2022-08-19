@@ -17,7 +17,7 @@ COPY . .
 # RHEL 8's 'python3' is Python 3.6. RHEL 9's 'python3' is Python 3.9.
 # We have to explicitly specify 'python39' to install Python 3.9.
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
-    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python39 PYTHON_CMD=python3.9 \
+    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python39 PYTHON_CMD=python3.9 DEVEL_PACKAGE=$devel_package \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 

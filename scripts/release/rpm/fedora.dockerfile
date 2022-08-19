@@ -12,7 +12,7 @@ WORKDIR /azure-cli
 COPY . .
 
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
-    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python3 PYTHON_CMD=python3 \
+    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python3 PYTHON_CMD=python3 DEVEL_PACKAGE=$devel_package \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/x86_64/azure-cli-${cli_version}-1.*.x86_64.rpm /azure-cli-dev.rpm
 
