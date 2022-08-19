@@ -100,7 +100,7 @@ class AcsClientTest(unittest.TestCase):
     @mock.patch('paramiko.SSHClient')
     def test_file_exists_positive(self, mock_ssh_client):
         sftp_mock = mock.Mock()
-        sftp_mock.stat.side_efect = 'filexists'
+        sftp_mock.stat.side_effect = 'filexists'
         transport_mock = mock.Mock()
         transport_mock.open_sftp_client.return_value = sftp_mock
         mock_ssh_client.get_transport.return_value = transport_mock
