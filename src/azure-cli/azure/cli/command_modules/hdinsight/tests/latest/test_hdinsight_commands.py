@@ -605,7 +605,7 @@ class HDInsightClusterTests(ScenarioTest):
     def _rest_proxy_arguments():
         return '--kafka-management-node-size {} --kafka-client-group-id {} --kafka-client-group-name {} -v 4.0 ' \
                '--component-version {} --location {}' \
-            .format('Standard_D4_v2', '7bef90fa-0aa3-4bb4-b4d2-2ae7c14cfe41', 'KafakaRestProperties', 'kafka=2.1',
+            .format('Standard_D4_v2', '7bef90fa-0aa3-4bb4-b4d2-2ae7c14cfe41', 'KafkaRestProperties', 'kafka=2.1',
                     '"South Central US"')
 
     @staticmethod
