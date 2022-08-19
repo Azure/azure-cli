@@ -1,6 +1,6 @@
 # Quoting issues with PowerShell
 
-ℹ **These issues have been fixed in Azure CLI 2.40.0 and PowerShell 7.3. Please update Azure CLI and PowerShell to the latest versions to avoid these issues. 
+**These issues have been fixed in Azure CLI 2.40.0 and PowerShell 7.3. Please update Azure CLI and PowerShell to the latest versions to avoid these issues.**
 
 With the latest versions, simply pass special characters as you normally would in pure PowerShell script or other shells, such as Bash.
 
@@ -27,7 +27,7 @@ cli.knack.cli: Command arguments: ['--debug', '{"key": "value"}']
 > az --debug "{`"key`": `"value`"}"
 cli.knack.cli: Command arguments: ['--debug', '{"key": "value"}']
 
-# Escape double quotes by doubleing them
+# Escape double quotes by doubling them
 > az --debug "{""key"": ""value""}"
 cli.knack.cli: Command arguments: ['--debug', '{"key": "value"}']
 ```
