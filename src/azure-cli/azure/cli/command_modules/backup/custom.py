@@ -16,7 +16,8 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
-    CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
+    CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
+    AzureMonitorAlertSettings, ClassicAlertSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -111,9 +112,14 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location, tags=None):
+def create_vault(client, vault_name, resource_group_name, location, tags=None, classic_alerts='Enable',
+                 azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
-    vault_properties = VaultProperties()
+    vault_properties = VaultProperties(
+        monitoring_settings=MonitoringSettings(
+            azure_monitor_alert_settings=AzureMonitorAlertSettings(
+                alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
+            classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')))
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
@@ -393,10 +399,12 @@ def show_encryption(client, resource_group_name, vault_name):
 
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
                           soft_delete_feature_state=None, cross_region_restore_flag=None,
-                          hybrid_backup_security_features=None, tenant_id=None):
+                          hybrid_backup_security_features=None, tenant_id=None,
+                          classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
     if soft_delete_feature_state or hybrid_backup_security_features:
         logger.warning("""
-        --backup-storage-redundancy and --cross-region-restore-flag parameters will be ignored if provided.
+        --backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and
+        --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
         """)
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         if tenant_id is not None:
@@ -418,24 +426,49 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
-    backup_config_response = client.get(vault_name, resource_group_name)
-    prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
-    if backup_storage_redundancy is None:
-        backup_storage_redundancy = backup_config_response.properties.storage_type
-    if cross_region_restore_flag is None:
-        cross_region_restore_flag = prev_crr_flag
-    else:
-        cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
-
-    if prev_crr_flag and not cross_region_restore_flag:
-        raise ArgumentUsageError("""
-        Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
+    if backup_storage_redundancy or cross_region_restore_flag:
+        logger.warning("""
+        --classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
         """)
+        backup_config_response = client.get(vault_name, resource_group_name)
+        prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
+        if backup_storage_redundancy is None:
+            backup_storage_redundancy = backup_config_response.properties.storage_type
+        if cross_region_restore_flag is None:
+            cross_region_restore_flag = prev_crr_flag
+        else:
+            cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
 
-    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
-                                                 cross_region_restore_flag=cross_region_restore_flag)
-    backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-    return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+        if prev_crr_flag and not cross_region_restore_flag:
+            raise ArgumentUsageError("""
+            Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
+            """)
+
+        backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
+                                                     cross_region_restore_flag=cross_region_restore_flag)
+        backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
+        return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+
+    if classic_alerts or azure_monitor_alerts_for_job_failures:
+        monitor_settings = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name).properties.monitoring_settings
+        prev_classic_alerts = 'Enabled'
+        prev_azmon_alerts = 'Enabled'
+        if (hasattr(monitor_settings, 'classic_alert_settings') and
+                hasattr(monitor_settings.classic_alert_settings, 'alerts_for_critical_operations')):
+            prev_classic_alerts = monitor_settings.classic_alert_settings.alerts_for_critical_operations
+        if (hasattr(monitor_settings, 'azure_monitor_alert_settings') and
+                hasattr(monitor_settings.azure_monitor_alert_settings, 'alerts_for_all_job_failures')):
+            prev_classic_alerts = monitor_settings.azure_monitor_alert_settings.alerts_for_all_job_failures
+        classic_alerts = prev_classic_alerts if classic_alerts is None else classic_alerts + 'd'
+        azmon_alerts = (prev_azmon_alerts if azure_monitor_alerts_for_job_failures is None else
+                        azure_monitor_alerts_for_job_failures + 'd')
+        vault_properties = VaultProperties(
+            monitoring_settings=MonitoringSettings(
+                azure_monitor_alert_settings=AzureMonitorAlertSettings(
+                    alerts_for_all_job_failures=azmon_alerts),
+                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts)))
+        return vaults_cf(cmd.cli_ctx).begin_update(resource_group_name, vault_name,
+                                                   PatchVault(properties=vault_properties))
 
 
 def get_backup_properties(cmd, client, vault_name, resource_group_name):
