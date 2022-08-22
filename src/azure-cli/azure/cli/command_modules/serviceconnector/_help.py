@@ -54,6 +54,13 @@ def get_auth_info_params(auth_type):
     return auth_params_map.get(auth_type)
 
 
+def get_source_display_name(source):
+    display_name = source
+    if source == RESOURCE.SpringCloud.value:
+        display_name = 'spring app'
+    return display_name
+
+
 for source in SOURCE_RESOURCES:
     if not should_load_source(source):
         continue
@@ -62,57 +69,58 @@ for source in SOURCE_RESOURCES:
     source_params = get_source_resource_params(source)
     connection_id = ('/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/'
                      'Microsoft.Web/sites/{site}/providers/Microsoft.ServiceLinker/linkers/{linker}')
+    source_display_name = get_source_display_name(source.value)
 
     helps['{source} connection'.format(source=source.value)] = """
         type: group
-        short-summary: Commands to manage {source} connections
-    """.format(source=source.value)
+        short-summary: Commands to manage {source_display_name} connections
+    """.format(source=source.value, source_display_name=source_display_name)
 
     helps['{source} connection list-support-types'.format(source=source.value)] = """
         type: command
-        short-summary: List client types and auth types supported by {source} connections.
+        short-summary: List client types and auth types supported by {source_display_name} connections.
         examples:
-          - name: List all {source} supported target resource types and auth types
+          - name: List all {source_display_name} supported target resource types and auth types
             text: |-
                   az {source} connection list-support-types -o table
-          - name: List {source} supported auth types for a specific target resource type
+          - name: List {source_display_name} supported auth types for a specific target resource type
             text: |-
                   az {source} connection list-support-types --target-type storage-blob -o table
-    """.format(source=source.value)
+    """.format(source=source.value, source_display_name=source_display_name)
 
     helps['{source} connection list'.format(source=source.value)] = """
       type: command
-      short-summary: List connections of a {source}.
+      short-summary: List connections of a {source_display_name}.
       examples:
-        - name: List {source} connections interactively
+        - name: List {source_display_name} connections interactively
           text: |-
                  az {source} connection list
-        - name: List {source} connections by source resource name
+        - name: List {source_display_name} connections by source resource name
           text: |-
                  az {source} connection list {source_params}
-        - name: List {source} connections by source resource id
+        - name: List {source_display_name} connections by source resource id
           text: |-
                  az {source} connection list --source-id {source_id}
-    """.format(source=source.value, source_params=source_params, source_id=source_id)
+    """.format(source=source.value, source_params=source_params, source_id=source_id, source_display_name=source_display_name)
 
     helps['{source} connection delete'.format(source=source.value)] = """
       type: command
-      short-summary: Delete a {source} connection.
+      short-summary: Delete a {source_display_name} connection.
       examples:
-        - name: Delete a {source} connection interactively
+        - name: Delete a {source_display_name} connection interactively
           text: |-
                  az {source} connection delete
-        - name: Delete a {source} connection by connection name
+        - name: Delete a {source_display_name} connection by connection name
           text: |-
                  az {source} connection delete {source_params} --connection MyConnection
-        - name: Delete a {source} connection by connection id
+        - name: Delete a {source_display_name} connection by connection id
           text: |-
                  az {source} connection delete --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
 
     helps['{source} connection list-configuration'.format(source=source.value)] = """
       type: command
-      short-summary: List source configurations of a {source} connection.
+      short-summary: List source configurations of a {source_display_name} connection.
       examples:
         - name: List a connection's source configurations interactively
           text: |-
@@ -123,11 +131,11 @@ for source in SOURCE_RESOURCES:
         - name: List a connection's source configurations by connection id
           text: |-
                  az {source} connection list-configuration --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
 
     helps['{source} connection validate'.format(source=source.value)] = """
       type: command
-      short-summary: Validate a {source} connection.
+      short-summary: Validate a {source_display_name} connection.
       examples:
         - name: Validate a connection interactively
           text: |-
@@ -138,7 +146,7 @@ for source in SOURCE_RESOURCES:
         - name: Validate a connection by connection id
           text: |-
                  az {source} connection validate --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
 
     helps['{source} connection wait'.format(source=source.value)] = """
       type: command
@@ -151,7 +159,7 @@ for source in SOURCE_RESOURCES:
 
     helps['{source} connection show'.format(source=source.value)] = """
       type: command
-      short-summary: Get the details of a {source} connection.
+      short-summary: Get the details of a {source_display_name} connection.
       examples:
           - name: Get a connection interactively
             text: |-
@@ -162,17 +170,17 @@ for source in SOURCE_RESOURCES:
           - name: Get a connection by connection id
             text: |-
                    az {source} connection show --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id)
+    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
 
     helps['{source} connection create'.format(source=source.value)] = """
       type: group
-      short-summary: Create a connection between a {source} and a target resource
-    """.format(source=source.value)
+      short-summary: Create a connection between a {source_display_name} and a target resource
+    """.format(source=source.value, source_display_name=source_display_name)
 
     helps['{source} connection update'.format(source=source.value)] = """
       type: group
-      short-summary: Update a {source} connection
-    """.format(source=source.value)
+      short-summary: Update a {source_display_name} connection
+    """.format(source=source.value, source_display_name=source_display_name)
 
     # use SUPPORTED_AUTH_TYPE to decide target resource, as some
     # target resources are not avialable for certain source resource
@@ -246,7 +254,7 @@ for source in SOURCE_RESOURCES:
 
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
-          short-summary: Create a {source} connection to {target}.
+          short-summary: Create a {source_display_name} connection to {target}.
           parameters:
             {secret_param}
             {secret_auto_param}
@@ -254,13 +262,13 @@ for source in SOURCE_RESOURCES:
             {user_identity_param}
             {service_principal_param}
           examples:
-            - name: Create a connection between {source} and {target} interactively
+            - name: Create a connection between {source_display_name} and {target} interactively
               text: |-
                      az {source} connection create {target}
-            - name: Create a connection between {source} and {target} with resource name
+            - name: Create a connection between {source_display_name} and {target} with resource name
               text: |-
                      az {source} connection create {target} {source_params} {target_params} {auth_params}
-            - name: Create a connection between {source} and {target} with resource id
+            - name: Create a connection between {source_display_name} and {target} with resource id
               text: |-
                      az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
             {provision_example}
@@ -277,11 +285,12 @@ for source in SOURCE_RESOURCES:
             source_params=source_params,
             target_params=target_params,
             auth_params=auth_params,
-            provision_example=provision_example)
+            provision_example=provision_example,
+            source_display_name=source_display_name)
 
         helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
           type: command
-          short-summary: Update a {source} to {target} connection.
+          short-summary: Update a {source_display_name} to {target} connection.
           parameters:
             {secret_param}
             {secret_auto_param}
@@ -304,7 +313,8 @@ for source in SOURCE_RESOURCES:
             user_identity_param=user_identity_param,
             service_principal_param=service_principal_param,
             source_params=source_params,
-            connection_id=connection_id)
+            connection_id=connection_id,
+            source_display_name=source_display_name)
 
     # special target resource, independent implementation
     target = RESOURCE.ConfluentKafka
@@ -315,20 +325,21 @@ for source in SOURCE_RESOURCES:
 
     helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
       type: command
-      short-summary: Create a {source} connection to {target}.
+      short-summary: Create a {source_display_name} connection to {target}.
       examples:
-        - name: Create a connection between {source} and {target}
+        - name: Create a connection between {source_display_name} and {target}
           text: |-
                   az {source} connection create {target} {source_params} {server_params} {registry_params}
     """.format(source=source.value,
                target=target.value,
                source_params=source_params,
                server_params=server_params,
-               registry_params=registry_params)
+               registry_params=registry_params,
+               source_display_name=source_display_name)
 
     helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
       type: command
-      short-summary: Update a {source} to {target} connection.
+      short-summary: Update a {source_display_name} to {target} connection.
       examples:
         - name: Update the client-type of a bootstrap server connection
           text: |-
@@ -346,4 +357,5 @@ for source in SOURCE_RESOURCES:
                target=target.value,
                source_params=source_params,
                server_params=server_params,
-               registry_params=registry_params)
+               registry_params=registry_params,
+               source_display_name=source_display_name)
