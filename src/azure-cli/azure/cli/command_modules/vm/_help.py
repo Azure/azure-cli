@@ -1225,8 +1225,13 @@ short-summary: update a share image gallery.
 examples:
   - name: Enable gallery to be shared to subscription or tenant
     text: |
-        az sig update --resource-group myresourcegroup --gallery-name mygallery \\
+        az sig update --resource-group myResourceGroup --gallery-name myGallery \\
         --permissions groups
+  - name: Update gallery from private to community
+    text: |
+        az sig update -g myResourceGroup --gallery-name myGallery --permissions Community \\
+        --publisher-uri myPublisherUri --publisher-email myPublisherEmail \\
+        --eula myEula --public-name-prefix myPublicNamePrefix
 """
 
 helps['sig gallery-application'] = """
