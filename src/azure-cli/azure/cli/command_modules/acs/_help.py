@@ -544,6 +544,12 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
+  - name: --gpu-instance-profile
+    type: string
+    short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -790,6 +796,9 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --http-proxy-config
+    type: string
+    short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
@@ -1093,6 +1102,9 @@ parameters:
   - name: --host-group-id
     type: string
     short-summary: The fully qualified dedicated host group id used to provision agent node pool.
+  - name: --gpu-instance-profile
+    type: string
+    short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1177,7 +1189,7 @@ parameters:
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool.
+    short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.

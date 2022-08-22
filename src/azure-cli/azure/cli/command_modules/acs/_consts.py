@@ -41,6 +41,13 @@ CONST_AVAILABILITY_SET = "AvailabilitySet"
 CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
 CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
 
+# gpu instance
+CONST_GPU_INSTANCE_PROFILE_MIG1_G = "MIG1g"
+CONST_GPU_INSTANCE_PROFILE_MIG2_G = "MIG2g"
+CONST_GPU_INSTANCE_PROFILE_MIG3_G = "MIG3g"
+CONST_GPU_INSTANCE_PROFILE_MIG4_G = "MIG4g"
+CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
+
 # consts for ManagedCluster
 # load balancer sku
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
@@ -133,7 +140,6 @@ ADDONS = {
 
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
-CONST_ACR_DOMAIN_NAME = ".azurecr.io"
 
 
 # consts for decorator pattern

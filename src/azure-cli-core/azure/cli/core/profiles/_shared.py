@@ -151,7 +151,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2021-09-01',
+        ResourceType.MGMT_STORAGE: '2022-05-01',
         ResourceType.MGMT_NETWORK: '2021-08-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-01', {
             'resource_skus': '2019-04-01',
@@ -185,11 +185,12 @@ AZURE_API_PROFILES = {
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-08-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
             'runs': '2019-06-01-preview',
+            'network_rule': '2021-08-01-preview'
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
@@ -207,7 +208,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
-            'action_groups': '2021-09-01',
+            'action_groups': '2022-06-01',
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
             'alert_rule_incidents': '2016-03-01',
