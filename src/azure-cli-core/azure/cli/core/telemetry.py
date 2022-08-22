@@ -203,6 +203,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
         set_custom_properties(result, 'PollStartTime', str(self.poll_start_time))
         set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
+        set_custom_properties(result, 'CloudName', _get_cloud_name())
 
         return result
 
@@ -559,6 +560,14 @@ def _get_azure_subscription_id():
         return _get_profile().get_subscription_id()
     except CLIError:
         return None
+
+
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_cloud_name():
+    try:
+        return _session.application.cloud.name
+    except AttributeError:
+        return 'unknown'
 
 
 def _get_shell_type():
