@@ -244,13 +244,13 @@ for source in SOURCE_RESOURCES:
 
         # create with `--new` examples
         provision_example = '''
-            - name: Create a new {target} and connect {source} to it interactively
+            - name: Create a new {target} and connect {source_display_name} to it interactively
               text: |-
                     az {source} connection create {target} --new
-            - name: Create a new {target} and connect {source} to it
+            - name: Create a new {target} and connect {source_display_name} to it
               text: |-
                     az {source} connection create {target} --source-id {source_id} --new
-        '''.format(source=source.value, target=target.value, source_id=source_id) if target in AddonFactory else ''
+        '''.format(source=source.value, target=target.value, source_id=source_id, source_display_name=source_display_name) if target in AddonFactory else ''
 
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
