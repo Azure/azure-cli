@@ -2222,3 +2222,46 @@ def validate_fs_file_set_expiry(namespace):
         namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
     except ValueError:
         pass
+
+
+# pylint: disable=too-few-public-methods
+class PermissionScopeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.permission_scope:
+            namespace.permission_scope = []
+        PermissionScope = namespace._cmd.get_models('PermissionScope')
+        try:
+            permissions, service, resource_name = '', '', ''
+            for s in values:
+                if "permissions" in s:
+                    permissions = s.split('=')[1]
+                elif "service" in s:
+                    service = s.split('=')[1]
+                elif "resource-name" in s:
+                    resource_name = s.split('=')[1]
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --permission-scope VARIABLE OPERATOR VALUE')
+        namespace.permission_scope.append(PermissionScope(
+            permissions=permissions,
+            service=service,
+            resource_name=resource_name
+        ))
+
+
+# pylint: disable=too-few-public-methods
+class SshPublicKeyAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.ssh_authorized_key:
+            namespace.ssh_authorized_key = []
+        SshPublicKey = namespace._cmd.get_models('SshPublicKey')
+        try:
+            description, key = '', ''
+            for k in values:
+                if "description" in k:
+                    description = k.split('=')[1]
+                elif "key" in k:
+                    key = k.split('=')[1]
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --ssh-authorized-key VARIABLE OPERATOR VALUE')
+        namespace.ssh_authorized_key.append(SshPublicKey(description=description, key=key))
+

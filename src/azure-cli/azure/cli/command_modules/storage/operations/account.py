@@ -962,3 +962,41 @@ def update_blob_inventory_policy(cmd, client, resource_group_name, account_name,
     BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)
+
+
+def _generate_local_user(local_user, permission_scope=None, ssh_authorized_key=None,
+                         home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None):
+    if permission_scope is not None:
+        local_user.permission_scopes = permission_scope
+    if ssh_authorized_key is not None:
+        local_user.ssh_authorized_keys = ssh_authorized_key
+    if home_directory is not None:
+        local_user.home_directory = home_directory
+    if has_shared_key is not None:
+        local_user.has_shared_key = has_shared_key
+    if has_ssh_key is not None:
+        local_user.has_ssh_key = has_ssh_key
+    if has_ssh_password is not None:
+        local_user.has_ssh_password = has_ssh_password
+
+
+def create_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None, home_directory=None,
+                      has_shared_key=None, has_ssh_key=None, has_ssh_password=None, ssh_authorized_key=None, **kwargs):
+    LocalUser = cmd.get_models('LocalUser')
+    local_user = LocalUser()
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)
+
+
+def update_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None,
+                      home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None,
+                      ssh_authorized_key=None, **kwargs):
+    local_user = client.get(resource_group_name, account_name, username)
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)
