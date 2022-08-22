@@ -142,3 +142,26 @@ class TestActionGroupScenarios(ScenarioTest):
                  '--alert-type budget')
 
         self.cmd('monitor action-group delete -n {ag} -g {rg} -ojson')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_ag_location')
+    def test_monitor_action_group_location(self, resource_group):
+        action_group_name = self.create_random_name('cliactiongrouptest', 32)
+        self.kwargs.update({
+            'ag': action_group_name
+        })
+        #location = '"Sweden Central"'
+        location = 'swedencentral'
+        self.cmd('monitor action-group create -n {} -g {} -l {} -ojson'.format(action_group_name[:10], resource_group,
+                                                                               location), checks=[
+            JMESPathCheck('length(emailReceivers)', 0),
+            JMESPathCheck('length(smsReceivers)', 0),
+            JMESPathCheck('length(webhookReceivers)', 0),
+            JMESPathCheck('length(eventHubReceivers)', 0),
+            JMESPathCheck('location', 'swedencentral'),
+            #JMESPathCheck('name', action_group_name[:10]),
+            JMESPathCheck('groupShortName', action_group_name[:10]),
+            JMESPathCheck('enabled', True),
+            #JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('tags', None)
+        ])
+
