@@ -153,7 +153,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.enhancedSecurityState", 'Enabled'),
         ])
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --classic-alerts Disable --azure-monitor-alerts-for-job-failures Disable', checks=[
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --classic-alerts Disable --alerts-for-job-failures Disable', checks=[
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
         ])

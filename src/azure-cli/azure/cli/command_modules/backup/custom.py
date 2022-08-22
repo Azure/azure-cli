@@ -458,7 +458,7 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
             prev_classic_alerts = monitor_settings.classic_alert_settings.alerts_for_critical_operations
         if (hasattr(monitor_settings, 'azure_monitor_alert_settings') and
                 hasattr(monitor_settings.azure_monitor_alert_settings, 'alerts_for_all_job_failures')):
-            prev_classic_alerts = monitor_settings.azure_monitor_alert_settings.alerts_for_all_job_failures
+            prev_azmon_alerts = monitor_settings.azure_monitor_alert_settings.alerts_for_all_job_failures
         classic_alerts = prev_classic_alerts if classic_alerts is None else classic_alerts + 'd'
         azmon_alerts = (prev_azmon_alerts if azure_monitor_alerts_for_job_failures is None else
                         azure_monitor_alerts_for_job_failures + 'd')
