@@ -130,7 +130,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
+        ha_value = 'ZoneRedundant'
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
@@ -683,7 +683,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
-        ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
+        ha_value = 'ZoneRedundant'
 
         # Create
         if database_engine == 'postgres':
@@ -803,7 +803,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, invalid_backup_retention),
                  expect_failure=True)
 
-        ha_value = 'Enabled' if database_engine == 'postgres' else 'ZoneRedundant'
+        ha_value = 'ZoneRedundant'
         self.cmd('{} flexible-server update -g {} -n {} --high-availability {}'.format(
                  database_engine, resource_group, server_name, ha_value),
                  expect_failure=True)
