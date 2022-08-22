@@ -1200,6 +1200,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return no_wait
 
+    def get_gpu_instance_profile(self) -> Union[str, None]:
+        """Obtain the value of gpu_instance_profile.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        gpu_instance_profile = self.raw_param.get("gpu_instance_profile")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "gpu_instance_profile") and
+            self.agentpool.gpu_instance_profile is not None
+        ):
+            gpu_instance_profile = self.agentpool.gpu_instance_profile
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_instance_profile
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1469,6 +1488,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1501,6 +1530,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_vm_properties(agentpool)
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
+        # set up gpu instance profile
+        agentpool = self.set_up_gpu_properties(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

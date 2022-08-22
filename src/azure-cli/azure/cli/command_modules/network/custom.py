@@ -145,14 +145,13 @@ def _is_v2_sku(sku):
 
 
 # pylint: disable=too-many-statements
-def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
+def create_application_gateway(cmd, application_gateway_name, resource_group_name, priority, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
-                               sku=None, priority=None,
-                               private_ip_address=None, public_ip_address=None,
+                               sku=None, private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1427,10 +1426,9 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
     return parent
 
 
-def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
+def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None,
-                                   priority=None):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1483,10 +1481,9 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
+def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
                            address_pool=None, settings=None, listener=None,
-                           rule_type='Basic', no_wait=False,
-                           priority=None):
+                           rule_type='Basic', no_wait=False):
     ApplicationGatewayRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -3545,12 +3542,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         if ip_configurations:
             PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
             for prop in ip_configurations:
-                ip_config = PrivateEndpointIPConfiguration(
-                    name=prop['name'],
-                    group_id=prop['group_id'],
-                    member_name=prop['member_name'],
-                    private_ip_address=prop['private_ip_address']
-                )
+                ip_config = PrivateEndpointIPConfiguration(**prop)
                 try:
                     private_endpoint.ip_configurations.append(ip_config)
                 except AttributeError:
@@ -3558,7 +3550,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         if application_security_groups:
             ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
             for prop in application_security_groups:
-                asg = ApplicationSecurityGroup(id=prop["id"])
+                asg = ApplicationSecurityGroup(**prop)
                 try:
                     private_endpoint.application_security_groups.append(asg)
                 except AttributeError:
@@ -6761,30 +6753,6 @@ def update_public_ip_prefix(instance, tags=None):
 # endregion
 
 
-# region RouteFilters
-def create_route_filter(cmd, client, resource_group_name, route_filter_name, location=None, tags=None):
-    RouteFilter = cmd.get_models('RouteFilter')
-    return client.begin_create_or_update(resource_group_name, route_filter_name,
-                                         RouteFilter(location=location, tags=tags))
-
-
-def list_route_filters(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-
-    return client.list()
-
-
-def create_route_filter_rule(cmd, client, resource_group_name, route_filter_name, rule_name, access, communities,
-                             location=None):
-    RouteFilterRule = cmd.get_models('RouteFilterRule')
-    return client.begin_create_or_update(resource_group_name, route_filter_name, rule_name,
-                                         RouteFilterRule(access=access, communities=communities,
-                                                         location=location))
-
-# endregion
-
-
 # region RouteTables
 def create_route_table(cmd, resource_group_name, route_table_name, location=None, tags=None,
                        disable_bgp_route_propagation=None):
@@ -6824,53 +6792,6 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
 
     if next_hop_ip_address is not None:
         instance.next_hop_ip_address = next_hop_ip_address
-    return instance
-# endregion
-
-
-# region ServiceEndpoints
-def create_service_endpoint_policy(cmd, resource_group_name, service_endpoint_policy_name, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    ServiceEndpointPolicy = cmd.get_models('ServiceEndpointPolicy')
-    policy = ServiceEndpointPolicy(tags=tags, location=location)
-    return client.begin_create_or_update(resource_group_name, service_endpoint_policy_name, policy)
-
-
-def list_service_endpoint_policies(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
-def update_service_endpoint_policy(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-
-    return instance
-
-
-def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
-                                              service_endpoint_policy_definition_name, service, service_resources,
-                                              description=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policy_definitions
-    ServiceEndpointPolicyDefinition = cmd.get_models('ServiceEndpointPolicyDefinition')
-    policy_def = ServiceEndpointPolicyDefinition(description=description, service=service,
-                                                 service_resources=service_resources)
-    return client.begin_create_or_update(resource_group_name, service_endpoint_policy_name,
-                                         service_endpoint_policy_definition_name, policy_def)
-
-
-def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
-    if service is not None:
-        instance.service = service
-
-    if service_resources is not None:
-        instance.service_resources = service_resources
-
-    if description is not None:
-        instance.description = description
-
     return instance
 # endregion
 

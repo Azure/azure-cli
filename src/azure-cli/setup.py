@@ -125,7 +125,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==1.1.0',
     'azure-mgmt-sqlvirtualmachine==1.0.0b3',
     'azure-mgmt-sql==4.0.0b2',
-    'azure-mgmt-storage~=20.0.0',
+    'azure-mgmt-storage~=20.1.0',
     'azure-mgmt-synapse==2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',
@@ -172,6 +172,7 @@ setup(
         'az',
         'az.completion.sh',
         'az.bat',
+        'az.ps1'
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
