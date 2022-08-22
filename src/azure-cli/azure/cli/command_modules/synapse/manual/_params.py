@@ -947,7 +947,7 @@ def load_arguments(self, _):
     for scope in ['show', 'create', 'delete']:
         with self.argument_context('synapse managed-private-endpoints ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-            c.argument('managed_private_endpoint_name', options_list=['--pe-name'], help='The managed private endpoint name.')
+            c.argument('managed_private_endpoint_name', arg_type=workspace_name_arg_type, options_list=['--pe-name'], help='The managed private endpoint name.')
 
     with self.argument_context('synapse managed-private-endpoints list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
