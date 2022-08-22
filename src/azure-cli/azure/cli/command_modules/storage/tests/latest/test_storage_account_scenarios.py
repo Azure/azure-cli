@@ -610,22 +610,22 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --allow-append')
 
-    # @AllowLargeResponse()
-    # @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-08-01')
-    # @ResourceGroupPreparer(name_prefix='cli_test_storage_account_sftp')
-    # def test_storage_account_sftp(self, resource_group):
-    #     self.kwargs.update({
-    #         'rg': resource_group,
-    #         'sa': self.create_random_name(prefix='cli', length=24),
-    #         'loc': 'centraluseuap'
-    #     })
-    #     self.cmd('storage account create -n {sa} -g {rg} -l {loc} --sku Standard_LRS --hns true '
-    #              '--enable-sftp true --enable-nfs-v3 false --enable-local-user true',
-    #              checks=[JMESPathCheck('isSftpEnabled', True), JMESPathCheck('isLocalUserEnabled', True)])
-    #     self.cmd('storage account update -n {sa} --enable-sftp false',
-    #              checks=[JMESPathCheck('isSftpEnabled', False), JMESPathCheck('isLocalUserEnabled', True)])
-    #     self.cmd('storage account update -n {sa} --enable-local-user false',
-    #              checks=[JMESPathCheck('isSftpEnabled', False), JMESPathCheck('isLocalUserEnabled', False)])
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-08-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_sftp')
+    def test_storage_account_sftp(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa': self.create_random_name(prefix='cli', length=24),
+            'loc': 'centraluseuap'
+        })
+        self.cmd('storage account create -n {sa} -g {rg} -l {loc} --sku Standard_LRS --hns true '
+                 '--enable-sftp true --enable-nfs-v3 false --enable-local-user true',
+                 checks=[JMESPathCheck('isSftpEnabled', True), JMESPathCheck('isLocalUserEnabled', True)])
+        self.cmd('storage account update -n {sa} --enable-sftp false',
+                 checks=[JMESPathCheck('isSftpEnabled', False), JMESPathCheck('isLocalUserEnabled', True)])
+        self.cmd('storage account update -n {sa} --enable-local-user false',
+                 checks=[JMESPathCheck('isSftpEnabled', False), JMESPathCheck('isLocalUserEnabled', False)])
 
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))

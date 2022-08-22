@@ -325,6 +325,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
+        c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   help='Enable Secure File Transfer Protocol.')
+        c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
@@ -438,6 +442,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
+        c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   is_preview=True, help='Enable Secure File Transfer Protocol.')
+        c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   is_preview=True, help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
