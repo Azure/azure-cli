@@ -776,7 +776,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['create', 'update']:
         with self.argument_context(f'storage account local-user {item}') as c:
             c.argument('permission_scope', nargs='+', action=PermissionScopeAddAction,
-                       help='The permission scope argument list which includes the permissions, service, and resource_name.'
+                       help='The permission scope argument list which includes the permissions, service, '
+                            'and resource_name.'
                             'The permissions can be a combination of the below possible values: '
                             'Read(r), Write (w), Delete (d), List (l), and Create (c). '
                             'The service has possible values: blob, file. '

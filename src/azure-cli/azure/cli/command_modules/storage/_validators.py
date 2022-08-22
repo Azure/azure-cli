@@ -2264,4 +2264,3 @@ class SshPublicKeyAddAction(argparse._AppendAction):
         except (ValueError, TypeError):
             raise CLIError('usage error: --ssh-authorized-key VARIABLE OPERATOR VALUE')
         namespace.ssh_authorized_key.append(SshPublicKey(description=description, key=key))
-
