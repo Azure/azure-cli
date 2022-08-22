@@ -625,8 +625,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
         if len(existing_apps) == 1:
             logger.warning("Found an existing application instance: (id) %s. We will patch it.",
                            existing_apps[0][ID])
-            body = update_application(
-                existing_apps[0], display_name=display_name, identifier_uris=identifier_uris,
+            update_application(
+                client, existing_apps[0][ID],
+                display_name=display_name, identifier_uris=identifier_uris,
                 is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
@@ -642,7 +643,6 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 app_roles=app_roles,
                 optional_claims=optional_claims,
                 required_resource_accesses=required_resource_accesses)
-            patch_application(cmd, existing_apps[0][ID], body)
 
             # no need to resolve identifierUris or appId. Just use id.
             return client.application_get(existing_apps[0][ID])
@@ -680,7 +680,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
     return result
 
 
-def update_application(instance, display_name=None, identifier_uris=None,  # pylint: disable=unused-argument
+def update_application(client, identifier, display_name=None, identifier_uris=None,
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
@@ -691,8 +691,11 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
                        # publicClient
                        public_client_redirect_uris=None,
                        # JSON properties
-                       app_roles=None, optional_claims=None, required_resource_accesses=None):
+                       app_roles=None, optional_claims=None, required_resource_accesses=None,
+                       # Generic update
+                       parameters=None, properties_to_set=None):
     body = {}
+    _update_patch_body(body, parameters, properties_to_set)
 
     key_credentials = None
     if key_value:
@@ -714,14 +717,8 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
         # JSON properties
         app_roles=app_roles, optional_claims=optional_claims, required_resource_accesses=required_resource_accesses
     )
-
-    return body
-
-
-def patch_application(cmd, identifier, parameters):
-    graph_client = _graph_client_factory(cmd.cli_ctx)
-    object_id = _resolve_application(graph_client, identifier)
-    return graph_client.application_update(object_id, parameters)
+    object_id = _resolve_application(client, identifier)
+    return client.application_update(object_id, body)
 
 
 def show_application(client, identifier):
@@ -1013,15 +1010,14 @@ def create_service_principal(cmd, identifier):
     return _create_service_principal(cmd.cli_ctx, identifier)
 
 
-def update_service_principal(instance):  # pylint: disable=unused-argument
+def update_service_principal(client, identifier,
+                             # Generic update
+                             parameters=None, properties_to_set=None):
     # Do not PATCH back properties retrieved with GET and leave everything else to generic update.
-    return {}
-
-
-def patch_service_principal(cmd, identifier, parameters):
-    graph_client = _graph_client_factory(cmd.cli_ctx)
-    object_id = _resolve_service_principal(graph_client, identifier)
-    return graph_client.service_principal_update(object_id, parameters)
+    body = {}
+    _update_patch_body(body, parameters, properties_to_set)
+    object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_update(object_id, body)
 
 
 def _create_service_principal(cli_ctx, identifier, resolve_app=True):
@@ -1989,3 +1985,26 @@ def _get_member_groups(get_member_group_func, identifier, security_enabled_only)
         "securityEnabledOnly": security_enabled_only
     }
     return get_member_group_func(identifier, body)
+
+
+def _update_patch_body(body, parameters, properties_to_set):
+    # --parameters
+    if parameters:
+        body.update(parameters)
+
+    # --set
+    if properties_to_set:
+        for exp in properties_to_set:
+            try:
+                key, value = exp.split('=', 1)
+            except ValueError as ex:
+                from azure.cli.core.azclierror import ArgumentUsageError
+                raise ArgumentUsageError('Usage error: Please set properties with space-separated list of '
+                                         '{name}={string or JSON}, such as `--set displayName=myapp`') from ex
+            # Try parsing value as JSON
+            try:
+                value = shell_safe_json_parse(value)
+            except:  # pylint:disable=bare-except
+                pass
+            body[key] = value
+    return body
