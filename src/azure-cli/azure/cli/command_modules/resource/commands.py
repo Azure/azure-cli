@@ -403,22 +403,14 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deployment_stack_at_subscription', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_subscription', confirmation = True)
         g.custom_command('create', 'create_deployment_stack_at_subscription', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
+        g.custom_command('export template', 'export_template_deployment_stack_at_subscription')
 
     with self.command_group('stack group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_at_resource_group', table_transformer=transform_stacks)
         g.custom_command('list', 'list_deployment_stack_at_resource_group', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_resource_group', confirmation = True)
         g.custom_command('create', 'create_deployment_stack_at_resource_group', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
-    
-    with self.command_group('stack snapshot sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_snapshot_at_subscription', table_transformer=transform_stacks)
-        g.custom_command('list', 'list_deployment_stack_snapshot_at_subscription', table_transformer=transform_stacks_list)
-        g.custom_command('delete', 'delete_deployment_stack_snapshot_at_subscription', confirmation = True)
-    
-    with self.command_group('stack snapshot group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_snapshot_at_resource_group', table_transformer=transform_stacks)
-        g.custom_command('list', 'list_deployment_stack_snapshot_at_resource_group', table_transformer=transform_stacks_list)
-        g.custom_command('delete', 'delete_deployment_stack_snapshot_at_resource_group', confirmation = True)
+        g.custom_command('export template', 'export_template_deployment_stack_at_resource_group')
     
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:

@@ -99,14 +99,13 @@ def load_arguments(self, _):
 
     stacks_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The name of the deployment stack.')
     stacks_description_type = CLIArgumentType(options_list=['--description'], help='The description of deployment stack.')
-    stacks_update_behavior_type = CLIArgumentType(options_list=['--update-behavior'], help='The update behavior of deployment stacks: either detachResources or purgeResources.')
+    stacks_action_on_unmanage_type = CLIArgumentType(options_list=['--action-on-unmanage'], help='The update behavior of deployment stacks: either detachResources or purgeResources.')
     stacks_stack_type = CLIArgumentType(help='The deployment stack resource id.')
     stacks_stack_name_type = CLIArgumentType(help='The deployment stack name')
     stacks_snapshot_type = CLIArgumentType(options_list=['--id'], help='The deployment stack snapshot resource id.')
     stacks_snapshot_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The deployment stack snapshot name.')
-
-
-
+    stacks_unmanage_action_resources_type = CLIArgumentType(options_list=['--unmanage-action-resources'], help='<>')
+    stacks_unmanage_action_resource_groups_type = CLIArgumentType(options_list=['--unmanage-action-resource-groups'], help='<>')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -665,7 +664,7 @@ def load_arguments(self, _):
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
-        c.argument('update_behavior', arg_type=stacks_update_behavior_type)
+        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('description', arg_type=stacks_description_type)
         c.argument('subscription', arg_type=subscription_type)
     
@@ -678,6 +677,8 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
+        c.argument('unmanage_action_resources', arg_type=stacks_unmanage_action_resources_type)
+        c.argument('unmanage_action_resource_groups', arg_type=stacks_unmanage_action_resource_groups_type)
     
     with self.argument_context('stack group create') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
@@ -686,7 +687,7 @@ def load_arguments(self, _):
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
-        c.argument('update_behavior', arg_type=stacks_update_behavior_type)
+        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
         c.argument('description', arg_type=stacks_description_type)
         c.argument('subscription', arg_type=subscription_type)
     
@@ -706,6 +707,8 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
+        c.argument('unmanage_action_resources', arg_type=stacks_unmanage_action_resources_type)
+        c.argument('unmanage_action_resource_groups', arg_type=stacks_unmanage_action_resource_groups_type)
     
     with self.argument_context('stack snapshot sub show') as c:
         c.argument('name', arg_type=stacks_snapshot_name_type)
