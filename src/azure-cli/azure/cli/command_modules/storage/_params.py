@@ -87,6 +87,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                 help='Enable Azure Files Active Directory Domain Service Authentication for '
                                      'storage account. When --enable-files-adds is set to true, Azure Active '
                                      'Directory Properties arguments must be provided.')
+    aadkerb_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2022-05-01',
+                                   arg_group='Azure Files Identity Based Authentication',
+                                   help='Enable Azure Files Active Directory Domain Service Kerberos Authentication '
+                                        'for the storage account')
     aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
                                  arg_group='Azure Files Identity Based Authentication',
                                  help='Enable Azure Active Directory Domain Services authentication for Azure Files')
@@ -326,6 +330,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
+        c.argument('enable_files_aadkerb', aadkerb_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
         c.argument('domain_name', domain_name_type)
         c.argument('net_bios_domain_name', net_bios_domain_name_type)
@@ -439,6 +444,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type, default=None)
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
+        c.argument('enable_files_aadkerb', aadkerb_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
         c.argument('domain_name', domain_name_type)
         c.argument('net_bios_domain_name', net_bios_domain_name_type)
