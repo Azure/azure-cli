@@ -294,29 +294,6 @@ def ensure_container_insights_for_monitoring(
     workspace_resource_id = sanitize_loganalytics_ws_resource_id(
         workspace_resource_id
     )
-
-    # extract subscription ID and resource group from workspace_resource_id URL
-    try:
-        subscription_id = workspace_resource_id.split("/")[2]
-        resource_group = workspace_resource_id.split("/")[4]
-    except IndexError:
-        raise AzCLIError(
-            "Could not locate resource group in workspace-resource-id URL."
-        )
-
-    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
-    if not remove_monitoring:
-        resources = get_resources_client(cmd.cli_ctx, subscription_id)
-        try:
-            resource = resources.get_by_id(
-                workspace_resource_id, "2015-11-01-preview"
-            )
-            location = resource.location
-            # location can have spaces for example 'East US' hence remove the spaces
-            location = location.replace(" ", "").lower()
-        except HttpResponseError as ex:
-            raise ex
-
     if aad_route:
         cluster_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
@@ -324,7 +301,7 @@ def ensure_container_insights_for_monitoring(
         )
         dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
         dcr_resource_id = (
-            f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
+            f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
         if create_dcr:
@@ -335,7 +312,7 @@ def ensure_container_insights_for_monitoring(
             for _ in range(3):
                 try:
                     location_list_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{subscription_id}/locations?api-version=2019-11-01"
+                        f"/subscriptions/{cluster_subscription}/locations?api-version=2019-11-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", location_list_url)
                     # this is required to fool the static analyzer. The else statement will only run if an exception
                     # is thrown, but flake8 will complain that e is undefined if we don't also define it here.
@@ -356,7 +333,7 @@ def ensure_container_insights_for_monitoring(
             for _ in range(3):
                 try:
                     feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
+                        f"/subscriptions/{cluster_subscription}/providers/Microsoft.Insights?api-version=2020-10-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
                     error = None
                     break
@@ -369,9 +346,9 @@ def ensure_container_insights_for_monitoring(
                 if resource["resourceType"].lower() == "datacollectionrules":
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
-                    if location not in region_ids:
+                    if cluster_region not in region_ids:
                         raise ClientRequestError(
-                            f"Data Collection Rules are not supported for LA workspace region {location}")
+                            f"Data Collection Rules are not supported for cluster region {cluster_region}")
                 if resource["resourceType"].lower() == "datacollectionruleassociations":
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
@@ -386,7 +363,7 @@ def ensure_container_insights_for_monitoring(
             # create the DCR
             dcr_creation_body = json.dumps(
                 {
-                    "location": location,
+                    "location": cluster_region,
                     "tags": existing_tags,
                     "properties": {
                         "dataSources": {
