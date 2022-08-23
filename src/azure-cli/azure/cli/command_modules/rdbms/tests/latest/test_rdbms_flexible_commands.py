@@ -7,6 +7,7 @@ import time
 
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
+from dateutil import parser
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
@@ -15,6 +16,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
@@ -72,7 +74,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
-    mysql_location = 'southcentralus'
+    mysql_location = 'northeurope'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -122,7 +124,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             storage_size = 32
             version = '5.7'
             location = self.mysql_location
-            location_result = 'South Central US'
+            location_result = 'North Europe'
             sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
@@ -210,7 +212,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        location = 'westus'
+        location = 'northeurope'
         list_skus_info = get_mysql_list_skus_info(self, location)
         iops_info = list_skus_info['iops_info']
 
@@ -303,11 +305,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
-        date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
-
-        if current_time < earliest_restore_time:
-            sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
-                                                                                             date_format)).total_seconds())
+        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+        sleep(max(0, seconds_to_wait + 180))
 
         # default vnet resources
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
@@ -391,8 +390,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'postgres':
             location = self.postgres_location
         elif database_engine == 'mysql':
-            location = 'eastus2euap'
-            target_location = 'centraluseuap'
+            location = 'northeurope'
+            target_location = 'westeurope'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_server_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -430,7 +429,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                   .format(database_engine, resource_group, target_location, target_server_public_access, source_server)).get_output_in_json()
 
             self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
-            self.assertEqual(restore_result['location'], 'Central US EUAP')
+            self.assertEqual(restore_result['location'], 'West Europe')
 
         # 3. vnet to different vnet
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
@@ -477,7 +476,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                   .format(database_engine, resource_group, target_location, target_server_public_access_2, source_server_2)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
-        self.assertEqual(restore_result['location'], 'Central US EUAP')
+        self.assertEqual(restore_result['location'], 'West Europe')
 
         # Delete servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
@@ -907,7 +906,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1028,7 +1027,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             private_dns_zone_key = "privateDnsZoneResourceId"
 
         # flexible-servers
-        servers = ['testvnetserver3' + database_engine, 'testvnetserver4' + database_engine]
+        servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) + database_engine, self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) + database_engine]
         private_dns_zone_1 = "testdnszone3.private.{}.database.azure.com".format(database_engine)
         private_dns_zone_2 = "testdnszone4.private.{}.database.azure.com".format(database_engine)
         # Case 1 : Provision a server with supplied Vname and subnet name that exists.
@@ -1587,7 +1586,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1743,19 +1742,20 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         self._test_backups_mgmt('mysql', resource_group, server)
 
     def _test_backups_mgmt(self, database_engine, resource_group, server):
-        server_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server)).get_output_in_json()
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-        earliest_restore_time = server_info['backup']['earliestRestoreDate']
-        date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
-        sleep(max(0, (datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time, date_format)).total_seconds() + 30))
+        attempts = 0
 
-        backups = self.cmd('{} flexible-server backup list -g {} -n {}'
-                       .format(database_engine, resource_group, server)).get_output_in_json()
+        while attempts < 10:
+            backups = self.cmd('{} flexible-server backup list -g {} -n {}'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+            attempts += 1
+            if len(backups) > 0:
+                break
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
 
         self.assertTrue(len(backups) == 1)
 
         automatic_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
-                                 .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
+                                    .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
 
         self.assertDictEqual(automatic_backup, backups[0])
 

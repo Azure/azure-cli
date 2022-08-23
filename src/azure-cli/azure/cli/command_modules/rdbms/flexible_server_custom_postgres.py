@@ -380,7 +380,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 
 def flexible_list_skus(cmd, client, location):
-    result = client.execute(location, api_version='2021-06-01')
+    result = client.execute(location)
     logger.warning('For prices please refer to https://aka.ms/postgres-pricing')
     return result
 

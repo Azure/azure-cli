@@ -169,7 +169,7 @@ def get_postgres_tiers(sku_info):
 
 def get_postgres_list_skus_info(cmd, location):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.execute(location, api_version='2021-06-01')
+    list_skus_result = list_skus_client.execute(location)
     return _postgres_parse_list_skus(list_skus_result)
 
 
