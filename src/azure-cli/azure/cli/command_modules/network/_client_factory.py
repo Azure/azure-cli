@@ -156,14 +156,6 @@ def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
 
 
-def cf_service_endpoint_policies(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_endpoint_policies
-
-
-def cf_service_endpoint_policy_definitions(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_endpoint_policy_definitions
-
-
 def cf_service_tags(cli_ctx, _):
     return network_client_factory(cli_ctx).service_tags
 
@@ -230,18 +222,6 @@ def cf_dns_mgmt_record_sets(cli_ctx, _):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
-
-
-def cf_route_filters(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_filters
-
-
-def cf_route_filter_rules(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_filter_rules
-
-
-def cf_service_community(cli_ctx, _):
-    return network_client_factory(cli_ctx).bgp_service_communities
 
 
 def cf_virtual_router(cli_ctx, _):

@@ -6,7 +6,7 @@
 from enum import Enum
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import user_confirmation
-from knack.log import get_logger
+from knack.log import get_logger, CLIError
 
 from ._utils import validate_premium_registry, get_registry_by_name
 
@@ -146,3 +146,45 @@ def acr_config_soft_delete_update(cmd,
         client.begin_update(resource_group_name, registry_name, parameters)
     )
     return updated_policies.policies.soft_delete_policy
+
+
+def acr_config_authentication_as_arm_show(cmd,
+                                          registry_name,
+                                          resource_group_name=None):
+
+    AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
+
+    try:
+        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    except CLIError:
+        return AzureADAuthenticationAsArmPolicy()
+
+    AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
+    policies = registry.policies
+    aadAuth_policy = policies.azure_ad_authentication_as_arm_policy if policies else AzureADAuthenticationAsArmPolicy()
+
+    return aadAuth_policy
+
+
+def acr_config_authentication_as_arm_update(cmd,
+                                            client,
+                                            registry_name,
+                                            status=None,
+                                            resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    policies = registry.policies
+    if status:
+        Policy = cmd.get_models('Policy')
+        policies = policies if policies else Policy()
+        AzureADAuthenticationAsArmPolicy = cmd.get_models('AzureADAuthenticationAsArmPolicy')
+        policies.azure_ad_authentication_as_arm_policy = policies.azure_ad_authentication_as_arm_policy \
+            if policies.azure_ad_authentication_as_arm_policy else AzureADAuthenticationAsArmPolicy()
+        policies.azure_ad_authentication_as_arm_policy.status = status
+
+    RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
+    parameters = RegistryUpdateParameters(policies=policies)
+    updated_policies = LongRunningOperation(cmd.cli_ctx)(
+        client.begin_update(resource_group_name, registry_name, parameters)
+    )
+
+    return updated_policies.policies.azure_ad_authentication_as_arm_policy

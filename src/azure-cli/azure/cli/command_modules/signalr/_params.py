@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-statements
 
 
 from knack.arguments import CLIArgumentType
@@ -32,6 +33,8 @@ logger = get_logger(__name__)
 
 def load_arguments(self, _):
     signalr_name_type = CLIArgumentType(options_list='--signalr-name', help='Name of the SignalR.', id_part='name')
+    signalr_custom_domain_name_type = CLIArgumentType(help='Name of the custom domain.', id_part='child_name_1')
+    signalr_custom_certificate_name_type = CLIArgumentType(help='Name of the custom certificate.', id_part='child_name_2')
 
     with self.argument_context('signalr') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -44,7 +47,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('signalr create') as c:
-        c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
+        c.argument('sku', help='The sku name of the signalr service. Allowed values: Premium_P1, Standard_S1, Free_F1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
         c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
         c.argument('enable_message_logs', help='The switch for messaging logs which signalr service will generate or not', arg_type=get_three_state_flag())
@@ -99,3 +102,36 @@ def load_arguments(self, _):
     # Managed Identity
     with self.argument_context('signalr identity assign') as c:
         c.argument('identity', help="Assigns managed identities to the service. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. You can only assign either on of them.")
+
+    # Custom Domain
+    for scope in ['signalr custom-domain update',
+                  'signalr custom-domain create',
+                  'signalr custom-domain show',
+                  'signalr custom-domain delete',
+                  'signalr custom-domain list']:
+        with self.argument_context(scope) as c:
+            c.argument('signalr_name', signalr_name_type, id_part=None)
+            c.argument('name', signalr_custom_domain_name_type)
+
+    for scope in ['signalr custom-domain update',
+                  'signalr custom-domain create']:
+        with self.argument_context(scope) as c:
+            c.argument('domain_name', help="Custom domain name. For example, `contoso.com`.")
+            c.argument('certificate_resource_id', help="ResourceId of a previously created custom certificate.")
+
+    # Custom Certificate
+    for scope in ['signalr custom-certificate update',
+                  'signalr custom-certificate create',
+                  'signalr custom-certificate show',
+                  'signalr custom-certificate delete',
+                  'signalr custom-certificate list']:
+        with self.argument_context(scope) as c:
+            c.argument('signalr_name', signalr_name_type, id_part=None)
+            c.argument('name', signalr_custom_certificate_name_type)
+
+    for scope in ['signalr custom-certificate update',
+                  'signalr custom-certificate create']:
+        with self.argument_context(scope) as c:
+            c.argument('keyvault_base_uri', help="Key vault base URI. For example, `https://contoso.vault.azure.net`.")
+            c.argument('keyvault_secret_name', help="Key vault secret name where certificate is stored.")
+            c.argument('keyvault_secret_version', help="Key vault secret version where certificate is stored. If empty, will use latest version.")

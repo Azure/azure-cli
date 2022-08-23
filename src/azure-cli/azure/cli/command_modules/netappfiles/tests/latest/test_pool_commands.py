@@ -9,7 +9,7 @@ from knack.util import CLIError
 POOL_DEFAULT = "--service-level Premium --size 4"
 POOL_DEFAULT_TOO_SMALL = "--service-level 'Premium' --size 3"
 POOL_DEFAULT_STRING_SIZE = "--service-level 'Premium' --size a"
-LOCATION = "southcentralusstage"
+LOCATION = "eastus2euap"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -125,11 +125,11 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
 
         self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g {rg} -a %s -p %s -l %s %s --encryption-type %s" %
-                 (account_name, pool_name, LOCATION, POOL_DEFAULT, "Double")).get_output_in_json()
+                 (account_name, pool_name, LOCATION, POOL_DEFAULT, "Single")).get_output_in_json()
 
         pool = self.cmd("az netappfiles pool show --resource-group {rg} -a %s -p %s" % (account_name, pool_name)).get_output_in_json()
         assert pool['name'] == account_name + '/' + pool_name
-        assert pool['encryptionType'] == "Double"
+        assert pool['encryptionType'] == "Single"
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus')
     def test_create_pool_with_no_location(self):
