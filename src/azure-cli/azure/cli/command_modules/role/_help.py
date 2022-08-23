@@ -101,9 +101,9 @@ helps['ad app credential list'] = """
 type: command
 short-summary: List an application's password or certificate credential metadata. (The content of the password or certificate credential is not retrievable.)
 examples:
-- name: list an application's password credentials
+- name: List an application's password credentials
   text: az ad app credential list --id 00000000-0000-0000-0000-000000000000
-- name: list an application's certificate credentials
+- name: List an application's certificate credentials
   text: az ad app credential list --id 00000000-0000-0000-0000-000000000000 --cert
 """
 
