@@ -6753,49 +6753,6 @@ def update_public_ip_prefix(instance, tags=None):
 # endregion
 
 
-# region RouteTables
-def create_route_table(cmd, resource_group_name, route_table_name, location=None, tags=None,
-                       disable_bgp_route_propagation=None):
-    RouteTable = cmd.get_models('RouteTable')
-    ncf = network_client_factory(cmd.cli_ctx)
-    route_table = RouteTable(location=location, tags=tags)
-    if cmd.supported_api_version(min_api='2017-10-01'):
-        route_table.disable_bgp_route_propagation = disable_bgp_route_propagation
-    return ncf.route_tables.begin_create_or_update(resource_group_name, route_table_name, route_table)
-
-
-def update_route_table(instance, tags=None, disable_bgp_route_propagation=None):
-    if tags == '':
-        instance.tags = None
-    elif tags is not None:
-        instance.tags = tags
-    if disable_bgp_route_propagation is not None:
-        instance.disable_bgp_route_propagation = disable_bgp_route_propagation
-    return instance
-
-
-def create_route(cmd, resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
-                 next_hop_ip_address=None):
-    Route = cmd.get_models('Route')
-    route = Route(next_hop_type=next_hop_type, address_prefix=address_prefix,
-                  next_hop_ip_address=next_hop_ip_address, name=route_name)
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.routes.begin_create_or_update(resource_group_name, route_table_name, route_name, route)
-
-
-def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_address=None):
-    if address_prefix is not None:
-        instance.address_prefix = address_prefix
-
-    if next_hop_type is not None:
-        instance.next_hop_type = next_hop_type
-
-    if next_hop_ip_address is not None:
-        instance.next_hop_ip_address = next_hop_ip_address
-    return instance
-# endregion
-
-
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
