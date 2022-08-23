@@ -775,7 +775,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account local-user') as c:
         c.argument('account_name', acct_name_type, options_list='--account-name', id_part=None)
-        c.argument('username', options_list=['--username', '--name', '-n'],
+        c.argument('username', options_list=['--user-name', '--name', '-n'],
                    help='The name of local user. The username must contain lowercase letters and numbers '
                         'only. It must be unique only within the storage account.')
 
