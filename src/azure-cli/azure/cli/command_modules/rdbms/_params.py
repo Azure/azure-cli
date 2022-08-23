@@ -89,7 +89,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
-            c.argument('version', help='Server major version.')
+            if command_group == 'postgres':
+                c.argument('version', default='11',
+                           help='Server major version. https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
+            else:
+                c.argument('version', help='Server major version.')
 
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')

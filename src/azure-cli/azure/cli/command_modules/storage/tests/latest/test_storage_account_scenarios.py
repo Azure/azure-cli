@@ -889,6 +889,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
+    @unittest.skip('Failure due to service behavior change')
     @ResourceGroupPreparer(location='eastus2euap')
     @KeyVaultPreparer(location='eastus2euap')
     def test_user_assigned_identity(self, resource_group, key_vault):
@@ -1517,6 +1518,177 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
         --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
         --sam-account-name {sam_account_name} --account-type Computer"""
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
+        self.assertEqual(activeDirectoryProperties['accountType'], "Computer")
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadkerb(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        create_cmd = 'storage account create -n {sc} -g {rg} -l eastus2euap --sku Standard_LRS ' \
+                     '--enable-files-aadkerb --domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadkerb_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name
+        })
+        result = self.cmd(
+            "storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-aadkerb false").get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadkerb_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        create_cmd = 'storage account create -n {sc} -g {rg} -l eastus2euap --sku Standard_LRS ' \
+                     '--enable-files-aadkerb true --domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadkerb(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} -l eastus2euap'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        update_cmd = 'storage account update -n {sc} -g {rg} --enable-files-aadkerb'
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+
+        update_cmd = 'storage account update -n {sc} -g {rg} --enable-files-aadkerb ' \
+                     '--domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadkerb_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} -l eastus2euap'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+
+        update_cmd = 'az storage account update -n {} -g {} --enable-files-aadkerb false'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadkerb_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} -l eastus2euap'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        update_cmd = 'storage account update -n {sc} -g {rg} --enable-files-aadkerb true ' \
+                     '--domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-08-01')
+    @ResourceGroupPreparer()
+    def test_storage_account_with_files_adds_sam_account_name(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234',
+            'sam_account_name': self.create_random_name(prefix='samaccount', length=48)
+        })
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name
+            {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid
+            {domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
+            --sam-account-name {sam_account_name} --account-type User"""
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
+        self.assertEqual(activeDirectoryProperties['accountType'], "User")
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
+        self.kwargs.update({
+            'sam_account_name': self.create_random_name(prefix='newsamaccount', length=48)
+        })
+        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds --domain-name {domain_name}
+            --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
+            --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
+            --sam-account-name {sam_account_name} --account-type Computer"""
         result = self.cmd(update_cmd).get_output_in_json()
 
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
@@ -2194,10 +2366,11 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
-        # Update ORS policy
-        result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
-            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
-        self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
+        # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
+        # # Update ORS policy
+        # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
+        #     resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
+        # self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
 
         # Delete policy from destination and source account
         self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')

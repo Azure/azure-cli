@@ -72,13 +72,6 @@ def tm_endpoint_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
         else []
 
 
-@Completer
-def service_endpoint_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    client = network_client_factory(cmd.cli_ctx).available_endpoint_services
-    location = namespace.location
-    return [x.name for x in client.list(location=location)]
-
-
 def get_sdk_completer(group, operation_name):
 
     @Completer
