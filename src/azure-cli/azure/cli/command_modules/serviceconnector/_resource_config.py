@@ -147,17 +147,17 @@ SOURCE_RESOURCES_PARAMS = {
     RESOURCE.SpringCloud: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
-            'help': 'The resource group which contains the spring-cloud',
+            'help': 'The resource group which contains app in the Azure Spring Apps',
             'placeholder': 'SpringCloudRG'
         },
         'spring': {
             'options': ['--service'],
-            'help': 'Name of the spring-cloud service',
+            'help': 'Name of the the Azure Spring Apps resource',
             'placeholder': 'MySpringService'
         },
         'app': {
             'options': ['--app'],
-            'help': 'Name of the spring-cloud app',
+            'help': 'Name of the app in the Azure Spring Apps',
             'placeholder': 'MyApp'
         },
         'deployment': {
