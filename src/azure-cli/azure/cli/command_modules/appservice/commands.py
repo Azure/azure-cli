@@ -498,6 +498,8 @@ def load_command_table(self, _):
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
+        g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
+                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())

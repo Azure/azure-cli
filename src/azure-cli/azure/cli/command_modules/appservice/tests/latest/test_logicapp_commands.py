@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from email import message
 import json
 import unittest
 from unittest import mock
@@ -47,7 +48,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd('logicapp show -g {} -n {}'.format(resource_group, logicapp_name),
         checks=[
             JMESPathCheck('name', logicapp_name),
-            JMESPathCheck('kind', 'functionapp,workflowapp'),
+            JMESPathCheck('kind', 'logicapp,workflowapp'),
             JMESPathCheck('state', 'Running') # app should be running on creation
         ])
 
@@ -182,6 +183,29 @@ class LogicappBasicE2ETest(ScenarioTest):
         ])
 
 
+class LogicappCommandsTest(ScenarioTest):
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
+    def test_logicapp_update(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='logicappplan', length=24)
+        logicapp = self.create_random_name(prefix='logicapp-slot', length=24)
+        slotname = self.create_random_name(prefix='slotname', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'WS1'),
+        ])
+        self.cmd('logicapp create -g {} -n {} --plan {} -s {}'.format(resource_group, logicapp, plan,
+                                                                                        storage_account), checks=[
+            JMESPathCheck('name', logicapp)
+        ])
+        self.cmd('logicapp update -g {} -n {} --set siteConfig.healthCheckPath=/api/HealthCheck'.format(resource_group, logicapp, slotname), checks=[
+            JMESPathCheck('name', logicapp),
+        ])
+        self.cmd('logicapp show -g {} -n {} '.format(resource_group, logicapp), checks=[
+            JMESPathCheck('siteConfig.healthCheckPath', '/api/HealthCheck')
+        ])
+
+
 class LogicAppDeployTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_zip_deploy_e2e(self, resource_group):
@@ -193,7 +217,7 @@ class LogicAppDeployTest(LiveScenarioTest):
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -p {} -s {} --os-type windows'.format(resource_group, logicapp_name, plan, storage))
 
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('site_name', logicapp_name),
         ])
@@ -208,9 +232,9 @@ class LogicAppDeployTest(LiveScenarioTest):
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -p {} -s {} --os-type linux'.format(resource_group, logicapp_name, plan, storage))
 
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('site_name', logicapp_name),
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
+            JMESPathCheck('status', 4),
+            JMESPathCheck('complete', True),
         ])
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
@@ -221,7 +245,7 @@ class LogicAppDeployTest(LiveScenarioTest):
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type windows'.format(resource_group, logicapp_name, DEFAULT_LOCATION, storage))
 
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('site_name', logicapp_name),
         ])
@@ -234,10 +258,7 @@ class LogicAppDeployTest(LiveScenarioTest):
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type linux'.format(resource_group, logicapp_name, DEFAULT_LOCATION, storage))
 
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('site_name', logicapp_name),
-        ])
+        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file))
 
 
 class LogicAppPlanTest(ScenarioTest):
@@ -278,7 +299,7 @@ class LogicAppPlanTest(ScenarioTest):
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('enabled', True),
             JMESPathCheck('appServicePlanId', plan_id),
-            JMESPathCheck('kind', 'functionapp,workflowapp'),
+            JMESPathCheck('kind', 'logicapp,workflowapp'),
         ])
 
     def _run_sku_test(self, sku, resource_group, storage_account):
@@ -338,7 +359,7 @@ class LogicAppOnWindows(ScenarioTest):
                  .format(resource_group, logicapp_name, WINDOWS_ASP_LOCATION_LOGICAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', logicapp_name),
-                     JMESPathCheck('kind', 'functionapp,workflowapp'),
+                     JMESPathCheck('kind', 'logicapp,workflowapp'),
                      JMESPathCheck('hostNames[0]', logicapp_name + '.azurewebsites.net')])
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
 
@@ -361,9 +382,9 @@ class LogicAppOnLinux(ScenarioTest):
         self.cmd('logicapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].name', logicapp_name),
-            JMESPathCheck('[0].kind', 'functionapp,linux,workflowapp')
+            JMESPathCheck('[0].kind', 'logicapp,linux,workflowapp')
         ]).get_output_in_json()
-        # self.assertTrue('functionapp,workflowapp,linux' in result[0]['kind'])
+        # self.assertTrue('logicapp,workflowapp,linux' in result[0]['kind'])
 
 
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
