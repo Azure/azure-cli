@@ -58,7 +58,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
-    process_vpn_connection_create_namespace, process_route_table_create_namespace,
+    process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 

@@ -147,52 +147,31 @@ class Wait(AAZWaitCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_route_read(cls._schema_on_200)
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.etag = AAZStrType()
+            _schema_on_200.id = AAZStrType()
+            _schema_on_200.name = AAZStrType()
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.address_prefix = AAZStrType(
+                serialized_name="addressPrefix",
+            )
+            properties.next_hop_ip_address = AAZStrType(
+                serialized_name="nextHopIpAddress",
+            )
+            properties.next_hop_type = AAZStrType(
+                serialized_name="nextHopType",
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+            )
 
             return cls._schema_on_200
-
-
-_schema_route_read = None
-
-
-def _build_schema_route_read(_schema):
-    global _schema_route_read
-    if _schema_route_read is not None:
-        _schema.etag = _schema_route_read.etag
-        _schema.id = _schema_route_read.id
-        _schema.name = _schema_route_read.name
-        _schema.properties = _schema_route_read.properties
-        return
-
-    _schema_route_read = AAZObjectType()
-
-    route_read = _schema_route_read
-    route_read.etag = AAZStrType()
-    route_read.id = AAZStrType()
-    route_read.name = AAZStrType()
-    route_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-
-    properties = _schema_route_read.properties
-    properties.address_prefix = AAZStrType(
-        serialized_name="addressPrefix",
-    )
-    properties.next_hop_ip_address = AAZStrType(
-        serialized_name="nextHopIpAddress",
-    )
-    properties.next_hop_type = AAZStrType(
-        serialized_name="nextHopType",
-        flags={"required": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-    )
-
-    _schema.etag = _schema_route_read.etag
-    _schema.id = _schema_route_read.id
-    _schema.name = _schema_route_read.name
-    _schema.properties = _schema_route_read.properties
 
 
 __all__ = ["Wait"]
