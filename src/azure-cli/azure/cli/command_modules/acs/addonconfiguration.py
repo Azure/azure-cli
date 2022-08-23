@@ -298,7 +298,6 @@ def ensure_container_insights_for_monitoring(
     # extract subscription ID and resource group from workspace_resource_id URL
     try:
         subscription_id = workspace_resource_id.split("/")[2]
-        resource_group = workspace_resource_id.split("/")[4]
     except IndexError:
         raise AzCLIError(
             "Could not locate resource group in workspace-resource-id URL."
