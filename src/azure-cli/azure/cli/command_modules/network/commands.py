@@ -16,8 +16,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
-    cf_route_tables, cf_routes, cf_virtual_networks,
-    cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
+    cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages,
@@ -245,11 +244,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PublicIPPrefixesOperations.{}',
         client_factory=cf_public_ip_prefixes,
         min_api='2018-07-01'
-    )
-
-    network_rt_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#RouteTablesOperations.{}',
-        client_factory=cf_route_tables
     )
 
     network_service_tags_sdk = CliCommandType(
@@ -1234,27 +1228,6 @@ def load_command_table(self, _):
     # region RouteFilters
     from azure.cli.command_modules.network.aaz.latest.network.route_filter.rule import ListServiceCommunities
     self.command_table['network route-filter rule list-service-communities'] = ListServiceCommunities(loader=self, table_transformer=transform_service_community_table_output)
-    # endregion
-
-    # region RouteTables
-    with self.command_group('network route-table', network_rt_sdk) as g:
-        g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_route_tables')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_route_table')
-
-    network_rtr_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#RoutesOperations.{}',
-        client_factory=cf_routes
-    )
-    with self.command_group('network route-table route', network_rtr_sdk) as g:
-        g.custom_command('create', 'create_route')
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='route_parameters', custom_func_name='update_route')
-
     # endregion
 
     # region TrafficManagers

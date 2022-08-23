@@ -1844,27 +1844,6 @@ def load_arguments(self, _):
         c.argument('custom_ip_prefix_name', min_api='2020-06-01', help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.")
     # endregion
 
-    # region RouteTables
-    with self.argument_context('network route-table') as c:
-        c.argument('route_table_name', name_arg_type, help='Name of the route table.', completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
-        c.argument('disable_bgp_route_propagation', arg_type=get_three_state_flag(), min_api='2017-10-01', help='Disable routes learned by BGP.')
-
-    with self.argument_context('network route-table create') as c:
-        c.extra('tags')
-        c.extra('location')
-        c.extra('cmd')
-        c.argument('location', get_location_type(self.cli_ctx))
-        c.ignore('parameters')
-
-    with self.argument_context('network route-table route') as c:
-        c.argument('route_name', name_arg_type, id_part='child_name_1', help='Route name')
-        c.argument('route_table_name', options_list='--route-table-name', help='Route table name')
-        c.argument('next_hop_type', help='The type of Azure hop the packet should be sent to.', arg_type=get_enum_type(RouteNextHopType))
-        c.argument('next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
-        c.argument('address_prefix', help='The destination CIDR to which the route applies.')
-
-    # endregion
-
     # region TrafficManagers
     monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
     with self.argument_context('network traffic-manager profile') as c:
