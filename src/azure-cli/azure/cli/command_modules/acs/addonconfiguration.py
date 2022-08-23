@@ -369,9 +369,9 @@ def ensure_container_insights_for_monitoring(
                 if resource["resourceType"].lower() == "datacollectionrules":
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
-                    if cluster_region not in region_ids:
+                    if location not in region_ids:
                         raise ClientRequestError(
-                            f"Data Collection Rules are not supported for cluster region {cluster_region}")
+                            f"Data Collection Rules are not supported for cluster region {location}")
                 if resource["resourceType"].lower() == "datacollectionruleassociations":
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
