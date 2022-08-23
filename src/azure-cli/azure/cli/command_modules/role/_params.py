@@ -213,7 +213,7 @@ def load_arguments(self, _):
     for item in ['ad app credential reset', 'ad sp credential reset']:
         with self.argument_context(item) as c:
             c.argument('display_name', arg_group='Credential',
-                       help="Friendly name for the password or certificate credential.")
+                       help="Friendly name for the credential.")
 
     for item in ['ad app credential list', 'ad app credential delete',
                  'ad sp credential list', 'ad sp credential delete']:
