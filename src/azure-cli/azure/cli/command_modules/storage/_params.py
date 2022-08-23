@@ -448,9 +448,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
         c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
-                   is_preview=True, help='Enable Secure File Transfer Protocol.')
+                   help='Enable Secure File Transfer Protocol.')
         c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
-                   is_preview=True, help='Enable local user features.')
+                   help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
         c.argument('enable_files_aadkerb', aadkerb_type)
