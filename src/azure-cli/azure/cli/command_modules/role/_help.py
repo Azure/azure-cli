@@ -120,6 +120,8 @@ long-summary: >-
 examples:
 - name: Reset an application's credential with a password
   text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000
+- name: Reset an application's credential with a new self-signed certificate
+  text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --create-cert
 - name: Append a certificate to the application with the certificate string.
   text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
 - name: Append a certificate to the application with the certificate file.
@@ -543,6 +545,8 @@ long-summary: >-
 examples:
 - name: Reset a service principal's credential with a password
   text: az ad sp credential reset --id 00000000-0000-0000-0000-000000000000
+- name: Reset a service principal's credential with a new self-signed certificate
+  text: az ad sp credential reset --id 00000000-0000-0000-0000-000000000000 --create-cert
 - name: Append a certificate to the service principal with the certificate string.
   text: az ad sp credential reset --id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
 - name: Append a certificate to the service principal with the certificate file.

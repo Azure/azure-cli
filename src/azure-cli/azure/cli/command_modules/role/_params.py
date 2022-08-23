@@ -174,8 +174,7 @@ def load_arguments(self, _):
         c.argument('scopes', nargs='+',
                    help="Space-separated list of scopes the service principal's role assignment applies to. e.g., "
                         "subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, "
-                        "/subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/"
-                        "Microsoft.Compute/virtualMachines/myVM")
+                        "/subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM")
         c.argument('role', completer=get_role_definition_name_completion_list,
                    help='Role of the service principal.')
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
@@ -216,6 +215,12 @@ def load_arguments(self, _):
             c.argument('display_name', arg_group='Credential',
                        help="Friendly name for the password or certificate credential.")
 
+    for item in ['ad app credential list', 'ad app credential delete',
+                 'ad sp credential list', 'ad sp credential delete']:
+        with self.argument_context(item) as c:
+            c.argument('key_id', help='credential key id')
+            c.argument('cert', action='store_true', help='Operate on certificate credentials')
+
     with self.argument_context('ad app federated-credential') as c:
         c.argument('app_identifier', options_list=['--id'],
                    help="Application's appId, identifierUri, or id (formerly known as objectId)")
@@ -223,11 +228,6 @@ def load_arguments(self, _):
                    help='ID or name of the federated identity credential')
         c.argument('parameters', type=validate_file_or_dict,
                    help='Parameters for creating federated identity credential. ' + JSON_PROPERTY_HELP)
-
-    for item in ['ad sp credential delete', 'ad sp credential list', 'ad app credential delete', 'ad app credential list']:
-        with self.argument_context(item) as c:
-            c.argument('key_id', help='credential key id')
-            c.argument('cert', action='store_true', help='a certificate based credential')
 
     with self.argument_context('ad') as c:
         c.argument('display_name', help='object\'s display name or its prefix')
