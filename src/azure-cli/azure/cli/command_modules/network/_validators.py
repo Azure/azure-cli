@@ -1086,11 +1086,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
 
 
-def process_route_table_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-
 def process_tm_endpoint_create_namespace(cmd, namespace):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 
