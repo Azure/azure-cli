@@ -70,7 +70,7 @@ class Create(AAZCommand):
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
         )
 
         local_address_prefixes = cls._args_schema.local_address_prefixes
