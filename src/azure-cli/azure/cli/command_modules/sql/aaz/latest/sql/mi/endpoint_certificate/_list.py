@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi endpoint-certificate list",
+    "sql mi endpoint-cert list",
 )
 class List(AAZCommand):
     """List certificates used on endpoints on the target instance.

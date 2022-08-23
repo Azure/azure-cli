@@ -6080,7 +6080,7 @@ class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
                         JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
 
         #show command DBM endpoint cert
-        dbm_endpoint_cert = self.cmd('sql mi endpoint-certificate show -g {rg} --instance-name {mi} --endpoint-type {endpoint_type_dbm}',
+        dbm_endpoint_cert = self.cmd('sql mi endpoint-cert show -g {rg} --instance-name {mi} --endpoint-type {endpoint_type_dbm}',
                     checks=[
                         JMESPathCheck('name', endpoint_type_dbm),
                         JMESPathCheck('resourceGroup', rg),
@@ -6096,7 +6096,7 @@ class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
         self.assertRegex(dbm_endpoint_cert_public_key, "^[0123456789ABCDEF]+$")
 
         #show command SB endpoint cert
-        sb_endpoint_cert = self.cmd('sql mi endpoint-certificate show -g {rg} --instance-name {mi} --endpoint-type {endpoint_type_sb}',
+        sb_endpoint_cert = self.cmd('sql mi endpoint-cert show -g {rg} --instance-name {mi} --endpoint-type {endpoint_type_sb}',
                     checks=[
                         JMESPathCheck('name', endpoint_type_sb),
                         JMESPathCheck('resourceGroup', rg),
@@ -6112,20 +6112,20 @@ class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
         self.assertRegex(sb_endpoint_cert_public_key, "^[0123456789ABCDEF]+$")
 
         #show command with --ids parameter
-        self.cmd('sql mi endpoint-certificate show --ids {dbm_endpoint_cert_id}',
+        self.cmd('sql mi endpoint-cert show --ids {dbm_endpoint_cert_id}',
                     checks=[
                         JMESPathCheck('name', endpoint_type_dbm),
                         JMESPathCheck('resourceGroup', rg),
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/endpointCertificates')])
         #show command with --ids parameter
-        self.cmd('sql mi endpoint-certificate show --ids {sb_endpoint_cert_id}',
+        self.cmd('sql mi endpoint-cert show --ids {sb_endpoint_cert_id}',
                     checks=[
                         JMESPathCheck('name', endpoint_type_sb),
                         JMESPathCheck('resourceGroup', rg),
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/endpointCertificates')])
 
         #list endpoint certificates
-        self.cmd('sql mi endpoint-certificate list -g {rg} --instance-name {mi}',
+        self.cmd('sql mi endpoint-cert list -g {rg} --instance-name {mi}',
                     checks=[
                         JMESPathCheckExists("[] | [?name == 'DATABASE_MIRRORING']"),
                         JMESPathCheckExists("[] | [?name == 'SERVICE_BROKER']"),

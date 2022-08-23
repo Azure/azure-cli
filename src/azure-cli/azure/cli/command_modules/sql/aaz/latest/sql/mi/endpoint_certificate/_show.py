@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi endpoint-certificate show",
+    "sql mi endpoint-cert show",
 )
 class Show(AAZCommand):
     """Gets a certificate used on the endpoint with the given id.
