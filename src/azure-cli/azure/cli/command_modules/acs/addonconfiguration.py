@@ -294,6 +294,29 @@ def ensure_container_insights_for_monitoring(
     workspace_resource_id = sanitize_loganalytics_ws_resource_id(
         workspace_resource_id
     )
+
+    # extract subscription ID and resource group from workspace_resource_id URL
+    try:
+        subscription_id = workspace_resource_id.split("/")[2]
+        resource_group = workspace_resource_id.split("/")[4]
+    except IndexError:
+        raise AzCLIError(
+            "Could not locate resource group in workspace-resource-id URL."
+        )
+
+    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
+    if not remove_monitoring:
+        resources = get_resources_client(cmd.cli_ctx, subscription_id)
+        try:
+            resource = resources.get_by_id(
+                workspace_resource_id, "2015-11-01-preview"
+            )
+            location = resource.location
+            # location can have spaces for example 'East US' hence remove the spaces
+            location = location.replace(" ", "").lower()
+        except HttpResponseError as ex:
+            raise ex
+
     if aad_route:
         cluster_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
@@ -363,7 +386,7 @@ def ensure_container_insights_for_monitoring(
             # create the DCR
             dcr_creation_body = json.dumps(
                 {
-                    "location": cluster_region,
+                    "location": location,
                     "tags": existing_tags,
                     "properties": {
                         "dataSources": {
