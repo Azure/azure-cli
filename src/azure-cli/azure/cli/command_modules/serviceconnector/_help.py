@@ -54,9 +54,9 @@ def get_auth_info_params(auth_type):
     return auth_params_map.get(auth_type)
 
 
-def get_source_display_name(source):
-    display_name = source
-    if source == RESOURCE.SpringCloud.value:
+def get_source_display_name(sourcename):
+    display_name = sourcename
+    if sourcename == RESOURCE.SpringCloud.value:
         display_name = 'spring app'
     return display_name
 
@@ -74,7 +74,7 @@ for source in SOURCE_RESOURCES:
     helps['{source} connection'.format(source=source.value)] = """
         type: group
         short-summary: Commands to manage {source_display_name} connections
-    """.format(source=source.value, source_display_name=source_display_name)
+    """.format(source_display_name=source_display_name)
 
     helps['{source} connection list-support-types'.format(source=source.value)] = """
         type: command
@@ -101,7 +101,11 @@ for source in SOURCE_RESOURCES:
         - name: List {source_display_name} connections by source resource id
           text: |-
                  az {source} connection list --source-id {source_id}
-    """.format(source=source.value, source_params=source_params, source_id=source_id, source_display_name=source_display_name)
+    """.format(
+        source=source.value,
+        source_params=source_params,
+        source_id=source_id,
+        source_display_name=source_display_name)
 
     helps['{source} connection delete'.format(source=source.value)] = """
       type: command
@@ -116,7 +120,11 @@ for source in SOURCE_RESOURCES:
         - name: Delete a {source_display_name} connection by connection id
           text: |-
                  az {source} connection delete --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
+    """.format(
+        source=source.value,
+        source_params=source_params,
+        connection_id=connection_id,
+        source_display_name=source_display_name)
 
     helps['{source} connection list-configuration'.format(source=source.value)] = """
       type: command
@@ -131,7 +139,11 @@ for source in SOURCE_RESOURCES:
         - name: List a connection's source configurations by connection id
           text: |-
                  az {source} connection list-configuration --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
+    """.format(
+        source=source.value,
+        source_params=source_params,
+        connection_id=connection_id,
+        source_display_name=source_display_name)
 
     helps['{source} connection validate'.format(source=source.value)] = """
       type: command
@@ -146,7 +158,11 @@ for source in SOURCE_RESOURCES:
         - name: Validate a connection by connection id
           text: |-
                  az {source} connection validate --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
+    """.format(
+        source=source.value,
+        source_params=source_params,
+        connection_id=connection_id,
+        source_display_name=source_display_name)
 
     helps['{source} connection wait'.format(source=source.value)] = """
       type: command
@@ -170,17 +186,21 @@ for source in SOURCE_RESOURCES:
           - name: Get a connection by connection id
             text: |-
                    az {source} connection show --id {connection_id}
-    """.format(source=source.value, source_params=source_params, connection_id=connection_id, source_display_name=source_display_name)
+    """.format(
+        source=source.value,
+        source_params=source_params,
+        connection_id=connection_id,
+        source_display_name=source_display_name)
 
     helps['{source} connection create'.format(source=source.value)] = """
       type: group
       short-summary: Create a connection between a {source_display_name} and a target resource
-    """.format(source=source.value, source_display_name=source_display_name)
+    """.format(source_display_name=source_display_name)
 
     helps['{source} connection update'.format(source=source.value)] = """
       type: group
       short-summary: Update a {source_display_name} connection
-    """.format(source=source.value, source_display_name=source_display_name)
+    """.format(source_display_name=source_display_name)
 
     # use SUPPORTED_AUTH_TYPE to decide target resource, as some
     # target resources are not avialable for certain source resource
@@ -250,7 +270,11 @@ for source in SOURCE_RESOURCES:
             - name: Create a new {target} and connect {source_display_name} to it
               text: |-
                     az {source} connection create {target} --source-id {source_id} --new
-        '''.format(source=source.value, target=target.value, source_id=source_id, source_display_name=source_display_name) if target in AddonFactory else ''
+        '''.format(
+            source=source.value,
+            target=target.value,
+            source_id=source_id,
+            source_display_name=source_display_name) if target in AddonFactory else ''
 
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
