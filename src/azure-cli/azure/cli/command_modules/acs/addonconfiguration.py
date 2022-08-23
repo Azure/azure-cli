@@ -371,7 +371,7 @@ def ensure_container_insights_for_monitoring(
                         lambda x: region_names_to_id[x], resource["locations"])
                     if location not in region_ids:
                         raise ClientRequestError(
-                            f"Data Collection Rules are not supported for cluster region {location}")
+                            f"Data Collection Rules are not supported for LA workspace region {location}")
                 if resource["resourceType"].lower() == "datacollectionruleassociations":
                     region_ids = map(
                         lambda x: region_names_to_id[x], resource["locations"])
