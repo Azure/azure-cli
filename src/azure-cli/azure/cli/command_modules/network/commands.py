@@ -16,8 +16,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
-    cf_route_tables, cf_routes, cf_virtual_networks,
-    cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
+    cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages,
@@ -27,8 +26,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_load_balancer_backend_pools,
-    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
     cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
@@ -59,7 +57,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
-    process_vpn_connection_create_namespace, process_route_table_create_namespace,
+    process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
@@ -247,11 +245,6 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
-    network_rt_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#RouteTablesOperations.{}',
-        client_factory=cf_route_tables
-    )
-
     network_service_tags_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ServiceTagsOperations.{}',
         client_factory=cf_service_tags,
@@ -388,24 +381,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
         client_factory=cf_bastion_hosts,
         min_api='2019-11-01'
-    )
-
-    network_virtual_appliances_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkVirtualAppliancesOperations.{}',
-        client_factory=cf_network_virtual_appliances,
-        min_api='2020-05-01'
-    )
-
-    virtual_appliance_skus_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSkusOperations.{}',
-        client_factory=cf_virtual_appliance_skus,
-        min_api='2020-05-01'
-    )
-
-    virtual_appliance_sites_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSitesOperations.{}',
-        client_factory=cf_virtual_appliance_sites,
-        min_api='2020-05-01'
     )
 
     network_custom_ip_prefix_sdk = CliCommandType(
@@ -1236,27 +1211,6 @@ def load_command_table(self, _):
     self.command_table['network route-filter rule list-service-communities'] = ListServiceCommunities(loader=self, table_transformer=transform_service_community_table_output)
     # endregion
 
-    # region RouteTables
-    with self.command_group('network route-table', network_rt_sdk) as g:
-        g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_route_tables')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_route_table')
-
-    network_rtr_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#RoutesOperations.{}',
-        client_factory=cf_routes
-    )
-    with self.command_group('network route-table route', network_rtr_sdk) as g:
-        g.custom_command('create', 'create_route')
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='route_parameters', custom_func_name='update_route')
-
-    # endregion
-
     # region TrafficManagers
     with self.command_group('network traffic-manager profile', network_tmp_sdk) as g:
         g.custom_command('check-dns', 'check_traffic_manager_name', client_factory=cf_traffic_manager_mgmt_profiles)
@@ -1476,24 +1430,4 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
-    # endregion
-
-    # region Network Virtual Appliance
-    with self.command_group('network virtual-appliance', network_virtual_appliances_sdk, client_factory=cf_network_virtual_appliances, is_preview=True) as g:
-        g.custom_command('create', 'create_network_virtual_appliance')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_network_virtual_appliance')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_network_virtual_appliance')
-        g.command('delete', 'begin_delete', confirmation=True)
-
-    with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, client_factory=cf_virtual_appliance_sites, is_preview=True) as g:
-        g.custom_command('create', 'create_network_virtual_appliance_site')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_network_virtual_appliance_site')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.command('list', 'list')
-
-    with self.command_group('network virtual-appliance sku', virtual_appliance_skus_sdk, is_preview=True) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
     # endregion
