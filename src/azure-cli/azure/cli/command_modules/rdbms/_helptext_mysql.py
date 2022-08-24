@@ -470,3 +470,32 @@ examples:
 
       az mysql flexible-server upgrade -g testgroup -n testsvr -v 8
 """
+
+helps['mysql flexible-server backup'] = """
+type: group
+short-summary: Manage flexible server backups.
+"""
+
+helps['mysql flexible-server backup list'] = """
+type: command
+short-summary: List all the backups for a given server.
+examples:
+  - name: List all backups for 'testsvr'.
+    text: az mysql flexible-server backup list -g testgroup -n testsvr
+"""
+
+helps['mysql flexible-server backup show'] = """
+type: command
+short-summary: Show the details of a specific backup for a given server.
+examples:
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az mysql flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['mysql flexible-server backup create'] = """
+type: command
+short-summary: Create a backup for a given server with specified backup name.
+examples:
+  - name: Create a backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+"""

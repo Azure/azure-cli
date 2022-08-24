@@ -7,6 +7,7 @@ import time
 
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
+from dateutil import parser
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
@@ -15,6 +16,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
@@ -72,7 +74,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
-    mysql_location = 'southcentralus'
+    mysql_location = 'northeurope'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -122,7 +124,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             storage_size = 32
             version = '5.7'
             location = self.mysql_location
-            location_result = 'South Central US'
+            location_result = 'North Europe'
             sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
@@ -161,12 +163,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
 
-        if database_engine == 'postgres':
-            tier = 'Burstable'
-            sku_name = 'Standard_B1ms'
-        elif database_engine == 'mysql':
-            tier = 'MemoryOptimized'
-            sku_name = 'Standard_E2ds_v4'
+        tier = 'MemoryOptimized'
+        sku_name = 'Standard_E2ds_v4'
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
                  .format(database_engine, resource_group, server_name, tier, sku_name),
                  checks=[JMESPathCheck('sku.tier', tier),
@@ -214,7 +212,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        location = 'westus'
+        location = 'northeurope'
         list_skus_info = get_mysql_list_skus_info(self, location)
         iops_info = list_skus_info['iops_info']
 
@@ -307,11 +305,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
-        date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
-
-        if current_time < earliest_restore_time:
-            sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
-                                                                                             date_format)).total_seconds())
+        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+        sleep(max(0, seconds_to_wait + 180))
 
         # default vnet resources
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
@@ -395,8 +390,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'postgres':
             location = self.postgres_location
         elif database_engine == 'mysql':
-            location = 'eastus2euap'
-            target_location = 'centraluseuap'
+            location = 'northeurope'
+            target_location = 'westeurope'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_server_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -434,7 +429,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                   .format(database_engine, resource_group, target_location, target_server_public_access, source_server)).get_output_in_json()
 
             self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
-            self.assertEqual(restore_result['location'], 'Central US EUAP')
+            self.assertEqual(restore_result['location'], 'West Europe')
 
         # 3. vnet to different vnet
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
@@ -481,7 +476,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                   .format(database_engine, resource_group, target_location, target_server_public_access_2, source_server_2)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
-        self.assertEqual(restore_result['location'], 'Central US EUAP')
+        self.assertEqual(restore_result['location'], 'West Europe')
 
         # Delete servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
@@ -652,7 +647,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
+    postgres_location = 'eastus'
     mysql_location = 'westus'
 
     @AllowLargeResponse()
@@ -910,8 +905,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
-    mysql_location = 'westus2'
+    postgres_location = 'eastus'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1032,7 +1027,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             private_dns_zone_key = "privateDnsZoneResourceId"
 
         # flexible-servers
-        servers = ['testvnetserver3' + database_engine, 'testvnetserver4' + database_engine]
+        servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) + database_engine, self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) + database_engine]
         private_dns_zone_1 = "testdnszone3.private.{}.database.azure.com".format(database_engine)
         private_dns_zone_2 = "testdnszone4.private.{}.database.azure.com".format(database_engine)
         # Case 1 : Provision a server with supplied Vname and subnet name that exists.
@@ -1340,7 +1335,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  resource_group, location, vnet_name, vnet_prefix))
 
         self.cmd('postgres flexible-server create -g {} -l {} --vnet {} --yes'.format(
-                 resource_group, 'eastus', vnet_name), # location of vnet and server are different
+                 resource_group, 'westus', vnet_name), # location of vnet and server are different
                  expect_failure=True)
 
         # delegated to different service
@@ -1367,8 +1362,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'eastus2euap'
-    mysql_location = 'westus2'
+    postgres_location = 'eastus'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1378,8 +1373,8 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='vnet_resource_group')
     def test_mysql_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('mysql', server_resource_group, vnet_resource_group)
 
@@ -1392,9 +1387,9 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='vnet_resource_group')
-    @ResourceGroupPreparer(location=postgres_location, parameter_name='dns_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='server_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='vnet_resource_group')
+    @ResourceGroupPreparer(location=mysql_location, parameter_name='dns_resource_group')
     def test_mysql_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
         self._test_flexible_server_new_private_dns_zone('mysql', server_resource_group, vnet_resource_group, dns_resource_group)
 
@@ -1591,7 +1586,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1728,3 +1723,55 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         # upgrade primary server
         result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version)).get_output_in_json()
         self.assertTrue(result['version'].startswith(new_version))
+
+
+class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+    mysql_location = 'northeurope'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_backups_mgmt(self, resource_group, server):
+        self._test_backups_mgmt('postgres', resource_group, server)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    @ServerPreparer(engine_type='mysql', location=mysql_location)
+    def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
+        self._test_backups_mgmt('mysql', resource_group, server)
+
+    def _test_backups_mgmt(self, database_engine, resource_group, server):
+        attempts = 0
+
+        while attempts < 10:
+            backups = self.cmd('{} flexible-server backup list -g {} -n {}'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+            attempts += 1
+            if len(backups) > 0:
+                break
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
+
+        self.assertTrue(len(backups) == 1)
+
+        automatic_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
+                                    .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
+
+        self.assertDictEqual(automatic_backup, backups[0])
+
+        if database_engine == 'mysql':
+            backup_name = self.create_random_name('backup', 20)
+            self.cmd('{} flexible-server backup create -g {} -n {} --backup-name {}'
+                     .format(database_engine, resource_group, server, backup_name))
+
+            backups = self.cmd('{} flexible-server backup list -g {} -n {}'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+
+            backups = sorted(backups, key=lambda x: x['completedTime'], reverse=True)
+            self.assertTrue(len(backups) == 2)
+
+            customer_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
+                                        .format(database_engine, resource_group, server, backup_name)).get_output_in_json()
+
+            self.assertEqual(backup_name, customer_backup['name'])
+            self.assertDictEqual(customer_backup, backups[0])
