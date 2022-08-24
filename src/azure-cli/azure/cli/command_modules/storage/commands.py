@@ -18,7 +18,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_sa_blob_inventory, cf_blob_service, cf_queue_client,
                                                                cf_share_client, cf_share_service,
                                                                cf_share_file_client, cf_share_directory_client,
-                                                               cf_container_lease_client)
+                                                               cf_container_lease_client, cf_local_users)
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -285,6 +285,30 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  getter_name='get_service_properties',
                                  setter_name='set_service_properties',
                                  custom_func_name='update_file_service_properties')
+
+    local_users_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#'
+                        'LocalUsersOperations.{}',
+        client_factory=cf_local_users,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    local_users_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_local_users,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    with self.command_group('storage account local-user', local_users_sdk,
+                            custom_command_type=local_users_custom_type,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2021-08-01') as g:
+        g.custom_command('create', 'create_local_user')
+        g.custom_command('update', 'update_local_user')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('list-keys', 'list_keys')
+        g.command('regenerate-password', 'regenerate_password')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
         from ._transformers import transform_logging_list_output
