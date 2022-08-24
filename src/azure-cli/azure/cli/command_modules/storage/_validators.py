@@ -2233,14 +2233,18 @@ class PermissionScopeAddAction(argparse._AppendAction):
         try:
             permissions, service, resource_name = '', '', ''
             for s in values:
-                if "permissions" in s:
-                    permissions = s.split('=')[1]
-                elif "service" in s:
-                    service = s.split('=')[1]
-                elif "resource-name" in s:
-                    resource_name = s.split('=')[1]
-        except (ValueError, TypeError):
-            raise CLIError('usage error: --permission-scope VARIABLE OPERATOR VALUE')
+                k, v = s.split('=', 1)
+                if k == "permissions":
+                    permissions = v
+                elif k == "service":
+                    service = v
+                elif k == "resource-name":
+                    resource_name = v
+                else:
+                    raise UnrecognizedArgumentError(
+                        'key error: key must be one of permissions, service, resource-name for --permission-scope')
+        except (ValueError, TypeError, IndexError):
+            raise CLIError('usage error: --permission-scope [Key=Value ...]')
         namespace.permission_scope.append(PermissionScope(
             permissions=permissions,
             service=service,
@@ -2256,11 +2260,15 @@ class SshPublicKeyAddAction(argparse._AppendAction):
         SshPublicKey = namespace._cmd.get_models('SshPublicKey')
         try:
             description, key = '', ''
-            for k in values:
-                if "description" in k:
-                    description = k.split('=')[1]
-                elif "key" in k:
-                    key = k.split('=')[1]
-        except (ValueError, TypeError):
-            raise CLIError('usage error: --ssh-authorized-key VARIABLE OPERATOR VALUE')
+            for s in values:
+                k, v = s.split('=', 1)
+                if k == "description":
+                    description = v
+                elif k == "key":
+                    key = v
+                else:
+                    raise UnrecognizedArgumentError(
+                        'key error: key must be one of description, key for --ssh-authorized-key')
+        except (ValueError, TypeError, IndexError):
+            raise CLIError('usage error: --ssh-authorized-key [Key=Value ...]')
         namespace.ssh_authorized_key.append(SshPublicKey(description=description, key=key))
