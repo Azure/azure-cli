@@ -3,14 +3,6 @@
 Release History
 ===============
 
-2.39.1
-++++++
-
-**CosmosDB**
-
-* Added Service code for CosmosDB
-* Added analyticalStorageTTL property to sql containers
-
 2.39.0
 ++++++
 

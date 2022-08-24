@@ -1351,7 +1351,7 @@ short-summary: Create a cosmosdb service resource.
 examples:
   - name: Create a cosmosdb service resource.
     text: |
-      az cosmosdb service create --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 3 --size "Cosmos.D4s"
+      az cosmosdb service create --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --count 3 --size "Cosmos.D4s"
 """
 
 helps['cosmosdb service update'] = """
@@ -1360,7 +1360,16 @@ short-summary: Update a cosmosdb service resource.
 examples:
   - name: Update a cosmosdb service resource.
     text: |
-      az cosmosdb service update --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 3
+      az cosmosdb service update --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway" --count 3
+"""
+
+helps['cosmosdb service show'] = """
+type: command
+short-summary: Get cosmosdb service resource under an account.
+examples:
+  - name: Get cosmosdb service resource under an account.
+    text: |
+      az cosmosdb service show --resource-group MyResourceGroup --account-name MyAccount --name "sqlDedicatedGateway"
 """
 
 helps['cosmosdb service list'] = """

@@ -2481,10 +2481,10 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
 def cli_cosmosdb_service_create(client,
                                 account_name,
                                 resource_group_name,
-                                service_kind,
                                 service_name,
                                 instance_count=1,
                                 instance_size="Cosmos.D4s"):
+    service_kind = "SqlDedicatedGateway"
     params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
                                                    instance_count=instance_count,
                                                    instance_size=instance_size)
@@ -2496,9 +2496,9 @@ def cli_cosmosdb_service_update(client,
                                 account_name,
                                 resource_group_name,
                                 service_name,
-                                service_kind,
                                 instance_count,
                                 instance_size=None):
+    service_kind = "SqlDedicatedGateway"
     params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
                                                    instance_count=instance_count,
                                                    instance_size=instance_size)

@@ -2205,13 +2205,15 @@ class CosmosDBTests(ScenarioTest):
 
         acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
 
-        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
+        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
         assert service_create["name"] == "sqlDedicatedGateway"
 
-        service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --kind "SqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()
+        service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()
         assert service_update["name"] == "sqlDedicatedGateway"
 
-        self.cmd('az cosmosdb service show --name "sqlDedicatedGateway" -a {acc} -g {rg}')
+        self.cmd('az cosmosdb service show  -a {acc} -g {rg} --name "sqlDedicatedGateway"')
 
         service_list = self.cmd('az cosmosdb service list -a {acc} -g {rg}').get_output_in_json()
         assert len(service_list) == 1
+
+        self.cmd('az cosmosdb service delete -a {acc} -g {rg} --name "sqlDedicatedGateway" --yes')
