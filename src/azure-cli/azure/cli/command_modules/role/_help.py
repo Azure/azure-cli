@@ -714,7 +714,7 @@ examples:
     text: az role assignment create --assignee sp_name --role a_role
   - name: Create role assignment for an assignee with description and condition.
     text: >-
-        az role assignment create --role "Owner" --assignee "Jhon.Doe@Contoso.com"
+        az role assignment create --role "Owner" --assignee "John.Doe@Contoso.com"
         --description "Role assignment foo to check on bar"
         --condition "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'"
         --condition-version "2.0"
