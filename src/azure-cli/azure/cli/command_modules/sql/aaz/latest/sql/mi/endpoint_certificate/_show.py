@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi endpoint-cert show",
 )
 class Show(AAZCommand):
-    """Gets a certificate used on the endpoint with the given id.
+    """Get a certificate used on the endpoint with the given id.
     """
 
     _aaz_info = {
