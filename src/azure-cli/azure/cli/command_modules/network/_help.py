@@ -6822,6 +6822,14 @@ parameters:
     short-summary: Name or ID of the VM to target.
   - name: --filters
     short-summary: JSON encoded list of packet filters. Use `@{path}` to load from file.
+  - name: --target
+    short-summary: Name or ID of the Target Resource. If TargetType is AzureVMSS, then target field is mandatory.
+  - name: --target_type
+    short-summary: Resource type of Target. Only AzureVM and AzureVMSS are supported now. Default Value is AzureVM.
+  - name: --include
+    short-summary: Space-separated list of VMSS Instances to include in Packet capture like 0 1 2
+  - name: --exclude
+    short-summary: Space-separated list of VMSS Instances to exclude in Packet capture
 examples:
   - name: Create a packet capture session on a VM.
     text: az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm --storage-account MyStorageAccount
@@ -6850,6 +6858,18 @@ examples:
                 { \\
                     "protocol":"UDP" \\
                 }]'
+  - name: Create a packet capture session on a VMSS.
+    text: |
+        az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVmVMSS \\
+            --storage-account MyStorageAccount --target-type "AzureVMSS"
+  - name: Create a packet capture session on a VMSS with including particular instances.
+    text: |
+        az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --target MyVmVMSS \\
+            --storage-account MyStorageAccount --target-type "AzureVMSS" --Include "0" "1"
+  - name: Create a packet capture session on a VMSS with excluding particular instances.
+    text: |
+        az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVmVMSS \\
+            --storage-account MyStorageAccount --target-type "AzureVMSS" --Exclude "0" "1"
 """
 
 helps['network watcher packet-capture delete'] = """
