@@ -309,6 +309,10 @@ def cf_mysql_flexible_log(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).log_files
 
 
+def cf_mysql_flexible_backups(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).backups
+
+
 def cf_mysql_check_resource_availability(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).check_name_availability
 
@@ -331,6 +335,10 @@ def cf_postgres_flexible_config(cli_ctx, _):
 
 def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
+
+
+def cf_postgres_flexible_backups(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).backups
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):
