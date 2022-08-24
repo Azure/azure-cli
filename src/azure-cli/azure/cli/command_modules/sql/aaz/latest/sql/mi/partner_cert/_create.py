@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi partner-cert create",
 )
 class Create(AAZCommand):
-    """Uploads a server trust certificate from box to Sql Managed Instance.
+    """Upload a server trust certificate from box to Sql Managed Instance.
     """
 
     _aaz_info = {
