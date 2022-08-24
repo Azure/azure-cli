@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Drops a distributed availability group between Sql On-Prem and Sql Managed Instance.
+    """Drop an Instance link between Sql On-Prem and Sql Managed Instance.
     """
 
     _aaz_info = {

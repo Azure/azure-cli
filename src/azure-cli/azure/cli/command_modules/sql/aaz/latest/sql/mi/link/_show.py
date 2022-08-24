@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi link show",
 )
 class Show(AAZCommand):
-    """Gets a distributed availability group info.
+    """Get an Instance link.
     """
 
     _aaz_info = {

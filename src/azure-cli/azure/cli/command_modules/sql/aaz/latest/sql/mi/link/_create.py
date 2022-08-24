@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi link create",
 )
 class Create(AAZCommand):
-    """Creates a distributed availability group between Sql On-Prem and Sql Managed Instance.
+    """Create an Instace link between Sql On-Prem and Sql Managed Instance.
     """
 
     _aaz_info = {
@@ -62,28 +62,28 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.primary_availability_group_name = AAZStrArg(
-            options=["--primary-availability-group-name"],
+            options=["--primary-ag", "--primary-availability-group-name"],
             arg_group="Properties",
             help="The primary availability group name",
         )
         _args_schema.replication_mode = AAZStrArg(
-            options=["--replication-mode"],
+            options=["--repl-mode", "--replication-mode"],
             arg_group="Properties",
             help="The replication mode of a distributed availability group. Parameter will be ignored during link creation.",
             enum={"Async": "Async", "Sync": "Sync"},
         )
         _args_schema.secondary_availability_group_name = AAZStrArg(
-            options=["--secondary-availability-group-name"],
+            options=["--secondary-ag", "--secondary-availability-group-name"],
             arg_group="Properties",
             help="The secondary availability group name",
         )
         _args_schema.source_endpoint = AAZStrArg(
-            options=["--source-endpoint"],
+            options=["--endpoint", "--src-endpoint", "--source-endpoint"],
             arg_group="Properties",
             help="The source endpoint",
         )
         _args_schema.target_database = AAZStrArg(
-            options=["--target-database"],
+            options=["--db", "--target-db", "--target-database"],
             arg_group="Properties",
             help="The name of the target database",
         )
