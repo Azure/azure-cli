@@ -20,7 +20,7 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       node_size_family=NodeSizeFamily.memory_optimized.value, enable_auto_scale=None,
                       min_node_count=None, max_node_count=None, spark_config_file_path=None,
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
-                      spark_log_folder="/logs", enable_dynamic_exec=None, min_executors=None,
+                      spark_log_folder="/logs", enable_dynamic_executor_allocation=None, min_executors=None,
                       max_executors=None, tags=None, no_wait=False):
 
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
@@ -38,7 +38,7 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
     big_data_pool_info.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                         delay_in_minutes=delay)
 
-    big_data_pool_info.dynamic_executor_allocation = DynamicExecutorAllocation(enabled=enable_dynamic_exec,
+    big_data_pool_info.dynamic_executor_allocation = DynamicExecutorAllocation(enabled=enable_dynamic_executor_allocation,
                                                                                min_executors=min_executors,
                                                                                max_executors=max_executors)
     if spark_config_file_path:
@@ -61,7 +61,7 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       node_size=None, node_count=None, enable_auto_scale=None,
                       min_node_count=None, max_node_count=None, enable_auto_pause=None, delay=None,
                       library_requirements=None, spark_config_file_path=None,
-                      package_action=None, package=None, enable_dynamic_exec=None, min_executors=None,
+                      package_action=None, package=None, enable_dynamic_executor_allocation=None, min_executors=None,
                       max_executors=None, tags=None, force=False, no_wait=False):
     existing_spark_pool = client.get(resource_group_name, workspace_name, spark_pool_name)
 
@@ -123,14 +123,14 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                                                                             filename=filename)
 
     if existing_spark_pool.dynamic_executor_allocation is not None:
-        if enable_dynamic_exec is not None:
-            existing_spark_pool.dynamic_executor_allocation.enabled = enable_dynamic_exec
+        if enable_dynamic_executor_allocation is not None:
+            existing_spark_pool.dynamic_executor_allocation.enabled = enable_dynamic_executor_allocation
         if min_executors:
             existing_spark_pool.dynamic_executor_allocation.min_executors = min_executors
         if max_executors:
             existing_spark_pool.dynamic_executor_allocation.max_executors = max_executors
     else:
-        existing_spark_pool.dynamic_executor_allocation = DynamicExecutorAllocation(enabled=enable_dynamic_exec,
+        existing_spark_pool.dynamic_executor_allocation = DynamicExecutorAllocation(enabled=enable_dynamic_executor_allocation,
                                                                                     min_executors=min_executors,
                                                                                     max_executors=max_executors)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,

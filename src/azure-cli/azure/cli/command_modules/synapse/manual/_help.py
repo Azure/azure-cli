@@ -162,7 +162,7 @@ examples:
   - name: Update the Spark pool's dynamic executor allocation configuration.
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --enable-dynamic-exec --min-executors 3 --max-executors 10
+        --enable-dynamic-executor-allocation --min-executors 3 --max-executors 10
 """
 
 helps['synapse spark pool delete'] = """
