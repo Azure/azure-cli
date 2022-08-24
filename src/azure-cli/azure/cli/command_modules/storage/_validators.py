@@ -10,6 +10,7 @@ import argparse
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
