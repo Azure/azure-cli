@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi endpoint-cert",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Returns information about one or more instance of endpoint certificate on an Azure SQL Managed Instance.
+    """Manage endpoint certificate on an Azure SQL Managed Instance.
     """
     pass
 
