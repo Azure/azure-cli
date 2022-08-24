@@ -13,7 +13,7 @@ counter=4
 
 while [ $counter -gt 0 ]
 do
-    yum install azure-cli -y
+    $DNF_COMMAND install azure-cli -y
     ACTUAL_VERSION=$(az version | sed -n 's|"azure-cli": "\(.*\)",|\1|p' | sed 's|[[:space:]]||g')
     echo "actual version:${ACTUAL_VERSION}"
     echo "expected version:${CLI_VERSION}"
