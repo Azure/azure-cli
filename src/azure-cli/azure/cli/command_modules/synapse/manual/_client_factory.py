@@ -152,16 +152,9 @@ def cf_synapse_role_definitions(cli_ctx, workspace_name):
 
 
 def cf_graph_client_factory(cli_ctx, **_):
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.commands.client_factory import configure_common_settings
-    from azure.graphrbac import GraphRbacManagementClient
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    client = GraphRbacManagementClient(cred, tenant_id,
-                                       base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    configure_common_settings(cli_ctx, client)
-    return client
+    from azure.cli.command_modules.role import graph_client_factory
+    graph_client = graph_client_factory(cli_ctx)
+    return graph_client
 
 
 def cf_synapse_client_artifacts_factory(cli_ctx, workspace_name):
@@ -254,6 +247,10 @@ def cf_kusto_scripts(cli_ctx, workspace_name):
 
 def cf_synapse_sql_script(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).sql_script
+
+
+def cf_synapse_client_azure_ad_only_authentications_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).azure_ad_only_authentications
 
 
 def cf_synapse_link_connection(cli_ctx, workspace_name):

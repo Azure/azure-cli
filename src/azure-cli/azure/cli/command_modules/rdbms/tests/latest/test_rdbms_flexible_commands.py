@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
 import time
 
 from datetime import datetime, timedelta, tzinfo
@@ -71,7 +72,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    mysql_location = 'southcentralus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -121,7 +122,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             storage_size = 32
             version = '5.7'
             location = self.mysql_location
-            location_result = 'West US 2'
+            location_result = 'South Central US'
             sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
@@ -213,7 +214,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        location = 'westus2'
+        location = 'westus'
         list_skus_info = get_mysql_list_skus_info(self, location)
         iops_info = list_skus_info['iops_info']
 
@@ -502,7 +503,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -519,6 +520,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         self._test_firewall_rule_mgmt('mysql', resource_group, server)
         self._test_parameter_mgmt('mysql', resource_group, server)
         self._test_database_mgmt('mysql', resource_group, server)
+        self._test_log_file_mgmt('mysql', resource_group, server)
 
     def _test_firewall_rule_mgmt(self, database_engine, resource_group, server):
 
@@ -612,11 +614,46 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server db delete -g {} -s {} -d {} --yes'.format(database_engine, resource_group, server, database_name),
                  checks=NoneCheck())
 
+    def _test_log_file_mgmt(self, database_engine, resource_group, server):
+        if database_engine == 'mysql':
+            # enable logs to be written to a file
+            self.cmd('{} flexible-server parameter set -g {} -s {} -n log_output --value FILE'
+                     .format(database_engine, resource_group, server))
+
+            # enable slow query log
+            config_name = 'slow_query_log'
+            new_value = 'ON'
+
+            self.cmd('{} flexible-server parameter set -g {} -s {} -n {} --value {}'
+                     .format(database_engine, resource_group, server, config_name, new_value),
+                     checks=[
+                         JMESPathCheck('name', config_name),
+                         JMESPathCheck('value', new_value)])
+
+            # retrieve logs filenames
+            result = self.cmd('{} flexible-server server-logs list -g {} -s {} --file-last-written 43800'
+                              .format(database_engine, resource_group, server),
+                              checks=[
+                                  JMESPathCheck('length(@)', 1),
+                                  JMESPathCheck('type(@)', 'array')]).get_output_in_json()
+
+            name = result[0]['name']
+            self.assertIsNotNone(name)
+
+            # download log
+            if name:
+                self.cmd('{} flexible-server server-logs download -g {} -s {} -n {}'
+                         .format(database_engine, resource_group, server, name))
+                
+                # assert that log file was downloaded successfully and delete it
+                self.assertTrue(os.path.isfile(name))
+                os.remove(name)
+
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus2euap'
-    mysql_location = 'westus2'
+    mysql_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -782,7 +819,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    mysql_location = 'westus2'
+    mysql_location = 'southcentralus'
 
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
@@ -1633,3 +1670,61 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[3]),
                  checks=NoneCheck())
+
+
+class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
+    mysql_location = 'northeurope'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_upgrade_mgmt(self, resource_group):
+        self._test_flexible_server_upgrade_mgmt('mysql', resource_group, False)
+        self._test_flexible_server_upgrade_mgmt('mysql', resource_group, True)
+    
+    def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        current_version = '5.7'
+        new_version = '8'
+
+        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --location {} --version {} --yes'.format(database_engine, resource_group, server_name, self.mysql_location, current_version)
+        if public_access:
+            create_command += ' --public-access none'
+        else:
+            vnet_name = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+            subnet_name = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+            create_command += ' --vnet {} --subnet {}'.format(vnet_name, subnet_name)
+
+        # create primary server
+        self.cmd(create_command)
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('version', current_version)])
+
+        # create replica
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                 .format(database_engine, resource_group, replica_name, server_name),
+                 checks=[JMESPathCheck('version', current_version)])
+
+        if database_engine == 'mysql':
+            # remove sql_mode NO_AUTO_CREATE_USER, which is incompatible with new version 8
+            for server in [replica_name, server_name]:
+                self.cmd('{} flexible-server parameter set -g {} -s {} -n {} -v {}'
+                        .format(database_engine,
+                                resource_group,
+                                server,
+                                'sql_mode',
+                                'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'))
+
+        # should fail because we first need to upgrade replica
+        self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
+                 expect_failure=True)
+
+        # upgrade replica
+        result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version)).get_output_in_json()
+        self.assertTrue(result['version'].startswith(new_version))
+
+        # upgrade primary server
+        result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version)).get_output_in_json()
+        self.assertTrue(result['version'].startswith(new_version))

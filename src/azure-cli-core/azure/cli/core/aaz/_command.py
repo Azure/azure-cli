@@ -87,10 +87,16 @@ class AAZCommand(CLICommand):
         #     schema.generic_update_force_string = AAZGenericUpdateForceString()
         return schema
 
-    def __init__(self, loader):
+    def __init__(self, loader=None, cli_ctx=None, **kwargs):
+        """
+
+        :param loader: it is required for command registered in the command table
+        :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
+        """
+        assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
         super().__init__(
-            cli_ctx=loader.cli_ctx,
+            cli_ctx=cli_ctx or loader.cli_ctx,
             name=self.AZ_NAME,
             confirmation=self.AZ_CONFIRMATION,
             arguments_loader=self._cli_arguments_loader,
@@ -98,6 +104,7 @@ class AAZCommand(CLICommand):
             # knack use cmd.handler to check whether it is group or command,
             # however this property will not be used in AAZCommand. So use True value for it.
             # https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
+            **kwargs
         )
         self.command_kwargs = {}
 
@@ -213,6 +220,26 @@ class AAZCommand(CLICommand):
             executor()
 
         return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
+
+
+class AAZWaitCommand(AAZCommand):
+    """Support wait command"""
+
+    def __init__(self, loader):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        super().__init__(loader)
+
+        # add wait args in commands
+        for param_name, argtype in WaitCommandOperation.wait_args().items():
+            self.arguments[param_name] = argtype
+
+    def __call__(self, *args, **kwargs):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        return WaitCommandOperation.wait(
+            *args, **kwargs,
+            cli_ctx=self.cli_ctx,
+            getter=lambda **command_args: self._handler(command_args)
+        )
 
 
 def register_command_group(

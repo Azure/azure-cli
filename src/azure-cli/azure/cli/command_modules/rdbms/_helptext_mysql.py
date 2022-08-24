@@ -409,16 +409,16 @@ examples:
 
 helps['mysql flexible-server deploy'] = """
 type: group
-short-summary: Enable and run github action workflow for MySQL server
+short-summary: Enable and run GitHub Actions workflow for MySQL server
 """
 
 helps['mysql flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for MySQL server.
+short-summary: Create GitHub Actions workflow file for MySQL server.
 examples:
-  - name: Create github action workflow file for MySQL server.
+  - name: Create GitHub Actions workflow file for MySQL server.
     text: az mysql flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
-  - name: Create github action workflow file for MySQL server and push it to the remote repository
+  - name: Create GitHub Actions workflow file for MySQL server and push it to the remote repository
     text: az mysql flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
 """
 
@@ -428,4 +428,45 @@ short-summary: Run an existing workflow in your github repository
 examples:
   - name: Run an existing workflow in your github repository
     text: az mysql flexible-server deploy run --action-name testAction --branch userBranch
+"""
+
+helps['mysql flexible-server server-logs'] = """
+type: group
+short-summary: Manage server logs.
+"""
+
+helps['mysql flexible-server server-logs download'] = """
+type: command
+short-summary: Download log files.
+examples:
+  - name: Download log files f1 and f2 to the current directory from the server 'testsvr'.
+    text: az mysql flexible-server server-logs download -g testgroup -s testsvr -n f1.log f2.log
+"""
+
+helps['mysql flexible-server server-logs list'] = """
+type: command
+short-summary: List log files for a server.
+examples:
+  - name: List log files for 'testsvr' modified in the last 72 hours (default value).
+    text: az mysql flexible-server server-logs list -g testgroup -s testsvr
+  - name: List log files for 'testsvr' modified in the last 10 hours.
+    text: az mysql flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
+  - name: List log files for 'testsvr' less than 30Kb in size.
+    text: az mysql flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+"""
+
+helps['mysql flexible-server upgrade'] = """
+type: command
+short-summary: Upgrade the major version of a flexible server.
+examples:
+  - name: Upgrade server 'testsvr' to MySQL major version 8.
+    text: >
+      # make sure that sql_mode only contains values allowed in new version, for example:
+
+      az mysql flexible-server parameter set -g testgroup -s testsvr -n sql_mode \\
+        -v "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO"
+
+      # upgrade server to MySQL major version 8.
+
+      az mysql flexible-server upgrade -g testgroup -n testsvr -v 8
 """

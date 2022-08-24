@@ -22,32 +22,6 @@ from msrestazure.tools import resource_id
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-class NetworkApplicationSecurityGroupScenario(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_asg')
-    def test_network_asg(self, resource_group):
-
-        self.kwargs.update({
-            'asg': 'asg1'
-        })
-
-        count1 = len(self.cmd('network asg list').get_output_in_json())
-        self.cmd('network asg create -g {rg} -n {asg} --tags foo=doo',
-                 checks=self.check('tags.foo', 'doo'))
-        self.cmd('network asg update -g {rg} -n {asg} --tags foo=bar',
-                 checks=self.check('tags.foo', 'bar'))
-        count2 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count2 == count1 + 1)
-        self.cmd('network asg show -g {rg} -n {asg}', checks=[
-            self.check('name', '{asg}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('tags.foo', 'bar')
-        ])
-        self.cmd('network asg delete -g {rg} -n {asg}')
-        count3 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count3 == count1)
-
-
 class NetworkLoadBalancerWithSku(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
@@ -676,27 +650,6 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
         table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
         self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
-
-
-class NetworkRouteFilterScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
-    @AllowLargeResponse()
-    def test_network_route_filter(self, resource_group):
-        self.kwargs['filter'] = 'filter1'
-        self.cmd('network route-filter create -g {rg} -n {filter} --tags foo=doo')
-        self.cmd('network route-filter update -g {rg} -n {filter}')
-        self.cmd('network route-filter show -g {rg} -n {filter}')
-        self.cmd('network route-filter list -g {rg}')
-
-        self.cmd('network route-filter rule list-service-communities')
-        self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow', expect_failure=True)
-        self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny', expect_failure=True)
-        self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1')
-        self.cmd('network route-filter rule list -g {rg} --filter-name {filter}')
-        self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1')
-
-        self.cmd('network route-filter delete -g {rg} -n {filter}')
 
 
 class NetworkExpressRouteScenarioTest(ScenarioTest):

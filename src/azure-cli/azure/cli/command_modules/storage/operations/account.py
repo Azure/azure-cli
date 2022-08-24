@@ -55,7 +55,7 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
-                           access_tier=None, https_only=None,
+                           access_tier=None, https_only=None, enable_files_aadkerb=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
@@ -123,6 +123,20 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_files_aadds is not None:
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
+    if enable_files_aadkerb is not None:
+        if enable_files_aadkerb:
+            active_directory_properties = None
+            if domain_name or domain_guid:
+                ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+                active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                        domain_guid=domain_guid)
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADKERB',
+                active_directory_properties=active_directory_properties)
+        else:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
@@ -328,7 +342,7 @@ def get_storage_account_properties(cli_ctx, account_id):
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions, line-too-long
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_version=None,
-                           encryption_key_name=None, encryption_key_vault=None,
+                           encryption_key_name=None, encryption_key_vault=None, enable_files_aadkerb=None,
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
@@ -411,6 +425,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-adds false\" "
                                "before enable AzureActiveDirectoryDomainServicesForFile.")
+            if origin_storage_account.azure_files_identity_based_authentication and \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryKerberosForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadkerb false\" "
+                               "before enable AzureActiveDirectoryDomainServicesForFile.")
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='AADDS' if enable_files_aadds else 'None')
         else:  # Only disable AADDS and keep others unchanged
@@ -418,6 +437,40 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             if not origin_storage_account.azure_files_identity_based_authentication or \
                     origin_storage_account.azure_files_identity_based_authentication.directory_service_options\
                     == 'AADDS':
+                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                    directory_service_options='None')
+            else:
+                params.azure_files_identity_based_authentication = \
+                    origin_storage_account.azure_files_identity_based_authentication
+
+    if enable_files_aadkerb is not None:
+        if enable_files_aadkerb:  # enable AADKERB
+            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
+            if origin_storage_account.azure_files_identity_based_authentication and \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options \
+                    == 'AADDS':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable AzureActiveDirectoryKerberosForFile.")
+            if origin_storage_account.azure_files_identity_based_authentication and \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
+                raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-adds false\" "
+                               "before enable AzureActiveDirectoryKerberosForFile.")
+            active_directory_properties = None
+            if domain_name or domain_guid:
+                ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+                active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                        domain_guid=domain_guid)
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADKERB',
+                active_directory_properties=active_directory_properties)
+
+        else:  # disable AADKERB
+            # Only disable AADKERB and keep others unchanged
+            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
+            if not origin_storage_account.azure_files_identity_based_authentication or \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
                 params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                     directory_service_options='None')
             else:
@@ -438,6 +491,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                     == 'AADDS':
                 raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable ActiveDirectoryDomainServicesForFile.")
+            if origin_storage_account.azure_files_identity_based_authentication and \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryKerberosForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadkerb false\" "
                                "before enable ActiveDirectoryDomainServicesForFile.")
             active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
                                                                     net_bios_domain_name=net_bios_domain_name,

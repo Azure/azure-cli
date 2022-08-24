@@ -12,6 +12,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_flexible_db,
     cf_mysql_flexible_replica,
     cf_mysql_flexible_location_capabilities,
+    cf_mysql_flexible_log,
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
@@ -60,6 +61,11 @@ def load_flexibleserver_command_table(self, _):
     mysql_flexible_location_capabilities_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_mysql_flexible_location_capabilities
+    )
+
+    mysql_flexible_log_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LogFilesOperations.{}',
+        client_factory=cf_mysql_flexible_log
     )
 
     postgres_flexible_servers_sdk = CliCommandType(
@@ -183,6 +189,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
+        g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=flexible_server_custom_common)
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
 
@@ -236,3 +243,9 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')
+
+    with self.command_group('mysql flexible-server server-logs', mysql_flexible_log_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_log) as g:
+        g.custom_command('list', 'flexible_server_log_list')
+        g.custom_command('download', 'flexible_server_log_download')

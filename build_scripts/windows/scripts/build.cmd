@@ -130,6 +130,7 @@ popd
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
 copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
+copy %REPO_ROOT%\build_scripts\windows\scripts\az.ps1 %BUILDING_DIR%\wbin\
 copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
