@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Deletes a server trust certificate that was uploaded from box to Sql Managed Instance.
+    """Delete a server trust certificate that was uploaded from box to Sql Managed Instance.
     """
 
     _aaz_info = {
