@@ -7184,3 +7184,11 @@ examples:
     text: |
         az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 22 --port 50022
 """
+
+helps['network bastion wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the Azure Bastion host machine is met.
+examples:
+  - name: Place the CLI in a waiting state until the Azure Bastion host machine is created.
+    text: az network bastion wait --resource-group MyResourceGroup --name MyBastionHost --created
+"""
