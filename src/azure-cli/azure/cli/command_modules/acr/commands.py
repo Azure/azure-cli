@@ -404,3 +404,16 @@ def load_command_table(self, _):
                                                           hide=True)) as g:
         g.command('info', 'acr_connected_registry_install_info')
         g.command('renew-credentials', 'acr_connected_registry_install_renew_credentials')
+
+    def _metadata_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
+        msg += " Use '{}' instead.".format(self.redirect)
+        return msg
+
+    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True,
+                            deprecate_info=self.deprecate(redirect="az acr manifest",
+                                                          message_func=_metadata_deprecate_message,
+                                                          hide=True)) as g:
+        g.show_command('show', 'acr_manifest_metadata_show')
+        g.command('list', 'acr_manifest_metadata_list')
+        g.command('update', 'acr_manifest_metadata_update')

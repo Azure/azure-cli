@@ -212,6 +212,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('perm_repo_id', arg_type=permissive_repo_id_type)
         c.argument('permissive_repo', options_list=['--name', '-n'], help="The name of the repository. May include a tag in the format 'name:tag'")
 
+    with self.argument_context('acr manifest metadata show') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest metadata list') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest metadata update') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
     with self.argument_context('acr manifest restore') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
         c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")

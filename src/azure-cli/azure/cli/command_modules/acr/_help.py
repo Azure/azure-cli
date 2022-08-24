@@ -636,6 +636,27 @@ examples:
     text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
 """
 
+# Deprecated
+helps['acr manifest metadata'] = """
+type: group
+short-summary: Manage artifact manifest metadata in Azure Container Registries.
+"""
+
+helps['acr manifest metadata show'] = """
+type: command
+short-summary: Get the metadata of an artifact in an Azure Container Registry.
+"""
+
+helps['acr manifest metadata list'] = """
+type: command
+short-summary: List the metadata of the manifests in a repository in an Azure Container Registry.
+"""
+
+helps['acr manifest metadata update'] = """
+type: command
+short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
+"""
+
 helps['acr manifest list-deleted'] = """
 type: command
 short-summary: List the soft-deleted manifests in a repository in an Azure Container Registry.
