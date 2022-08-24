@@ -48,7 +48,7 @@ from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
-    process_lb_create_namespace, process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
+    process_lb_create_namespace, process_lb_frontend_ip_namespace,
     process_nw_cm_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -1003,12 +1003,7 @@ def load_command_table(self, _):
 
     # region LocalGateways
     with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
         g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
-        g.custom_command('create', 'create_local_gateway', supports_no_wait=True, validator=process_local_gateway_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_local_gateway', supports_no_wait=True)
-        g.wait_command('wait')
     # endregion
 
     # region NetworkInterfaces: (NIC)

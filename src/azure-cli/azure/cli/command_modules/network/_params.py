@@ -1200,17 +1200,8 @@ def load_arguments(self, _):
         c.argument('backend_pools_name', nargs='+', help='List of name of the backend address pool', min_api='2021-02-01', is_preview=True)
     # endregion
 
-    # region LocalGateway
-    with self.argument_context('network local-gateway') as c:
-        c.argument('local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
-        c.argument('local_address_prefix', nargs='+', options_list='--local-address-prefixes', help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
-        c.argument('gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
-        c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
-
-    with self.argument_context('network local-gateway create') as c:
-        c.ignore('use_bgp_settings')
-
-    for item in ['local-gateway', 'vnet-gateway']:
+    # region VnetGateway
+    for item in ['vnet-gateway']:
         with self.argument_context('network {}'.format(item)) as c:
             c.argument('asn', type=int, arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
             c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
