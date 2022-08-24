@@ -189,6 +189,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
+        g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=flexible_server_custom_common)
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
 
