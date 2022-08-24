@@ -169,6 +169,12 @@ def load_arguments(self, _):
         # Spark config file
         c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
 
+        # Dynamic executor allocation
+        c.argument('enable_dynamic_exec', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
+                   help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+        c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
+        c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
+
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('synapse spark pool update') as c:
@@ -202,6 +208,12 @@ def load_arguments(self, _):
 
         # Spark config file
         c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
+
+        # Dynamic executor allocation
+        c.argument('enable_dynamic_exec', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
+                   help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+        c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
+        c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
 
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
