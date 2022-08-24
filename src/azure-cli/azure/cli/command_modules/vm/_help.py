@@ -822,13 +822,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=TrustedLaunchAndConfidentialVmSupported
-  - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
