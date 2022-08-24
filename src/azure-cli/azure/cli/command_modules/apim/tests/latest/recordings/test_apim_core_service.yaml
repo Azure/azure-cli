@@ -5120,7 +5120,7 @@ interactions:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/apis/az-cli000004\",\r\n
         \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"az-cli000004\",\r\n
-        \ \"properties\": {\r\n    \"displayName\": \"Contoso API\",\r\n    \"apiRevision\":
+        \ \"properties\": {\r\n    \"displayName\": \"Contoso API\",\r\n    \"api,Revision\":
         \"1\",\r\n    \"description\": null,\r\n    \"subscriptionRequired\": false,\r\n
         \   \"serviceUrl\": \"https://contoso.com\",\r\n    \"path\": \"test\",\r\n
         \   \"protocols\": [\r\n      \"https\"\r\n    ],\r\n    \"authenticationSettings\":
@@ -13221,6 +13221,10 @@ interactions:
       - apim product api list
       Connection:
       - keep-alive
+      Content-Length:
+      - '1198'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --product-id
       User-Agent:
@@ -13230,12 +13234,13 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/products/standard/apis?api-version=2021-08-01
   response:
     body:
-      string: "{\r\n  \"value\": [],\r\n  \"count\": 0\r\n}"
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAANUSQ=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2020-09-10T15:35:41.1801718Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":"https://cli-test-apim-000003-wu-01.regional.azure-api.net","portalUrl":"https://cli-test-apim-000003.portal.azure-api.net","developerPortalUrl":"https://cli-test-apim-000003.developer.azure-api.net","managementApiUrl":"https://cli-test-apim-000003.management.azure-api.net","scmUrl":"https://cli-test-apim-000003.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":["168.62.8.174"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Developer","capacity":1},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '34'
+      - '2487'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -13265,7 +13270,56 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - apim product api add
+      - apim list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.8.3 (macOS-10.13.6-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-apimanagement/0.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/service?api-version=2019-12-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAANUSQ=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2020-09-10T15:35:41.1801718Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":"https://cli-test-apim-000003-wu-01.regional.azure-api.net","portalUrl":"https://cli-test-apim-000003.portal.azure-api.net","developerPortalUrl":"https://cli-test-apim-000003.developer.azure-api.net","managementApiUrl":"https://cli-test-apim-000003.management.azure-api.net","scmUrl":"https://cli-test-apim-000003.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":["168.62.8.174"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Developer","capacity":1},"identity":null},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/apim/providers/Microsoft.ApiManagement/service/apimhack008","name":"apimhack008","type":"Microsoft.ApiManagement/service","tags":{},"location":"East
+        US","etag":"AAAAAAAVvW0=","properties":{"publisherEmail":"kehilli@microsoft.com","publisherName":"msft","notificationSenderEmail":"apimgmt-noreply@mail.windowsazure.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2020-09-09T19:34:12.8069525Z","gatewayUrl":"https://apimhack008.azure-api.net","gatewayRegionalUrl":"https://apimhack008-eastus-01.regional.azure-api.net","portalUrl":"https://apimhack008.portal.azure-api.net","developerPortalUrl":"https://apimhack008.developer.azure-api.net","managementApiUrl":"https://apimhack008.management.azure-api.net","scmUrl":"https://apimhack008.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"apimhack008.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":["40.114.92.12"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Developer","capacity":1},"identity":null},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/apim/providers/Microsoft.ApiManagement/service/apimhack007","name":"apimhack007","type":"Microsoft.ApiManagement/service","tags":{},"location":"East
+        US","etag":"AAAAAAAQ8ME=","properties":{"publisherEmail":"kehilli@microsoft.com","publisherName":"msft","notificationSenderEmail":"apimgmt-noreply@mail.windowsazure.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2020-03-10T16:33:35.0851527Z","gatewayUrl":"https://apimhack007.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"apimhack007.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"enableClientCertificate":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Consumption","capacity":0},"identity":null}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6293'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Sep 2020 16:13:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - e0e644a2-dc3f-44b1-afa3-66a97bda34c2
+      - adf17955-7414-4043-9711-6a9f1f4a30d4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim show
       Connection:
       - keep-alive
       Content-Length:
@@ -13279,15 +13333,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/products/standard/apis/az-cli000004?api-version=2021-08-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/products/standard/apis/az-cli000004\",\r\n
-        \ \"type\": \"Microsoft.ApiManagement/service/products/apis\",\r\n  \"name\":
-        \"az-cli000004\",\r\n  \"properties\": {\r\n    \"displayName\": \"Contoso
-        API\",\r\n    \"apiRevision\": \"2\",\r\n    \"description\": \"Contoso API
-        Description\",\r\n    \"subscriptionRequired\": false,\r\n    \"serviceUrl\":
-        \"https://contoso.com\",\r\n    \"path\": \"test\",\r\n    \"protocols\":
-        null,\r\n    \"authenticationSettings\": null,\r\n    \"subscriptionKeyParameterNames\":
-        null,\r\n    \"isCurrent\": true,\r\n    \"apiRevisionDescription\": \"New
-        API Revision\"\r\n  }\r\n}"
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAANUSQ=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2020-09-10T15:35:41.1801718Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":"https://cli-test-apim-000003-wu-01.regional.azure-api.net","portalUrl":"https://cli-test-apim-000003.portal.azure-api.net","developerPortalUrl":"https://cli-test-apim-000003.developer.azure-api.net","managementApiUrl":"https://cli-test-apim-000003.management.azure-api.net","scmUrl":"https://cli-test-apim-000003.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":["168.62.8.174"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Developer","capacity":1},"identity":null}'
     headers:
       cache-control:
       - no-cache
@@ -13412,7 +13459,8 @@ interactions:
       code: 204
       message: No Content
 - request:
-    body: null
+    body: '{"storageAccount": "clitest000002", "accessKey": "veryFakedStorageAccountKey==",
+      "containerName": "backups", "backupName": "cli-test-apim-000003_test_backup"}'
     headers:
       Accept:
       - application/json
@@ -13443,6 +13491,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:23 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003//operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -13488,6 +13538,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:24 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -13537,6 +13589,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:25 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -13596,6 +13650,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:26 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -13645,6 +13701,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:28 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -13809,6 +13867,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:30 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -13856,6 +13916,8 @@ interactions:
       - Thu, 18 Aug 2022 10:09:31 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X0JhY2t1cF8zOTA5YTM0Mg==?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -14274,12 +14336,15 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/apis/gr-api000005/schemas/graphql?api-version=2021-08-01
   response:
     body:
-      string: ''
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAANUTY=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2020-09-10T15:35:41.1801718Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":"https://cli-test-apim-000003-wu-01.regional.azure-api.net","portalUrl":"https://cli-test-apim-000003.portal.azure-api.net","developerPortalUrl":"https://cli-test-apim-000003.developer.azure-api.net","managementApiUrl":"https://cli-test-apim-000003.management.azure-api.net","scmUrl":"https://cli-test-apim-000003.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":["168.62.8.174"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Developer","capacity":1},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '0'
+      - '2487'
+      content-type:
+      - application/json; charset=utf-8
       date:
       - Thu, 18 Aug 2022 10:10:02 GMT
       expires:
@@ -15585,7 +15650,7 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g --service-name --named-value-id
+      - -g -n -y
       User-Agent:
       - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
@@ -15593,12 +15658,13 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/namedValues/az-nv000007/listValue?api-version=2021-08-01
   response:
     body:
-      string: '{"value":"testvalue123"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAANUTg=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"Deleting","createdAtUtc":"2020-09-10T15:35:41.1801718Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":"https://cli-test-apim-000003-wu-01.regional.azure-api.net","portalUrl":"https://cli-test-apim-000003.portal.azure-api.net","developerPortalUrl":"https://cli-test-apim-000003.developer.azure-api.net","managementApiUrl":"https://cli-test-apim-000003.management.azure-api.net","scmUrl":"https://cli-test-apim-000003.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true}],"publicIPAddresses":["168.62.8.174"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null}},"sku":{"name":"Developer","capacity":1},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '24'
+      - '2495'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -15607,23 +15673,21 @@ interactions:
       - '"AAAAAAAACaw="'
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X1Rlcm1fNzIyNjBlOWI=?api-version=2019-12-01
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -15632,11 +15696,13 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - apim nv show
+      - apim delete
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
-      - -g --service-name --named-value-id
+      - -g -n -y
       User-Agent:
       - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
@@ -15661,6 +15727,8 @@ interactions:
       - '"AAAAAAAACaw="'
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZnhla21uYzN1eG1qNmRtd2xvc2k2Mmxibnh1Mm9zYjdmbmo0X1Rlcm1fNzIyNjBlOWI=?api-version=2019-12-01
       pragma:
       - no-cache
       server:
@@ -15684,11 +15752,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - apim nv update
+      - apim delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --service-name --named-value-id --value
+      - -g -n -y
       User-Agent:
       - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
@@ -15737,7 +15805,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - apim nv update
+      - apim show
       Connection:
       - keep-alive
       Content-Length:
@@ -15745,7 +15813,7 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g --service-name --named-value-id --value
+      - -n -g
       User-Agent:
       - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
@@ -15753,12 +15821,15 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/namedValues/az-nv000007?api-version=2021-08-01
   response:
     body:
-      string: ''
+      string: '{"error":{"code":"ServiceNotFound","message":"Api service does not
+        exist: cli-test-apim-000003","details":null,"innerError":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '0'
+      - '160'
+      content-type:
+      - application/json; charset=utf-8
       date:
       - Thu, 18 Aug 2022 10:11:11 GMT
       expires:

@@ -5,7 +5,9 @@
 
 import os
 import unittest
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from knack.util import CLIError
+from azure.mgmt.apimanagement.models._models_py3 import ErrorResponseException
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
@@ -15,7 +17,6 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ApimScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
-    @AllowLargeResponse()
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
         service_name = self.create_random_name('cli-test-apim-', 50)
 
@@ -33,7 +34,7 @@ class ApimScenarioTest(ScenarioTest):
             'publisher_email': 'publisher@contoso.com',
             'publisher_name': 'Contoso',
             'sku_name': 'Developer',
-            'skucapacity': 1,
+            'sku_capacity': 1,
             'enable_cert': True,
             'enable_managed_identity': True,
             'tag': "foo=boo"
@@ -42,12 +43,11 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert} --enable-managed-identity {enable_managed_identity}',
+        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --sku-capacity {sku_capacity} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert}',
                  checks=[self.check('name', '{service_name}'),
                          self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
-                         # expect None for Developer sku, even though requested value was True - only works with Consumption sku
                          self.check('enableClientCertificate', None),
                          self.check('identity.type', 'SystemAssigned'),
                          self.check('publisherName', '{publisher_name}'),
@@ -65,6 +65,9 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('publisherName', '{publisher_name}'),
                     self.check('publisherEmail', '{publisher_email}')])
 
+        count = len(self.cmd('apim list').get_output_in_json())
+        self.assertGreaterEqual(count, 1)
+
         self.cmd('apim show -g {rg} -n {service_name}', checks=[
             # recheck properties from create
             self.check('name', '{service_name}'),
@@ -76,7 +79,6 @@ class ApimScenarioTest(ScenarioTest):
         ])
 
         # backup command
-
         account_container = 'backups'
         account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -o tsv'.format(
             storage_account_for_backup, resource_group)).output[: -1]
