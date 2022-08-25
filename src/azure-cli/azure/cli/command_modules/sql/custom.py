@@ -338,12 +338,14 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
             raise CLIError(
                 "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
                 " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
-                " supported combinations of family and capacity.".format(
+                " supported combinations of family and capacity."
+                " And ensure that the sku supports '{compute_model}' compute model.".format(
                     tier=sku.tier,
                     family=sku.family,
                     capacity=sku.capacity,
                     skus=[(slo.sku.family, slo.sku.capacity)
-                          for slo in supported_service_level_objectives]
+                          for slo in supported_service_level_objectives],
+                    compute_model=compute_model
                 ))
     elif sku.family:
         # Error - cannot find based on family alone.

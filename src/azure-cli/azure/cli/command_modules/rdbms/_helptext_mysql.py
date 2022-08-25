@@ -409,16 +409,16 @@ examples:
 
 helps['mysql flexible-server deploy'] = """
 type: group
-short-summary: Enable and run github action workflow for MySQL server
+short-summary: Enable and run GitHub Actions workflow for MySQL server
 """
 
 helps['mysql flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for MySQL server.
+short-summary: Create GitHub Actions workflow file for MySQL server.
 examples:
-  - name: Create github action workflow file for MySQL server.
+  - name: Create GitHub Actions workflow file for MySQL server.
     text: az mysql flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
-  - name: Create github action workflow file for MySQL server and push it to the remote repository
+  - name: Create GitHub Actions workflow file for MySQL server and push it to the remote repository
     text: az mysql flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
 """
 
@@ -453,4 +453,49 @@ examples:
     text: az mysql flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
   - name: List log files for 'testsvr' less than 30Kb in size.
     text: az mysql flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+"""
+
+helps['mysql flexible-server upgrade'] = """
+type: command
+short-summary: Upgrade the major version of a flexible server.
+examples:
+  - name: Upgrade server 'testsvr' to MySQL major version 8.
+    text: >
+      # make sure that sql_mode only contains values allowed in new version, for example:
+
+      az mysql flexible-server parameter set -g testgroup -s testsvr -n sql_mode \\
+        -v "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO"
+
+      # upgrade server to MySQL major version 8.
+
+      az mysql flexible-server upgrade -g testgroup -n testsvr -v 8
+"""
+
+helps['mysql flexible-server backup'] = """
+type: group
+short-summary: Manage flexible server backups.
+"""
+
+helps['mysql flexible-server backup list'] = """
+type: command
+short-summary: List all the backups for a given server.
+examples:
+  - name: List all backups for 'testsvr'.
+    text: az mysql flexible-server backup list -g testgroup -n testsvr
+"""
+
+helps['mysql flexible-server backup show'] = """
+type: command
+short-summary: Show the details of a specific backup for a given server.
+examples:
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az mysql flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['mysql flexible-server backup create'] = """
+type: command
+short-summary: Create a backup for a given server with specified backup name.
+examples:
+  - name: Create a backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
 """

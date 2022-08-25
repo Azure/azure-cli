@@ -24,11 +24,19 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
-    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE)
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G)
 from azure.cli.command_modules.acs._validators import (
-    validate_acr, validate_assign_identity, validate_assign_kubelet_identity,
+    validate_acr, validate_agent_pool_name, validate_assign_identity,
+    validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
+    validate_azure_keyvault_kms_key_vault_resource_id,
     validate_create_parameters, validate_credential_format,
-    validate_eviction_policy, validate_ip_ranges, validate_k8s_version,
+    validate_defender_config_parameter,
+    validate_defender_disable_and_enable_parameters, validate_eviction_policy,
+    validate_host_group_id, validate_ip_ranges, validate_k8s_version,
+    validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_kubectl_version, validate_kubelogin_version,
     validate_linux_host_name, validate_list_of_integers,
     validate_load_balancer_idle_timeout,
@@ -41,11 +49,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_nodes_count, validate_pod_subnet_id, validate_ppg,
     validate_priority, validate_snapshot_id, validate_snapshot_name,
     validate_spot_max_price, validate_ssh_key, validate_taints,
-    validate_vm_set_type, validate_vnet_subnet_id,
-    validate_keyvault_secrets_provider_disable_and_enable_parameters,
-    validate_defender_disable_and_enable_parameters, validate_defender_config_parameter,
-    validate_host_group_id,
-    validate_azure_keyvault_kms_key_id, validate_azure_keyvault_kms_key_vault_resource_id)
+    validate_vm_set_type, validate_vnet_subnet_id, validate_registry_name)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -114,6 +118,14 @@ auto_upgrade_channels = [
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
+
+gpu_instance_profiles = [
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G,
+]
 
 
 def load_arguments(self, _):
@@ -326,6 +338,7 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('http_proxy_config')
+        c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -448,13 +461,13 @@ def load_arguments(self, _):
         c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
 
     with self.argument_context('aks check-acr', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
-        c.argument('acr')
+        c.argument('acr', validator=validate_registry_name)
         c.argument('node_name')
 
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('cluster_name', help='The cluster name.')
         # the following argument is declared for the wait command
-        c.argument('agent_pool_name', options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_nodepool_name, help='The node pool name.')
+        c.argument('agent_pool_name', options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_agent_pool_name, help='The node pool name.')
 
     for sub_command in ['add', 'update', 'upgrade', 'scale', 'show', 'list', 'delete']:
         with self.argument_context('aks nodepool ' + sub_command) as c:
@@ -492,6 +505,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[

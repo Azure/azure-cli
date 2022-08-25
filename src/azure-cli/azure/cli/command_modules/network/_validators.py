@@ -1044,17 +1044,6 @@ def process_cross_region_lb_frontend_ip_namespace(cmd, namespace):
     get_public_ip_validator()(cmd, namespace)
 
 
-def process_local_gateway_create_namespace(cmd, namespace):
-    ns = namespace
-    get_default_location_from_resource_group(cmd, ns)
-    validate_tags(ns)
-
-    use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
-        raise ValueError(
-            'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
-
-
 def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
@@ -1084,11 +1073,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' when sku is Standard and zone is not provided:'
                        ' For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"];'
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
-
-
-def process_route_table_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
 
 
 def process_tm_endpoint_create_namespace(cmd, namespace):

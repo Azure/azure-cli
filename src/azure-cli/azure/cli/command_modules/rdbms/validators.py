@@ -14,6 +14,7 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
 from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
@@ -304,18 +305,23 @@ def _pg_version_validator(version, sku_info, tier, instance):
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
     if instance:
         tier = instance.sku.tier if tier is None else tier
-    if high_availability is not None and high_availability.lower() == 'enabled':
+        zone = instance.availability_zone if zone is None else zone
+
+    if high_availability is not None and high_availability.lower() != 'disabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az:
+        if single_az and high_availability.lower() == 'zoneredundant':
             raise ArgumentUsageError("This region is single availability zone. "
-                                     "High availability is not supported in a single availability zone region.")
+                                     "Zone redundant high availability is not supported "
+                                     "in a single availability zone region.")
 
     if standby_availability_zone:
-        if not high_availability:
-            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
+        if not high_availability or high_availability.lower() != 'zoneredundant':
+            raise ArgumentUsageError("You need to enable zone redundant high availability "
+                                     "to set standby availability zone.")
         if zone == standby_availability_zone:
-            raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
+            raise ArgumentUsageError("Your server is in availability zone {}. "
+                                     "The zone of the server cannot be same as the standby zone.".format(zone))
 
 
 def _network_arg_validator(subnet, public_access):
@@ -428,11 +434,15 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
 
     if db_context.command_group == 'mysql':
-        result = client.execute(db_context.location,
-                                name_availability_request={
-                                    'name': server_name,
-                                    'location_name': db_context.location,
-                                    'type': type_})
+        try:
+            result = client.execute(db_context.location,
+                                    name_availability_request={
+                                        'name': server_name,
+                                        'type': type_})
+        except HttpResponseError as e:
+            if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+                client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
+                result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
     else:
         result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 

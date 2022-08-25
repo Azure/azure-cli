@@ -6,8 +6,11 @@
 # --------------------------------------------------------------------------------------------
 
 import logging
+import os
 import subprocess
 import sys
+import time
+import xml.etree.ElementTree as ET
 from azdev.utilities import get_path_table
 
 logger = logging.getLogger(__name__)
@@ -16,11 +19,16 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
-# sys.argv is passed by .azure-pipelines/templates/automation_test.yml in section `Running full test`
+# sys.argv is passed by
+# .azure-pipelines/templates/automation_test.yml in section `Running full test`
+# scripts/bump_version/bump_version.yml in `azdev test` step
 instance_cnt = int(sys.argv[1])
 instance_idx = int(sys.argv[2])
 profile = sys.argv[3]
 serial_modules = sys.argv[4].split()
+fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
+working_directory = "/home/vsts/work/1/s"
+azdev_test_result_dir = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env"
 jobs = {
             'acr': 45,
             'acs': 62,
@@ -97,6 +105,93 @@ jobs = {
             'azure-cli-telemetry': 18,
             'azure-cli-testsdk': 20,
         }
+
+
+def run_command(cmd, check_return_code=False):
+    error_flag = False
+    logger.info(cmd)
+    try:
+        out = subprocess.run(cmd, check=True)
+        if check_return_code and out.returncode:
+            raise RuntimeError(f"{cmd} failed")
+    except subprocess.CalledProcessError:
+        error_flag = True
+    return error_flag
+
+
+def git_restore(file_path):
+    if not file_path:
+        return
+    logger.info(f"git restore {file_path}")
+    out = subprocess.Popen(["git", "restore", file_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, err = out.communicate()
+    if stdout:
+        logger.info(stdout)
+    if err:
+        logger.warning(err)
+
+
+def git_push(message):
+    out = subprocess.Popen(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, _ = out.communicate()
+    if "nothing to commit, working tree clean" in str(stdout):
+        return
+    try:
+        run_command(["git", "add", "*/command_modules/*"], check_return_code=True)
+        run_command(["git", "commit", "-m", message], check_return_code=True)
+    except RuntimeError as ex:
+        raise ex
+    retry = 3
+    while retry >= 0:
+        try:
+            run_command(["git", "fetch", "azclibot"], check_return_code=True)
+            run_command(["git", "pull", "--rebase"], check_return_code=True)
+            run_command(["git", "push"], check_return_code=True)
+
+            logger.info("git push all recording files")
+            break
+        except RuntimeError as ex:
+            if retry == 0:
+                raise ex
+            retry -= 1
+            time.sleep(10)
+
+
+def get_failed_tests(test_result_fp):
+    tree = ET.parse(test_result_fp)
+    root = tree.getroot()
+    failed_tests = {}
+    for testsuite in root:
+        for testcase in testsuite:
+            # Collect failed tests
+            failures = testcase.findall('failure')
+            if failures:
+                logger.info(f"failed testcase attributes: {testcase.attrib}")
+                test_case = testcase.attrib['name']
+                recording_folder = os.path.join(os.path.dirname(testcase.attrib['file']), 'recordings')
+                if 'src' not in recording_folder:
+                    recording_folder = os.path.join(os.path.join('src', 'azure-cli'), recording_folder)
+                failed_tests[test_case] = os.path.join(recording_folder, test_case + '.yaml')
+    return failed_tests
+
+
+def process_test(cmd, azdev_test_result_fp, live_rerun=False):
+    error_flag = run_command(cmd)
+    if not error_flag or not live_rerun:
+        return error_flag
+    # drop the original `--pytest-args` and add new arguments
+    cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
+    error_flag = run_command(cmd)
+    # restore original recording yaml file for failed test in live run
+    if error_flag:
+        failed_tests = get_failed_tests(azdev_test_result_fp)
+        for (test, file) in failed_tests.items():
+            git_restore(os.path.join(working_directory, file))
+
+    # save live run recording changes to git
+    commit_message = f"Rerun tests from instance {instance_idx}. See {os.path.basename(azdev_test_result_fp)} for details"
+    git_push(commit_message)
+    return False
 
 
 class AutomaticScheduling(object):
@@ -181,21 +276,15 @@ class AutomaticScheduling(object):
             else:
                 parallel_tests.append(k)
         if serial_tests:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + \
-                  serial_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            logger.info(cmd)
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError:
-                error_flag = True
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
+            error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         if parallel_tests:
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + \
-                  parallel_tests + ['--profile', f'{profile}', '--pytest-args', '"--durations=10"']
-            logger.info(cmd)
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError:
-                error_flag = True
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
+            error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         return error_flag
 
 
