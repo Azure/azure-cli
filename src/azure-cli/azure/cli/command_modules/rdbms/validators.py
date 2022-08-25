@@ -304,18 +304,23 @@ def _pg_version_validator(version, sku_info, tier, instance):
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
     if instance:
         tier = instance.sku.tier if tier is None else tier
-    if high_availability is not None and high_availability.lower() == 'enabled':
+        zone = instance.availability_zone if zone is None else zone
+
+    if high_availability is not None and high_availability.lower() != 'disabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az:
+        if single_az and high_availability.lower() == 'zoneredundant':
             raise ArgumentUsageError("This region is single availability zone. "
-                                     "High availability is not supported in a single availability zone region.")
+                                     "Zone redundant high availability is not supported "
+                                     "in a single availability zone region.")
 
     if standby_availability_zone:
-        if not high_availability:
-            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
+        if not high_availability or high_availability.lower() != 'zoneredundant':
+            raise ArgumentUsageError("You need to enable zone redundant high availability "
+                                     "to set standby availability zone.")
         if zone == standby_availability_zone:
-            raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
+            raise ArgumentUsageError("Your server is in availability zone {}. "
+                                     "The zone of the server cannot be same as the standby zone.".format(zone))
 
 
 def _network_arg_validator(subnet, public_access):
