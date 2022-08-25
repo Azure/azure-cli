@@ -14,6 +14,7 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
 from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
@@ -433,11 +434,15 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
 
     if db_context.command_group == 'mysql':
-        result = client.execute(db_context.location,
-                                name_availability_request={
-                                    'name': server_name,
-                                    'location_name': db_context.location,
-                                    'type': type_})
+        try:
+            result = client.execute(db_context.location,
+                                    name_availability_request={
+                                        'name': server_name,
+                                        'type': type_})
+        except HttpResponseError as e:
+            if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+                client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
+                result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
     else:
         result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
