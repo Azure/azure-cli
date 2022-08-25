@@ -152,7 +152,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_version_validator(version, sku_info, tier, instance)
     _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
-                          disable_data_encryption, geo_redundant_backup)
+                          disable_data_encryption, geo_redundant_backup, instance)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
@@ -249,7 +249,7 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
 
 
 def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
-                          disable_data_encryption, geo_redundant_backup):
+                          disable_data_encryption, geo_redundant_backup, instance):
     # identity and key should be provided as a pair
     if bool(byok_identity is None) ^ bool(byok_key is None) or\
        bool(backup_byok_identity is None) ^ bool(backup_byok_key is None):
@@ -263,11 +263,13 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
     if disable_data_encryption and (byok_key or backup_byok_key):
         raise ArgumentUsageError("Data encryption cannot be disabled if key or backup key is provided.")
 
-    if (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and backup_byok_identity is None:
+    if not disable_data_encryption and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
+       backup_byok_identity is None:
         raise ArgumentUsageError("Backup identity and key need to be provided for geo-redundant server.")
 
-    if (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and backup_byok_identity is not None:
-        raise ArgumentUsageError("Data encryption with geo-redundant server is not supported.")
+    if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
+        raise CLIError("Data encryption cannot be modified on a server with replication role. "
+                       "Use the primary server instead.")
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,

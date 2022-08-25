@@ -116,7 +116,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_georestore_mgmt('mysql', resource_group)
     
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_byok_mgmt(self, resource_group):
         self._test_flexible_server_byok_mgmt('mysql', resource_group)
 
@@ -528,6 +528,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         sku_name = 'Standard_D2ds_v4'
         location = 'northeurope'
         backup_location = 'westeurope'
+        backup_location_full_name = 'West Europe'
 
         self.cmd(
             'keyvault create -g {} -n {} --location {} --enable-soft-delete true --enable-purge-protection true'
@@ -553,7 +554,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, backup_vault_name, backup_identity['principalId']))
 
-        def invalid_input():
+        def invalid_input_tests():
             # key or identity only
             self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {}'.format(
                 database_engine,
@@ -618,22 +619,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 identity['id'],
             ), expect_failure=True)
 
-            # data encryption with geo-redundant-backup not supported
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-key {} --backup-identity {} --geo-redundant-backup Enabled'.format(
-                database_engine,
-                resource_group,
-                server_name,
-                tier,
-                sku_name,
-                key['key']['kid'],
-                identity['id'],
-                backup_key['key']['kid'],
-                backup_identity['id']
-            ), expect_failure=True)
+        def main_tests(geo_redundant_backup):
+            geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
+            backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
+            restore_type = 'geo-restore --location {}'.format(backup_location) if geo_redundant_backup else 'restore'
 
-        def no_geo_redundant_backup():
             # create primary flexible server with data encryption
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --location {}'.format(
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
                         database_engine,
                         resource_group,
                         server_name,
@@ -641,15 +633,26 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                         sku_name,
                         key['key']['kid'],
                         identity['id'],
-                        location
+                        backup_key_id_flags,
+                        location,
+                        geo_redundant_backup_enabled
                     ))
 
+            main_checks = [
+                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
+            ]
+
+            if geo_redundant_backup:
+                main_checks += [
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
+                    JMESPathCheck('dataEncryption.geoBackupKeyUri', backup_key['key']['kid']),
+                    JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
+                ]
+
             result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                    checks=[
-                        JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                        JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
-                        JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
-                    ]).get_output_in_json()
+                    checks=main_checks).get_output_in_json()
 
             # should fail because disable-data-encryption and key for data encryption are provided at the same time
             self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} --disable-data-encryption'.format(
@@ -674,28 +677,21 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
                 JMESPathCheck('dataEncryption', None),
                 JMESPathCheck('replicationRole', 'Replica')
-            ])
+            ] + ([JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id']))] if geo_redundant_backup else []))
 
             # enable data encryption again in primary server
-            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {}'.format(
+            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} {}'.format(
                         database_engine,
                         resource_group,
                         server_name,
                         key['key']['kid'],
-                        identity['id']
-            ), checks=[
-                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
-                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
-            ])
+                        identity['id'],
+                        backup_key_id_flags
+            ), checks=main_checks)
 
             # replica 1 now should have data encryption as well
             self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
-                checks=[
-                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                    JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
-                    JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
-                ])
+                checks=main_checks)
 
             # create replica 2
             self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
@@ -703,12 +699,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                         resource_group,
                         replica_2_name,
                         server_name
-            ), checks=[
-                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
-                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id']),
-                JMESPathCheck('replicationRole', 'Replica')
-            ])
+            ), checks=main_checks + [JMESPathCheck('replicationRole', 'Replica')])
 
             # should fail because modifying data encryption on replica server is not allowed
             self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'
@@ -718,21 +709,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # restore backup
             current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
             earliest_restore_time = result['backup']['earliestRestoreDate']
-            date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
+            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+            sleep(max(0, seconds_to_wait))
 
-            if current_time < earliest_restore_time:
-                sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time, date_format)).total_seconds())
-
-            self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'.format(
+            self.cmd('{} flexible-server {} -g {} --name {} --source-server {}'.format(
                      database_engine,
+                     restore_type,
                      resource_group,
                      backup_name,
                      server_name
-            ), checks=[
-                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
-                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
-            ])
+            ), checks=main_checks + ([JMESPathCheck('location', backup_location_full_name)] if geo_redundant_backup else []))
 
             # disable data encryption in primary server
             self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
@@ -745,14 +731,15 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_2_name),
                 checks=[JMESPathCheck('dataEncryption', None)])
 
-            # delete all the servers
+            # delete all servers
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_1_name))
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_2_name))
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, backup_name))
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
-        invalid_input()
-        no_geo_redundant_backup()
+        invalid_input_tests()
+        main_tests(True)
+        main_tests(False)
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

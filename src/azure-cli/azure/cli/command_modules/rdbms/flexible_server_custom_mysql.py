@@ -418,9 +418,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if disable_data_encryption:
         data_encryption = mysql_flexibleservers.models.DataEncryption(type="SystemManaged")
 
-    if instance.replication_role == 'Replica' and (disable_data_encryption or byok_key):
-        raise CLIError('Data encryption cannot be modified on a server with replication role. Use the primary server instead.')
-
     if disable_data_encryption or byok_key:
         server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
         replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
