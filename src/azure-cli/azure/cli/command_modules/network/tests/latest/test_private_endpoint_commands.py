@@ -900,83 +900,111 @@ class NetworkResourceManagementPrivateLinksTest(ScenarioTest):
         # Delete
         self.cmd('az network private-endpoint-connection delete -g {rg} --resource-name {rmplname} -n {pe} --type Microsoft.Authorization/resourceManagementPrivateLinks -y')
 
-class NetworkPrivateLinkAgFoodPlatformScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_fb_plr')
-    def test_private_link_resource_fb(self, resource_group):
-        self.kwargs.update({
-            'acc': self.create_random_name('cli-test-fb-plr-', 28),
-            'loc': 'eastus2',
-            'rg': resource_group
-        })
-        
-        self.cmd('az fb create -n {acc} -g {rg}')
-        
-        self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.AgFoodPlatform/farmBeats',
-                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'fb')])
+class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_fb_pe')
-    def test_private_endpoint_connection_fb(self, resource_group):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_farmbeats_pe', random_name_length=40, location="centraluseuap")
+    def test_farmbeats_private_endpoint(self, resource_group):
+
         self.kwargs.update({
-            'acc': self.create_random_name('cli-test-fb-pe-', 28),
-            'loc': 'eastus',
             'rg': resource_group,
-            'vnet': self.create_random_name('cli-vnet-', 24),
-            'subnet': self.create_random_name('cli-subnet-', 24),
-            'pe': self.create_random_name('cli-pe-', 24),
-            'pe_connection': self.create_random_name('cli-pec-', 24)
+            'resource_name': self.create_random_name('cli', 15),
+            'resource_type': 'farmBeats',
+            'sub': self.get_subscription_id(),
+            'namespace': 'Microsoft.AgFoodPlatform',
+            'vnet': self.create_random_name('cli-farmbeats-vnet-', 40),
+            'subnet': self.create_random_name('cli-farmbeats-subnet-', 40),
+            'private_endpoint': self.create_random_name('cli-farmbeats-pe-', 40),
+            'private_endpoint_connection': self.create_random_name('cli-farmbeats-pec-', 40),
+            'location': 'centraluseuap',
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!',
+            'body': '{\\"location\\":\\"centraluseuap\\",\\"tags\\":{\\"awesomeness\\":\\"100\\",\\"farm\\":\\"beats\\"}}',
+            'api_version': '2021-09-01-preview'
         })
-        
-        # Prepare farmbeats account and network
-        account = self.cmd('az fb create -n {acc} -g {rg} --enable-public-network false').get_output_in_json()
-        self.kwargs['acc_id'] = account['id']
-        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-                 checks=self.check('length(newVNet.subnets)', 1))
-        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+
+        # Create farmbeats resource
+        # This API only accepts the creation request, provisioning state of the resource has to be polled
+        self.cmd('az rest --method "PUT" \
+                --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/{namespace}/{resource_type}/{resource_name}?api-version={api_version}" \
+                --body "{body}"')
+
+        # check for resource provisioning state
+        self.check_provisioning_state_for_farmbeats_resource()
+
+        # Get resource id for the instance
+        self.kwargs['resource_id']= self.cmd(
+            'az resource show --name {resource_name} -g {rg} --resource-type {resource_type} --namespace {namespace} --query id').output
+
+        # Create virtual net and sub net
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+
+        # Update sub net
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} --name {subnet} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-        
-        # Create a private endpoint connection
-        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
-                      '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
-                      '--group-id fb').get_output_in_json()
-        self.kwargs['pe_id'] = pe['id']
-        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
+        # Test list private link resources. Get group id
+        private_link_resources = self.cmd(
+            'network private-link-resource list --id {resource_id} ').get_output_in_json()
+        self.kwargs['group_id'] = private_link_resources[0]['properties']['groupId']
         
-        # Show the connection at farmbeats side
-        results = self.kwargs['pe_id'].split('/')
-        self.kwargs[
-            'pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AgFoodPlatform/farmBeats/{2}/privateEndpointConnections/{3}'.format(
-            results[2], results[4], self.kwargs['acc'], results[-1])
-        self.cmd('az network private-endpoint-connection show --id {pec_id}',
-                 checks=self.check('id', '{pec_id}'))
-        self.cmd(
-            'az network private-endpoint-connection show --resource-name {acc} --name {pe_name} --resource-group {rg} --type Microsoft.AgFoodPlatform/farmBeats',
-            checks=self.check('name', '{pe_name}'))
-        self.cmd('az network private-endpoint-connection show --resource-name {acc} -n {pe_name} -g {rg} --type Microsoft.AgFoodPlatform/farmBeats',
-                 checks=self.check('name', '{pe_name}'))
 
-        # Test approval/rejection
-        self.kwargs.update({
-            'approval_desc': 'You are approved!',
-            'rejection_desc': 'You are rejected!'
-        })
+        # Create private endpoint
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {resource_id} --connection-name {private_endpoint_connection} '
+            '--group-id {group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint'].lower() in private_endpoint['name'].lower())
+        
+        
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {resource_id}').get_output_in_json()
+
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+           
+        
+        self.kwargs['private-endpoint'] = private_endpoint['id']
+
+        # # Test reject private endpoint connection
         self.cmd(
-            'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.AgFoodPlatform/farmBeats '
-            '--description "{approval_desc}"', checks=[
-                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            'network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+            ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
             ])
-        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
-                 '--description "{rejection_desc}"',
-                 checks=[
-                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
-                 ])
-        self.cmd('az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.AgFoodPlatform/farmBeats', checks=[
-            self.check('length(@)', 1)
-        ])
 
         # Test delete
-        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+        self.cmd('az network private-endpoint-connection delete --id {private-endpoint-connection-id} -y')
+        time.sleep(30)
+        self.cmd('az network private-endpoint-connection list --id {private-endpoint-connection-id}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
+    def get_provisioning_state_for_farmbeats_resource(self):
+        # get provisioning state
+        response = self.cmd('az rest --method "GET" \
+                --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/{namespace}/{resource_type}/{resource_name}?api-version={api_version}"').get_output_in_json()
+
+        return response['properties']['provisioningState']
+
+    def check_provisioning_state_for_farmbeats_resource(self):
+        count = 0
+        print("checking status of creation...........")
+        state = self.get_provisioning_state_for_farmbeats_resource()
+        print(state)
+        while state!="Succeeded":
+            if state == "Failed":
+                print("creation failed!")
+                self.assertTrue(False)
+            elif (count == 12):
+                print("TimeOut after waiting for 120 mins!")
+                self.assertTrue(False)
+            print("instance not yet created. waiting for 10 more mins...")
+            count+=1
+            time.sleep(600) # Wait for 10 minutes
+            state = self.get_provisioning_state_for_farmbeats_resource()
+        print("creation succeeded!")
+
 
 class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
