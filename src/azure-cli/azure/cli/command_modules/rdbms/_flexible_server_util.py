@@ -184,7 +184,7 @@ def _postgres_parse_list_skus(result):
 
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    single_az = not result[0].zone_redundant_ha_supported
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
