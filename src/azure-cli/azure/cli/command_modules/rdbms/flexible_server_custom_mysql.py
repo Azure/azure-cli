@@ -15,7 +15,8 @@ from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
-    cf_mysql_flexible_db, cf_mysql_check_resource_availability, cf_mysql_flexible_private_dns_zone_suffix_operations
+    cf_mysql_flexible_db, cf_mysql_check_resource_availability, \
+    cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, \
     generate_password, parse_maintenance_window, replace_memory_optimized_tier
 from .flexible_server_custom_common import create_firewall_rule
@@ -48,8 +49,10 @@ def flexible_server_create(cmd, client,
                                                                              server_name, 'mysql')
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
-        cf_availability=cf_mysql_check_resource_availability, cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations, logging_name='MySQL', command_group='mysql', server_client=client,
-        location=location)
+        cf_availability=cf_mysql_check_resource_availability,
+        cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+        cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
+        logging_name='MySQL', command_group='mysql', server_client=client, location=location)
 
     # Process parameters
     server_name = server_name.lower()
@@ -189,8 +192,9 @@ def flexible_server_restore(cmd, client,
         location = ''.join(source_server_object.location.lower().split())
 
         db_context = DbContext(
-            cmd=cmd, cf_availability=cf_mysql_check_resource_availability, logging_name='MySQL', command_group='mysql', server_client=client,
-            location=location)
+            cmd=cmd, cf_availability=cf_mysql_check_resource_availability,
+            cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+            logging_name='MySQL', command_group='mysql', server_client=client, location=location)
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
 
         parameters = mysql_flexibleservers.models.Server(
@@ -204,8 +208,10 @@ def flexible_server_restore(cmd, client,
         if any((public_access, vnet, subnet)):
             db_context = DbContext(
                 cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
-                cf_availability=cf_mysql_check_resource_availability, cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations, logging_name='MySQL', command_group='mysql', server_client=client,
-                location=location)
+                cf_availability=cf_mysql_check_resource_availability,
+                cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+                cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
+                logging_name='MySQL', command_group='mysql', server_client=client, location=location)
 
             parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
                                                                                   resource_group_name=resource_group_name,
@@ -255,8 +261,10 @@ def flexible_server_georestore(cmd, client,
 
         db_context = DbContext(
             cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
-            cf_availability=cf_mysql_check_resource_availability, cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations, logging_name='MySQL', command_group='mysql', server_client=client,
-            location=source_server_object.location)
+            cf_availability=cf_mysql_check_resource_availability,
+            cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+            cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
+            logging_name='MySQL', command_group='mysql', server_client=client, location=source_server_object.location)
 
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
         validate_georestore_location(db_context, location)
@@ -310,8 +318,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
-        cf_availability=cf_mysql_check_resource_availability, logging_name='MySQL', command_group='mysql', server_client=client,
-        location=instance.location)
+        cf_availability=cf_mysql_check_resource_availability,
+        cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+        logging_name='MySQL', command_group='mysql', server_client=client, location=instance.location)
 
     if high_availability and high_availability.lower() == 'enabled':
         logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
@@ -741,12 +750,14 @@ def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
     def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
-                 cf_availability=None, cf_private_dns_zone_suffix=None, command_group=None, server_client=None, location=None):
+                 cf_availability=None, cf_availability_without_location=None, cf_private_dns_zone_suffix=None,
+                 command_group=None, server_client=None, location=None):
         self.cmd = cmd
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
         self.cf_db = cf_db
         self.cf_availability = cf_availability
+        self.cf_availability_without_location = cf_availability_without_location
         self.cf_private_dns_zone_suffix = cf_private_dns_zone_suffix
         self.logging_name = logging_name
         self.command_group = command_group

@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "eastus2euap"
+VNET_LOCATION = "eastus2euap"
 
 
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
@@ -67,11 +67,13 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
     def wait_for_backup_created(self, account_name, pool_name, volume_name, backup_name):
         attempts = 0
-        while attempts < 40:
+        while attempts < 60:
             attempts += 1
             backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
                               (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
             if backup['provisioningState'] != "Creating":
+                backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
+                (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
                 break
             if self.is_live or self.in_recording:
                 time.sleep(60)
@@ -80,9 +82,11 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         attempts = 0
         while attempts < 60:
             attempts += 1
-            backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
-                              (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
-            if backup['provisioningState'] != "Uninitialized":
+            #backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
+             #                 (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
+            status = self.cmd("az netappfiles volume backup status -g {rg} -a %s -p %s -v %s" %
+                          (account_name, pool_name, volume_name)).get_output_in_json()             
+            if status['mirrorState'] != "Uninitialized":
                 break
             if self.is_live or self.in_recording:
                 time.sleep(60)
@@ -178,7 +182,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
-
+        self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         # update backup
         # tags = "Tag1=Value1 Tag2=Value2"
         label = "label"

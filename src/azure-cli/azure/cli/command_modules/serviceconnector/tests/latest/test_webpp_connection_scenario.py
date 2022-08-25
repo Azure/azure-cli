@@ -938,7 +938,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('webapp connection create sql --connection {} --source-id {} --target-id {} --secret name={} secret={} '
-                 '--client-type dotnet --store-connstr'.format(name, source_id, target_id, user, password))
+                 '--client-type dotnet --config-connstr'.format(name, source_id, target_id, user, password))
 
         # list connection
         connections = self.cmd(
@@ -952,7 +952,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update connection
-        self.cmd('webapp connection update sql --id {} --client-type dotnet --store-connstr '
+        self.cmd('webapp connection update sql --id {} --client-type dotnet --config-connstr '
                  '--secret name={} secret={}'.format(connection_id, user, password),
                  checks = [ self.check('clientType', 'dotnet-connectionString') ])
 

@@ -652,27 +652,6 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
         self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
 
 
-class NetworkRouteFilterScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
-    @AllowLargeResponse()
-    def test_network_route_filter(self, resource_group):
-        self.kwargs['filter'] = 'filter1'
-        self.cmd('network route-filter create -g {rg} -n {filter} --tags foo=doo')
-        self.cmd('network route-filter update -g {rg} -n {filter}')
-        self.cmd('network route-filter show -g {rg} -n {filter}')
-        self.cmd('network route-filter list -g {rg}')
-
-        self.cmd('network route-filter rule list-service-communities')
-        self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow', expect_failure=True)
-        self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny', expect_failure=True)
-        self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1')
-        self.cmd('network route-filter rule list -g {rg} --filter-name {filter}')
-        self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1')
-
-        self.cmd('network route-filter delete -g {rg} -n {filter}')
-
-
 class NetworkExpressRouteScenarioTest(ScenarioTest):
 
     def _test_express_route_peering(self):
