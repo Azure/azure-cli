@@ -1063,6 +1063,7 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
 
 
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
