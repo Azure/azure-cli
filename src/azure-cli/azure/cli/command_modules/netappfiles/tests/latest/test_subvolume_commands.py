@@ -4,9 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-LOCATION = "westus2"
-VNET_LOCATION = "westus2"
-
+LOCATION = "southcentralusstage"
+VNET_LOCATION = "southcentralus"
 
 class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
     def create_volume(self, volume_only=False):
@@ -43,8 +42,8 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         # create
         self.cmd("az netappfiles subvolume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name} --path {path}", checks=[
-            self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
-            self.check('path', '{path}')])
+                     self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
+                     self.check('path', '{path}')])
 
         # update
         self.kwargs.update({
@@ -52,14 +51,14 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         })
         self.cmd("az netappfiles subvolume update -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name} --path {path}", checks=[
-            self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
-            self.check('path', '{path}')])
+                     self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
+                     self.check('path', '{path}')])
 
         # get
         self.cmd("az netappfiles subvolume show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name}", checks=[
-            self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
-            self.check('path', '{path}')])
+                     self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
+                     self.check('path', '{path}')])
 
         # delete
         self.cmd("az netappfiles subvolume delete -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
@@ -88,8 +87,8 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         # create
         self.cmd("az netappfiles subvolume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name1} --path {path1}", checks=[
-            self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name1}'),
-            self.check('path', '{path1}')])
+                     self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name1}'),
+                     self.check('path', '{path1}')])
 
         # list
         self.cmd("az netappfiles subvolume list -g {rg} -a {acc_name} -p {pool_name} -v {vol_name}", checks=[
@@ -98,8 +97,8 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         # create
         self.cmd("az netappfiles subvolume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name2} --path {path2}", checks=[
-            self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name2}'),
-            self.check('path', '{path2}')])
+                     self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name2}'),
+                     self.check('path', '{path2}')])
 
         # list
         self.cmd("az netappfiles subvolume list -g {rg} -a {acc_name} -p {pool_name} -v {vol_name}", checks=[
@@ -140,14 +139,13 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         # create
         self.cmd("az netappfiles subvolume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name} --path {path}", checks=[
-            self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
-            self.check('path', '{path}')])
+                     self.check('name', '{acc_name}' + '/' + '{pool_name}' + '/' + '{vol_name}' + '/' + '{sub_vol_name}'),
+                     self.check('path', '{path}')])
 
         # get metadata
         self.cmd("az netappfiles subvolume metadata show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name}", checks=[
-            self.check('path', '{path}')])
+                     self.check('path', '{path}')])
 
         self.cmd("az netappfiles subvolume delete -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} "
                  "--subvolume-name {sub_vol_name} -y")
-        

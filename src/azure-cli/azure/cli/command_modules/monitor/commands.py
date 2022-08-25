@@ -266,6 +266,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
         g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
                                  table_transformer=action_group_list_table)
+        g.custom_command('test-notifications create', 'post_notifications', table_transformer=action_group_list_table, supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)

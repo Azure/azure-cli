@@ -1191,7 +1191,7 @@ def create_service_principal_for_rbac(
     # Password credential is created *after* application creation.
     # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
     if not use_cert:
-        result = _application_add_password(graph_client, aad_application, app_start_date, app_end_date, 'rbac')
+        result = _application_add_password(graph_client, aad_application, 'rbac', app_start_date, app_end_date)
         password = result['secretText']
 
     # retry till server replication is done
@@ -1564,15 +1564,9 @@ def _gen_guid():
     return uuid.uuid4()
 
 
-def _application_add_password(client, app, start_datetime, end_datetime, display_name):
+def _application_add_password(client, app, display_name, start_datetime, end_datetime):
     """Let graph service generate a random password."""
-    body = {
-        "passwordCredential": {
-            "startDateTime": _datetime_to_utc(start_datetime),
-            "endDateTime": _datetime_to_utc(end_datetime),
-            "displayName": display_name
-        }
-    }
+    body = _build_add_password_credential_body(display_name, start_datetime, end_datetime)
     result = client.application_add_password(app[ID], body)
     return result
 

@@ -72,3 +72,88 @@ def enable_receiver(client, resource_group_name, action_group_name, receiver_nam
     return client.enable_receiver(resource_group_name=resource_group_name,
                                   action_group_name=action_group_name,
                                   enable_request=enable_request)
+
+
+# pylint: disable=too-many-locals
+# pylint: disable=no-else-return
+def post_notifications(client, alert_type, resource_group_name=None, action_group_name=None, add_receivers=None,
+                       no_wait=False):
+    from azure.mgmt.monitor.models import NotificationRequestBody
+    EmailReceivers = []
+    SmsReceivers = []
+    WebhookReceivers = []
+    ItsmReceivers = []
+    AzureAppPushReceivers = []
+    AutomationRunbookReceivers = []
+    VoiceReceivers = []
+    LogicAppReceivers = []
+    AzureFunctionReceivers = []
+    ArmRoleReceivers = []
+    EventHubReceivers = []
+    for r in add_receivers:
+        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, ItsmReceiver, \
+            AzureAppPushReceiver, AutomationRunbookReceiver, VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, \
+            ArmRoleReceiver, EventHubReceiver
+        if isinstance(r, EmailReceiver):
+            EmailReceivers.append(EmailReceiver(name=r.name, email_address=r.email_address,
+                                                use_common_alert_schema=r.use_common_alert_schema))
+        elif isinstance(r, SmsReceiver):
+            SmsReceivers.append(SmsReceiver(name=r.name, country_code=r.country_code, phone_number=r.phone_number))
+        elif isinstance(r, WebhookReceiver):
+            WebhookReceivers.append(WebhookReceiver(name=r.name, service_uri=r.service_uri,
+                                                    use_common_alert_schema=r.use_common_alert_schema,
+                                                    use_aad_auth=r.use_aad_auth, object_id=r.object_id,
+                                                    identifier_uri=r.identifier_uri, tenant_id=r.tenant_id))
+        elif isinstance(r, ItsmReceiver):
+            ItsmReceivers.append(ItsmReceiver(name=r.name, workspace_id=r.workspace_id, connection_id=r.connection_id,
+                                              ticket_configuration=r.ticket_configuration, region=r.region))
+        elif isinstance(r, AzureAppPushReceiver):
+            AzureAppPushReceivers.append(AzureAppPushReceiver(name=r.name, email_address=r.email_address))
+        elif isinstance(r, AutomationRunbookReceiver):
+            AutomationRunbookReceivers\
+                .append(AutomationRunbookReceiver(automation_account_id=r.automation_account_id,
+                                                  runbook_name=r.runbook_name,
+                                                  webhook_resource_id=r.webhook_resource_id,
+                                                  is_global_runbook=r.is_global_runbook,
+                                                  name=r.name,
+                                                  service_uri=r.service_uri,
+                                                  use_common_alert_schema=r.use_common_alert_schema))
+        elif isinstance(r, VoiceReceiver):
+            VoiceReceivers.append(VoiceReceiver(name=r.name, country_code=r.country_code, phone_number=r.phone_number))
+        elif isinstance(r, LogicAppReceiver):
+            LogicAppReceivers.append(LogicAppReceiver(name=r.name, resource_id=r.resource_id,
+                                                      callback_url=r.callback_url))
+        elif isinstance(r, AzureFunctionReceiver):
+            AzureFunctionReceivers.append(AzureFunctionReceiver(name=r.name,
+                                                                function_app_resource_id=r.function_app_resource_id,
+                                                                function_name=r.function_name,
+                                                                http_trigger_url=r.http_trigger_url,
+                                                                use_common_alert_schema=r.use_common_alert_schema))
+        elif isinstance(r, ArmRoleReceiver):
+            ArmRoleReceivers.append(ArmRoleReceiver(name=r.name, role_id=r.role_id,
+                                                    use_common_alert_schema=r.use_common_alert_schema))
+        elif isinstance(r, EventHubReceiver):
+            EventHubReceivers.append(EventHubReceiver(name=r.name,
+                                                      event_hub_name_space=r.event_hub_name_space,
+                                                      event_hub_name=r.event_hub_name,
+                                                      subscription_id=r.subscription_id))
+
+    notification_request = NotificationRequestBody(alert_type=alert_type, email_receivers=EmailReceivers,
+                                                   sms_receivers=SmsReceivers, webhook_receivers=WebhookReceivers,
+                                                   itsm_receivers=ItsmReceivers,
+                                                   azure_app_push_receivers=AzureAppPushReceivers,
+                                                   automation_runbook_receivers=AutomationRunbookReceivers,
+                                                   voice_receivers=VoiceReceivers,
+                                                   logic_app_receivers=LogicAppReceivers,
+                                                   azure_function_receivers=AzureFunctionReceivers,
+                                                   arm_role_receivers=ArmRoleReceivers,
+                                                   event_hub_receivers=EventHubReceivers)
+    from azure.cli.core.util import sdk_no_wait
+    if action_group_name:
+        return sdk_no_wait(no_wait, client.begin_create_notifications_at_action_group_resource_level,
+                           resource_group_name, action_group_name, notification_request)
+    elif resource_group_name:
+        return sdk_no_wait(no_wait, client.begin_create_notifications_at_resource_group_level,
+                           resource_group_name, notification_request)
+    else:
+        return sdk_no_wait(no_wait, client.begin_post_test_notifications, notification_request)
