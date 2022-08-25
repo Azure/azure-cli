@@ -3,16 +3,15 @@
 # This script should be run in a docker to verify installing rpm package from the yum repository.
 
 if [ "$IMPORT_KEY" == "true" ]; then
-  rpm --import https://packages.microsoft.com/keys/microsoft.asc
-  if [ ! -z $RPM_URL ]; then
-    dnf install -y $RPM_URL
-  fi
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    if [ ! -z $RPM_URL ]; then
+        dnf install -y $RPM_URL
+    fi
 fi
 
 counter=4
 
-while [ $counter -gt 0 ]
-do
+while [ $counter -gt 0 ]; do
     $DNF_COMMAND install azure-cli -y
     ACTUAL_VERSION=$(az version | sed -n 's|"azure-cli": "\(.*\)",|\1|p' | sed 's|[[:space:]]||g')
     echo "actual version:${ACTUAL_VERSION}"
