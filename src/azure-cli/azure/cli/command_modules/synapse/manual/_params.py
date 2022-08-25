@@ -544,7 +544,7 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse spark job submit') as c:
         c.argument('main_definition_file', help='The main file used for the job.')
-        c.argument('main_class_name',
+        c.argument('main_class_name', required=True,
                    help='The fully-qualified identifier or the main class that is in the main definition file.')
         c.argument('command_line_arguments', options_list=['--arguments'], type=split, nargs='+',
                    help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
