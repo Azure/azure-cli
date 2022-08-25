@@ -1278,9 +1278,6 @@ def load_arguments(self, _):
     with self.argument_context('network nsg') as c:
         c.argument('network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'), id_part='name')
 
-    with self.argument_context('network nsg create') as c:
-        c.argument('name', name_arg_type)
-
     with self.argument_context('network nsg rule') as c:
         c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
         c.argument('network_security_group_name', options_list='--nsg-name', metavar='NSGNAME', help='Name of the network security group', id_part='name')

@@ -99,10 +99,6 @@ def list_nics(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_interfaces', resource_group_name)
 
 
-def list_nsgs(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'network_security_groups', resource_group_name)
-
-
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
     client = network_client_factory(cmd.cli_ctx).network_security_groups
     nsg = client.get(resource_group_name, network_security_group_name)
@@ -5153,13 +5149,6 @@ def remove_nic_ip_config_inbound_nat_rule(
 
 
 # region NetworkSecurityGroups
-def create_nsg(cmd, resource_group_name, network_security_group_name, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).network_security_groups
-    NetworkSecurityGroup = cmd.get_models('NetworkSecurityGroup')
-    nsg = NetworkSecurityGroup(location=location, tags=tags)
-    return client.begin_create_or_update(resource_group_name, network_security_group_name, nsg)
-
-
 def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name):
 
     if not val:
