@@ -272,7 +272,7 @@ def load_arguments(self, _):
         c.argument('max_throughput', max_throughput_type)
         c.argument('throughput', help='The throughput of Gremlin graph (RU/s). Default value is 400. Omit this parameter if the database has shared throughput unless the graph should have dedicated throughput.')
         c.argument('analytical_storage_ttl', type=int, help='Analytical TTL, when analytical storage is enabled.')
-        
+
 # Table
     with self.argument_context('cosmosdb table') as c:
         c.argument('account_name', account_name_type, id_part=None)

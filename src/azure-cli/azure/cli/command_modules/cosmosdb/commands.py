@@ -7,7 +7,6 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.commands.parameters import get_enum_type 
 
 from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_db_accounts,
