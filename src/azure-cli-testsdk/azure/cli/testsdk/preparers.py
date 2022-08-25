@@ -96,6 +96,51 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             self.live_only_execute(self.cli_ctx, template.format(name))
 
 
+# Api Management Preparer and its shorthand decorator
+
+# pylint: disable=line-too-long
+# pylint: disable=too-many-instance-attributes
+class ApiManagementPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest', sku_name='Developer', location='westus', parameter_name='api_management',
+                 resource_group_parameter_name='resource_group', skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_APIM_NAME',
+                 publisher_email='publisher@contsoso.com', publisher_name='Contoso', key='apim'):
+        super(ApiManagementPreparer, self).__init__(name_prefix, 24)
+        self.cli_ctx = get_dummy_cli()
+        self.location = location
+        self.sku_name = sku_name
+        self.publisher_email = publisher_email
+        self.publisher_name = publisher_name
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.skip_delete = skip_delete
+        self.parameter_name = parameter_name
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+        self.key = key
+
+    def create_resource(self, name, **kwargs):
+        group = self._get_resource_group(**kwargs)
+
+        if not self.dev_setting_name:
+            template = 'az apim create --name  {} -g {} -l {} --publisher-email {} --publisher-name {} --sku-name {}'
+            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.publisher_email, self.publisher_name, self.sku_name))
+            self.test_class_instance.kwargs[self.key] = name
+            return {self.parameter_name: name}
+
+        return {self.parameter_name: self.dev_setting_name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.skip_delete and not self.dev_setting_name:
+            group = self._get_resource_group(**kwargs)
+            self.live_only_execute(self.cli_ctx, 'az apim delete -n {} -g {} --yes'.format(name, group))
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create an api management a resource group is required. Please add ' \
+                       'decorator @{} in front of this api management preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__))
+
+
 # Storage Account Preparer and its shorthand decorator
 
 # pylint: disable=too-many-instance-attributes

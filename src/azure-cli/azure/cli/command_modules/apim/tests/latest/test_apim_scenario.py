@@ -6,8 +6,7 @@
 import os
 import unittest
 from knack.util import CLIError
-from azure.mgmt.apimanagement.models._models_py3 import ErrorResponseException
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
