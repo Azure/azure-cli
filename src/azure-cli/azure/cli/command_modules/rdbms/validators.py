@@ -580,6 +580,14 @@ def validate_identity(cmd, namespace):
         namespace.identity = _validate_identity(cmd, namespace, namespace.identity)
 
 
+def validate_byok_identity(cmd, namespace):
+    if namespace.byok_identity:
+        namespace.byok_identity = _validate_identity(cmd, namespace, namespace.byok_identity)
+
+    if namespace.backup_byok_identity:
+        namespace.backup_byok_identity = _validate_identity(cmd, namespace, namespace.backup_byok_identity)
+
+
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]

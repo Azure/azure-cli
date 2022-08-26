@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator, validate_identity, validate_identities
+    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -219,7 +219,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     _complex_params('postgres')
 
     # Flexible-server
-    # pylint: disable=too-many-statements, too-many-locals
+    # pylint: disable=too-many-statements, too-many-locals, too-many-branches
     def _flexible_server_params(command_group):
 
         server_name_arg_type = CLIArgumentType(
@@ -410,12 +410,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         identity_arg_type = CLIArgumentType(
             options_list=['--identity'],
-            help='The resource ID of the user assigned identity for data encryption.'
+            help='The name or resource ID of the user assigned identity for data encryption.',
+            validator=validate_byok_identity
         )
 
         backup_identity_arg_type = CLIArgumentType(
             options_list=['--backup-identity'],
-            help='The resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.'
+            help='The name or resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
+            validator=validate_byok_identity
         )
 
         key_arg_type = CLIArgumentType(

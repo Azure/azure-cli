@@ -111,7 +111,7 @@ examples:
       az identity create -g testGroup --name testIdentity --location testLocation
 
 
-      # add testIdentity as an access policy with key permissions 'Get' and 'List' inside testVault
+      # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
 
       az keyvault set-policy -g testGroup -n testVault --object-id '<principalID of testIdentity>' --key-permissions wrapKey unwrapKey get list
 

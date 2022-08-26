@@ -438,10 +438,15 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
             cmd.cli_ctx, 'Adding identities to replica {}'.format(replica.name)
         )
 
-    return client.begin_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters=parameters)
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
+    )
+
+    return result.identity
 
 
 def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
@@ -451,8 +456,15 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
 
     instance = client.get(resource_group_name, server_name)
 
-    if instance.data_encryption and instance.data_encryption.primary_user_assigned_identity_id.lower() in [identity.lower() for identity in identities]:
-        raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(instance.data_encryption.primary_user_assigned_identity_id))
+    if instance.data_encryption:
+        primary_id = instance.data_encryption.primary_user_assigned_identity_id
+        backup_id = instance.data_encryption.geo_backup_user_assigned_identity_id
+
+        if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
+
+        if backup_id and backup_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(backup_id))
 
     if isinstance(client, MySqlServersOperations):
         admin_operations_client = cf_mysql_flexible_adadmin(cmd.cli_ctx, '_')
@@ -490,10 +502,15 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
             cmd.cli_ctx, 'Removing identities from replica {}'.format(replica.name)
         )
 
-    return client.begin_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters=parameters)
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
+    )
+
+    return result.identity
 
 
 def flexible_server_identity_list(client, resource_group_name, server_name):
