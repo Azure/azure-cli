@@ -3498,6 +3498,7 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
             'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.Dashboard/grafana -y')
 
 class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_deviceupdate_private_endpoint', random_name_length=40, location="westus2")
     def test_private_link_endpoint_deviceupdate(self, resource_group):
         self.kwargs.update({
