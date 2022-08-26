@@ -284,7 +284,7 @@ def process_action_group_detail_for_creation(namespace):
     name = ns['action_group_name']
     receivers = ns.pop('receivers') or []
     action_group_resource_properties = {
-        'location': 'global',  # as of now, 'global' is the only available location for action group
+        'location': ns.pop('location') or 'Global',  # both inputed or 'global' location are available for action group
         'group_short_name': ns.pop('short_name') or name[:12],  # '12' is the short name length limitation
         'email_receivers': [r for r in receivers if isinstance(r, EmailReceiver)],
         'sms_receivers': [r for r in receivers if isinstance(r, SmsReceiver)],
