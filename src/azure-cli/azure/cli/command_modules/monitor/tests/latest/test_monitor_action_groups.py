@@ -151,7 +151,7 @@ class TestActionGroupScenarios(ScenarioTest):
         })
         #location = '"Sweden Central"'
         location = 'swedencentral'
-        self.cmd('monitor action-group create -n {} -g {} -l {} -ojson'.format(action_group_name[:10], resource_group,
+        self.cmd('monitor action-group create -n {} -g {} -l {} -ojson'.format(action_group_name, resource_group,
                                                                                location), checks=[
             JMESPathCheck('length(emailReceivers)', 0),
             JMESPathCheck('length(smsReceivers)', 0),
@@ -159,7 +159,7 @@ class TestActionGroupScenarios(ScenarioTest):
             JMESPathCheck('length(eventHubReceivers)', 0),
             JMESPathCheck('location', 'swedencentral'),
             #JMESPathCheck('name', action_group_name[:10]),
-            JMESPathCheck('groupShortName', action_group_name[:10]),
+            JMESPathCheck('groupShortName', action_group_name[:12]),
             JMESPathCheck('enabled', True),
             #JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('tags', None)
