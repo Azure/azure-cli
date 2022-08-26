@@ -3497,6 +3497,75 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
         self.cmd(
             'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.Dashboard/grafana -y')
 
+class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_deviceupdate_private_endpoint', random_name_length=40, location="westus2")
+    def test_private_link_endpoint_deviceupdate(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'deviceupdate_name': self.create_random_name('cli-test-adu-', 24),
+            'vnet_name': self.create_random_name('cli-test-adu-pe-vnet', 40),
+            'subnet_name': self.create_random_name('cli-test-adu-pe-subnet', 40),
+            'endpoint_name': self.create_random_name('cli-test-adu-pe-', 40),
+            'endpoint_connection_name': self.create_random_name('cli-test-adu-pec-', 40),
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!'
+        })
+
+        # Device Update is an IoT extension
+        self.cmd('extension add --name azure-iot')
+
+        # Create device update account
+        deviceupdate = self.cmd(
+            'iot device-update account create --account {deviceupdate_name} --resource-group {rg}').get_output_in_json()
+        self.kwargs['deviceupdate_id'] = deviceupdate['id']
+
+        # Create a vnet and subnet for private endpoint connection
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test list private link resources
+        deviceupdate_private_link_resources = self.cmd(
+            'network private-link-resource list --id {deviceupdate_id}').get_output_in_json()
+        self.kwargs['group_id'] = deviceupdate_private_link_resources[0]['properties']['groupId']
+
+        # Create private endpoint with manual request approval
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--private-connection-resource-id {deviceupdate_id} --connection-name {endpoint_connection_name} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in private_endpoint['name'].lower())
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {deviceupdate_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Pending'),
+                                                ]).get_output_in_json()
+
+        # Test approve private endpoint connection
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+        self.cmd(
+            'network private-endpoint-connection approve --id {private-endpoint-connection-id} '
+            '--description {approve_description_msg}', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+
+        # Test reject private endpoint connnection
+        self.cmd('network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+                 ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private-endpoint-connection-id} --yes')
+        import time
+        time.sleep(90)
+        self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
+                 expect_failure=True)
+
 
 if __name__ == '__main__':
     unittest.main()
