@@ -24,11 +24,10 @@ class ApimProductScenarioTest(ScenarioTest):
         ])
 
         self.cmd('apim product show -n {apim} -g {rg} -p {product_id}', checks=[
-            self.check('description', '{description}'),
-            self.check('state', '{state}')
+            self.check('state', 'notPublished')
         ])
 
-        self.cmd('apim product update -n {apim} -g {rg} -p {product_id} --description {description} --state {state}',
+        self.cmd('apim product update -n {apim} -g {rg} -p {product_id} --description "{description}" --state {state}',
                  checks=[
                      self.check('description', '{description}'),
                      self.check('state', '{state}')])

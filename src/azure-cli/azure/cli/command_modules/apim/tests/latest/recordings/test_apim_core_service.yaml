@@ -1,0 +1,2737 @@
+interactions:
+- request:
+    body: '{"name": "cli-test-apim-000003"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim check-name
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -o
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/checkNameAvailability?api-version=2021-08-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"Valid","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '52'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 20:45:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Developer", "capacity": 1}, "location": "westus", "properties":
+      {"notificationSenderEmail": "publisher@contoso.com", "enableClientCertificate":
+      true, "disableGateway": false, "virtualNetworkType": "None", "restore": false,
+      "publisherEmail": "publisher@contoso.com", "publisherName": "Contoso"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '312'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAA6Bek=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Created","targetProvisioningState":"Activating","createdAtUtc":"2022-08-26T20:45:24.9764368Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":null,"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"undetermined"},"sku":{"name":"Developer","capacity":1},"identity":null,"zones":null,"systemData":{"createdBy":"kehilli@microsoft.com","createdByType":"User","createdAt":"2022-08-26T20:45:24.7066097Z","lastModifiedBy":"kehilli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T20:45:24.7066097Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1697'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 20:45:27 GMT
+      etag:
+      - '"AAAAAAA6Bek="'
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:46:27 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:47:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:48:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:49:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:50:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:51:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:52:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:53:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:54:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:55:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:56:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:57:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:58:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 20:59:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:00:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:01:35 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:02:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:03:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:04:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:05:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:06:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:07:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:08:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:09:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:10:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:11:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:12:41 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:13:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:14:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:15:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:16:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:17:45 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:18:45 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:19:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:20:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:21:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:22:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:23:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:24:48 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:25:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:26:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:27:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:28:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:29:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:30:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:31:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:32:52 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:33:52 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:34:53 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:35:53 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:36:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:37:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:38:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:39:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:40:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:41:56 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:42:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:43:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:44:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 21:45:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --sku-capacity --publisher-email --publisher-name
+        --enable-client-certificate
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tZGMyd2JpbXMyMmdyemoycGJ3dHllMml0NHhld253aGVzM2t0X0FjdF83MmE2OTc1OA==?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003","name":"cli-test-apim-000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAA6BxI=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2022-08-26T20:45:24.9764368Z","gatewayUrl":"https://cli-test-apim-000003.azure-api.net","gatewayRegionalUrl":"https://cli-test-apim-000003-wu-01.regional.azure-api.net","portalUrl":"https://cli-test-apim-000003.portal.azure-api.net","developerPortalUrl":"https://cli-test-apim-000003.developer.azure-api.net","managementApiUrl":"https://cli-test-apim-000003.management.azure-api.net","scmUrl":"https://cli-test-apim-000003.scm.azure-api.net","hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":["20.237.224.102"],"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"stv2"},"sku":{"name":"Developer","capacity":1},"identity":null,"zones":null,"systemData":{"createdBy":"kehilli@microsoft.com","createdByType":"User","createdAt":"2022-08-26T20:45:24.7066097Z","lastModifiedBy":"kehilli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T20:45:24.7066097Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2606'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 21:46:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
