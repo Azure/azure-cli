@@ -5781,7 +5781,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --enable-native-client-support --enable-ip-based-connection --disable-copy-paste --tags a=b', checks=[
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --enable-tunneling --enable-ip-connect --disable-copy-paste --tags a=b', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
             self.check('name', '{bastion}'),
             self.check('scaleUnits', '{num}'),
@@ -5791,7 +5791,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             self.check('enableIpConnect', True),
             self.check('tags.a', 'b')
         ])
-        self.cmd('network bastion update -g {rg} -n {bastion} --scale-units {num2} --enable-native-client-support false --enable-ip-based-connection false --disable-copy-paste false ', checks=[
+        self.cmd('network bastion update -g {rg} -n {bastion} --scale-units {num2} --enable-tunneling false --enable-ip-connect false --disable-copy-paste false ', checks=[
             self.check('scaleUnits', '{num2}'),
             self.check('disableCopyPaste', False),
             self.check('enableTunneling', False),

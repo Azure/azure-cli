@@ -7133,7 +7133,7 @@ short-summary: Update a Azure Bastion host machine.
 examples:
   - name: Update a Azure Bastion host machine to enable native client support
     text: |
-        az network bastion update --name MyBastionHost --resource-group MyResourceGroup --enable-native-client-support
+        az network bastion update --name MyBastionHost --resource-group MyResourceGroup --enable-tunneling
     crafted: true
 """
 
