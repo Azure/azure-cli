@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.parameters import (get_enum_type, get_three_state_flag)
+from azure.cli.core.commands.parameters import get_enum_type
 from azure.mgmt.apimanagement.models import VersioningScheme
 
 VERSIONING_SCHEME = VersioningScheme

@@ -5,8 +5,6 @@
 # pylint: disable=line-too-long
 
 import os
-import datetime
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, ApiManagementPreparer, StorageAccountPreparer)
 
 
@@ -18,7 +16,7 @@ class ApimApiScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim-')     
     @StorageAccountPreparer(parameter_name='test_data_storage_account')
     @ApiManagementPreparer(sku_name='Consumption', parameter_name='apim_name')
     def test_apim_api(self, resource_group, apim_name, test_data_storage_account):
@@ -32,6 +30,7 @@ class ApimApiScenarioTest(ScenarioTest):
         self._then_create_revision_from_api()
 
         self._create_api_from_swagger_url()
+        self._create_api_from_graphql_schema()
         self._import_api_from_openapi_url()
         self._import_api_from_wsdl_url()
 
@@ -63,6 +62,9 @@ class ApimApiScenarioTest(ScenarioTest):
             'subscription_key_header_name': 'header1234',
             'subscription_key_query_string_name': 'query1234'
         })
+
+        self.graphql_schema_data = self.GraphQLSchemaData()
+        self.graphql_schema_data.read_schema_file()
 
     def _delete_an_api(self):
         self.kwargs.update({'api_id': self.api_id})
@@ -164,6 +166,29 @@ class ApimApiScenarioTest(ScenarioTest):
         ])
         self.created_api_count += 1
 
+    def _create_api_from_graphql_schema(self):
+        self.kwargs.update({
+            'graphql_api_id': self.create_random_name('gr-api', 10),
+            'graphql_sch_id': 'graphql',
+            'graphql_schema_path': self.graphql_schema_data.schema_file,
+            'graphql_schema_type': 'application/vnd.ms-azure-apim.graphql.schema',
+            'graphql_schema_type2': 'Microsoft.ApiManagement/service/apis/schemas',
+            'schema_file_value': self.graphql_schema_data.schema_content,
+            'graphql_display_name': 'graphQl API',
+            'graphql_protocol': 'https',
+            'graphql_api_type': 'graphql',
+            'graphql_path': 'graphqltestpath',
+            'graphql_service_url': 'https://api.spacex.land/graphql/'
+        })
+
+        self.cmd('apim api create -g "{rg}" --service-name "{apim_name}" --display-name "{graphql_display_name}" --path "{graphql_path}" --api-id "{graphql_api_id}" --protocols "{graphql_protocol}" --service-url "{graphql_service_url}" --api-type "{graphql_api_type}"', checks=[
+            self.check('displayName', '{graphql_display_name}'),
+            self.check('path', '{graphql_path}'),
+            self.check('serviceUrl', '{graphql_service_url}'),
+            self.check('protocols[0]', '{graphql_protocol}')
+        ])
+        self.created_api_count += 1
+
     def _import_api_from_openapi_url(self):
         self.kwargs.update({
             'openapi_api_id': self.api_id + '-oai3-import',
@@ -173,7 +198,7 @@ class ApimApiScenarioTest(ScenarioTest):
             'openapi_value': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml'
         })
 
-        self.cmd('apim api create -n {apim_name} -g {rg} -a {openapi_api_id} --path {openapi_path} --import-format {openapi_import_format} --value {openapi_url}', checks=[
+        self.cmd('apim api create -n {apim_name} -g {rg} -a {openapi_api_id} --path {openapi_path} --display-name "{openapi_display_name}" --import-format {openapi_import_format} --value {openapi_url}', checks=[
             self.check('name', '{openapi_api_id}'),
             self.check('path', '{openapi_path}'),
             self.check('displayName', '{openapi_display_name}')
@@ -252,3 +277,18 @@ class ApimApiScenarioTest(ScenarioTest):
             'wsdl_url': url_template.format(storage_account, container_name, 'calculator.wsdl.xml'),
             'openapi_url': url_template.format(storage_account, container_name, 'petstore.openapi.yaml')
         })
+
+    class GraphQLSchemaData:
+        """Test XML Policy data management for the scenario test"""
+        SCHEMA_FILE_NAME = 'data/gql_schema.gql'
+        schema_content = ''
+
+        def __init__(self):
+            self.schema_file = os.path.join(TEST_DIR, self.SCHEMA_FILE_NAME).replace('\\', '\\\\')
+
+        def read_schema_file(self):
+            file = open(self.schema_file, "r")
+            contents = file.read()
+            self.schema_content = contents
+
+            file.close()

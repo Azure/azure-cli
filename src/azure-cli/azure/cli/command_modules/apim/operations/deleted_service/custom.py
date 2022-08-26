@@ -9,18 +9,14 @@ from azure.cli.core.util import sdk_no_wait
 
 def get_deleted_service(client, location, service_name):
     """Get specific soft-deleted Api Management Service."""
-    return client.deleted_services.get_by_name(service_name, location)
+    return client.get_by_name(service_name, location)
 
 
 def list_deleted_service(client):
     """List soft-deleted Api Management Service."""
-    return client.deleted_services.list_by_subscription()
+    return client.list_by_subscription()
 
 
 def purge_deleted_service(client, service_name, location, no_wait=False):
     """Purge soft-deleted Api Management Service."""
-    return sdk_no_wait(
-        no_wait,
-        client.deleted_services.begin_purge,
-        service_name=service_name,
-        location=location)
+    return sdk_no_wait(no_wait, client.begin_purge, service_name=service_name, location=location)

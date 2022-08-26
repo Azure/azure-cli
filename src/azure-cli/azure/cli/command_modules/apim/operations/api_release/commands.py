@@ -8,6 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._client_factory import cf_api_release
 from azure.cli.command_modules.apim._exception_handler import default_exception_handler
 
+
 def load_command_table(commands_loader, _):
     sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiReleaseOperations.{}',

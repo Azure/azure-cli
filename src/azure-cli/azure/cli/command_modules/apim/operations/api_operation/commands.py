@@ -22,6 +22,6 @@ def load_command_table(commands_loader, _):
     with commands_loader.command_group('apim api operation', sdk, custom_command_type=custom_type, is_preview=True) as g:
         g.custom_command('list', 'list_api_operation')
         g.custom_show_command('show', 'get_api_operation')
-        g.custom_command('create', 'create_api_operation')
+        g.custom_command('create', 'create_api_operation', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_api_operation')
         g.custom_command('delete', 'delete_api_operation')

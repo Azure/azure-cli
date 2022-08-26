@@ -17,7 +17,7 @@ class ApimApiVersionSetScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @ApiManagementPreparer(parameter_name='apim_name')
-    def test_apim_api_versionset(self, resource_group, apim_name):
+    def test_apim_api_version_set(self, resource_group, apim_name):
         initial_vs_count = len(self.cmd('apim api-version-set list -g "{rg}" -n "{apim}"').get_output_in_json())
 
         # create API version set

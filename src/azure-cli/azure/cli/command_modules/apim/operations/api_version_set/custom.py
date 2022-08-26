@@ -21,8 +21,7 @@ def show_api_version_set(client, resource_group_name, service_name, version_set_
 
 
 def create_api_version_set(client, resource_group_name, service_name, display_name, versioning_scheme, version_set_id=None, if_match=None,
-                    description=None, version_query_name=None, version_header_name=None, no_wait=False):
-    """Creates or Updates a Api Version Set."""
+                           description=None, version_query_name=None, version_header_name=None, no_wait=False):
     if version_set_id is None:
         version_set_id = uuid.uuid4().hex
 

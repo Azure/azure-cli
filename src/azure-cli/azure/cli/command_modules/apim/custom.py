@@ -13,16 +13,13 @@
 # pylint: disable=too-many-locals
 
 from .generated.custom import *  # noqa: F403
-
-
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties,
                                              ApiManagementServiceBackupRestoreParameters,
-                                             VirtualNetworkType, SkuType, ApiManagementServiceCheckNameAvailabilityParameters)
+                                             VirtualNetworkType, SkuType,
+                                             ApiManagementServiceCheckNameAvailabilityParameters)
 
-
-# Service Operations
 
 def apim_create(client, resource_group_name, name, publisher_email, sku_name=SkuType.developer.value,
                 sku_capacity=1, virtual_network_type=VirtualNetworkType.none.value, enable_managed_identity=False,

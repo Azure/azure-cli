@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 
 import uuid
+from azure.mgmt.apimanagement.models import ApiReleaseContract
 
 
 def list_api_release(client, resource_group_name, service_name, api_id):
@@ -17,15 +18,18 @@ def show_api_release(client, resource_group_name, service_name, api_id, release_
     return client.get(resource_group_name, service_name, api_id, release_id)
 
 
-def create_api_release(client, resource_group_name, service_name, api_id, api_revision, release_id=None, if_match=None, notes=None):
+def create_api_release(client, resource_group_name, service_name, api_id, api_revision, release_id=None, notes=None, if_match=None):
     """Creates a new Release for the API."""
     if release_id is None:
         release_id = uuid.uuid4().hex
 
-    api_revision_to_release_and_make_current = "/apis/" + api_id + ";rev=" + api_revision
     if_match = "*" if if_match is None else if_match
+    parameters = ApiReleaseContract(
+        notes=notes,
+        api_id="/apis/" + api_id + ";rev=" + api_revision
+    )
 
-    return client.create_or_update(resource_group_name, service_name, api_id, release_id, if_match, api_revision_to_release_and_make_current, notes)
+    return client.create_or_update(resource_group_name, service_name, api_id, release_id, parameters, notes)
 
 
 def update_api_release(instance, notes=None):

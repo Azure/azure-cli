@@ -13,11 +13,9 @@ def list_api_revision(client, resource_group_name, service_name, api_id):
     return client.api_revision.list_by_service(resource_group_name, service_name, api_id)
 
 
-def create_api_revision(client, resource_group_name, service_name, api_id, api_revision, api_revision_description=None,
-                             no_wait=False):
+def create_api_revision(client, resource_group_name, service_name, api_id, api_revision, api_revision_description=None, no_wait=False):
     """Creates a new API Revision. """
     cur_api = client.api.get(resource_group_name, service_name, api_id)
-
     resource = ApiCreateOrUpdateParameter(
         path=cur_api.path,
         display_name=cur_api.display_name,

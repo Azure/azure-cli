@@ -6,9 +6,7 @@
 
 def default_exception_handler(ex):
     from azure.mgmt.apimanagement.models import ErrorResponse
-    from azure.mgmt.apimanagement.models import ErrorFieldContract
     from msrest.exceptions import ValidationError
-    from msrest.exceptions import HttpOperationError
     from knack.util import CLIError
 
     if isinstance(ex, ErrorResponse) and ex.message:

@@ -9,11 +9,9 @@ from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExc
 from azure.mgmt.apimanagement.models import SchemaContract
 
 
-
 def create_api_schema(client, resource_group_name, service_name, api_id, schema_id, schema_type,
-                           schema_name=None, schema_path=None, schema_content=None,
-                           resource_type=None, no_wait=False):
-    """creates or updates an API Schema. """
+                      schema_name=None, schema_path=None, schema_content=None,
+                      resource_type=None, no_wait=False):
 
     if schema_path is not None and schema_content is None:
         api_file = open(schema_path, 'r')
@@ -42,7 +40,6 @@ def create_api_schema(client, resource_group_name, service_name, api_id, schema_
 
 
 def delete_api_schema(client, resource_group_name, service_name, api_id, schema_id, if_match=None, no_wait=False):
-    """Deletes an API Schema. """
     return sdk_no_wait(no_wait, client.delete,
                        resource_group_name=resource_group_name,
                        service_name=service_name, api_id=api_id, schema_id=schema_id,
@@ -50,24 +47,15 @@ def delete_api_schema(client, resource_group_name, service_name, api_id, schema_
 
 
 def get_api_schema(client, resource_group_name, service_name, api_id, schema_id):
-    """Shows details of an API Schema. """
-    return client.get(resource_group_name=resource_group_name,
-                                 service_name=service_name,
-                                 api_id=api_id,
-                                 schema_id=schema_id)
+    return client.get(resource_group_name, service_name, api_id, schema_id)
 
 
 def get_api_schema_entity_tag(client, resource_group_name, service_name, api_id, schema_id):
-    """Shows details of an API Schema. """
-    return client.get_entity_tag(resource_group_name=resource_group_name,
-                                            service_name=service_name,
-                                            api_id=api_id,
-                                            schema_id=schema_id)
+    return client.get_entity_tag(resource_group_name, service_name, api_id, schema_id)
 
 
 def list_api_schema(client, resource_group_name, api_id, service_name, filter_display_name=None, top=None, skip=None):
-    """Get the schema configuration at the API level. """
     return client.list_by_api(resource_group_name,
-                                         service_name, api_id,
-                                         filter=filter_display_name,
-                                         skip=skip, top=top)
+                              service_name, api_id,
+                              filter=filter_display_name,
+                              skip=skip, top=top)

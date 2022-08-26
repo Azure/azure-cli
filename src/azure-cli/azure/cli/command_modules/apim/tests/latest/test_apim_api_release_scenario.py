@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
-
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, ApiManagementPreparer)
 
 
@@ -13,9 +11,9 @@ class ApimApiReleaseScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiReleaseScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @ApiManagementPreparer(parameter_name='apim_name', sku_name='Consumption')
-    def test_apim_api_release(self, resource_group, apim_name):
+    @ResourceGroupPreparer(name_prefix='cli_test_apim-')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_api_release(self):
         self._setup_an_api()
         self._setup_revision_of_the_api()
 

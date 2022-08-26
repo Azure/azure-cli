@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-branches
 from azure.cli.command_modules.apim._util import resolve_version_set_id
+from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiCreateOrUpdateParameter, Protocol,
                                              AuthenticationSettingsContract, OAuth2AuthenticationSettingsContract, OpenIdAuthenticationSettingsContract, BearerTokenSendingMethod,
                                              SubscriptionKeyParameterNamesContract,
@@ -22,7 +23,7 @@ def create_api(client, resource_group_name, service_name, api_id,
                subscription_required=None, header_name=None,
                querystring_name=None, is_current=None,
                import_format=None, value=None, wsdl_service_name=None,
-               wsdl_endpoint_name=None, api_type=None
+               wsdl_endpoint_name=None, api_type=None, no_wait=False
                ):
 
     # Revsion indicator
@@ -92,7 +93,14 @@ def create_api(client, resource_group_name, service_name, api_id,
             wsdl_endpoint_name=wsdl_endpoint_name
         )
 
-    return client.create_or_update(resource_group_name, service_name, api_id, parameters, if_match)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        parameters=parameters,
+        if_match=if_match)
 
 
 def update_api(instance,
@@ -104,7 +112,7 @@ def update_api(instance,
                openid_provider_id=None, openid_bearer_token_sending_methods=None,
                subscription_required=None, header_name=None, querystring_name=None,
                is_current=None, import_format=None, value=None,
-               wsdl_service_name=None, wsdl_endpoint_name=None, api_type=None, is_match='*'
+               wsdl_service_name=None, wsdl_endpoint_name=None, api_type=None, if_match='*'
                ):
 
     if path is not None:
@@ -177,8 +185,8 @@ def update_api(instance,
     if api_type is not None:
         instance.api_type = api_type
 
-    if is_match is not None:
-        instance.is_match = is_match
+    if if_match is not None:
+        instance.if_match = if_match
 
     return instance
 

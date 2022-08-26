@@ -43,7 +43,7 @@ class ApimCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.apim._params import load_arguments
         load_arguments(self, command)
         self.subgroups_loader.load_arguments(command)
-        
+
         try:
             from .generated._params import load_arguments as load_arguments_generated
             load_arguments_generated(self, command)

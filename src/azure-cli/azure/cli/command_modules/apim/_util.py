@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 import re
 
+
 def get_xml_content(xml, xml_path, xml_uri):
     """Gets the XML content for policies based on the 3 options that a user can provide, with inline taking precedentsm, then file, then uri"""
     xml_content = xml
@@ -22,6 +23,7 @@ def read_file(file_path):
         content = fs.read()
         return content
 
+
 def resolve_version_set_id(version_set_id):
     API_VS_ARM_ID_Reg = "(.*?)/providers/microsoft.apimanagement/service/([^/]+)/apiVersionSets/([^/]+)"
     API_VS_PREFIX = "/apiVersionSets/"
@@ -36,6 +38,7 @@ def resolve_version_set_id(version_set_id):
 
     return full_path
 
+
 def get_if_match(if_match=None):
-    value = if_match="*" if if_match is None else if_match
+    value = if_match = "*" if if_match is None else if_match
     return value

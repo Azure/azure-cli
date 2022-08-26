@@ -19,8 +19,8 @@ def load_command_table(commands_loader, _):
         client_factory=cf_deleted_services
     )
 
-    with commands_loader.command_group('apim deleted-service', deleted_service_sdk, custom_command_type=deleted_service_custom_type, 
-                            is_preview=True, client_factory=cf_deleted_services) as g:
+    with commands_loader.command_group('apim deleted-service', deleted_service_sdk, custom_command_type=deleted_service_custom_type,
+                                       is_preview=True, client_factory=cf_deleted_services) as g:
         g.custom_command('list', 'list_deleted_service')
         g.custom_show_command('show', 'get_deleted_service')
-        g.custom_command('purge', 'purge_deleted_service')
+        g.custom_command('purge', 'purge_deleted_service', supports_no_wait=True)

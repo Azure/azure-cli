@@ -101,8 +101,13 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # pylint: disable=line-too-long
 # pylint: disable=too-many-instance-attributes
 class ApiManagementPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku_name='Developer', location='westus', parameter_name='api_management',
-                 resource_group_parameter_name='resource_group', skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_APIM_NAME',
+    def __init__(self, name_prefix='clitest', sku_name='Developer', location='westus', 
+                 parameter_name_for_location='api_management_location',
+                 parameter_name='api_management',
+                 resource_group_parameter_name='resource_group', 
+                 skip_delete=True, 
+                 dev_setting_name='AZURE_CLI_TEST_DEV_APIM_NAME',
+                 dev_setting_location='AZURE_CLI_TEST_DEV_APIM_LOCATION',
                  publisher_email='publisher@contsoso.com', publisher_name='Contoso', key='apim'):
         super(ApiManagementPreparer, self).__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
@@ -113,7 +118,10 @@ class ApiManagementPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
+        self.parameter_name_for_location = parameter_name_for_location
+
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
+        self.dev_setting_location = os.environ.get(dev_setting_location, location)
         self.key = key
 
     def create_resource(self, name, **kwargs):
@@ -123,9 +131,9 @@ class ApiManagementPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             template = 'az apim create --name  {} -g {} -l {} --publisher-email {} --publisher-name {} --sku-name {}'
             self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.publisher_email, self.publisher_name, self.sku_name))
             self.test_class_instance.kwargs[self.key] = name
-            return {self.parameter_name: name}
+            return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
-        return {self.parameter_name: self.dev_setting_name}
+        return {self.parameter_name: self.dev_setting_name, self.parameter_name_for_location: self.dev_setting_location}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
