@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._format import (
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_vnet_create_output, transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_nsg_create_output, transform_vnet_gateway_create_output,
+    transform_vnet_gateway_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
