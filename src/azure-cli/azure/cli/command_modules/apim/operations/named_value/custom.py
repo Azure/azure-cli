@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
+from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import NamedValueCreateContract
 
 
-def create_named_value(client, resource_group_name, service_name, named_value_id, display_name, value=None, tags=None, secret=False):
+def create_named_value(client, resource_group_name, service_name, named_value_id, display_name, value=None, tags=None, secret=False, no_wait=False):
     """Creates a new Named Value. """
     resource = NamedValueCreateContract(
         tags=tags,
@@ -15,7 +16,8 @@ def create_named_value(client, resource_group_name, service_name, named_value_id
         display_name=display_name,
         value=value
     )
-    return client.create_or_update(resource_group_name, service_name, named_value_id, resource)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name, service_name, named_value_id, resource)
 
 
 def get_named_value(client, resource_group_name, service_name, named_value_id, secret=False):
@@ -33,12 +35,12 @@ def list_named_value(client, resource_group_name, service_name):
     return client.list_by_service(resource_group_name, service_name)
 
 
-def delete_named_value(client, resource_group_name, service_name, named_value_id):
+def delete_named_value(client, resource_group_name, service_name, named_value_id, no_wait=False):
     """Deletes an existing Named Value. """
-    return client.delete(resource_group_name, service_name, named_value_id, if_match='*')
+    return sdk_no_wait(no_wait, client.delete, resource_group_name, service_name, named_value_id, if_match='*')
 
 
-def update_named_value(instance, value=None, tags=None, secret=None):
+def update_named_value(instance, value=None, tags=None, secret=None, if_match='*'):
     """Updates an existing Named Value."""
     if tags is not None:
         instance.tags = tags
@@ -48,5 +50,8 @@ def update_named_value(instance, value=None, tags=None, secret=None):
 
     if secret is not None:
         instance.secret = secret
+
+    if if_match is not None:
+        instance.if_match = if_match
 
     return instance

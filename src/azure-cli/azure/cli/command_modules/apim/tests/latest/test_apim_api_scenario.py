@@ -16,7 +16,7 @@ class ApimApiScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-')     
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_api-')     
     @StorageAccountPreparer(parameter_name='test_data_storage_account')
     @ApiManagementPreparer(sku_name='Consumption', parameter_name='apim_name')
     def test_apim_api(self, resource_group, apim_name, test_data_storage_account):

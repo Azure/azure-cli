@@ -5,12 +5,12 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.util import sdk_no_wait
-from azure.mgmt.apimanagement.models import PolicyContentFormat
+from azure.mgmt.apimanagement.models import (PolicyContentFormat, PolicyIdName, PolicyContract)
 from azure.cli.command_modules.apim._util import (get_xml_content)
 
 
 def get_policy(client, resource_group_name, service_name):
-    return client.get(resource_group_name, service_name)
+    return client.get(resource_group_name, service_name, policy_id=PolicyIdName.POLICY)
 
 
 def create_policy(client, resource_group_name, service_name, xml=None, xml_path=None, xml_uri=None, no_wait=False):
@@ -22,7 +22,7 @@ def update_policy(client, resource_group_name, service_name, xml=None, xml_path=
 
 
 def delete_policy(client, resource_group_name, service_name):
-    return client.delete(resource_group_name, service_name, if_match='*')
+    return client.delete(resource_group_name, service_name, policy_id=PolicyIdName.POLICY, if_match='*')
 
 
 def _create_update(client, no_wait, resource_group_name, service_name, xml=None, xml_path=None, xml_uri=None, is_update=False):
@@ -30,11 +30,16 @@ def _create_update(client, no_wait, resource_group_name, service_name, xml=None,
     xml_format = _get_xml_format(xml, xml_path, xml_uri)
     xml_content = get_xml_content(xml, xml_path, xml_uri)
 
+    parameters = PolicyContract(
+        value=xml_content,
+        format=xml_format
+    )
     return sdk_no_wait(no_wait, client.create_or_update,
                        resource_group_name=resource_group_name,
                        service_name=service_name,
-                       value=xml_content, if_match=if_match,
-                       format=xml_format)
+                       policy_id=PolicyIdName.POLICY,
+                       parameters=parameters,
+                       if_match=if_match)
 
 
 def _get_xml_format(xml, xml_path, xml_uri):

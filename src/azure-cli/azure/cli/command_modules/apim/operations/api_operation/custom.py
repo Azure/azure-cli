@@ -62,7 +62,6 @@ def update_api_operation(instance, display_name=None, description=None, method=N
 
 def delete_api_operation(client, resource_group_name, service_name, api_id, operation_id, if_match=None, no_wait=False):
     """Deletes the specified operation in the API."""
-
     return sdk_no_wait(
         no_wait,
         client.delete,

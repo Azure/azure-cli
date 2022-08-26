@@ -5,9 +5,7 @@
 # pylint: disable=line-too-long
 
 import os
-import unittest
 import xmltodict
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, ApiManagementPreparer)
 
 
@@ -34,11 +32,10 @@ class ApimPolicyScenarioTest(ScenarioTest):
         self._delete_xml_file()
         super(ApimPolicyScenarioTest, self).tearDown()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @ApiManagementPreparer(parameter_name='apim_name')
-    def test_apim_policy(self, resource_group, apim_name):
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_policy-')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_policy(self):
         self.kwargs.update({
-            'apim_name': apim_name,
             'name': 'policy',
             'xml_value': self.xml_content,
             'xml_file': self.policy_file
@@ -49,7 +46,7 @@ class ApimPolicyScenarioTest(ScenarioTest):
         self._delete_policy_resets_xml_value()
 
     def _create_policy_using_inline_xml(self):
-        cmd_statement = 'apim policy create -n {apim_name} -g {rg} -v "{xml_value}" --output tsv --query value'
+        cmd_statement = 'apim policy create -n {apim} -g {rg} -v "{xml_value}" --output tsv --query value'
 
         result = xmltodict.parse(self.cmd(cmd_statement).output)
         expected = xmltodict.parse(self.xml_content)
@@ -57,7 +54,7 @@ class ApimPolicyScenarioTest(ScenarioTest):
         self.assertDictEqual(expected, result)
 
     def _create_policy_using_xml_from_file(self):
-        cmd_statement = 'apim policy create -n {apim_name} -g {rg} -f {xml_file} --output tsv --query value'
+        cmd_statement = 'apim policy create -n {apim} -g {rg} -f {xml_file} --output tsv --query value'
 
         result = xmltodict.parse(self.cmd(cmd_statement).output)
         expected = xmltodict.parse(self.xml_content)
@@ -65,10 +62,10 @@ class ApimPolicyScenarioTest(ScenarioTest):
         self.assertDictEqual(expected, result)
 
     def _delete_policy_resets_xml_value(self):
-        self.cmd('apim policy delete -n {apim_name} -g {rg} --yes')
+        self.cmd('apim policy delete -n {apim} -g {rg} --yes')
 
         with self.assertRaises(SystemExit):  # raises exit code 3 because of resource not found
-            self.cmd('az apim policy show -n {apim_name} -g {rg}')
+            self.cmd('az apim policy show -n {apim} -g {rg}')
 
     def _delete_xml_file(self):
         os.remove(self.policy_file)

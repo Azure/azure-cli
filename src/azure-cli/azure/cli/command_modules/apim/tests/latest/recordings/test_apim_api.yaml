@@ -1,0 +1,2285 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --query
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-storage/20.1.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2022-05-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-08-26T18:15:05.0450778Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-08-26T18:15:05.0450778Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Fri, 26 Aug 2022 18:17:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name --name --public-access
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-storage/20.1.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/storageAccounts?api-version=2022-05-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-eastus/providers/Microsoft.Storage/storageAccounts/cs26c5159d3e9b1x4eafxb96","name":"cs26c5159d3e9b1x4eafxb96","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"ms-resource-usage":"azure-cloud-shell"},"properties":{"keyCreationTime":{"key1":null,"key2":null},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-02-11T17:28:10.1839861Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-02-11T17:28:10.1839861Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-02-11T17:28:10.0902390Z","primaryEndpoints":{"blob":"https://cs26c5159d3e9b1x4eafxb96.blob.core.windows.net/","queue":"https://cs26c5159d3e9b1x4eafxb96.queue.core.windows.net/","table":"https://cs26c5159d3e9b1x4eafxb96.table.core.windows.net/","file":"https://cs26c5159d3e9b1x4eafxb96.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-sphere/providers/Microsoft.Storage/storageAccounts/spheredevkitdemo2stor0","name":"spheredevkitdemo2stor0","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"keyCreationTime":{"key1":null,"key2":null},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-01-26T13:02:48.6678353Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-01-26T13:02:48.6678353Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-01-26T13:02:48.5896775Z","primaryEndpoints":{"dfs":"https://spheredevkitdemo2stor0.dfs.core.windows.net/","web":"https://spheredevkitdemo2stor0.z13.web.core.windows.net/","blob":"https://spheredevkitdemo2stor0.blob.core.windows.net/","queue":"https://spheredevkitdemo2stor0.queue.core.windows.net/","table":"https://spheredevkitdemo2stor0.table.core.windows.net/","file":"https://spheredevkitdemo2stor0.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-sphere/providers/Microsoft.Storage/storageAccounts/spheredevkitdemo2stor3","name":"spheredevkitdemo2stor3","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"keyCreationTime":{"key1":null,"key2":null},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-01-26T13:16:14.2321796Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-01-26T13:16:14.2321796Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-01-26T13:16:14.1227240Z","primaryEndpoints":{"dfs":"https://spheredevkitdemo2stor3.dfs.core.windows.net/","web":"https://spheredevkitdemo2stor3.z13.web.core.windows.net/","blob":"https://spheredevkitdemo2stor3.blob.core.windows.net/","queue":"https://spheredevkitdemo2stor3.queue.core.windows.net/","table":"https://spheredevkitdemo2stor3.table.core.windows.net/","file":"https://spheredevkitdemo2stor3.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-sphere/providers/Microsoft.Storage/storageAccounts/spheredevkitdemo2stor4","name":"spheredevkitdemo2stor4","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"keyCreationTime":{"key1":null,"key2":null},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-01-26T13:41:53.8451380Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-01-26T13:41:53.8451380Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-01-26T13:41:53.7670417Z","primaryEndpoints":{"dfs":"https://spheredevkitdemo2stor4.dfs.core.windows.net/","web":"https://spheredevkitdemo2stor4.z13.web.core.windows.net/","blob":"https://spheredevkitdemo2stor4.blob.core.windows.net/","queue":"https://spheredevkitdemo2stor4.queue.core.windows.net/","table":"https://spheredevkitdemo2stor4.table.core.windows.net/","file":"https://spheredevkitdemo2stor4.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-08-26T18:15:05.0450778Z","key2":"2022-08-26T18:15:05.0450778Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-08-26T18:15:05.0606954Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-08-26T18:15:05.0606954Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2022-08-26T18:15:04.9513437Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6926'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:17:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 5494d06f-1ab0-4627-9361-1ddf3f97a4be
+      - b888bc97-ea8a-47d8-bc95-cb636bb526be
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --account-name --name --public-access
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-storage/20.1.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2022-05-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2022-08-26T18:15:05.0450778Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-08-26T18:15:05.0450778Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Fri, 26 Aug 2022 18:17:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --account-name --name --public-access
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-storage-blob/12.12.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+      x-ms-blob-public-access:
+      - blob
+      x-ms-date:
+      - Fri, 26 Aug 2022 18:17:35 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/apimtestdata000004?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 18:17:35 GMT
+      etag:
+      - '"0x8DA878F407F297B"'
+      last-modified:
+      - Fri, 26 Aug 2022 18:17:35 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "<policies>\n        <inbound></inbound>\n        <backend>\n                <!--
+      test -->\n        </backend>\n        <outbound />\n        <on-error />\n</policies>"
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload-batch
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '159'
+      Content-Type:
+      - application/octet-stream
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -d --account-name --account-key --source
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-storage-blob/12.12.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+      x-ms-blob-content-type:
+      - application/xml
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/apimtestdata000004/api_policy.xml
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - e8mO7BH0kscnjHG/p7D+lQ==
+      date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      etag:
+      - '"0x8DA878F40F53B41"'
+      last-modified:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-content-crc64:
+      - Rj64KbGiqJk=
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "schema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n\ntype
+      Address {\n  address: String\n  city: String\n  state: String\n}\n\ntype Capsule
+      {\n  id: ID\n  landings: Int\n  missions: [CapsuleMission]\n  original_launch:
+      Date\n  reuse_count: Int\n  status: String\n  type: String\n  dragon: Dragon\n}\n\ntype
+      CapsuleMission {\n  flight: Int\n  name: String\n}\n\ninput CapsulesFind {\n
+      \ id: ID\n  landings: Int\n  mission: String\n  original_launch: Date\n  reuse_count:
+      Int\n  status: String\n  type: String\n}\n\ntype Core {\n  asds_attempts: Int\n
+      \ asds_landings: Int\n  block: Int\n  id: ID\n  missions: [CapsuleMission]\n
+      \ original_launch: Date\n  reuse_count: Int\n  rtls_attempts: Int\n  rtls_landings:
+      Int\n  status: String\n  water_landing: Boolean\n}\n\ntype CoreMission {\n  name:
+      String\n  flight: Int\n}\n\ninput CoresFind {\n  asds_attempts: Int\n  asds_landings:
+      Int\n  block: Int\n  id: String\n  missions: String\n  original_launch: Date\n
+      \ reuse_count: Int\n  rtls_attempts: Int\n  rtls_landings: Int\n  status: String\n
+      \ water_landing: Boolean\n}\n\nscalar Date\n\ntype Distance {\n  feet: Float\n
+      \ meters: Float\n}\n\ntype Dragon {\n  active: Boolean\n  crew_capacity: Int\n
+      \ description: String\n  diameter: Distance\n  dry_mass_kg: Int\n  dry_mass_lb:
+      Int\n  first_flight: String\n  heat_shield: DragonHeatShield\n  height_w_trunk:
+      Distance\n  id: ID\n  launch_payload_mass: Mass\n  launch_payload_vol: Volume\n
+      \ name: String\n  orbit_duration_yr: Int\n  pressurized_capsule: DragonPressurizedCapsule\n
+      \ return_payload_mass: Mass\n  return_payload_vol: Volume\n  sidewall_angle_deg:
+      Float\n  thrusters: [DragonThrust]\n  trunk: DragonTrunk\n  type: String\n  wikipedia:
+      String\n}\n\ntype DragonHeatShield {\n  dev_partner: String\n  material: String\n
+      \ size_meters: Float\n  temp_degrees: Int\n}\n\ntype DragonPressurizedCapsule
+      {\n  payload_volume: Volume\n}\n\ntype DragonThrust {\n  amount: Int\n  fuel_1:
+      String\n  fuel_2: String\n  pods: Int\n  thrust: Force\n  type: String\n}\n\ntype
+      DragonTrunk {\n  cargo: DragonTrunkCargo\n  trunk_volume: Volume\n}\n\ntype
+      DragonTrunkCargo {\n  solar_array: Int\n  unpressurized_cargo: Boolean\n}\n\ntype
+      Force {\n  kN: Float\n  lbf: Float\n}\n\ntype HistoriesResult {\n  result: Result\n
+      \ data: [History]\n}\n\ntype History {\n  details: String\n  event_date_unix:
+      Date\n  event_date_utc: Date\n  id: ID\n  links: Link\n  title: String\n  flight:
+      Launch\n}\n\ninput HistoryFind {\n  end: Date\n  flight_number: Int\n  id: ID\n
+      \ start: Date\n}\n\ntype Info {\n  ceo: String\n  coo: String\n  cto_propulsion:
+      String\n  cto: String\n  employees: Int\n  founded: Int\n  founder: String\n
+      \ headquarters: Address\n  launch_sites: Int\n  links: InfoLinks\n  name: String\n
+      \ summary: String\n  test_sites: Int\n  valuation: Float\n  vehicles: Int\n}\n\ntype
+      InfoLinks {\n  elon_twitter: String\n  flickr: String\n  twitter: String\n  website:
+      String\n}\n\ntype Landpad {\n  attempted_landings: String\n  details: String\n
+      \ full_name: String\n  id: ID\n  landing_type: String\n  location: Location\n
+      \ status: String\n  successful_landings: String\n  wikipedia: String\n}\n\ntype
+      Launch {\n  details: String\n  id: ID\n  is_tentative: Boolean\n  launch_date_local:
+      Date\n  launch_date_unix: Date\n  launch_date_utc: Date\n  launch_site: LaunchSite\n
+      \ launch_success: Boolean\n  launch_year: String\n  links: LaunchLinks\n  mission_id:
+      [String]\n  mission_name: String\n  rocket: LaunchRocket\n  static_fire_date_unix:
+      Date\n  static_fire_date_utc: Date\n  telemetry: LaunchTelemetry\n  tentative_max_precision:
+      String\n  upcoming: Boolean\n  ships: [Ship]\n}\n\ninput LaunchFind {\n  apoapsis_km:
+      Float\n  block: Int\n  cap_serial: String\n  capsule_reuse: String\n  core_flight:
+      Int\n  core_reuse: String\n  core_serial: String\n  customer: String\n  eccentricity:
+      Float\n  end: Date\n  epoch: Date\n  fairings_recovered: String\n  fairings_recovery_attempt:
+      String\n  fairings_reuse: String\n  fairings_reused: String\n  fairings_ship:
+      String\n  gridfins: String\n  id: ID\n  inclination_deg: Float\n  land_success:
+      String\n  landing_intent: String\n  landing_type: String\n  landing_vehicle:
+      String\n  launch_date_local: Date\n  launch_date_utc: Date\n  launch_success:
+      String\n  launch_year: String\n  legs: String\n  lifespan_years: Float\n  longitude:
+      Float\n  manufacturer: String\n  mean_motion: Float\n  mission_id: String\n
+      \ mission_name: String\n  nationality: String\n  norad_id: Int\n  orbit: String\n
+      \ payload_id: String\n  payload_type: String\n  periapsis_km: Float\n  period_min:
+      Float\n  raan: Float\n  reference_system: String\n  regime: String\n  reused:
+      String\n  rocket_id: String\n  rocket_name: String\n  rocket_type: String\n
+      \ second_stage_block: String\n  semi_major_axis_km: Float\n  ship: String\n
+      \ side_core1_reuse: String\n  side_core2_reuse: String\n  site_id: String\n
+      \ site_name_long: String\n  site_name: String\n  start: Date\n  tbd: String\n
+      \ tentative_max_precision: String\n  tentative: String\n}\n\ntype LaunchLinks
+      {\n  article_link: String\n  flickr_images: [String]\n  mission_patch_small:
+      String\n  mission_patch: String\n  presskit: String\n  reddit_campaign: String\n
+      \ reddit_launch: String\n  reddit_media: String\n  reddit_recovery: String\n
+      \ video_link: String\n  wikipedia: String\n}\n\ntype LaunchRocket {\n  fairings:
+      LaunchRocketFairings\n  first_stage: LaunchRocketFirstStage\n  rocket_name:
+      String\n  rocket_type: String\n  rocket: Rocket\n  second_stage: LaunchRocketSecondStage\n}\n\ntype
+      LaunchRocketFairings {\n  recovered: Boolean\n  recovery_attempt: Boolean\n
+      \ reused: Boolean\n  ship: String\n}\n\ntype LaunchRocketFirstStage {\n  cores:
+      [LaunchRocketFirstStageCore]\n}\n\ntype LaunchRocketFirstStageCore {\n  block:
+      Int\n  core: Core\n  flight: Int\n  gridfins: Boolean\n  land_success: Boolean\n
+      \ landing_intent: Boolean\n  landing_type: String\n  landing_vehicle: String\n
+      \ legs: Boolean\n  reused: Boolean\n}\n\ntype LaunchRocketSecondStage {\n  block:
+      Int\n  payloads: [Payload]\n}\n\ntype LaunchSite {\n  site_id: String\n  site_name_long:
+      String\n  site_name: String\n}\n\ntype LaunchTelemetry {\n  flight_club: String\n}\n\ntype
+      LaunchesPastResult {\n  result: Result\n  data: [Launch]\n}\n\ntype Launchpad
+      {\n  attempted_launches: Int\n  details: String\n  id: ID\n  location: Location\n
+      \ name: String\n  status: String\n  successful_launches: Int\n  vehicles_launched:
+      [Rocket]\n  wikipedia: String\n}\n\ntype Link {\n  article: String\n  reddit:
+      String\n  wikipedia: String\n}\n\ntype Location {\n  latitude: Float\n  longitude:
+      Float\n  name: String\n  region: String\n}\n\ntype Mass {\n  kg: Int\n  lb:
+      Int\n}\n\ntype Mission {\n  description: String\n  id: ID\n  manufacturers:
+      [String]\n  name: String\n  twitter: String\n  website: String\n  wikipedia:
+      String\n  payloads: [Payload]\n}\n\ntype MissionResult {\n  result: Result\n
+      \ data: [Mission]\n}\n\ninput MissionsFind {\n  id: ID\n  manufacturer: String\n
+      \ name: String\n  payload_id: String\n}\n\ntype Mutation {\n  # delete data
+      from the table: \\\"users\\\"\n  delete_users(\n    # filter the rows which
+      have to be deleted\n    where: users_bool_exp!\n  ): users_mutation_response\n
+      \ # insert data into the table: \\\"users\\\"\n  insert_users(\n    # the rows
+      to be inserted\n    objects: [users_insert_input!]!\n    # on conflict condition\n
+      \   on_conflict: users_on_conflict\n  ): users_mutation_response\n  # update
+      data of the table: \\\"users\\\"\n  update_users(\n    # sets the columns of
+      the filtered rows to the given values\n    _set: users_set_input\n    # filter
+      the rows which have to be updated\n    where: users_bool_exp!\n  ): users_mutation_response\n}\n\nscalar
+      ObjectID\n\ntype Payload {\n  customers: [String]\n  id: ID\n  manufacturer:
+      String\n  nationality: String\n  norad_id: [Int]\n  orbit_params: PayloadOrbitParams\n
+      \ orbit: String\n  payload_mass_kg: Float\n  payload_mass_lbs: Float\n  payload_type:
+      String\n  reused: Boolean\n}\n\ntype PayloadOrbitParams {\n  apoapsis_km: Float\n
+      \ arg_of_pericenter: Float\n  eccentricity: Float\n  epoch: Date\n  inclination_deg:
+      Float\n  lifespan_years: Float\n  longitude: Float\n  mean_anomaly: Float\n
+      \ mean_motion: Float\n  periapsis_km: Float\n  period_min: Float\n  raan: Float\n
+      \ reference_system: String\n  regime: String\n  semi_major_axis_km: Float\n}\n\ninput
+      PayloadsFind {\n  apoapsis_km: Float\n  customer: String\n  eccentricity: Float\n
+      \ epoch: Date\n  inclination_deg: Float\n  lifespan_years: Float\n  longitude:
+      Float\n  manufacturer: String\n  mean_motion: Float\n  nationality: String\n
+      \ norad_id: Int\n  orbit: String\n  payload_id: ID\n  payload_type: String\n
+      \ periapsis_km: Float\n  period_min: Float\n  raan: Float\n  reference_system:
+      String\n  regime: String\n  reused: Boolean\n  semi_major_axis_km: Float\n}\n\ntype
+      Query {\n  # fetch data from the table: \\\"users\\\"\n  users(\n    # distinct
+      select on columns\n    distinct_on: [users_select_column!]\n    # limit the
+      nuber of rows returned\n    limit: Int\n    # skip the first n rows. Use only
+      with order_by\n    offset: Int\n    # sort the rows by one or more columns\n
+      \   order_by: [users_order_by!]\n    # filter the rows returned\n    where:
+      users_bool_exp\n  ): [users!]!\n  # fetch aggregated fields from the table:
+      \\\"users\\\"\n  users_aggregate(\n    # distinct select on columns\n    distinct_on:
+      [users_select_column!]\n    # limit the nuber of rows returned\n    limit: Int\n
+      \   # skip the first n rows. Use only with order_by\n    offset: Int\n    #
+      sort the rows by one or more columns\n    order_by: [users_order_by!]\n    #
+      filter the rows returned\n    where: users_bool_exp\n  ): users_aggregate!\n
+      \ # fetch data from the table: \\\"users\\\" using primary key columns\n  users_by_pk(\n
+      \   id: uuid!\n  ): users\n  capsules(\n    find: CapsulesFind\n    limit: Int\n
+      \   offset: Int\n    order: String\n    sort: String\n  ): [Capsule]\n  capsulesPast(\n
+      \   find: CapsulesFind\n    limit: Int\n    offset: Int\n    order: String\n
+      \   sort: String\n  ): [Capsule]\n  capsulesUpcoming(\n    find: CapsulesFind\n
+      \   limit: Int\n    offset: Int\n    order: String\n    sort: String\n  ): [Capsule]\n
+      \ capsule(\n    id: ID!\n  ): Capsule\n  company: Info\n  cores(\n    find:
+      CoresFind\n    limit: Int\n    offset: Int\n    order: String\n    sort: String\n
+      \ ): [Core]\n  coresPast(\n    find: CoresFind\n    limit: Int\n    offset:
+      Int\n    order: String\n    sort: String\n  ): [Core]\n  coresUpcoming(\n    find:
+      CoresFind\n    limit: Int\n    offset: Int\n    order: String\n    sort: String\n
+      \ ): [Core]\n  core(\n    id: ID!\n  ): Core\n  dragons(\n    limit: Int\n    offset:
+      Int\n  ): [Dragon]\n  dragon(\n    id: ID!\n  ): Dragon\n  histories(\n    find:
+      HistoryFind\n    limit: Int\n    offset: Int\n    order: String\n    sort: String\n
+      \ ): [History]\n  historiesResult(\n    find: HistoryFind\n    limit: Int\n
+      \   offset: Int\n    order: String\n    sort: String\n  ): HistoriesResult\n
+      \ history(\n    id: ID!\n  ): History\n  landpads(\n    limit: Int\n    offset:
+      Int\n  ): [Landpad]\n  landpad(\n    id: ID!\n  ): Landpad\n  launches(\n    find:
+      LaunchFind\n    limit: Int\n    offset: Int\n    order: String\n    sort: String\n
+      \ ): [Launch]\n  launchesPast(\n    find: LaunchFind\n    limit: Int\n    offset:
+      Int\n    order: String\n    sort: String\n  ): [Launch]\n  launchesPastResult(\n
+      \   find: LaunchFind\n    limit: Int\n    offset: Int\n    order: String\n    sort:
+      String\n  ): LaunchesPastResult\n  launchesUpcoming(\n    find: LaunchFind\n
+      \   limit: Int\n    offset: Int\n    order: String\n    sort: String\n  ): [Launch]\n
+      \ launch(\n    id: ID!\n  ): Launch\n  launchLatest(\n    offset: Int\n  ):
+      Launch\n  launchNext(\n    offset: Int\n  ): Launch\n  launchpads(\n    limit:
+      Int\n    offset: Int\n  ): [Launchpad]\n  launchpad(\n    id: ID!\n  ): Launchpad\n
+      \ missions(\n    find: MissionsFind\n    limit: Int\n    offset: Int\n  ): [Mission]\n
+      \ missionsResult(\n    find: MissionsFind\n    limit: Int\n    offset: Int\n
+      \ ): MissionResult\n  mission(\n    id: ID!\n  ): Mission\n  payloads(\n    find:
+      PayloadsFind\n    limit: Int\n    offset: Int\n    order: String\n    sort:
+      String\n  ): [Payload]\n  payload(\n    id: ID!\n  ): Payload\n  roadster: Roadster\n
+      \ rockets(\n    limit: Int\n    offset: Int\n  ): [Rocket]\n  rocketsResult(\n
+      \   limit: Int\n    offset: Int\n  ): RocketsResult\n  rocket(\n    id: ID!\n
+      \ ): Rocket\n  ships(\n    find: ShipsFind\n    limit: Int\n    offset: Int\n
+      \   order: String\n    sort: String\n  ): [Ship]\n  shipsResult(\n    find:
+      ShipsFind\n    limit: Int\n    offset: Int\n    order: String\n    sort: String\n
+      \ ): ShipsResult\n  ship(\n    id: ID!\n  ): Ship\n}\n\ntype Result {\n  totalCount:
+      Int\n}\n\ntype Roadster {\n  apoapsis_au: Float\n  details: String\n  earth_distance_km:
+      Float\n  earth_distance_mi: Float\n  eccentricity: Float\n  epoch_jd: Float\n
+      \ inclination: Float\n  launch_date_unix: Date\n  launch_date_utc: Date\n  launch_mass_kg:
+      Int\n  launch_mass_lbs: Int\n  longitude: Float\n  mars_distance_km: Float\n
+      \ mars_distance_mi: Float\n  name: String\n  norad_id: Int\n  orbit_type: Float\n
+      \ periapsis_arg: Float\n  periapsis_au: Float\n  period_days: Float\n  semi_major_axis_au:
+      Float\n  speed_kph: Float\n  speed_mph: Float\n  wikipedia: String\n}\n\ntype
+      Rocket {\n  active: Boolean\n  boosters: Int\n  company: String\n  cost_per_launch:
+      Int\n  country: String\n  description: String\n  diameter: Distance\n  engines:
+      RocketEngines\n  first_flight: Date\n  first_stage: RocketFirstStage\n  height:
+      Distance\n  id: ID\n  landing_legs: RocketLandingLegs\n  mass: Mass\n  name:
+      String\n  payload_weights: [RocketPayloadWeight]\n  second_stage: RocketSecondStage\n
+      \ stages: Int\n  success_rate_pct: Int\n  type: String\n  wikipedia: String\n}\n\ntype
+      RocketEngines {\n  number: Int\n  type: String\n  version: String\n  layout:
+      String\n  engine_loss_max: String\n  propellant_1: String\n  propellant_2: String\n
+      \ thrust_sea_level: Force\n  thrust_vacuum: Force\n  thrust_to_weight: Float\n}\n\ntype
+      RocketFirstStage {\n  burn_time_sec: Int\n  engines: Int\n  fuel_amount_tons:
+      Float\n  reusable: Boolean\n  thrust_sea_level: Force\n  thrust_vacuum: Force\n}\n\ntype
+      RocketLandingLegs {\n  number: Int\n  material: String\n}\n\ntype RocketPayloadWeight
+      {\n  id: String\n  kg: Int\n  lb: Int\n  name: String\n}\n\ntype RocketSecondStage
+      {\n  burn_time_sec: Int\n  engines: Int\n  fuel_amount_tons: Float\n  payloads:
+      RocketSecondStagePayloads\n  thrust: Force\n}\n\ntype RocketSecondStagePayloadCompositeFairing
+      {\n  height: Distance\n  diameter: Distance\n}\n\ntype RocketSecondStagePayloads
+      {\n  option_1: String\n  composite_fairing: RocketSecondStagePayloadCompositeFairing\n}\n\ntype
+      RocketsResult {\n  result: Result\n  data: [Rocket]\n}\n\ntype Ship {\n  abs:
+      Int\n  active: Boolean\n  attempted_landings: Int\n  class: Int\n  course_deg:
+      Int\n  home_port: String\n  id: ID\n  image: String\n  imo: Int\n  missions:
+      [ShipMission]\n  mmsi: Int\n  model: String\n  name: String\n  position: ShipLocation\n
+      \ roles: [String]\n  speed_kn: Float\n  status: String\n  successful_landings:
+      Int\n  type: String\n  url: String\n  weight_kg: Int\n  weight_lbs: Int\n  year_built:
+      Int\n}\n\ntype ShipLocation {\n  latitude: Float\n  longitude: Float\n}\n\ntype
+      ShipMission {\n  flight: String\n  name: String\n}\n\ninput ShipsFind {\n  id:
+      ID\n  name: String\n  model: String\n  type: String\n  role: String\n  active:
+      Boolean\n  imo: Int\n  mmsi: Int\n  abs: Int\n  class: Int\n  weight_lbs: Int\n
+      \ weight_kg: Int\n  year_built: Int\n  home_port: String\n  status: String\n
+      \ speed_kn: Int\n  course_deg: Int\n  latitude: Float\n  longitude: Float\n
+      \ successful_landings: Int\n  attempted_landings: Int\n  mission: String\n}\n\ntype
+      ShipsResult {\n  result: Result\n  data: [Ship]\n}\n\n# expression to compare
+      columns of type String. All fields are combined with logical 'AND'.\ninput String_comparison_exp
+      {\n  _eq: String\n  _gt: String\n  _gte: String\n  _ilike: String\n  _in: [String!]\n
+      \ _is_null: Boolean\n  _like: String\n  _lt: String\n  _lte: String\n  _neq:
+      String\n  _nilike: String\n  _nin: [String!]\n  _nlike: String\n  _nsimilar:
+      String\n  _similar: String\n}\n\ntype Subscription {\n  # fetch data from the
+      table: \\\"users\\\"\n  users(\n    # distinct select on columns\n    distinct_on:
+      [users_select_column!]\n    # limit the nuber of rows returned\n    limit: Int\n
+      \   # skip the first n rows. Use only with order_by\n    offset: Int\n    #
+      sort the rows by one or more columns\n    order_by: [users_order_by!]\n    #
+      filter the rows returned\n    where: users_bool_exp\n  ): [users!]!\n  # fetch
+      aggregated fields from the table: \\\"users\\\"\n  users_aggregate(\n    # distinct
+      select on columns\n    distinct_on: [users_select_column!]\n    # limit the
+      nuber of rows returned\n    limit: Int\n    # skip the first n rows. Use only
+      with order_by\n    offset: Int\n    # sort the rows by one or more columns\n
+      \   order_by: [users_order_by!]\n    # filter the rows returned\n    where:
+      users_bool_exp\n  ): users_aggregate!\n  # fetch data from the table: \\\"users\\\"
+      using primary key columns\n  users_by_pk(\n    id: uuid!\n  ): users\n}\n\ntype
+      Volume {\n  cubic_feet: Int\n  cubic_meters: Int\n}\n\n# conflict action\nenum
+      conflict_action {\n  # ignore the insert on this row\n  ignore\n  # update the
+      row with the given values\n  update\n}\n\n# column ordering options\nenum order_by
+      {\n  # in the ascending order, nulls last\n  asc\n  # in the ascending order,
+      nulls first\n  asc_nulls_first\n  # in the ascending order, nulls last\n  asc_nulls_last\n
+      \ # in the descending order, nulls first\n  desc\n  # in the descending order,
+      nulls first\n  desc_nulls_first\n  # in the descending order, nulls last\n  desc_nulls_last\n}\n\nscalar
+      timestamptz\n\n# expression to compare columns of type timestamptz. All fields
+      are combined with logical 'AND'.\ninput timestamptz_comparison_exp {\n  _eq:
+      timestamptz\n  _gt: timestamptz\n  _gte: timestamptz\n  _in: [timestamptz!]\n
+      \ _is_null: Boolean\n  _lt: timestamptz\n  _lte: timestamptz\n  _neq: timestamptz\n
+      \ _nin: [timestamptz!]\n}\n\n# columns and relationships of \\\"users\\\"\ntype
+      users {\n  id: uuid!\n  name: String\n  rocket: String\n  timestamp: timestamptz!\n
+      \ twitter: String\n}\n\n# aggregated selection of \\\"users\\\"\ntype users_aggregate
+      {\n  aggregate: users_aggregate_fields\n  nodes: [users!]!\n}\n\n# aggregate
+      fields of \\\"users\\\"\ntype users_aggregate_fields {\n  count(\n    columns:
+      [users_select_column!]\n    distinct: Boolean\n  ): Int\n  max: users_max_fields\n
+      \ min: users_min_fields\n}\n\n# order by aggregate values of table \\\"users\\\"\ninput
+      users_aggregate_order_by {\n  count: order_by\n  max: users_max_order_by\n  min:
+      users_min_order_by\n}\n\n# input type for inserting array relation for remote
+      table \\\"users\\\"\ninput users_arr_rel_insert_input {\n  data: [users_insert_input!]!\n
+      \ on_conflict: users_on_conflict\n}\n\n# Boolean expression to filter rows from
+      the table \\\"users\\\". All fields are combined with a logical 'AND'.\ninput
+      users_bool_exp {\n  _and: [users_bool_exp]\n  _not: users_bool_exp\n  _or: [users_bool_exp]\n
+      \ id: uuid_comparison_exp\n  name: String_comparison_exp\n  rocket: String_comparison_exp\n
+      \ timestamp: timestamptz_comparison_exp\n  twitter: String_comparison_exp\n}\n\n#
+      unique or primary key constraints on table \\\"users\\\"\nenum users_constraint
+      {\n  # unique or primary key constraint\n  users_pkey\n}\n\n# input type for
+      inserting data into table \\\"users\\\"\ninput users_insert_input {\n  id: uuid\n
+      \ name: String\n  rocket: String\n  timestamp: timestamptz\n  twitter: String\n}\n\n#
+      aggregate max on columns\ntype users_max_fields {\n  name: String\n  rocket:
+      String\n  timestamp: timestamptz\n  twitter: String\n}\n\n# order by max() on
+      columns of table \\\"users\\\"\ninput users_max_order_by {\n  name: order_by\n
+      \ rocket: order_by\n  timestamp: order_by\n  twitter: order_by\n}\n\n# aggregate
+      min on columns\ntype users_min_fields {\n  name: String\n  rocket: String\n
+      \ timestamp: timestamptz\n  twitter: String\n}\n\n# order by min() on columns
+      of table \\\"users\\\"\ninput users_min_order_by {\n  name: order_by\n  rocket:
+      order_by\n  timestamp: order_by\n  twitter: order_by\n}\n\n# response of any
+      mutation on the table \\\"users\\\"\ntype users_mutation_response {\n  # number
+      of affected rows by the mutation\n  affected_rows: Int!\n  # data of the affected
+      rows by the mutation\n  returning: [users!]!\n}\n\n# input type for inserting
+      object relation for remote table \\\"users\\\"\ninput users_obj_rel_insert_input
+      {\n  data: users_insert_input!\n  on_conflict: users_on_conflict\n}\n\n# on
+      conflict condition type for table \\\"users\\\"\ninput users_on_conflict {\n
+      \ constraint: users_constraint!\n  update_columns: [users_update_column!]!\n}\n\n#
+      ordering options when selecting data from \\\"users\\\"\ninput users_order_by
+      {\n  id: order_by\n  name: order_by\n  rocket: order_by\n  timestamp: order_by\n
+      \ twitter: order_by\n}\n\n# select columns of table \\\"users\\\"\nenum users_select_column
+      {\n  # column name\n  id\n  # column name\n  name\n  # column name\n  rocket\n
+      \ # column name\n  timestamp\n  # column name\n  twitter\n}\n\n# input type
+      for updating data in table \\\"users\\\"\ninput users_set_input {\n  id: uuid\n
+      \ name: String\n  rocket: String\n  timestamp: timestamptz\n  twitter: String\n}\n\n#
+      update columns of table \\\"users\\\"\nenum users_update_column {\n  # column
+      name\n  id\n  # column name\n  name\n  # column name\n  rocket\n  # column name\n
+      \ timestamp\n  # column name\n  twitter\n}\n\nscalar uuid\n\n# expression to
+      compare columns of type uuid. All fields are combined with logical 'AND'.\ninput
+      uuid_comparison_exp {\n  _eq: uuid\n  _gt: uuid\n  _gte: uuid\n  _in: [uuid!]\n
+      \ _is_null: Boolean\n  _lt: uuid\n  _lte: uuid\n  _neq: uuid\n  _nin: [uuid!]\n}\n"
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload-batch
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '20705'
+      Content-Type:
+      - application/octet-stream
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -d --account-name --account-key --source
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-storage-blob/12.12.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/apimtestdata000004/gql_schema.gql
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - TjvO2Rf9yXD/JHw7ma1Ktg==
+      date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      etag:
+      - '"0x8DA878F41147E3F"'
+      last-modified:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-content-crc64:
+      - j3cgGbSOxxA=
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\n  \"swagger\": \"2.0\",\n  \"info\": {\n    \"version\": \"v1\",\n    \"title\":
+      \"FoodTrucks\",\n    \"description\": \"A sample API where you can find Food
+      trucks.\"\n  },\n  \"host\": \"foodtruckapi.azurewebsites.net\",\n  \"schemes\":
+      [ \"http\", \"https\" ],\n  \"basePath\": \"/api/data\",\n  \"paths\": {\n    \"/foodtrucks\":
+      {\n      \"get\": {\n        \"tags\": [ \"FoodTrucks\" ],\n        \"operationId\":
+      \"getFoodTrucks\",\n        \"consumes\": [],\n        \"produces\": [ \"application/json\",
+      \"text/json\", \"application/xml\", \"text/xml\" ],\n        \"responses\":
+      {\n          \"200\": {\n            \"description\": \"OK\",\n            \"schema\":
+      {\n              \"type\": \"array\",\n              \"items\": { \"$ref\":
+      \"#/definitions/Restaurant\" }\n            }\n          }\n        },\n        \"deprecated\":
+      false\n      }\n    },\n    \"/foodtrucks/{id}\": {\n      \"get\": {\n        \"tags\":
+      [ \"FoodTrucks\" ],\n        \"operationId\": \"getFoodTruckDetails\",\n        \"consumes\":
+      [],\n        \"produces\": [ \"application/json\", \"text/json\", \"application/xml\",
+      \"text/xml\" ],\n        \"parameters\": [\n          {\n            \"name\":
+      \"id\",\n            \"in\": \"path\",\n            \"required\": true,\n            \"type\":
+      \"integer\",\n            \"format\": \"int32\"\n          }\n        ],\n        \"responses\":
+      {\n          \"200\": {\n            \"description\": \"OK\",\n            \"schema\":
+      {\n              \"type\": \"array\",\n              \"items\": { \"$ref\":
+      \"#/definitions/Restaurant\" }\n            }\n          }\n        },\n        \"deprecated\":
+      false\n      }\n    }\n  },\n  \"definitions\": {\n    \"Restaurant\": {\n      \"type\":
+      \"object\",\n      \"properties\": {\n        \"id\": {\n          \"format\":
+      \"int32\",\n          \"type\": \"integer\"\n        },\n        \"name\": {
+      \"type\": \"string\" },\n        \"likes\": {\n          \"format\": \"int32\",\n
+      \         \"type\": \"integer\"\n        },\n        \"savory\": { \"type\":
+      \"boolean\" },\n        \"sweet\": { \"type\": \"boolean\" },\n        \"vegetarian\":
+      { \"type\": \"boolean\" },\n        \"bookable\": { \"type\": \"boolean\" },\n
+      \       \"city\": { \"type\": \"string\" }\n      }\n    }\n  }\n}\n"
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload-batch
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1996'
+      Content-Type:
+      - application/octet-stream
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -d --account-name --account-key --source
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-storage-blob/12.12.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/apimtestdata000004/swagger.json
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - b3swLB0Hm4GquR2Tzs3Hnw==
+      date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      etag:
+      - '"0x8DA878F41251D81"'
+      last-modified:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-content-crc64:
+      - uCiRiD3qaXQ=
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "openapi: \"3.0.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\n
+      \ license:\n    name: MIT\nservers:\n  - url: http://petstore.swagger.io/v1\npaths:\n
+      \ /pets:\n    get:\n      summary: List all pets\n      operationId: listPets\n
+      \     tags:\n        - pets\n      parameters:\n        - name: limit\n          in:
+      query\n          description: How many items to return at one time (max 100)\n
+      \         required: false\n          schema:\n            type: integer\n            format:
+      int32\n      responses:\n        '200':\n          description: A paged array
+      of pets\n          headers:\n            x-next:\n              description:
+      A link to the next page of responses\n              schema:\n                type:
+      string\n          content:\n            application/json:    \n              schema:\n
+      \               $ref: \"#/components/schemas/Pets\"\n        default:\n          description:
+      unexpected error\n          content:\n            application/json:\n              schema:\n
+      \               $ref: \"#/components/schemas/Error\"\n    post:\n      summary:
+      Create a pet\n      operationId: createPets\n      tags:\n        - pets\n      responses:\n
+      \       '201':\n          description: Null response\n        default:\n          description:
+      unexpected error\n          content:\n            application/json:\n              schema:\n
+      \               $ref: \"#/components/schemas/Error\"\n  /pets/{petId}:\n    get:\n
+      \     summary: Info for a specific pet\n      operationId: showPetById\n      tags:\n
+      \       - pets\n      parameters:\n        - name: petId\n          in: path\n
+      \         required: true\n          description: The id of the pet to retrieve\n
+      \         schema:\n            type: string\n      responses:\n        '200':\n
+      \         description: Expected response to a valid request\n          content:\n
+      \           application/json:\n              schema:\n                $ref:
+      \"#/components/schemas/Pet\"\n        default:\n          description: unexpected
+      error\n          content:\n            application/json:\n              schema:\n
+      \               $ref: \"#/components/schemas/Error\"\ncomponents:\n  schemas:\n
+      \   Pet:\n      type: object\n      required:\n        - id\n        - name\n
+      \     properties:\n        id:\n          type: integer\n          format: int64\n
+      \       name:\n          type: string\n        tag:\n          type: string\n
+      \   Pets:\n      type: array\n      items:\n        $ref: \"#/components/schemas/Pet\"\n
+      \   Error:\n      type: object\n      required:\n        - code\n        - message\n
+      \     properties:\n        code:\n          type: integer\n          format:
+      int32\n        message:\n          type: string\n"
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload-batch
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2573'
+      Content-Type:
+      - application/octet-stream
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -d --account-name --account-key --source
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-storage-blob/12.12.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/apimtestdata000004/petstore.openapi.yaml
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - h82S+7JFW+cPVmt8Gi5WuA==
+      date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      etag:
+      - '"0x8DA878F41356EAF"'
+      last-modified:
+      - Fri, 26 Aug 2022 18:17:37 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-content-crc64:
+      - 8Tp1UVV9EIM=
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<wsdl:definitions xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\"
+      xmlns:tm=\"http://microsoft.com/wsdl/mime/textMatching/\" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\"
+      xmlns:mime=\"http://schemas.xmlsoap.org/wsdl/mime/\" xmlns:tns=\"http://tempuri.org/\"
+      xmlns:s=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://schemas.xmlsoap.org/wsdl/soap12/\"
+      xmlns:http=\"http://schemas.xmlsoap.org/wsdl/http/\" targetNamespace=\"http://tempuri.org/\"
+      xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\">\n  <wsdl:types>\n    <s:schema
+      elementFormDefault=\"qualified\" targetNamespace=\"http://tempuri.org/\">\n
+      \     <s:element name=\"Add\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intA\" type=\"s:int\"
+      />\n            <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intB\" type=\"s:int\"
+      />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"AddResponse\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"AddResult\" type=\"s:int\"
+      />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"Subtract\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intA\" type=\"s:int\"
+      />\n            <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intB\" type=\"s:int\"
+      />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"SubtractResponse\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"SubtractResult\"
+      type=\"s:int\" />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"Multiply\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intA\" type=\"s:int\"
+      />\n            <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intB\" type=\"s:int\"
+      />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"MultiplyResponse\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"MultiplyResult\"
+      type=\"s:int\" />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"Divide\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intA\" type=\"s:int\"
+      />\n            <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"intB\" type=\"s:int\"
+      />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \     <s:element name=\"DivideResponse\">\n        <s:complexType>\n          <s:sequence>\n
+      \           <s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"DivideResult\"
+      type=\"s:int\" />\n          </s:sequence>\n        </s:complexType>\n      </s:element>\n
+      \   </s:schema>\n  </wsdl:types>\n  <wsdl:message name=\"AddSoapIn\">\n    <wsdl:part
+      name=\"parameters\" element=\"tns:Add\" />\n  </wsdl:message>\n  <wsdl:message
+      name=\"AddSoapOut\">\n    <wsdl:part name=\"parameters\" element=\"tns:AddResponse\"
+      />\n  </wsdl:message>\n  <wsdl:message name=\"SubtractSoapIn\">\n    <wsdl:part
+      name=\"parameters\" element=\"tns:Subtract\" />\n  </wsdl:message>\n  <wsdl:message
+      name=\"SubtractSoapOut\">\n    <wsdl:part name=\"parameters\" element=\"tns:SubtractResponse\"
+      />\n  </wsdl:message>\n  <wsdl:message name=\"MultiplySoapIn\">\n    <wsdl:part
+      name=\"parameters\" element=\"tns:Multiply\" />\n  </wsdl:message>\n  <wsdl:message
+      name=\"MultiplySoapOut\">\n    <wsdl:part name=\"parameters\" element=\"tns:MultiplyResponse\"
+      />\n  </wsdl:message>\n  <wsdl:message name=\"DivideSoapIn\">\n    <wsdl:part
+      name=\"parameters\" element=\"tns:Divide\" />\n  </wsdl:message>\n  <wsdl:message
+      name=\"DivideSoapOut\">\n    <wsdl:part name=\"parameters\" element=\"tns:DivideResponse\"
+      />\n  </wsdl:message>\n  <wsdl:portType name=\"CalculatorSoap\">\n    <wsdl:operation
+      name=\"Add\">\n      <wsdl:documentation xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\">Adds
+      two integers. This is a test WebService. \xA9DNE Online</wsdl:documentation>\n
+      \     <wsdl:input message=\"tns:AddSoapIn\" />\n      <wsdl:output message=\"tns:AddSoapOut\"
+      />\n    </wsdl:operation>\n    <wsdl:operation name=\"Subtract\">\n      <wsdl:input
+      message=\"tns:SubtractSoapIn\" />\n      <wsdl:output message=\"tns:SubtractSoapOut\"
+      />\n    </wsdl:operation>\n    <wsdl:operation name=\"Multiply\">\n      <wsdl:input
+      message=\"tns:MultiplySoapIn\" />\n      <wsdl:output message=\"tns:MultiplySoapOut\"
+      />\n    </wsdl:operation>\n    <wsdl:operation name=\"Divide\">\n      <wsdl:input
+      message=\"tns:DivideSoapIn\" />\n      <wsdl:output message=\"tns:DivideSoapOut\"
+      />\n    </wsdl:operation>\n  </wsdl:portType>\n  <wsdl:binding name=\"CalculatorSoap\"
+      type=\"tns:CalculatorSoap\">\n    <soap:binding transport=\"http://schemas.xmlsoap.org/soap/http\"
+      />\n    <wsdl:operation name=\"Add\">\n      <soap:operation soapAction=\"http://tempuri.org/Add\"
+      style=\"document\" />\n      <wsdl:input>\n        <soap:body use=\"literal\"
+      />\n      </wsdl:input>\n      <wsdl:output>\n        <soap:body use=\"literal\"
+      />\n      </wsdl:output>\n    </wsdl:operation>\n    <wsdl:operation name=\"Subtract\">\n
+      \     <soap:operation soapAction=\"http://tempuri.org/Subtract\" style=\"document\"
+      />\n      <wsdl:input>\n        <soap:body use=\"literal\" />\n      </wsdl:input>\n
+      \     <wsdl:output>\n        <soap:body use=\"literal\" />\n      </wsdl:output>\n
+      \   </wsdl:operation>\n    <wsdl:operation name=\"Multiply\">\n      <soap:operation
+      soapAction=\"http://tempuri.org/Multiply\" style=\"document\" />\n      <wsdl:input>\n
+      \       <soap:body use=\"literal\" />\n      </wsdl:input>\n      <wsdl:output>\n
+      \       <soap:body use=\"literal\" />\n      </wsdl:output>\n    </wsdl:operation>\n
+      \   <wsdl:operation name=\"Divide\">\n      <soap:operation soapAction=\"http://tempuri.org/Divide\"
+      style=\"document\" />\n      <wsdl:input>\n        <soap:body use=\"literal\"
+      />\n      </wsdl:input>\n      <wsdl:output>\n        <soap:body use=\"literal\"
+      />\n      </wsdl:output>\n    </wsdl:operation>\n  </wsdl:binding>\n  <wsdl:binding
+      name=\"CalculatorSoap12\" type=\"tns:CalculatorSoap\">\n    <soap12:binding
+      transport=\"http://schemas.xmlsoap.org/soap/http\" />\n    <wsdl:operation name=\"Add\">\n
+      \     <soap12:operation soapAction=\"http://tempuri.org/Add\" style=\"document\"
+      />\n      <wsdl:input>\n        <soap12:body use=\"literal\" />\n      </wsdl:input>\n
+      \     <wsdl:output>\n        <soap12:body use=\"literal\" />\n      </wsdl:output>\n
+      \   </wsdl:operation>\n    <wsdl:operation name=\"Subtract\">\n      <soap12:operation
+      soapAction=\"http://tempuri.org/Subtract\" style=\"document\" />\n      <wsdl:input>\n
+      \       <soap12:body use=\"literal\" />\n      </wsdl:input>\n      <wsdl:output>\n
+      \       <soap12:body use=\"literal\" />\n      </wsdl:output>\n    </wsdl:operation>\n
+      \   <wsdl:operation name=\"Multiply\">\n      <soap12:operation soapAction=\"http://tempuri.org/Multiply\"
+      style=\"document\" />\n      <wsdl:input>\n        <soap12:body use=\"literal\"
+      />\n      </wsdl:input>\n      <wsdl:output>\n        <soap12:body use=\"literal\"
+      />\n      </wsdl:output>\n    </wsdl:operation>\n    <wsdl:operation name=\"Divide\">\n
+      \     <soap12:operation soapAction=\"http://tempuri.org/Divide\" style=\"document\"
+      />\n      <wsdl:input>\n        <soap12:body use=\"literal\" />\n      </wsdl:input>\n
+      \     <wsdl:output>\n        <soap12:body use=\"literal\" />\n      </wsdl:output>\n
+      \   </wsdl:operation>\n  </wsdl:binding>\n  <wsdl:service name=\"Calculator\">\n
+      \   <wsdl:port name=\"CalculatorSoap\" binding=\"tns:CalculatorSoap\">\n      <soap:address
+      location=\"http://www.dneonline.com/calculator.asmx\" />\n    </wsdl:port>\n
+      \   <wsdl:port name=\"CalculatorSoap12\" binding=\"tns:CalculatorSoap12\">\n
+      \     <soap12:address location=\"http://www.dneonline.com/calculator.asmx\"
+      />\n    </wsdl:port>\n  </wsdl:service>\n</wsdl:definitions>"
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload-batch
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '7685'
+      Content-Type:
+      - application/octet-stream
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -d --account-name --account-key --source
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-storage-blob/12.12.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+      x-ms-blob-content-type:
+      - application/xml
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Fri, 26 Aug 2022 18:17:37 GMT
+      x-ms-version:
+      - '2021-06-08'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/apimtestdata000004/calculator.wsdl.xml
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - Nz45TeipT2XjhJ5rcJPXyA==
+      date:
+      - Fri, 26 Aug 2022 18:17:36 GMT
+      etag:
+      - '"0x8DA878F41465BFF"'
+      last-modified:
+      - Fri, 26 Aug 2022 18:17:37 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-content-crc64:
+      - ksiK8obo8zc=
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [],\r\n  \"count\": 0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '34'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:17:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [],\r\n  \"count\": 0\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '34'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:17:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"description": "api description", "authenticationSettings":
+      {}, "subscriptionKeyParameterNames": {"header": "header1234", "query": "query1234"},
+      "displayName": "api display name", "serviceUrl": "http://echoapi.cloudapp.net/api",
+      "path": "api-path", "protocols": ["http"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '288'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -a --path --display-name --description --service-url --protocols --header-name
+        --querystring-name
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": \"api description\",\r\n    \"subscriptionRequired\":
+        true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n    \"path\":
+        \"api-path\",\r\n    \"protocols\": [\r\n      \"http\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '744'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:17:41 GMT
+      etag:
+      - '"AAAAAADmkZ0="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a --path --display-name --description --service-url --protocols --header-name
+        --querystring-name
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": \"api description\",\r\n    \"subscriptionRequired\":
+        true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n    \"path\":
+        \"api-path\",\r\n    \"protocols\": [\r\n      \"http\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '744'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:18:11 GMT
+      etag:
+      - '"AAAAAADmkZ0="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"description": "api description clone", "authenticationSettings":
+      {}, "sourceApiId": "/apis/api-id", "displayName": "api display name clone",
+      "path": "api-path-clone", "protocols": ["https"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '208'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -a --path --display-name --description --source-api-id
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-clone?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-clone\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id-clone\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name clone\",\r\n
+        \   \"apiRevision\": \"1\",\r\n    \"description\": \"api description clone\",\r\n
+        \   \"subscriptionRequired\": true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n
+        \   \"path\": \"api-path-clone\",\r\n    \"protocols\": [\r\n      \"https\"\r\n
+        \   ],\r\n    \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n
+        \     \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '775'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:18:15 GMT
+      etag:
+      - '"AAAAAADmkaI="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a --path --display-name --description --source-api-id
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-clone?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-clone\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id-clone\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name clone\",\r\n
+        \   \"apiRevision\": \"1\",\r\n    \"description\": \"api description clone\",\r\n
+        \   \"subscriptionRequired\": true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n
+        \   \"path\": \"api-path-clone\",\r\n    \"protocols\": [\r\n      \"https\"\r\n
+        \   ],\r\n    \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n
+        \     \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '775'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:18:46 GMT
+      etag:
+      - '"AAAAAADmkaI="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"authenticationSettings": {}, "apiRevisionDescription":
+      "api description revision 2", "sourceApiId": "/apis/api-id", "serviceUrl": "http://echoapi.cloudapp.net/api2",
+      "path": "api-path"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '203'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -a --path --revision-description --service-url --source-api-id
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id%3Brev%3D2?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id;rev=2\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id;rev=2\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name\",\r\n    \"apiRevision\":
+        \"2\",\r\n    \"description\": \"api description\",\r\n    \"subscriptionRequired\":
+        true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api2\",\r\n    \"path\":
+        \"api-path\",\r\n    \"protocols\": [\r\n      \"http\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"apiRevisionDescription\": \"api description revision 2\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '794'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:18:48 GMT
+      etag:
+      - '"AAAAAADmkac="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a --path --revision-description --service-url --source-api-id
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id%3Brev%3D2?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id;rev=2\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id;rev=2\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name\",\r\n    \"apiRevision\":
+        \"2\",\r\n    \"description\": \"api description\",\r\n    \"subscriptionRequired\":
+        true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api2\",\r\n    \"path\":
+        \"api-path\",\r\n    \"protocols\": [\r\n      \"http\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"apiRevisionDescription\": \"api description revision 2\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '794'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:19:18 GMT
+      etag:
+      - '"AAAAAADmkac="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"authenticationSettings": {}, "displayName": "api-path-swagger",
+      "serviceUrl": "http://petstore.swagger.wordnik.com/api", "path": "api-path-swagger",
+      "protocols": ["https"], "value": "http://apimpimportviaurl.azurewebsites.net/api/apidocs/",
+      "format": "swagger-link-json"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '289'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -a --path --import-format --value --service-url
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-swagger?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 18:19:20 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-swagger?api-version=2021-08-01&asyncId=63090ea8b2738c1becb561a2&asyncCode=201
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a --path --import-format --value --service-url
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-swagger?api-version=2021-08-01&asyncId=63090ea8b2738c1becb561a2&asyncCode=201
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-swagger\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id-swagger\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api-path-swagger\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": \"This is a sample server Petstore server.
+        \ You can find out more about Swagger \\n    at <a href=\\\"http://swagger.wordnik.com\\\">http://swagger.wordnik.com</a>
+        or on irc.freenode.net, #swagger.  For this sample,\\n    you can use the
+        api key \\\"special-key\\\" to test the authorization filters\",\r\n    \"subscriptionRequired\":
+        true,\r\n    \"serviceUrl\": \"http://petstore.swagger.wordnik.com/api\",\r\n
+        \   \"path\": \"api-path-swagger\",\r\n    \"protocols\": [\r\n      \"https\"\r\n
+        \   ],\r\n    \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n
+        \     \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"Ocp-Apim-Subscription-Key\",\r\n      \"query\":
+        \"subscription-key\"\r\n    },\r\n    \"contact\": {\r\n      \"name\": null,\r\n
+        \     \"url\": null,\r\n      \"email\": \"apiteam@wordnik.com\"\r\n    },\r\n
+        \   \"license\": {\r\n      \"name\": \"Apache 2.0\",\r\n      \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1295'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:19:50 GMT
+      etag:
+      - '"AAAAAADmkaw="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"authenticationSettings": {}, "type": "graphql", "displayName":
+      "graphQl API", "serviceUrl": "https://api.spacex.land/graphql/", "path": "graphqltestpath",
+      "protocols": ["https"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '196'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --service-name --display-name --path --api-id --protocols --service-url
+        --api-type
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/gr-api000005?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/gr-api000005\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"gr-api000005\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"graphQl API\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": null,\r\n    \"subscriptionRequired\": true,\r\n
+        \   \"serviceUrl\": \"https://api.spacex.land/graphql/\",\r\n    \"path\":
+        \"graphqltestpath\",\r\n    \"protocols\": [\r\n      \"https\"\r\n    ],\r\n
+        \   \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n      \"openid\":
+        null\r\n    },\r\n    \"subscriptionKeyParameterNames\": {\r\n      \"header\":
+        \"Ocp-Apim-Subscription-Key\",\r\n      \"query\": \"subscription-key\"\r\n
+        \   },\r\n    \"type\": \"graphql\",\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '793'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:19:52 GMT
+      etag:
+      - '"AAAAAADmkd0="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --service-name --display-name --path --api-id --protocols --service-url
+        --api-type
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/gr-api000005?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/gr-api000005\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"gr-api000005\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"graphQl API\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": null,\r\n    \"subscriptionRequired\": true,\r\n
+        \   \"serviceUrl\": \"https://api.spacex.land/graphql/\",\r\n    \"path\":
+        \"graphqltestpath\",\r\n    \"protocols\": [\r\n      \"https\"\r\n    ],\r\n
+        \   \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n      \"openid\":
+        null\r\n    },\r\n    \"subscriptionKeyParameterNames\": {\r\n      \"header\":
+        \"Ocp-Apim-Subscription-Key\",\r\n      \"query\": \"subscription-key\"\r\n
+        \   },\r\n    \"type\": \"graphql\",\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '793'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:20:22 GMT
+      etag:
+      - '"AAAAAADmkd0="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"authenticationSettings": {}, "displayName": "Swagger Petstore",
+      "path": "api-path-oai3-import", "protocols": ["https"], "value": "https://clitest000002.blob.core.windows.net/apimtestdata000004/petstore.openapi.yaml",
+      "format": "openapi-link"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '260'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -a --path --display-name --import-format --value
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-oai3-import?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 18:20:24 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-oai3-import?api-version=2021-08-01&asyncId=63090ee82354cb20d82cb16c&asyncCode=201
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a --path --display-name --import-format --value
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-oai3-import?api-version=2021-08-01&asyncId=63090ee82354cb20d82cb16c&asyncCode=201
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-oai3-import\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id-oai3-import\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"Swagger Petstore\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": null,\r\n    \"subscriptionRequired\": true,\r\n
+        \   \"serviceUrl\": \"http://petstore.swagger.io/v1\",\r\n    \"path\": \"api-path-oai3-import\",\r\n
+        \   \"protocols\": [\r\n      \"https\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"Ocp-Apim-Subscription-Key\",\r\n      \"query\":
+        \"subscription-key\"\r\n    },\r\n    \"license\": {\r\n      \"name\": \"MIT\",\r\n
+        \     \"url\": null\r\n    },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '855'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:20:55 GMT
+      etag:
+      - '"AAAAAADmkeI="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"authenticationSettings": {}, "type": "http", "displayName":
+      "Calculator", "path": "api-path-wsdl", "protocols": ["https"], "value": "https://clitest000002.blob.core.windows.net/apimtestdata000004/calculator.wsdl.xml",
+      "format": "wsdl-link", "wsdlSelector": {"wsdlServiceName": "Calculator", "wsdlEndpointName":
+      "CalculatorSoap"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '347'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --api-id --path --display-name --import-format --value --wsdl-service-name
+        --wsdl-endpoint-name --api-type
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-wsdl?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 18:20:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-wsdl?api-version=2021-08-01&asyncId=63090f09c486510d005ceb8b&asyncCode=201
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --api-id --path --display-name --import-format --value --wsdl-service-name
+        --wsdl-endpoint-name --api-type
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-wsdl?api-version=2021-08-01&asyncId=63090f09c486510d005ceb8b&asyncCode=201
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-wsdl\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id-wsdl\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"Calculator\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": null,\r\n    \"subscriptionRequired\": true,\r\n
+        \   \"serviceUrl\": \"http://www.dneonline.com\",\r\n    \"path\": \"api-path-wsdl\",\r\n
+        \   \"protocols\": [\r\n      \"https\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"Ocp-Apim-Subscription-Key\",\r\n      \"query\":
+        \"subscription-key\"\r\n    },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '756'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:28 GMT
+      etag:
+      - '"AAAAAADmkfg="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a --path --display-name --description --header-name --querystring-name
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name\",\r\n    \"apiRevision\":
+        \"1\",\r\n    \"description\": \"api description\",\r\n    \"subscriptionRequired\":
+        true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n    \"path\":
+        \"api-path\",\r\n    \"protocols\": [\r\n      \"http\"\r\n    ],\r\n    \"authenticationSettings\":
+        {\r\n      \"oAuth2\": null,\r\n      \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '744'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:29 GMT
+      etag:
+      - '"AAAAAADmkZ0="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"description": "api description updated", "authenticationSettings":
+      {}, "subscriptionKeyParameterNames": {"header": "updatedheader1234", "query":
+      "updatedquery1234"}, "apiRevision": "1", "isCurrent": true, "subscriptionRequired":
+      true, "displayName": "api display name updated", "serviceUrl": "http://echoapi.cloudapp.net/api",
+      "path": "api-path-updated", "protocols": ["http"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '395'
+      Content-Type:
+      - application/json
+      If-Match:
+      - '*'
+      ParameterSetName:
+      - -n -g -a --path --display-name --description --header-name --querystring-name
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name updated\",\r\n
+        \   \"apiRevision\": \"1\",\r\n    \"description\": \"api description updated\",\r\n
+        \   \"subscriptionRequired\": true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n
+        \   \"path\": \"api-path-updated\",\r\n    \"protocols\": [\r\n      \"http\"\r\n
+        \   ],\r\n    \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n
+        \     \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"updatedheader1234\",\r\n      \"query\": \"updatedquery1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:30 GMT
+      etag:
+      - '"AAAAAADmki4="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-clone\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-clone\",\r\n      \"properties\": {\r\n        \"displayName\": \"api
+        display name clone\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        \"api description clone\",\r\n        \"subscriptionRequired\": true,\r\n
+        \       \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n        \"path\":
+        \"api-path-clone\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id\",\r\n      \"properties\": {\r\n        \"displayName\": \"api display
+        name updated\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        \"api description updated\",\r\n        \"subscriptionRequired\": true,\r\n
+        \       \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n        \"path\":
+        \"api-path-updated\",\r\n        \"protocols\": [\r\n          \"http\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id;rev=2\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id;rev=2\",\r\n      \"properties\": {\r\n        \"displayName\": \"api
+        display name updated\",\r\n        \"apiRevision\": \"2\",\r\n        \"description\":
+        \"api description updated\",\r\n        \"subscriptionRequired\": true,\r\n
+        \       \"serviceUrl\": \"http://echoapi.cloudapp.net/api2\",\r\n        \"path\":
+        \"api-path-updated\",\r\n        \"protocols\": [\r\n          \"http\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"apiRevisionDescription\": \"api description revision 2\"\r\n
+        \     }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-swagger\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-swagger\",\r\n      \"properties\": {\r\n        \"displayName\":
+        \"api-path-swagger\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        \"This is a sample server Petstore server.  You can find out more about Swagger
+        \\n    at <a href=\\\"http://swagger.wordnik.com\\\">http://swagger.wordnik.com</a>
+        or on irc.freenode.net, #swagger.  For this sample,\\n    you can use the
+        api key \\\"special-key\\\" to test the authorization filters\",\r\n        \"subscriptionRequired\":
+        true,\r\n        \"serviceUrl\": \"http://petstore.swagger.wordnik.com/api\",\r\n
+        \       \"path\": \"api-path-swagger\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-wsdl\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-wsdl\",\r\n      \"properties\": {\r\n        \"displayName\": \"Calculator\",\r\n
+        \       \"apiRevision\": \"1\",\r\n        \"description\": null,\r\n        \"subscriptionRequired\":
+        true,\r\n        \"serviceUrl\": \"http://www.dneonline.com\",\r\n        \"path\":
+        \"api-path-wsdl\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/gr-api000005\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"gr-api000005\",\r\n      \"properties\": {\r\n        \"displayName\": \"graphQl
+        API\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\": null,\r\n
+        \       \"subscriptionRequired\": true,\r\n        \"serviceUrl\": \"https://api.spacex.land/graphql/\",\r\n
+        \       \"path\": \"graphqltestpath\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"type\": \"graphql\",\r\n        \"isCurrent\": true\r\n
+        \     }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-oai3-import\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-oai3-import\",\r\n      \"properties\": {\r\n        \"displayName\":
+        \"Swagger Petstore\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        null,\r\n        \"subscriptionRequired\": true,\r\n        \"serviceUrl\":
+        \"http://petstore.swagger.io/v1\",\r\n        \"path\": \"api-path-oai3-import\",\r\n
+        \       \"protocols\": [\r\n          \"https\"\r\n        ],\r\n        \"authenticationSettings\":
+        null,\r\n        \"subscriptionKeyParameterNames\": null,\r\n        \"isCurrent\":
+        true\r\n      }\r\n    }\r\n  ],\r\n  \"count\": 7\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5491'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name updated\",\r\n
+        \   \"apiRevision\": \"1\",\r\n    \"description\": \"api description updated\",\r\n
+        \   \"subscriptionRequired\": true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n
+        \   \"path\": \"api-path-updated\",\r\n    \"protocols\": [\r\n      \"http\"\r\n
+        \   ],\r\n    \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n
+        \     \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"updatedheader1234\",\r\n      \"query\": \"updatedquery1234\"\r\n
+        \   },\r\n    \"isCurrent\": true\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:32 GMT
+      etag:
+      - '"AAAAAADmki4="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id%3Brev%3D2?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id;rev=2\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n  \"name\": \"api-id;rev=2\",\r\n
+        \ \"properties\": {\r\n    \"displayName\": \"api display name updated\",\r\n
+        \   \"apiRevision\": \"2\",\r\n    \"description\": \"api description updated\",\r\n
+        \   \"subscriptionRequired\": true,\r\n    \"serviceUrl\": \"http://echoapi.cloudapp.net/api2\",\r\n
+        \   \"path\": \"api-path-updated\",\r\n    \"protocols\": [\r\n      \"http\"\r\n
+        \   ],\r\n    \"authenticationSettings\": {\r\n      \"oAuth2\": null,\r\n
+        \     \"openid\": null\r\n    },\r\n    \"subscriptionKeyParameterNames\":
+        {\r\n      \"header\": \"header1234\",\r\n      \"query\": \"query1234\"\r\n
+        \   },\r\n    \"apiRevisionDescription\": \"api description revision 2\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '818'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:33 GMT
+      etag:
+      - '"AAAAAADmki8="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-Match:
+      - '*'
+      ParameterSetName:
+      - -n -g -a --delete-revisions --yes
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id?deleteRevisions=true&api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 18:21:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim api list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-clone\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-clone\",\r\n      \"properties\": {\r\n        \"displayName\": \"api
+        display name clone\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        \"api description clone\",\r\n        \"subscriptionRequired\": true,\r\n
+        \       \"serviceUrl\": \"http://echoapi.cloudapp.net/api\",\r\n        \"path\":
+        \"api-path-clone\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-swagger\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-swagger\",\r\n      \"properties\": {\r\n        \"displayName\":
+        \"api-path-swagger\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        \"This is a sample server Petstore server.  You can find out more about Swagger
+        \\n    at <a href=\\\"http://swagger.wordnik.com\\\">http://swagger.wordnik.com</a>
+        or on irc.freenode.net, #swagger.  For this sample,\\n    you can use the
+        api key \\\"special-key\\\" to test the authorization filters\",\r\n        \"subscriptionRequired\":
+        true,\r\n        \"serviceUrl\": \"http://petstore.swagger.wordnik.com/api\",\r\n
+        \       \"path\": \"api-path-swagger\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-wsdl\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-wsdl\",\r\n      \"properties\": {\r\n        \"displayName\": \"Calculator\",\r\n
+        \       \"apiRevision\": \"1\",\r\n        \"description\": null,\r\n        \"subscriptionRequired\":
+        true,\r\n        \"serviceUrl\": \"http://www.dneonline.com\",\r\n        \"path\":
+        \"api-path-wsdl\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"isCurrent\": true\r\n      }\r\n    },\r\n    {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/gr-api000005\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"gr-api000005\",\r\n      \"properties\": {\r\n        \"displayName\": \"graphQl
+        API\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\": null,\r\n
+        \       \"subscriptionRequired\": true,\r\n        \"serviceUrl\": \"https://api.spacex.land/graphql/\",\r\n
+        \       \"path\": \"graphqltestpath\",\r\n        \"protocols\": [\r\n          \"https\"\r\n
+        \       ],\r\n        \"authenticationSettings\": null,\r\n        \"subscriptionKeyParameterNames\":
+        null,\r\n        \"type\": \"graphql\",\r\n        \"isCurrent\": true\r\n
+        \     }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/clitest000003/apis/api-id-oai3-import\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/apis\",\r\n      \"name\":
+        \"api-id-oai3-import\",\r\n      \"properties\": {\r\n        \"displayName\":
+        \"Swagger Petstore\",\r\n        \"apiRevision\": \"1\",\r\n        \"description\":
+        null,\r\n        \"subscriptionRequired\": true,\r\n        \"serviceUrl\":
+        \"http://petstore.swagger.io/v1\",\r\n        \"path\": \"api-path-oai3-import\",\r\n
+        \       \"protocols\": [\r\n          \"https\"\r\n        ],\r\n        \"authenticationSettings\":
+        null,\r\n        \"subscriptionKeyParameterNames\": null,\r\n        \"isCurrent\":
+        true\r\n      }\r\n    }\r\n  ],\r\n  \"count\": 5\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3971'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 18:21:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

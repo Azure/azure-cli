@@ -3,10 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
-
-import os
-import unittest
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, ApiManagementPreparer)
 
 
@@ -15,9 +11,9 @@ class ApimApiVersionSetScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiVersionSetScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @ApiManagementPreparer(parameter_name='apim_name')
-    def test_apim_api_version_set(self, resource_group, apim_name):
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_avs-')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_api_version_set(self):
         initial_vs_count = len(self.cmd('apim api-version-set list -g "{rg}" -n "{apim}"').get_output_in_json())
 
         # create API version set
@@ -48,5 +44,6 @@ class ApimApiVersionSetScenarioTest(ScenarioTest):
             'version_query_name': 'QueryName',
             'description': 'Version set description.',
             'id': 'version-set-id',
+            'versioning_scheme': 'Query',
             'updated_display_name': 'Updated version set display name'
         })

@@ -59,7 +59,6 @@ def update_subscription(cmd, client, resource_group_name, service_name, sid, dis
     if scope is not None:
         service_client = cf_service(cmd.cli_ctx)
         apim_instance = service_client.get(resource_group_name, service_name)
-        print(apim_instance)
         scope = apim_instance.id + scope
 
     parameters = SubscriptionUpdateParameters(
@@ -71,7 +70,7 @@ def update_subscription(cmd, client, resource_group_name, service_name, sid, dis
         state=state,
         allow_tracing=allow_tracing
     )
-    client.update(resource_group_name, service_name, sid, parameters, if_match='*')
+    client.update(resource_group_name, service_name, sid, if_match='*', parameters=parameters)
     return sdk_no_wait(no_wait, client.get, resource_group_name, service_name, sid)
 
 
@@ -86,4 +85,4 @@ def regenerate_key(client, resource_group_name, service_name, sid, key_kind=Subs
 
 
 def list_keys(client, resource_group_name, service_name, sid):
-    return client.list_secrets(resource_group_name, service_name, sid, if_match='*')
+    return client.list_secrets(resource_group_name, service_name, sid)

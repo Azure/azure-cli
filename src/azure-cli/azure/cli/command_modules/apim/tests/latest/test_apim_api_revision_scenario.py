@@ -14,9 +14,9 @@ class ApimApiRevisionScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiRevisionScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @ApiManagementPreparer(parameter_name='apim_name', sku_name='Consumption')
-    def test_apim_api_revision(self, resource_group, apim_name):
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_api_revision-')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_api_revision(self):
         self._setup_an_api()
 
         self.cmd('apim api revision list -g "{rg}" -n "{apim}" --api-id "{api_id}"')

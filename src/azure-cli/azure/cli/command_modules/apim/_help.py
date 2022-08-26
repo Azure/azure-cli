@@ -350,7 +350,7 @@ helps['apim named-value create'] = """
 type: command
 short-summary: Create an API Management Named Value.
 parameters:
-  - name: --nid
+  - name: --id
     type: string
     short-summary: unique name for the Named Value to be created
     long-summary: |
@@ -371,7 +371,7 @@ helps['apim named-value update'] = """
 type: command
 short-summary: Update an API Management Named Value.
 parameters:
-  - name: --named-value-id
+  - name: --id
     type: string
     short-summary: unique name of the api to be created
     long-summary: |
@@ -382,7 +382,7 @@ parameters:
 examples:
   - name: Create a basic API.
     text: |-
-        az apim named-value update --service-name MyApim -g MyResourceGroup --named-value-id MyNamedValue --value foo
+        az apim named-value update -n MyApim -g MyResourceGroup --id MyNamedValue --value foo
 """
 
 helps['apim api policy create'] = """
