@@ -5,14 +5,20 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.util import sdk_no_wait
-
+from azure.core.exceptions import ResourceNotFoundError
 
 def list_product_api(client, resource_group_name, service_name, product_id):
     return client.list_by_product(resource_group_name, service_name, product_id)
 
 
-def check_product_exists(client, resource_group_name, service_name, product_id, api_id):
-    return client.check_entity_exists(resource_group_name, service_name, product_id, api_id)
+def check_product_api_exists(client, resource_group_name, service_name, product_id, api_id):
+    result = { 'associated': False }
+    try:
+        value = client.check_entity_exists(resource_group_name, service_name, product_id, api_id)
+        result['associated'] = value
+    except ResourceNotFoundError as e:
+        pass
+    return result
 
 
 def create_product_api(client, resource_group_name, service_name, product_id, api_id, no_wait=False):

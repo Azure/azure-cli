@@ -10,15 +10,10 @@ class ApimProductScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim_product-')
     @ApiManagementPreparer(sku_name='Consumption')
     def test_apim_product(self):
-        # Set variable for product operations
-        product_id = self.create_random_name('apim_product-', 50)
-        description = 'foo-bar'
-        state = 'published'
-
         self.kwargs.update({
-            'product_id': product_id,
-            'description': description,
-            'state': state,
+            'product_id': self.create_random_name('apim_product-', 50),
+            'description': 'product description',
+            'state': 'published',
             'tags': ["foo=boo"]
         })
 
@@ -27,7 +22,7 @@ class ApimProductScenarioTest(ScenarioTest):
         self.cmd('apim product delete -n {apim} -g {rg} -p Unlimited')
 
         # Create a single product within the APIM instance
-        self.cmd('apim product create -n {apim} -g {rg} -p {product_id}', checks=[
+        self.cmd('apim product create -n {apim} -g {rg} -p {product_id} --display-name {display_name}', checks=[
             self.check('name', '{product_id}')
         ])
 

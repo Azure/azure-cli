@@ -9,7 +9,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
 
 class ApimScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
