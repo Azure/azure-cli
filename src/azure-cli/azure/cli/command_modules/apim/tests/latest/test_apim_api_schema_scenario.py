@@ -31,8 +31,11 @@ class ApimApiSchemaScenarioTest(ScenarioTest):
         super(ApimApiSchemaScenarioTest, self).setUp()
 
     @ResourceGroupPreparer(name_prefix='cli_test_apim_api_schema-')
-    @ApiManagementPreparer()
+    @ApiManagementPreparer(sku_name='Consumption')
     def test_apim_api_schema(self):
+        # create API to test against
+        self.cmd('apim api create -g {rg} -n {apim} --api-id {graphql_api_id} --path /api/{graphql_api_id} --display-name "{graphql_api_id}"')
+
         self._test_graphql_schema()
 
     def _test_graphql_schema(self):

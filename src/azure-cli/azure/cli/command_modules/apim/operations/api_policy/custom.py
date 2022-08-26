@@ -10,14 +10,26 @@ from azure.cli.command_modules.apim._util import (get_xml_content)
 
 
 def create_api_policy(client, resource_group_name, service_name, api_id, xml=None, xml_path=None, xml_uri=None, no_wait=False):
-    return _create_update_api(client, no_wait, resource_group_name, service_name, api_id, xml, xml_path, xml_uri, is_update=False)
+    return _create_update(client, no_wait, resource_group_name, service_name, api_id, xml, xml_path, xml_uri, is_update=False)
 
 
 def update_api_policy(client, resource_group_name, service_name, api_id, xml=None, xml_path=None, xml_uri=None, no_wait=False):
-    return _create_update_api(client, no_wait, resource_group_name, service_name, api_id, xml, xml_path, xml_uri, is_update=True)
+    return _create_update(client, no_wait, resource_group_name, service_name, api_id, xml, xml_path, xml_uri, is_update=True)
 
 
-def _create_update_api(client, no_wait, resource_group_name, service_name, api_id, xml=None, xml_path=None, xml_uri=None, is_update=False):
+def list_api_policy(client, resource_group_name, service_name, api_id):
+    return client.list_by_api(resource_group_name, service_name, api_id)
+
+
+def show_api_policy(client, resource_group_name, service_name, api_id):
+    return client.get(resource_group_name, service_name, api_id, policy_id=PolicyIdName.POLICY)
+
+
+def delete_api_policy(client, resource_group_name, service_name, api_id):
+    return client.delete(resource_group_name, service_name, api_id, if_match='*')
+
+
+def _create_update(client, no_wait, resource_group_name, service_name, api_id, xml=None, xml_path=None, xml_uri=None, is_update=False):
     if_match = None if not is_update else client.get_entity_tag(resource_group_name, service_name, api_id)
     parameters = _get_parameters(xml, xml_path, xml_uri)
 
@@ -28,18 +40,6 @@ def _create_update_api(client, no_wait, resource_group_name, service_name, api_i
                        policy_id=PolicyIdName.POLICY,
                        parameters=parameters,
                        if_match=if_match)
-
-
-def list_api_policy(client, resource_group_name, service_name, api_id):
-    return client.list_by_api(resource_group_name, service_name, api_id)
-
-
-def show_api_policy(client, resource_group_name, service_name, api_id):
-    return client.get(resource_group_name, service_name, api_id)
-
-
-def delete_api_policy(client, resource_group_name, service_name, api_id):
-    return client.delete(resource_group_name, service_name, api_id, if_match='*')
 
 
 def _get_parameters(xml, xml_path, xml_uri):

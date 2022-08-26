@@ -12,7 +12,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ApimApiPolicyScenarioTest(ScenarioTest):
-    API_ID = 'echo-api'
+    API_ID = 'test-policy-api'
 
     def setUp(self):
         self.data = self.XmlPolicyData()
@@ -23,24 +23,27 @@ class ApimApiPolicyScenarioTest(ScenarioTest):
         self.data.delete_xml_file()
         super(ApimApiPolicyScenarioTest, self).tearDown()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @ApiManagementPreparer(parameter_name='apim_name')
-    def test_apim_api_policy(self, resource_group, apim_name):
-        self.kwargs.update({
-            'apim_name': apim_name,
-            'api_id': self.API_ID,
-            'xml_value': self.data.xml_content,
-            'xml_file': self.data.policy_file
-        })
+    @ResourceGroupPreparer(name_prefix='cli_test_apim-')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_api_policy(self):
+        self._test_setup()
 
         self._create_policy_using_inline_xml()
         self._create_policy_using_xml_from_file()
 
+    def _test_setup(self):
+        self.kwargs.update({
+            'api_id': self.API_ID,
+            'xml_value': self.data.xml_content,
+            'xml_file': self.data.policy_file
+        })
+        self.cmd('apim api create -g {rg} -n {apim} --api-id {api_id} --path /api/{api_id} --display-name "{api_id}"')
+
     def _create_policy_using_inline_xml(self):
-        self._assert_xml_output_is_equal_to_expected('apim api policy create -n {apim_name} -g {rg} -a {api_id} -v "{xml_value}" --output tsv --query value')
+        self._assert_xml_output_is_equal_to_expected('apim api policy create -n {apim} -g {rg} -a {api_id} -v "{xml_value}" --output tsv --query value')
 
     def _create_policy_using_xml_from_file(self):
-        self._assert_xml_output_is_equal_to_expected('apim api policy create -n {apim_name} -g {rg} -a {api_id} -f {xml_file} --output tsv --query value')
+        self._assert_xml_output_is_equal_to_expected('apim api policy create -n {apim} -g {rg} -a {api_id} -f {xml_file} --output tsv --query value')
 
     def _assert_xml_output_is_equal_to_expected(self, cmd_statement):
         result = xmltodict.parse(self.cmd(cmd_statement).output)
@@ -49,8 +52,8 @@ class ApimApiPolicyScenarioTest(ScenarioTest):
         self.assertDictEqual(expected, result)
 
     def _delete_policy_removes_the_policy_resource(self):
-        self.cmd('apim api policy delete -n {apim_name} -g {rg} -a {api_id}')
-        final_count = self.cmd('apim api policy list -n {apim_name} -g {rg} -a {api_id}').get_output_in_json()['count']
+        self.cmd('apim api policy delete -n {apim} -g {rg} -a {api_id}')
+        final_count = self.cmd('apim api policy list -n {apim} -g {rg} -a {api_id}').get_output_in_json()['count']
 
         self.assertEqual(0, final_count)  # 0 used here since the default APIM products were deleted
 

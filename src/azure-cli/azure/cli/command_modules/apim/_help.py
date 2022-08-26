@@ -412,7 +412,7 @@ short-summary: Update a policy for the specified API.
 examples:
   - name: Update a policy for a specific API using an XML file containing the definition of the policy
     text: |-
-        az apim api operation list --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --xml-file /path/to/xml/file
+        az apim api policy update --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --xml-file /path/to/xml/file
 """
 
 helps['apim api operation list'] = """

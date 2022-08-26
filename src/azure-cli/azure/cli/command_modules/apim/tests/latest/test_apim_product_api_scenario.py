@@ -21,7 +21,7 @@ class ApimProductApiScenarioTest(ScenarioTest):
         initial_productapi_count = len(self.cmd('apim product api list -g {rg} -n {apim} --product-id {product_id}').get_output_in_json())
 
         # add API to product
-        self.cmd('apim product api add -g {rg} -n {apim} --product-id {product_id} --api-id {api_id}')
+        self.cmd('apim product api create -g {rg} -n {apim} --product-id {product_id} --api-id {api_id}')
         current_productapi_count = len(self.cmd('apim product api list -g {rg} -n {apim} --product-id {product_id}').get_output_in_json())
         self.assertEqual(initial_productapi_count, current_productapi_count - 1)
 

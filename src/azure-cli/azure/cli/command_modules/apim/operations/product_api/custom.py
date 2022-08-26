@@ -15,8 +15,7 @@ def check_product_exists(client, resource_group_name, service_name, product_id, 
     return client.check_entity_exists(resource_group_name, service_name, product_id, api_id)
 
 
-def add_product_api(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
-
+def create_product_api(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
     return sdk_no_wait(
         no_wait,
         client.create_or_update,
@@ -27,7 +26,6 @@ def add_product_api(client, resource_group_name, service_name, product_id, api_i
 
 
 def delete_product_api(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
-
     return sdk_no_wait(
         no_wait,
         client.delete,
