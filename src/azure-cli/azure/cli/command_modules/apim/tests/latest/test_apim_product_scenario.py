@@ -11,30 +11,27 @@ class ApimProductScenarioTest(ScenarioTest):
     @ApiManagementPreparer(sku_name='Consumption')
     def test_apim_product(self):
         self.kwargs.update({
-            'product_id': self.create_random_name('apim_product-', 50),
+            'product_id': self.create_random_name('apim_product-', 20),
+            'display_name': 'apim product',
             'description': 'product description',
             'state': 'published',
             'tags': ["foo=boo"]
         })
 
-        # Delete the default Products Starter and unlimited
-        self.cmd('apim product delete -n {apim} -g {rg} -p Starter')
-        self.cmd('apim product delete -n {apim} -g {rg} -p Unlimited')
-
-        # Create a single product within the APIM instance
-        self.cmd('apim product create -n {apim} -g {rg} -p {product_id} --display-name {display_name}', checks=[
+        self.cmd('apim product create -n {apim} -g {rg} -p {product_id} --display-name "{display_name}"', checks=[
+            self.check('displayName', '{display_name}'),
             self.check('name', '{product_id}')
+        ])
+
+        self.cmd('apim product show -n {apim} -g {rg} -p {product_id}', checks=[
+            self.check('description', '{description}'),
+            self.check('state', '{state}')
         ])
 
         self.cmd('apim product update -n {apim} -g {rg} -p {product_id} --description {description} --state {state}',
                  checks=[
                      self.check('description', '{description}'),
                      self.check('state', '{state}')])
-
-        self.cmd('apim product show -n {apim} -g {rg} -p {product_id}', checks=[
-            self.check('description', '{description}'),
-            self.check('state', '{state}')
-        ])
 
         self.cmd('apim product delete -n {apim} -g {rg} -p {product_id}')
 
