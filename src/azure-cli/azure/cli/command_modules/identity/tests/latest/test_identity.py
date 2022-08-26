@@ -97,7 +97,8 @@ class TestIdentity(ScenarioTest):
                  ])
 
         # delete a federated identity credential
-        self.cmd('identity federated-credential delete --name {fic1} --identity-name {identity} --resource-group {rg}')
+        self.cmd('identity federated-credential delete --name {fic1}'
+                 ' --identity-name {identity} --resource-group {rg} --yes')
         self.cmd('identity federated-credential list --identity-name {identity} --resource-group {rg}',
                  checks=[
                      self.check('type(@)', 'array'),
@@ -110,7 +111,8 @@ class TestIdentity(ScenarioTest):
                  ])
 
         # delete a federated identity credential
-        self.cmd('identity federated-credential delete --name {fic2} --identity-name {identity} --resource-group {rg}')
+        self.cmd('identity federated-credential delete --name {fic2}'
+                 ' --identity-name {identity} --resource-group {rg} --yes')
         self.cmd('identity federated-credential list --identity-name {identity} --resource-group {rg}',
                  checks=[
                      self.check('type(@)', 'array'),

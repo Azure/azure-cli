@@ -43,5 +43,5 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_or_update_federated_credential')
         g.custom_command('update', 'create_or_update_federated_credential')
         g.custom_show_command('show', 'show_federated_credential')
-        g.custom_command('delete', 'delete_federated_credential')
+        g.custom_command('delete', 'delete_federated_credential', confirmation=True)
         g.custom_command('list', 'list_federated_credential')
