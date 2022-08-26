@@ -2201,8 +2201,8 @@ class ResourceMoveScenarioTest(ScenarioTest):
             'nsg2': self.create_random_name('nsg-move', 20)
         })
 
-        self.kwargs['nsg1_id'] = self.cmd('network nsg create -n {nsg1} -g {rg1}').get_output_in_json()['NewNSG']['id']
-        self.kwargs['nsg2_id'] = self.cmd('network nsg create -n {nsg2} -g {rg1}').get_output_in_json()['NewNSG']['id']
+        self.kwargs['nsg1_id'] = self.cmd('network nsg create -n {nsg1} -g {rg1}').get_output_in_json()['id']
+        self.kwargs['nsg2_id'] = self.cmd('network nsg create -n {nsg2} -g {rg1}').get_output_in_json()['id']
 
         self.cmd('resource move --ids {nsg1_id} {nsg2_id} --destination-group {rg2}')
 
