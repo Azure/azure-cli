@@ -50,7 +50,6 @@ def should_prompt(cli):
 
     if not os.path.isfile(GLOBAL_SURVEY_NOTE_PATH):
         import uuid
-        from azure.cli.core._profile import Profile
 
         # If the survey note file doesn't exist, then it should be the first time for cx to run CLI
         # We should let cx try CLI for some days(EXPERIENCE_PERIOD_IN_DAYS) and then prompt the survey message
