@@ -126,10 +126,12 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
+# pylint: disable=too-many-locals
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
                               subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
-                              geo_redundant_backup=None, instance=None):
+                              geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None,
+                              backup_byok_key=None, disable_data_encryption=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
@@ -149,6 +151,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                                        single_az, auto_grow, instance)
     _mysql_version_validator(version, sku_info, tier, instance)
     _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
+    _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
+                          disable_data_encryption, geo_redundant_backup, instance)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
@@ -242,6 +246,30 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
+
+
+def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
+                          disable_data_encryption, geo_redundant_backup, instance):
+    # identity and key should be provided as a pair
+    if bool(byok_identity is None) ^ bool(byok_key is None) or\
+       bool(backup_byok_identity is None) ^ bool(backup_byok_key is None):
+        raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
+                                 "Please provide --identity, --key (and --backup-identity, --backup-key "
+                                 "if applicable) together.")
+
+    if byok_identity is None and backup_byok_identity is not None:
+        raise ArgumentUsageError("Backup identity and key must be provided with principal identity and key.")
+
+    if disable_data_encryption and (byok_key or backup_byok_key):
+        raise ArgumentUsageError("Data encryption cannot be disabled if key or backup key is provided.")
+
+    if not disable_data_encryption and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
+       backup_byok_identity is None:
+        raise ArgumentUsageError("Backup identity and key need to be provided for geo-redundant server.")
+
+    if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
+        raise CLIError("Data encryption cannot be modified on a server with replication role. "
+                       "Use the primary server instead.")
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
