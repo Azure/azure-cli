@@ -1,0 +1,197 @@
+interactions:
+- request:
+    body: '{"name": "cli-test-apim-000002"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim check-name
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -o
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ApiManagement/checkNameAvailability?api-version=2021-08-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"Valid","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '52'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 23:02:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Consumption", "capacity": 0}, "identity": {"type": "SystemAssigned"},
+      "location": "westus", "properties": {"notificationSenderEmail": "publisher@contoso.com",
+      "disableGateway": false, "virtualNetworkType": "None", "restore": false, "publisherEmail":
+      "publisher@contoso.com", "publisherName": "Contoso"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '321'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -l --sku-name --publisher-email --publisher-name --enable-managed-identity
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002","name":"cli-test-apim-000002","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAA6CC0=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Created","targetProvisioningState":"Activating","createdAtUtc":"2022-08-26T23:02:46.4585675Z","gatewayUrl":"https://cli-test-apim-000002.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000002.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":null,"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"mtv1"},"sku":{"name":"Consumption","capacity":0},"identity":{"type":"SystemAssigned","principalId":"3f7b0667-1c57-41ce-add2-917bb4f9bb71","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"zones":null,"systemData":{"createdBy":"kehilli@microsoft.com","createdByType":"User","createdAt":"2022-08-26T23:02:45.4321459Z","lastModifiedBy":"kehilli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T23:02:45.4321459Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 23:02:49 GMT
+      etag:
+      - '"AAAAAAA6CC0="'
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tbWplYnVwYmVib3JmZXFtczJsY3R3X0FjdF9mMTY5NjQ1Nw==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --publisher-email --publisher-name --enable-managed-identity
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tbWplYnVwYmVib3JmZXFtczJsY3R3X0FjdF9mMTY5NjQ1Nw==?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 26 Aug 2022 23:03:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tbWplYnVwYmVib3JmZXFtczJsY3R3X0FjdF9mMTY5NjQ1Nw==?api-version=2021-08-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku-name --publisher-email --publisher-name --enable-managed-identity
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002/operationresults/d2VzdHVzOmNsaS10ZXN0LWFwaW0tbWplYnVwYmVib3JmZXFtczJsY3R3X0FjdF9mMTY5NjQ1Nw==?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_managed_identity-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000002","name":"cli-test-apim-000002","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAA6CDU=","properties":{"publisherEmail":"publisher@contoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2022-08-26T23:02:46.4585675Z","gatewayUrl":"https://cli-test-apim-000002.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"cli-test-apim-000002.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"mtv1"},"sku":{"name":"Consumption","capacity":0},"identity":{"type":"SystemAssigned","principalId":"3f7b0667-1c57-41ce-add2-917bb4f9bb71","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"zones":null,"systemData":{"createdBy":"kehilli@microsoft.com","createdByType":"User","createdAt":"2022-08-26T23:02:45.4321459Z","lastModifiedBy":"kehilli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T23:02:45.4321459Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2323'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 23:04:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.testsdk.preparers import ApiManagementPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
@@ -10,120 +11,134 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
 class ApimScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_core-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
-        service_name = self.create_random_name('cli-test-apim-', 50)
+        self._setup_test(location=resource_group_location, sku='Developer')
 
-        # try to use the injected location, but if the location is not known
-        # fall back to west us, otherwise we can't validate since the sdk returns displayName
-        if resource_group_location not in KNOWN_LOCS.keys():
-            resource_group_location = 'westus'
-
-        self.kwargs.update({
-            'service_name': service_name,
-            'rg': resource_group,
-            'rg_loc': resource_group_location,
-            'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
-            'notification_sender_email': 'notifications@contoso.com',
-            'publisher_email': 'publisher@contoso.com',
-            'publisher_name': 'Contoso',
-            'sku_name': 'Developer',
-            'sku_capacity': 1,
-            'enable_cert': True,
-            'enable_managed_identity': True,
-            'tag': "foo=boo"
-        })
-
-        self.cmd('apim check-name -n {service_name} -o json',
-                 checks=[self.check('nameAvailable', True)])
-
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --sku-capacity {sku_capacity} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert}',
-                 checks=[self.check('name', '{service_name}'),
-                         self.check('location', '{rg_loc_displayName}'),
+        self.cmd('apim check-name -n {apim} -o json', checks=[self.check('nameAvailable', True)])
+        self.cmd('apim create --name {apim} -g {rg} -l {apim_location} --sku-name {sku_name} --sku-capacity {sku_capacity} --publisher-email {publisher_email} --publisher-name {publisher_name}',
+                 checks=[self.check('name', '{apim}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('enableClientCertificate', None),
-                         self.check('identity.type', 'SystemAssigned'),
+                         self.check('identity', None),
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
         # wait
-        self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
+        self.cmd('apim wait -g {rg} -n {apim} --created', checks=[self.is_empty()])
 
-        self.cmd('apim check-name -n {service_name}',
-                 checks=[self.check('nameAvailable', False),
-                         self.check('reason', 'AlreadyExists')])
+        # confirm name is taken
+        self.cmd('apim check-name -n {apim}', checks=[self.check('nameAvailable', False), self.check('reason', 'AlreadyExists')])
 
         self.cmd(
-            'apim update -n {service_name} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
+            'apim update -n {apim} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
             checks=[self.check('publisherName', '{publisher_name}'),
                     self.check('publisherEmail', '{publisher_email}')])
 
         count = len(self.cmd('apim list').get_output_in_json())
         self.assertGreaterEqual(count, 1)
 
-        self.cmd('apim show -g {rg} -n {service_name}', checks=[
+        self.cmd('apim show -g {rg} -n {apim}', checks=[
             # recheck properties from create
-            self.check('name', '{service_name}'),
-            self.check('location', '{rg_loc_displayName}'),
+            self.check('name', '{apim}'),
+            self.check('location', self._get_location_display_name()),
             self.check('sku.name', '{sku_name}'),
             # recheck properties from update
             self.check('publisherName', '{publisher_name}'),
             self.check('publisherEmail', '{publisher_email}')
         ])
 
-        # backup command
-        account_container = 'backups'
-        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -o tsv'.format(
-            storage_account_for_backup, resource_group)).output[: -1]
 
-        self.cmd('az storage container create -n {} --account-name {} --account-key {}'.format(account_container,
-                 storage_account_for_backup, account_key))
+    # expect None for Developer sku, even though requested value was True - only works with Consumption sku
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_managed_identity-', parameter_name_for_location='resource_group_location')
+    def test_apim_client_certificate(self, resource_group_location):
+        self._setup_test(location=resource_group_location)
+
+        self.cmd('apim check-name -n {apim} -o json', checks=[self.check('nameAvailable', True)])
+        self.cmd('apim create --name {apim} -g {rg} -l {apim_location} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_client_certificate}',
+                 checks=[self.check('name', '{apim}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('enableClientCertificate', True),
+                         self.check('publisherName', '{publisher_name}'),
+                         self.check('publisherEmail', '{publisher_email}')])
+
+
+    def _setup_test(self, location, sku='Consumption'):
+        # defaults
+        self.service_name = self.create_random_name('cli-test-apim-', 35)
+        self.service_location = location
+        self.service_sku = sku
 
         self.kwargs.update({
-            'backup_name': service_name + '_test_backup',
+            'apim': self.service_name,
+            'apim_location': self.service_location,
+            'notification_sender_email': 'notifications@contoso.com',
+            'publisher_email': 'publisher@contoso.com',
+            'publisher_name': 'Contoso',
+            'sku_name': self.service_sku,
+            'skucapacity': 1,
+            'enable_client_certificate': True,
+            'enable_managed_identity': True,
+        })
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_managed_identity-', parameter_name_for_location='resource_group_location')
+    def test_apim_managed_identity(self, resource_group_location):
+        self._setup_test(location=resource_group_location)
+
+        self.cmd('apim check-name -n {apim} -o json', checks=[self.check('nameAvailable', True)])
+        self.cmd('apim create --name {apim} -g {rg} -l {apim_location} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
+                 checks=[self.check('name', '{apim}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.check('publisherName', '{publisher_name}'),
+                         self.check('publisherEmail', '{publisher_email}')])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_backup')
+    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_core_service(self, resource_group, storage_account_for_backup):
+        account_container = 'backups'
+        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -o tsv'.format(storage_account_for_backup, resource_group)).output[: -1]
+        self.cmd('az storage container create -n {} --account-name {} --account-key {}'.format(account_container, storage_account_for_backup, account_key))
+
+        self.kwargs.update({
+            'backup_name': self.service_name + '_test_backup',
             'storage_account_name': storage_account_for_backup,
             'storage_account_key': account_key,
             'storage_account_container': account_container
         })
 
-        self.cmd(
-            'apim backup -g {rg} -n {service_name} --backup-name {backup_name} --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}',
+        self.cmd('apim backup -g {rg} -n {apim} --backup-name {backup_name} --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}',
             checks=[self.check('provisioningState', 'Succeeded')])
 
 
-KNOWN_LOCS = {'eastasia': 'East Asia',
-              'southeastasia': 'Southeast Asia',
-              'centralus': 'Central US',
-              'eastus': 'East US',
-              'eastus2': 'East US 2',
-              'westus': 'West US',
-              'northcentralus': 'North Central US',
-              'southcentralus': 'South Central US',
-              'northeurope': 'North Europe',
-              'westeurope': 'West Europe',
-              'japanwest': 'Japan West',
-              'japaneast': 'Japan East',
-              'brazilsouth': 'Brazil South',
-              'australiaeast': 'Australia East',
-              'australiasoutheast': 'Australia Southeast',
-              'southindia': 'South India',
-              'centralindia': 'Central India',
-              'westindia': 'West India',
-              'canadacentral': 'Canada Central',
-              'canadaeast': 'Canada East',
-              'uksouth': 'UK South',
-              'ukwest': 'UK West',
-              'westcentralus': 'West Central US',
-              'westus2': 'West US 2',
-              'koreacentral': 'Korea Central',
-              'koreasouth': 'Korea South',
-              'francecentral': 'France Central',
-              'francesouth': 'France South',
-              'australiacentral': 'Australia Central',
-              'australiacentral2': 'Australia Central 2',
-              'uaecentral': 'UAE Central',
-              'uaenorth': 'UAE North',
-              'southafricanorth': 'South Africa North',
-              'southafricawest': 'South Africa West'}
+    def _setup_test(self, location, sku='Consumption'):
+        # defaults
+        self.service_name = self.create_random_name('cli-test-apim-', 35)
+        self.service_location = location
+        self.service_sku = sku
+
+        self.kwargs.update({
+            'apim': self.service_name,
+            'apim_location': self.service_location,
+            'notification_sender_email': 'notifications@contoso.com',
+            'publisher_email': 'publisher@contoso.com',
+            'publisher_name': 'Contoso',
+            'sku_name': self.service_sku,
+            'sku_capacity': 1,
+            'enable_client_certificate': True,
+            'enable_managed_identity': True,
+            'tag': "foo=boo"
+        })
+    
+
+    def _get_location_display_name(self):
+        return self.cmd('az account list-locations --query "[?name==\'{}\'].displayName" -o tsv'.format(self.location_name))

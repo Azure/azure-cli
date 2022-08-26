@@ -14,7 +14,7 @@ class ApimApiRevisionScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiRevisionScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim_api_revision-')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_api_rev-')
     @ApiManagementPreparer(sku_name='Consumption')
     def test_apim_api_revision(self):
         self._setup_an_api()
@@ -23,7 +23,7 @@ class ApimApiRevisionScenarioTest(ScenarioTest):
         self.cmd('apim api revision create -g "{rg}" -n "{apim}" --api-id "{api_id}"  --api-revision {api_revision} --api-revision-description "{api_revision_description}"')
 
     def _setup_an_api(self):
-        output = self.cmd('apim api create -n {apim} -g {rg} -a {api_id} --path {path} --display-name "{display_name}" --description "{description}"  --service-url {service_url}  --protocols {protocols} --header-name {subscription_key_header_name} --querystring-name {subscription_key_query_string_name}').get_output_in_json()
+        output = self.cmd('apim api create -n {apim} -g {rg} -a {api_id} --path {path} --display-name "{display_name}" --service-url {service_url}  --protocols {protocols} --header-name {subscription_key_header_name} --querystring-name {subscription_key_query_string_name}').get_output_in_json()
         self.kwargs.update({
             'source_api_id': output['id'].rpartition('/')[2]
         })
