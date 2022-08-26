@@ -105,6 +105,8 @@ def check_pull_request(title, body):
 def check_line(line):
     # check every line
     error_flag = False
+    enclosed_begin = False
+    enclosed_end = True
     # Check Fix #number in title, just give a warning here, because it is not necessarily.
     if 'Fix' in line:
         sub_pattern = r'#\d'
@@ -150,18 +152,27 @@ def check_line(line):
                 logger.error(' ' * index + '↑')
                 error_flag = True
         # --xxx parameters must be enclosed in `, e.g., `--size`
-        if i == '-' and line[idx + 1] == '-':
-            param = '--'
-            index = idx + 2
-            while index < len(line) and line[index] != ' ':
-                param += line[index]
-                index += 1
-            try:
-                assert line[idx - 1] == '`'
-            except:
-                logger.info('%s%s: missing ` around %s', line, yellow, param)
-                logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
-                error_flag = True
+        if line[idx] == '`' and not enclosed_begin:
+            enclosed_begin = True
+            enclosed_end = False
+        elif line[idx] == '`' and enclosed_begin:
+            enclosed_begin = False
+            enclosed_end = True
+        if i == '-' and (idx + 1) < len(line) and line[idx + 1] == '-':
+            if not enclosed_begin:
+                param = '--'
+                index = idx + 2
+                # get each parameter separate by space or /
+                while index < len(line) and line[index] not in [' ', '/']:
+                    param += line[index]
+                    index += 1
+                # Check the starting ` character
+                try:
+                    assert line[idx - 1] == '`'
+                except:
+                    logger.info('%s%s: missing ` around %s', line, yellow, param)
+                    logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
+                    error_flag = True
         # verb check: only check the first word after ] or :
         if i in [']', ':']:
             word = ''
@@ -189,6 +200,11 @@ def check_line(line):
     if line[-1] in ['.', ',', ' ']:
         logger.info('%s%s: please delete the last character', line, yellow)
         logger.error(' ' * idx + '↑')
+        error_flag = True
+
+    # check the ending ` character
+    if not enclosed_end:
+        logger.info('%s%s: unable to find the ending ` character', line, yellow)
         error_flag = True
 
     return error_flag
