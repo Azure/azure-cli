@@ -7,7 +7,9 @@ import os
 import sys
 import json
 from datetime import datetime, timedelta
+from azure.cli.core import __version__ as core_version
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
+from azure.cli.core._profile import Profile
 from azure.cli.core.style import print_styled_text
 from knack.log import get_logger
 
@@ -29,10 +31,20 @@ NEW_LINE = '\x1b[1L'
 ERASE_IN_LINE = '\x1b[0K'
 
 
+_SURVEY_URL = "https://go.microsoft.com/fwlink/?linkid=2201856&ID={installation_id}&v={version}&d={day}"
+_SURVEY_LEARN_MORE_URL = "https://go.microsoft.com/fwlink/?linkid=2203309"
+
+
 def should_prompt(cli):
+    # should not prompt for automation
+    if not sys.stderr.isatty():
+        return False
+
+    # should not prompt if cx disables with config
     if not cli.config.getboolean('core', 'survey_message', True):
         return False
 
+    # should not prompt if cx is running survey command already
     if sys.argv[1] == 'survey':
         return False
 
@@ -69,11 +81,13 @@ def prompt_survey_message(cli):
         return
 
     # prompt message
+    installation_id = Profile(cli_ctx=cli).get_installation_id()
+    survey_link = _SURVEY_URL.format(installation_id=installation_id, version=core_version, day=0)
     print_styled_text((SURVEY_STYLE, NEW_LINE))
     print_styled_text([
-        (SURVEY_STYLE, "[Survey] Help us improve Azure CLI by sharing your experience. "
-                       "This survey should take about 3 minutes. Run 'az survey' to open in browser. "
-                       "Learn more at https://go.microsoft.com/fwlink/?linkid=2203309"),
+        (SURVEY_STYLE, f"[Survey] Help us improve Azure CLI by sharing your experience. "
+                       f"This survey should take about 5 minutes. Open {survey_link} or run 'az survey' to "
+                       f"open in browser. Learn more at {_SURVEY_LEARN_MORE_URL}"),
         (SURVEY_STYLE, ERASE_IN_LINE)
     ])
     print_styled_text((SURVEY_STYLE, NEW_LINE))

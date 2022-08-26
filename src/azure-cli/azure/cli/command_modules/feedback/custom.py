@@ -13,6 +13,7 @@ from urllib.parse import urlencode
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 from azure.cli.core.commands.constants import SURVEY_PROMPT
 from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
+from azure.cli.core.intercept_survey import _SURVEY_URL
 from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console
 from knack.log import get_logger
 from knack.prompting import prompt, NoTTYException
@@ -38,8 +39,6 @@ _RAW_CLI_ISSUES_URL = "https://github.com/azure/azure-cli/issues/new"
 
 _EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
 _RAW_EXTENSIONS_ISSUES_URL = "https://github.com/azure/azure-cli-extensions/issues/new"
-
-_CLI_SURVEY_URL = "https://go.microsoft.com/fwlink/?linkid=2201856&ID={installation_id}&v={version}&d={day}"
 
 _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
@@ -610,9 +609,9 @@ def handle_survey(cmd):
             last_prompt_time = datetime.datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S')
             use_duration = datetime.datetime.utcnow() - last_prompt_time
 
-    url = _CLI_SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
-                                 version=core_version,
-                                 day=use_duration.days if use_duration else -1)
+    url = _SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
+                             version=core_version,
+                             day=use_duration.days if use_duration else -1)
     if can_launch_browser() and not in_cloud_console():
         open_page_in_browser(url)
         print("A new tab of {} has been launched in your browser, thanks for taking the survey!".format(url))
