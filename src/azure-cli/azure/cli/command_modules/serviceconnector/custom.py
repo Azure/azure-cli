@@ -28,9 +28,9 @@ from ._addon_factory import AddonFactory
 from ._utils import (
     set_user_token_by_source_and_target,
     set_user_token_header,
-    enable_mi_for_db_linker,
     auto_register
 )
+from ._credential_free import enable_mi_for_db_linker
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test
 
 
