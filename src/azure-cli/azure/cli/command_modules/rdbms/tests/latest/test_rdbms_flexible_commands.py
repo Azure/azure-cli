@@ -22,6 +22,7 @@ from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
+    KeyVaultPreparer,
     ScenarioTest,
     StringContainCheck,
     VirtualNetworkPreparer,
@@ -114,11 +115,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_georestore_mgmt(self, resource_group):
         self._test_flexible_server_georestore_mgmt('mysql', resource_group)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_byok_mgmt(self, resource_group):
-        self._test_flexible_server_byok_mgmt('mysql', resource_group)
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=mysql_location, additional_params='--enable-purge-protection true --retention-days 90')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location='westeurope', additional_params='--enable-purge-protection true --retention-days 90')
+    def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
+        self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -513,11 +516,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
 
-    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group):
-        vault_name = self.create_random_name('rdbmsvault', 24)
+    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name):
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
-        backup_vault_name = self.create_random_name('rdbmsvault', 24)
         backup_key_name = self.create_random_name('rdbmskey', 32)
         backup_identity_name = self.create_random_name('identity', 32)
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -530,19 +531,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_location = 'westeurope'
         backup_location_full_name = 'West Europe'
 
-        self.cmd(
-            'keyvault create -g {} -n {} --location {} --enable-soft-delete true --enable-purge-protection true'
-            .format(resource_group, vault_name, location))
-
-        self.cmd(
-            'keyvault create -g {} -n {} --location {} --enable-soft-delete true --enable-purge-protection true'
-            .format(resource_group, backup_vault_name, backup_location))
-
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
-                            .format(key_name, vault_name)).get_output_in_json()
+                       .format(key_name, vault_name)).get_output_in_json()
 
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
-                            .format(backup_key_name, backup_vault_name)).get_output_in_json()
+                              .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
 
