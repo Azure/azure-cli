@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._format import (
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_vnet_create_output, transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_vnet_gateway_create_output,
+    transform_nsg_create_output, transform_vnet_gateway_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -1042,6 +1042,7 @@ def load_command_table(self, _):
 
     # region NetworkSecurityGroups
     with self.command_group('network nsg', network_nsg_sdk) as g:
+        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
         g.generic_update_command('update', setter_name='begin_create_or_update')
 
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
