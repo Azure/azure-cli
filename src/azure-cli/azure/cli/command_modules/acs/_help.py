@@ -622,7 +622,7 @@ examples:
 
 helps['aks update'] = """
 type: command
-short-summary: Update a managed Kubernetes cluster.
+short-summary: Update a managed Kubernetes cluster. When called with no optional arguments this attempts to move the cluster to its goal state without changing the current cluster configuration. This can be used to move out of a non succeeded state.
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
@@ -801,6 +801,8 @@ parameters:
     short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
+  - name: Reconcile the cluster back to its current state.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
@@ -1161,7 +1163,8 @@ short-summary: Show the details for a node pool in the managed Kubernetes cluste
 
 helps['aks nodepool update'] = """
 type: command
-short-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count
+short-summary: Update a node pool properties.
+long-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count. When called with no optional arguments this attempts to move the node pool to its goal state without changing the current node pool configuration. This can be used to move out of a non succeeded state.
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
@@ -1197,6 +1200,8 @@ parameters:
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
+  - name: Reconcile the nodepool back to its current state.
+    text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Disable cluster-autoscaler for an existing cluster
