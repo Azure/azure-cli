@@ -2194,6 +2194,11 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
                    options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
+    for scope in ['create', 'update']:
+        with self.argument_context('network bastion {}'.format(scope)) as c:
+            c.argument('disable_copy_paste', help='Disable copy and paste for all sessions on this Azure Bastion resource', options_list=['--disable-copy-paste'], arg_type=get_three_state_flag())
+            c.argument('enable_tunneling', help='Enable Native Client Support on this Azure Bastion resource', options_list=['--enable-native-client-support'], arg_type=get_three_state_flag())
+            c.argument('enable_ip_connect', help='Enable IP-based Connections on this Azure Bastion resource', options_list=['--enable-ip-based-connection'], arg_type=get_three_state_flag())
     with self.argument_context('network bastion ssh') as c:
         c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
         c.argument('username', help='User name for SSH connections.', options_list=['--username'])

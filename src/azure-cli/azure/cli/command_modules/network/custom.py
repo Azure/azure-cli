@@ -8191,7 +8191,7 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
                         public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None,
-                        no_wait=False):
+                        disable_copy_paste=False, enable_tunneling=False, enable_ip_connect=False, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -8214,11 +8214,28 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                    location=location,
                                    scale_units=scale_units,
                                    sku=sku,
-                                   tags=tags)
+                                   tags=tags,
+                                   disable_copy_paste=disable_copy_paste,
+                                   enable_tunneling=enable_tunneling,
+                                   enable_ip_connect=enable_ip_connect)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        bastion_host_name=bastion_host_name,
                        parameters=bastion_host)
+
+
+def update_bastion_host(cmd, instance, scale_units=None, sku=None, disable_copy_paste=None, enable_tunneling=None, enable_ip_connect=None):
+    # both VirtualHub and VirtualRouter own those properties
+    sku_type = cmd.get_models('Sku')
+    sku = sku_type(name=sku)
+
+    with cmd.update_context(instance) as c:
+        c.set_param('scale_units', scale_units)
+        c.set_param('sku', sku)
+        c.set_param('disable_copy_paste', disable_copy_paste)
+        c.set_param('enable_tunneling', enable_tunneling)
+        c.set_param('enable_ip_connect', enable_ip_connect)
+    return instance
 
 
 def list_bastion_host(cmd, resource_group_name=None):
