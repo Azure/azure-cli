@@ -312,7 +312,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         # prepare the target resource
         nsg_info = self.cmd('network nsg create -g {rg} -n {nsg}').get_output_in_json()
         self.kwargs.update({
-            'nsg_id': nsg_info['id']
+            'nsg_id': nsg_info['NewNSG']['id']
         })
 
         # prepare workspace
@@ -520,7 +520,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         # prepare the target resource
         nsg_info = self.cmd('network nsg create -g {rg} -n {nsg}').get_output_in_json()
         self.kwargs.update({
-            'nsg_id': nsg_info['id']
+            'nsg_id': nsg_info['NewNSG']['id']
         })
 
         # prepare another storage account in another resource group

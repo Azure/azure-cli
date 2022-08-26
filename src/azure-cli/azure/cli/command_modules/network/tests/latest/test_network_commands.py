@@ -4270,7 +4270,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             'prefixes': '20.0.0.0/16 10.0.0.0/16'
         })
         result = self.cmd('network nsg create --resource-group {rg} --name {nsg}').get_output_in_json()
-        self.kwargs['nsg_id'] = result['id']
+        self.kwargs['nsg_id'] = result['NewNSG']['id']
         self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefixes {prefixes} '
                  '--subnet-name {subnet} --subnet-prefixes 20.0.0.0/24 --nsg {nsg}')
         self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
