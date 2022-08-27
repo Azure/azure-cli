@@ -226,7 +226,7 @@ def validate_load_balancer_idle_timeout(namespace):
             
 def validate_network_policy(namespace):
     """validate network policy to be in lowercase"""
-    if namespace.network_policy.islower() == False:
+    if namespace.network_policy.islower() is False:
             raise CLIError("--network-policy should be provided in lowercase")
 
 
