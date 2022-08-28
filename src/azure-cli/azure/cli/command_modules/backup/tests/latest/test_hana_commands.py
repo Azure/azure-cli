@@ -11,14 +11,14 @@ import json
 import os
 
 
-id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitestvm-donotuse'
-item_id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourcegroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitestvm-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitestvm-donotuse/protectedItems/SAPHanaDatabase;hxe;hxe'
+id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitestvm-donotuse2'
+item_id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourcegroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitestvm-donotuse2/protectedItems/SAPHanaDatabase;hxe;hxe'
 sub_hana = '38304e13-357e-405e-9e9a-220351dcce8c'
 rg_hana = 'saphana-clitest-rg'
 vault_hana = 'saphana-clitestvault-donotuse'
-container_hana = 'VMAppContainer;Compute;saphana-clitest-rg;saphana-clitestvm-donotuse'
-container_friendly_hana = 'saphana-clitestvm-donotuse'
-server_friendly_name = 'saphana-clitestvm-donotuse'
+container_hana = 'VMAppContainer;Compute;saphana-clitest-rg;saphana-clitestvm-donotuse2'
+container_friendly_hana = 'saphana-clitestvm-donotuse2'
+server_friendly_name = 'saphana-clitestvm-donotuse2'
 item_name = 'saphanadatabase;hxe;systemdb'
 item_friendly_name = 'systemdb'
 
@@ -27,7 +27,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # SAP HANA workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
-    # For the tests using saphana-clitestvm-donotuse and saphana-clitestvault-donotuse -
+    # For the tests using saphana-clitestvm-donotuse2 and saphana-clitestvault-donotuse -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
@@ -391,7 +391,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': item_friendly_name,
             'id': id_hana,
             'pit': "SAPHanaDatabase",
-            'entityFriendlyName': 'SYSTEMDB [saphana-clitestvm-donotuse]'
+            'entityFriendlyName': 'SYSTEMDB [saphana-clitestvm-donotuse2]'
         })
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
