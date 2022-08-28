@@ -39,9 +39,11 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
 
         # Create Namespace
         getresponse = self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename1} --location {location}  --tags {tags} --sku {skupremium} --zone-redundant {istrue}').get_output_in_json()
+            'servicebus namespace create --resource-group {rg} --name {namespacename1} --location {location}  '
+            '--tags {tags} --sku {skupremium} --zone-redundant {istrue} --minimum-tls-version 1.1').get_output_in_json()
         self.assertEqual(getresponse['sku']['name'], self.kwargs['skupremium'])
         self.assertTrue(getresponse['zoneRedundant'])
+        self.assertTrue('1.1', getresponse['minimumTlsVersion'])
 
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',

@@ -15,7 +15,8 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
+                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None,
+                         mi_user_assigned=None, encryption_config=None, minimum_tls_version=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -51,6 +52,9 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         parameter.encryption = Encryption()
         parameter.encryption.key_vault_properties = encryption_config
 
+    if minimum_tls_version:
+        parameter.minimum_tls_version = minimum_tls_version
+
     client.begin_create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -65,7 +69,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None):
+def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None, minimum_tls_version=None):
     from msrestazure.tools import parse_resource_id
 
     if tags is not None:
@@ -77,6 +81,9 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
 
     if capacity is not None:
         instance.sku.capacity = capacity
+
+    if minimum_tls_version:
+        instance.minimum_tls_version = minimum_tls_version
 
     if default_action:
         resourcegroup = parse_resource_id(instance.id)['resource_group']
