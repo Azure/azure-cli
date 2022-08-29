@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi link list",
 )
 class List(AAZCommand):
-    """Get a list of instance links on a given SQL Managed Instance.
+    """Get a list of a distributed availability groups in instance.
     """
 
     _aaz_info = {
@@ -41,8 +41,8 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--instance-name", "--managed-instance-name"],
-            help="The name of the managed instance.",
+            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
+            help="Name of the managed instance.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

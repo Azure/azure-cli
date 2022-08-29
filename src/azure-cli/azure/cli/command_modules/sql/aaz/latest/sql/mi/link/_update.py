@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi link update",
 )
 class Update(AAZCommand):
-    """Update the Instance link between Sql On-Prem and Sql Managed Instance.
+    """Update a distributed availability group between Sql On-Prem and Sql Managed Instance.
     """
 
     _aaz_info = {
@@ -46,13 +46,13 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.distributed_availability_group_name = AAZStrArg(
             options=["-n", "--name", "--distributed-availability-group-name"],
-            help="The distributed availability group name.",
+            help="Distributed availability group name.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--instance-name", "--managed-instance-name"],
-            help="The name of the managed instance.",
+            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
+            help="Name of the managed instance.",
             required=True,
             id_part="name",
         )
@@ -66,32 +66,32 @@ class Update(AAZCommand):
         _args_schema.primary_availability_group_name = AAZStrArg(
             options=["--primary-ag", "--primary-availability-group-name"],
             arg_group="Properties",
-            help="The primary availability group name",
+            help="Primary availability group name",
             nullable=True,
         )
         _args_schema.replication_mode = AAZStrArg(
-            options=["--repl-mode", "--replication-mode"],
+            options=["--replication-mode"],
             arg_group="Properties",
-            help="The replication mode of a distributed availability group. Parameter will be ignored during link creation.",
+            help="Replication mode of a distributed availability group. Parameter will be ignored during link creation.",
             nullable=True,
             enum={"Async": "Async", "Sync": "Sync"},
         )
         _args_schema.secondary_availability_group_name = AAZStrArg(
             options=["--secondary-ag", "--secondary-availability-group-name"],
             arg_group="Properties",
-            help="The secondary availability group name",
+            help="Secondary availability group name",
             nullable=True,
         )
         _args_schema.source_endpoint = AAZStrArg(
-            options=["--endpoint", "--src-endpoint", "--source-endpoint"],
+            options=["--source-endpoint"],
             arg_group="Properties",
-            help="The source endpoint",
+            help="Source endpoint",
             nullable=True,
         )
         _args_schema.target_database = AAZStrArg(
-            options=["--db", "--target-db", "--target-database"],
+            options=["--target-db", "--target-database"],
             arg_group="Properties",
-            help="The name of the target database",
+            help="Name of the target database",
             nullable=True,
         )
         return cls._args_schema

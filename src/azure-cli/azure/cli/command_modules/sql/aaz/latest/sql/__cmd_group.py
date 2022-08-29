@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Sql
+    """Manage Azure SQL Databases and Data Warehouses.
     """
     pass
 
