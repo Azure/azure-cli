@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi partner-cert list",
 )
 class List(AAZCommand):
-    """Gets a list of server trust certificates that were uploaded from box to the given Sql Managed Instance.
+    """Get a list of server trust certificates that were uploaded from box to the given Sql Managed Instance.
     """
 
     _aaz_info = {
