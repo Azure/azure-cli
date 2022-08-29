@@ -418,3 +418,24 @@ examples:
   - name: Run an existing workflow in your github repository
     text: az postgres flexible-server deploy run --action-name testAction --branch userBranch
 """
+
+helps['postgres flexible-server backup'] = """
+type: group
+short-summary: Manage flexible server backups.
+"""
+
+helps['postgres flexible-server backup list'] = """
+type: command
+short-summary: List all the backups for a given server.
+examples:
+  - name: List all backups for 'testsvr'.
+    text: az postgres flexible-server backup list -g testgroup -n testsvr
+"""
+
+helps['postgres flexible-server backup show'] = """
+type: command
+short-summary: Show the details of a specific backup for a given server.
+examples:
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""

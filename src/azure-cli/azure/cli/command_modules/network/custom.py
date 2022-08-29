@@ -99,10 +99,6 @@ def list_nics(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_interfaces', resource_group_name)
 
 
-def list_nsgs(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'network_security_groups', resource_group_name)
-
-
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
     client = network_client_factory(cmd.cli_ctx).network_security_groups
     nsg = client.get(resource_group_name, network_security_group_name)
@@ -4873,35 +4869,6 @@ def _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight):
         else:
             raise CLIError(
                 'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
-
-
-def create_local_gateway(cmd, resource_group_name, local_network_gateway_name, gateway_ip_address,
-                         location=None, tags=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, no_wait=False):
-    AddressSpace, LocalNetworkGateway, BgpSettings = cmd.get_models(
-        'AddressSpace', 'LocalNetworkGateway', 'BgpSettings')
-    client = network_client_factory(cmd.cli_ctx).local_network_gateways
-    local_gateway = LocalNetworkGateway(
-        local_network_address_space=AddressSpace(address_prefixes=(local_address_prefix or [])),
-        location=location, tags=tags, gateway_ip_address=gateway_ip_address)
-    if bgp_peering_address or asn or peer_weight:
-        local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
-                                                 peer_weight=peer_weight)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, local_network_gateway_name, local_gateway)
-
-
-def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, tags=None):
-    _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
-
-    if gateway_ip_address is not None:
-        instance.gateway_ip_address = gateway_ip_address
-    if local_address_prefix is not None:
-        instance.local_network_address_space.address_prefixes = local_address_prefix
-    if tags is not None:
-        instance.tags = tags
-    return instance
 # endregion
 
 
@@ -8219,7 +8186,8 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None,
+                        disable_copy_paste=False, enable_tunneling=False, enable_ip_connect=False, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -8242,10 +8210,28 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                    location=location,
                                    scale_units=scale_units,
                                    sku=sku,
-                                   tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         bastion_host_name=bastion_host_name,
-                                         parameters=bastion_host)
+                                   tags=tags,
+                                   disable_copy_paste=disable_copy_paste,
+                                   enable_tunneling=enable_tunneling,
+                                   enable_ip_connect=enable_ip_connect)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       bastion_host_name=bastion_host_name,
+                       parameters=bastion_host)
+
+
+def update_bastion_host(cmd, instance, scale_units=None, sku=None, disable_copy_paste=None, enable_tunneling=None, enable_ip_connect=None):
+    # both VirtualHub and VirtualRouter own those properties
+    sku_type = cmd.get_models('Sku')
+    sku = sku_type(name=sku)
+
+    with cmd.update_context(instance) as c:
+        c.set_param('scale_units', scale_units)
+        c.set_param('sku', sku)
+        c.set_param('disable_copy_paste', disable_copy_paste)
+        c.set_param('enable_tunneling', enable_tunneling)
+        c.set_param('enable_ip_connect', enable_ip_connect)
+    return instance
 
 
 def list_bastion_host(cmd, resource_group_name=None):

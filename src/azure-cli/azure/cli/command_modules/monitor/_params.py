@@ -346,12 +346,14 @@ def load_arguments(self, _):
     # region ActionGroup
     with self.argument_context('monitor action-group') as c:
         c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('location', get_location_type(self.cli_ctx), validator=None)
 
     with self.argument_context('monitor action-group create') as c:
         from .actions import ActionGroupReceiverParameterAction
         c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
         c.extra('short_name')
         c.extra('tags')
+        c.extra('location', get_location_type(self.cli_ctx))
         c.ignore('action_group')
 
     with self.argument_context('monitor action-group update', arg_group='Actions') as c:
