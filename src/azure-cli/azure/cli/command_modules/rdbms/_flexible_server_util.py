@@ -23,6 +23,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
+from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 
@@ -184,7 +185,7 @@ def _postgres_parse_list_skus(result):
 
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    single_az = not result[0].zone_redundant_ha_supported
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -469,3 +470,40 @@ def _is_resource_name(resource):
     if len(resource.split('/')) == 1:
         return True
     return False
+
+
+def build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok_key, backup_byok_key):
+    identity, data_encryption = None, None
+
+    if byok_identity and byok_key:
+        identities = {byok_identity: {}}
+
+        if backup_byok_identity:
+            identities[backup_byok_identity] = {}
+
+        identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
+                                                         type="UserAssigned")
+
+        data_encryption = mysql_flexibleservers.models.DataEncryption(
+            primary_user_assigned_identity_id=byok_identity,
+            primary_key_uri=byok_key,
+            geo_backup_user_assigned_identity_id=backup_byok_identity,
+            geo_backup_key_uri=backup_byok_key,
+            type="AzureKeyVault")
+
+    return identity, data_encryption
+
+
+def get_identity_and_data_encryption(server):
+    identity, data_encryption = server.identity, server.data_encryption
+
+    if identity and identity.type == 'UserAssigned':
+        for current_id in identity.user_assigned_identities:
+            identity.user_assigned_identities[current_id] = {}
+    else:
+        identity = None
+
+    if not (data_encryption and data_encryption.type == 'AzureKeyVault'):
+        data_encryption = None
+
+    return identity, data_encryption

@@ -406,3 +406,7 @@ def cf_share_directory_client(cli_ctx, kwargs):
 def cf_share_file_client(cli_ctx, kwargs):
     return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_name')).\
         get_file_client(file_name=kwargs.pop('file_name'))
+
+
+def cf_local_users(cli_ctx, _):
+    return storage_client_factory(cli_ctx).local_users

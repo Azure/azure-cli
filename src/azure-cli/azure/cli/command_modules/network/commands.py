@@ -48,7 +48,7 @@ from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
-    process_lb_create_namespace, process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
+    process_lb_create_namespace, process_lb_frontend_ip_namespace,
     process_nw_cm_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -1003,12 +1003,7 @@ def load_command_table(self, _):
 
     # region LocalGateways
     with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
         g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
-        g.custom_command('create', 'create_local_gateway', supports_no_wait=True, validator=process_local_gateway_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_local_gateway', supports_no_wait=True)
-        g.wait_command('wait')
     # endregion
 
     # region NetworkInterfaces: (NIC)
@@ -1047,14 +1042,10 @@ def load_command_table(self, _):
 
     # region NetworkSecurityGroups
     with self.command_group('network nsg', network_nsg_sdk) as g:
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_nsgs')
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
         g.generic_update_command('update', setter_name='begin_create_or_update')
 
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
-        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
         g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
         g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
@@ -1411,13 +1402,15 @@ def load_command_table(self, _):
 
     # region Bastion
     with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
-        g.custom_command('create', 'create_bastion_host')
+        g.custom_command('create', 'create_bastion_host', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_bastion_host', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
         g.custom_command('ssh', 'ssh_bastion_host')
         g.custom_command('rdp', 'rdp_bastion_host')
         g.custom_command('tunnel', 'create_bastion_tunnel')
         g.command('delete', 'begin_delete')
+        g.wait_command('wait')
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
