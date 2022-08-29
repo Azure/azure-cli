@@ -21,9 +21,9 @@ class BastionConnectableResourceIdTest(ScenarioTest):
     def test_bastion_session_handles_bad_ids(self):
 
         self.kwargs.update({
-            'invalid_vm_rid': '/subscriptions/1ab4107d-2377-43ab-a9e0-b55b8cd8c345/resourceGroups/examplersg/providers/Microsoft.Compute/virtualMachines/thisisabadvmid/',
-            'valid_rg_id_not_vm_rid': '/subscriptions/1ab4107d-2377-43ab-a9e0-b55b8cd8c345/resourceGroups/examplersg',
-            'valid_nic_id_not_vm_rid': '/subscriptions/1ab4107d-2377-43ab-a9e0-b55b8cd8c345/resourceGroups/examplersg/providers/Microsoft.Network/networkInterfaces/thisisavirtualnic',
+            'invalid_vm_rid': '/subscriptions/6946cec3-97a2-4e51-a3b1-84eb61f7e091/resourceGroups/examplersg/providers/Microsoft.Compute/virtualMachines/thisisabadvmid/',
+            'valid_rg_id_not_vm_rid': '/subscriptions/6946cec3-97a2-4e51-a3b1-84eb61f7e091/resourceGroups/examplersg',
+            'valid_nic_id_not_vm_rid': '/subscriptions/6946cec3-97a2-4e51-a3b1-84eb61f7e091/resourceGroups/examplersg/providers/Microsoft.Network/networkInterfaces/thisisavirtualnic',
             'bastion_name':'bastionname',
             'vnet':'bastion_vnet',
             'ip':'ip1',
