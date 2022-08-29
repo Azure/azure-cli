@@ -50,7 +50,11 @@ def flexible_server_create(cmd, client,
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
+
     server_name = server_name.lower()
+    if high_availability and high_availability.lower() == 'enabled':
+        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
+        high_availability = 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
@@ -101,8 +105,6 @@ def flexible_server_create(cmd, client,
 
     sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    if high_availability.lower() == "enabled":
-        high_availability = "ZoneRedundant"
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
@@ -247,6 +249,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
+    if high_availability and high_availability.lower() == 'enabled':
+        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
+        high_availability = 'ZoneRedundant'
+
     pg_arguments_validator(db_context,
                            location=location,
                            tier=tier,
@@ -298,8 +304,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
     if high_availability:
-        if high_availability.lower() == "enabled":
-            high_availability_param.mode = "ZoneRedundant"
+        if high_availability.lower() != "disabled":
+            high_availability_param.mode = high_availability
             if standby_availability_zone:
                 high_availability_param.standby_availability_zone = standby_availability_zone
         else:

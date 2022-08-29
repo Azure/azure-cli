@@ -153,7 +153,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '12.13.0'),
+            JMESPathCheck('[0].value', '~14'),
         ])
 
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -340,19 +340,19 @@ class BackupWithName(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_config_backup_restore(self, resource_group):
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    def test_config_backup_restore(self, resource_group, storage_account_info):
         plan = self.create_random_name(prefix='plan-backup', length=24)
         webapp = self.create_random_name(prefix='backup-webapp', length=24)
-        storage_account = self.create_random_name(prefix='backup', length=24)
         container = self.create_random_name(prefix='backupcontainer', length=24)
         backup_name = self.create_random_name(prefix='backup-name', length=24)
 
         expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
         slot_name = "slot"
 
-        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --sku Standard_LRS')
-        self.cmd(f'storage container create --account-name {storage_account} --name {container}')
-        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv').output.strip()
+        storage_account, account_key = storage_account_info
+        self.cmd(f'storage container create --account-name {storage_account} --name {container} --account-key {account_key}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv --account-key {account_key}').output.strip()
         sasurl = f'\"https://{storage_account}.blob.core.windows.net/{container}?{sastoken}\"'
 
         self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')
@@ -605,7 +605,7 @@ class WebappConfigureTest(ScenarioTest):
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.2'),
+            JMESPathCheck('phpVersion', '7.4'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
@@ -614,7 +614,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('http20Enabled', True),
             JMESPathCheck('ftpsState', 'Disabled')]
 
-        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.2 '
+        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
                  '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \

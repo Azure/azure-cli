@@ -46,7 +46,6 @@ from azure.cli.command_modules.acs._client_factory import (
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_ACR_DOMAIN_NAME,
     CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_CANIPULL_IMAGE,
     CONST_CONFCOM_ADDON_NAME,
@@ -1533,6 +1532,10 @@ def aks_create(
     node_resource_group=None,
     enable_defender=False,
     defender_config=None,
+    enable_azure_keyvault_kms=False,
+    azure_keyvault_kms_key_id=None,
+    azure_keyvault_kms_key_vault_network_access=None,
+    azure_keyvault_kms_key_vault_resource_id=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -1566,6 +1569,7 @@ def aks_create(
     vm_set_type=None,
     zones=None,
     ppg=None,
+    http_proxy_config=None,
     max_pods=0,
     enable_encryption_at_host=False,
     enable_ultra_ssd=False,
@@ -1575,6 +1579,8 @@ def aks_create(
     no_wait=False,
     yes=False,
     aks_custom_headers=None,
+    host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1638,6 +1644,11 @@ def aks_update(
     enable_defender=False,
     disable_defender=False,
     defender_config=None,
+    enable_azure_keyvault_kms=False,
+    disable_azure_keyvault_kms=False,
+    azure_keyvault_kms_key_id=None,
+    azure_keyvault_kms_key_vault_network_access=None,
+    azure_keyvault_kms_key_vault_resource_id=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -1649,6 +1660,7 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
+    http_proxy_config=None,
     no_wait=False,
     yes=False,
     aks_custom_headers=None,
@@ -2356,8 +2368,6 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
-    if not acr.endswith(CONST_ACR_DOMAIN_NAME):
-        acr = acr + CONST_ACR_DOMAIN_NAME
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2972,6 +2982,8 @@ def aks_agentpool_add(
     linux_os_config=None,
     no_wait=False,
     aks_custom_headers=None,
+    host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

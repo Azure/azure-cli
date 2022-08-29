@@ -197,7 +197,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=to
         if client_type == CLIENT_TYPE.Dotnet.value:
             client_type = CLIENT_TYPE.DotnetConnectionString.value
         else:
-            logger.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
+            logger.warning('client_type is not dotnet, ignore "--config-connstr"')
 
     parameters = {
         'target_service': {
@@ -328,7 +328,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         if client_type == CLIENT_TYPE.Dotnet.value:
             client_type = CLIENT_TYPE.DotnetConnectionString.value
         else:
-            logger.warning('client_type is not dotnet, ignore "--store-in-connection-string"')
+            logger.warning('client_type is not dotnet, ignore "--config-connstr"')
 
     parameters = {
         'target_service': linker.get('targetService'),

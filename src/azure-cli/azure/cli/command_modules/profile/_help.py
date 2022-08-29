@@ -67,14 +67,7 @@ short-summary: Set a subscription to be the current active subscription.
 helps['account show'] = """
 type: command
 short-summary: Get the details of a subscription.
-long-summary: >-
-    If the subscription isn't specified, shows the details of the default subscription.
-
-
-    When --sdk-auth is used,
-    the output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an alternative, consider using
-    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+long-summary: If the subscription isn't specified, shows the details of the default subscription.
 """
 
 helps['account get-access-token'] = """

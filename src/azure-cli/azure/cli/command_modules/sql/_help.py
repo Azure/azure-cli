@@ -742,12 +742,12 @@ short-summary: Updates an existing managed instance Active Directory administrat
 
 helps['sql mi ad-only-auth'] = """
 type: group
-short-summary: Manage a Managed Instance's Azure Active Directly only settings.
+short-summary: Manage a Managed Instance's Azure Active Directory only settings.
 """
 
 helps['sql mi ad-only-auth enable'] = """
 type: command
-short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
+short-summary: Enable Azure Active Directory only Authentication for this Managed Instance.
 examples:
   - name: Enable Active Directory only authentication for a managed instance
     text: az sql mi ad-only-auth enable --resource-group mygroup --name myMI
@@ -755,7 +755,7 @@ examples:
 
 helps['sql mi ad-only-auth disable'] = """
 type: command
-short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
+short-summary: Disable Azure Active Directory only Authentication for this Managed Instance.
 examples:
   - name: Disable Active Directory only authentication for a managed instance
     text: az sql mi ad-only-auth disable --resource-group mygroup --name myMI
@@ -763,7 +763,7 @@ examples:
 
 helps['sql mi ad-only-auth get'] = """
 type: command
-short-summary: Get a specific Azure Active Directly only Authentication property.
+short-summary: Get a specific Azure Active Directory only Authentication property.
 examples:
   - name: Get Active Directory only authentication status for a managed instance
     text: az sql mi ad-only-auth get --resource-group mygroup --name myMI
@@ -1150,12 +1150,12 @@ short-summary: Update an existing server Active Directory administrator.
 
 helps['sql server ad-only-auth'] = """
 type: group
-short-summary: Manage Azure Active Directly only Authentication settings for this Server.
+short-summary: Manage Azure Active Directory only Authentication settings for this Server.
 """
 
 helps['sql server ad-only-auth enable'] = """
 type: command
-short-summary: Enable Azure Active Directly only Authentication for this Server.
+short-summary: Enable Azure Active Directory only Authentication for this Server.
 examples:
   - name: Enable Active Directory only authentication for a sql server
     text: az sql server ad-only-auth enable --resource-group mygroup --name myServer
@@ -1163,7 +1163,7 @@ examples:
 
 helps['sql server ad-only-auth disable'] = """
 type: command
-short-summary: Disable Azure Active Directly only Authentication for this Server.
+short-summary: Disable Azure Active Directory only Authentication for this Server.
 examples:
   - name: Disable Active Directory only authentication for a sql server
     text: az sql server ad-only-auth disable --resource-group mygroup --name myServer
@@ -1171,7 +1171,7 @@ examples:
 
 helps['sql server ad-only-auth get'] = """
 type: command
-short-summary: Get a specific Azure Active Directly only Authentication property.
+short-summary: Get a specific Azure Active Directory only Authentication property.
 examples:
   - name: Get Active Directory only authentication status for a sql server
     text: az sql server ad-only-auth get --resource-group mygroup --name myServer
@@ -1472,7 +1472,7 @@ short-summary: Manage a server's encryption protector.
 
 helps['sql server tde-key set'] = """
 type: command
-short-summary: Sets the server's encryption protector.
+short-summary: Sets the server's encryption protector. Ensure to create the key first https://docs.microsoft.com/en-us/cli/azure/sql/server/key?view=azure-cli-latest#az-sql-server-key-create
 """
 
 helps['sql server update'] = """
