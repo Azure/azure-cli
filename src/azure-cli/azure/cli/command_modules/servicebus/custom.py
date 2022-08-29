@@ -706,6 +706,22 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
+def cli_networkrule_update(client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
+                           default_action=None):
+    networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if trusted_service_access_enabled is not None:
+        networkruleset.trusted_service_access_enabled = trusted_service_access_enabled
+
+    if public_network_access:
+        networkruleset.public_network_access = public_network_access
+
+    if default_action:
+        networkruleset.default_action = default_action
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, networkruleset)
+
+
 def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
