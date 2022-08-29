@@ -50,8 +50,8 @@ class Delete(AAZCommand):
             id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--instance-name", "--managed-instance-name"],
-            help="The name of the managed instance.",
+            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
+            help="Name of the managed instance.",
             required=True,
             id_part="name",
         )

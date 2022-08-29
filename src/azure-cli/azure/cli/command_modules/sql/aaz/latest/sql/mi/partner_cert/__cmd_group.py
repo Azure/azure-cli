@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi partner-cert",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Server trust certificate management API.
+    """Server trust certificate management commands.
     """
     pass
 

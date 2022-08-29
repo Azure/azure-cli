@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi",
 )
 class __CMDGroup(AAZCommandGroup):
-    """az sql
+    """Manage SQL managed instances.
     """
     pass
 
