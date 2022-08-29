@@ -1407,6 +1407,7 @@ def load_command_table(self, _):
     # region Bastion
     with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_bastion_host', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_bastion_host', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
         g.custom_command('ssh', 'ssh_bastion_host')
