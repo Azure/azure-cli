@@ -139,4 +139,4 @@ class ApimScenarioTest(ScenarioTest):
     
 
     def _get_location_display_name(self):
-        return self.cmd('az account list-locations --query "[?name==\'{}\'].displayName" -o tsv'.format(self.location_name))
+        return self.cmd('az account list-locations --query "[?name==\'{}\'].displayName" -o tsv'.format(self.service_location))

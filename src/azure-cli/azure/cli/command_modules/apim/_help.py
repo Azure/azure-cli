@@ -68,10 +68,10 @@ short-summary: Manage Azure API Management API Version Set.
 
 helps['apim api schema'] = """
 type: group
-short-summary: Manage Azure API Management API Schema's.
+short-summary: Manage the schema of an Azure API Management API.
 """
 
-helps['apim deletedservice'] = """
+helps['apim deleted-service'] = """
 type: group
 short-summary: Manage soft-deleted Azure API Management services.
 """
@@ -185,12 +185,12 @@ helps['apim api create'] = """
 type: command
 short-summary: Create an API Management API.
 parameters:
-  - name: --api-id
+  - name: --api-id -a
     type: string
     short-summary: unique name of the api to be created
     long-summary: |
         API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  - name: --path
+  - name: --path -p
     type: string
     short-summary: the URL path of the API
   - name: --display-name
@@ -206,7 +206,7 @@ helps['apim api update'] = """
 type: command
 short-summary: Update an API Management API.
 parameters:
-  - name: --api-id
+  - name: --api-id -a
     type: string
     short-summary: unique name of the api to be updated
     long-summary: |
@@ -235,10 +235,6 @@ examples:
         az apim api policy delete -g MyResourceGroup -n MyApim -a echo-api
 """
 
-helps['apim api import'] = """
-type: command
-short-summary: Import an API Management service instance.
-"""
 
 helps['apim product api list'] = """
 type: command
@@ -258,13 +254,13 @@ examples:
         az apim product api check --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
 """
 
-helps['apim product api add'] = """
+helps['apim product api create'] = """
 type: command
-short-summary: Add an API to the specified product.
+short-summary: Create an API to the specified product.
 examples:
-  - name: Add an API to the specified product.
+  - name: Create an API to the specified product.
     text: |-
-        az apim product api add --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+        az apim product api create --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
 """
 
 helps['apim product api delete'] = """
@@ -331,14 +327,14 @@ examples:
     crafted: true
 """
 
-helps['apim named-value show'] = """
+helps['apim named-value list'] = """
 type: command
 short-summary: List API Management Named Values.
 """
 
-helps['apim named-value show-secret'] = """
+helps['apim named-value show'] = """
 type: command
-short-summary: Gets the secret of an API Management Named Value.
+short-summary: Gets the value with the option show the secret of an API Management Named Value.
 """
 
 helps['apim named-value delete'] = """
@@ -355,10 +351,10 @@ parameters:
     short-summary: unique name for the Named Value to be created
     long-summary: |
         Must be unique in the current API Management service instance.
-  - name: --display-name
+  - name: --display-name -d
     type: string
     short-summary: The Display name of the Named Value.
-  - name: --value
+  - name: --value -v
     type: string
     short-summary: The value of the Named Value.
 examples:
@@ -376,13 +372,39 @@ parameters:
     short-summary: unique name of the api to be created
     long-summary: |
         Must be unique in the current API Management service instance.
-  - name: --value
+  - name: --value -v
     type: string
     short-summary: The value of the Named Value.
 examples:
   - name: Create a basic API.
     text: |-
         az apim named-value update -n MyApim -g MyResourceGroup --id MyNamedValue --value foo
+"""
+
+
+helps['apim policy create'] = """
+type: command
+short-summary: Create the Policy of an Azure API Management.
+"""
+
+helps['apim policy delete'] = """
+type: command
+short-summary: Delete the Policy of an Azure API Management, causing the policy to reset to a default, blank policy definition.
+"""
+
+helps['apim policy show'] = """
+type: command
+short-summary: Get the Policy of an Azure API Management.
+"""
+
+helps['apim policy update'] = """
+type: command
+short-summary: Update the Policy of an Azure API Management.
+"""
+
+helps['apim policy wait'] = """
+type: command
+short-summary: Wait for an operation performed on the Policy of an Azure API Management.
 """
 
 helps['apim api policy create'] = """
@@ -403,7 +425,7 @@ short-summary: List a collection of the policies for the specified API.
 examples:
   - name: List a collection of the policies for the specified API.
     text: |-
-        az apim api operation list --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId
+        az apim api policy list -g MyResourceGroup -n MyApim -a MyApiId
 """
 
 helps['apim api policy update'] = """
@@ -521,6 +543,26 @@ examples:
   - name: Create a revision for the specfic API.
     text: |-
         az apim api revision create --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --api-revision RevisionNumber --api-revision-description RevisionDescription
+"""
+
+helps['apim api schema list'] = """
+type: command
+short-summary: List the schemas of an Azure API Management API.
+"""
+
+helps['apim api schema create'] = """
+type: command
+short-summary: Create a schema of an Azure API Management API.
+"""
+
+helps['apim api schema delete'] = """
+type: command
+short-summary: Delete a schema of an Azure API Management API.
+"""
+
+helps['apim api schema show'] = """
+type: command
+short-summary: Show a schema of an Azure API Management API.
 """
 
 helps['apim api-version-set list'] = """
