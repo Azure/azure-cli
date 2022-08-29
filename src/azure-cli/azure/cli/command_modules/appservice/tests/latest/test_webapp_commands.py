@@ -340,19 +340,19 @@ class BackupWithName(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_config_backup_restore(self, resource_group):
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    def test_config_backup_restore(self, resource_group, storage_account_info):
         plan = self.create_random_name(prefix='plan-backup', length=24)
         webapp = self.create_random_name(prefix='backup-webapp', length=24)
-        storage_account = self.create_random_name(prefix='backup', length=24)
         container = self.create_random_name(prefix='backupcontainer', length=24)
         backup_name = self.create_random_name(prefix='backup-name', length=24)
 
         expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
         slot_name = "slot"
 
-        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --sku Standard_LRS')
-        self.cmd(f'storage container create --account-name {storage_account} --name {container}')
-        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv').output.strip()
+        storage_account, account_key = storage_account_info
+        self.cmd(f'storage container create --account-name {storage_account} --name {container} --account-key {account_key}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv --account-key {account_key}').output.strip()
         sasurl = f'\"https://{storage_account}.blob.core.windows.net/{container}?{sastoken}\"'
 
         self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')

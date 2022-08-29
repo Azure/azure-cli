@@ -44,12 +44,12 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'argcomplete~=1.8',
-    'azure-cli-telemetry==1.0.7.*',
+    'azure-cli-telemetry==1.0.8.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.9.0',
+    'knack~=0.10.0',
     'msal-extensions~=1.0.0',
     'msal==1.18.0b1',
     'msrestazure~=0.6.4',

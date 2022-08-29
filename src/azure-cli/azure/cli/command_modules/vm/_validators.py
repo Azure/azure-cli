@@ -2151,9 +2151,8 @@ def _disk_encryption_set_format(cmd, namespace, name):
 
 
 def process_ppg_create_namespace(namespace):
-    """
-    The availability zone can be provided only when an intent is provided
-    """
+    validate_tags(namespace)
+    # The availability zone can be provided only when an intent is provided
     if namespace.zone and not namespace.intent_vm_sizes:
         raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
                                            'Please use parameter --intent-vm-sizes to specify possible sizes of '

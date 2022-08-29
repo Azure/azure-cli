@@ -4249,13 +4249,28 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 # from azure.mgmt.compute.models import Gallery, SharingProfile
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
-                           soft_delete=None, **kwargs):
+                           soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
+                           public_name_prefix=None, **kwargs):
     if permissions:
         if gallery.sharing_profile is None:
             SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
+        community_gallery_info = None
+        if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+            community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                          publisher_contact=publisher_contact,
+                                                          eula=eula,
+                                                          public_name_prefix=public_name_prefix)
+        gallery.sharing_profile.community_gallery_info = community_gallery_info
+
     if soft_delete is not None:
         gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
 
