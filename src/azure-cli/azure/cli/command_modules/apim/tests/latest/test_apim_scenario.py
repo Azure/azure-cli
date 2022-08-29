@@ -12,8 +12,7 @@ class ApimScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_apim_core-', parameter_name_for_location='resource_group_location')
-    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
-    def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
+    def test_apim_core_service(self, resource_group_location):
         self._setup_test(location=resource_group_location, sku='Developer')
 
         self.cmd('apim check-name -n {apim} -o json', checks=[self.check('nameAvailable', True)])
@@ -53,7 +52,7 @@ class ApimScenarioTest(ScenarioTest):
 
     # expect None for Developer sku, even though requested value was True - only works with Consumption sku
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_apim_managed_identity-', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_client_cert-', parameter_name_for_location='resource_group_location')
     def test_apim_client_certificate(self, resource_group_location):
         self._setup_test(location=resource_group_location)
 
@@ -87,7 +86,7 @@ class ApimScenarioTest(ScenarioTest):
 
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_apim_managed_identity-', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_mi-', parameter_name_for_location='resource_group_location')
     def test_apim_managed_identity(self, resource_group_location):
         self._setup_test(location=resource_group_location)
 
@@ -101,22 +100,21 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('publisherEmail', '{publisher_email}')])
 
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim_backup')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_backup-')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
-    @ApiManagementPreparer(sku_name='Consumption')
-    def test_apim_core_service(self, resource_group, storage_account_for_backup):
+    @ApiManagementPreparer()
+    def test_apim_backup(self, resource_group, storage_account_for_backup):
         account_container = 'backups'
         account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -o tsv'.format(storage_account_for_backup, resource_group)).output[: -1]
         self.cmd('az storage container create -n {} --account-name {} --account-key {}'.format(account_container, storage_account_for_backup, account_key))
 
         self.kwargs.update({
-            'backup_name': self.service_name + '_test_backup',
             'storage_account_name': storage_account_for_backup,
             'storage_account_key': account_key,
             'storage_account_container': account_container
         })
 
-        self.cmd('apim backup -g {rg} -n {apim} --backup-name {backup_name} --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}',
+        self.cmd('apim backup -g {rg} -n {apim} --backup-name {apim}_test_backup --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}',
             checks=[self.check('provisioningState', 'Succeeded')])
 
 
@@ -134,8 +132,8 @@ class ApimScenarioTest(ScenarioTest):
             'publisher_name': 'Contoso',
             'sku_name': self.service_sku,
             'sku_capacity': 1,
-            'enable_client_certificate': True,
-            'enable_managed_identity': True,
+            'enable_client_certificate': 'true',
+            'enable_managed_identity': 'true',
             'tag': "foo=boo"
         })
     

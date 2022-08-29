@@ -5,7 +5,6 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.command_modules.apim.operations.api.custom import create_api
 from azure.mgmt.apimanagement.models import ApiCreateOrUpdateParameter
 
 
@@ -35,5 +34,4 @@ def create_api_revision(cmd, resource_group_name, service_name, api_id, api_revi
                        resource_group_name=resource_group_name,
                        service_name=service_name,
                        api_id=api_id + ";rev=" + api_revision,
-                       parameters=resource
-            )
+                       parameters=resource)
