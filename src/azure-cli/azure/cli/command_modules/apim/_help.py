@@ -76,6 +76,16 @@ type: group
 short-summary: Manage soft-deleted Azure API Management services.
 """
 
+helps['apim subscription'] = """
+type: group
+short-summary: Manage subscriptions for Azure API Management services.
+"""
+
+helps['apim subscription keys'] = """
+type: group
+short-summary: Manage subscription keys for Azure API Management services.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
