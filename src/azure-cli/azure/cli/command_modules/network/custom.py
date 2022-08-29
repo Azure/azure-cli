@@ -8325,7 +8325,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     if not resource_port:
         resource_port = 22
     if not _is_bastion_connectable_resource(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id.")
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id.\n If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
@@ -8375,7 +8375,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     if not resource_port:
         resource_port = 3389
     if not _is_bastion_connectable_resource(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id.")
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id.\n If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
     if platform.system() == 'Windows':
         if disable_gateway:
             tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
