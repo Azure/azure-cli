@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator
+    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -219,7 +219,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     _complex_params('postgres')
 
     # Flexible-server
-    # pylint: disable=too-many-statements, too-many-locals
+    # pylint: disable=too-many-statements, too-many-locals, too-many-branches
     def _flexible_server_params(command_group):
 
         server_name_arg_type = CLIArgumentType(
@@ -410,12 +410,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         identity_arg_type = CLIArgumentType(
             options_list=['--identity'],
-            help='The resource ID of the user assigned identity for data encryption.'
+            help='The name or resource ID of the user assigned identity for data encryption.',
+            validator=validate_byok_identity
         )
 
         backup_identity_arg_type = CLIArgumentType(
             options_list=['--backup-identity'],
-            help='The resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.'
+            help='The name or resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
+            validator=validate_byok_identity
         )
 
         key_arg_type = CLIArgumentType(
@@ -432,6 +434,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--disable-data-encryption'],
             arg_type=get_three_state_flag(),
             help='Disable data encryption by removing key(s).'
+        )
+
+        identities_arg_type = CLIArgumentType(
+            options_list=['--identity', '-n'],
+            nargs='+',
+            help='Space-separated names or ID\'s of identities.',
+            validator=validate_identities
         )
 
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
@@ -667,6 +676,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        # identity
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+            with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
+                c.argument('identities', arg_type=identities_arg_type)
+
+            with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
+                c.argument('identities', arg_type=identities_arg_type)
+
+            with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
+                c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+
+        # ad-admin
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+            with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
+                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+                c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
