@@ -40,7 +40,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         required_args = []
         for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
             id_arg = '\'--id\'' if enable_id else '\'--source-id\''
-            context.argument(arg, options_list=content.get('options'), type=str,
+            context.argument(arg, configured_default=content.get('configured_default'),
+                             options_list=content.get('options'), type=str,
                              help='{}. Required if {} is not specified.'.format(content.get('help'), id_arg))
             required_args.append(content.get('options')[0])
 
@@ -150,9 +151,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     def add_connection_string_argument(context, source, target):
         if source == RESOURCE.WebApp and target in TARGET_RESOURCES_CONNECTION_STRING:
-            context.argument('store_in_connection_string', options_list=['--store-connstr'],
+            context.argument('store_in_connection_string', options_list=['--config-connstr'],
                              arg_type=get_three_state_flag(), default=False, is_preview=True,
-                             help='Store configuration into connection string, '
+                             help='Store configuration into connection strings, '
                                   'only could be used together with dotnet client_type')
         else:
             context.ignore('store_in_connection_string')

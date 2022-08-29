@@ -605,6 +605,35 @@ examples:
         az functionapp deployment user set --user-name MyUserName
 """
 
+helps['functionapp deployment github-actions'] = """
+type: group
+short-summary: Configure GitHub Actions for a functionapp
+"""
+
+helps['functionapp deployment github-actions add'] = """
+type: command
+short-summary: Add a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified functionapp.
+examples:
+  - name: Add GitHub Actions to a specified repository, providing personal access token
+    text: >
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
+  - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+"""
+
+helps['functionapp deployment github-actions remove'] = """
+type: command
+short-summary: Remove and disconnect the GitHub Actions workflow file from the specified repository.
+examples:
+  - name: Remove GitHub Actions from a specified repository, providing personal access token
+    text: >
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
+  - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+"""
+
 helps['functionapp function'] = """
 type: group
 short-summary: Manage function app functions.

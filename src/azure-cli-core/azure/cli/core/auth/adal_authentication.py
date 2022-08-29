@@ -98,6 +98,12 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         logger.debug("MSIAuthenticationWrapper.signed_session invoked by Track 1 SDK")
         super().signed_session(session)
 
+    def get_auxiliary_tokens(self, *scopes, **kwargs):  # pylint:disable=no-self-use,unused-argument
+        """This method is added to align with CredentialAdaptor.get_auxiliary_tokens
+        Since managed identity belongs to a single tenant and currently doesn't support cross-tenant authentication,
+        simply return None."""
+        return None
+
 
 def _normalize_expires_on(expires_on):
     """

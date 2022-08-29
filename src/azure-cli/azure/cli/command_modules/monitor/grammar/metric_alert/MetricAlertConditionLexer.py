@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# Generated from AutoscaleCondition.g4 by ANTLR 4.9.3
+# Generated from MetricAlertCondition.g4 by ANTLR 4.9.3
 # encoding: utf-8
 # pylint: disable=all
 from antlr4 import *
@@ -72,8 +72,8 @@ def serializedATN():
         buf.write("[\u00e3\3\2\2\2]\u00e8\3\2\2\2_\u0108\3\2\2\2a\u010b\3")
         buf.write("\2\2\2c\u0117\3\2\2\2e\u011a\3\2\2\2g\u0123\3\2\2\2i\u012b")
         buf.write("\3\2\2\2kl\7\60\2\2l\4\3\2\2\2mn\7\61\2\2n\6\3\2\2\2o")
-        buf.write("p\7a\2\2p\b\3\2\2\2qr\7^\2\2r\n\3\2\2\2st\7<\2\2t\f\3")
-        buf.write("\2\2\2uv\7\'\2\2v\16\3\2\2\2wx\7/\2\2x\20\3\2\2\2yz\7")
+        buf.write("p\7/\2\2p\b\3\2\2\2qr\7a\2\2r\n\3\2\2\2st\7^\2\2t\f\3")
+        buf.write("\2\2\2uv\7<\2\2v\16\3\2\2\2wx\7\'\2\2x\20\3\2\2\2yz\7")
         buf.write(".\2\2z\22\3\2\2\2{|\7~\2\2|\24\3\2\2\2}~\7-\2\2~\26\3")
         buf.write("\2\2\2\177\u0080\7,\2\2\u0080\30\3\2\2\2\u0081\u0082\7")
         buf.write("\u0080\2\2\u0082\32\3\2\2\2\u0083\u0084\t\2\2\2\u0084")
@@ -188,7 +188,7 @@ class MetricAlertConditionLexer(Lexer):
     modeNames = [ "DEFAULT_MODE" ]
 
     literalNames = [ "<INVALID>",
-            "'.'", "'/'", "'_'", "'\\'", "':'", "'%'", "'-'", "','", "'|'", 
+            "'.'", "'/'", "'-'", "'_'", "'\\'", "':'", "'%'", "','", "'|'", 
             "'+'", "'*'", "'~'" ]
 
     symbolicNames = [ "<INVALID>",
