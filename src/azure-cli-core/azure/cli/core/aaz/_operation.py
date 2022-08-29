@@ -14,6 +14,7 @@ from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
 from ._content_builder import AAZContentBuilder
 from ._field_type import AAZSimpleType, AAZObjectType, AAZDictType, AAZListType
+from ._field_value import AAZObject, AAZList, AAZDict, AAZSimpleValue
 
 try:
     from urllib import quote  # type: ignore
@@ -367,7 +368,48 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    @staticmethod
-    def _update_instance_by_generic(instance, args):  # pylint: disable=unused-argument
-        # TODO: implement generic instance update
+    def _update_instance_by_generic(self, instance, *_):  # pylint: disable=unused-argument
+        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, \
+            add_properties, remove_properties, set_properties
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        if not self.ctx.generic_update_args:
+            return instance
+        assert isinstance(instance, AAZBaseValue)
+
+
+        data = instance.to_serialized_data()  # to raw data
+        force_string = self.ctx.args.generic_update_force_string == True
+        for option_string, values in self.ctx.generic_update_args:
+            if option_string == "set":
+                try:
+                    for expression in values:
+                        set_properties(data, expression, force_string)
+                except ValueError:
+                    raise InvalidArgumentValueError('invalid syntax: {}'.format(set_usage))
+            elif option_string == "add":
+                try:
+                    add_properties(data, values, force_string)
+                except ValueError:
+                    raise InvalidArgumentValueError('invalid syntax: {}'.format(add_usage))
+            elif option_string == "remove":
+                try:
+                    remove_properties(data, values)
+                except ValueError:
+                    raise InvalidArgumentValueError('invalid syntax: {}'.format(remove_usage))
+
+        # verify and update instance
+        try:
+            data = instance._schema.process_data(data)
+        except AssertionError as err:
+            raise InvalidArgumentValueError(f'invalid argument: {err}')
+
+        if isinstance(instance, AAZSimpleValue):
+            # should be combined with
+            #   self.ctx.var.instance = _update_instance_by_generic(self.ctx.var.instance)
+            instance._data = data
+        else:
+            # in place update _data. Cannot use instance._data = data, because the original _data will not be changed.
+            assert isinstance(instance._data, dict)
+            instance._data.clear()
+            instance._data.update(data)
         return instance

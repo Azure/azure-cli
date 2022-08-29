@@ -362,9 +362,10 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
 
 class AAZGenericUpdateAction(Action):  # pylint: disable=too-few-public-methods
-    DEST = '_generic_update_args'
+    DEST = 'generic_update_args'
+    OPTION_NAME = None
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not getattr(namespace, self.DEST, None):
             setattr(namespace, self.DEST, [])
-        getattr(namespace, self.DEST).append((option_string, values))
+        getattr(namespace, self.DEST).append((self.OPTION_NAME or option_string, values))

@@ -449,16 +449,18 @@ class AAZSubscriptionIdArg(AAZStrArg):
 
 
 # Generic Update arguments
-class AAZGenericUpdateForceString(AAZBoolArg):
+class AAZGenericUpdateForceStringArg(AAZBoolArg):
 
     def __init__(
             self, options=('--force-string',), arg_group='Generic Update',
             help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON.",
+            default=False,
             **kwargs):
         super().__init__(
             options=options,
             help=help,
             arg_group=arg_group,
+            default=default,
             **kwargs,
         )
 
@@ -496,7 +498,9 @@ class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            OPTION_NAME = "set"
+        return Action
 
 
 class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
@@ -521,7 +525,9 @@ class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            OPTION_NAME = "add"
+        return Action
 
 
 class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
@@ -546,7 +552,9 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            OPTION_NAME = "remove"
+        return Action
 
 
 def has_value(arg_value):
