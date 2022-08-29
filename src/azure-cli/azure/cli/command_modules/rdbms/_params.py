@@ -436,6 +436,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Disable data encryption by removing key(s).'
         )
 
+        identities_arg_type = CLIArgumentType(
+            options_list=['--identity', '-n'],
+            nargs='+',
+            help='Space-separated names or ID\'s of identities.',
+            validator=validate_identities
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -676,10 +683,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
             with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
-                c.argument('identities', options_list=['--identity', '-n'], nargs='+', help='Space-separated names or ID\'s of identities to assign.', validator=validate_identities)
+                c.argument('identities', arg_type=identities_arg_type)
 
             with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
-                c.argument('identities', options_list=['--identity', '-n'], nargs='+', help='Space-separated names or ID\'s of identities to remove.', validator=validate_identities)
+                c.argument('identities', arg_type=identities_arg_type)
 
             with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
                 c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
