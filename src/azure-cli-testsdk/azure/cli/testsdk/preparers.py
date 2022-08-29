@@ -101,11 +101,11 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # pylint: disable=line-too-long
 # pylint: disable=too-many-instance-attributes
 class ApiManagementPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku_name='Developer', location='westus', 
+    def __init__(self, name_prefix='clitest', sku_name='Developer', location='westus',
                  parameter_name_for_location='api_management_location',
                  parameter_name='api_management',
-                 resource_group_parameter_name='resource_group', 
-                 skip_delete=True, 
+                 resource_group_parameter_name='resource_group',
+                 skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_APIM_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_APIM_LOCATION',
                  publisher_email='publisher@contsoso.com', publisher_name='Contoso', key='apim'):
