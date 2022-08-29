@@ -402,11 +402,6 @@ type: command
 short-summary: Update the Policy of an Azure API Management.
 """
 
-helps['apim policy wait'] = """
-type: command
-short-summary: Wait for an operation performed on the Policy of an Azure API Management.
-"""
-
 helps['apim api policy create'] = """
 type: command
 short-summary: Create a policy for the specified API.

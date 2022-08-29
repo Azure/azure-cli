@@ -13,7 +13,7 @@ class ApimScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_apim_core-', parameter_name_for_location='resource_group_location')
     def test_apim_core_service(self, resource_group_location):
-        self._setup_test(location=resource_group_location, sku='Developer')
+        self._setup_test(location=resource_group_location, sku='Consumption')
 
         self.cmd('apim check-name -n {apim} -o json', checks=[self.check('nameAvailable', True)])
         self.cmd('apim create --name {apim} -g {rg} -l {apim_location} --sku-name {sku_name} --sku-capacity {sku_capacity} --publisher-email {publisher_email} --publisher-name {publisher_name}',
@@ -31,10 +31,14 @@ class ApimScenarioTest(ScenarioTest):
         # confirm name is taken
         self.cmd('apim check-name -n {apim}', checks=[self.check('nameAvailable', False), self.check('reason', 'AlreadyExists')])
 
-        self.cmd(
-            'apim update -n {apim} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
-            checks=[self.check('publisherName', '{publisher_name}'),
-                    self.check('publisherEmail', '{publisher_email}')])
+        self.kwargs.update({
+            'publisher_email': 'updated.publisher@contoso.com',
+            'publisher_name': 'Updated Contoso',
+        })
+
+        self.cmd('apim update -n {apim} -g {rg} --publisher-name "{publisher_name}" --set publisherEmail={publisher_email}',
+                 checks=[self.check('publisherName', '{publisher_name}'),
+                         self.check('publisherEmail', '{publisher_email}')])
 
         count = len(self.cmd('apim list').get_output_in_json())
         self.assertGreaterEqual(count, 1)
@@ -48,6 +52,11 @@ class ApimScenarioTest(ScenarioTest):
             self.check('publisherName', '{publisher_name}'),
             self.check('publisherEmail', '{publisher_email}')
         ])
+
+        # confirm deletion
+        self.cmd('apim delete -g {rg} -n {apim} -y')
+        count = len(self.cmd('apim list --query "[?name==\'{apim}\'][]"').get_output_in_json())
+        self.assertEqual(count, 0)
 
 
     # expect None for Developer sku, even though requested value was True - only works with Consumption sku
@@ -139,4 +148,4 @@ class ApimScenarioTest(ScenarioTest):
     
 
     def _get_location_display_name(self):
-        return self.cmd('az account list-locations --query "[?name==\'{}\'].displayName" -o tsv'.format(self.service_location))
+        return self.cmd('az account list-locations --query "[?name==\'{}\'].displayName" -o tsv'.format(self.service_location)).output.rstrip()

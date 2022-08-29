@@ -40,7 +40,7 @@ def delete_named_value(client, resource_group_name, service_name, named_value_id
     return sdk_no_wait(no_wait, client.delete, resource_group_name, service_name, named_value_id, if_match='*')
 
 
-def update_named_value(instance, value=None, tags=None, secret=None, if_match='*'):
+def update_named_value(instance, value=None, tags=None, secret=None, if_match=None):
     """Updates an existing Named Value."""
     if tags is not None:
         instance.tags = tags

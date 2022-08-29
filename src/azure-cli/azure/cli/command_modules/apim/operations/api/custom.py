@@ -112,7 +112,7 @@ def update_api(instance,
                openid_provider_id=None, openid_bearer_token_sending_methods=None,
                subscription_required=None, header_name=None, querystring_name=None,
                is_current=None, import_format=None, value=None,
-               wsdl_service_name=None, wsdl_endpoint_name=None, api_type=None, if_match='*'
+               wsdl_service_name=None, wsdl_endpoint_name=None, api_type=None, if_match=None
                ):
 
     if path is not None:
