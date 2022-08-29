@@ -8316,6 +8316,7 @@ def _build_args(cert_file, private_key_file):
         certificate = ["-o", "CertificateFile=" + cert_file]
     return private_key + certificate
 
+
 def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
     import os
     from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
