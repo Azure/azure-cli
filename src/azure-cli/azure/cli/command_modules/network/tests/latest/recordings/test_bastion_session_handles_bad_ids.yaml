@@ -1,0 +1,1192 @@
+interactions:
+- request:
+    body: '{"location": "eastus2euap", "tags": {}, "properties": {"addressSpace":
+      {"addressPrefixes": ["10.13.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name":
+      "Subnet1", "properties": {"addressPrefix": "10.13.1.0/24", "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '306'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --address-prefixes --location --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastion_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet\",\r\n
+        \ \"etag\": \"W/\\\"12b14cc9-35c0-4702-8fb0-72d7b80d14a1\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"4bf29c63-c693-46f6-aaa0-d65405cfda1f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.13.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"Subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/Subnet1\",\r\n
+        \       \"etag\": \"W/\\\"12b14cc9-35c0-4702-8fb0-72d7b80d14a1\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.13.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/547cf8fc-f3d3-4619-b8c5-134ad29e4b64?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1342'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bdf0357a-89b3-45b0-9493-89a6f493b67d
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefixes --location --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/547cf8fc-f3d3-4619-b8c5-134ad29e4b64?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4fdf2405-f951-422b-a126-514ef05528f5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefixes --location --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastion_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet\",\r\n
+        \ \"etag\": \"W/\\\"2196f2c5-42a1-48b8-96b2-efbb478d7052\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"4bf29c63-c693-46f6-aaa0-d65405cfda1f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.13.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"Subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/Subnet1\",\r\n
+        \       \"etag\": \"W/\\\"2196f2c5-42a1-48b8-96b2-efbb478d7052\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.13.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1344'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:52 GMT
+      etag:
+      - W/"2196f2c5-42a1-48b8-96b2-efbb478d7052"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3116c53a-7f31-4cd6-8ead-6f8c39098101
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --address-prefixes --name
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastion_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet\",\r\n
+        \ \"etag\": \"W/\\\"2196f2c5-42a1-48b8-96b2-efbb478d7052\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"4bf29c63-c693-46f6-aaa0-d65405cfda1f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.13.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"Subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/Subnet1\",\r\n
+        \       \"etag\": \"W/\\\"2196f2c5-42a1-48b8-96b2-efbb478d7052\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.13.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1344'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:54 GMT
+      etag:
+      - W/"2196f2c5-42a1-48b8-96b2-efbb478d7052"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5dafdad2-9ae0-4260-b9d2-0d76c6f82fae
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet",
+      "location": "eastus2euap", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.13.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/Subnet1",
+      "name": "Subnet1", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.13.1.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}, {"name": "AzureBastionSubnet",
+      "properties": {"addressPrefix": "10.13.2.0/24", "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
+      [], "enableDdosProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '974'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --address-prefixes --name
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastion_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet\",\r\n
+        \ \"etag\": \"W/\\\"3340d6fc-b86f-43fd-8dc0-54ba074922f2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"4bf29c63-c693-46f6-aaa0-d65405cfda1f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.13.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"Subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/Subnet1\",\r\n
+        \       \"etag\": \"W/\\\"3340d6fc-b86f-43fd-8dc0-54ba074922f2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.13.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/AzureBastionSubnet\",\r\n
+        \       \"etag\": \"W/\\\"3340d6fc-b86f-43fd-8dc0-54ba074922f2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.13.2.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/09816d78-c75a-46f6-8c1e-b028fac61a26?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1994'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fef4399e-a7f8-4282-ad3c-37e1bc5d3526
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --address-prefixes --name
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/09816d78-c75a-46f6-8c1e-b028fac61a26?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 48294572-287b-4480-b568-06a3a08fcb34
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --address-prefixes --name
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastion_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet\",\r\n
+        \ \"etag\": \"W/\\\"7a05828f-cace-48d2-83df-b05d32abe3a6\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"4bf29c63-c693-46f6-aaa0-d65405cfda1f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.13.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"Subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/Subnet1\",\r\n
+        \       \"etag\": \"W/\\\"7a05828f-cace-48d2-83df-b05d32abe3a6\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.13.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/AzureBastionSubnet\",\r\n
+        \       \"etag\": \"W/\\\"7a05828f-cace-48d2-83df-b05d32abe3a6\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.13.2.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1997'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:05:59 GMT
+      etag:
+      - W/"7a05828f-cace-48d2-83df-b05d32abe3a6"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 56a62af0-5f46-4ec9-b052-8ae3cbbb7d15
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "sku": {"name": "Standard"}, "properties":
+      {"publicIPAllocationMethod": "Static", "publicIPAddressVersion": "IPv4", "idleTimeoutInMinutes":
+      4}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '171'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku --location
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
+        \ \"etag\": \"W/\\\"a557ca07-ec74-482c-a81f-7cc6509c339c\\\"\",\r\n  \"location\":
+        \"eastus2euap\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"f807d7cb-f86e-4fd0-af53-62d819a5fd00\",\r\n    \"publicIPAddressVersion\":
+        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
+        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/1fcefdaf-3a24-4e3a-8875-a6c3cb2c7fb1?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '641'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d380cb89-9137-4fcc-9202-7f64e9fbde92
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --location
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/1fcefdaf-3a24-4e3a-8875-a6c3cb2c7fb1?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ab8d881f-e0a8-4058-b900-72d3bacca61d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --location
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
+        \ \"etag\": \"W/\\\"9e12beeb-6a4b-4c37-a412-576acd138fc3\\\"\",\r\n  \"location\":
+        \"eastus2euap\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"f807d7cb-f86e-4fd0-af53-62d819a5fd00\",\r\n    \"ipAddress\":
+        \"20.221.188.204\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
+        {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '678'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:03 GMT
+      etag:
+      - W/"9e12beeb-6a4b-4c37-a412-576acd138fc3"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f46e1217-acae-4e01-b578-a4d6659df0d9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "sku": {"name": "Standard"}, "properties":
+      {"ipConfigurations": [{"name": "bastion_ip_config", "properties": {"subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/AzureBastionSubnet"},
+      "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1"}}}],
+      "disableCopyPaste": false, "enableFileCopy": false, "enableIpConnect": false,
+      "enableShareableLink": false, "enableTunneling": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '656'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/bastionHosts/bastionname?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastionname\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/bastionHosts/bastionname\",\r\n
+        \ \"etag\": \"W/\\\"a8032b3b-0ad5-4430-a4f1-576d3017da14\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"scaleUnits\":
+        2,\r\n    \"enableTunneling\": false,\r\n    \"enableIpConnect\": false,\r\n
+        \   \"enableFileCopy\": false,\r\n    \"disableCopyPaste\": false,\r\n    \"enableShareableLink\":
+        false,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"bastion_ip_config\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/bastionHosts/bastionname/bastionHostIpConfigurations/bastion_ip_config\",\r\n
+        \       \"etag\": \"W/\\\"a8032b3b-0ad5-4430-a4f1-576d3017da14\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1\"\r\n
+        \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/AzureBastionSubnet\"\r\n
+        \         }\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  \"sku\": {\r\n    \"name\":
+        \"Standard\"\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1643'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d9368e9b-df03-4eee-b08a-851d7a741818
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ae4ae3c9-9999-46e5-b731-fed342da83ee
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2cd07c79-27fc-4ce6-9259-101917746bdd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:06:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d474e938-5856-4d47-9705-7fb1792fa5a4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:07:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0b6c2642-91e7-46a5-9c7f-370b29b9ba1d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:07:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ef78e64f-d56a-4722-86aa-42015f0e61da
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:08:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3b92983d-deba-4826-bd4c-81cb72ac7453
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:09:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 326e9df3-0362-4c54-bd7f-b89195ba80fe
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/d16b96ff-ce9d-4b38-bacb-473d57f3041d?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:12:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bb1c98be-dcd8-4229-afaf-0441776e1265
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --sku --location --public-ip-address
+      User-Agent:
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/bastionHosts/bastionname?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"bastionname\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/bastionHosts/bastionname\",\r\n
+        \ \"etag\": \"W/\\\"f23ca948-1145-4d5d-89b0-6af56f95d5c2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"dnsName\":
+        \"bst-bd827a1a-8acf-453d-9f85-7d177e11e2d5.bastion.azure.com\",\r\n    \"scaleUnits\":
+        2,\r\n    \"enableTunneling\": false,\r\n    \"enableIpConnect\": false,\r\n
+        \   \"enableFileCopy\": false,\r\n    \"disableCopyPaste\": false,\r\n    \"enableShareableLink\":
+        false,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"bastion_ip_config\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/bastionHosts/bastionname/bastionHostIpConfigurations/bastion_ip_config\",\r\n
+        \       \"etag\": \"W/\\\"f23ca948-1145-4d5d-89b0-6af56f95d5c2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/publicIPAddresses/ip1\"\r\n
+        \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_bastion_rid_ssh000001/providers/Microsoft.Network/virtualNetworks/bastion_vnet/subnets/AzureBastionSubnet\"\r\n
+        \         }\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  \"sku\": {\r\n    \"name\":
+        \"Standard\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1722'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 29 Aug 2022 00:12:28 GMT
+      etag:
+      - W/"f23ca948-1145-4d5d-89b0-6af56f95d5c2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 53b1177a-08d1-4c70-955e-59f75c7e100a
+    status:
+      code: 200
+      message: OK
+version: 1
