@@ -974,7 +974,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
-            'db_name': db_name,
+            'db_name': db_name
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin')
@@ -1005,6 +1005,8 @@ class CosmosDBTests(ScenarioTest):
         new_default_ttl = 2000
         conflict_resolution_policy = '"{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"'
         indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}]}"'
+        analytical_ttl = 3000
+        new_analytical_ttl = -1
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
@@ -1013,24 +1015,29 @@ class CosmosDBTests(ScenarioTest):
             'part': partition_key,
             'ttl': default_ttl,
             'nttl': new_default_ttl,
-            "conflict_resolution": conflict_resolution_policy,
-            "indexing": indexing
+            'conflict_resolution': conflict_resolution_policy,
+            'indexing': indexing,
+            'analytical_ttl': analytical_ttl,
+            'new_analytical_ttl': new_analytical_ttl
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin  --enable-analytical-storage true')
         self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb gremlin graph exists -g {rg} -a {acc} -d {db_name} -n {gp_name}').get_output_in_json()
 
-        graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} -p {part} --ttl {ttl} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
+        graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} -p {part} --ttl {ttl} \
+            --conflict-resolution-policy {conflict_resolution} --idx {indexing} --analytical-storage-ttl {analytical_ttl}').get_output_in_json()
         assert graph_create["name"] == gp_name
         assert graph_create["resource"]["partitionKey"]["paths"][0] == partition_key
         assert graph_create["resource"]["defaultTtl"] == default_ttl
         assert graph_create["resource"]["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
         assert graph_create["resource"]["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
+        assert graph_create["resource"]["analyticalStorageTtl"] == analytical_ttl
 
-        graph_update = self.cmd('az cosmosdb gremlin graph update -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {nttl}').get_output_in_json()
+        graph_update = self.cmd('az cosmosdb gremlin graph update -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {nttl} --analytical-storage-ttl {new_analytical_ttl}').get_output_in_json()
         assert graph_update["resource"]["defaultTtl"] == new_default_ttl
+        assert graph_update["resource"]["analyticalStorageTtl"] == new_analytical_ttl
 
         graph_show = self.cmd('az cosmosdb gremlin graph show -g {rg} -a {acc} -d {db_name} -n {gp_name}').get_output_in_json()
         assert graph_show["name"] == gp_name
@@ -2189,3 +2196,24 @@ class CosmosDBTests(ScenarioTest):
         assert locations_show['properties']['backupStorageRedundancies'] != None
         assert locations_show['properties']['isResidencyRestricted'] != None
         assert locations_show['properties']['supportsAvailabilityZone'] != None
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_service', location='eastus2')
+    def test_cosmosdb_service(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15)
+        })
+
+        acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
+
+        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
+        assert service_create["name"] == "sqlDedicatedGateway"
+
+        service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()
+        assert service_update["name"] == "sqlDedicatedGateway"
+
+        self.cmd('az cosmosdb service show  -a {acc} -g {rg} --name "sqlDedicatedGateway"')
+
+        service_list = self.cmd('az cosmosdb service list -a {acc} -g {rg}').get_output_in_json()
+        assert len(service_list) == 1
+
+        self.cmd('az cosmosdb service delete -a {acc} -g {rg} --name "sqlDedicatedGateway" --yes')

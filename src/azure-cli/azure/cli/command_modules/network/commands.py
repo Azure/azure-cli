@@ -1042,14 +1042,10 @@ def load_command_table(self, _):
 
     # region NetworkSecurityGroups
     with self.command_group('network nsg', network_nsg_sdk) as g:
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_nsgs')
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
         g.generic_update_command('update', setter_name='begin_create_or_update')
 
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
-        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
         g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
         g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
@@ -1407,6 +1403,7 @@ def load_command_table(self, _):
     # region Bastion
     with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_bastion_host', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_bastion_host', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
         g.custom_command('ssh', 'ssh_bastion_host')
