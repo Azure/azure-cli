@@ -11,7 +11,6 @@ from collections import namedtuple
 from urllib.parse import urlencode
 
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
-from azure.cli.core.commands.constants import SURVEY_PROMPT
 from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
 from azure.cli.core.intercept_survey import _SURVEY_URL
 from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console
@@ -44,8 +43,7 @@ _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
     'For more information on getting started, visit: {}\n' \
     'If you have questions, visit our Stack Overflow page: {}\n'\
-    '{}\n'\
-    .format(_GET_STARTED_URL, _QUESTIONS_URL, SURVEY_PROMPT)
+    .format(_GET_STARTED_URL, _QUESTIONS_URL)
 
 _MSG_CMD_ISSUE = "\nEnter the number of the command you would like to create an issue for. Enter q to quit: "
 
