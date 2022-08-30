@@ -1629,7 +1629,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # Create a application gateway without enable --enable-private-link
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
                  '--sku Standard_v2 '
-                 '--public-ip-address {appgw_public_ip}')
+                 '--public-ip-address {appgw_public_ip} '
+                 '--priority 1001')
 
         # Add one private link
         self.cmd('network application-gateway private-link add -g {rg} '
@@ -1709,7 +1710,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         self.cmd('network application-gateway rule create -g {rg} '
                  '--gateway {appgw} '
                  '--name privateRule '
-                 '--http-listener privateHTTPListener')
+                 '--http-listener privateHTTPListener '
+                 '--priority 1002')
 
         private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
         self.assertEqual(len(private_link_resource), 2)
@@ -1768,7 +1770,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         # Create a application gateway without enable --enable-private-link
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
-                 '--public-ip-address {appgw_public_ip}')
+                 '--public-ip-address {appgw_public_ip} --priority 1001')
 
         # Add one private link
         # These will fail because application-gateway feature cannot be enabled for selected sku
@@ -3178,6 +3180,113 @@ class NetworkPrivateLinkRecoveryServicesScenarioTest(ScenarioTest):
         self.cmd('vault delete --name {vault} --resource-group {rg}')
 
 
+class NetworkPrivateLinkEnergyServicesScenarioTest(ScenarioTest):
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_energyservices_pe', random_name_length=40, location="centraluseuap")
+    def test_energyservices_private_endpoint(self, resource_group):
+
+        # Currently create energy services resource not supported in OAK
+        self.kwargs.update({
+            'rg': resource_group,
+            'resource_name': self.create_random_name('cli', 15),
+            'resource_type': 'energyServices',
+            'sub': self.get_subscription_id(),
+            'namespace': 'Microsoft.OpenEnergyPlatform',
+            'vnet': self.create_random_name('cli-energyservices-vnet-', 40),
+            'subnet': self.create_random_name('cli-energyservices-subnet-', 40),
+            'private_endpoint': self.create_random_name('cli-energyservices-pe-', 40),
+            'private_endpoint_connection': self.create_random_name('cli-energyservices-pec-', 40),
+            'location': 'centraluseuap',
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!',
+            'body': '{\\"location\\":\\"centraluseuap\\",\\"properties\\":{\\"authAppId\\":\\"2f59abbc-7b40-4d0e-91b2-22ca3084bc84\\",\\"dataPartitionNames\\":[{\\"name\\":\\"dp1\\"}]},\\"tags\\":{\\"environment\\":\\"test\\",\\"program\\":\\"exploration\\"}}',
+            'api_version': '2022-07-21-preview'
+        })
+
+        # Create energy services resource
+        # This API only accepts the creation request, provisioning state of the resource has to be polled
+        self.cmd('az rest --method "PUT" \
+                --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/{namespace}/{resource_type}/{resource_name}?api-version={api_version}" \
+                --body "{body}"')
+
+        # check for resource provisioning state
+        self.check_provisioning_state_for_energyservices_resource()
+
+        # Get resource id for the instance
+        self.kwargs['resource_id']= self.cmd(
+            'az resource show --name {resource_name} -g {rg} --resource-type {resource_type} --namespace {namespace} --query id').output
+
+        # Create virtual net and sub net
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+
+        # Update sub net
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} --name {subnet} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test list private link resources
+        private_link_resources = self.cmd(
+            'network private-link-resource list --id {resource_name} ').get_output_in_json()
+        self.kwargs['group_id'] = private_link_resources[0]['properties']['groupId']
+
+        # Create private endpoint
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {resource_id} --connection-name {private_endpoint_connection} '
+            '--group-id {group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint'].lower() in private_endpoint['name'].lower())
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {resource_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Approved'),
+                                                ]).get_output_in_json()
+
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+
+        # Test reject private endpoint connection
+        self.cmd(
+            'network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+            ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {private-endpoint-connection-id} -y')
+        time.sleep(30)
+        self.cmd('az network private-endpoint-connection list --id {private-endpoint-connection-id}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
+    def get_provisioning_state_for_energyservices_resource(self):
+        # get provisioning state
+        response = self.cmd('az rest --method "GET" \
+                --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/{namespace}/{resource_type}/{resource_name}?api-version={api_version}"').get_output_in_json()
+
+        return response['properties']['provisioningState']
+
+    def check_provisioning_state_for_energyservices_resource(self):
+        count = 0
+        print("checking status of creation...........")
+        state = self.get_provisioning_state_for_energyservices_resource()
+        print(state)
+        while state!="Succeeded":
+            if state == "Failed":
+                print("creation failed!")
+                self.assertTrue(False)
+            elif (count == 12):
+                print("TimeOut after waiting for 120 mins!")
+                self.assertTrue(False)
+            print("instance not yet created. waiting for 10 more mins...")
+            count+=1
+            time.sleep(600) # Wait for 10 minutes
+            state = self.get_provisioning_state_for_energyservices_resource()
+        print("creation succeeded!")
+
+
 class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_private_endpoint_pls', location='centralus')
     def test_private_endpoint_pls(self):
@@ -3387,6 +3496,76 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
         # Remove private endpoint
         self.cmd(
             'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.Dashboard/grafana -y')
+
+class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_deviceupdate_private_endpoint', random_name_length=40, location="westus2")
+    def test_private_link_endpoint_deviceupdate(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'deviceupdate_name': self.create_random_name('cli-test-adu-', 24),
+            'vnet_name': self.create_random_name('cli-test-adu-pe-vnet', 40),
+            'subnet_name': self.create_random_name('cli-test-adu-pe-subnet', 40),
+            'endpoint_name': self.create_random_name('cli-test-adu-pe-', 40),
+            'endpoint_connection_name': self.create_random_name('cli-test-adu-pec-', 40),
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!'
+        })
+
+        # Device Update is an IoT extension
+        self.cmd('extension add --name azure-iot')
+
+        # Create device update account
+        deviceupdate = self.cmd(
+            'iot device-update account create --account {deviceupdate_name} --resource-group {rg}').get_output_in_json()
+        self.kwargs['deviceupdate_id'] = deviceupdate['id']
+
+        # Create a vnet and subnet for private endpoint connection
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test list private link resources
+        deviceupdate_private_link_resources = self.cmd(
+            'network private-link-resource list --id {deviceupdate_id}').get_output_in_json()
+        self.kwargs['group_id'] = deviceupdate_private_link_resources[0]['properties']['groupId']
+
+        # Create private endpoint with manual request approval
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--private-connection-resource-id {deviceupdate_id} --connection-name {endpoint_connection_name} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in private_endpoint['name'].lower())
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {deviceupdate_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Pending'),
+                                                ]).get_output_in_json()
+
+        # Test approve private endpoint connection
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+        self.cmd(
+            'network private-endpoint-connection approve --id {private-endpoint-connection-id} '
+            '--description {approve_description_msg}', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+
+        # Test reject private endpoint connnection
+        self.cmd('network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+                 ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private-endpoint-connection-id} --yes')
+        import time
+        time.sleep(90)
+        self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
+                 expect_failure=True)
 
 
 if __name__ == '__main__':

@@ -152,6 +152,75 @@ short-summary: Enable a receiver in an action group.
 long-summary: This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
 """
 
+helps['monitor action-group wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state.
+"""
+
+helps['monitor action-group test-notifications'] = """
+type: group
+short-summary: Manage action groups test-notifications
+"""
+
+helps['monitor action-group test-notifications create'] = """
+type: command
+short-summary: Create an action group test-notifications
+parameters:
+  - name: --add-action -a
+    short-summary: Add receivers to the action group test-notifications
+    long-summary: |
+        Usage:   --add-action TYPE NAME [ARG ...]
+        Email:
+            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
+            Example:    --add-action email bob bob@contoso.com
+        SMS:
+            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action sms charli 1 5551234567
+        Webhook:
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
+        Arm Role:
+            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
+        Azure App Push:
+            Format:     --add-action azureapppush NAME EMAIL_ADDRESS
+            Example:    --add-action azureapppush test_apppush bob@contoso.com
+        ITSM:
+            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
+            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast
+        Automation runbook:
+            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
+            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
+        Voice:
+            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action voice charli 1 4441234567
+        Logic App:
+            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
+        Azure Function:
+            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
+            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
+        Multiple actions can be specified by using more than one `--add-action` argument.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
+examples:
+  - name: Create an action group test-notifications with action group
+    text: |
+        az monitor action-group test-notifications create --action-group MyActionGroup \\
+        --resource-group MyResourceGroup -a email alice alice@example.com usecommonalertsChema --alert-type budget
+  - name: Create an action group test-notifications with resource-group
+    text: |
+        az monitor action-group test-notifications create --resource-group MyResourceGroup \\
+        -a email alice alice@example.com usecommonalertsChema --alert-type budget
+  - name: Create an action group test-notifications
+    text: |
+        az monitor action-group test-notifications create -a email alice alice@example.com usecommonalertsChema \\
+        --alert-type budget
+"""
+
 helps['monitor activity-log'] = """
 type: group
 short-summary: Manage activity logs.

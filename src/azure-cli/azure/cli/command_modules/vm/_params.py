@@ -1228,22 +1228,23 @@ def load_arguments(self, _):
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
-        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
-        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
-                   help='Enable soft-deletion for resources in this gallery, '
-                        'allowing them to be recovered within retention time.')
-        c.argument('publisher_uri', help='Community gallery publisher uri.')
-        c.argument('publisher_contact', options_list=['--publisher-email'], help='Community gallery publisher contact email.')
-        c.argument('eula', help='Community gallery publisher eula.')
-        c.argument('public_name_prefix', help='Community gallery public name prefix.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
-        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
-        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
-                   help='Enable soft-deletion for resources in this gallery, '
-                        'allowing them to be recovered within retention time.')
+    for scope in ['sig create', 'sig update']:
+        with self.argument_context(scope) as c:
+            c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
+                       arg_group='Sharing Profile',
+                       min_api='2020-09-30',
+                       help='This property allows you to specify the permission of sharing gallery.')
+            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+                       help='Enable soft-deletion for resources in this gallery, '
+                            'allowing them to be recovered within retention time.')
+            c.argument('publisher_uri', help='Community gallery publisher uri.')
+            c.argument('publisher_contact', options_list=['--publisher-email'],
+                       help='Community gallery publisher contact email.')
+            c.argument('eula', help='Community gallery publisher eula.')
+            c.argument('public_name_prefix', help='Community gallery public name prefix.')
+
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:

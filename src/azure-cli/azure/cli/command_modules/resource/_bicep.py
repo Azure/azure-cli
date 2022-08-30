@@ -28,6 +28,7 @@ from azure.cli.core.azclierror import (
     ClientRequestError,
     InvalidTemplateError,
 )
+from azure.cli.core.util import should_disable_connection_verify
 
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
@@ -44,6 +45,8 @@ _bicep_version_check_cache_ttl = timedelta(minutes=10)
 _bicep_version_check_time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 _logger = get_logger(__name__)
+
+_requests_verify = not should_disable_connection_verify()
 
 
 def validate_bicep_target_scope(template_schema, deployment_scope):
@@ -144,7 +147,7 @@ def is_bicep_file(file_path):
 def get_bicep_available_release_tags():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepReleases")
+        response = requests.get("https://aka.ms/BicepReleases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -153,7 +156,7 @@ def get_bicep_available_release_tags():
 def get_bicep_latest_release_tag():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepLatestRelease")
+        response = requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify)
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:

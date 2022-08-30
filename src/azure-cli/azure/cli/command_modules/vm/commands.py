@@ -430,7 +430,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_nics')
 
     with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
-        g.custom_command('invoke', 'vm_run_command_invoke')
+        g.custom_command('invoke', 'vm_run_command_invoke', supports_no_wait=True)
         g.custom_command('list', 'vm_run_command_list')
         g.custom_show_command('show', 'vm_run_command_show')
         g.custom_command('create', 'vm_run_command_create', supports_no_wait=True)
