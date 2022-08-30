@@ -395,7 +395,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repository', options_list=['--remove-repository', c.deprecate(target='--remove', redirect='--remove-repository', hide=True)], nargs='+', action='append', required=False,
-                   help='respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+                   help='repository permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('add_gateway', options_list=['--add-gateway'], nargs='+', action='append', required=False,
                    help='gateway permissions to be added. Use the format "--add-gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
         c.argument('remove_gateway', options_list=['--remove-gateway'], nargs='+', action='append', required=False,
@@ -509,13 +509,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repos', options_list=['--remove'], nargs='*',
-                   help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+                   help='repository permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
     with self.argument_context('acr connected-registry repo') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repos', options_list=['--remove'], nargs='*',
-                   help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+                   help='repository permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
 
 def _get_helm_default_install_location():
