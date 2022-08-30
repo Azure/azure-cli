@@ -184,10 +184,10 @@ short-summary: Create a linked IoT hub in an Azure IoT Hub Device Provisioning S
 examples:
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service instance
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service which applies allocation weight and weight being 10
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus --allocation-weight 10 --apply-allocation-policy True
 """
 
 helps['iot dps linked-hub delete'] = """
