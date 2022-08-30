@@ -544,6 +544,15 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --disable-disk-driver
+    type: bool
+    short-summary: Disable AzureDisk CSI Driver.
+  - name: --disable-file-driver
+    type: bool
+    short-summary: Disable AzureFile CSI Driver.
+  - name: --disable-snapshot-controller
+    type: bool
+    short-summary: Disable CSI Snapshot Controller.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
@@ -796,6 +805,24 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-disk-driver
+    type: bool
+    short-summary: Enable AzureDisk CSI Driver.
+  - name: --disable-disk-driver
+    type: bool
+    short-summary: Disable AzureDisk CSI Driver.
+  - name: --enable-file-driver
+    type: bool
+    short-summary: Enable AzureFile CSI Driver.
+  - name: --disable-file-driver
+    type: bool
+    short-summary: Disable AzureFile CSI Driver.
+  - name: --enable-snapshot-controller
+    type: bool
+    short-summary: Enable Snapshot Controller.
+  - name: --disable-snapshot-controller
+    type: bool
+    short-summary: Disable CSI Snapshot Controller.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
