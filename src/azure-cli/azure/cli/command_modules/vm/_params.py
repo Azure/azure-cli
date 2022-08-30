@@ -42,6 +42,7 @@ def load_arguments(self, _):
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
+    DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -133,6 +134,7 @@ def load_arguments(self, _):
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
+    disk_controller_type = CLIArgumentType(help='Specify the disk controller type configured for the VM or VMSS.', arg_type=get_enum_type(DiskControllerTypes), arg_group='Storage', is_preview=True)
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -1136,6 +1138,7 @@ def load_arguments(self, _):
                        min_api='2021-04-01', is_preview=True)
             c.argument('v_cpus_available', type=int, min_api='2021-11-01', help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, min_api='2021-11-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
+            c.argument('disk_controller_type', disk_controller_type)
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
