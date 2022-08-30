@@ -2613,10 +2613,13 @@ def vm_run_command_list(client,
                         vm_name=None,
                         expand=None,
                         location=None):
-    if resource_group_name or vm_name is not None:
-        return client.list_by_virtual_machine(resource_group_name=resource_group_name,
-                                              vm_name=vm_name,
-                                              expand=expand)
+
+    if not location and not (resource_group_name and vm_name):
+        raise RequiredArgumentMissingError("Please specify --location or specify --vm-name and --resource-group")
+
+    if vm_name:
+        return client.list_by_virtual_machine(resource_group_name=resource_group_name, vm_name=vm_name, expand=expand)
+
     return client.list(location=location)
 
 
@@ -2628,15 +2631,18 @@ def vm_run_command_show(client,
                         instance_view=False,
                         location=None,
                         command_id=None):
-    if resource_group_name or vm_name is not None or run_command_name is not None:
+
+    if not (resource_group_name and vm_name and run_command_name) and not (location and command_id):
+        raise RequiredArgumentMissingError(
+            "Please specify --location and --command-id or specify --vm-name, --resource-group and --run-command-name")
+
+    if vm_name:
         if instance_view:
             expand = 'instanceView'
-        return client.get_by_virtual_machine(resource_group_name=resource_group_name,
-                                             vm_name=vm_name,
-                                             run_command_name=run_command_name,
-                                             expand=expand)
-    return client.get(location=location,
-                      command_id=command_id)
+        return client.get_by_virtual_machine(resource_group_name=resource_group_name, vm_name=vm_name,
+                                             run_command_name=run_command_name, expand=expand)
+
+    return client.get(location=location, command_id=command_id)
 
 # endregion
 
