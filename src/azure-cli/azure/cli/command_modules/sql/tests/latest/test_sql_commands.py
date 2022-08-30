@@ -6059,3 +6059,74 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
         self.cmd('sql db ledger-digest-uploads show -g {} -s {} --name {}'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])
+
+class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_endpoint_cert_mgmt(self, mi, rg):
+        endpoint_type_dbm = 'DATABASE_MIRRORING'
+        endpoint_type_sb = 'SERVICE_BROKER'
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'endpoint_type_dbm': endpoint_type_dbm,
+            'endpoint_type_sb': endpoint_type_sb,
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        #show command DBM endpoint cert
+        dbm_endpoint_cert = self.cmd('sql mi endpoint-cert show -g {rg} --instance-name {mi} --endpoint-type {endpoint_type_dbm}',
+                    checks=[
+                        JMESPathCheck('name', endpoint_type_dbm),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/endpointCertificates'),
+                        ]).get_output_in_json()
+
+        dbm_endpoint_cert_id = dbm_endpoint_cert['id']
+        self.kwargs.update({
+            'dbm_endpoint_cert_id': dbm_endpoint_cert_id
+        })
+
+        dbm_endpoint_cert_public_key = dbm_endpoint_cert['publicBlob']
+        self.assertRegex(dbm_endpoint_cert_public_key, "^[0123456789ABCDEF]+$")
+
+        #show command SB endpoint cert
+        sb_endpoint_cert = self.cmd('sql mi endpoint-cert show -g {rg} --instance-name {mi} --endpoint-type {endpoint_type_sb}',
+                    checks=[
+                        JMESPathCheck('name', endpoint_type_sb),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/endpointCertificates'),
+                        ]).get_output_in_json()
+
+        sb_endpoint_cert_id = sb_endpoint_cert['id']
+        self.kwargs.update({
+            'sb_endpoint_cert_id': sb_endpoint_cert_id
+        })
+
+        sb_endpoint_cert_public_key = sb_endpoint_cert['publicBlob']
+        self.assertRegex(sb_endpoint_cert_public_key, "^[0123456789ABCDEF]+$")
+
+        #show command with --ids parameter
+        self.cmd('sql mi endpoint-cert show --ids {dbm_endpoint_cert_id}',
+                    checks=[
+                        JMESPathCheck('name', endpoint_type_dbm),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/endpointCertificates')])
+        #show command with --ids parameter
+        self.cmd('sql mi endpoint-cert show --ids {sb_endpoint_cert_id}',
+                    checks=[
+                        JMESPathCheck('name', endpoint_type_sb),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/endpointCertificates')])
+
+        #list endpoint certificates
+        self.cmd('sql mi endpoint-cert list -g {rg} --instance-name {mi}',
+                    checks=[
+                        JMESPathCheckExists("[] | [?name == 'DATABASE_MIRRORING']"),
+                        JMESPathCheckExists("[] | [?name == 'SERVICE_BROKER']"),
+                        JMESPathCheck('length(@)', 2)]).get_output_in_json()
