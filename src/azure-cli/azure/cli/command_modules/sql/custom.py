@@ -503,7 +503,6 @@ def _get_identity_object_from_type(
     if assignIdentityIsPresent is False and existingResourceIdentity is not None:
         identityResult = existingResourceIdentity
 
-    print(identityResult)
     return identityResult
 
 
