@@ -37,15 +37,15 @@ class BastionConnectableResourceIdTest(ScenarioTest):
 
         # Expect invalid vm resource id - rid has hanging /
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('network bastion ssh --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{invalid_vm_rid}" --auth-type "AAD"')
+            self.cmd('network bastion rdp --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{invalid_vm_rid}" --auth-type "AAD"')
 
         # Expect invalid vm resource id - rid is of a resource group
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('network bastion ssh --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_rg_id_not_vm_rid}" --auth-type "AAD"')
+            self.cmd('network bastion rdp --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_rg_id_not_vm_rid}" --auth-type "AAD"')
 
         # Expect resource not found - rid is of a network interface
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('network bastion ssh --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_nic_id_not_vm_rid}" --auth-type "AAD"')
+            self.cmd('network bastion rdp --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_nic_id_not_vm_rid}" --auth-type "AAD"')
 
 if __name__ == '__main__':
     unittest.main()
