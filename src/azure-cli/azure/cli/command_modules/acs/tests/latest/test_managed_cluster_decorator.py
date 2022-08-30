@@ -6637,7 +6637,17 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         # fail on no updated parameter provided
-        with self.assertRaises(RequiredArgumentMissingError):
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(RequiredArgumentMissingError):
+            dec_1.check_raw_parameters()
+
+        # unless user says they want to reconcile
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
             dec_1.check_raw_parameters()
 
         # custom value
