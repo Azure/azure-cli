@@ -24,5 +24,4 @@ def load_command_table(commands_loader, _):
         g.custom_command('delete', 'delete_api_schema', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'get_api_schema')
         g.custom_command('list', 'list_api_schema')
-        g.custom_command('get-etag', 'get_api_schema_entity_tag')
         g.wait_command('wait')

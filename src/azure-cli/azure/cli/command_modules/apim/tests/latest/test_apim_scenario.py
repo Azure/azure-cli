@@ -16,7 +16,7 @@ class ApimScenarioTest(ScenarioTest):
         self._setup_test(location=resource_group_location, sku='Consumption')
 
         self.cmd('apim check-name -n {apim} -o json', checks=[self.check('nameAvailable', True)])
-        self.cmd('apim create --name {apim} -g {rg} -l {apim_location} --sku-name {sku_name} --sku-capacity {sku_capacity} --publisher-email {publisher_email} --publisher-name {publisher_name}',
+        self.cmd('apim create --name {apim} -g {rg} -l {apim_location} --sku-name {sku_name} --sku-capacity {sku_capacity} --publisher-email {publisher_email} --publisher-name "{publisher_name}"',
                  checks=[self.check('name', '{apim}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),

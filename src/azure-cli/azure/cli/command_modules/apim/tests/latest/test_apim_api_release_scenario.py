@@ -11,7 +11,7 @@ class ApimApiReleaseScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiReleaseScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_api_rel-')
     @ApiManagementPreparer(sku_name='Consumption')
     def test_apim_api_release(self):
         self._setup_an_api()

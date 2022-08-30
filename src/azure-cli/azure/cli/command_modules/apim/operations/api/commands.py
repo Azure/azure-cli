@@ -18,5 +18,5 @@ def load_command_table(commands_loader, _):
         g.custom_command('delete', 'delete_api', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'get_api', table_transformer=None)
         g.custom_command('list', 'list_api', table_transformer=None)
-        g.generic_update_command('update', setter_name='update', custom_func_name='update_api', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_api', supports_no_wait=True)
         g.wait_command('wait')

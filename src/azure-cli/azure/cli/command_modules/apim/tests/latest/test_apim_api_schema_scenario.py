@@ -18,7 +18,7 @@ class ApimApiSchemaScenarioTest(ScenarioTest):
         self.kwargs.update({
             'graphql_api_id': self.create_random_name('gr-api', 10),
             'graphql_sch_id': 'graphql',
-            'graphql_schema_path': self.data.file_path,
+            'graphql_schema_file': self.data.file_path,
             'graphql_schema_type': 'application/vnd.ms-azure-apim.graphql.schema',
             'graphql_schema_type2': 'Microsoft.ApiManagement/service/apis/schemas',
             'schema_file_value': self.data.content,
@@ -40,13 +40,13 @@ class ApimApiSchemaScenarioTest(ScenarioTest):
 
     def _test_graphql_schema(self):
         #create schema
-        self.cmd('apim api schema create -g "{rg}" --service-name "{apim}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --schema-type "{graphql_schema_type}" --schema-path "{graphql_schema_path}"',
+        self.cmd('apim api schema create -g "{rg}" --service-name "{apim}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --schema-type "{graphql_schema_type}" --schema-file "{graphql_schema_file}"',
             checks=[self.check('contentType', '{graphql_schema_type}'),
                     self.check('name', '{graphql_sch_id}'),
                     self.check('value', '{schema_file_value}')])
         
         #get schema
-        self.cmd('apim api schema show -g "{rg}" --service-name "{apim}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"',
+        self.cmd('apim api schema show -g "{rg}" --service-name "{apim}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --include-schema-value',
             checks=[self.check('contentType', '{graphql_schema_type}'),
                     self.check('name', '{graphql_sch_id}'),
                     self.check('value', '{schema_file_value}')])
@@ -54,10 +54,6 @@ class ApimApiSchemaScenarioTest(ScenarioTest):
         #list api schemas
         schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{apim}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(schema_count, 1)
-        
-        #entity
-        entity = self.cmd('apim api schema get-etag -g "{rg}" --service-name "{apim}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"')
-        self.assertTrue(entity)
         
         #delete schema
         self.cmd('apim api schema delete -g "{rg}" --service-name "{apim}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --yes')

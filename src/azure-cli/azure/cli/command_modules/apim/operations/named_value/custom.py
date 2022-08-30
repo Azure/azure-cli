@@ -51,7 +51,7 @@ def update_named_value(instance, value=None, tags=None, secret=None, if_match=No
     if secret is not None:
         instance.secret = secret
 
-    if if_match is not None:
-        instance.if_match = if_match
+    if if_match is None:
+        instance.if_match = "*"
 
     return instance

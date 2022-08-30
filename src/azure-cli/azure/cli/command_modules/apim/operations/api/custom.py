@@ -161,11 +161,11 @@ def update_api(instance,
         instance.subscription_required = subscription_required
 
     # Set the subscription_key_parameter_names
-    if header_name is not None:
-        instance.subscription_key_parameter_names.header = header_name
-
-    if querystring_name is not None:
-        instance.subscription_key_parameter_names.query = querystring_name
+    if header_name is not None or querystring_name is not None:
+        instance.subscription_key_parameter_names = SubscriptionKeyParameterNamesContract(
+            header=header_name,
+            query=querystring_name
+        )
 
     if is_current is not None:
         instance.is_current = is_current

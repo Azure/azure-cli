@@ -25,5 +25,5 @@ def load_command_table(commands_loader, _):
         g.custom_show_command('show', 'get_named_value')
         g.custom_command('list', 'list_named_value')
         g.custom_command('delete', 'delete_named_value', confirmation=True, supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_update', custom_func_name='update_named_value')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_named_value')
         g.wait_command('wait')

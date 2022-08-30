@@ -32,3 +32,16 @@ def load_arguments(commands_loader, _):
         c.argument('header_name', help='Subscription key header name.')
         c.argument('oauth2_server_id', help='OAuth authorization server identifier.')
         c.argument('oauth2_scope', help='OAuth operations scope.')
+
+        c.argument('api_revision', help='The API Revision number.')
+        c.argument('api_version_set_id', options_list=['--api-version-set-id'], help='The API Version Set identifier.')
+        c.argument('api_version', options_list=['--api-version'], help='Indicates the version identifier of the API if the API is versioned.')
+        c.argument('openid_provider_id', help='OAuth authorization server identifier.')
+        c.argument('service_url', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')
+        c.argument('source_api_id', help='API identifier of the source API.')
+        c.argument('value', help='Content value when Importing an API.')
+        c.argument('wsdl_endpoint_name', help='Name of endpoint(port) to import from WSDL')
+        c.argument('wsdl_service_name', help='Name of service to import from WSDL')
+        c.argument('display_name', help='API name. Must be 1 to 300 characters long.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')

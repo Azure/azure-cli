@@ -20,7 +20,7 @@ class ApimApiRevisionScenarioTest(ScenarioTest):
         self._setup_an_api()
 
         self.cmd('apim api revision list -g "{rg}" -n "{apim}" --api-id "{api_id}"')
-        self.cmd('apim api revision create -g "{rg}" -n "{apim}" --api-id "{api_id}"  --api-revision {api_revision} --api-revision-description "{api_revision_description}"')
+        self.cmd('apim api revision create -g "{rg}" -n "{apim}" --api-id "{api_id}"  -r {api_revision} -d "{api_revision_description}"')
 
     def _setup_an_api(self):
         output = self.cmd('apim api create -n {apim} -g {rg} -a {api_id} --path {path} --display-name "{display_name}" --service-url {service_url}  --protocols {protocols} --header-name {subscription_key_header_name} --querystring-name {subscription_key_query_string_name}').get_output_in_json()
@@ -31,12 +31,11 @@ class ApimApiRevisionScenarioTest(ScenarioTest):
     def _initialize_variables(self):
         # api variables
         self.kwargs.update({
-            'api_id': 'api-id',
-            'path': 'api-path',
-            'display_name': 'api display name',
-            'description': 'api description',
+            'api_id': 'echo-api',
+            'path': 'api/echo-api',
+            'display_name': 'Echo API',
             'service_url': 'http://echoapi.cloudapp.net/api',
-            'protocols': 'http',
+            'protocols': 'https',
             'subscription_key_header_name': 'header1234',
             'subscription_key_query_string_name': 'query1234'
         })

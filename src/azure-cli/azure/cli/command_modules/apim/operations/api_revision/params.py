@@ -11,5 +11,5 @@ def load_arguments(commands_loader, _):
         c.argument('api_id', options_list=['--api-id', '-a'], help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with commands_loader.argument_context('apim api revision create') as c:
-        c.argument('api_revision', options_list=['--api-revision', '-r'], help='Describes the Revision of the Api.')
-        c.argument('api_revision_description', options_list=['--api-revision-description', '--rd'], help='Description of the Api Revision.')
+        c.argument('api_revision', options_list=['--revision-id', '-r'], help='The simple Revision Id of the Api.')
+        c.argument('api_revision_description', options_list=['--description', '-d'], help='Description of the Api Revision.')

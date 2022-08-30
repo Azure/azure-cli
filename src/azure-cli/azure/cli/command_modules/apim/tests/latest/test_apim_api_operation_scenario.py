@@ -12,9 +12,9 @@ class ApimApiOperationScenarioTest(ScenarioTest):
         self._initialize_variables()
         super(ApimApiOperationScenarioTest, self).setUp()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @ApiManagementPreparer(parameter_name='apim_name', sku_name='Consumption')
-    def test_apim_api_operation(self, resource_group, apim_name):
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_api_op-')
+    @ApiManagementPreparer(sku_name='Consumption')
+    def test_apim_api_operation(self):
         self._setup_an_api()
 
         # list operations in an API

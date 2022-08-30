@@ -21,6 +21,8 @@ def load_arguments(commands_loader, _):
         c.argument('approval_required', arg_type=get_three_state_flag(), help='Whether subscription approval is required. If false, new subscriptions will be approved automatically enabling developers to call the product’s APIs immediately after subscribing. If true, administrators must manually approve the subscription before the developer can any of the product’s APIs. Can be present only if subscriptionRequired property is present and has a value of false.')
         c.argument('subscriptions_limit', type=int, help='Whether the number of subscriptions a user can have to this product at the same time. Set to null or omit to allow unlimited per user subscriptions. Can be present only if --subscription-required is present and has a value of false.')
         c.argument('state', get_enum_type(STATE_TYPES), help='Whether product is published or not. Published products are discoverable by users of developer portal. Non published products are visible only to administrators. Default state of Product is notPublished.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
 
     with commands_loader.argument_context('apim product') as c:
         c.argument('delete_subscriptions', arg_type=get_three_state_flag(), help="Whether to delete the product's subscriptions. Default is true.")

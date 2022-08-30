@@ -15,6 +15,8 @@ def load_arguments(commands_loader, _):
         c.argument('value', options_list=['--value', '-v'], help='Required. Value of the NamedValue. Can contain policy expressions. It may not be empty or consist only of whitespace. This property will not be filled on GET operations! Use /listSecrets POST request to get the value.')
         c.argument('secret', arg_type=get_three_state_flag(), help='Determines whether the value is a secret. Default value is false.')
         c.argument('tags', tags_type)
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
 
     with commands_loader.argument_context('apim named-value show') as c:
         c.argument('secret', arg_type=get_three_state_flag(), help='Whether the value is a secret and should display the value. Default value is false.')
