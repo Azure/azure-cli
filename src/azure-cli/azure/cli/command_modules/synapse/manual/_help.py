@@ -45,7 +45,7 @@ examples:
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --repository-type AzureDevOpsGit --account-name testuser --project-name testprj \\
           --repository-name testrepo --collaboration-branch main --last-commit-id 000000
-  - name: Create a Synapse workspace with managed resource group 
+  - name: Create a Synapse workspace with managed resource group
     text: |-
         az synapse workspace create --name testworkspace --resource-group rg \\
           --managed-resource-group-name managedrg \\
