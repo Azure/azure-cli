@@ -287,4 +287,4 @@ class PollingAnimation():
     def flush(cls):
         sys.stdout.flush()
         sys.stdout.write('\r')
-        sys.stdout.write("\033[K")
+        sys.stdout.write("\033[K")  # \33[K: clears from cursor to end of line.
