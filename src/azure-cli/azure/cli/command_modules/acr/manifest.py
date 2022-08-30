@@ -310,10 +310,6 @@ def acr_manifest_show(cmd,
     else:
         repository, tag, manifest = _parse_image_name(manifest_spec, allow_digest=True)
 
-    if not manifest:
-        image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
-
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -323,12 +319,21 @@ def acr_manifest_show(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
 
-    raw_result = _obtain_manifest_from_registry(
-        login_server=login_server,
-        path=_get_v2_manifest_path(repository, manifest),
-        raw=raw_output,
-        username=username,
-        password=password)
+    if tag:
+        raw_result = _obtain_manifest_from_registry(
+            login_server=login_server,
+            path=_get_v2_manifest_path(repository, tag),
+            raw=raw_output,
+            username=username,
+            password=password)
+
+    else:
+        raw_result = _obtain_manifest_from_registry(
+            login_server=login_server,
+            path=_get_v2_manifest_path(repository, manifest),
+            raw=raw_output,
+            username=username,
+            password=password)
 
     # We are forced to print directly here in order to preserve bit for bit integrity and
     # avoid any formatting so that the output can successfully be hashed. Customer will expect that
