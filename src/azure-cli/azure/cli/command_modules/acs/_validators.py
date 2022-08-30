@@ -223,7 +223,7 @@ def validate_load_balancer_idle_timeout(namespace):
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
-            
+
 def validate_network_policy(namespace):
     """validate network policy to be in lowercase"""
     if namespace.network_policy.islower() is False:
