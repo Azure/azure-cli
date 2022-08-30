@@ -14,7 +14,8 @@ from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
-from ._arg import AAZArgumentsSchema, AAZBoolArg, AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg
+from ._arg import AAZArgumentsSchema, AAZBoolArg, \
+    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
