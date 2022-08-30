@@ -176,10 +176,10 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete --id {kv_pe_id} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_pe')
-    def test_hsm_private_endpoint_connection(self, resource_group):
+    def test_hsm_private_endpoint_connection2(self, resource_group):
         self.kwargs.update({
             'hsm': self.create_random_name('cli-test-hsm-pe-', 24),
-            'loc': 'centraluseuap',
+            'loc': 'westus3',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
