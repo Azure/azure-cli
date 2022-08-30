@@ -959,7 +959,7 @@ def cli_cosmosdb_mongodb_database_exists(client,
 
 
 def _populate_mongodb_collection_definition(mongodb_collection_resource, shard_key_path, indexes, analytical_storage_ttl):
-    if all(arg is None for arg in [shard_key_path, indexes]):
+    if all(arg is None for arg in [shard_key_path, indexes, analytical_storage_ttl]):
         return False
 
     if shard_key_path is not None:
