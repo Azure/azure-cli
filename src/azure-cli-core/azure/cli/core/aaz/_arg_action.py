@@ -363,9 +363,28 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
 class AAZGenericUpdateAction(Action):  # pylint: disable=too-few-public-methods
     DEST = 'generic_update_args'
-    OPTION_NAME = None
+    ACTION_NAME = None
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not getattr(namespace, self.DEST, None):
-            setattr(namespace, self.DEST, [])
-        getattr(namespace, self.DEST).append((self.OPTION_NAME or option_string, values))
+            setattr(namespace, self.DEST, {"actions": []})
+        getattr(namespace, self.DEST)["actions"].append((self.ACTION_NAME or option_string, values))
+
+
+class AAZGenericUpdateForceStringAction(AAZSimpleTypeArgAction):
+    DEST = 'generic_update_args'
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        dest_ops = AAZArgActionOperations()
+        try:
+            self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
+        except AAZShowHelp as aaz_help:
+            # show help message
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
+
+        if not getattr(namespace, self.DEST, None):
+            setattr(namespace, self.DEST, {"actions": []})
+        dest_ops.apply(getattr(namespace, self.DEST), dest='force_string')

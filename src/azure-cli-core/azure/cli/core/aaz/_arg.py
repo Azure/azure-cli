@@ -9,7 +9,7 @@ from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction, \
-    AAZGenericUpdateAction
+    AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType
@@ -18,7 +18,7 @@ from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AA
     AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
     AAZDateTimeFormat, AAZDurationFormat
 
-# pylint: disable=redefined-builtin, protected-access
+# pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -454,15 +454,18 @@ class AAZGenericUpdateForceStringArg(AAZBoolArg):
     def __init__(
             self, options=('--force-string',), arg_group='Generic Update',
             help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON.",
-            default=False,
             **kwargs):
         super().__init__(
             options=options,
             help=help,
             arg_group=arg_group,
-            default=default,
             **kwargs,
         )
+
+    def _build_cmd_action(self):
+        class Action(AAZGenericUpdateForceStringAction):
+            _schema = self  # bind action class with current schema
+        return Action
 
 
 class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
@@ -499,7 +502,7 @@ class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
 
     def _build_cmd_action(self):
         class Action(AAZGenericUpdateAction):
-            OPTION_NAME = "set"
+            ACTION_NAME = "set"
         return Action
 
 
@@ -526,7 +529,7 @@ class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
 
     def _build_cmd_action(self):
         class Action(AAZGenericUpdateAction):
-            OPTION_NAME = "add"
+            ACTION_NAME = "add"
         return Action
 
 
@@ -553,7 +556,7 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
 
     def _build_cmd_action(self):
         class Action(AAZGenericUpdateAction):
-            OPTION_NAME = "remove"
+            ACTION_NAME = "remove"
         return Action
 
 
