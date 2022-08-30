@@ -2747,6 +2747,69 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].lun', 0)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-force-detach')
+    def test_vm_disk_force_detach(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': 'vm-diskforcedetach-test',
+            'disk1': 'd1',
+            'disk2': 'd2'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image centos '
+                 '--admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[1].lun', 2),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[1].caching', 'None')
+        ])
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 1),
+            self.check('storageProfile.dataDisks[0].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[0].lun', 2)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --caching ReadWrite --sku standard_lrs')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[0].lun', 0)
+        ])
+
+        # detach a not existing disk
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2} --force-detach')
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2}')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --size-gb 1 --caching ReadOnly')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk2} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 1),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
     def test_vm_disk_attach_multiple_disks(self, resource_group):
 
@@ -3625,7 +3688,7 @@ class VMSSUpdateTests(ScenarioTest):
             'vmss': 'vmss1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest1 --generate-ssh-key --nsg-rule None --admin-username vmtest')
-        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --no-wait')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
@@ -5592,8 +5655,9 @@ class VMGalleryImage(ScenarioTest):
             'vmss2': 'vmss2'
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true"', checks=[
-            self.check('osState', 'Specialized')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1 --features "IsAcceleratedNetworkSupported=true" --tags tag=test', checks=[
+            self.check('osState', 'Specialized'),
+            self.check('tags', {'tag': 'test'})
         ])
         self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
         disk = self.cmd('vm show -g {rg} -n {vm1}').get_output_in_json()['storageProfile']['osDisk']['name']
@@ -5901,6 +5965,30 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_update_gallery_permissions_', location='eastus2euap')
+    def test_update_gallery_permissions(self, resource_group):
+        self.kwargs.update({
+            'gallery1': self.create_random_name('gallery1', 15),
+            'gallery2': self.create_random_name('gallery2', 15)
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery1} --permissions Community '
+                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+                 checks=[
+                     self.check('sharingProfile.permissions', 'Community')
+                 ])
+        # update gallery from community to private
+        self.cmd('sig share reset --gallery-name {gallery1} -g {rg}')
+        self.cmd('sig show --gallery-name {gallery1} --resource-group {rg} --select Permissions', checks=[
+            self.check('sharingProfile.permissions', 'Private')
+        ])
+
+        # update gallery from private to community
+        self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
+                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+                 checks=[
+                     self.check('sharingProfile.permissions', 'Community')
+                 ])
+
 
 class VMGalleryApplication(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
@@ -6057,11 +6145,12 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         })
 
         # test creating proximity placement group with intent vm size and available zone
-        self.cmd('ppg create -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2} --zone {zone}',
+        self.cmd('ppg create -n {ppg1} -g {rg} --intent-vm-sizes {vm_size1} {vm_size2} --zone {zone} --tags tag=test',
                  checks=[
                      self.check('name', '{ppg1}'),
                      self.check('length(intent.vmSizes)', '2'),
-                     self.check('zones[0]', '{zone}')
+                     self.check('zones[0]', '{zone}'),
+                     self.check('tags', {'tag': 'test'})
                  ])
 
         # test creating proximity placement group with intent vm size

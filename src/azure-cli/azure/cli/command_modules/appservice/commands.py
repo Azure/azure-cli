@@ -10,7 +10,8 @@ from azure.cli.core.util import empty_on_404
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
-                          validate_webapp_up, validate_app_exists, validate_add_vnet)
+                          validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
+                          validate_app_is_webapp)
 
 
 def output_slots_in_table(slots):
@@ -255,9 +256,13 @@ def load_command_table(self, _):
         g.custom_command('config', 'enable_cd')
         g.custom_command('show-cd-url', 'show_container_cd_url')
 
-    with self.command_group('webapp deployment github-actions') as g:
+    with self.command_group('webapp deployment github-actions', validator=validate_app_is_webapp) as g:
         g.custom_command('add', 'add_github_actions')
         g.custom_command('remove', 'remove_github_actions')
+
+    with self.command_group('functionapp deployment github-actions', validator=validate_app_is_functionapp) as g:
+        g.custom_command('add', 'add_functionapp_github_actions')
+        g.custom_command('remove', 'remove_functionapp_github_actions')
 
     with self.command_group('webapp auth') as g:
         g.custom_show_command('show', 'get_auth_settings')

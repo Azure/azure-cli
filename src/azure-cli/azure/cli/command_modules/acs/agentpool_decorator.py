@@ -351,6 +351,21 @@ class AKSAgentPoolContext(BaseAKSContext):
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
+    def get_host_group_id(self) -> Union[str, None]:
+        return self._get_host_group_id()
+
+    def _get_host_group_id(self) -> Union[str, None]:
+        raw_value = self.raw_param.get("host_group_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "host_group_id"):
+            value_obtained_from_agentpool = self.agentpool.host_group_id
+        if value_obtained_from_agentpool is not None:
+            host_group_id = value_obtained_from_agentpool
+        else:
+            host_group_id = raw_value
+        return host_group_id
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
@@ -1185,6 +1200,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return no_wait
 
+    def get_gpu_instance_profile(self) -> Union[str, None]:
+        """Obtain the value of gpu_instance_profile.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        gpu_instance_profile = self.raw_param.get("gpu_instance_profile")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "gpu_instance_profile") and
+            self.agentpool.gpu_instance_profile is not None
+        ):
+            gpu_instance_profile = self.agentpool.gpu_instance_profile
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_instance_profile
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1325,6 +1359,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.os_sku = self.context.get_os_sku()
         return agentpool
 
+    def set_up_host_group_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up host group related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.host_group_id = self.context.get_host_group_id()
+        return agentpool
+
     def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up priority related properties for the AgentPool object.
 
@@ -1444,6 +1488,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1458,6 +1512,8 @@ class AKSAgentPoolAddDecorator:
         self._remove_defaults_in_agentpool(agentpool)
         # set up snapshot properties
         agentpool = self.set_up_snapshot_properties(agentpool)
+        # set up host group properties
+        agentpool = self.set_up_host_group_properties(agentpool)
         # set up node network properties
         agentpool = self.set_up_node_network_properties(agentpool)
         # set up auto scaler properties
@@ -1474,6 +1530,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_vm_properties(agentpool)
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
+        # set up gpu instance profile
+        agentpool = self.set_up_gpu_properties(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

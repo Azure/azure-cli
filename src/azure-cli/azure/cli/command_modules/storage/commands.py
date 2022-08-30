@@ -18,7 +18,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_sa_blob_inventory, cf_blob_service, cf_queue_client,
                                                                cf_share_client, cf_share_service,
                                                                cf_share_file_client, cf_share_directory_client,
-                                                               cf_container_lease_client)
+                                                               cf_container_lease_client, cf_local_users)
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -286,6 +286,30 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  setter_name='set_service_properties',
                                  custom_func_name='update_file_service_properties')
 
+    local_users_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#'
+                        'LocalUsersOperations.{}',
+        client_factory=cf_local_users,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    local_users_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_local_users,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    with self.command_group('storage account local-user', local_users_sdk,
+                            custom_command_type=local_users_custom_type,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2021-08-01') as g:
+        g.custom_command('create', 'create_local_user')
+        g.custom_command('update', 'update_local_user')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('list-keys', 'list_keys')
+        g.command('regenerate-password', 'regenerate_password')
+
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
         from ._transformers import transform_logging_list_output
         g.storage_command('update', 'set_logging')
@@ -490,18 +514,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature')
         g.storage_command_oauth('restore', 'undelete_container', min_api='2020-02-10')
 
-    with self.command_group('storage container', resource_type=ResourceType.DATA_STORAGE_BLOB,
+    with self.command_group('storage container policy', resource_type=ResourceType.DATA_STORAGE_BLOB,
                             custom_command_type=get_custom_sdk('access_policy', client_factory=cf_container_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
-        g.storage_custom_command_oauth('policy create', 'create_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth('policy delete', 'delete_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command_oauth('create', 'create_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command_oauth('delete', 'delete_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command_oauth(
-            'policy update', 'set_acl_policy', transform=transform_acl_edit)
+            'update', 'set_acl_policy', transform=transform_acl_edit)
         g.storage_custom_command_oauth(
-            'policy show', 'get_acl_policy', transform=transform_acl_datetime, exception_handler=show_exception_handler)
+            'show', 'get_acl_policy', transform=transform_acl_datetime, exception_handler=show_exception_handler)
         g.storage_custom_command_oauth(
-            'policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
+            'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
 
     blob_container_mgmt_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#BlobContainersOperations.{}',
@@ -931,6 +955,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata update', 'set_metadata')
         g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
+        g.storage_command_oauth('set-expiry', "set_file_expiry")
 
     with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_directory_sdk,
                             resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:

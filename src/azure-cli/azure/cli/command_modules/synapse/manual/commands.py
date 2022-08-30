@@ -32,6 +32,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_kusto_pool
     from ._client_factory import cf_kusto_script
     from ._client_factory import cf_kusto_scripts
+    from ._client_factory import cf_synapse_client_azure_ad_only_authentications_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -207,6 +208,10 @@ def load_command_table(self, _):
         client_factory=cf_kusto_script,
     )
 
+    synapse_adonlyauthentications_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#AzureADOnlyAuthenticationsOperations.{}',
+        client_factory=cf_synapse_client_azure_ad_only_authentications_factory,
+    )
     synapse_link_connection_sdk = CliCommandType(
         operations_tmpl='azure.synapse.artifacts.operations#linkconnectionOperations.{}',
         client_factory=None,
@@ -582,6 +587,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'synapse_kusto_script_list', client_factory=cf_kusto_scripts)
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')
+
+    with self.command_group('synapse ad-only-auth', command_type=synapse_adonlyauthentications_sdk,
+                            custom_command_type=get_custom_sdk('adonlyauthentications', cf_synapse_client_azure_ad_only_authentications_factory),
+                            client_factory=cf_synapse_client_azure_ad_only_authentications_factory) as g:
+        g.custom_command('enable', 'synapse_enable_adonly_auth')
+        g.custom_command('disable', 'synapse_disable_adonly_auth')
+        g.command('get', 'list')
 
     with self.command_group('synapse link-connection', synapse_link_connection_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:

@@ -462,12 +462,17 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
 
     message = "For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy"
 
-    if (retain_until is not None and backup_type != 'CopyOnlyFull'):
-        logger.warning(message)
-        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
-
     if retain_until is None:
-        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+        if backup_type.lower() == 'copyonlyfull':
+            logger.warning("The default value for retain-until for backup-type CopyOnlyFull is 30 days.")
+            retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+        if backup_type.lower() == 'full':
+            logger.warning("The default value for retain-until for backup-type Full is 45 days.")
+            retain_until = datetime.now(timezone.utc) + timedelta(days=45)
+    else:
+        if backup_type.lower() in ['differential', 'log']:
+            retain_until = None
+            logger.warning(message)
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -479,7 +484,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
             Enable compression is not applicable for SAPHanaDatabase item type.
             """)
 
-    if cust_help.is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull', 'Incremental']:
+    if cust_help.is_hana(backup_item_type) and backup_type.lower() in ['log', 'copyonlyfull', 'incremental']:
         raise CLIError(
             """
             Backup type cannot be Log, CopyOnlyFull, Incremental for SAPHanaDatabase Adhoc backup.

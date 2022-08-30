@@ -56,6 +56,220 @@ class AAZStrArgFormat(AAZBaseArgFormat):
         return value
 
 
+class AAZDurationFormat(AAZBaseArgFormat):
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        from msrest.serialization import Serializer
+        from isodate.isoerror import ISO8601Error
+
+        try:
+            data = Serializer.serialize_duration(data.upper())
+        except ISO8601Error:
+            try:
+                # parse '##DT##H##M##S
+                data = Serializer.serialize_duration(f'P0M{data.upper()}')
+            except ISO8601Error:
+                try:
+                    # parse '##H##M##S'
+                    data = Serializer.serialize_duration(f'PT{data.upper()}')
+                except ISO8601Error:
+                    raise AAZInvalidArgValueError(
+                        f"Invalid format: '{data}' should be of the form "
+                        f"'##dT##h##m##s', '##h##m##s' or ISO8601 duration"
+                    )
+        value._data = data
+        return value
+
+
+class AAZDateFormat(AAZBaseArgFormat):
+
+    def __init__(self):
+        self.help_string = 'Format: date (yyyy-mm-dd)'
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        import dateutil.parser
+        import dateutil.tz
+
+        dt_val = None
+        try:
+            dt_val = dateutil.parser.parse(data)
+        except ValueError:
+            pass
+
+        if not dt_val:
+            raise AAZInvalidArgValueError(
+                f"Unable to parse: '{data}'. Expected format: {self.help_string}"
+            )
+
+        if any([dt_val.hour, dt_val.minute, dt_val.second, dt_val.microsecond]):
+            logger.warning('Time info will be ignored in %s.', data)
+
+        if dt_val.tzinfo:
+            logger.warning('Timezone info will be ignored in %s.', data)
+
+        data = "{:04}-{:02}-{:02}".format(dt_val.year, dt_val.month, dt_val.day)
+        value._data = data
+        return value
+
+
+class AAZTimeFormat(AAZBaseArgFormat):
+
+    def __init__(self):
+        self.help_string = 'Format: time (hh:mm:ss.xxxxxx)'
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        import dateutil.parser
+        import dateutil.tz
+
+        dt_val = None
+        try:
+            dt_val = dateutil.parser.parse(data)
+        except ValueError:
+            pass
+
+        if not dt_val:
+            raise AAZInvalidArgValueError(
+                f"Unable to parse: '{data}'. Expected format: {self.help_string}"
+            )
+
+        if any([dt_val.day, dt_val.month, dt_val.year]):
+            logger.warning('Date info will be ignored in %s.', data)
+
+        if dt_val.tzinfo:
+            logger.warning('Timezone info will be ignored in %s.', data)
+
+        data = "{:02}:{:02}:{:02}".format(dt_val.hour, dt_val.minute, dt_val.second)
+        if dt_val.microsecond:
+            microseconds = str(dt_val.microsecond).rjust(6, '0').rstrip('0').ljust(3, '0')
+            data += '.' + microseconds
+
+        value._data = data
+        return value
+
+
+class AAZDateTimeFormat(AAZBaseArgFormat):
+
+    def __init__(self, protocol="iso"):
+        self.protocol = protocol
+        self.help_string = 'Format: date (yyyy-mm-dd) time (hh:mm:ss.xxxxxx) timezone (+/-hh:mm)'
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        import dateutil.parser
+        import dateutil.tz
+        from msrest.serialization import Serializer
+
+        dt_val = None
+        try:
+            dt_val = dateutil.parser.parse(data)
+        except ValueError:
+            pass
+
+        if not dt_val:
+            raise AAZInvalidArgValueError(
+                f"Unable to parse: '{data}'. Expected format: {self.help_string}"
+            )
+
+        if not dt_val.tzinfo:
+            dt_val = dt_val.replace(tzinfo=dateutil.tz.tzlocal())
+
+        if self.protocol == "iso":
+            data = Serializer.serialize_iso(dt_val)
+        elif self.protocol == "rfc":
+            data = Serializer.serialize_rfc(dt_val)
+        else:
+            raise NotImplementedError()
+
+        value._data = data
+        return value
+
+
+class AAZUuidFormat(AAZBaseArgFormat):
+
+    _uuid_pattern = re.compile(r'^[{(]?[0-9a-fA-F]{8}([-]?[0-9a-fA-F]{4}){3}[-]?[0-9a-fA-F]{12}[)}]?$')
+
+    def __init__(self, case=None, braces_removed=True, hyphens_filled=True):
+        """
+        :param case: 'upper' to format data into upper case, 'lower' to format data into lower case
+        """
+        self.case = case
+        self.braces_removed = braces_removed
+        self.hyphens_filled = hyphens_filled
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        if not self._uuid_pattern.fullmatch(data):
+            raise AAZInvalidArgValueError(
+                f"Invalid format: '{data}' is not a valid GUID or UUID"
+            )
+
+        if '-' in data and data.count('-') != 4:
+            raise AAZInvalidArgValueError(
+                f"Invalid format: '{data}' is not a valid GUID or UUID"
+            )
+
+        if data.startswith('{') or data.endswith('}'):
+            # remove braces
+            if not (data.startswith('{') and data.endswith('}')):
+                raise AAZInvalidArgValueError(
+                    f"Invalid format: '{data}' is not a valid GUID or UUID"
+                )
+            if self.braces_removed:
+                data = data[1:-1]
+
+        elif data.startswith('(') or data.endswith(')'):
+            # remove parentheses
+            if not (data.startswith('(') and data.endswith(')')):
+                raise AAZInvalidArgValueError(
+                    f"Invalid format: '{data}' is not a valid GUID or UUID"
+                )
+            if self.braces_removed:
+                data = data[1:-1]
+
+        if '-' not in data and self.hyphens_filled:
+            # add '-' in data
+            if data[0] in ('{', '('):
+                data = f'{data[:9]}-{data[9:13]}-{data[13:17]}-{data[17:21]}-{data[21:]}'
+            else:
+                data = f'{data[:8]}-{data[8:12]}-{data[12:16]}-{data[16:20]}-{data[20:]}'
+
+        if self.case == 'upper':
+            data = data.upper()
+        elif self.case == 'lower':
+            data = data.lower()
+
+        value._data = data
+        return value
+
+
 class AAZIntArgFormat(AAZBaseArgFormat):
 
     def __init__(self, multiple_of=None, maximum=None, minimum=None):

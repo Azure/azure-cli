@@ -273,6 +273,7 @@ def load_arguments(self, _):
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
         c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/azure/virtual-machines/linux/image-builder-json')
         c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
+        c.argument('staging_resource_group', min_api='2022-02-14', help='The staging resource group id in the same subscription as the image template that will be used to build the image.')
 
         # VM profile
         c.argument('vm_size', help='Size of the virtual machine used to build, customize and capture images. Omit or specify empty string to use the default (Standard_D1_v2)')
@@ -350,6 +351,9 @@ def load_arguments(self, _):
         c.argument('file_source', arg_type=ib_file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
         c.argument('dest_path', arg_type=ib_file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
 
+    with self.argument_context('image builder validator add', min_api='2022-02-14') as c:
+        c.argument('dis_on_failure', options_list=['--continue-distribute-on-failure', '--dis-on-failure'], arg_type=get_three_state_flag(), help="If validation fails and this parameter is set to false, output image(s) will not be distributed.")
+        c.argument('source_validation_only', arg_type=get_three_state_flag(), help="If this parameter is set to true, the image specified in the 'source' section will directly be validated. No separate build will be run to generate and then validate a customized image.")
     # endregion
 
     # region AvailabilitySets
@@ -500,6 +504,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
+        c.argument('force_detach', action='store_true', min_api='2020-12-01', help='Force detach managed data disks from a VM.')
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
@@ -1223,22 +1228,23 @@ def load_arguments(self, _):
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
-        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
-        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
-                   help='Enable soft-deletion for resources in this gallery, '
-                        'allowing them to be recovered within retention time.')
-        c.argument('publisher_uri', help='Community gallery publisher uri.')
-        c.argument('publisher_contact', options_list=['--publisher-email'], help='Community gallery publisher contact email.')
-        c.argument('eula', help='Community gallery publisher eula.')
-        c.argument('public_name_prefix', help='Community gallery public name prefix.')
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
-        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
-                   min_api='2020-09-30', help='This property allows you to specify the permission of sharing gallery.')
-        c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
-                   help='Enable soft-deletion for resources in this gallery, '
-                        'allowing them to be recovered within retention time.')
+    for scope in ['sig create', 'sig update']:
+        with self.argument_context(scope) as c:
+            c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
+                       arg_group='Sharing Profile',
+                       min_api='2020-09-30',
+                       help='This property allows you to specify the permission of sharing gallery.')
+            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
+                       help='Enable soft-deletion for resources in this gallery, '
+                            'allowing them to be recovered within retention time.')
+            c.argument('publisher_uri', help='Community gallery publisher uri.')
+            c.argument('publisher_contact', options_list=['--publisher-email'],
+                       help='Community gallery publisher contact email.')
+            c.argument('eula', help='Community gallery publisher eula.')
+            c.argument('public_name_prefix', help='Community gallery public name prefix.')
+
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:

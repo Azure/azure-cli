@@ -64,7 +64,8 @@ from azure.mgmt.cosmosdb.models import (
     CommandPostBody,
     DataCenterResource,
     DataCenterResourceProperties,
-    ManagedCassandraManagedServiceIdentity
+    ManagedCassandraManagedServiceIdentity,
+    ServiceResourceCreateUpdateParameters
 )
 
 logger = get_logger(__name__)
@@ -612,7 +613,6 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container_resource.default_ttl = sql_container.resource.default_ttl
     sql_container_resource.unique_key_policy = sql_container.resource.unique_key_policy
     sql_container_resource.conflict_resolution_policy = sql_container.resource.conflict_resolution_policy
-    sql_container_resource.client_encryption_policy = sql_container.resource.client_encryption_policy
 
     if _populate_sql_container_definition(sql_container_resource,
                                           None,
@@ -821,7 +821,8 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
                                        partition_key_path,
                                        default_ttl,
                                        indexing_policy,
-                                       conflict_resolution_policy):
+                                       conflict_resolution_policy,
+                                       analytical_storage_ttl):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
         return False
 
@@ -840,6 +841,9 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
     if conflict_resolution_policy is not None:
         gremlin_graph_resource.conflict_resolution_policy = conflict_resolution_policy
 
+    if analytical_storage_ttl is not None:
+        gremlin_graph_resource.analytical_storage_ttl = analytical_storage_ttl
+
     return True
 
 
@@ -853,7 +857,8 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
                                       throughput=None,
                                       max_throughput=None,
-                                      conflict_resolution_policy=None):
+                                      conflict_resolution_policy=None,
+                                      analytical_storage_ttl=None):
     """Creates an Azure Cosmos DB Gremlin graph """
     gremlin_graph_resource = GremlinGraphResource(id=graph_name)
 
@@ -861,7 +866,8 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                        partition_key_path,
                                        default_ttl,
                                        indexing_policy,
-                                       conflict_resolution_policy)
+                                       conflict_resolution_policy,
+                                       analytical_storage_ttl)
 
     options = _get_options(throughput, max_throughput)
 
@@ -882,7 +888,8 @@ def cli_cosmosdb_gremlin_graph_update(client,
                                       database_name,
                                       graph_name,
                                       default_ttl=None,
-                                      indexing_policy=None):
+                                      indexing_policy=None,
+                                      analytical_storage_ttl=None):
     """Updates an Azure Cosmos DB Gremlin graph """
     logger.debug('reading Gremlin graph')
     gremlin_graph = client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
@@ -893,12 +900,14 @@ def cli_cosmosdb_gremlin_graph_update(client,
     gremlin_graph_resource.default_ttl = gremlin_graph.resource.default_ttl
     gremlin_graph_resource.unique_key_policy = gremlin_graph.resource.unique_key_policy
     gremlin_graph_resource.conflict_resolution_policy = gremlin_graph.resource.conflict_resolution_policy
+    gremlin_graph_resource.analytical_storage_ttl = gremlin_graph.resource.analytical_storage_ttl
 
     if _populate_gremlin_graph_definition(gremlin_graph_resource,
                                           None,
                                           default_ttl,
                                           indexing_policy,
-                                          None):
+                                          None,
+                                          analytical_storage_ttl):
         logger.debug('replacing Gremlin graph')
 
     gremlin_graph_create_update_resource = GremlinGraphCreateUpdateParameters(
@@ -1635,7 +1644,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
                                      account_name,
                                      subnet,
                                      virtual_network=None):
-    """ Adds a virtual network rule to an existing Cosmos DB database account """
+    """ Remove a virtual network rule from an existing Cosmos DB database account """
     subnet = _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network)
     existing = client.get(resource_group_name, account_name)
 
@@ -2463,3 +2472,32 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
     )
 
     return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
+
+
+# Create function for CosmosDB ComputeV2 services
+def cli_cosmosdb_service_create(client,
+                                account_name,
+                                resource_group_name,
+                                service_name,
+                                instance_count=1,
+                                instance_size="Cosmos.D4s"):
+    service_kind = "SqlDedicatedGateway"
+    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
+                                                   instance_count=instance_count,
+                                                   instance_size=instance_size)
+
+    return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
+
+
+def cli_cosmosdb_service_update(client,
+                                account_name,
+                                resource_group_name,
+                                service_name,
+                                instance_count,
+                                instance_size=None):
+    service_kind = "SqlDedicatedGateway"
+    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
+                                                   instance_count=instance_count,
+                                                   instance_size=instance_size)
+
+    return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
