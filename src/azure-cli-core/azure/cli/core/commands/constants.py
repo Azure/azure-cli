@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.style import Style
 from knack.parser import ARGPARSE_SUPPORTED_KWARGS
 
 

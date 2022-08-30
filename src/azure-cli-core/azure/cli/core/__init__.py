@@ -117,7 +117,6 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.style import print_styled_text
 
         ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
