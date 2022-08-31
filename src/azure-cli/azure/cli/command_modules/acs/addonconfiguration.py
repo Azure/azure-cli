@@ -67,6 +67,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         "switzerlandnorth": "CHN",
         "switzerlandwest": "CHW",
         "uaecentral": "AUH",
+        "qatarcentral": "QAC",
     }
     AzureCloudRegionToOmsRegionMap = {
         "australiacentral": "australiacentral",
@@ -112,6 +113,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         "eastus2euap": "eastus2euap",
         "centraluseuap": "eastus2euap",
         "brazilsoutheast": "brazilsoutheast",
+        "qatarcentral": "qatarcentral",
     }
 
     # mapping for azure china cloud
