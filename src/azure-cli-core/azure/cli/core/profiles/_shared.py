@@ -201,7 +201,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-06-08',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
         ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
