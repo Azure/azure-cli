@@ -771,7 +771,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=logicapp_name_arg_type, local_context_attribute=None)
 
     with self.argument_context('logicapp update') as c:
-        c.argument('plan', required=False, help='The name or resource id of the plan to update the logicapp with.')
+        c.argument('plan', help='The name or resource id of the plan to update the logicapp with.')
         c.ignore('force')
 
     with self.argument_context('logicapp deployment source config-zip') as c:
