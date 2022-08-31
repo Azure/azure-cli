@@ -573,7 +573,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show -n mytemplate -g my-group
 """
@@ -606,7 +606,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show-runs -n mytemplate -g my-group
 """
@@ -646,7 +646,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show -n mytemplate -g my-group
 """
@@ -815,13 +815,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
-  - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -1225,8 +1218,13 @@ short-summary: update a share image gallery.
 examples:
   - name: Enable gallery to be shared to subscription or tenant
     text: |
-        az sig update --resource-group myresourcegroup --gallery-name mygallery \\
+        az sig update --resource-group myResourceGroup --gallery-name myGallery \\
         --permissions groups
+  - name: Update gallery from private to community
+    text: |
+        az sig update -g myResourceGroup --gallery-name myGallery --permissions Community \\
+        --publisher-uri myPublisherUri --publisher-email myPublisherEmail \\
+        --eula myEula --public-name-prefix myPublicNamePrefix
 """
 
 helps['sig gallery-application'] = """
@@ -2594,100 +2592,100 @@ examples:
 """
 
 helps['vm run-command show'] = """
-    type: command
-    short-summary: "The operation to get the run command. And Gets specific run command for a subscription in a \
-location."
-    examples:
-      - name: Get the run commands in the virtual machine.
-        text: |-
-               az vm run-command show --resource-group "myResourceGroup" --run-command-name \
+type: command
+short-summary: Get specific run command
+long-summary: You can specify "--resource-group", "--run-command-name" and "--vm-name" to get run command in a virtual machine. Or you can specify "--command-id" and "--location" to get run command for a subscription in a location.
+examples:
+  - name: Get the run commands in a virtual machine.
+    text: |-
+           az vm run-command show --resource-group "myResourceGroup" --run-command-name \
 "myRunCommand" --vm-name "myVM"
-      - name: Get specific run command for a subscription in a location.
-        text: |-
-               az vm run-command show --command-id "RunPowerShellScript" --location "SoutheastAsia"
+  - name: Get specific run command for a subscription in a location.
+    text: |-
+           az vm run-command show --command-id "RunPowerShellScript" --location "SoutheastAsia"
 """
 
 
 helps['vm run-command create'] = """
-    type: command
-    short-summary: "The operation to create the run command."
-    parameters:
-      - name: --script
-        short-summary: "Specify the script content to be executed on the VM."
-      - name: --script-uri
-        short-summary: "Specify the script download location."
-      - name: --command-id
-        short-summary: "Specify a commandId of predefined built-in script."
-      - name: --parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --parameters arg1=XX arg2=XX
-      - name: --protected-parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --protected-parameters credentials=somefoo secret=somebar
-    examples:
-      - name: Create a run command.
-        text: |-
-               az vm run-command create --resource-group "myResourceGroup" --location "West US" \
+type: command
+short-summary: "The operation to create the run command."
+parameters:
+  - name: --script
+    short-summary: "Specify the script content to be executed on the VM."
+  - name: --script-uri
+    short-summary: "Specify the script download location."
+  - name: --command-id
+    short-summary: "Specify a commandId of predefined built-in script."
+  - name: --parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --parameters arg1=XX arg2=XX
+  - name: --protected-parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --protected-parameters credentials=somefoo secret=somebar
+examples:
+  - name: Create a run command.
+    text: |-
+           az vm run-command create --resource-group "myResourceGroup" --location "West US" \
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
 """
 
 helps['vm run-command update'] = """
-    type: command
-    short-summary: "The operation to update the run command."
-    parameters:
-      - name: --script
-        short-summary: "Specify the script content to be executed on the VM."
-      - name: --script-uri
-        short-summary: "Specify the script download location."
-      - name: --command-id
-        short-summary: "Specify a commandId of predefined built-in script."
-      - name: --parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --parameters arg1=XX arg2=XX
-      - name: --protected-parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --protected-parameters credentials=somefoo secret=somebar
-    examples:
-      - name: Update a run command.
-        text: |-
-               az vm run-command update --resource-group "myResourceGroup" --location "West US" \
+type: command
+short-summary: "The operation to update the run command."
+parameters:
+  - name: --script
+    short-summary: "Specify the script content to be executed on the VM."
+  - name: --script-uri
+    short-summary: "Specify the script download location."
+  - name: --command-id
+    short-summary: "Specify a commandId of predefined built-in script."
+  - name: --parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --parameters arg1=XX arg2=XX
+  - name: --protected-parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --protected-parameters credentials=somefoo secret=somebar
+examples:
+  - name: Update a run command.
+    text: |-
+           az vm run-command update --resource-group "myResourceGroup" --location "West US" \
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
 """
 
 helps['vm run-command delete'] = """
-    type: command
-    short-summary: "The operation to delete the run command."
-    examples:
-      - name: Delete a run command.
-        text: |-
-               az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
+type: command
+short-summary: "The operation to delete the run command."
+examples:
+  - name: Delete a run command.
+    text: |-
+           az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
 "myRunCommand" --vm-name "myVM"
 """
 
 helps['vm run-command wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.
 """
 
 helps['vm run-command list'] = """
-    type: command
-    short-summary: "The operation to get all run commands of a Virtual Machine. And Lists all available run commands \
-for a subscription in a location."
-    examples:
-      - name: List run commands in a Virtual Machine.
-        text: |-
-               az vm run-command list --resource-group "myResourceGroup" --vm-name "myVM"
-      - name: List all available run commands for a subscription in a location.
-        text: |-
-               az vm run-command list --location "SoutheastAsia"
+type: command
+short-summary: List run commands from a VM or a location
+long-summary: You can specify "--resource-group" and "--vm-name" to get all run commands of a virtual machine. Or you can specify "--location" to list all available run commands for a subscription in a location.
+examples:
+  - name: List run commands in a virtual machine.
+    text: |-
+           az vm run-command list --resource-group "myResourceGroup" --vm-name "myVM"
+  - name: List all available run commands for a subscription in a location.
+    text: |-
+           az vm run-command list --location "SoutheastAsia"
 """
 
 helps['vm secret'] = """

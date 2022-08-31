@@ -1532,6 +1532,9 @@ def aks_create(
     node_resource_group=None,
     enable_defender=False,
     defender_config=None,
+    disable_disk_driver=False,
+    disable_file_driver=False,
+    disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
@@ -1580,6 +1583,7 @@ def aks_create(
     yes=False,
     aks_custom_headers=None,
     host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1643,6 +1647,12 @@ def aks_update(
     enable_defender=False,
     disable_defender=False,
     defender_config=None,
+    enable_disk_driver=False,
+    disable_disk_driver=False,
+    enable_file_driver=False,
+    disable_file_driver=False,
+    enable_snapshot_controller=False,
+    disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     disable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
@@ -2982,6 +2992,7 @@ def aks_agentpool_add(
     no_wait=False,
     aks_custom_headers=None,
     host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

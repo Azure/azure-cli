@@ -16,7 +16,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER, CONST_NONE_UPGRADE_CHANNEL,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
-    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_UBUNTU,
+    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_PATCH_UPGRADE_CHANNEL,
@@ -24,7 +24,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
-    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE)
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -36,7 +39,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_kubectl_version, validate_kubelogin_version,
     validate_linux_host_name, validate_list_of_integers,
-    validate_load_balancer_idle_timeout,
+    validate_load_balancer_idle_timeout, validate_network_policy,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
     validate_load_balancer_sku, validate_max_surge,
@@ -97,7 +100,7 @@ node_priorities = [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SP
 node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER]
-node_os_skus = [CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER]
+node_os_skus = [CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 
 # consts for ManagedCluster
@@ -115,6 +118,14 @@ auto_upgrade_channels = [
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
+
+gpu_instance_profiles = [
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G,
+]
 
 
 def load_arguments(self, _):
@@ -246,7 +257,7 @@ def load_arguments(self, _):
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
-        c.argument('network_policy')
+        c.argument('network_policy', validator=validate_network_policy)
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
@@ -279,6 +290,9 @@ def load_arguments(self, _):
         c.argument('node_resource_group')
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
+        c.argument('disable_disk_driver', action='store_true')
+        c.argument('disable_file_driver', action='store_true')
+        c.argument('disable_snapshot_controller', action='store_true')
         c.argument('enable_azure_keyvault_kms', action='store_true')
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
         c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
@@ -327,6 +341,7 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('http_proxy_config')
+        c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -363,6 +378,12 @@ def load_arguments(self, _):
         c.argument('gmsa_root_domain_name')
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
         c.argument('detach_acr', acr_arg_type, validator=validate_acr)
+        c.argument('enable_disk_driver', action='store_true')
+        c.argument('disable_disk_driver', action='store_true')
+        c.argument('enable_file_driver', action='store_true')
+        c.argument('disable_file_driver', action='store_true')
+        c.argument('enable_snapshot_controller', action='store_true')
+        c.argument('disable_snapshot_controller', action='store_true')
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
@@ -493,6 +514,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
+        c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[

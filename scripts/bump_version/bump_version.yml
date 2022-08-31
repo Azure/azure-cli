@@ -1,0 +1,146 @@
+name: CLI BUMP VERSION $(PACKAGE) $(TARGET_PACKAGE_VERSION) $(Date:yyyyMMdd)$(Rev:.r)
+
+resources:
+- repo: self
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+jobs:
+- job: UpdateVersionFiles
+  displayName: CLI Bump Version Update Version Files
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+        displayName: "Use Python 3.10"
+    - task: AzureCLI@1
+      displayName: 'update version'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+
+          git checkout -b bump_version_$(Build.BuildId)
+
+          echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
+          echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
+
+          if [[ -z "$(PACKAGE)" || -z "$(TARGET_PACKAGE_VERSION)" ]]; then
+            echo "'PACKAGE' and 'TARGET_PACKAGE_VERSION' are required"
+            exit 1
+          fi
+          sed -i "s/'$(PACKAGE)==.*'/'$(PACKAGE)==$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
+          sed -i "s/'$(PACKAGE)~=.*'/'$(PACKAGE)~=$(TARGET_PACKAGE_VERSION)'/g" ./src/azure-cli/setup.py
+          sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.windows.txt
+          sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Linux.txt
+          sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
+
+          if [[ -n "$(RESOURCE_TYPE)" ]]; then
+            python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
+          fi
+
+          git add .
+          git commit -m "update version"
+          git push --set-upstream azclibot bump_version_$(Build.BuildId)
+
+- job: RerunTests
+  displayName: CLI Bump Version Rerun tests
+  dependsOn: UpdateVersionFiles
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+        displayName: "Use Python 3.10"
+    - task: AzureCLI@1
+      displayName: 'Checkout Target Branch'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+          git fetch azclibot
+
+          git checkout -b bump_version_$(Build.BuildId) azclibot/bump_version_$(Build.BuildId)
+    - template: ../../.azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+        set -ev
+
+        source env/bin/activate
+        pip show $(PACKAGE)
+
+        az login -u $(CLI_LIVE_TEST_ACCOUNT) -p $(CLI_LIVE_TEST_PASSWORD)
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
+        serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+        python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules" "True"
+      displayName: "Rerun tests"
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results_*.xml'
+        testRunTitle: 'CLI Bump Version test results of instance $(Instance_idx)'
+
+- job: CreatePR
+  displayName: CLI Bump Version Create PR
+  dependsOn: RerunTests
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - task: AzureCLI@1
+      displayName: 'Create PR'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+
+          pr_title="{Package} Bump version for $(PACKAGE) to $(TARGET_PACKAGE_VERSION)"
+          pr_body="Triggered by CLI Bump Version Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\npackage: $(PACKAGE) $(TARGET_PACKAGE_VERSION)\nresource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)\n\nThere may still exist some failed tests, see [details](https://dev.azure.com/azure-sdk/internal/_build/results?buildId=$(Build.BuildId)&view=ms.vss-test-web.build-test-results-tab) in ADO pipeline"
+          pr_head="azclibot:bump_version_$(Build.BuildId)"
+
+          curl \
+          -H "Authorization: token ${GITHUB_TOKEN}" \
+          -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"dev\"}" \
+          https://api.github.com/repos/Azure/azure-cli/pulls
