@@ -122,6 +122,37 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
+def is_sku_available(cmd, sku_info, zone):
+    """
+    The SKU is unavailable in the following cases:
+    1. regional restriction and the region is restricted
+    2. parameter --zone is input which indicates only showing skus with availability zones.
+       Meanwhile, zonal restriction and all zones are restricted
+    """
+    is_available = True
+    is_restrict_zone = False
+    is_restrict_location = False
+    if not sku_info.restrictions:
+        return is_available
+    for restriction in sku_info.restrictions:
+        if restriction.reason_code == 'NotAvailableForSubscription':
+            # The attribute location_info is not supported in versions 2017-03-30 and earlier
+            if cmd.supported_api_version(max_api='2017-03-30'):
+                is_available = False
+                break
+            if restriction.type == 'Zone' and not (
+                    set(sku_info.location_info[0].zones or []) - set(restriction.restriction_info.zones or [])):
+                is_restrict_zone = True
+            if restriction.type == 'Location' and (
+                    sku_info.location_info[0].location in (restriction.restriction_info.locations or [])):
+                is_restrict_location = True
+
+            if is_restrict_location or (is_restrict_zone and zone):
+                is_available = False
+                break
+    return is_available
+
+
 # pylint: disable=too-many-statements, too-many-branches
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,

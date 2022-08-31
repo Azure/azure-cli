@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-LOCATION = "eastus2euap"
+LOCATION = "westus3"
 VNET_LOCATION = "eastus2euap"
 
 
