@@ -31,7 +31,7 @@ from ._utils import (
     auto_register
 )
 from ._credential_free import enable_mi_for_db_linker
-# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test
+# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
 
 
 logger = get_logger(__name__)

@@ -17,7 +17,7 @@ from ._utils import run_cli_cmd, generate_random_string
 from ._resource_config import (
     RESOURCE
 )
-# pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes
+# pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member
 
 logger = get_logger(__name__)
 
@@ -187,9 +187,13 @@ class SqlHandler(TargetHandler):
         if not psy_installed:
             import platform
             system = platform.system()
-            if system!='Windows':
-                logger.error("Only windows supports AAD authentication by pyodbc")
-            logger.error("please manually install odbc 18 for sql server and run 'pip install pyodbc'")
+            if system != 'Windows':
+                logger.error(
+                    "Only windows supports AAD authentication by pyodbc")
+            import pip
+            pip.main(['install', 'pyodbc'])
+            logger.error(
+                "please manually install odbc 18 for sql server and run 'pip install pyodbc'")
 
         import pyodbc
 
@@ -199,14 +203,15 @@ class SqlHandler(TargetHandler):
                     try:
                         cursor.execute(execution_query)
                     except pyodbc.ProgrammingError as e:
-                        logger.warn(e)
+                        logger.warning(e)
                     conn.commit()
         except pyodbc.Error as e:
-            print(e) 
+            print(e)
 
     def get_connection_string(self):
-        conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server='+self.db_server+'.database.windows.net;'
-        'database='+self.dbname+';UID='+self.user+';Authentication=ActiveDirectoryInteractive;'
+        conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
+            self.db_server + '.database.windows.net;database=' + self.dbname + ';UID=' + self.user + \
+            ';Authentication=ActiveDirectoryInteractive;'
         return conn_string
 
     def get_create_query(self, client_id):
@@ -215,7 +220,7 @@ class SqlHandler(TargetHandler):
         grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(
             self.dbname, self.aad_user)
 
-        return role_q+grant_q
+        return role_q + grant_q
 
 
 class PostgresFlexHandler(TargetHandler):
@@ -237,8 +242,9 @@ class PostgresFlexHandler(TargetHandler):
         self.user = self.profile.get_current_account_user()
 
     def enable_target_aad_auth(self):
-        server_info = run_cli_cmd('az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}'
-        '/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(self.sub, self.rg, self.db_server))
+        rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(
+            self.sub, self.rg, self.db_server)
+        server_info = run_cli_cmd(rq)
         if server_info.get("properties").get("authConfig").get("activeDirectoryAuthEnabled"):
             return
         logger.warning('Enable service aad authentication')
@@ -278,9 +284,11 @@ class PostgresFlexHandler(TargetHandler):
             client.begin_create_or_update(self.rg, deployment_name, deployment))
 
     def set_user_admin(self, login_user, user_object_id):
-        admins = run_cli_cmd('az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL'
-                '/flexibleServers/{}/administrators?api-version=2022-03-08-privatepreview'.format(self.sub, self.rg, self.db_server)).get("value")
-        is_admin = any(user_object_id in u.get("properties").get("objectId") for u in admins)
+        rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/administrators?api-version=2022-03-08-privatepreview'.format(
+            self.sub, self.rg, self.db_server)
+        admins = run_cli_cmd(rq).get("value")
+        is_admin = any(user_object_id in u.get(
+            "properties").get("objectId") for u in admins)
         if is_admin:
             return
         logger.warning('Set current user as DB Server AAD Administrators.')
@@ -289,7 +297,7 @@ class PostgresFlexHandler(TargetHandler):
         master_template.add_resource({
             'type': "Microsoft.DBforPostgreSQL/flexibleServers/administrators",
             'apiVersion': '2022-03-08-privatepreview',
-            'name': self.db_server+"/"+user_object_id,
+            'name': self.db_server + "/" + user_object_id,
             'location': "East US",
             'properties': {
                 'principalName': login_user,
@@ -380,7 +388,8 @@ class PostgresFlexHandler(TargetHandler):
         except (psycopg2.Error, psycopg2.OperationalError) as e:
             import re
             logger.warning(e)
-            search_ip=re.search('no pg_hba.conf entry for host "(.*)", user ', str(e))
+            search_ip = re.search(
+                'no pg_hba.conf entry for host "(.*)", user ', str(e))
             if search_ip is not None:
                 self.ip = search_ip.group(1)
             raise ConnectionFailError
@@ -410,14 +419,13 @@ class PostgresFlexHandler(TargetHandler):
         return conn_string
 
     def get_create_query(self, client_id):
-        role_q = "drop role IF EXISTS \"{0}\"; \
-            select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
+        role_q = "drop role IF EXISTS \"{0}\";"
+        "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
             self.aad_user, client_id)
-        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {0} TO \"{1}\"; \
-                    GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{1}\";".format(
+        grant_q = 'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";GRANT ALL ON ALL TABLES IN SCHEMA public TO "{1}";'.format(
             self.dbname, self.aad_user)
 
-        return role_q+grant_q
+        return role_q + grant_q
 
     def get_auth_config(self):
         if self.auth_type in {'systemAssignedIdentity'}:
@@ -480,14 +488,12 @@ class PostgresSingleHandler(PostgresFlexHandler):
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def get_create_query(self, client_id):
-        role_q = "SET aad_validate_oids_in_tenant = off; \
-                    drop role IF EXISTS \"{}\"; \
-                    CREATE ROLE \"{}\" WITH LOGIN PASSWORD '{}' IN ROLE azure_ad_user;".format(
-            self.aad_user, self.aad_user, client_id)
-        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {} TO \"{}\"; GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{}\";".format(
-            self.dbname, self.aad_user, self.aad_user)
+        role_q = "SET aad_validate_oids_in_tenant = off; drop role IF EXISTS \"{0}\"; \
+                    CREATE ROLE \"{0}\" WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(self.aad_user, client_id)
+        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {0} TO \"{1}\"; GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{1}\";".format(
+            self.dbname, self.aad_user)
 
-        return role_q+grant_q
+        return role_q + grant_q
 
 
 def getSourceHandler(source_id, source_type):
