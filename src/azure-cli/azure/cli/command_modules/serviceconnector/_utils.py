@@ -72,7 +72,7 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
     return randstr.lower()
 
 
-def run_cli_cmd(cmd, retry=0):
+def run_cli_cmd(cmd, retry=0, is_json=True):
     '''Run a CLI command
     :param cmd: The CLI command to be executed
     :param retry: The times to re-try
@@ -89,7 +89,7 @@ def run_cli_cmd(cmd, retry=0):
             raise CLIInternalError('Command execution failed, command is: '
                                    '{}, error message is: {}'.format(cmd, output.stderr))
 
-    return json.loads(output.stdout) if output.stdout else None
+    return json.loads(output.stdout) if is_json and output.stdout else output.stdout or None
 
 
 def set_user_token_header(client, cli_ctx):

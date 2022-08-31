@@ -201,13 +201,13 @@ class SqlHandler(TargetHandler):
 
 
 class PostgresFlexHandler(TargetHandler):
-    aad_user = generate_random_string(
-        prefix="aad_" + RESOURCE.PostgresFlexible.value + '_')
+    aad_user = generate_random_string(prefix="aad_psqlflex_")
 
     db_server = ""
     host = ""
     dbname = ""
     user = ""
+    ip = ""
 
     def __init__(self, cmd, target_id, target_type, auth_type):
         super().__init__(cmd, target_id, target_type, auth_type)
@@ -219,6 +219,10 @@ class PostgresFlexHandler(TargetHandler):
         self.user = self.profile.get_current_account_user()
 
     def enable_target_aad_auth(self):
+        server_info = run_cli_cmd('az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}'
+        '/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(self.sub, self.rg, self.db_server))
+        if server_info.get("properties").get("authConfig").get("activeDirectoryAuthEnabled"):
+            return
         logger.warning('Enable service aad authentication')
         server = self.db_server
         master_template = ArmTemplateBuilder()
@@ -256,6 +260,11 @@ class PostgresFlexHandler(TargetHandler):
             client.begin_create_or_update(self.rg, deployment_name, deployment))
 
     def set_user_admin(self, login_user, user_object_id):
+        admins = run_cli_cmd('az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL'
+                '/flexibleServers/{}/administrators?api-version=2022-03-08-privatepreview'.format(self.sub, self.rg, self.db_server)).get("value")
+        is_admin = any(user_object_id in u.get("properties").get("objectId") for u in admins)
+        if is_admin:
+            return
         logger.warning('Set current user as DB Server AAD Administrators.')
         cmd = self.cmd
         master_template = ArmTemplateBuilder()
@@ -291,7 +300,7 @@ class PostgresFlexHandler(TargetHandler):
             client.begin_create_or_update(self.rg, deployment_name, deployment))
 
     def create_aad_user(self, identity_name, client_id):
-        self.aad_user = identity_name or self.aad_user
+        # self.aad_user = identity_name or self.aad_user
 
         q = self.get_create_query(client_id)
         connection_string = self.get_connection_string()
@@ -322,10 +331,12 @@ class PostgresFlexHandler(TargetHandler):
             # logger.warning("Update database server firewall rule to connect...")
             if target.get('publicNetworkAccess') == "Disabled":
                 return True
+            start_ip = self.ip or '0.0.0.0'
+            end_ip = self.ip or '255.255.255.255'
             run_cli_cmd(
                 'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
-                '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
-                    self.rg, self.db_server, ip_name, self.sub)
+                '--subscription {3} --start-ip-address {4} --end-ip-address {5}'.format(
+                    self.rg, self.db_server, ip_name, self.sub, start_ip, end_ip)
             )
             return False
         # logger.warning("Remove database server firewall rules to recover...")
@@ -347,10 +358,13 @@ class PostgresFlexHandler(TargetHandler):
 
         # pylint: disable=protected-access
         try:
-            logger.warning("Connecting to database...")
             conn = psycopg2.connect(conn_string)
-        except psycopg2.Error as e:
+        except (psycopg2.Error, psycopg2.OperationalError) as e:
+            import re
             logger.warning(e)
+            search_ip=re.search('no pg_hba.conf entry for host "(.*)", user ', str(e))
+            if search_ip is not None:
+                self.ip = search_ip.group(1)
             raise ConnectionFailError
 
         conn.autocommit = True
@@ -434,10 +448,12 @@ class PostgresSingleHandler(PostgresFlexHandler):
             if target.get('publicNetworkAccess') == "Disabled":
                 run_cli_cmd(
                     'az postgres server update --public Enabled --ids {}'.format(target_id))
+            start_ip = self.ip or '0.0.0.0'
+            end_ip = self.ip or '255.255.255.255'
             run_cli_cmd(
                 'az postgres server firewall-rule create -g {0} -s {1} -n {2} --subscription {3}'
-                ' --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
-                    rg, server, ip_name, sub)
+                ' --start-ip-address {4} --end-ip-address {5}'.format(
+                    rg, server, ip_name, sub, start_ip, end_ip)
             )
             return target.get('publicNetworkAccess') == "Disabled"
         # logger.warning("Remove database server firewall rules to recover...")
