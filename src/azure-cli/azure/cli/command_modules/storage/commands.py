@@ -894,7 +894,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2018-11-09') as g:
         from ._transformers import transform_fs_list_public_access_output, transform_fs_public_access_output, \
             transform_metadata
-        g.storage_command_oauth('create', 'create_file_system')
+        g.storage_custom_command_oauth('create', 'create_file_system')
         g.storage_command_oauth('list', 'list_file_systems', command_type=adls_service_sdk,
                                 transform=transform_fs_list_public_access_output)
         g.storage_command_oauth('show', 'get_file_system_properties', exception_handler=show_exception_handler,
