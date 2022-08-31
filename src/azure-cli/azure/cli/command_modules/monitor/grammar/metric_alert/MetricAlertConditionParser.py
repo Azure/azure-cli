@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# Generated from AutoscaleCondition.g4 by ANTLR 4.9.3
+# Generated from MetricAlertCondition.g4 by ANTLR 4.9.3
 # encoding: utf-8
 # pylint: disable=all
 from antlr4 import *
@@ -36,9 +36,9 @@ def serializedATN():
         buf.write("\27\16\27\u00b8\13\27\3\30\6\30\u00bb\n\30\r\30\16\30")
         buf.write("\u00bc\3\31\3\31\3\31\3\32\3\32\3\32\3\33\3\33\3\33\2")
         buf.write("\2\34\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.")
-        buf.write("\60\62\64\2\t\5\2\3\4\32\32\36\36\6\2\3\13\32\32\34\34")
-        buf.write("\36\36\b\2\3\3\7\7\t\t\f\f\32\32\36\36\4\2\n\n\20\20\3")
-        buf.write("\2\21\22\4\2\n\n\23\23\t\2\3\3\5\5\7\13\r\16\32\32\34")
+        buf.write("\60\62\64\2\t\5\2\3\5\32\32\36\36\6\2\3\13\32\32\34\34")
+        buf.write("\36\36\b\2\3\3\5\5\b\b\f\f\32\32\36\36\4\2\n\n\20\20\3")
+        buf.write("\2\21\22\4\2\n\n\23\23\t\2\3\3\5\6\b\13\r\16\32\32\34")
         buf.write("\34\36\36\2\u00b9\2\66\3\2\2\2\4]\3\2\2\2\6a\3\2\2\2\b")
         buf.write("f\3\2\2\2\nj\3\2\2\2\fm\3\2\2\2\16o\3\2\2\2\20r\3\2\2")
         buf.write("\2\22\u0080\3\2\2\2\24\u0083\3\2\2\2\26\u0086\3\2\2\2")
@@ -103,8 +103,8 @@ class MetricAlertConditionParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'.'", "'/'", "'_'", "'\\'", "':'", "'%'", 
-                     "'-'", "','", "'|'", "'+'", "'*'", "'~'" ]
+    literalNames = [ "<INVALID>", "'.'", "'/'", "'-'", "'_'", "'\\'", "':'", 
+                     "'%'", "','", "'|'", "'+'", "'*'", "'~'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
@@ -458,7 +458,7 @@ class MetricAlertConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 94
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -1056,7 +1056,7 @@ class MetricAlertConditionParser ( Parser ):
             while True:
                 self.state = 140
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1064,7 +1064,7 @@ class MetricAlertConditionParser ( Parser ):
                 self.state = 143 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -1570,7 +1570,7 @@ class MetricAlertConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 183
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.T__11) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.T__11) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)

@@ -490,9 +490,9 @@ def show_updates(updates_available_components, only_show_when_updates_available=
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
-            warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
+            warning_msg = 'You have %i update(s) available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = "You have %i updates available."
+            warning_msg = "You have %i update(s) available."
             if CLI_PACKAGE_NAME in updates_available_components:
                 warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
         logger.warning(warning_msg, len(updates_available_components))

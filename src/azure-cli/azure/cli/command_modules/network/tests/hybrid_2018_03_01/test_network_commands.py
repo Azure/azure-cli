@@ -1258,6 +1258,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
 
 class NetworkSecurityGroupScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nsg')
     def test_network_nsg(self, resource_group):
 

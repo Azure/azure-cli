@@ -99,10 +99,6 @@ def list_nics(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_interfaces', resource_group_name)
 
 
-def list_nsgs(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'network_security_groups', resource_group_name)
-
-
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
     client = network_client_factory(cmd.cli_ctx).network_security_groups
     nsg = client.get(resource_group_name, network_security_group_name)
@@ -4873,35 +4869,6 @@ def _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight):
         else:
             raise CLIError(
                 'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
-
-
-def create_local_gateway(cmd, resource_group_name, local_network_gateway_name, gateway_ip_address,
-                         location=None, tags=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, no_wait=False):
-    AddressSpace, LocalNetworkGateway, BgpSettings = cmd.get_models(
-        'AddressSpace', 'LocalNetworkGateway', 'BgpSettings')
-    client = network_client_factory(cmd.cli_ctx).local_network_gateways
-    local_gateway = LocalNetworkGateway(
-        local_network_address_space=AddressSpace(address_prefixes=(local_address_prefix or [])),
-        location=location, tags=tags, gateway_ip_address=gateway_ip_address)
-    if bgp_peering_address or asn or peer_weight:
-        local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
-                                                 peer_weight=peer_weight)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, local_network_gateway_name, local_gateway)
-
-
-def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, tags=None):
-    _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
-
-    if gateway_ip_address is not None:
-        instance.gateway_ip_address = gateway_ip_address
-    if local_address_prefix is not None:
-        instance.local_network_address_space.address_prefixes = local_address_prefix
-    if tags is not None:
-        instance.tags = tags
-    return instance
 # endregion
 
 
@@ -6753,49 +6720,6 @@ def update_public_ip_prefix(instance, tags=None):
 # endregion
 
 
-# region RouteTables
-def create_route_table(cmd, resource_group_name, route_table_name, location=None, tags=None,
-                       disable_bgp_route_propagation=None):
-    RouteTable = cmd.get_models('RouteTable')
-    ncf = network_client_factory(cmd.cli_ctx)
-    route_table = RouteTable(location=location, tags=tags)
-    if cmd.supported_api_version(min_api='2017-10-01'):
-        route_table.disable_bgp_route_propagation = disable_bgp_route_propagation
-    return ncf.route_tables.begin_create_or_update(resource_group_name, route_table_name, route_table)
-
-
-def update_route_table(instance, tags=None, disable_bgp_route_propagation=None):
-    if tags == '':
-        instance.tags = None
-    elif tags is not None:
-        instance.tags = tags
-    if disable_bgp_route_propagation is not None:
-        instance.disable_bgp_route_propagation = disable_bgp_route_propagation
-    return instance
-
-
-def create_route(cmd, resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
-                 next_hop_ip_address=None):
-    Route = cmd.get_models('Route')
-    route = Route(next_hop_type=next_hop_type, address_prefix=address_prefix,
-                  next_hop_ip_address=next_hop_ip_address, name=route_name)
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.routes.begin_create_or_update(resource_group_name, route_table_name, route_name, route)
-
-
-def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_address=None):
-    if address_prefix is not None:
-        instance.address_prefix = address_prefix
-
-    if next_hop_type is not None:
-        instance.next_hop_type = next_hop_type
-
-    if next_hop_ip_address is not None:
-        instance.next_hop_ip_address = next_hop_ip_address
-    return instance
-# endregion
-
-
 # region TrafficManagers
 def list_traffic_manager_profiles(cmd, resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
@@ -8262,7 +8186,8 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None,
+                        disable_copy_paste=False, enable_tunneling=False, enable_ip_connect=False, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -8285,10 +8210,28 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                    location=location,
                                    scale_units=scale_units,
                                    sku=sku,
-                                   tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         bastion_host_name=bastion_host_name,
-                                         parameters=bastion_host)
+                                   tags=tags,
+                                   disable_copy_paste=disable_copy_paste,
+                                   enable_tunneling=enable_tunneling,
+                                   enable_ip_connect=enable_ip_connect)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       bastion_host_name=bastion_host_name,
+                       parameters=bastion_host)
+
+
+def update_bastion_host(cmd, instance, scale_units=None, sku=None, disable_copy_paste=None, enable_tunneling=None, enable_ip_connect=None):
+    # both VirtualHub and VirtualRouter own those properties
+    sku_type = cmd.get_models('Sku')
+    sku = sku_type(name=sku)
+
+    with cmd.update_context(instance) as c:
+        c.set_param('scale_units', scale_units)
+        c.set_param('sku', sku)
+        c.set_param('disable_copy_paste', disable_copy_paste)
+        c.set_param('enable_tunneling', enable_tunneling)
+        c.set_param('enable_ip_connect', enable_ip_connect)
+    return instance
 
 
 def list_bastion_host(cmd, resource_group_name=None):
@@ -8535,78 +8478,5 @@ def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_l
 def update_shared_key(cmd, instance, value):
     with cmd.update_context(instance) as c:
         c.set_param('value', value)
-    return instance
-# endregion
-
-
-# region network virtual appliance
-def create_network_virtual_appliance(cmd, client, resource_group_name, network_virtual_appliance_name,
-                                     vendor, bundled_scale_unit, market_place_version,
-                                     virtual_hub, boot_strap_configuration_blobs=None,
-                                     cloud_init_configuration_blobs=None,
-                                     cloud_init_configuration=None, asn=None,
-                                     location=None, tags=None, no_wait=False):
-    (NetworkVirtualAppliance,
-     SubResource,
-     VirtualApplianceSkuProperties) = cmd.get_models('NetworkVirtualAppliance',
-                                                     'SubResource',
-                                                     'VirtualApplianceSkuProperties')
-
-    virtual_appliance = NetworkVirtualAppliance(boot_strap_configuration_blobs=boot_strap_configuration_blobs,
-                                                cloud_init_configuration_blobs=cloud_init_configuration_blobs,
-                                                cloud_init_configuration=cloud_init_configuration,
-                                                virtual_appliance_asn=asn,
-                                                virtual_hub=SubResource(id=virtual_hub),
-                                                nva_sku=VirtualApplianceSkuProperties(
-                                                    vendor=vendor,
-                                                    bundled_scale_unit=bundled_scale_unit,
-                                                    market_place_version=market_place_version
-                                                ),
-                                                location=location,
-                                                tags=tags)
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, network_virtual_appliance_name, virtual_appliance)
-
-
-def update_network_virtual_appliance(instance, cmd, cloud_init_configuration=None, asn=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('virtual_appliance_asn', asn)
-        c.set_param('cloud_init_configuration', cloud_init_configuration)
-    return instance
-
-
-def list_network_virtual_appliance(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-    return client.list()
-
-
-def create_network_virtual_appliance_site(cmd, client, resource_group_name, network_virtual_appliance_name,
-                                          site_name, address_prefix, allow=None, optimize=None, default=None,
-                                          no_wait=False):
-    (BreakOutCategoryPolicies,
-     Office365PolicyProperties,
-     VirtualApplianceSite) = cmd.get_models('BreakOutCategoryPolicies',
-                                            'Office365PolicyProperties',
-                                            'VirtualApplianceSite')
-
-    virtual_appliance_site = VirtualApplianceSite(address_prefix=address_prefix,
-                                                  o365_policy=Office365PolicyProperties(
-                                                      break_out_categories=BreakOutCategoryPolicies(
-                                                          allow=allow,
-                                                          optimize=optimize,
-                                                          default=default
-                                                      )))
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, network_virtual_appliance_name, site_name, virtual_appliance_site)
-
-
-def update_network_virtual_appliance_site(instance, cmd, address_prefix, allow=None, optimize=None, default=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('address_prefix', address_prefix)
-        c.set_param('o365_policy.break_out_categories.allow', allow)
-        c.set_param('o365_policy.break_out_categories.optimize', optimize)
-        c.set_param('o365_policy.break_out_categories.default', default)
     return instance
 # endregion

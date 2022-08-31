@@ -57,7 +57,7 @@ def load_arguments(self, _):
      ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRoutePortsEncapsulation,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
-     RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
+     SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
      ExpressRouteLinkMacSecCipher,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
@@ -69,7 +69,7 @@ def load_arguments(self, _):
          'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'ExpressRoutePortsEncapsulation',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
-         'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
+         'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
          'ExpressRouteLinkMacSecCipher',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
@@ -1200,17 +1200,8 @@ def load_arguments(self, _):
         c.argument('backend_pools_name', nargs='+', help='List of name of the backend address pool', min_api='2021-02-01', is_preview=True)
     # endregion
 
-    # region LocalGateway
-    with self.argument_context('network local-gateway') as c:
-        c.argument('local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
-        c.argument('local_address_prefix', nargs='+', options_list='--local-address-prefixes', help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
-        c.argument('gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
-        c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
-
-    with self.argument_context('network local-gateway create') as c:
-        c.ignore('use_bgp_settings')
-
-    for item in ['local-gateway', 'vnet-gateway']:
+    # region VnetGateway
+    for item in ['vnet-gateway']:
         with self.argument_context('network {}'.format(item)) as c:
             c.argument('asn', type=int, arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
             c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
@@ -1844,27 +1835,6 @@ def load_arguments(self, _):
         c.argument('custom_ip_prefix_name', min_api='2020-06-01', help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.")
     # endregion
 
-    # region RouteTables
-    with self.argument_context('network route-table') as c:
-        c.argument('route_table_name', name_arg_type, help='Name of the route table.', completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
-        c.argument('disable_bgp_route_propagation', arg_type=get_three_state_flag(), min_api='2017-10-01', help='Disable routes learned by BGP.')
-
-    with self.argument_context('network route-table create') as c:
-        c.extra('tags')
-        c.extra('location')
-        c.extra('cmd')
-        c.argument('location', get_location_type(self.cli_ctx))
-        c.ignore('parameters')
-
-    with self.argument_context('network route-table route') as c:
-        c.argument('route_name', name_arg_type, id_part='child_name_1', help='Route name')
-        c.argument('route_table_name', options_list='--route-table-name', help='Route table name')
-        c.argument('next_hop_type', help='The type of Azure hop the packet should be sent to.', arg_type=get_enum_type(RouteNextHopType))
-        c.argument('next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
-        c.argument('address_prefix', help='The destination CIDR to which the route applies.')
-
-    # endregion
-
     # region TrafficManagers
     monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
     with self.argument_context('network traffic-manager profile') as c:
@@ -2221,9 +2191,16 @@ def load_arguments(self, _):
         c.argument('scale_units', type=int, min_api='2021-03-01', options_list=['--scale-units'],
                    validator=validate_scale_unit_ranges,
                    help='The scale units for the Bastion Host resource, which minimum is 2 and maximum is 50.')
-        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
+        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), min_api='2021-03-01',
                    options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
+    with self.argument_context('network bastion create') as c:
+        c.argument('sku', default='Standard')
+    for scope in ['create', 'update']:
+        with self.argument_context('network bastion {}'.format(scope)) as c:
+            c.argument('disable_copy_paste', help='Disable copy and paste for all sessions on this Azure Bastion resource', arg_type=get_three_state_flag())
+            c.argument('enable_tunneling', help='Enable Native Client Support on this Azure Bastion resource', arg_type=get_three_state_flag())
+            c.argument('enable_ip_connect', help='Enable IP-based Connections on this Azure Bastion resource', arg_type=get_three_state_flag())
     with self.argument_context('network bastion ssh') as c:
         c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
         c.argument('username', help='User name for SSH connections.', options_list=['--username'])
@@ -2256,30 +2233,4 @@ def load_arguments(self, _):
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
             c.argument('resource_name', required=False, help='Name of the resource')
-    # endregion
-
-    # region Network Virtual Appliance
-    with self.argument_context('network virtual-appliance', arg_group='Sku') as c:
-        c.argument('vendor', help='Virtual Appliance Vendor.')
-        c.argument('bundled_scale_unit', options_list=['--scale-unit'], help='Virtual Appliance Scale Unit.')
-        c.argument('market_place_version', options_list=['--version', '-v'], help='Virtual Appliance Version.')
-    with self.argument_context('network virtual-appliance') as c:
-        c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--name', '-n'])
-        c.argument('boot_strap_configuration_blobs', options_list=['--boot-strap-config-blobs', '--boot-blobs'], nargs='+', help='Space-separated list of BootStrapConfigurationBlobs storage URLs.')
-        c.argument('cloud_init_configuration_blobs', options_list=['--cloud-init-config-blobs', '--cloud-blobs'], nargs='+', help='Space-separated list of CloudInitConfigurationBlob storage URLs.')
-        c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
-        c.argument('cloud_init_configuration', options_list=['--cloud-init-config', '--init-config'], help='CloudInitConfiguration scripts that will be run during cloud initialization')
-        c.argument('asn', type=int, help='VirtualAppliance ASN. The valid value ranges from 1 to 4294967295. ')
-
-    with self.argument_context('network virtual-appliance sku') as c:
-        c.argument('sku_name', help='The name of Network Virtual Appliance SKU', options_list=['--name', '-n'])
-
-    with self.argument_context('network virtual-appliance site') as c:
-        c.argument('network_virtual_appliance_name', options_list=['--appliance-name'])
-        c.argument('site_name', help='The name of Network Virtual Appliance Site', options_list=['--name', '-n'])
-        c.argument('address_prefix', help='Address Prefix of Network Virtual Appliance Site')
-    with self.argument_context('network virtual-appliance site', arg_group='Breakout of O365') as c:
-        c.argument('allow', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 allow category.')
-        c.argument('optimize', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 optimize category.')
-        c.argument('default', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 default category.')
     # endregion

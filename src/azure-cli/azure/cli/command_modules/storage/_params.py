@@ -23,7 +23,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
-                          blob_tier_validator_track2, services_type_v2, resource_type_type_v2)
+                          blob_tier_validator_track2, services_type_v2, resource_type_type_v2, PermissionScopeAddAction,
+                          SshPublicKeyAddAction)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -328,6 +329,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
+        c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   help='Enable Secure File Transfer Protocol.')
+        c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
         c.argument('enable_files_aadkerb', aadkerb_type)
@@ -442,6 +447,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
+        c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   help='Enable Secure File Transfer Protocol.')
+        c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
+                   help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
         c.argument('enable_files_aadkerb', aadkerb_type)
@@ -763,6 +772,39 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('request_type', options_list=['--type', '--request-type'],
                    arg_type=get_enum_type(['validation', 'upgrade']), validator=validate_hns_migration_type,
                    help='Start a validation request for migration or start a migration request')
+
+    with self.argument_context('storage account local-user') as c:
+        c.argument('account_name', acct_name_type, options_list='--account-name', id_part=None)
+        c.argument('username', options_list=['--user-name', '--name', '-n'],
+                   help='The name of local user. The username must contain lowercase letters and numbers '
+                        'only. It must be unique only within the storage account.')
+
+    for item in ['create', 'update']:
+        with self.argument_context(f'storage account local-user {item}') as c:
+            c.argument('permission_scope', nargs='+', action=PermissionScopeAddAction,
+                       help='The permission scope argument list which includes the permissions, service, '
+                            'and resource_name.'
+                            'The permissions can be a combination of the below possible values: '
+                            'Read(r), Write (w), Delete (d), List (l), and Create (c). '
+                            'The service has possible values: blob, file. '
+                            'The resource-name is the container name or the file share name. '
+                            'Example: --permission-scope permissions=r service=blob resource-name=container1'
+                            'Can specify multiple permission scopes: '
+                            '--permission-scope permissions=rw service=blob resource-name=container1'
+                            '--permission-scope permissions=rwd service=file resource-name=share2')
+            c.argument('home_directory', help='The home directory.')
+            c.argument('ssh_authorized_key', nargs='+', action=SshPublicKeyAddAction,
+                       help='SSH authorized keys for SFTP. Includes an optional description and key. '
+                            'The key is the base64 encoded SSH public key , with format: '
+                            '<keyType> <keyData> e.g. ssh-rsa AAAABBBB.'
+                            'Example: --ssh_authorized_key description=description key="ssh-rsa AAAABBBB"'
+                            'or --ssh_authorized_key key="ssh-rsa AAAABBBB"')
+            c.argument('has_shared_key', arg_type=get_three_state_flag(),
+                       help='Indicates whether shared key exists. Set it to false to remove existing shared key.')
+            c.argument('has_ssh_key', arg_type=get_three_state_flag(),
+                       help='Indicates whether ssh key exists. Set it to false to remove existing SSH key.')
+            c.argument('has_ssh_password', arg_type=get_three_state_flag(),
+                       help='Indicates whether ssh password exists. Set it to false to remove existing SSH password.')
 
     for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:
@@ -2264,6 +2306,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()),
                    validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
+                   arg_group='Encryption Policy', validator=validate_encryption_scope_parameter,
+                   help='Specify the default encryption scope to set on the file system and use for all future writes.')
+        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy',
+                   help='If true, prevents any request from specifying a different encryption scope than the scope '
+                        'set on the file system. Default value is false.')
 
     with self.argument_context('storage fs generate-sas') as c:
         t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
@@ -2292,6 +2341,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
         c.argument('full_uri', action='store_true',
                    help='Indicate that this command return the full blob URI and the shared access signature token.')
+        c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
+                                            'write operations will be service encrypted.')
 
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),
@@ -2416,6 +2467,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
         c.argument('full_uri', action='store_true',
                    help='Indicate that this command return the full blob URI and the shared access signature token.')
+        c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
+                                            'write operations will be service encrypted.')
 
     with self.argument_context('storage fs file list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'],
