@@ -137,7 +137,7 @@ class SqlHandler(TargetHandler):
                         ' --subscription {}'.format(self.rg, self.db_server, login_user, user_object_id, self.sub)).get('objectId')
 
     def create_aad_user(self, identity_name, client_id):
-        self.aad_user = identity_name or self.aad_user
+        self.aad_user = identity_name
 
         q = self.get_create_query(client_id)
         connection_string = self.get_connection_string()
@@ -150,7 +150,7 @@ class SqlHandler(TargetHandler):
             ip_name = generate_random_string(prefix='svc_')
             self.set_target_firewall(True, ip_name)
             # create again
-            self.create_aad_user_in_pg(connection_string, q)
+            self.create_aad_user_in_sql(connection_string, q)
 
         # remove firewall rule
         if ip_name is not None:
@@ -180,15 +180,33 @@ class SqlHandler(TargetHandler):
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def create_aad_user_in_sql(self, conn_string, execution_query):
-        return
+        import pkg_resources
+        installed_packages = pkg_resources.working_set
+        psy_installed = any(('pyodbc') in d.key.lower()
+                            for d in installed_packages)
+        if not psy_installed:
+            import platform
+            system = platform.system()
+            if system!='Windows':
+                logger.error("Only windows supports AAD authentication by pyodbc")
+            logger.error("please manually install odbc 18 for sql server and run 'pip install pyodbc'")
+
+        import pyodbc
+
+        try:
+            with pyodbc.connect(conn_string) as conn:
+                with conn.cursor() as cursor:
+                    try:
+                        cursor.execute(execution_query)
+                    except pyodbc.ProgrammingError as e:
+                        logger.warn(e)
+                    conn.commit()
+        except pyodbc.Error as e:
+            print(e) 
 
     def get_connection_string(self):
-        password = run_cli_cmd(
-            'az account get-access-token --resource-type oss-rdbms').get('accessToken')
-        sslmode = "require"
-
-        conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(
-            self.host, self.user, self.dbname, password, sslmode)
+        conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server='+self.db_server+'.database.windows.net;'
+        'database='+self.dbname+';UID='+self.user+';Authentication=ActiveDirectoryInteractive;'
         return conn_string
 
     def get_create_query(self, client_id):
