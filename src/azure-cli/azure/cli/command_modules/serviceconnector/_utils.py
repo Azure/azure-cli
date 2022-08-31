@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-from unittest import skip
 from knack.log import get_logger
 from knack.util import todict
 from msrestazure.tools import parse_resource_id

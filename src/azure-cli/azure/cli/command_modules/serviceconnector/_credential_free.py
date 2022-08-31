@@ -15,11 +15,9 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 from ._utils import run_cli_cmd, generate_random_string
 from ._resource_config import (
-    SOURCE_RESOURCES_USERTOKEN,
-    TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
-# pylint: disable=unused-argument, not-an-iterable, too-many-statements
+# pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes
 
 logger = get_logger(__name__)
 
@@ -30,11 +28,11 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
         return
     source_handler = getSourceHandler(source_id, source_type)
-    if(source_handler == None):
+    if source_handler is None:
         return
     target_handler = getTargetHandler(
         cmd, target_id, target_type, auth_info['auth_type'])
-    if(target_handler == None):
+    if target_handler is None:
         return
 
     # get login user info
@@ -67,8 +65,9 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
 def getTargetHandler(cmd, target_id, target_type, auth_type):
     if target_type in {RESOURCE.Postgres}:
         return PostgresSingleHandler(cmd, target_id, target_type, auth_type)
-    elif target_type in {RESOURCE.PostgresFlexible}:
+    if target_type in {RESOURCE.PostgresFlexible}:
         return PostgresFlexHandler(cmd, target_id, target_type, auth_type)
+    return None
 
 
 class TargetHandler:
@@ -100,14 +99,105 @@ class TargetHandler:
     def set_user_admin(self, login_user, user_object_id):
         return
 
-    def set_target_firewall(self):
+    def set_target_firewall(self, add_new_rule, ip_name):
         return
 
-    def create_aad_user(self):
+    def create_aad_user(self, identity_name, client_id):
         return
 
     def get_auth_config(self):
         return
+
+
+class SqlHandler(TargetHandler):
+    aad_user = generate_random_string(
+        prefix="aad_" + RESOURCE.Sql.value + '_')
+
+    db_server = ""
+    dbname = ""
+    user = ""
+
+    def __init__(self, cmd, target_id, target_type, auth_type):
+        super().__init__(cmd, target_id, target_type, auth_type)
+
+        target_segments = parse_resource_id(target_id)
+        self.db_server = target_segments.get('name')
+        self.dbname = target_segments.get('child_name_1')
+        self.user = self.profile.get_current_account_user()
+
+    def set_user_admin(self, login_user, user_object_id):
+        # pylint: disable=not-an-iterable
+        admins = run_cli_cmd(
+            'az sql server ad-admin list --ids {}'.format(self.target_id))
+        is_admin = any(ad.get('sid') == user_object_id for ad in admins)
+        if not is_admin:
+            logger.warning('Setting current user as database server AAD admin:'
+                           ' user=%s object id=%s', login_user, user_object_id)
+            run_cli_cmd('az sql server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
+                        ' --subscription {}'.format(self.rg, self.db_server, login_user, user_object_id, self.sub)).get('objectId')
+
+    def create_aad_user(self, identity_name, client_id):
+        self.aad_user = identity_name or self.aad_user
+
+        q = self.get_create_query(client_id)
+        connection_string = self.get_connection_string()
+        ip_name = None
+        try:
+            logger.warning("Connecting to database...")
+            self.create_aad_user_in_sql(connection_string, q)
+        except ConnectionFailError:
+            # allow public access
+            ip_name = generate_random_string(prefix='svc_')
+            self.set_target_firewall(True, ip_name)
+            # create again
+            self.create_aad_user_in_pg(connection_string, q)
+
+        # remove firewall rule
+        if ip_name is not None:
+            try:
+                self.set_target_firewall(False, ip_name)
+            # pylint: disable=bare-except
+            except:
+                pass
+                # logger.warning('Please manually delete firewall rule %s to avoid security issue', ipname)
+
+    def set_target_firewall(self, add_new_rule, ip_name):
+        if add_new_rule:
+            target = run_cli_cmd(
+                'az postgres flexible-server show --ids {}'.format(self.target_id))
+            # logger.warning("Update database server firewall rule to connect...")
+            if target.get('publicNetworkAccess') == "Disabled":
+                return True
+            run_cli_cmd(
+                'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
+                '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
+                    self.rg, self.db_server, ip_name, self.sub)
+            )
+            return False
+        # logger.warning("Remove database server firewall rules to recover...")
+        # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
+        # if deny_public_access:
+        #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
+
+    def create_aad_user_in_sql(self, conn_string, execution_query):
+        return
+
+    def get_connection_string(self):
+        password = run_cli_cmd(
+            'az account get-access-token --resource-type oss-rdbms').get('accessToken')
+        sslmode = "require"
+
+        conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(
+            self.host, self.user, self.dbname, password, sslmode)
+        return conn_string
+
+    def get_create_query(self, client_id):
+        role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
+            self.aad_user)
+        grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(
+            self.dbname, self.aad_user)
+
+        return role_q+grant_q
 
 
 class PostgresFlexHandler(TargetHandler):
@@ -138,10 +228,10 @@ class PostgresFlexHandler(TargetHandler):
             'name': server,
             'location': "East US",
             'properties': {
-                    'authConfig': {
-                        'activeDirectoryAuthEnabled': True,
-                        'tenantId': self.tenant_id
-                    },
+                'authConfig': {
+                    'activeDirectoryAuthEnabled': True,
+                    'tenantId': self.tenant_id
+                },
                 'createMode': "Update"
             },
         })
@@ -209,10 +299,10 @@ class PostgresFlexHandler(TargetHandler):
         try:
             logger.warning("Connecting to database...")
             self.create_aad_user_in_pg(connection_string, q)
-        except ConnectionFailError as e:
+        except ConnectionFailError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
-            deny_public_access = self.set_target_firewall(True, ip_name)
+            self.set_target_firewall(True, ip_name)
             # create again
             self.create_aad_user_in_pg(connection_string, q)
 
@@ -224,6 +314,24 @@ class PostgresFlexHandler(TargetHandler):
             except:
                 pass
                 # logger.warning('Please manually delete firewall rule %s to avoid security issue', ipname)
+
+    def set_target_firewall(self, add_new_rule, ip_name):
+        if add_new_rule:
+            target = run_cli_cmd(
+                'az postgres flexible-server show --ids {}'.format(self.target_id))
+            # logger.warning("Update database server firewall rule to connect...")
+            if target.get('publicNetworkAccess') == "Disabled":
+                return True
+            run_cli_cmd(
+                'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
+                '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
+                    self.rg, self.db_server, ip_name, self.sub)
+            )
+            return False
+        # logger.warning("Remove database server firewall rules to recover...")
+        # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
+        # if deny_public_access:
+        #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def create_aad_user_in_pg(self, conn_string, execution_query):
         import pkg_resources
@@ -252,7 +360,7 @@ class PostgresFlexHandler(TargetHandler):
                 "Adding new AAD user %s to database...", self.aad_user)
             cursor.execute(execution_query)
         except psycopg2.Error as e:  # role "aad_user" already exists
-            logger.debug(e)
+            logger.warning(e)
             conn.commit()
 
         # Clean up
@@ -270,16 +378,17 @@ class PostgresFlexHandler(TargetHandler):
         return conn_string
 
     def get_create_query(self, client_id):
-        aad_user = self.aad_user
-        role_q = "drop role IF EXISTS \"{}\"; \
-            select * from pgaadauth_create_principal_with_oid('{}', '{}', 'ServicePrincipal', false, false);".format(aad_user, aad_user, client_id)
-        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {} TO \"{}\"; \
-                    GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{}\";".format(self.dbname, aad_user, aad_user)
+        role_q = "drop role IF EXISTS \"{0}\"; \
+            select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
+            self.aad_user, client_id)
+        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {0} TO \"{1}\"; \
+                    GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{1}\";".format(
+            self.dbname, self.aad_user)
 
         return role_q+grant_q
 
     def get_auth_config(self):
-        if(self.auth_type in {'systemAssignedIdentity'}):
+        if self.auth_type in {'systemAssignedIdentity'}:
             return {
                 'auth_type': 'secret',
                 'name': self.aad_user,
@@ -313,7 +422,7 @@ class PostgresSingleHandler(PostgresFlexHandler):
             run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
                         ' --subscription {}'.format(rg, server, login_user, user_object_id, sub)).get('objectId')
 
-    def set_target_firewall(self, add_new_rule, ip_name, deny_public_access=False):
+    def set_target_firewall(self, add_new_rule, ip_name):
         sub = self.sub
         rg = self.rg
         server = self.db_server
@@ -337,12 +446,12 @@ class PostgresSingleHandler(PostgresFlexHandler):
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def get_create_query(self, client_id):
-        aad_user = self.aad_user
         role_q = "SET aad_validate_oids_in_tenant = off; \
                     drop role IF EXISTS \"{}\"; \
-                    CREATE ROLE \"{}\" WITH LOGIN PASSWORD '{}' IN ROLE azure_ad_user;".format(aad_user, aad_user, client_id)
-        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {} TO \"{}\"; \
-                    GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{}\";".format(self.dbname, aad_user, aad_user)
+                    CREATE ROLE \"{}\" WITH LOGIN PASSWORD '{}' IN ROLE azure_ad_user;".format(
+            self.aad_user, self.aad_user, client_id)
+        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {} TO \"{}\"; GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{}\";".format(
+            self.dbname, self.aad_user, self.aad_user)
 
         return role_q+grant_q
 
@@ -352,7 +461,7 @@ def getSourceHandler(source_id, source_type):
         return WebappHandler(source_id, source_type)
     if source_type in {RESOURCE.ContainerApp}:
         return ContainerappHandler(source_id, source_type)
-    elif source_type in {RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated}:
+    if source_type in {RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated}:
         return SpringHandler(source_id, source_type)
 
 
@@ -364,7 +473,7 @@ class SourceHandler:
         self.source_id = source_id
         self.source_type = source_type.value
 
-    def get_identity(source_id):
+    def get_identity(self):
         return
 
 
@@ -378,12 +487,14 @@ class SpringHandler(SourceHandler):
         logger.warning(
             'Checking if Spring Cloud app enables System Identity...')
         identity = run_cli_cmd(
-            'az {} app show -g {} -s {} -n {} --subscription {}'.format(self.source_type, rg, spring, app, sub)).get('identity')
+            'az {} app show -g {} -s {} -n {} --subscription {}'.format(
+                self.source_type, rg, spring, app, sub)).get('identity')
         if (identity is None or identity.get('type') != "SystemAssigned"):
             # assign system identity for spring-cloud
             logger.warning('Enabling Spring Cloud app System Identity...')
             run_cli_cmd(
-                'az {} app identity assign -g {} -s {} -n {} --subscription {}'.format(self.source_type, rg, spring, app, sub))
+                'az {} app identity assign -g {} -s {} -n {} --subscription {}'.format(
+                    self.source_type, rg, spring, app, sub))
             cnt = 0
             while (identity is None and cnt < 5):
                 identity = run_cli_cmd('az {} app show -g {} -s {} -n {} --subscription {}'
