@@ -30,6 +30,8 @@ class BastionConnectableResourceIdTest(ScenarioTest):
             'subnet':'Subnet1'
         })
 
+        self.cmd('extension add -n ssh')
+
         self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes 10.13.0.0/16 --location eastus2euap --subnet-name {subnet} --subnet-prefix 10.13.1.0/24')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --address-prefixes 10.13.2.0/24 --name AzureBastionSubnet')
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --location eastus2euap')
@@ -37,15 +39,15 @@ class BastionConnectableResourceIdTest(ScenarioTest):
 
         # Expect invalid vm resource id - rid has hanging /
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('network bastion rdp --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{invalid_vm_rid}"')
+            self.cmd('network bastion ssh --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{invalid_vm_rid}"')
 
         # Expect invalid vm resource id - rid is of a resource group
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('network bastion rdp --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_rg_id_not_vm_rid}"')
+            self.cmd('network bastion ssh --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_rg_id_not_vm_rid}"')
 
         # Expect resource not found - rid is of a network interface
         with self.assertRaises(InvalidArgumentValueError):
-            self.cmd('network bastion rdp --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_nic_id_not_vm_rid}"')
+            self.cmd('network bastion ssh --name "{bastion_name}" --resource-group "{rg}" --target-resource-id "{valid_nic_id_not_vm_rid}"')
 
 if __name__ == '__main__':
     unittest.main()
