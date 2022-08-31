@@ -1556,10 +1556,69 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l westus --resource-type disks').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['resourceType'] == 'disks']))
 
-    @AllowLargeResponse(size_kb=99999)
-    def test_list_compute_skus_partially_unavailable(self):
-        result = self.cmd('vm list-skus -l eastus --query "[?name==\'Standard_M64m\']"').get_output_in_json()
-        self.assertTrue(result and result[0]["restrictions"] and result[0]["restrictions"][0]["reasonCode"] == 'NotAvailableForSubscription')
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_list_compute_skus_partially_unavailable(self, client_factory_mock):
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.command_modules.vm._vm_utils import is_sku_available
+        compute_client = mock.MagicMock()
+
+        cmd = mock.Mock()
+        cmd.supported_api_version = mock.Mock(return_value=False)
+        cmd.cli_ctx = DummyCli()
+
+        client_factory_mock.return_value = compute_client
+
+        np = mock.MagicMock()
+        location_info0 = mock.MagicMock()
+        location_info0.zones = [1, 2, 3]
+        location_info0.location = 'location'
+        location_info = [location_info0]
+        np.location_info = location_info
+        restriction_info_zone = mock.MagicMock()
+        restriction_info_zone.zones = [1, 2, 3]
+        restriction_zone = mock.MagicMock()
+        restriction_zone.reason_code = 'NotAvailableForSubscription'
+        restriction_zone.type = 'Zone'
+        restriction_zone.restriction_info = restriction_info_zone
+        restriction_info_location = mock.MagicMock()
+        restriction_info_location.locations = ['location']
+        restriction_location = mock.MagicMock()
+        restriction_location.reason_code = 'NotAvailableForSubscription'
+        restriction_location.type = 'Location'
+        restriction_location.restriction_info = restriction_info_location
+
+        # zonal restriction but not regional restriction
+        restrictions = [restriction_zone]
+        np.restrictions = restrictions
+        # show skus supporting availability zones
+        is_available = is_sku_available(cmd, np, True)
+        self.assertFalse(is_available)
+        # not show skus supporting availability zones
+        is_available = is_sku_available(cmd, np, None)
+        self.assertTrue(is_available)
+
+        # not all zones are restricted
+        restriction_info_zone.zones = [1, 2]
+        is_available = is_sku_available(cmd, np, True)
+        self.assertTrue(is_available)
+        is_available = is_sku_available(cmd, np, None)
+        self.assertTrue(is_available)
+
+        # regional restriction but not zonal restriction
+        restrictions = [restriction_location]
+        np.restrictions = restrictions
+        is_available = is_sku_available(cmd, np, True)
+        self.assertFalse(is_available)
+        is_available = is_sku_available(cmd, np, None)
+        self.assertFalse(is_available)
+
+        # regional restriction and zonal restriction
+        restrictions = [restriction_location, restriction_zone]
+        np.restrictions = restrictions
+        is_available = is_sku_available(cmd, np, True)
+        self.assertFalse(is_available)
+        is_available = is_sku_available(cmd, np, None)
+        self.assertFalse(is_available)
 
 
 class VMExtensionScenarioTest(ScenarioTest):
@@ -4836,6 +4895,11 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('timeoutInSeconds', 3600),
             self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
             ])
+
+        message = 'Please specify --location or specify --vm-name and --resource-group'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm run-command list')
+
         self.cmd('vm run-command list --vm-name {vm} -g {rg}', checks=[
             self.check('[0].resourceGroup', '{rg}'),
             self.check('[0].name', '{run_cmd}'),
@@ -4843,6 +4907,11 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('[0].asyncExecution', False),
             self.check('[0].timeoutInSeconds', 3600)
         ])
+
+        message = 'Please specify --location and --command-id or specify --vm-name, --resource-group and --run-command-name'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm run-command show --vm-name {vm} --name {run_cmd}')
+
         self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
@@ -5522,7 +5591,7 @@ class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
                       additional_params='--enable-purge-protection true --enable-soft-delete true')
-    def test_create_image_version_with_region_cvm_encryptio(self, resource_group, resource_group_location, key_vault):
+    def test_create_image_version_with_region_cvm_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
             'gallery': self.create_random_name(prefix='gallery_', length=20),
@@ -8378,9 +8447,11 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'vm1': self.create_random_name('vm', 10),
             'vm2': self.create_random_name('vm', 10),
             'vm3': self.create_random_name('vm', 10),
+            'vm4': self.create_random_name('vm', 10),
             'id1': self.create_random_name('id', 10),
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10),
+            'vmss3': self.create_random_name('vmss', 10),
 
         })
         self.cmd('identity create -g {rg} -n {id1}')
@@ -8412,6 +8483,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
 
         ])
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4} --enable-secure-boot')
+        self.cmd('vm show -g {rg} -n {vm4}', checks=[
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+        ])
         self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('identity.type', 'SystemAssigned'),
@@ -8431,6 +8506,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.extensionProfile', 'None'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot')
+        self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
