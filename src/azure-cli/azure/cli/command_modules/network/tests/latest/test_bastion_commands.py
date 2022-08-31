@@ -16,6 +16,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class BastionConnectableResourceIdTest(ScenarioTest):
 
     # At this time, only negative tests are working for Bastion tunneling (due to bug in the design of the tunnel daemon)
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_bastion_rid_ssh')
     @AllowLargeResponse()
     def test_bastion_session_handles_bad_ids(self):
