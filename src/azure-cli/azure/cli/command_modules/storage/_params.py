@@ -2306,6 +2306,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()),
                    validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
+                   arg_group='Encryption Policy', validator=validate_encryption_scope_parameter,
+                   help='Specify the default encryption scope to set on the file system and use for all future writes.')
+        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy',
+                   help='If true, prevents any request from specifying a different encryption scope than the scope '
+                        'set on the file system. Default value is false.')
 
     with self.argument_context('storage fs generate-sas') as c:
         t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
@@ -2334,6 +2341,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
         c.argument('full_uri', action='store_true',
                    help='Indicate that this command return the full blob URI and the shared access signature token.')
+        c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
+                                            'write operations will be service encrypted.')
 
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),
@@ -2458,6 +2467,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
         c.argument('full_uri', action='store_true',
                    help='Indicate that this command return the full blob URI and the shared access signature token.')
+        c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
+                                            'write operations will be service encrypted.')
 
     with self.argument_context('storage fs file list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'],
