@@ -498,8 +498,8 @@ def _get_identity_object_from_type(
                 identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
                                                   user_assigned_identities=umiDict)
 
-            if resourceIdentityType == ResourceIdType.system_assigned.value:
-                identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
+        if resourceIdentityType == ResourceIdType.system_assigned.value:
+            identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
 
     elif assignIdentityIsPresent:
         identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
