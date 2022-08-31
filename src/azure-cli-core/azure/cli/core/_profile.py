@@ -678,11 +678,12 @@ class Profile:
             try:
                 # We share the same installationId with Azure Powershell. So try to load installationId from PSH file
                 # Contact: DEV@Nanxiang Liu, PM@Damien Caro
-                shared_installation_id_file = os.path.join(self.cli_ctx.config.config_dir, 'AzureRmSurvey.json')
+                shared_installation_id_file = os.path.join(self.cli_ctx.config.config_dir,
+                                                           'AzureRmContextSettings.json')
                 with open(shared_installation_id_file, 'r', encoding='utf-8-sig') as f:
                     import json
                     content = json.load(f)
-                    installation_id = content[_INSTALLATION_ID]
+                    installation_id = content['Settings']['InstallationId']
             except Exception as ex:  # pylint: disable=broad-except
                 logger.debug('Failed to load installationId from AzureRmSurvey.json. %s', str(ex))
                 import uuid
