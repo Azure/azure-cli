@@ -426,7 +426,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                           manifest_spec='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
             headers=get_manifest_authorization_header('username', 'password'),
             params=None,
             json=None,
@@ -451,7 +451,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                           manifest_id=['testregistry.azurecr.io/testrepository:testtag'])
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
             headers=get_manifest_authorization_header('username', 'password'),
             params=None,
             json=None,
@@ -463,7 +463,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                           manifest_id=['https://testregistry.azurecr.io/testrepository:testtag'])
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
             headers=get_manifest_authorization_header('username', 'password'),
             params=None,
             json=None,

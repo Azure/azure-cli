@@ -1063,13 +1063,14 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
 
 
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None):
+                  target_subscription_id=None, storage_account_resource_group=None):
     target_subscription = get_subscription_id(cmd.cli_ctx)
     if target_subscription_id is not None and restore_mode == "AlternateLocation":
         target_subscription = target_subscription_id
@@ -1105,7 +1106,9 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
             """)
 
     # Construct trigger restore request object
-    sa_name, sa_rg = cust_help.get_resource_name_and_rg(resource_group_name, storage_account)
+    if storage_account_resource_group is None:
+        storage_account_resource_group = resource_group_name
+    sa_name, sa_rg = cust_help.get_resource_name_and_rg(storage_account_resource_group, storage_account)
     _storage_account_id = _get_storage_account_id(cmd.cli_ctx, target_subscription, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
     target_rg_id = None
