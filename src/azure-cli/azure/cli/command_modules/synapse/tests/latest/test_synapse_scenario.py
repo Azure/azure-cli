@@ -1156,7 +1156,6 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
@@ -1203,13 +1202,15 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update spark pool
         self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
-                 ' --spark-config-file-path "{file}"',
+                 ' --spark-config-file-path "{file}"'
+                 ' --enable-dynamic-executor-allocation --min-executors 1 --max-executors 2',
                  checks=[
                     self.check('tags.key1', 'value1'),
                     self.check('name', self.kwargs['spark-pool']),
                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('sparkConfigProperties.filename','sparkconfigfile')
+                    self.check('sparkConfigProperties.filename','sparkconfigfile'),
+                    self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
 
         # delete spark pool with spark pool name
