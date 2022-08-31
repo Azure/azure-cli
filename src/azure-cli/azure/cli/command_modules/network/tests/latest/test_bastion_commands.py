@@ -6,7 +6,7 @@
 import os
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from azure.cli.core.azclierror import InvalidArgumentValueError
