@@ -2691,7 +2691,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '--name={windows_nodepool_name} '
                  '--node-count=1 '
                  '--os-type Windows '
-                 '--os-sku Windows2022',
+                 '--os-sku Windows2022 '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindows2022Preview',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
                 self.check('osSku', 'Windows2022'),
