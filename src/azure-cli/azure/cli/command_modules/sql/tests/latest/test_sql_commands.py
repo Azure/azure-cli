@@ -6201,3 +6201,74 @@ class SqlManagedInstanceServerTrustCertificateScenarioTest(ScenarioTest):
         # list server trust certificates
         self.cmd('sql mi partner-cert list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json()
+
+
+class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_link_mgmt(self, mi, rg):
+        link_name = 'dag'
+        primary_ag = 'ag_primary'
+        replication_mode = 'Async'
+        secondary_ag = 'ag_secondary'
+        source_endpoint = 'TCP://localhost:7022'
+        target_database = 'db'
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'link_name': link_name,
+            'primary_ag': primary_ag,
+            'replication_mode': replication_mode,
+            'secondary_ag': secondary_ag,
+            'source_endpoint': source_endpoint,
+            'target_database': target_database,
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert link (copying state)
+        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --replication-mode {replication_mode} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
+
+        # wait a bit for the resource creation (this doesn't mean the link is fully established)
+        time.sleep(60)
+        # show link
+        link = self.cmd('sql mi link show -g {rg} --instance-name {mi} --name {link_name}',
+                    checks=[
+                        JMESPathCheck('name', link_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+                        JMESPathCheck('targetDatabase', target_database),
+                        JMESPathCheck('sourceEndpoint', source_endpoint),
+                        JMESPathCheck('linkState', 'Copying'),
+                        ]).get_output_in_json()
+
+        link_id = link['id']
+        self.kwargs.update({
+            'link_id': link_id
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi link show --ids {link_id}',
+                    checks=[
+                        JMESPathCheck('name', link_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+                        JMESPathCheck('targetDatabase', target_database),
+                        JMESPathCheck('sourceEndpoint', source_endpoint),
+                        JMESPathCheck('linkState', 'Copying'),
+                        ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json

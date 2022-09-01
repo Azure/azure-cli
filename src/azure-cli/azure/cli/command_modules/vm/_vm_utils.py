@@ -421,6 +421,18 @@ def is_valid_vm_resource_id(vm_resource_id):
     return False
 
 
+def is_valid_vmss_resource_id(vmss_resource_id):
+    if not vmss_resource_id:
+        return False
+
+    vmss_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                 r'virtualMachineScaleSets/.*$', re.IGNORECASE)
+    if vmss_id_pattern.match(vmss_resource_id):
+        return True
+
+    return False
+
+
 def is_valid_image_version_id(image_version_id):
     if not image_version_id:
         return False
