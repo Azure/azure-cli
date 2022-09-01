@@ -37,9 +37,9 @@ examples:
     text: az cognitiveservices account create --kind Face --location WestEurope --name myresource --resource-group myResourceGroup --sku S0 --subscription MySubscription --yes
     crafted: true
   - name: Create a Text Analytics Cognitive Services account in West Europe without confirmation required and use customer owned storage.
-    text: az cognitiveservices account create -n issue23056textanalytics -g Issue23056 --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes --storage "[{\"resourceId\": \"/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/myStorageAccount\"}]"
+    text: az cognitiveservices account create -n myresource -g myResourceGroup --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes --storage '[{"resourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/myStorageAccount"}]'
   - name: Create a Text Analytics Cognitive Services account in West Europe without confirmation required and user Customer-managed encryption.
-    text: az cognitiveservices account create -n issue23056textanalytics -g Issue23056 --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes --encryption "{\"keySource\":\"Microsoft.KeyVault\",\"keyVaultProperties\": {\"keyName\":\"KeyName\",\"keyVersion\":\"891CF236-D241-4738-9462-D506AF493DFA\",\"keyVaultUri\":\"https://pltfrmscrts-use-pc-dev.vault.azure.net/\"}}"  
+    text: az cognitiveservices account create -n myresource -g myResourceGroup --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes --encryption '{"keySource":"Microsoft.KeyVault","keyVaultProperties": {"keyName":"KeyName","keyVersion":"891CF236-D241-4738-9462-D506AF493DFA","keyVaultUri":"https://pltfrmscrts-use-pc-dev.vault.azure.net/"}}"
 """
 
 helps['cognitiveservices account delete'] = """
