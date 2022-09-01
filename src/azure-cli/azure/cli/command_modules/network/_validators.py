@@ -1375,15 +1375,6 @@ def process_nw_cm_v2_create_namespace(cmd, namespace):
     return get_network_watcher_from_location()(cmd, namespace)
 
 
-def process_nw_cm_create_namespace(cmd, namespace):
-    # V2 parameter set
-    if namespace.source_resource is None:
-        return process_nw_cm_v2_create_namespace(cmd, namespace)
-
-    # V1 parameter set
-    return process_nw_cm_v1_create_namespace(cmd, namespace)
-
-
 def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
     if hasattr(namespace, 'filter_type') or hasattr(namespace, 'filter_items'):
         filter_type, filter_items = namespace.filter_type, namespace.filter_items
