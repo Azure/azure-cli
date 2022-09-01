@@ -250,6 +250,7 @@ class StorageCommandGroup(AzCommandGroup):
                     message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
+    "Storage Blob Data Owner"
     "Storage Blob Data Contributor"
     "Storage Blob Data Reader"
     "Storage Queue Data Contributor"

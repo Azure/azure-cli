@@ -1082,6 +1082,21 @@ examples:
     text: >
         az security secure-score-control-definitions list
 """
+
+helps['security security-solutions-reference-data'] = """
+type: group
+short-summary: Display all security solutions reference data at the subscription level.
+"""
+
+helps['security security-solutions-reference-data list'] = """
+type: command
+short-summary: Display all security solutions reference data at the subscription level.
+examples:
+  - name: Display all security solutions reference data.
+    text: >
+        az security security-solutions-reference-data list
+"""
+
 helps['security automation'] = """
 type: group
 short-summary: View your security automations.
@@ -1208,6 +1223,20 @@ examples:
 helps['security automation-action-event-hub'] = """
 type: group
 short-summary: Creates security automation event hub action.
+"""
+
+helps['security security-solutions'] = """
+type: group
+short-summary: Display all security solutions at the subscription level.
+"""
+
+helps['security security-solutions list'] = """
+type: command
+short-summary: Display all security solutions at the subscription level.
+examples:
+  - name: Display all security solutions.
+    text: >
+        az security security-solutions list
 """
 
 helps['security automation-action-event-hub create'] = """

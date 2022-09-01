@@ -108,13 +108,23 @@ def validate_k8s_version(namespace):
                            'such as "1.7.12" or "1.7"')
 
 
+def _validate_nodepool_name(nodepool_name):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    if nodepool_name != "":
+        if len(nodepool_name) > 12:
+            raise InvalidArgumentValueError('--nodepool-name can contain at most 12 characters')
+        if not nodepool_name.isalnum():
+            raise InvalidArgumentValueError('--nodepool-name should contain only alphanumeric characters')
+
+
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
-    if namespace.nodepool_name != "":
-        if len(namespace.nodepool_name) > 12:
-            raise CLIError('--nodepool-name can contain at most 12 characters')
-        if not namespace.nodepool_name.isalnum():
-            raise CLIError('--nodepool-name should contain only alphanumeric characters')
+    _validate_nodepool_name(namespace.nodepool_name)
+
+
+def validate_agent_pool_name(namespace):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    _validate_nodepool_name(namespace.agent_pool_name)
 
 
 def validate_kubectl_version(namespace):
@@ -212,6 +222,12 @@ def validate_load_balancer_idle_timeout(namespace):
     if namespace.load_balancer_idle_timeout is not None:
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
+
+
+def validate_network_policy(namespace):
+    """validate network policy to be in lowercase"""
+    if namespace.network_policy is not None and namespace.network_policy.islower() is False:
+        raise InvalidArgumentValueError("--network-policy should be provided in lowercase")
 
 
 def validate_nat_gateway_managed_outbound_ip_count(namespace):
@@ -561,3 +577,20 @@ def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
     from msrestazure.tools import is_valid_resource_id
     if not is_valid_resource_id(key_vault_resource_id):
         raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
+
+
+def validate_registry_name(cmd, namespace):
+    """Append login server endpoint suffix."""
+    registry = namespace.acr
+    suffixes = cmd.cli_ctx.cloud.suffixes
+    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    from azure.cli.core.cloud import CloudSuffixNotSetException
+    try:
+        acr_suffix = suffixes.acr_login_server_endpoint
+    except CloudSuffixNotSetException:
+        acr_suffix = None
+    if registry and acr_suffix:
+        pos = registry.find(acr_suffix)
+        if pos == -1:
+            logger.warning("The login server endpoint suffix '%s' is automatically appended.", acr_suffix)
+            namespace.acr = registry + acr_suffix

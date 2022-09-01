@@ -1268,26 +1268,13 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
 
 
 def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
-    from ._vm_utils import list_sku_info
+    from ._vm_utils import list_sku_info, is_sku_available
     result = list_sku_info(cmd.cli_ctx, location)
     # pylint: disable=too-many-nested-blocks
     if not show_all:
         available_skus = []
         for sku_info in result:
-            is_available = True
-            if sku_info.restrictions:
-                for restriction in sku_info.restrictions:
-                    if restriction.reason_code == 'NotAvailableForSubscription':
-                        # The attribute location_info is not supported in versions 2017-03-30 and earlier
-                        if cmd.supported_api_version(max_api='2017-03-30'):
-                            is_available = False
-                            break
-                        # This SKU is not available only if all zones are restricted
-                        if not (set(sku_info.location_info[0].zones or []) -
-                                set(restriction.restriction_info.zones or [])):
-                            is_available = False
-                            break
-            if is_available:
+            if is_sku_available(cmd, sku_info, zone):
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
@@ -2626,10 +2613,13 @@ def vm_run_command_list(client,
                         vm_name=None,
                         expand=None,
                         location=None):
-    if resource_group_name or vm_name is not None:
-        return client.list_by_virtual_machine(resource_group_name=resource_group_name,
-                                              vm_name=vm_name,
-                                              expand=expand)
+
+    if not location and not (resource_group_name and vm_name):
+        raise RequiredArgumentMissingError("Please specify --location or specify --vm-name and --resource-group")
+
+    if vm_name:
+        return client.list_by_virtual_machine(resource_group_name=resource_group_name, vm_name=vm_name, expand=expand)
+
     return client.list(location=location)
 
 
@@ -2641,15 +2631,18 @@ def vm_run_command_show(client,
                         instance_view=False,
                         location=None,
                         command_id=None):
-    if resource_group_name or vm_name is not None or run_command_name is not None:
+
+    if not (resource_group_name and vm_name and run_command_name) and not (location and command_id):
+        raise RequiredArgumentMissingError(
+            "Please specify --location and --command-id or specify --vm-name, --resource-group and --run-command-name")
+
+    if vm_name:
         if instance_view:
             expand = 'instanceView'
-        return client.get_by_virtual_machine(resource_group_name=resource_group_name,
-                                             vm_name=vm_name,
-                                             run_command_name=run_command_name,
-                                             expand=expand)
-    return client.get(location=location,
-                      command_id=command_id)
+        return client.get_by_virtual_machine(resource_group_name=resource_group_name, vm_name=vm_name,
+                                             run_command_name=run_command_name, expand=expand)
+
+    return client.get(location=location, command_id=command_id)
 
 # endregion
 
@@ -4249,13 +4242,28 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 # from azure.mgmt.compute.models import Gallery, SharingProfile
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
-                           soft_delete=None, **kwargs):
+                           soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
+                           public_name_prefix=None, **kwargs):
     if permissions:
         if gallery.sharing_profile is None:
             SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
+        community_gallery_info = None
+        if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+            community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                          publisher_contact=publisher_contact,
+                                                          eula=eula,
+                                                          public_name_prefix=public_name_prefix)
+        gallery.sharing_profile.community_gallery_info = community_gallery_info
+
     if soft_delete is not None:
         gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
 

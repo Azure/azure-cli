@@ -162,6 +162,7 @@ def load_arguments(self, _):
                   'secure-scores',
                   'secure-score-controls',
                   'secure-score-control-definitions',
+                  'security_solutions_reference_data',
                   'setting',
                   'automation'
                   ]:

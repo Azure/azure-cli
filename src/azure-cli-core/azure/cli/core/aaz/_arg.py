@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import abc
+import copy
 
 from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction, \
-    AAZGenericUpdateAction
+    AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType
@@ -17,7 +18,7 @@ from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AA
     AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
     AAZDateTimeFormat, AAZDurationFormat
 
-# pylint: disable=redefined-builtin, protected-access
+# pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -115,7 +116,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
             required=self._required if self._default == AAZUndefined else False,
             help=self._help.get('short-summary', None),
             id_part=self._id_part,
-            default=self._default,
+            default=copy.deepcopy(self._default),
         )
         if self._arg_group:
             arg.arg_group = self._arg_group
@@ -448,7 +449,7 @@ class AAZSubscriptionIdArg(AAZStrArg):
 
 
 # Generic Update arguments
-class AAZGenericUpdateForceString(AAZBoolArg):
+class AAZGenericUpdateForceStringArg(AAZBoolArg):
 
     def __init__(
             self, options=('--force-string',), arg_group='Generic Update',
@@ -460,6 +461,11 @@ class AAZGenericUpdateForceString(AAZBoolArg):
             arg_group=arg_group,
             **kwargs,
         )
+
+    def _build_cmd_action(self):
+        class Action(AAZGenericUpdateForceStringAction):
+            _schema = self  # bind action class with current schema
+        return Action
 
 
 class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
@@ -495,7 +501,9 @@ class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            ACTION_NAME = "set"
+        return Action
 
 
 class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
@@ -520,7 +528,9 @@ class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            ACTION_NAME = "add"
+        return Action
 
 
 class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
@@ -545,7 +555,9 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            ACTION_NAME = "remove"
+        return Action
 
 
 def has_value(arg_value):

@@ -7,7 +7,7 @@ import os
 import re
 import time
 from types import SimpleNamespace
-from typing import Dict, List, Tuple, TypeVar, Union
+from typing import Dict, List, Optional, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
@@ -28,6 +28,7 @@ from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_private_cluster,
+    format_parameter_name_to_option_name,
     get_user_assigned_identity_by_resource_id,
     map_azure_error_to_cli_error,
     safe_list_get,
@@ -100,6 +101,10 @@ Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
+ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
+ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfileDiskCSIDriver')
+ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
+ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -514,6 +519,132 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string
         """
         return self.agentpool_context.get_kubernetes_version()
+
+    def get_disk_driver(self) -> Optional[ManagedClusterStorageProfileDiskCSIDriver]:
+        """Obtain the value of storage_profile.disk_csi_driver
+
+        :return: Optional[ManagedClusterStorageProfileDiskCSIDriver]
+        """
+        enable_disk_driver = self.raw_param.get("enable_disk_driver")
+        disable_disk_driver = self.raw_param.get("disable_disk_driver")
+
+        if not enable_disk_driver and not disable_disk_driver:
+            return None
+        profile = self.models.ManagedClusterStorageProfileDiskCSIDriver()
+
+        if enable_disk_driver and disable_disk_driver:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-disk-driver and "
+                "--disable-disk-driver at the same time."
+            )
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if disable_disk_driver:
+                profile.enabled = False
+            else:
+                profile.enabled = True
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if enable_disk_driver:
+                profile.enabled = True
+            elif disable_disk_driver:
+                msg = (
+                    "Please make sure there are no existing PVs and PVCs "
+                    "that are used by AzureDisk CSI driver before disabling."
+                )
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = False
+
+        return profile
+
+    def get_file_driver(self) -> Optional[ManagedClusterStorageProfileFileCSIDriver]:
+        """Obtain the value of storage_profile.file_csi_driver
+
+        :return: Optional[ManagedClusterStorageProfileFileCSIDriver]
+        """
+        enable_file_driver = self.raw_param.get("enable_file_driver")
+        disable_file_driver = self.raw_param.get("disable_file_driver")
+
+        if not enable_file_driver and not disable_file_driver:
+            return None
+        profile = self.models.ManagedClusterStorageProfileFileCSIDriver()
+
+        if enable_file_driver and disable_file_driver:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-file-driver and "
+                "--disable-file-driver at the same time."
+            )
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if disable_file_driver:
+                profile.enabled = False
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if enable_file_driver:
+                profile.enabled = True
+            elif disable_file_driver:
+                msg = (
+                    "Please make sure there are no existing PVs and PVCs "
+                    "that are used by AzureFile CSI driver before disabling."
+                )
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = False
+
+        return profile
+
+    def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
+        """Obtain the value of storage_profile.snapshot_controller
+
+        :return: Optional[ManagedClusterStorageProfileSnapshotController]
+        """
+        enable_snapshot_controller = self.raw_param.get("enable_snapshot_controller")
+        disable_snapshot_controller = self.raw_param.get("disable_snapshot_controller")
+
+        if not enable_snapshot_controller and not disable_snapshot_controller:
+            return None
+
+        profile = self.models.ManagedClusterStorageProfileSnapshotController()
+
+        if enable_snapshot_controller and disable_snapshot_controller:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-snapshot_controller and "
+                "--disable-snapshot_controller at the same time."
+            )
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if disable_snapshot_controller:
+                profile.enabled = False
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if enable_snapshot_controller:
+                profile.enabled = True
+            elif disable_snapshot_controller:
+                msg = (
+                    "Please make sure there are no existing "
+                    "VolumeSnapshots, VolumeSnapshotClasses and VolumeSnapshotContents "
+                    "that are used by the snapshot controller before disabling."
+                )
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = False
+
+        return profile
+
+    def get_storage_profile(self) -> Optional[ManagedClusterStorageProfile]:
+        """Obtain the value of storage_profile.
+
+        :return: Optional[ManagedClusterStorageProfile]
+        """
+        profile = self.models.ManagedClusterStorageProfile()
+        if self.mc.storage_profile is not None:
+            profile = self.mc.storage_profile
+        profile.disk_csi_driver = self.get_disk_driver()
+        profile.file_csi_driver = self.get_file_driver()
+        profile.snapshot_controller = self.get_snapshot_controller()
+
+        return profile
 
     def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
@@ -4388,6 +4519,18 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.windows_profile = windows_profile
         return mc
 
+    def set_up_storage_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up storage profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if hasattr(self.models, "ManagedClusterStorageProfile"):
+            mc.storage_profile = self.context.get_storage_profile()
+
+        return mc
+
     def set_up_service_principal_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up service principal profile for the ManagedCluster object.
 
@@ -5118,6 +5261,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group(mc)
         # set up defender
         mc = self.set_up_defender(mc)
+        # set up storage profile
+        mc = self.set_up_storage_profile(mc)
         # set up azure keyvalut kms
         mc = self.set_up_azure_keyvault_kms(mc)
         mc = self.set_up_http_proxy_config(mc)
@@ -5377,49 +5522,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         )
 
         if not is_changed and is_default:
-            # Note: Uncomment the followings to automatically generate the error message.
-            # option_names = [
-            #     '"{}"'.format(format_parameter_name_to_option_name(x))
-            #     for x in self.context.raw_param.keys()
-            #     if x not in excluded_keys
-            # ]
-            # error_msg = "Please specify one or more of {}.".format(
-            #     " or ".join(option_names)
-            # )
-            # raise RequiredArgumentMissingError(error_msg)
-            raise RequiredArgumentMissingError(
-                'Please specify one or more of "--enable-cluster-autoscaler" or '
-                '"--disable-cluster-autoscaler" or '
-                '"--update-cluster-autoscaler" or '
-                '"--cluster-autoscaler-profile" or '
-                '"--load-balancer-managed-outbound-ip-count" or '
-                '"--load-balancer-outbound-ips" or '
-                '"--load-balancer-outbound-ip-prefixes" or '
-                '"--load-balancer-outbound-ports" or '
-                '"--load-balancer-idle-timeout" or '
-                '"--nat-gateway-managed-outbound-ip-count" or '
-                '"--nat-gateway-idle-timeout" or '
-                '"--auto-upgrade-channel" or '
-                '"--attach-acr" or "--detach-acr" or '
-                '"--uptime-sla" or '
-                '"--no-uptime-sla" or '
-                '"--api-server-authorized-ip-ranges" or '
-                '"--enable-aad" or '
-                '"--aad-tenant-id" or '
-                '"--aad-admin-group-object-ids" or '
-                '"--enable-ahub" or '
-                '"--disable-ahub" or '
-                '"--windows-admin-password" or '
-                '"--enable-managed-identity" or '
-                '"--assign-identity" or '
-                '"--enable-azure-rbac" or '
-                '"--disable-azure-rbac" or '
-                '"--enable-public-fqdn" or '
-                '"--disable-public-fqdn" or '
-                '"--tags" or '
-                '"--nodepool-labels" or '
-                '"--enble-windows-gmsa".'
-            )
+            reconcilePrompt = 'no argument specified to update would you like to reconcile to current settings?'
+            if not prompt_y_n(reconcilePrompt, default="n"):
+                # Note: Uncomment the followings to automatically generate the error message.
+                option_names = [
+                    '"{}"'.format(format_parameter_name_to_option_name(x))
+                    for x in self.context.raw_param.keys()
+                    if x not in excluded_keys
+                ]
+                error_msg = "Please specify one or more of {}.".format(
+                    " or ".join(option_names)
+                )
+                raise RequiredArgumentMissingError(error_msg)
 
     def _ensure_mc(self, mc: ManagedCluster) -> None:
         """Internal function to ensure that the incoming `mc` object is valid and the same as the attached `mc` object
@@ -5931,6 +6045,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             ] = azure_keyvault_secrets_provider_addon_profile
         return mc
 
+    def update_storage_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update storage profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc.storage_profile = self.context.get_storage_profile()
+
+        return mc
+
     def update_defender(self, mc: ManagedCluster) -> ManagedCluster:
         """Update defender for the ManagedCluster object.
         :return: the ManagedCluster object
@@ -6062,6 +6187,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
+        # update stroage profile
+        mc = self.update_storage_profile(mc)
         # update defender
         mc = self.update_defender(mc)
         # update azure keyvalut kms
