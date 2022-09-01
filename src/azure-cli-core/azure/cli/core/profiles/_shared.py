@@ -152,7 +152,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2022-05-01',
-        ResourceType.MGMT_NETWORK: '2021-08-01',
+        ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-01', {
             'resource_skus': '2019-04-01',
             'disks': '2022-03-02',
@@ -201,11 +201,11 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-06-08',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
         ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2022-06-01',
@@ -295,7 +295,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -342,7 +342,7 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
