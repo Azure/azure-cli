@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.core.exceptions import ResourceNotFoundError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -13,7 +14,9 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 UserIdentity,
                                                 EncryptionProperties,
                                                 KeyVaultProperties,
-                                                RegenerateKeyParameters, CreateMode)
+                                                RegenerateKeyParameters,
+                                                CreateMode,
+                                                Replica)
 from azure.cli.core.util import user_confirmation
 
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
@@ -241,6 +244,43 @@ def list_credential(cmd, client, name, resource_group_name=None):
 def regenerate_credential(cmd, client, name, id_, resource_group_name=None):
     resource_group_name, _ = resolve_store_metadata(cmd, name)
     return client.regenerate_key(resource_group_name, name, RegenerateKeyParameters(id=id_))
+
+
+def list_replica(cmd, client, store_name, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+
+    return client.list_by_configuration_store(resource_group_name=resource_group_name, config_store_name=store_name)
+
+
+def show_replica(cmd, client, store_name, name, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+    try:
+        return client.get(resource_group_name=resource_group_name, config_store_name=store_name, replica_name=name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError("The replica '{}' for App Configuration '{}' not found.".format(name, store_name))
+
+
+def create_replica(cmd, client, store_name, name, location, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+
+    replica_creation_params = Replica(location=location)
+    return client.begin_create(resource_group_name=resource_group_name,
+                               config_store_name=store_name,
+                               replica_name=name,
+                               replica_creation_parameters=replica_creation_params)
+
+
+def delete_replica(cmd, client, store_name, name, resource_group_name=None, yes=False):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+
+    user_confirmation("Are you sure you want to delete the replica '{}' for the App Configuration '{}'".format(name, store_name), yes)
+    return client.begin_delete(resource_group_name=resource_group_name,
+                               config_store_name=store_name,
+                               replica_name=name)
 
 
 def __get_resource_identity(assign_identity):

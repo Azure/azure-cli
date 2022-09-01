@@ -10,14 +10,27 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 logger = get_logger(__name__)
 
 
+STABLE_API_VERSION = '2022-05-01'
+REPLICATION_API_VERSION = '2022-03-01-preview'
+
+
 def get_appconfig_service_client(cli_ctx, api_version=None):
     ''' Returns the client for managing configuration stores.'''
     from azure.mgmt.appconfiguration import AppConfigurationManagementClient
-    return get_mgmt_service_client(cli_ctx, AppConfigurationManagementClient, api_version=api_version)
+    api_version = STABLE_API_VERSION if not api_version else api_version
+    client = get_mgmt_service_client(cli_ctx, AppConfigurationManagementClient, api_version=api_version)
+    client.api_version = api_version
+    return client
 
 
 def cf_configstore(cli_ctx, *_):
     return get_appconfig_service_client(cli_ctx).configuration_stores
+
+
+def cf_replicas(cli_ctx, *_):
+    client = get_appconfig_service_client(cli_ctx, REPLICATION_API_VERSION).replicas
+    client.api_version = REPLICATION_API_VERSION
+    return client
 
 
 def cf_configstore_operations(cli_ctx, *_):
