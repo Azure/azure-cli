@@ -38,7 +38,7 @@ examples:
     crafted: true
   - name: Create a Text Analytics Cognitive Services account in West Europe without confirmation required and use customer owned storage.
     text: |
-        az cognitiveservices account create -n myresource -g myResourceGroup --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes 
+        az cognitiveservices account create -n myresource -g myResourceGroup --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes
             --storage '[
             {
               "resourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/myStorageAccount"
@@ -46,7 +46,7 @@ examples:
           ]'
   - name: Create a Text Analytics Cognitive Services account in West Europe without confirmation required and user Customer-managed encryption.
     text: |
-        az cognitiveservices account create -n myresource -g myResourceGroup --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes 
+        az cognitiveservices account create -n myresource -g myResourceGroup --assign-identity --kind TextAnalytics --sku S -l WestEurope --yes
             --encryption '{
               "keySource": "Microsoft.KeyVault",
               "keyVaultProperties": {
