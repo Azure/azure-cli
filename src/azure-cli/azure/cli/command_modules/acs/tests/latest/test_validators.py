@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+from unittest.mock import Mock
 from types import SimpleNamespace
 
 from azure.cli.command_modules.acs import _validators as validators
@@ -616,6 +617,24 @@ class TestValidateNodepoolName(unittest.TestCase):
         validators.validate_agent_pool_name(
             namespace
         )
+
+
+class TestValidateRegistryName(unittest.TestCase):
+    def test_append_suffix(self):
+        from azure.cli.core.cloud import HARD_CODED_CLOUD_LIST, CloudSuffixNotSetException
+        for hard_coded_cloud in HARD_CODED_CLOUD_LIST:
+            namespace = SimpleNamespace(
+                **{
+                    "acr": "myacr",
+                }
+            )
+            try:
+                acr_suffix = hard_coded_cloud.suffixes.acr_login_server_endpoint
+            except CloudSuffixNotSetException:
+                acr_suffix = ""
+            cmd = Mock(cli_ctx=Mock(cloud=hard_coded_cloud))
+            validators.validate_registry_name(cmd, namespace)
+            self.assertEqual(namespace.acr, "myacr" + acr_suffix)
 
 
 if __name__ == "__main__":

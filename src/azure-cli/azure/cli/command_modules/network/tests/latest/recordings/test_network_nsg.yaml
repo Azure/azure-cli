@@ -13,12 +13,13 @@ interactions:
       ParameterSetName:
       - --name -g --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nsg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001","name":"cli_test_nsg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-26T08:50:15Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001","name":"cli_test_nsg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-30T02:35:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:18 GMT
+      - Tue, 30 Aug 2022 02:35:44 GMT
       expires:
       - '-1'
       pragma:
@@ -59,19 +60,20 @@ interactions:
       ParameterSetName:
       - --name -g --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1\",\r\n
-        \ \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"56a750dd-c432-4570-a697-fc05a431c7de\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"3761be92-373d-469c-a4c0-1dc3b6194562\",\r\n
         \   \"securityRules\": [],\r\n    \"defaultSecurityRules\": [\r\n      {\r\n
         \       \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -83,7 +85,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -95,7 +97,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -106,7 +108,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -118,7 +120,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -130,7 +132,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"f468d2ec-1156-4255-b1dc-340c557b77af\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1f659ca5-4b0e-495a-a9b5-b3d302b048b1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -145,7 +147,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2034116d-775d-40bd-bb55-88d9c7c3f389?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/abc5cf9a-9bee-46b5-8039-a599f346e2ce?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -153,7 +155,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:22 GMT
+      - Tue, 30 Aug 2022 02:35:50 GMT
       expires:
       - '-1'
       pragma:
@@ -166,9 +168,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1c4cbc21-7ed7-4830-b5e0-0e3e3cd90780
+      - db563ea4-5cbb-427a-82df-c3eeae0b20c9
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1159'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -186,9 +188,10 @@ interactions:
       ParameterSetName:
       - --name -g --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2034116d-775d-40bd-bb55-88d9c7c3f389?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/abc5cf9a-9bee-46b5-8039-a599f346e2ce?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -200,7 +203,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:26 GMT
+      - Tue, 30 Aug 2022 02:35:54 GMT
       expires:
       - '-1'
       pragma:
@@ -217,7 +220,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 027d539e-615c-4716-a177-752a6c08f51f
+      - ec04f1d9-21da-487c-9772-877cee2046cd
     status:
       code: 200
       message: OK
@@ -235,19 +238,20 @@ interactions:
       ParameterSetName:
       - --name -g --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1\",\r\n
-        \ \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"56a750dd-c432-4570-a697-fc05a431c7de\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"3761be92-373d-469c-a4c0-1dc3b6194562\",\r\n
         \   \"securityRules\": [],\r\n    \"defaultSecurityRules\": [\r\n      {\r\n
         \       \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n
+        \       \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -259,7 +263,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n
+        \       \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -271,7 +275,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n
+        \       \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -282,7 +286,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n
+        \       \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -294,7 +298,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n
+        \       \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -306,7 +310,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"3a92e5de-bfc2-4c24-8135-dc24aacad530\\\"\",\r\n
+        \       \"etag\": \"W/\\\"65f3c815-fce9-4d9e-969d-c9b82b00bc1e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -325,9 +329,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:26 GMT
+      - Tue, 30 Aug 2022 02:35:54 GMT
       etag:
-      - W/"3a92e5de-bfc2-4c24-8135-dc24aacad530"
+      - W/"65f3c815-fce9-4d9e-969d-c9b82b00bc1e"
       expires:
       - '-1'
       pragma:
@@ -344,7 +348,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9caf19f9-a0ab-4b45-8d9a-ec98b464962b
+      - bd0ed08e-4dd0-473c-a33d-ecbc6b0599cc
     status:
       code: 200
       message: OK
@@ -369,13 +373,14 @@ interactions:
       - --access --destination-address-prefix --direction --nsg-name --protocol -g
         --source-address-prefix -n --source-port-range --destination-port-range --priority
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"2b783708-77b5-495f-897c-8b1af56b0646\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"d9fcc1be-798c-4866-a264-856e0bc7c8e4\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"protocol\": \"*\",\r\n
         \   \"sourcePortRange\": \"*\",\r\n    \"destinationPortRange\": \"4444\",\r\n
@@ -386,7 +391,7 @@ interactions:
         []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c1aca6a1-377a-4423-a7a8-d15e4020aa3b?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3403296f-e5f5-42c7-b336-a485cd0359c5?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -394,7 +399,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:28 GMT
+      - Tue, 30 Aug 2022 02:35:56 GMT
       expires:
       - '-1'
       pragma:
@@ -407,9 +412,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e834859d-6260-48b1-8568-7aa1c2d571d0
+      - 703d9389-64d1-4b3d-b882-3c709e817d14
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1152'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -428,9 +433,10 @@ interactions:
       - --access --destination-address-prefix --direction --nsg-name --protocol -g
         --source-address-prefix -n --source-port-range --destination-port-range --priority
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c1aca6a1-377a-4423-a7a8-d15e4020aa3b?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3403296f-e5f5-42c7-b336-a485cd0359c5?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -442,7 +448,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:38 GMT
+      - Tue, 30 Aug 2022 02:36:06 GMT
       expires:
       - '-1'
       pragma:
@@ -459,7 +465,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e192b514-6f84-4d49-ba6b-e767c4c567eb
+      - a757bafb-afac-4f81-b714-73f8a5d1e124
     status:
       code: 200
       message: OK
@@ -478,13 +484,14 @@ interactions:
       - --access --destination-address-prefix --direction --nsg-name --protocol -g
         --source-address-prefix -n --source-port-range --destination-port-range --priority
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"protocol\": \"*\",\r\n
         \   \"sourcePortRange\": \"*\",\r\n    \"destinationPortRange\": \"4444\",\r\n
@@ -501,9 +508,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:38 GMT
+      - Tue, 30 Aug 2022 02:36:06 GMT
       etag:
-      - W/"46838d12-d9ac-44d5-a766-6efa602e503c"
+      - W/"4d66cf1e-33bf-4952-b5fa-f32b7139191a"
       expires:
       - '-1'
       pragma:
@@ -520,7 +527,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a7d34c1f-de8b-42e0-9a71-3df5f16c6541
+      - 76210c46-4067-41d6-b94c-59c4468a5955
     status:
       code: 200
       message: OK
@@ -536,71 +543,49 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkSecurityGroups?api-version=2021-08-01
   response:
     body:
-      string: '{"value":[{"name":"test-nsg1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"56a750dd-c432-4570-a697-fc05a431c7de","securityRules":[{"name":"web","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"4444","sourceAddressPrefix":"789","destinationAddressPrefix":"1234","access":"Allow","priority":1000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"46838d12-d9ac-44d5-a766-6efa602e503c\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}]}},{"name":"mynsg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"1bbb2d10-5f69-4b24-80ab-cb26a25f9821","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg/defaultSecurityRules/AllowVnetInBound","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg/defaultSecurityRules/DenyAllInBound","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nyy01/providers/Microsoft.Network/networkSecurityGroups/mynsg/defaultSecurityRules/DenyAllOutBound","etag":"W/\"836adb3d-098e-4456-813f-6c33b666653b\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}]}},{"name":"nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"7543a162-3a80-4f04-ac31-adc8ab594af5","securityRules":[{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-inbound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-inbound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for worker nodes communication within a cluster.","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":100,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-control-plane-to-worker-ssh","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-control-plane-to-worker-ssh","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for Databricks control plane management of worker nodes.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"22","sourceAddressPrefix":"AzureDatabricks","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":101,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-control-plane-to-worker-proxy","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-control-plane-to-worker-proxy","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for Databricks control plane communication with worker nodes.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"5557","sourceAddressPrefix":"AzureDatabricks","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":102,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for workers communication with Databricks Webapp.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"443","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"AzureDatabricks","access":"Allow","priority":100,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-sql","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-sql","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for workers communication with Azure SQL services.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"3306","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"Sql","access":"Allow","priority":101,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-storage","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for workers communication with Azure Storage services.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"443","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"Storage","access":"Allow","priority":102,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-outbound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-outbound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for worker nodes communication within a cluster.","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":103,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-eventhub","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-eventhub","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
-        for worker communication with Azure Eventhub services.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"9093","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"EventHub","access":"Allow","priority":104,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/defaultSecurityRules/AllowVnetInBound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/defaultSecurityRules/DenyAllInBound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/networkSecurityGroups/nsgwwbwyyajxfjuu2hbvaadlyhuodbr4e5tdujt7/defaultSecurityRules/DenyAllOutBound","etag":"W/\"5d536846-fef5-4d3e-b2f2-5ea324680767\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"subnets":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet4b3tovr6frmci/subnets/databricks-privatelink-subnetdagl57rnzox"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet4b3tovr6frmci/subnets/private-subnet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpointb7pl6f5q/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet4b3tovr6frmci/subnets/public-subnet"}]}},{"name":"acctestNSG-aadds-123","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups","location":"westeurope","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"884227d0-4ef4-4135-90a7-8e160045adca","securityRules":[{"name":"AllowRD","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/securityRules/AllowRD","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"3389","sourceAddressPrefix":"CorpNetSaw","destinationAddressPrefix":"*","access":"Allow","priority":201,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowSyncWithAzureAD","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/securityRules/AllowSyncWithAzureAD","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"443","sourceAddressPrefix":"AzureActiveDirectoryDomainServices","destinationAddressPrefix":"*","access":"Allow","priority":101,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowLDAPS","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/securityRules/AllowLDAPS","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"636","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Allow","priority":401,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowPSRemoting","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/securityRules/AllowPSRemoting","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"5986","sourceAddressPrefix":"AzureActiveDirectoryDomainServices","destinationAddressPrefix":"*","access":"Allow","priority":301,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/defaultSecurityRules/AllowVnetInBound","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/defaultSecurityRules/DenyAllInBound","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/networkSecurityGroups/acctestNSG-aadds-123/defaultSecurityRules/DenyAllOutBound","etag":"W/\"9ac3b57d-ff2b-45e4-ab4b-9f76a2675857\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"subnets":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acclongtestRG-aadds-123/providers/Microsoft.Network/virtualNetworks/acctestVnet-aadds-123/subnets/acctestSubnet-aadds-123"}]}},{"name":"jiasli-ssh-nsg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups","location":"southeastasia","properties":{"provisioningState":"Succeeded","resourceGuid":"89208c37-a18e-4b87-bf92-6c4a54cc6f14","securityRules":[{"name":"allow_ssh","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/securityRules/allow_ssh","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        SSH from CorpNet","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"22","sourceAddressPrefix":"CorpNetPublic","destinationAddressPrefix":"*","access":"Allow","priority":100,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/defaultSecurityRules/AllowVnetInBound","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/defaultSecurityRules/DenyAllInBound","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkSecurityGroups/jiasli-ssh-nsg/defaultSecurityRules/DenyAllOutBound","etag":"W/\"25943829-6406-4fa1-9984-86d63fadb788\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-ssh-rg/providers/Microsoft.Network/networkInterfaces/jiasli-ssh939"}]}},{"name":"bez-vm01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded","resourceGuid":"219189b8-f770-4b61-b3af-130d31d449c9","securityRules":[{"name":"bez-vm013389","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/securityRules/bez-vm013389","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"3389","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Allow","priority":1000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"bez-vm015985","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/securityRules/bez-vm015985","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"5985","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Allow","priority":1001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/defaultSecurityRules/AllowVnetInBound","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/defaultSecurityRules/DenyAllInBound","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm01/defaultSecurityRules/DenyAllOutBound","etag":"W/\"4f72f2ec-07a9-4787-a04e-f0e03cc290e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkInterfaces/bez-vm01"}]}},{"name":"testfilehandle1NSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"06b0cad5-b130-4ca1-a98e-78b30c38fdd3","securityRules":[{"name":"allow_ssh","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/securityRules/allow_ssh","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        SSH from CorpNet","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"22","sourceAddressPrefix":"CorpNetPublic","destinationAddressPrefix":"*","access":"Allow","priority":100,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/defaultSecurityRules/DenyAllInBound","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle1NSG/defaultSecurityRules/DenyAllOutBound","etag":"W/\"6cd5c5aa-2dde-460b-ae40-9f7bcb9f5162\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle1rg/providers/Microsoft.Network/networkInterfaces/testfilehandle1VMNic"}]}},{"name":"testfilehandle2NSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"5809b3e7-3d78-4cf3-b62a-154a4315f7a9","securityRules":[{"name":"allow_ssh","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/securityRules/allow_ssh","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        SSH from CorpNet","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"22","sourceAddressPrefix":"CorpNetPublic","destinationAddressPrefix":"*","access":"Allow","priority":100,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/defaultSecurityRules/DenyAllInBound","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkSecurityGroups/testfilehandle2NSG/defaultSecurityRules/DenyAllOutBound","etag":"W/\"c878e8bb-4028-411c-b671-b93ba61f1e29\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testfilehandle2rg/providers/Microsoft.Network/networkInterfaces/testfilehandle2VMNic"}]}},{"name":"vmssgrpf4nNSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups","location":"centraluseuap","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"2b3fa5b1-82ef-48f0-9be8-049756c44ba8","securityRules":[{"name":"Port_8080","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/securityRules/Port_8080","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Port_80802","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/securityRules/Port_80802","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+      string: '{"value":[{"name":"test-nsg1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","resourceGuid":"3761be92-373d-469c-a4c0-1dc3b6194562","securityRules":[{"name":"web","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"4444","sourceAddressPrefix":"789","destinationAddressPrefix":"1234","access":"Allow","priority":1000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}]}},{"name":"bez-vm","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups","location":"eastus","properties":{"provisioningState":"Succeeded","resourceGuid":"493fe263-25d4-4dc5-964c-75efad0e54f5","securityRules":[{"name":"bez-vm22","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/securityRules/bez-vm22","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"22","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Allow","priority":1000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/defaultSecurityRules/AllowVnetInBound","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/defaultSecurityRules/DenyAllInBound","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkSecurityGroups/bez-vm/defaultSecurityRules/DenyAllOutBound","etag":"W/\"8dfecdca-1333-4102-a682-32ffa57e59e1\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Network/networkInterfaces/bez-vm"}]}},{"name":"vmfornfs-nsg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups","location":"eastus","properties":{"provisioningState":"Succeeded","resourceGuid":"35ae64b5-a953-4115-856b-d2ccd9c6ccc2","securityRules":[{"name":"allow_ssh","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/securityRules/allow_ssh","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        SSH from CorpNet","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"22","sourceAddressPrefix":"CorpNetPublic","destinationAddressPrefix":"*","access":"Allow","priority":100,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/defaultSecurityRules/AllowVnetInBound","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/defaultSecurityRules/DenyAllInBound","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkSecurityGroups/vmfornfs-nsg/defaultSecurityRules/DenyAllOutBound","etag":"W/\"94583184-8564-47c2-839c-5731b2291a63\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Network/networkInterfaces/vmfornfs821"}]}},{"name":"zhoxing-testNSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"c026b5a9-bbd6-4bac-9d45-8fdfbe9bc88c","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG/defaultSecurityRules/DenyAllInBound","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkSecurityGroups/zhoxing-testNSG/defaultSecurityRules/DenyAllOutBound","etag":"W/\"7717486d-d753-489c-b6ce-0b1544d5699f\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Network/networkInterfaces/zhoxing-testVMNic"}]}},{"name":"databricks-nsg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups","location":"centralus","properties":{"provisioningState":"Succeeded","resourceGuid":"16e85f89-beaf-40f6-9bf0-87a8d6111c13","securityRules":[{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-inbound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-inbound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
+        for worker nodes communication within a cluster.","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":100,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
+        for workers communication with Databricks Webapp.","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"443","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"AzureDatabricks","access":"Allow","priority":100,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-sql","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-sql","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
+        for workers communication with Azure SQL services.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"3306","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"Sql","access":"Allow","priority":101,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-storage","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
+        for workers communication with Azure Storage services.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"443","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"Storage","access":"Allow","priority":102,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-outbound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-outbound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
+        for worker nodes communication within a cluster.","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":103,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-eventhub","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/securityRules/Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-eventhub","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","description":"Required
+        for worker communication with Azure Eventhub services.","protocol":"tcp","sourcePortRange":"*","destinationPortRange":"9093","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"EventHub","access":"Allow","priority":104,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/defaultSecurityRules/AllowVnetInBound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/defaultSecurityRules/DenyAllInBound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg/defaultSecurityRules/DenyAllOutBound","etag":"W/\"46385879-fcc6-48bd-a508-5e18ffa1a840\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"subnets":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/virtualNetworks/databricks-vnet/subnets/public-subnet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Network/virtualNetworks/databricks-vnet/subnets/private-subnet"}]}},{"name":"vmssgrpf4nNSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups","location":"centraluseuap","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"2b3fa5b1-82ef-48f0-9be8-049756c44ba8","securityRules":[{"name":"Port_8080","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/securityRules/Port_8080","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"Port_80802","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/securityRules/Port_80802","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
         inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
         inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/defaultSecurityRules/DenyAllInBound","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
         all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_3tlf6fnaho6xh2k67p5k2gzrdwsz6shx7wiovzaqqgrv6/providers/Microsoft.Network/networkSecurityGroups/vmssgrpf4nNSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"712ecff7-062a-4bd8-8d4b-9e4e5ac7af48\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
@@ -714,22 +699,22 @@ interactions:
         all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wbqhujrqkqkaecjvlez4kql3kjuokx62ayhp5pxuiktgj/providers/Microsoft.Network/networkSecurityGroups/vmsszmndmeNSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"b8efcf75-e086-4784-9b61-1078b8f5c7c4\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
         outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wbqhujrqkqkaecjvlez4kql3kjuokx62ayhp5pxuiktgj/providers/Microsoft.Network/networkSecurityGroups/vmsszmndmeNSG/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"b8efcf75-e086-4784-9b61-1078b8f5c7c4\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
         outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wbqhujrqkqkaecjvlez4kql3kjuokx62ayhp5pxuiktgj/providers/Microsoft.Network/networkSecurityGroups/vmsszmndmeNSG/defaultSecurityRules/DenyAllOutBound","etag":"W/\"b8efcf75-e086-4784-9b61-1078b8f5c7c4\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}]}},{"name":"vmss4xbwxkNSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups","location":"centraluseuap","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"a0573a0a-7d4d-41f1-8b15-d01ed936ae9d","securityRules":[{"name":"deny","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/securityRules/deny","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"deny1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/securityRules/deny1","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/DenyAllInBound","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
-        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
-        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/DenyAllOutBound","etag":"W/\"cfe4fc44-e315-4244-a1a9-c6c6650ae451\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}]}},{"name":"vmss4xbwxkNSG","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups","location":"centraluseuap","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"a0573a0a-7d4d-41f1-8b15-d01ed936ae9d","securityRules":[{"name":"deny","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/securityRules/deny","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"deny1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/securityRules/deny1","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/securityRules","properties":{"provisioningState":"Succeeded","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1010,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowVnetInBound","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/DenyAllInBound","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Network/networkSecurityGroups/vmss4xbwxkNSG/defaultSecurityRules/DenyAllOutBound","etag":"W/\"bb870cfe-dd86-4e09-a593-47816c01fad9\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
         all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound","sourcePortRanges":[],"destinationPortRanges":[],"sourceAddressPrefixes":[],"destinationAddressPrefixes":[]}}],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Compute/virtualMachineScaleSets/vmss4xbwxk/virtualMachines/0/networkInterfaces/vmss41653Nic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_capacity_reservation_wws6rf3szk4njqxzd5gnn46dl6jsnandg3f4x4hgynzzb/providers/Microsoft.Compute/virtualMachineScaleSets/vmss4xbwxk/virtualMachines/2/networkInterfaces/vmss41653Nic"}]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '193460'
+      - '170347'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:42 GMT
+      - Tue, 30 Aug 2022 02:36:08 GMT
       expires:
       - '-1'
       pragma:
@@ -741,12 +726,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-original-request-ids:
-      - 8236aa89-68e6-4f94-b0e9-e49fc2639d43
-      - 4e62be4c-5a7f-4401-9af4-2ac36a23fbfc
-      - 5e2d9be8-9308-48c7-858b-3de98df14e3f
-      - f2a33604-e18f-4d69-8a9a-5cbdc74f54d1
-      - cf66bc0d-2062-4cdc-9948-4e2443f4a7a5
-      - 6a0f6750-c4b4-433f-aa37-e2bd337cdd7a
+      - d881e43d-a6e2-4492-8968-192844ecbea7
+      - 17e4bba4-7e01-4602-9476-0d73b81db1cf
+      - 634578f7-bc3d-49c4-be17-55805cf85c6d
+      - 6231237d-160e-4593-93f4-4192a33c2e72
     status:
       code: 200
       message: OK
@@ -764,20 +747,20 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"test-nsg1\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1\",\r\n
-        \     \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n      \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n      \"location\": \"westus\",\r\n
         \     \"tags\": {\r\n        \"foo\": \"doo\"\r\n      },\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"56a750dd-c432-4570-a697-fc05a431c7de\",\r\n        \"securityRules\": [\r\n
+        \"3761be92-373d-469c-a4c0-1dc3b6194562\",\r\n        \"securityRules\": [\r\n
         \         {\r\n            \"name\": \"web\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"protocol\": \"*\",\r\n              \"sourcePortRange\": \"*\",\r\n
@@ -789,7 +772,7 @@ interactions:
         []\r\n            }\r\n          }\r\n        ],\r\n        \"defaultSecurityRules\":
         [\r\n          {\r\n            \"name\": \"AllowVnetInBound\",\r\n            \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -802,7 +785,7 @@ interactions:
         [],\r\n              \"destinationAddressPrefixes\": []\r\n            }\r\n
         \         },\r\n          {\r\n            \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -815,7 +798,7 @@ interactions:
         [],\r\n              \"destinationAddressPrefixes\": []\r\n            }\r\n
         \         },\r\n          {\r\n            \"name\": \"DenyAllInBound\",\r\n
         \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"description\": \"Deny all inbound traffic\",\r\n              \"protocol\":
@@ -827,7 +810,7 @@ interactions:
         [],\r\n              \"destinationAddressPrefixes\": []\r\n            }\r\n
         \         },\r\n          {\r\n            \"name\": \"AllowVnetOutBound\",\r\n
         \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"description\": \"Allow outbound traffic from all VMs to all
@@ -840,7 +823,7 @@ interactions:
         [],\r\n              \"destinationAddressPrefixes\": []\r\n            }\r\n
         \         },\r\n          {\r\n            \"name\": \"AllowInternetOutBound\",\r\n
         \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -852,7 +835,7 @@ interactions:
         [],\r\n              \"sourceAddressPrefixes\": [],\r\n              \"destinationAddressPrefixes\":
         []\r\n            }\r\n          },\r\n          {\r\n            \"name\":
         \"DenyAllOutBound\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \           \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \           \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"description\": \"Deny all outbound traffic\",\r\n              \"protocol\":
@@ -871,7 +854,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:43 GMT
+      - Tue, 30 Aug 2022 02:36:10 GMT
       expires:
       - '-1'
       pragma:
@@ -888,7 +871,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 91e05b0f-3c46-4504-a58b-ee8787970390
+      - 04b713c5-801c-4ffe-9c66-68e7e31eac83
     status:
       code: 200
       message: OK
@@ -906,19 +889,19 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1\",\r\n
-        \ \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"56a750dd-c432-4570-a697-fc05a431c7de\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"3761be92-373d-469c-a4c0-1dc3b6194562\",\r\n
         \   \"securityRules\": [\r\n      {\r\n        \"name\": \"web\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
@@ -929,7 +912,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      }\r\n    ],\r\n    \"defaultSecurityRules\": [\r\n
         \     {\r\n        \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -941,7 +924,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -953,7 +936,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -964,7 +947,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -976,7 +959,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -988,7 +971,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -1007,9 +990,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:45 GMT
+      - Tue, 30 Aug 2022 02:36:11 GMT
       etag:
-      - W/"46838d12-d9ac-44d5-a766-6efa602e503c"
+      - W/"4d66cf1e-33bf-4952-b5fa-f32b7139191a"
       expires:
       - '-1'
       pragma:
@@ -1026,7 +1009,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 88ac4b76-f9d5-4b53-9c42-b9073c8403d7
+      - 951b536b-0bb2-461f-890c-a80502482d35
     status:
       code: 200
       message: OK
@@ -1044,19 +1027,20 @@ interactions:
       ParameterSetName:
       - --resource-group --nsg-name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1\",\r\n
-        \ \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"56a750dd-c432-4570-a697-fc05a431c7de\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"3761be92-373d-469c-a4c0-1dc3b6194562\",\r\n
         \   \"securityRules\": [\r\n      {\r\n        \"name\": \"web\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
@@ -1067,7 +1051,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      }\r\n    ],\r\n    \"defaultSecurityRules\": [\r\n
         \     {\r\n        \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -1079,7 +1063,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -1091,7 +1075,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -1102,7 +1086,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -1114,7 +1098,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -1126,7 +1110,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -1145,9 +1129,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:47 GMT
+      - Tue, 30 Aug 2022 02:36:12 GMT
       etag:
-      - W/"46838d12-d9ac-44d5-a766-6efa602e503c"
+      - W/"4d66cf1e-33bf-4952-b5fa-f32b7139191a"
       expires:
       - '-1'
       pragma:
@@ -1164,7 +1148,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 725a632c-3dc8-412b-9a50-c7741dc206f0
+      - 06194d2a-5c7f-40d5-a5a3-1666c890145a
     status:
       code: 200
       message: OK
@@ -1182,13 +1166,14 @@ interactions:
       ParameterSetName:
       - --resource-group --nsg-name --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"protocol\": \"*\",\r\n
         \   \"sourcePortRange\": \"*\",\r\n    \"destinationPortRange\": \"4444\",\r\n
@@ -1205,9 +1190,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:49 GMT
+      - Tue, 30 Aug 2022 02:36:12 GMT
       etag:
-      - W/"46838d12-d9ac-44d5-a766-6efa602e503c"
+      - W/"4d66cf1e-33bf-4952-b5fa-f32b7139191a"
       expires:
       - '-1'
       pragma:
@@ -1224,7 +1209,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bae5ae82-1818-43a9-8b30-9d9b0e2c9f4e
+      - cd8eb8f3-dcdd-41eb-9981-e8243a948d68
     status:
       code: 200
       message: OK
@@ -1244,13 +1229,14 @@ interactions:
         --source-address-prefix --source-port-range --destination-port-range --priority
         --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"46838d12-d9ac-44d5-a766-6efa602e503c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4d66cf1e-33bf-4952-b5fa-f32b7139191a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"protocol\": \"*\",\r\n
         \   \"sourcePortRange\": \"*\",\r\n    \"destinationPortRange\": \"4444\",\r\n
@@ -1267,9 +1253,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:51 GMT
+      - Tue, 30 Aug 2022 02:36:13 GMT
       etag:
-      - W/"46838d12-d9ac-44d5-a766-6efa602e503c"
+      - W/"4d66cf1e-33bf-4952-b5fa-f32b7139191a"
       expires:
       - '-1'
       pragma:
@@ -1286,7 +1272,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dbee05c1-f66c-4437-83bf-2024878e13dd
+      - a879a57b-98ae-4137-b45b-8a61bb2bc9a5
     status:
       code: 200
       message: OK
@@ -1315,13 +1301,14 @@ interactions:
         --source-address-prefix --source-port-range --destination-port-range --priority
         --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"6b6ce948-1756-45b3-9e9e-11cb450e74b8\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"99c5411c-acbf-43e5-86fc-c4afdadc2d06\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"description\": \"greatrule\",\r\n
         \   \"protocol\": \"Tcp\",\r\n    \"sourcePortRange\": \"1234-1235\",\r\n
@@ -1332,7 +1319,7 @@ interactions:
         [],\r\n    \"destinationAddressPrefixes\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ce713bf7-3a0d-4813-a29b-186fc17527bd?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1d183d5d-9303-476d-b9a9-a9d51d4b83a7?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1340,7 +1327,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:50:52 GMT
+      - Tue, 30 Aug 2022 02:36:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1357,9 +1344,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1843806c-9216-47bc-ab44-64e6da8376c2
+      - 70f953a5-3de4-4ffd-a5b5-5ffe4892089f
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1141'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1379,9 +1366,10 @@ interactions:
         --source-address-prefix --source-port-range --destination-port-range --priority
         --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ce713bf7-3a0d-4813-a29b-186fc17527bd?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1d183d5d-9303-476d-b9a9-a9d51d4b83a7?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1393,7 +1381,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:02 GMT
+      - Tue, 30 Aug 2022 02:36:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1410,7 +1398,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bb1b3dd4-69d6-450a-a3b2-9193d2e5e8ac
+      - 60686c70-4f5c-4be4-93cf-b1a90e774513
     status:
       code: 200
       message: OK
@@ -1430,13 +1418,14 @@ interactions:
         --source-address-prefix --source-port-range --destination-port-range --priority
         --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"96946af2-0d21-4d6d-ac17-a65703f9222f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"10460427-25ac-4fe4-bb61-7ba74e20891f\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"description\": \"greatrule\",\r\n
         \   \"protocol\": \"Tcp\",\r\n    \"sourcePortRange\": \"1234-1235\",\r\n
@@ -1453,9 +1442,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:03 GMT
+      - Tue, 30 Aug 2022 02:36:25 GMT
       etag:
-      - W/"96946af2-0d21-4d6d-ac17-a65703f9222f"
+      - W/"10460427-25ac-4fe4-bb61-7ba74e20891f"
       expires:
       - '-1'
       pragma:
@@ -1472,7 +1461,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ae56380d-37b2-4a96-bf99-138c9e1c2e69
+      - e1cdbacf-e45f-44e7-ae12-dd704c9efb0f
     status:
       code: 200
       message: OK
@@ -1490,13 +1479,14 @@ interactions:
       ParameterSetName:
       - -g --nsg-name -n --set
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"96946af2-0d21-4d6d-ac17-a65703f9222f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"10460427-25ac-4fe4-bb61-7ba74e20891f\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"description\": \"greatrule\",\r\n
         \   \"protocol\": \"Tcp\",\r\n    \"sourcePortRange\": \"1234-1235\",\r\n
@@ -1513,9 +1503,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:05 GMT
+      - Tue, 30 Aug 2022 02:36:25 GMT
       etag:
-      - W/"96946af2-0d21-4d6d-ac17-a65703f9222f"
+      - W/"10460427-25ac-4fe4-bb61-7ba74e20891f"
       expires:
       - '-1'
       pragma:
@@ -1532,7 +1522,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4658b444-0e6d-4555-b5af-3789d75413ef
+      - a56b1a87-dd9f-46ff-ab0d-fb92c3453a13
     status:
       code: 200
       message: OK
@@ -1560,13 +1550,14 @@ interactions:
       ParameterSetName:
       - -g --nsg-name -n --set
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"66639546-1895-4f65-b008-011674be6000\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"77a0c8c5-d5f2-462a-80c2-b91d97ae826d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"description\": \"cool\",\r\n
         \   \"protocol\": \"Tcp\",\r\n    \"sourcePortRange\": \"1234-1235\",\r\n
@@ -1577,7 +1568,7 @@ interactions:
         [],\r\n    \"destinationAddressPrefixes\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fb235b77-8163-42f2-a1c0-9abb6886fc24?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3a349621-d36b-43f0-b189-8d1152b3c699?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1585,7 +1576,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:06 GMT
+      - Tue, 30 Aug 2022 02:36:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1602,9 +1593,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f0890273-ac16-4b9a-9a8c-ce9371b9c3fb
+      - ecb4fffa-74b7-41be-ab80-b164fd479e78
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1140'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1622,9 +1613,10 @@ interactions:
       ParameterSetName:
       - -g --nsg-name -n --set
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fb235b77-8163-42f2-a1c0-9abb6886fc24?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3a349621-d36b-43f0-b189-8d1152b3c699?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1636,7 +1628,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:17 GMT
+      - Tue, 30 Aug 2022 02:36:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1653,7 +1645,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a213b61e-db8c-40a0-b9d1-a5f25f4764d6
+      - 112aa1da-e23f-43c9-adb0-b10f8cf4aafa
     status:
       code: 200
       message: OK
@@ -1671,13 +1663,14 @@ interactions:
       ParameterSetName:
       - -g --nsg-name -n --set
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"web\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web\",\r\n
-        \ \"etag\": \"W/\\\"c6e559cf-b71c-4ba8-9b02-08af7816da71\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"91afeabe-6dea-4bf5-b98a-4d0f2f203fe5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups/securityRules\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"description\": \"cool\",\r\n
         \   \"protocol\": \"Tcp\",\r\n    \"sourcePortRange\": \"1234-1235\",\r\n
@@ -1694,9 +1687,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:18 GMT
+      - Tue, 30 Aug 2022 02:36:37 GMT
       etag:
-      - W/"c6e559cf-b71c-4ba8-9b02-08af7816da71"
+      - W/"91afeabe-6dea-4bf5-b98a-4d0f2f203fe5"
       expires:
       - '-1'
       pragma:
@@ -1713,7 +1706,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7da2ea43-b55a-4e59-94ea-d43f48dbeb1c
+      - 54243ebc-6e54-455a-898f-07ff75e3a333
     status:
       code: 200
       message: OK
@@ -1721,7 +1714,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1733,7 +1726,7 @@ interactions:
       ParameterSetName:
       - --resource-group --nsg-name --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1/securityRules/web?api-version=2021-08-01
   response:
@@ -1741,17 +1734,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f81f02b1-f13d-483d-97c7-c45818b09fc7?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d5c00668-51a0-46ed-bb60-be7862f8fdeb?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 08:51:19 GMT
+      - Tue, 30 Aug 2022 02:36:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f81f02b1-f13d-483d-97c7-c45818b09fc7?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d5c00668-51a0-46ed-bb60-be7862f8fdeb?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -1762,9 +1755,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8d2aa159-29c3-43ed-9c54-e80eba15941e
+      - 93855d21-f892-4163-a7a5-89923d1bed8f
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14993'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1782,9 +1775,9 @@ interactions:
       ParameterSetName:
       - --resource-group --nsg-name --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f81f02b1-f13d-483d-97c7-c45818b09fc7?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d5c00668-51a0-46ed-bb60-be7862f8fdeb?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1796,7 +1789,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:30 GMT
+      - Tue, 30 Aug 2022 02:36:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1813,7 +1806,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2af55e18-1597-42d5-9114-00fb6e82331f
+      - 55c1aa19-af9a-4dc2-862b-8de0455bd0d4
     status:
       code: 200
       message: OK
@@ -1831,25 +1824,25 @@ interactions:
       ParameterSetName:
       - --resource-group --nsg-name --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f81f02b1-f13d-483d-97c7-c45818b09fc7?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d5c00668-51a0-46ed-bb60-be7862f8fdeb?api-version=2021-08-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f81f02b1-f13d-483d-97c7-c45818b09fc7?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d5c00668-51a0-46ed-bb60-be7862f8fdeb?api-version=2021-08-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:31 GMT
+      - Tue, 30 Aug 2022 02:36:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f81f02b1-f13d-483d-97c7-c45818b09fc7?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d5c00668-51a0-46ed-bb60-be7862f8fdeb?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -1860,7 +1853,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8d2aa159-29c3-43ed-9c54-e80eba15941e
+      - 93855d21-f892-4163-a7a5-89923d1bed8f
     status:
       code: 204
       message: No Content
@@ -1868,7 +1861,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1880,7 +1873,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups/test-nsg1?api-version=2021-08-01
   response:
@@ -1890,17 +1883,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/41a7f454-069e-4955-b6ef-5f34bed8ecf1?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e2aee183-a742-4b3a-9e6f-885dd6574da9?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 08:51:34 GMT
+      - Tue, 30 Aug 2022 02:36:51 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/41a7f454-069e-4955-b6ef-5f34bed8ecf1?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/e2aee183-a742-4b3a-9e6f-885dd6574da9?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -1911,9 +1904,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6332fad1-5c4c-4e87-9d24-470c3e5e214a
+      - 4575162b-14cd-453f-b3c6-dface39e80c4
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14993'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1931,9 +1924,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/41a7f454-069e-4955-b6ef-5f34bed8ecf1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e2aee183-a742-4b3a-9e6f-885dd6574da9?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1945,7 +1938,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:44 GMT
+      - Tue, 30 Aug 2022 02:37:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1955,14 +1948,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 81d63d51-0f88-46fe-a564-5bc7b88ac0a2
+      - 26c95dcd-237a-4bad-aa38-d8339305d019
     status:
       code: 200
       message: OK
@@ -1980,9 +1969,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/41a7f454-069e-4955-b6ef-5f34bed8ecf1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/e2aee183-a742-4b3a-9e6f-885dd6574da9?api-version=2021-08-01
   response:
     body:
       string: ''
@@ -1990,17 +1979,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/41a7f454-069e-4955-b6ef-5f34bed8ecf1?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e2aee183-a742-4b3a-9e6f-885dd6574da9?api-version=2021-08-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:44 GMT
+      - Tue, 30 Aug 2022 02:37:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/41a7f454-069e-4955-b6ef-5f34bed8ecf1?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/e2aee183-a742-4b3a-9e6f-885dd6574da9?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -2011,7 +2000,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6332fad1-5c4c-4e87-9d24-470c3e5e214a
+      - 4575162b-14cd-453f-b3c6-dface39e80c4
     status:
       code: 204
       message: No Content
@@ -2029,7 +2018,7 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nsg000001/providers/Microsoft.Network/networkSecurityGroups?api-version=2021-08-01
   response:
@@ -2043,7 +2032,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:47 GMT
+      - Tue, 30 Aug 2022 02:37:03 GMT
       expires:
       - '-1'
       pragma:

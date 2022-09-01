@@ -87,7 +87,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('name', '{vault3}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
-            self.check('properties.provisioningState', 'Succeeded')
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
+            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
@@ -149,6 +151,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Enable', checks=[
             self.check("properties.enhancedSecurityState", 'Enabled'),
+        ])
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --classic-alerts Disable --job-failure-alerts Disable', checks=[
+            self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
+            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
         ])
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
@@ -626,6 +633,58 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastasia")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="eastasia")
+    @ResourceGroupPreparer(parameter_name="storage_account_resource_group", location="eastasia")
+    @VaultPreparer(soft_delete=False)
+    @VMPreparer()
+    @ItemPreparer()
+    @RPPreparer()
+    @StorageAccountPreparer(location="eastasia", resource_group_parameter_name="storage_account_resource_group")
+    def test_backup_restore_when_storage_in_different_rg(self, resource_group, target_resource_group, vault_name, vm_name, storage_account, storage_account_resource_group):
+
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group,
+            'sa': storage_account,
+            'sa_rg': storage_account_resource_group,
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'vnet_name': self.create_random_name('clitest-vnet', 30),
+            'subnet_name': self.create_random_name('clitest-subnet', 30),
+            'target_vm_name': self.create_random_name('clitest-tvm', 15)
+        })
+
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        # Trigger Restore Disks
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --storage-account-resource-group {sa_rg}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        trigger_restore_job_details = self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        property_bag = trigger_restore_job_details['properties']['extendedInfo']['propertyBag']
+        self.assertEqual(property_bag['Target Storage Account Name'], storage_account)
+
+        self.kwargs['container'] = property_bag['Config Blob Container Name']
+        self.kwargs['blob'] = property_bag['Config Blob Name']
+
+        self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}', checks=self.check("exists", True))
 
 
     #@AllowLargeResponse()

@@ -224,6 +224,12 @@ def validate_load_balancer_idle_timeout(namespace):
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
+def validate_network_policy(namespace):
+    """validate network policy to be in lowercase"""
+    if namespace.network_policy is not None and namespace.network_policy.islower() is False:
+        raise InvalidArgumentValueError("--network-policy should be provided in lowercase")
+
+
 def validate_nat_gateway_managed_outbound_ip_count(namespace):
     """validate NAT gateway profile managed outbound IP count"""
     if namespace.nat_gateway_managed_outbound_ip_count is not None:
@@ -571,3 +577,20 @@ def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
     from msrestazure.tools import is_valid_resource_id
     if not is_valid_resource_id(key_vault_resource_id):
         raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
+
+
+def validate_registry_name(cmd, namespace):
+    """Append login server endpoint suffix."""
+    registry = namespace.acr
+    suffixes = cmd.cli_ctx.cloud.suffixes
+    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    from azure.cli.core.cloud import CloudSuffixNotSetException
+    try:
+        acr_suffix = suffixes.acr_login_server_endpoint
+    except CloudSuffixNotSetException:
+        acr_suffix = None
+    if registry and acr_suffix:
+        pos = registry.find(acr_suffix)
+        if pos == -1:
+            logger.warning("The login server endpoint suffix '%s' is automatically appended.", acr_suffix)
+            namespace.acr = registry + acr_suffix
