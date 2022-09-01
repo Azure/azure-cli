@@ -6275,9 +6275,6 @@ helps['network watcher connection-monitor create'] = """
 type: command
 short-summary: Create a connection monitor.
 examples:
-  - name: Create a connection monitor for a virtual machine.
-    text: |
-        az network watcher connection-monitor create -g MyResourceGroup -n MyConnectionMonitorName --source-resource MyVM
   - name: Create a connection monitor
     text: >
       az network watcher connection-monitor create
