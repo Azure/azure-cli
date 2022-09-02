@@ -93,7 +93,7 @@ Release History
 **Network**
 
 * `az network application-gateway create`: Support rule priority field provided as part of configuration (#23438)
-* Private link add `Microsoft.OpenEnergyPlatform/energyServices` provider (#23587)
+* `az network private-endpoint-connection`: Add `Microsoft.OpenEnergyPlatform/energyServices` provider (#23587)
 * Fix #22594: `az network bastion create`: Add no wait support for bastion create (#23467)
 * Fix #23525: `az network bastion create/update`: Add missing arguments and update command (#23676)
 * `az network watcher packet-capture create`: Add VMSS support in packet capture (#23649)
