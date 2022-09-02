@@ -6,7 +6,7 @@ Release History
 2.40.0
 ++++++
 * `aaz`: Support using `cli_ctx` to initiate AAZCommand class (#23459)
-* `aaz`: Fix AAZBearerTokenCredentialPolicy to support MSIAuthenticationWrapper crendital (#23471)
+* `aaz`: Fix AAZBearerTokenCredentialPolicy to support MSIAuthenticationWrapper credential (#23471)
 * Allow adding dedicated key for collecting cli telemetry (#23530)
 * Add `az.ps1` entry script for PowerShell (#23514)
 * `aaz`: Support generic update arguments (#23701)
