@@ -80,7 +80,7 @@ Release History
 
 * `az monitor action-group test-notifications create`: Add new command (#23411)
 * `az monitor metric alert`: Support metric namespace with dash (#23637)
-* `az monitor action-group create`: Add optional `--location` parameter to `create` cmd (#23619)
+* `az monitor action-group create`: Add optional parameter `--location` (#23619)
 
 **NetAppFiles**
 
@@ -122,7 +122,7 @@ Release History
 
 **Service Connector**
 
-* Update `az spring connection` description after spring app rename (#23616)
+* `az spring connection`: Update description after spring app renames (#23616)
 
 **SignalR**
 
