@@ -80,7 +80,7 @@ Release History
 
 **Monitor**
 
-* Add new command: `az monitor action-group test-notifications create` (#23411)
+* `az monitor action-group test-notifications create`: Add new command (#23411)
 * `az monitor metric alert`: Support metric namespace with dash (#23637)
 * `az monitor action-group create`: Add optional `--location` parameter to `create` cmd (#23619)
 
