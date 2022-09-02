@@ -2691,7 +2691,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '--name={windows_nodepool_name} '
                  '--node-count=1 '
                  '--os-type Windows '
-                 '--os-sku Windows2022',
+                 '--os-sku Windows2022 '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindows2022Preview',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
                 self.check('osSku', 'Windows2022'),
@@ -6050,7 +6051,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_with_SP_then_update_to_user_assigned_identity(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
@@ -6812,7 +6813,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
-        dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+        dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
@@ -6885,7 +6886,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # check that the DCR was created
         dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
-        dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+        dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
@@ -6939,7 +6940,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         try:
             # check that the DCR was created
             dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
-            dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{workspace_resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+            dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
             get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
             self.cmd(get_cmd, checks=[
                 self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')

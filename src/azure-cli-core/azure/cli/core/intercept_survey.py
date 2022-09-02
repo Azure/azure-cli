@@ -7,7 +7,6 @@ import os
 import sys
 import json
 from datetime import datetime, timedelta
-from azure.cli.core import __version__ as core_version
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
 from azure.cli.core._profile import Profile
 from azure.cli.core.style import print_styled_text
@@ -80,12 +79,10 @@ def prompt_survey_message(cli):
         return
 
     # prompt message
-    installation_id = Profile(cli_ctx=cli).get_installation_id()
-    survey_link = _SURVEY_URL.format(installation_id=installation_id, version=core_version, day=0)
     print_styled_text((SURVEY_STYLE, NEW_LINE))
     print_styled_text([
         (SURVEY_STYLE, f"[Survey] Help us improve Azure CLI by sharing your experience. "
-                       f"This survey should take about 5 minutes. Open {survey_link} or run 'az survey' to "
+                       f"This survey should take about 5 minutes. Run 'az survey' to "
                        f"open in browser. Learn more at {_SURVEY_LEARN_MORE_URL}"),
         (SURVEY_STYLE, ERASE_IN_LINE)
     ])

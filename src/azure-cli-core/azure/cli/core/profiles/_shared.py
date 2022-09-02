@@ -240,7 +240,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_MSI: '2021-09-30-preview',
+        ResourceType.MGMT_MSI: '2022-01-31-preview',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
@@ -248,7 +248,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-06-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-07-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })

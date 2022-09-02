@@ -753,10 +753,48 @@ def load_arguments(self, _):
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 
+    with self.argument_context('logicapp') as c:
+        c.argument('name', arg_type=logicapp_name_arg_type)
+
+    with self.argument_context('logicapp create') as c:
+        # Dynamic SKU is no longer supported for logicapp standard
+        c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
+                   help="Geographic location where {} app will be hosted. Use `az {} list-consumption-locations` to view available locations.".format(app_type, scope),
+                   deprecate_info=c.deprecate(expiration='2.41.0'))
+        c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.",
+                   deprecate_info=c.deprecate(expiration='2.41.0'))
+
     with self.argument_context('logicapp show') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)
+
     with self.argument_context('logicapp delete') as c:
         c.argument('name', arg_type=logicapp_name_arg_type, local_context_attribute=None)
+
+    with self.argument_context('logicapp update') as c:
+        c.argument('plan', help='The name or resource id of the plan to update the logicapp with.')
+        c.ignore('force')
+
+    with self.argument_context('logicapp deployment source config-zip') as c:
+        c.argument('src', help='a zip file path for deployment')
+        c.argument('build_remote', help='enable remote build during deployment',
+                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('timeout', type=int, options_list=['--timeout', '-t'],
+                   help='Configurable timeout in seconds for checking the status of deployment',
+                   validator=validate_timeout_value)
+
+    with self.argument_context('logicapp config appsettings') as c:
+        c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
+        c.argument('setting_names', nargs='+', help="space-separated app setting names")
+        c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
+
+    with self.argument_context('logicapp config appsettings list') as c:
+        c.argument('name', arg_type=logicapp_name_arg_type, id_part=None)
+
+    with self.argument_context('logicapp scale') as c:
+        c.argument('minimum_instance_count', options_list=['--min-instances'], type=int,
+                   help='The number of instances that are always ready and warm for this logic app.')
+        c.argument('maximum_instance_count', options_list=['--max-instances'], type=int,
+                   help='The maximum number of instances this logic app can scale out to under load.')
 
     with self.argument_context('functionapp plan') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
