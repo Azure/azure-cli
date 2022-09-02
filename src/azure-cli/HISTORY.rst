@@ -112,9 +112,8 @@ Release History
 
 **Security**
 
-* Introducing securitySolutionsReferenceData CLI (#23336)
-* Introducing securitySolutions CLI (#23361)
-* Introducing securitySolutionsReferenceData CLI (Updated) (#23456)
+* `az security security-solutions-reference-data`: Add new command group (#23336)
+* `az security security-solutions`: Add new command group (#23361)
 
 **Service Bus**
 
