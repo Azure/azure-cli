@@ -7,8 +7,6 @@ Release History
 ++++++
 
 **ACR**
-
-* Connected registry error help command typo (#23431)
 * `az acr config authentication-as-arm show`: Add new command to support showing the configured 'Azure AD authenticate as ARM' policy (#23323)
 * `az acr config authentication-as-arm update`: Add new command to support updating 'Azure AD authenticate as ARM' policy (#23323)
 * `az acr manifest show`: Improve performance (#23523)
@@ -18,8 +16,8 @@ Release History
 * `az acr manifest list-deleted`: Add new command to list deleted manifests (#22959)
 * `az acr manifest list-deleted-tags`: Add new command to list deleted tags (#22959)
 * `az acr manifest restore`: Add new command to restore deleted manifests and tags (#22959)
-* Deprecate params `subnet` and `vnet-name` on `network-rule` command group (#22959)
-* Fix bug in some `acr config` commands that would in certain circumstances attempt to pull a nonexistent model from SDK (#22959)
+* `az acr network-rule`: Deprecate params `--subnet` and `--vnet-name` (#22959)
+* `acr config`: Fix bug in some commands that would in certain circumstances attempt to pull a nonexistent model from SDK (#22959)
 
 **AKS**
 
@@ -46,7 +44,7 @@ Release History
 
 **ARM**
 
-* `azure bicep`: Use `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` when checking Bicep CLI versions (#23524)
+* `az bicep`: Use `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` when checking Bicep CLI versions (#23524)
 
 **Backup**
 
