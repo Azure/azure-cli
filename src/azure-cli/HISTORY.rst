@@ -7,9 +7,9 @@ Release History
 ++++++
 
 **ACR**
+
 * `az acr config authentication-as-arm show`: Add new command to support showing the configured 'Azure AD authenticate as ARM' policy (#23323)
 * `az acr config authentication-as-arm update`: Add new command to support updating 'Azure AD authenticate as ARM' policy (#23323)
-* `az acr manifest show`: Improve performance (#23523)
 * `az acr config soft-delete show`: Add new command to show soft-delete policy (#22959)
 * `az acr config soft-delete update`: Add new command to update soft-delete policy (#22959)
 * `az acr repository list-deleted`: Add new command to list deleted repositories (#22959)
