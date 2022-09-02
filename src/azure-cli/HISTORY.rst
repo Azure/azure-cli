@@ -84,11 +84,11 @@ Release History
 
 **NetAppFiles**
 
-* `az netappfiles volume create`: Add optional parameter `--kv_private_endpoint_id` (#23439)
-* `az netappfiles volume-group create`: Add optional parameter `--kv_private_endpoint_id` (#23439)
-* `az netappfiles volume update`: Add optional parameter `--cool_access` (#23439)
-* `az netappfiles volume update`: Add optional parameter `--coolness_period` (#23439)
-* `az netappfiles pool update`: Add optional parameter `--cool_access` (#23439)
+* `az netappfiles volume create`: Add optional parameter `--kv-private-endpoint-id` (#23439)
+* `az netappfiles volume-group create`: Add optional parameter `--kv-private-endpoint-id` (#23439)
+* `az netappfiles volume update`: Add optional parameter `--cool-access` (#23439)
+* `az netappfiles volume update`: Add optional parameter `--coolness-period` (#23439)
+* `az netappfiles pool update`: Add optional parameter `--cool-access` (#23439)
 
 **Network**
 
