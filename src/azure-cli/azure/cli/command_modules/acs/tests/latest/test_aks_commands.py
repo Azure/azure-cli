@@ -494,7 +494,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_private_dns_zone(self, resource_group, resource_group_location):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
