@@ -150,10 +150,15 @@ def check_line(line):
                 logger.error(' ' * index + '↑')
                 error_flag = True
         # --xxx parameters must be enclosed in `, e.g., `--size`
+        # should find the --x_x_x format and prompt to change to the --x-x-x format
         if i == '-' and line[idx + 1] == '-':
             param = '--'
             index = idx + 2
             while index < len(line) and line[index] != ' ':
+                if line[index] == '_':
+                    logger.info('%s%s: parameter should use the format --x-x-x , please replace _ with -', line, yellow)
+                    logger.error(' ' * index + '↑')
+                    error_flag = True
                 param += line[index]
                 index += 1
             try:
