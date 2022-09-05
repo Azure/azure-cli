@@ -21,7 +21,6 @@ from azure.cli.command_modules.acs._format import (
     aks_versions_table_format,
 )
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.profiles import ResourceType
 
 
