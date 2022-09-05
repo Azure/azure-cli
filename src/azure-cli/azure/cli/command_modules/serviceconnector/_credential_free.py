@@ -545,7 +545,8 @@ class PostgresFlexHandler(TargetHandler):
         password = run_cli_cmd(
             'az account get-access-token --resource-type oss-rdbms').get('accessToken')
 
-        conn_string = "host={0} user={1} dbname={2} password={3} sslmode=require".format(
+        # extension functions require the extension to be available, which is the case for postgres (default) database.
+        conn_string = "host={0} user={1} dbname=postgres password={3} sslmode=require".format(
             self.host, self.user, self.dbname, password)
         return conn_string
 
