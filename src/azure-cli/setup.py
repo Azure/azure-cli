@@ -142,6 +142,7 @@ DEPENDENCIES = [
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
+    'mycli~=1.22.2',
     'packaging>=20.9,<22.0',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',

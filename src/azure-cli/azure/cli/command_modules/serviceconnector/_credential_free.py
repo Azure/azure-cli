@@ -3,9 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from cmath import log
 import time
 from knack.log import get_logger
+from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
+from azure.cli.core.azclierror import AzureConnectionError
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core._profile import Profile
@@ -33,6 +36,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     target_handler = getTargetHandler(
         cmd, target_id, target_type, auth_info['auth_type'])
     if target_handler is None:
+        logger.error("Create AAD connection to service " + target_type + " is not supported")
         return
 
     # get login user info
@@ -67,6 +71,8 @@ def getTargetHandler(cmd, target_id, target_type, auth_type):
         return PostgresSingleHandler(cmd, target_id, target_type, auth_type)
     if target_type in {RESOURCE.PostgresFlexible}:
         return PostgresFlexHandler(cmd, target_id, target_type, auth_type)
+    if target_type in {RESOURCE.MysqlFlexible}:
+        return MysqlFlexibleHandler(cmd, target_id, target_type, auth_type)
     return None
 
 
@@ -78,6 +84,8 @@ class TargetHandler:
     tenant_id = ""
     sub = ""
     rg = ""
+    user = ""
+    endpoint = ""
 
     auth_type = ""
 
@@ -92,6 +100,7 @@ class TargetHandler:
         self.sub = target_segments.get('subscription')
         self.rg = target_segments.get('resource_group')
         self.auth_type = auth_type
+        self.user = self.profile.get_current_account_user()
 
     def enable_target_aad_auth(self):
         return
@@ -109,21 +118,145 @@ class TargetHandler:
         return
 
 
+class MysqlFlexibleHandler(TargetHandler):
+
+    aad_user = generate_random_string(
+        prefix="aad_" + RESOURCE.Mysql.value + '_')
+
+    db_server = ""
+    dbname = ""
+
+    def __init__(self, cmd, target_id, target_type, auth_type):
+        super().__init__(cmd, target_id, target_type, auth_type)
+        self.endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
+        target_segments = parse_resource_id(target_id)
+        self.db_server = target_segments.get('name')
+        self.dbname = target_segments.get('child_name_1')
+
+    def set_user_admin(self, login_user, user_object_id):
+        # not implemented yet
+        return
+
+    def create_aad_user(self, identity_name, client_id):
+        query_list = self.get_create_query(client_id)
+        connection_kwargs = self.get_connection_string()
+        ip_name = None
+        try:
+            logger.warning("Connecting to database...")
+            self.create_aad_user_in_mysql(connection_kwargs, query_list)
+        except AzureConnectionError:
+            # allow public access
+            ip_name = generate_random_string(prefix='svc_')
+            self.set_target_firewall(True, ip_name)
+            # create again
+            self.create_aad_user_in_mysql(connection_kwargs, query_list)
+
+        # remove firewall rule
+        if ip_name is not None:
+            try:
+                self.set_target_firewall(False, ip_name)
+            # pylint: disable=bare-except
+            except:
+                pass
+                # logger.warning('Please manually delete firewall rule %s to avoid security issue', ipname)
+
+    def set_target_firewall(self, add_new_rule, ip_name):
+        if add_new_rule:
+            target = run_cli_cmd(
+                'az postgres flexible-server show --ids {}'.format(self.target_id))
+            # logger.warning("Update database server firewall rule to connect...")
+            if target.get('publicNetworkAccess') == "Disabled":
+                return True
+            run_cli_cmd(
+                'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
+                '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
+                    self.rg, self.db_server, ip_name, self.sub)
+            )
+            return False
+        # logger.warning("Remove database server firewall rules to recover...")
+        # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
+        # if deny_public_access:
+        #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
+
+    def create_aad_user_in_mysql(self, connection_kwargs, query_list):
+        import pkg_resources
+        installed_packages = pkg_resources.working_set
+        psy_installed = any(('pymysql') in d.key.lower()
+                            for d in installed_packages)
+        if not psy_installed:
+            import pip
+            pip.main(['install', 'mycli'])
+
+        import pymysql
+        from pymysql.constants import CLIENT
+
+        connection_kwargs['client_flag'] = CLIENT.MULTI_STATEMENTS
+        try:
+            connection = pymysql.connect(**connection_kwargs)
+            cursor = connection.cursor()
+            for q in query_list:
+                try:
+                    logger.debug(q)
+                    cursor.execute(q)
+                except Exception as e:
+                    logger.warning(
+                        "Unable to execute the sql query %s, error: %s", q, str(e))
+        except pymysql.Error as e:
+            logger.debug(e)
+            raise AzureConnectionError
+        if cursor is not None:
+            try:
+                cursor.close()
+            except Exception as e:  # pylint: disable=broad-except
+                raise CLIError(str(e))
+
+    def get_connection_string(self):
+        password = run_cli_cmd(
+            'az account get-access-token --resource-type oss-rdbms').get('accessToken')
+
+        return {
+            'host': self.db_server + self.endpoint,
+            'database': self.dbname,
+            'user': self.user,
+            'password': password,
+            'ssl': {"fake_flag_to_enable_tls": True},
+            'autocommit': True
+        }
+
+    def get_create_query(self, client_id):
+        return [
+            "SET aad_auth_validate_oids_in_tenant = OFF;",
+            "DROP USER IF EXISTS '{}'@'%';".format(self.aad_user),
+            "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
+                self.aad_user, client_id),
+            "GRANT ALL PRIVILEGES ON Db.* TO '{}'@'%';".format(self.aad_user),
+            "FLUSH privileges;"
+        ]
+
+    def get_auth_config(self):
+        if self.auth_type in {'systemAssignedIdentity'}:
+            return {
+                'auth_type': 'secret',
+                'name': self.aad_user,
+                'secret_info': {
+                    'secret_type': 'rawValue'
+                }
+            }
+
+
 class SqlHandler(TargetHandler):
     aad_user = generate_random_string(
         prefix="aad_" + RESOURCE.Sql.value + '_')
 
     db_server = ""
     dbname = ""
-    user = ""
 
     def __init__(self, cmd, target_id, target_type, auth_type):
         super().__init__(cmd, target_id, target_type, auth_type)
-
+        self.endpoint = cmd.cli_ctx.cloud.suffixes.sqlServerHostname
         target_segments = parse_resource_id(target_id)
         self.db_server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
-        self.user = self.profile.get_current_account_user()
 
     def set_user_admin(self, login_user, user_object_id):
         # pylint: disable=not-an-iterable
@@ -145,7 +278,7 @@ class SqlHandler(TargetHandler):
         try:
             logger.warning("Connecting to database...")
             self.create_aad_user_in_sql(connection_string, query_list)
-        except ConnectionFailError:
+        except AzureConnectionError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
             self.set_target_firewall(True, ip_name)
@@ -207,11 +340,11 @@ class SqlHandler(TargetHandler):
                             logger.warning(e)
                         conn.commit()
         except pyodbc.Error as e:
-            raise ConnectionFailError
+            raise AzureConnectionError
 
     def get_connection_string(self):
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
-            self.db_server + '.database.windows.net;database=' + self.dbname + ';UID=' + self.user + \
+            self.db_server + self.endpoint + ';database=' + self.dbname + ';UID=' + self.user + \
             ';Authentication=ActiveDirectoryInteractive;'
         return conn_string
 
@@ -230,17 +363,15 @@ class PostgresFlexHandler(TargetHandler):
     db_server = ""
     host = ""
     dbname = ""
-    user = ""
     ip = ""
 
     def __init__(self, cmd, target_id, target_type, auth_type):
         super().__init__(cmd, target_id, target_type, auth_type)
-
+        self.endpoint = cmd.cli_ctx.cloud.suffixes.postgresqlServerEndpoint
         target_segments = parse_resource_id(target_id)
         self.db_server = target_segments.get('name')
-        self.host = "{0}.postgres.database.azure.com".format(self.db_server)
+        self.host = self.db_server + self.endpoint
         self.dbname = target_segments.get('child_name_1')
-        self.user = self.profile.get_current_account_user()
 
     def enable_target_aad_auth(self):
         rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(
@@ -335,7 +466,7 @@ class PostgresFlexHandler(TargetHandler):
         try:
             logger.warning("Connecting to database...")
             self.create_aad_user_in_pg(connection_string, query_list)
-        except ConnectionFailError:
+        except AzureConnectionError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
             self.set_target_firewall(True, ip_name)
@@ -393,7 +524,7 @@ class PostgresFlexHandler(TargetHandler):
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
             if search_ip is not None:
                 self.ip = search_ip.group(1)
-            raise ConnectionFailError
+            raise AzureConnectionError
 
         conn.autocommit = True
         cursor = conn.cursor()
@@ -413,10 +544,9 @@ class PostgresFlexHandler(TargetHandler):
     def get_connection_string(self):
         password = run_cli_cmd(
             'az account get-access-token --resource-type oss-rdbms').get('accessToken')
-        sslmode = "require"
 
-        conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(
-            self.host, self.user, self.dbname, password, sslmode)
+        conn_string = "host={0} user={1} dbname={2} password={3} sslmode=require".format(
+            self.host, self.user, self.dbname, password)
         return conn_string
 
     def get_create_query(self, client_id):
@@ -583,7 +713,3 @@ class ContainerappHandler(SourceHandler):
                 time.sleep(3)
                 cnt += 1
         return identity
-
-
-class ConnectionFailError(Exception):
-    pass
