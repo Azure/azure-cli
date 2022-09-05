@@ -9,7 +9,6 @@ import tempfile
 import unittest
 from unittest import mock
 
-import requests
 import yaml
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
@@ -17,19 +16,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
 )
-from azure.cli.command_modules.acs._params import (
-    regions_in_preview,
-    regions_in_prod,
-)
 from azure.cli.command_modules.acs.custom import (
-    _acs_browse_internal,
-    _add_role_assignment,
     _get_command_context,
-    _get_default_dns_prefix,
     _update_addons,
     k8s_install_kubectl,
     k8s_install_kubelogin,
-    list_acs_locations,
     merge_kubernetes_configurations,
 )
 from azure.cli.command_modules.acs.tests.latest.mocks import (
@@ -42,125 +33,14 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
     get_test_data_file_path,
 )
 from azure.cli.core.util import CLIError
-from azure.mgmt.containerservice.models import (
-    ContainerService,
-    ContainerServiceOrchestratorProfile,
-    ContainerServiceOrchestratorTypes,
-)
 from azure.mgmt.containerservice.v2020_03_01.models import (
     ManagedClusterAddonProfile,
 )
-from msrestazure.azure_exceptions import CloudError
 
 
 class AcsCustomCommandTest(unittest.TestCase):
     def setUp(self):
         self.cli = MockCLI()
-
-    def test_list_acs_locations(self):
-        client, cmd = mock.MagicMock(), mock.MagicMock()
-        regions = list_acs_locations(client, cmd)
-        prodregions = regions["productionRegions"]
-        previewregions = regions["previewRegions"]
-        self.assertListEqual(prodregions, regions_in_prod, "Production regions doesn't match")
-        self.assertListEqual(previewregions, regions_in_preview, "Preview regions doesn't match")
-
-    def test_get_default_dns_prefix(self):
-        name = 'test5678910'
-        resource_group_name = 'resource_group_with_underscore'
-        sub_id = '123456789'
-
-        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
-        self.assertEqual(dns_name_prefix, "test567891-resourcegroupwit-123456")
-
-        name = '1test5678910'
-        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
-        self.assertEqual(dns_name_prefix, "a1test5678-resourcegroupwit-123456")
-
-    def test_add_role_assignment_basic(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
-            self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
-
-    def test_add_role_assignment_msi_basic(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            ok = _add_role_assignment(cli_ctx, role, sp, False, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, False, scope=None)
-            self.assertTrue(ok, 'Expected _add_role_assignment with msi to succeed')
-
-    def test_add_role_assignment_exists(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = requests.Response()
-            resp.status_code = 409
-            resp._content = b'Conflict'
-            err = CloudError(resp)
-            err.message = 'The role assignment already exists.'
-            create_role_assignment.side_effect = err
-            ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
-            self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
-
-    def test_add_role_assignment_fails(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = requests.Response()
-            resp.status_code = 500
-            resp._content = b'Internal Error'
-            err = CloudError(resp)
-            err.message = 'Internal Error'
-            create_role_assignment.side_effect = err
-            ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
-            self.assertFalse(ok, 'Expected _add_role_assignment to fail')
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')
-    def test_browse_k8s(self, get_subscription_id):
-        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            orchestrator_type=ContainerServiceOrchestratorTypes.kubernetes)
-        client, cmd = mock.MagicMock(), mock.MagicMock()
-
-        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
-                        return_value=acs_info) as get_acs_info:
-            with mock.patch(
-                    'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-                _acs_browse_internal(client, cmd, acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-                get_acs_info.assert_called_once()
-                k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')
-    def test_browse_dcos(self, get_subscription_id):
-        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            orchestrator_type=ContainerServiceOrchestratorTypes.dcos)
-        client, cmd = mock.MagicMock(), mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
-            _acs_browse_internal(client, cmd, acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-            dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials_non_existent(self):
         self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent', False)
