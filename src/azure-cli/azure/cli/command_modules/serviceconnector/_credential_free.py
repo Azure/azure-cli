@@ -139,18 +139,18 @@ class SqlHandler(TargetHandler):
     def create_aad_user(self, identity_name, client_id):
         self.aad_user = identity_name
 
-        q = self.get_create_query(client_id)
+        query_list = self.get_create_query(client_id)
         connection_string = self.get_connection_string()
         ip_name = None
         try:
             logger.warning("Connecting to database...")
-            self.create_aad_user_in_sql(connection_string, q)
+            self.create_aad_user_in_sql(connection_string, query_list)
         except ConnectionFailError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
             self.set_target_firewall(True, ip_name)
             # create again
-            self.create_aad_user_in_sql(connection_string, q)
+            self.create_aad_user_in_sql(connection_string, query_list)
 
         # remove firewall rule
         if ip_name is not None:
@@ -179,7 +179,7 @@ class SqlHandler(TargetHandler):
         # if deny_public_access:
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
-    def create_aad_user_in_sql(self, conn_string, execution_query):
+    def create_aad_user_in_sql(self, conn_string, query_list):
         import pkg_resources
         installed_packages = pkg_resources.working_set
         psy_installed = any(('pyodbc') in d.key.lower()
@@ -200,13 +200,14 @@ class SqlHandler(TargetHandler):
         try:
             with pyodbc.connect(conn_string) as conn:
                 with conn.cursor() as cursor:
-                    try:
-                        cursor.execute(execution_query)
-                    except pyodbc.ProgrammingError as e:
-                        logger.warning(e)
-                    conn.commit()
+                    for execution_query in query_list:
+                        try:
+                            cursor.execute(execution_query)
+                        except pyodbc.ProgrammingError as e:
+                            logger.warning(e)
+                        conn.commit()
         except pyodbc.Error as e:
-            print(e)
+            raise ConnectionFailError
 
     def get_connection_string(self):
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
@@ -220,7 +221,7 @@ class SqlHandler(TargetHandler):
         grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(
             self.dbname, self.aad_user)
 
-        return role_q + grant_q
+        return [role_q, grant_q]
 
 
 class PostgresFlexHandler(TargetHandler):
@@ -328,18 +329,18 @@ class PostgresFlexHandler(TargetHandler):
     def create_aad_user(self, identity_name, client_id):
         # self.aad_user = identity_name or self.aad_user
 
-        q = self.get_create_query(client_id)
+        query_list = self.get_create_query(client_id)
         connection_string = self.get_connection_string()
         ip_name = None
         try:
             logger.warning("Connecting to database...")
-            self.create_aad_user_in_pg(connection_string, q)
+            self.create_aad_user_in_pg(connection_string, query_list)
         except ConnectionFailError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
             self.set_target_firewall(True, ip_name)
             # create again
-            self.create_aad_user_in_pg(connection_string, q)
+            self.create_aad_user_in_pg(connection_string, query_list)
 
         # remove firewall rule
         if ip_name is not None:
@@ -370,7 +371,7 @@ class PostgresFlexHandler(TargetHandler):
         # if deny_public_access:
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
-    def create_aad_user_in_pg(self, conn_string, execution_query):
+    def create_aad_user_in_pg(self, conn_string, query_list):
         import pkg_resources
         installed_packages = pkg_resources.working_set
         psy_installed = any(('psycopg2') in d.key.lower()
@@ -396,13 +397,13 @@ class PostgresFlexHandler(TargetHandler):
 
         conn.autocommit = True
         cursor = conn.cursor()
-        try:
-            logger.warning(
-                "Adding new AAD user %s to database...", self.aad_user)
-            cursor.execute(execution_query)
-        except psycopg2.Error as e:  # role "aad_user" already exists
-            logger.warning(e)
-            conn.commit()
+        logger.warning("Adding new AAD user %s to database...", self.aad_user)
+        for execution_query in query_list:
+            try:
+                logger.debug(execution_query)
+                cursor.execute(execution_query)
+            except psycopg2.Error as e:  # role "aad_user" already exists
+                logger.warning(e)
 
         # Clean up
         conn.commit()
@@ -419,13 +420,12 @@ class PostgresFlexHandler(TargetHandler):
         return conn_string
 
     def get_create_query(self, client_id):
-        role_q = "drop role IF EXISTS \"{0}\";"
-        "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
-            self.aad_user, client_id)
-        grant_q = 'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";GRANT ALL ON ALL TABLES IN SCHEMA public TO "{1}";'.format(
-            self.dbname, self.aad_user)
-
-        return role_q + grant_q
+        return [
+            'drop role IF EXISTS "{0}";'.format(self.aad_user),
+            "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
+                self.aad_user, client_id),
+            'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";'.format(
+                self.dbname, self.aad_user)]
 
     def get_auth_config(self):
         if self.auth_type in {'systemAssignedIdentity'}:
@@ -488,12 +488,15 @@ class PostgresSingleHandler(PostgresFlexHandler):
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def get_create_query(self, client_id):
-        role_q = "SET aad_validate_oids_in_tenant = off; drop role IF EXISTS \"{0}\"; \
-                    CREATE ROLE \"{0}\" WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(self.aad_user, client_id)
-        grant_q = "GRANT ALL PRIVILEGES ON DATABASE {0} TO \"{1}\"; GRANT ALL ON ALL TABLES IN SCHEMA public TO \"{1}\";".format(
-            self.dbname, self.aad_user)
 
-        return role_q + grant_q
+        return [
+            'SET aad_validate_oids_in_tenant = off;',
+            'drop role IF EXISTS "{0}";'.format(self.aad_user),
+            'CREATE ROLE "{0}" WITH LOGIN PASSWORD "{1}" IN ROLE azure_ad_user;'.format(
+                self.aad_user, client_id),
+            'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";'.format(
+                self.dbname, self.aad_user)
+        ]
 
 
 def getSourceHandler(source_id, source_type):
