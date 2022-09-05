@@ -6245,18 +6245,26 @@ def show_nw_security_view(cmd, client, resource_group_name, vm, watcher_rg, watc
     return client.begin_get_vm_security_rules(watcher_rg, watcher_name, security_group_view_parameters)
 
 
-def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
-                             watcher_rg, watcher_name, location=None,
+def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
+                             watcher_rg, watcher_name, vm=None, location=None,
                              storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None, filters=None):
+                             capture_size=None, capture_limit=None, time_limit=None, filters=None,
+                             target_type=None, target=None, include=None, exclude=None):
     PacketCapture, PacketCaptureStorageLocation = cmd.get_models('PacketCapture', 'PacketCaptureStorageLocation')
+    PacketCaptureMachineScope = cmd.get_models('PacketCaptureMachineScope')
+    # Set the appropriate fields if target is VM
+    pcap_scope = None
+    if not target_type or target_type.lower() != "azurevmss":
+        target = vm
+    else:
+        pcap_scope = PacketCaptureMachineScope(include=include, exclude=exclude)
 
     storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
                                                     storage_path=storage_path, file_path=file_path)
-    capture_params = PacketCapture(target=vm, storage_location=storage_settings,
+    capture_params = PacketCapture(target=target, storage_location=storage_settings,
                                    bytes_to_capture_per_packet=capture_size,
                                    total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
-                                   filters=filters)
+                                   filters=filters, target_type=target_type, scope=pcap_scope)
     return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
 
 
@@ -8334,13 +8342,14 @@ def _build_args(cert_file, private_key_file):
 
 def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
     import os
+    from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
 
     _test_extension(SSH_EXTENSION_NAME)
 
     if not resource_port:
         resource_port = 22
-    if not is_valid_resource_id(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+    if not _is_bastion_connectable_resource(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
@@ -8385,11 +8394,12 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
+    from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
 
     if not resource_port:
         resource_port = 3389
-    if not is_valid_resource_id(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+    if not _is_bastion_connectable_resource(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
     if platform.system() == 'Windows':
         if disable_gateway:
             tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
