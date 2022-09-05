@@ -5642,18 +5642,50 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': resource_group_location,
             'vm': 'vm1',
-            'capture': 'capture1'
+            'capture1': 'capture1',
+            'capture2': 'capture2'
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
-        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture} --file-path capture/capture.cap')
+        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture1} --file-path capture/capture.cap')
+        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture2} --file-path capture/capture.cap --target-type AzureVM')
+        self.cmd('network watcher packet-capture show -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture stop -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture show-status -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture list -l {loc}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture2}')
+        self.cmd('network watcher packet-capture list -l {loc}')
+
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture_vmss_as_target', location='westcentralus')
+    @AllowLargeResponse()
+    def test_network_watcher_packet_capture_vmss_as_target(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vmss': 'vmssForPcap',
+            'capture': 'captureVmss',
+            'capture1': 'captureVMSS1',
+            'capture2': 'captureVMSS2'
+        })
+        self.cmd('vmss create -g {rg} --name {vmss} --image UbuntuLTS --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic')
+        self.cmd('vmss extension set --name NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher --resource-group {rg} --vmss-name  {vmss}')
+
+        self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture} --target-type AzureVMSS --file-path capture/capture.cap', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+        self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture1} --target-type AzureVMSS --file-path capture/capture.cap --exclude 1')
+        self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture2} --target-type AzureVMSS --file-path capture/capture.cap --include 0 1')
         self.cmd('network watcher packet-capture show -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture stop -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture show-status -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture list -l {loc}')
         self.cmd('network watcher packet-capture delete -l {loc} -n {capture}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture2}')
         self.cmd('network watcher packet-capture list -l {loc}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_troubleshooting', location='westcentralus')
