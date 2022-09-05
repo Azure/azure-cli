@@ -7505,13 +7505,13 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='eastus2euap')
     def test_disk_controller_type(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm-', 15),
             'vmss': self.create_random_name('vmss-', 15),
         })
-        self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --image ubuntults --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('storageProfile.diskControllerType', 'SCSI')
         ])
@@ -7519,7 +7519,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('storageProfile.diskControllerType', 'NVMe')
         ])
-        self.cmd('vmss create --disk-controller-type SCSI -n {vm} -g {rg} --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vmss create --disk-controller-type SCSI -n {vm} -g {rg} --image ubuntults --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
         ])
