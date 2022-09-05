@@ -253,7 +253,7 @@ class SqlHandler(TargetHandler):
 
     def __init__(self, cmd, target_id, target_type, auth_type):
         super().__init__(cmd, target_id, target_type, auth_type)
-        self.endpoint = cmd.cli_ctx.cloud.suffixes.sqlServerHostname
+        self.endpoint = cmd.cli_ctx.cloud.suffixes.sql_server_hostname
         target_segments = parse_resource_id(target_id)
         self.db_server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
@@ -367,7 +367,7 @@ class PostgresFlexHandler(TargetHandler):
 
     def __init__(self, cmd, target_id, target_type, auth_type):
         super().__init__(cmd, target_id, target_type, auth_type)
-        self.endpoint = cmd.cli_ctx.cloud.suffixes.postgresqlServerEndpoint
+        self.endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
         target_segments = parse_resource_id(target_id)
         self.db_server = target_segments.get('name')
         self.host = self.db_server + self.endpoint
