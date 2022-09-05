@@ -36,7 +36,6 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     target_handler = getTargetHandler(
         cmd, target_id, target_type, auth_info['auth_type'])
     if target_handler is None:
-        logger.error("Create AAD connection to service " + target_type + " is not supported")
         return
 
     # get login user info
