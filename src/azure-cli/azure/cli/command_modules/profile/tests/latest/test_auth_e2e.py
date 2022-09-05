@@ -108,8 +108,6 @@ class CAEScenarioTest(LiveScenarioTest):
         access_token = result['accessToken']
         decoded = decode_access_token(access_token)
         self.assertEqual(decoded['xms_cc'], ['CP1'])  # xms_cc: extension microsoft client capabilities
-        # It seems xms_ssm is dropped from GA version of CAE
-        # self.assertEqual(decoded['xms_ssm'], '1')  # xms_ssm: extension microsoft smart session management
 
     def test_cae_scenario(self):
         arm_command = "group list"
