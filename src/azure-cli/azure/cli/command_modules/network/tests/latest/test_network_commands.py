@@ -5439,8 +5439,8 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         })
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method priority --unique-dns-name {dns} --tags foo=doo',
-                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method priority --unique-dns-name {dns} --tags foo=doo --path "/"',
+                 checks=self.check('trafficRoutingMethod', 'Priority'))
         self.cmd('network traffic-manager profile show -g {rg} -n {tm}',
                  checks=self.check('dnsConfig.relativeName', '{dns}'))
         self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method weighted --tags foo=boo',
@@ -5478,8 +5478,8 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             'tm': 'mytmprofile2',
             'dns': 'mytrafficmanager001100a2'
         })
-        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo',
-                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'MultiValue'))
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo --path "/"',
+                 checks=self.check('trafficRoutingMethod', 'MultiValue'))
 
         self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method MultiValue  --max-return 4 --tags foo=boo',
                  checks=self.check('maxReturn', 4))
