@@ -18,8 +18,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
-    cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages,
+    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
+    cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -55,7 +55,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
-    process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
+    process_public_ip_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
@@ -254,11 +254,6 @@ def load_command_table(self, _):
     network_subnet_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
         client_factory=cf_subnets
-    )
-
-    network_tmp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.trafficmanager.operations#ProfilesOperations.{}',
-        client_factory=cf_traffic_manager_mgmt_profiles
     )
 
     network_tme_sdk = CliCommandType(
@@ -1203,24 +1198,14 @@ def load_command_table(self, _):
     # endregion
 
     # region TrafficManagers
-    with self.command_group('network traffic-manager profile', network_tmp_sdk) as g:
-        g.custom_command('check-dns', 'check_traffic_manager_name', client_factory=cf_traffic_manager_mgmt_profiles)
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_traffic_manager_profiles')
-        g.custom_command('create', 'create_traffic_manager_profile', transform=transform_traffic_manager_create_output)
-        g.generic_update_command('update', custom_func_name='update_traffic_manager_profile')
+    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.profile import Create
+    self.command_table['network traffic-manager profile create'] = Create(loader=self, transform=transform_traffic_manager_create_output)
 
     with self.command_group('network traffic-manager endpoint', network_tme_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.custom_command('create', 'create_traffic_manager_endpoint', validator=process_tm_endpoint_create_namespace)
         g.custom_command('list', 'list_traffic_manager_endpoints')
-        g.generic_update_command('update', custom_func_name='update_traffic_manager_endpoint')
 
-        tm_geographic_path = 'azure.mgmt.trafficmanager.operations#GeographicHierarchiesOperations.{}'
-        g.command('show-geographic-hierarchy', 'get_default', client_factory=cf_tm_geographic, operations_tmpl=tm_geographic_path, table_transformer=transform_geographic_hierachy_table_output)
-
+    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.endpoint import ShowGeographicHierarchy
+    self.command_table['network traffic-manager endpoint show-geographic-hierarchy'] = ShowGeographicHierarchy(loader=self, table_transformer=transform_geographic_hierachy_table_output)
     # endregion
 
     # region VirtualNetworks

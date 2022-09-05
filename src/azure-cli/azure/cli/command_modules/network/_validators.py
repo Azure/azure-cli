@@ -1075,69 +1075,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
 
 
-def process_tm_endpoint_create_namespace(cmd, namespace):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = client.get(namespace.resource_group_name, namespace.profile_name)
-
-    routing_type = profile.traffic_routing_method  # pylint: disable=no-member
-    endpoint_type = namespace.endpoint_type
-    all_options = ['target_resource_id', 'target', 'min_child_endpoints',
-                   'min_child_ipv4', 'min_child_ipv6', 'priority', 'weight', 'endpoint_location']
-    props_to_options = {
-        'target_resource_id': '--target-resource-id',
-        'target': '--target',
-        'min_child_endpoints': '--min-child-endpoints',
-        'min_child_ipv4': '--min-child-ipv4',
-        'min_child_ipv6': '--min-child-ipv6',
-        'priority': '--priority',
-        'weight': '--weight',
-        'endpoint_location': '--endpoint-location',
-        'geo_mapping': '--geo-mapping'
-    }
-    validate_subnet_ranges(namespace)
-    validate_custom_headers(namespace)
-
-    required_options = []
-
-    # determine which options are required based on profile and routing method
-    if endpoint_type.lower() == 'externalendpoints':
-        required_options.append('target')
-    else:
-        required_options.append('target_resource_id')
-
-    if routing_type.lower() == 'weighted':
-        required_options.append('weight')
-    elif routing_type.lower() == 'priority':
-        required_options.append('priority')
-
-    if endpoint_type.lower() == 'nestedendpoints':
-        required_options.append('min_child_endpoints')
-
-    if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and routing_type.lower() == 'performance':
-        required_options.append('endpoint_location')
-
-    if routing_type.lower() == 'geographic':
-        required_options.append('geo_mapping')
-
-    # ensure required options are provided
-    missing_options = [props_to_options[x] for x in required_options if getattr(namespace, x, None) is None]
-    extra_options = [props_to_options[x] for x in all_options if
-                     getattr(namespace, x, None) is not None and x not in required_options]
-
-    if missing_options or extra_options:
-        error_message = "Incorrect options for profile routing method '{}' and endpoint type '{}'.".format(routing_type,
-                                                                                                           endpoint_type)  # pylint: disable=line-too-long
-        if missing_options:
-            error_message = '{}\nSupply the following: {}'.format(error_message, ', '.join(
-                missing_options))
-        if extra_options:
-            error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(
-                extra_options))
-        raise CLIError(error_message)
-
-
 def process_vnet_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_ddos_name_or_id(cmd, namespace)
@@ -1946,21 +1883,6 @@ def validate_custom_error_pages(namespace):
     namespace.custom_error_pages = values
 
 
-def validate_custom_headers(namespace):
-    if not namespace.monitor_custom_headers:
-        return
-
-    values = []
-    for item in namespace.monitor_custom_headers:
-        try:
-            item_split = item.split('=', 1)
-            values.append({'name': item_split[0], 'value': item_split[1]})
-        except IndexError:
-            raise CLIError('usage error: --custom-headers KEY=VALUE')
-
-    namespace.monitor_custom_headers = values
-
-
 def validate_status_code_ranges(namespace):
     if not namespace.status_code_ranges:
         return
@@ -1994,33 +1916,6 @@ def validate_capture_size_and_limit(namespace):
     if namespace.time_limit:
         if namespace.time_limit < 0:
             raise CLIError('usage error: --time-limit cannot be a negative value.')
-
-
-def validate_subnet_ranges(namespace):
-    if not namespace.subnets:
-        return
-
-    values = []
-    for item in namespace.subnets:
-        try:
-            item_split = item.split('-', 1)
-            if len(item_split) == 2:
-                values.append({'first': item_split[0], 'last': item_split[1]})
-                continue
-        except ValueError:
-            pass
-
-        try:
-            item_split = item.split(':', 1)
-            if len(item_split) == 2:
-                values.append({'first': item_split[0], 'scope': item_split[1]})
-                continue
-        except ValueError:
-            pass
-
-        values.append({'first': item})
-
-    namespace.subnets = values
 
 
 # pylint: disable=too-few-public-methods
