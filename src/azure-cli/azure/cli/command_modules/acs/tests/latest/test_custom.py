@@ -486,7 +486,7 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # monitoring added
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                    'clitest000001', 'clitest000001', 'monitoring', enable=True)
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
         self.assertTrue(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
@@ -561,15 +561,14 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = mock.Mock()
         instance.addon_profiles = None
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                    'clitest000001', 'clitest000001', 'monitoring', enable=True)
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
         with self.assertRaises(CLIError):
             instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                        'clitest000001', 'clitest000001', 'monitoring', enable=True)
+                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
 
         # virtual-node enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        cmd = mock.MagicMock()
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
         self.assertIn('aciConnectorLinux', instance.addon_profiles)
@@ -585,7 +584,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         # ingress-appgw enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        cmd = mock.MagicMock()
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=True, appgw_subnet_cidr='10.2.0.0/16')
         self.assertIn('ingressApplicationGateway', instance.addon_profiles)
