@@ -60,35 +60,6 @@ def load_command_table(self, _):
         client_factory=cf_snapshots
     )
 
-    # ACS base commands
-    # TODO: When the first azure-cli release after January 31, 2020 is planned, add
-    # `expiration=<CLI core version>` to the `self.deprecate()` args below.
-    deprecate_info = self.deprecate(redirect='aks', hide=True)
-    with self.command_group('acs', container_services_sdk, deprecate_info=deprecate_info,
-                            client_factory=cf_container_services) as g:
-        g.custom_command('browse', 'acs_browse')
-        g.custom_command('create', 'acs_create', supports_no_wait=True,
-                         table_transformer=deployment_validate_table_format)
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('list', 'list_container_services')
-        g.custom_command('list-locations', 'list_acs_locations')
-        g.custom_command('scale', 'update_acs')
-        g.show_command('show', 'get')
-        g.wait_command('wait')
-
-    # ACS Mesos DC/OS commands
-    with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
-        g.custom_command('browse', 'dcos_browse')
-        g.custom_command('install-cli', 'dcos_install_cli',
-                         client_factory=None)
-
-    # ACS Kubernetes commands
-    with self.command_group('acs kubernetes', container_services_sdk,
-                            client_factory=cf_container_services) as g:
-        g.custom_command('browse', 'k8s_browse')
-        g.custom_command('get-credentials', 'k8s_get_credentials')
-        g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
-
     # AKS commands
     with self.command_group('aks', managed_clusters_sdk,
                             client_factory=cf_managed_clusters) as g:
