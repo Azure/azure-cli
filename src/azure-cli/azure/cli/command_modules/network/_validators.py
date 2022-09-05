@@ -1883,27 +1883,6 @@ def validate_custom_error_pages(namespace):
     namespace.custom_error_pages = values
 
 
-def validate_status_code_ranges(namespace):
-    if not namespace.status_code_ranges:
-        return
-
-    values = []
-    for item in namespace.status_code_ranges:
-        item_split = item.split('-', 1)
-        usage_error = CLIError('usage error: --status-code-ranges VAL | --status-code-ranges MIN-MAX')
-        try:
-            if len(item_split) == 1:
-                values.append({'min': int(item_split[0]), 'max': int(item_split[0])})
-            elif len(item_split) == 2:
-                values.append({'min': int(item_split[0]), 'max': int(item_split[1])})
-            else:
-                raise usage_error
-        except ValueError:
-            raise usage_error
-
-    namespace.status_code_ranges = values
-
-
 def validate_capture_size_and_limit(namespace):
     if namespace.capture_limit:
         if namespace.capture_limit < 0:

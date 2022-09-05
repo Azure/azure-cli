@@ -27,7 +27,6 @@ from azure.cli.command_modules.network._validators import (
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
-    validate_status_code_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
@@ -37,10 +36,9 @@ from azure.cli.command_modules.network._validators import (
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
     process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
-from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
+    ag_url_map_rule_completion_list, get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
     SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest)

@@ -8,8 +8,6 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
-
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client

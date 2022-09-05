@@ -19,6 +19,9 @@ class Create(AAZCommand):
 
     :example: Create an endpoint for a performance profile to point to an Azure Web App endpoint.
         az network traffic-manager endpoint create -g MyResourceGroup --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints --target-resource-id $MyWebApp1Id --endpoint-status enabled
+
+    :example: Create an endpoint.
+        az network traffic-manager endpoint create -n MyTmEndpoint --profile-name MyTmProfile -g MyResourceGroup --type azureEndpoints --target-resource-id $MyWebApp1Id --subnets [{{first:10.0.0.0}}] --custom-headers [{{name:test,value:best}}]
     """
 
     _aaz_info = {

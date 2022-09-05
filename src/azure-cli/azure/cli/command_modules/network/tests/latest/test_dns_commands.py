@@ -319,9 +319,9 @@ class DnsScenarioTest(ScenarioTest):
         })
 
         self.cmd('network dns zone create -g {rg} -n {zone}')
-        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method geographic').get_output_in_json()
+        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method geographic --path "/"').get_output_in_json()
 
-        self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
+        self.kwargs['tm_id'] = tm['id']
 
         self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
                  checks=self.check("targetResource.id.contains(@, '{tm}')", True))
