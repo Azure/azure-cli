@@ -546,8 +546,8 @@ class PostgresFlexHandler(TargetHandler):
             'az account get-access-token --resource-type oss-rdbms').get('accessToken')
 
         # extension functions require the extension to be available, which is the case for postgres (default) database.
-        conn_string = "host={0} user={1} dbname=postgres password={3} sslmode=require".format(
-            self.host, self.user, self.dbname, password)
+        conn_string = "host={} user={} dbname=postgres password={} sslmode=require".format(
+            self.host, self.user, password)
         return conn_string
 
     def get_create_query(self, client_id):
