@@ -97,6 +97,14 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     elif isinstance(ex, ValidationError):
         az_error = azclierror.ValidationError(error_msg)
 
+    elif isinstance(ex, azclierror.HTTPError):
+        # For resources that don't support CAE - 401 can't be handled
+        if ex.response.status_code == 401 and 'WWW-Authenticate' in ex.response.headers:
+            az_error = azclierror.AuthenticationError(ex)
+            az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
+        else:
+            az_error = azclierror.UnclassifiedUserFault(ex)
+
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
         az_error = azclierror.UnclassifiedUserFault(error_msg)
