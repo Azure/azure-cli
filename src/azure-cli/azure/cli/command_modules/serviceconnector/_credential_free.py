@@ -163,27 +163,27 @@ class MysqlFlexibleHandler(TargetHandler):
     def set_target_firewall(self, add_new_rule, ip_name):
         if add_new_rule:
             target = run_cli_cmd(
-                'az postgres flexible-server show --ids {}'.format(self.target_id))
+                'az mysql flexible-server show --ids {}'.format(self.target_id))
             # logger.warning("Update database server firewall rule to connect...")
             if target.get('publicNetworkAccess') == "Disabled":
                 return True
             run_cli_cmd(
-                'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
+                'az mysql flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
                     self.rg, self.db_server, ip_name, self.sub)
             )
             return False
         # logger.warning("Remove database server firewall rules to recover...")
-        # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
+        # run_cli_cmd('az mysql server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
         # if deny_public_access:
-        #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
+        #     run_cli_cmd('az mysql server update --public Disabled --ids {}'.format(target_id))
 
     def create_aad_user_in_mysql(self, connection_kwargs, query_list):
         import pkg_resources
         installed_packages = pkg_resources.working_set
-        psy_installed = any(('pymysql') in d.key.lower()
+        pym_installed = any(('pymysql') in d.key.lower()
                             for d in installed_packages)
-        if not psy_installed:
+        if not pym_installed:
             import pip
             pip.main(['install', 'mycli'])
 
