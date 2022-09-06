@@ -26,7 +26,7 @@ from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import FileOperationError, AzureInternalError
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
-from ._utils import prep_label_filter_for_url_encoding, resolve_store_metadata
+from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -280,8 +280,10 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
     except Exception as exception:
         raise CLIError("Failed to export key-values to file. " + str(exception))
 
+
 # Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Value=<kvValue>; Label=<kvLabel>).
 # Label is optional
+
 def __map_to_appservice_config_reference(key_value, endpoint):
     if endpoint is None:
         raise CLIError("No endpoint provided.")
@@ -428,7 +430,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
         for item in settings:
             key = prefix_to_add + item['name']
             value = item['value']
-            if validate_import_key(key) and not value.strip().lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()): # Exclude app configuration references.
+            if validate_import_key(key) and not value.strip().lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()):  # Exclude app configuration references.
                 tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
 
                 # Value will look like one of the following if it is a KeyVault reference:

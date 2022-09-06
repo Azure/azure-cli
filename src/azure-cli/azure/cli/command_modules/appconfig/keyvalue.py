@@ -256,7 +256,7 @@ def export_config(cmd,
             endpoint = get_store_endpoint_from_connection_string(connection_string) or resolve_store_metadata(cmd, name)[1]
 
         src_kvs = [__map_to_appservice_config_reference(kv, endpoint) for kv in src_kvs]
-    
+
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
     if profile == ImportExportProfiles.DEFAULT or (profile == ImportExportProfiles.KVSET and skip_features):
