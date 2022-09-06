@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from cmath import log
 import time
 from knack.log import get_logger
 from knack.util import CLIError
@@ -18,17 +17,20 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 from ._utils import run_cli_cmd, generate_random_string
 from ._resource_config import (
-    RESOURCE
+    RESOURCE,
+    CLIENT_TYPE,
 )
 # pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member
 
 logger = get_logger(__name__)
 
 
-def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type):
+def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type):
     cli_ctx = cmd.cli_ctx
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
+        return
+    if client_type not in {CLIENT_TYPE.Java.value, CLIENT_TYPE.SpringBoot.value}:
         return
     source_handler = getSourceHandler(source_id, source_type)
     if source_handler is None:
@@ -49,10 +51,9 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
             "no object id found for user {}".format(login_user))
 
     # enable source mi
-    identity = source_handler.get_identity()
-    object_id = identity.get('principalId')
-    identity_info = run_cli_cmd(
-        'az ad sp show --id {0}'.format(object_id))
+    source_object_id = source_handler.get_identity_pid()
+
+    identity_info = run_cli_cmd('az ad sp show --id {}'.format(source_object_id), 15, 10)
     client_id = identity_info.get('appId')
     identity_name = identity_info.get('displayName')
 
@@ -646,22 +647,20 @@ class SourceHandler:
         self.source_id = source_id
         self.source_type = source_type.value
 
-    def get_identity(self):
+    def get_identity_pid(self):
         return
 
 
 class SpringHandler(SourceHandler):
-    def get_identity(self):
+    def get_identity_pid(self):
         segments = parse_resource_id(self.source_id)
         sub = segments.get('subscription')
         spring = segments.get('name')
         app = segments.get('child_name_1')
         rg = segments.get('resource_group')
-        logger.warning(
-            'Checking if Spring Cloud app enables System Identity...')
-        identity = run_cli_cmd(
-            'az {} app show -g {} -s {} -n {} --subscription {}'.format(
-                self.source_type, rg, spring, app, sub)).get('identity')
+        logger.warning('Checking if Spring Cloud app enables System Identity...')
+        identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
+            self.source_type, rg, spring, app, sub))
         if (identity is None or identity.get('type') != "SystemAssigned"):
             # assign system identity for spring-cloud
             logger.warning('Enabling Spring Cloud app System Identity...')
@@ -669,47 +668,57 @@ class SpringHandler(SourceHandler):
                 'az {} app identity assign -g {} -s {} -n {} --subscription {}'.format(
                     self.source_type, rg, spring, app, sub))
             cnt = 0
-            while (identity is None and cnt < 5):
-                identity = run_cli_cmd('az {} app show -g {} -s {} -n {} --subscription {}'
-                                       .format(self.source_type, rg, spring, app, sub)).get('identity')
-                time.sleep(3)
+            while (cnt < 15):
+                identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
+                    self.source_type, rg, spring, app, sub))
+                if identity is not None:
+                    break
+                time.sleep(5)
                 cnt += 1
-        return identity
+        if identity is None:
+            raise CLIError("Unable to get system identity of Spring. Please try it later.")
+        return identity.get('principalId')
 
 
 class WebappHandler(SourceHandler):
-    def get_identity(self):
+    def get_identity_pid(self):
         logger.warning('Checking if WebApp enables System Identity...')
-        identity = run_cli_cmd(
-            'az webapp show --ids {}'.format(self.source_id)).get('identity')
+        identity = run_cli_cmd('az webapp identity show --ids {}'.format(self.source_id))
         if (identity is None or "SystemAssigned" not in identity.get('type')):
             # assign system identity for spring-cloud
             logger.warning('Enabling WebApp System Identity...')
             run_cli_cmd(
                 'az webapp identity assign --ids {}'.format(self.source_id))
             cnt = 0
-            while (identity is None and cnt < 5):
+            while (cnt < 15):
                 identity = run_cli_cmd(
-                    'az webapp identity show --ids {}'.format(self.source_id)).get('identity')
-                time.sleep(3)
+                    'az webapp identity show --ids {}'.format(self.source_id))
+                if identity is not None:
+                    break
+                time.sleep(5)
                 cnt += 1
-        return identity
+        if identity is None:
+            raise CLIError("Unable to get system identity of Web App. Please try it later.")
+        return identity.get('principalId')
 
 
 class ContainerappHandler(SourceHandler):
-    def get_identity(self):
+    def get_identity_pid(self):
         logger.warning('Checking if Container App enables System Identity...')
-        identity = run_cli_cmd(
-            'az containerapp show --ids {}'.format(self.source_id)).get('identity')
+        identity = run_cli_cmd('az containerapp identity show --ids {}'.format(self.source_id))
         if (identity is None or "SystemAssigned" not in identity.get('type')):
             # assign system identity for spring-cloud
             logger.warning('Enabling Container App System Identity...')
             run_cli_cmd(
                 'az containerapp identity assign --ids {} --system-assigned'.format(self.source_id))
             cnt = 0
-            while (identity is None and cnt < 5):
+            while (cnt < 15):
                 identity = run_cli_cmd(
-                    'az containerapp identity show --ids {}'.format(self.source_id)).get('identity')
-                time.sleep(3)
+                    'az containerapp identity show --ids {}'.format(self.source_id))
+                if identity is not None:
+                    break
+                time.sleep(5)
                 cnt += 1
-        return identity
+        if identity is None:
+            raise CLIError("Unable to get system identity of Container App. Please try it later.")
+        return identity.get('principalId')

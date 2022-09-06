@@ -72,24 +72,27 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
     return randstr.lower()
 
 
-def run_cli_cmd(cmd, retry=0, is_json=True):
+def run_cli_cmd(cmd, retry=0, interval=0):
     '''Run a CLI command
     :param cmd: The CLI command to be executed
     :param retry: The times to re-try
+    :param interval: The seconds wait before retry
     '''
     import json
     import subprocess
 
     output = subprocess.run(cmd, shell=True, check=False,
                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    logger.debug(output)
     if output.returncode != 0:
         if retry:
-            run_cli_cmd(cmd, retry - 1)
+            time.sleep(interval)
+            return run_cli_cmd(cmd, retry - 1, interval)
         else:
             raise CLIInternalError('Command execution failed, command is: '
                                    '{}, error message is: {}'.format(cmd, output.stderr))
 
-    return json.loads(output.stdout) if is_json and output.stdout else output.stdout or None
+    return json.loads(output.stdout) if output.stdout else None
 
 
 def set_user_token_header(client, cli_ctx):
