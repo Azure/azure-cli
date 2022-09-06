@@ -3858,11 +3858,6 @@ helps['restore-point create'] = """
       - name: --exclude-disks
         short-summary: "List of disk resource ids that the customer wishes to exclude from the restore point. If no \
 disks are specified, all disks will be included."
-        long-summary: |
-            Usage: --exclude-disks id=XX
-            id: The ARM resource id in the form of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/.\
-..
-            Multiple actions can be specified by using more than one --exclude-disks argument.
     examples:
       - name: Create a restore point
         text: |-

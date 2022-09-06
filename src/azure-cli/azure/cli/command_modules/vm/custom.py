@@ -5311,14 +5311,17 @@ def restore_point_create(client,
                          restore_point_name,
                          exclude_disks=None,
                          source_restore_point=None,
+                         consistency_mode=None,
                          no_wait=False):
     parameters = {}
     if exclude_disks is not None:
-        parameters['exclude_disks'] = []
+        parameters['excludeDisks'] = []
         for disk in exclude_disks:
-            parameters['exclude_disks'].append({'id': disk})
+            parameters['excludeDisks'].append({'id': disk})
     if source_restore_point is not None:
-        parameters['source_restore_point'] = {'id': source_restore_point}
+        parameters['sourceRestorePoint'] = {'id': source_restore_point}
+    if consistency_mode is not None:
+        parameters['consistencyMode'] = consistency_mode
     return sdk_no_wait(no_wait,
                        client.begin_create,
                        resource_group_name=resource_group_name,

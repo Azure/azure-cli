@@ -9124,7 +9124,7 @@ class DiskRPTestScenario(ScenarioTest):
 
 class RestorePointScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collections', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point', location='EASTUS2EUAP')
     def test_restore_point(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -9141,12 +9141,14 @@ class RestorePointScenarioTest(ScenarioTest):
         self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id} -l eastus', checks=[
             self.check('location', 'eastus'),
             self.check('name', '{collection_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}')
         ])
 
-        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name} --consistency-mode FileSystemConsistent', checks=[
             self.check('name', '{point_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('consistencyMode', 'FileSystemConsistent')
         ]).get_output_in_json()
 
         self.kwargs.update({
