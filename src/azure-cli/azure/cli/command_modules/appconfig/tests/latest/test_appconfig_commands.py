@@ -946,7 +946,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             config_store_name.lower(),
             entry_key,
             entry_label)
-        
+
         self.kwargs.update({
             'key': entry_key,
             'value': entry_value,
@@ -964,7 +964,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             'export_dest': 'appservice',
             'appservice_account': webapp_name
         })
-        
+
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
         exported_keys = next(x for x in app_settings if x['name'] == entry_key)
