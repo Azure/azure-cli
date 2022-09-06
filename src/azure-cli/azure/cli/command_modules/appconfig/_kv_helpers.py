@@ -25,8 +25,8 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import FileOperationError, AzureInternalError
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles)
-from ._utils import prep_label_filter_for_url_encoding
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
+from ._utils import prep_label_filter_for_url_encoding, resolve_store_metadata
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -280,6 +280,17 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
     except Exception as exception:
         raise CLIError("Failed to export key-values to file. " + str(exception))
 
+# Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Value=<kvValue>; Label=<kvLabel>).
+# Label is optional
+def __map_to_appservice_config_reference(key_value, endpoint):
+    if endpoint is None:
+        raise CLIError("No endpoint provided.")
+
+    label = key_value.label
+    key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + '(Endpoint={0}; Key={1}'.format(
+        endpoint, key_value.key) + ('; Label={0}'.format(label) if label is not None else '') + ')'
+    return key_value
+
 
 # Config Store <-> List of KeyValue object
 
@@ -416,19 +427,19 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
             cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=slot)
         for item in settings:
             key = prefix_to_add + item['name']
-            if validate_import_key(key):
+            value = item['value']
+            if validate_import_key(key) and not value.strip().lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()): # Exclude app configuration references.
                 tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
-                value = item['value']
 
                 # Value will look like one of the following if it is a KeyVault reference:
                 # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
                 # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
-                if value and value.strip().lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
+                if value and value.strip().lower().startswith(AppServiceConstants.APPSVC_KEYVAULT_PREFIX.lower()):
                     try:
                         # Strip all whitespaces from value string.
                         # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
                         value = value.replace(" ", "")
-                        appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
+                        appsvc_value_dict = dict(x.split('=') for x in value[len(AppServiceConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
                         appsvc_value_dict = {k.lower(): v for k, v in appsvc_value_dict.items()}
                         secret_identifier = appsvc_value_dict.get('secreturi')
                         if not secret_identifier:
@@ -484,7 +495,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
                 try:
                     secret_uri = json.loads(value).get("uri")
                     if secret_uri:
-                        value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
+                        value = AppServiceConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
                     else:
                         logger.debug(
                             'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n', name, value)
@@ -518,10 +529,12 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     elif level == 'appservice':
         for kv in keyvalues:
             kv_json = {'value': kv.value}
+            # Explicitly assign slot settings for comparison.
+            slot_setting = 'false'
             if kv.tags:
-                for tag_k, tag_v in kv.tags.items():
-                    if tag_k == 'AppService:SlotSetting':
-                        kv_json[tag_k] = tag_v
+                slot_setting = kv.tags.get('AppService:SlotSetting', 'false')
+            kv_json['AppService:SlotSetting'] = slot_setting
+
             res[kv.key] = kv_json
     # import/export key, value, content-type, and tags (as a sub group)
     elif level == 'appconfig':

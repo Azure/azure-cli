@@ -25,7 +25,7 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes, ImportExportProfiles)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding
+from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
@@ -34,7 +34,8 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __serialize_kv_list_to_comparable_json_object, __print_preview,
                           __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview,
-                          __import_kvset_from_file, __delete_configuration_setting_from_config_store)
+                          __import_kvset_from_file, __delete_configuration_setting_from_config_store,
+                          __map_to_appservice_config_reference)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -218,7 +219,8 @@ def export_config(cmd,
                   dest_auth_mode="key",
                   dest_endpoint=None,
                   # to-app-service parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  export_as_reference=False):
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -249,6 +251,12 @@ def export_config(cmd,
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
 
+    if destination == 'appservice' and export_as_reference:
+        if endpoint is None:
+            endpoint = get_store_endpoint_from_connection_string(connection_string) or resolve_store_metadata(cmd, name)[1]
+
+        src_kvs = [__map_to_appservice_config_reference(kv, endpoint) for kv in src_kvs]
+    
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
     if profile == ImportExportProfiles.DEFAULT or (profile == ImportExportProfiles.KVSET and skip_features):

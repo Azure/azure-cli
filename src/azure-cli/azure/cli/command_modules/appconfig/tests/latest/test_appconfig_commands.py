@@ -15,7 +15,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -936,6 +936,73 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         slot = self.create_random_name(prefix='Slot', length=24)
         self.cmd('webapp deployment slot create -g {} -n {} -s {}'.format(resource_group, webapp_name, slot))
 
+        # App configuration reference tests
+        # Create new key-values
+        entry_key = 'TestKey'
+        entry_value = 'TestValue'
+        entry_label = 'AppServiceReferenceExport'
+        expected_reference = '{}(Endpoint=https://{}.azconfig.io; Key={}; Label={})'.format(
+            AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX,
+            config_store_name.lower(),
+            entry_key,
+            entry_label)
+        
+        self.kwargs.update({
+            'key': entry_key,
+            'value': entry_value,
+            'label': entry_label
+        })
+
+        # Add a new key-value entry
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', entry_value),
+                         self.check('label', entry_label)])
+
+        # Export key-value reference to AppService
+        self.kwargs.update({
+            'export_dest': 'appservice',
+            'appservice_account': webapp_name
+        })
+        
+        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
+        exported_keys = next(x for x in app_settings if x['name'] == entry_key)
+        self.assertEquals(exported_keys['name'], entry_key)
+        self.assertEquals(exported_keys['value'], expected_reference)
+        self.assertEquals(exported_keys['slotSetting'], False)
+
+        # Verify that app configuration references are ignored during import
+        ref_entry_key = entry_key
+        entry_key = 'TestKey2'
+        entry_value = 'TestValue2'
+        import_label = 'AppServiceImport'
+
+        self.kwargs.update({
+            'key': entry_key,
+            'value': entry_value
+        })
+
+        # Create new key-value in AppService
+        self.cmd('webapp config appsettings set -g {rg} -n {appservice_account} --settings {key}={value}')
+
+        # Verify that both the app configuration reference and key-value exist in app service
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
+        app_setting_names = [setting["name"] for setting in app_settings]
+        assert ref_entry_key in app_setting_names
+        assert entry_key in app_setting_names
+
+        # Import settings to app configuration
+        self.kwargs.update({
+            'label': import_label
+        })
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+
+        # Verfiy that app configuration reference does not exist in imported keys
+        imported_config =  self.cmd('appconfig kv list --connection-string {connection_string} --label {label}').get_output_in_json()
+        assert not any(setting['value'].lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()) for setting in imported_config)
+
+
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
@@ -955,11 +1022,6 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
                          self.check('label', label),
                          self.check('value', appconfig_keyvault_value)])
 
-        # Export KeyVault ref to AppService
-        self.kwargs.update({
-            'export_dest': 'appservice',
-            'appservice_account': webapp_name
-        })
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()

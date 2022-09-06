@@ -16,6 +16,10 @@ class FeatureFlagConstants:
 
 class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+
+
+class AppServiceConstants:
+    APPSVC_CONFIG_REFERENCE_PREFIX = "@Microsoft.AppConfiguration"
     APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
 
 
