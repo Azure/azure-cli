@@ -496,9 +496,9 @@ examples:
   - name: Create without role assignment.
     text: az ad sp create-for-rbac
   - name: Create using a custom display name.
-    text: az ad sp create-for-rbac -n "MyApp"
+    text: az ad sp create-for-rbac -n MyApp
   - name: Create with a Contributor role assignments on specified scopes. To retrieve current subscription ID, run `az account show --query id --output tsv`.
-    text: az ad sp create-for-rbac -n "MyApp" --role Contributor --scopes /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup1} /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup2}
+    text: az ad sp create-for-rbac -n MyApp --role Contributor --scopes /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1 /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup2
   - name: Create using a self-signed certificate.
     text: az ad sp create-for-rbac --create-cert
   - name: Create using a self-signed certificate, and store it within KeyVault.
