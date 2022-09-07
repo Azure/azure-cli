@@ -46,7 +46,7 @@ class ListAdvertisedRoutes(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="The name of the Route Server Peering.",
             required=True,
         )
