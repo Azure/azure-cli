@@ -200,10 +200,10 @@ class MysqlFlexibleHandler(TargetHandler):
                     cursor.execute(q)
                 except Exception as e:
                     logger.warning(
-                        "Unable to execute the sql query %s, error: %s", q, str(e))
+                        "Query %s, error: %s", q, str(e))
         except pymysql.Error as e:
             logger.debug(e)
-            raise AzureConnectionError("Fail to connect mysql")
+            raise AzureConnectionError("Fail to connect mysql. " + str(e))
         if cursor is not None:
             try:
                 cursor.close()
@@ -340,7 +340,7 @@ class SqlHandler(TargetHandler):
                             logger.warning(e)
                         conn.commit()
         except pyodbc.Error as e:
-            raise AzureConnectionError("Fail to connect sql")
+            raise AzureConnectionError("Fail to connect sql. " + str(e))
 
     def get_connection_string(self):
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
@@ -524,7 +524,7 @@ class PostgresFlexHandler(TargetHandler):
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
             if search_ip is not None:
                 self.ip = search_ip.group(1)
-            raise AzureConnectionError("Fail to connect to postgresql")
+            raise AzureConnectionError("Fail to connect to postgresql. " + str(e))
 
         conn.autocommit = True
         cursor = conn.cursor()
