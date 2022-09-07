@@ -941,7 +941,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         entry_key = 'TestKey'
         entry_value = 'TestValue'
         entry_label = 'AppServiceReferenceExport'
-        expected_reference = '{}(Endpoint=https://{}.azconfig.io; Key={}; Label={})'.format(
+        expected_reference = '{}Endpoint=https://{}.azconfig.io; Key={}; Label={})'.format(
             AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX,
             config_store_name.lower(),
             entry_key,

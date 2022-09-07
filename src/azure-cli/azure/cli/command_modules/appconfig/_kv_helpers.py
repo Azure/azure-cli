@@ -289,7 +289,7 @@ def __map_to_appservice_config_reference(key_value, endpoint):
         raise CLIError("No endpoint provided.")
 
     label = key_value.label
-    key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + '(Endpoint={0}; Key={1}'.format(
+    key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + 'Endpoint={0}; Key={1}'.format(
         endpoint, key_value.key) + ('; Label={0}'.format(label) if label is not None else '') + ')'
     return key_value
 
