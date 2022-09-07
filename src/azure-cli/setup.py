@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.39.0"
+VERSION = "2.40.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==10.0.0',
-    'azure-mgmt-containerservice~=20.2.0',
+    'azure-mgmt-containerservice~=20.3.0',
     'azure-mgmt-cosmosdb==7.0.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -103,9 +103,9 @@ DEPENDENCIES = [
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=4.0.1',
-    'azure-mgmt-msi~=6.0.1',
+    'azure-mgmt-msi~=6.1.0',
     'azure-mgmt-netapp~=8.1.0',
-    'azure-mgmt-network~=20.0.0',
+    'azure-mgmt-network~=21.0.1',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.2.0b3',
@@ -118,7 +118,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource==21.1.0b1',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security==2.0.0b1',
-    'azure-mgmt-servicebus~=7.1.0',
+    'azure-mgmt-servicebus~=8.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.0.0',
     'azure-mgmt-servicefabric~=1.0.0',
@@ -129,7 +129,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse==2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',
-    'azure-multiapi-storage~=0.9.0',
+    'azure-multiapi-storage~=0.10.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.13.0',

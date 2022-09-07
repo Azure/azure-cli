@@ -1262,6 +1262,13 @@ def load_cert_file(param_name):
     return load_cert_validator
 
 
+def get_network_watcher_for_pcap_creation(cmd, namespace):
+    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
+        get_network_watcher_from_vmss(cmd, namespace)
+    else:
+        get_network_watcher_from_vm(cmd, namespace)
+
+
 def get_network_watcher_from_vm(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 
@@ -1269,6 +1276,16 @@ def get_network_watcher_from_vm(cmd, namespace):
     vm_name = parse_resource_id(namespace.vm)['name']
     vm = compute_client.get(namespace.resource_group_name, vm_name)
     namespace.location = vm.location  # pylint: disable=no-member
+    get_network_watcher_from_location()(cmd, namespace)
+
+
+def get_network_watcher_from_vmss(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
+    vmss_name = parse_resource_id(namespace.target)['name']
+    vmss = compute_client.get(namespace.resource_group_name, vmss_name)
+    namespace.location = vmss.location  # pylint: disable=no-member
     get_network_watcher_from_location()(cmd, namespace)
 
 
@@ -1738,7 +1755,6 @@ def process_nw_topology_namespace(cmd, namespace):
 
 def process_nw_packet_capture_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
-    get_network_watcher_from_vm(cmd, namespace)
 
     storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path '
                              'PATH] [--file-path PATH] | --file-path PATH')
@@ -1748,13 +1764,24 @@ def process_nw_packet_capture_create_namespace(cmd, namespace):
     if namespace.storage_path and not namespace.storage_account:
         raise storage_usage
 
-    if not is_valid_resource_id(namespace.vm):
-        namespace.vm = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Compute',
-            type='virtualMachines',
-            name=namespace.vm)
+    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
+        get_network_watcher_from_vmss(cmd, namespace)
+        if not is_valid_resource_id(namespace.target):
+            namespace.target = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='virtualMachineScaleSets',
+                name=namespace.target)
+    else:
+        get_network_watcher_from_vm(cmd, namespace)
+        if not is_valid_resource_id(namespace.vm):
+            namespace.vm = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='virtualMachines',
+                name=namespace.vm)
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
@@ -2102,3 +2129,16 @@ def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused
         raise CLIError('--rules and --rule-group-name must be provided at the same time')
     if rules is not None and rule_group_name is None:
         raise CLIError('--rules and --rule-group-name must be provided at the same time')
+
+
+def _is_bastion_connectable_resource(rid):
+    from azure.mgmt.core.tools import is_valid_resource_id
+    from azure.cli.command_modules.vm._vm_utils import is_valid_vm_resource_id, is_valid_vmss_resource_id
+
+    if is_valid_resource_id(rid):
+        if is_valid_vmss_resource_id(rid):
+            return True
+        if is_valid_vm_resource_id(rid):
+            return True
+
+    return False

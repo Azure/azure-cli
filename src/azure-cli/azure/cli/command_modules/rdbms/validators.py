@@ -264,7 +264,7 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
         raise ArgumentUsageError("Data encryption cannot be disabled if key or backup key is provided.")
 
     if not disable_data_encryption and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
-       backup_byok_identity is None:
+       (byok_identity is not None and backup_byok_identity is None):
         raise ArgumentUsageError("Backup identity and key need to be provided for geo-redundant server.")
 
     if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
