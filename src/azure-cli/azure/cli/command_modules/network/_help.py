@@ -6148,11 +6148,6 @@ type: command
 short-summary: Delete a virtual router peering.
 """
 
-helps['network routeserver'] = """
-type: group
-short-summary: Manage the route server.
-"""
-
 helps['network routeserver create'] = """
 type: command
 short-summary: Create a route server.
@@ -6162,79 +6157,9 @@ examples:
       az network routeserver create --resource-group myresourcegroup --name myrouteserver --hosted-subnet my_subnet_id --public-ip-address my_public_ip
 """
 
-helps['network routeserver update'] = """
-type: command
-short-summary: Update a route server.
-examples:
-  - name: Update a route server.
-    text: |
-        az network routeserver update --name myrouteserver --resource-group myresourcegroup --tags super_secure no_80 no_22
-    crafted: true
-"""
-
-helps['network routeserver show'] = """
-type: command
-short-summary: Show a route server.
-"""
-
-helps['network routeserver list'] = """
-type: command
-short-summary: List all route servers under a subscription or a resource group.
-"""
-
 helps['network routeserver delete'] = """
 type: command
 short-summary: Delete a route server under a resource group.
-"""
-
-helps['network routeserver wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the route server is met.
-"""
-
-helps['network routeserver peering'] = """
-type: group
-short-summary: Manage the route server peering.
-"""
-
-helps['network routeserver peering create'] = """
-type: command
-short-summary: Create a route server peering.
-"""
-
-helps['network routeserver peering update'] = """
-type: command
-short-summary: Update a route server peering.
-"""
-
-helps['network routeserver peering list'] = """
-type: command
-short-summary: List all route server peerings under a resource group.
-"""
-
-helps['network routeserver peering show'] = """
-type: command
-short-summary: Show a route server peering
-"""
-
-helps['network routeserver peering delete'] = """
-type: command
-short-summary: Delete a route server peering.
-"""
-
-helps['network routeserver peering list-learned-routes'] = """
-type: command
-short-summary: List all routes the route server bgp connection has learned.
-"""
-
-helps['network routeserver peering list-advertised-routes'] = """
-type: command
-short-summary: List all routes the route server bgp connection is advertising to the specified peer.
-"""
-
-helps['network routeserver peering wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the route server peering is met.
 """
 
 helps['network watcher'] = """

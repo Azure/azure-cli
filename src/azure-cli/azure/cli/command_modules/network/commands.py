@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
-    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
+    cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -320,30 +320,6 @@ def load_command_table(self, _):
     network_virtual_hub_update_sdk = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionOperations.{}',
-        client_factory=cf_virtual_hub_bgp_connection,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connection_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_hub_bgp_connection,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connections_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionsOperations.{}',
-        client_factory=cf_virtual_hub_bgp_connections,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connections_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_hub_bgp_connections,
         min_api='2020-07-01'
     )
 
@@ -1373,31 +1349,31 @@ def load_command_table(self, _):
     with self.command_group('network routeserver', network_virtual_hub_sdk,
                             custom_command_type=network_virtual_hub_update_sdk) as g:
         g.custom_command('create', 'create_virtual_hub')
-        g.generic_update_command('update',
-                                 setter_name='virtual_hub_update_setter',
-                                 setter_type=network_virtual_hub_update_sdk,
-                                 custom_func_name='update_virtual_hub')
+        # g.generic_update_command('update',
+        #                          setter_name='virtual_hub_update_setter',
+        #                          setter_type=network_virtual_hub_update_sdk,
+        #                          custom_func_name='update_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_virtual_hub')
-        g.wait_command('wait')
+        # g.show_command('show', 'get')
+        # g.custom_command('list', 'list_virtual_hub')
+        # g.wait_command('wait')
 
-    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
-                            custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
-        g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
-        g.generic_update_command('update',
-                                 setter_name='virtual_hub_bgp_connection_update_setter',
-                                 setter_type=network_virtual_hub_bgp_connection_update_sdk,
-                                 custom_func_name='update_virtual_hub_bgp_connection')
-        g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
-        g.show_command('show', 'get')
-        g.wait_command('wait')
+    # with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
+    #                         custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
+    #     g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
+    #     g.generic_update_command('update',
+    #                              setter_name='virtual_hub_bgp_connection_update_setter',
+    #                              setter_type=network_virtual_hub_bgp_connection_update_sdk,
+    #                              custom_func_name='update_virtual_hub_bgp_connection')
+    #     g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
+    #     g.show_command('show', 'get')
+    #     g.wait_command('wait')
 
-    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
-                            custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
-        g.command('list', 'list')
-        g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')
-        g.custom_command('list-advertised-routes', 'list_virtual_hub_bgp_connection_advertised_routes')
+    # with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
+    #                         custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
+    #     g.command('list', 'list')
+    #     g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')
+    #     g.custom_command('list-advertised-routes', 'list_virtual_hub_bgp_connection_advertised_routes')
     # endregion
 
     # region Bastion
