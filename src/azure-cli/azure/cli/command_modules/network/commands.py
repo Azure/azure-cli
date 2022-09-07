@@ -1349,31 +1349,7 @@ def load_command_table(self, _):
     with self.command_group('network routeserver', network_virtual_hub_sdk,
                             custom_command_type=network_virtual_hub_update_sdk) as g:
         g.custom_command('create', 'create_virtual_hub')
-        # g.generic_update_command('update',
-        #                          setter_name='virtual_hub_update_setter',
-        #                          setter_type=network_virtual_hub_update_sdk,
-        #                          custom_func_name='update_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
-        # g.show_command('show', 'get')
-        # g.custom_command('list', 'list_virtual_hub')
-        # g.wait_command('wait')
-
-    # with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
-    #                         custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
-    #     g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
-    #     g.generic_update_command('update',
-    #                              setter_name='virtual_hub_bgp_connection_update_setter',
-    #                              setter_type=network_virtual_hub_bgp_connection_update_sdk,
-    #                              custom_func_name='update_virtual_hub_bgp_connection')
-    #     g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
-    #     g.show_command('show', 'get')
-    #     g.wait_command('wait')
-
-    # with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
-    #                         custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
-    #     g.command('list', 'list')
-    #     g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')
-    #     g.custom_command('list-advertised-routes', 'list_virtual_hub_bgp_connection_advertised_routes')
     # endregion
 
     # region Bastion
