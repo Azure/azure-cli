@@ -3,11 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import time
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
-from azure.cli.core.azclierror import AzureConnectionError
+from azure.cli.core.azclierror import (
+    AzureConnectionError,
+    CLIInternalError,
+    ValidationError
+)
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core._profile import Profile
@@ -20,23 +25,23 @@ from ._resource_config import (
     RESOURCE,
     CLIENT_TYPE,
 )
+
 # pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member
 
 logger = get_logger(__name__)
 
 
-def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type):
+def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name, identity_resource_id):
     cli_ctx = cmd.cli_ctx
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
         return
-    if client_type not in {CLIENT_TYPE.Java.value, CLIENT_TYPE.SpringBoot.value}:
-        return
+
     source_handler = getSourceHandler(source_id, source_type)
     if source_handler is None:
         return
     target_handler = getTargetHandler(
-        cmd, target_id, target_type, auth_info['auth_type'])
+        cmd, target_id, target_type, auth_info['auth_type'], client_type, connection_name)
     if target_handler is None:
         return
 
@@ -59,20 +64,24 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
 
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
-    target_handler.set_user_admin(login_user, user_object_id)
+    target_handler.set_user_admin(user_object_id, identity_resource_id=identity_resource_id)
 
     # create an aad user in db
     target_handler.create_aad_user(identity_name, client_id)
     return target_handler.get_auth_config()
 
 
-def getTargetHandler(cmd, target_id, target_type, auth_type):
+def getTargetHandler(cmd, target_id, target_type, auth_type, client_type, connection_name):
+    if target_type in {RESOURCE.Sql}:
+        return SqlHandler(cmd, target_id, target_type, auth_type, connection_name)
+    if client_type not in {CLIENT_TYPE.Java.value, CLIENT_TYPE.SpringBoot.value}:
+        return
     if target_type in {RESOURCE.Postgres}:
-        return PostgresSingleHandler(cmd, target_id, target_type, auth_type)
+        return PostgresSingleHandler(cmd, target_id, target_type, auth_type, connection_name)
     if target_type in {RESOURCE.PostgresFlexible}:
-        return PostgresFlexHandler(cmd, target_id, target_type, auth_type)
+        return PostgresFlexHandler(cmd, target_id, target_type, auth_type, connection_name)
     if target_type in {RESOURCE.MysqlFlexible}:
-        return MysqlFlexibleHandler(cmd, target_id, target_type, auth_type)
+        return MysqlFlexibleHandler(cmd, target_id, target_type, auth_type, connection_name)
     return None
 
 
@@ -82,30 +91,32 @@ class TargetHandler:
     profile = None
     cmd = None
     tenant_id = ""
-    sub = ""
-    rg = ""
-    user = ""
+    subscription = ""
+    resource_group = ""
+    login_username = ""
     endpoint = ""
+    aad_username = ""
 
     auth_type = ""
 
-    def __init__(self, cmd, target_id, target_type, auth_type):
+    def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
         self.profile = Profile(cli_ctx=cmd.cli_ctx)
         self.cmd = cmd
         self.target_id = target_id
         self.target_type = target_type
+        self.aad_username = "aad_" + connection_name
         self.tenant_id = Profile(
             cli_ctx=cmd.cli_ctx).get_subscription().get("tenantId")
         target_segments = parse_resource_id(target_id)
-        self.sub = target_segments.get('subscription')
-        self.rg = target_segments.get('resource_group')
+        self.subscription = target_segments.get('subscription')
+        self.resource_group = target_segments.get('resource_group')
         self.auth_type = auth_type
-        self.user = self.profile.get_current_account_user()
+        self.login_username = self.profile.get_current_account_user()
 
     def enable_target_aad_auth(self):
         return
 
-    def set_user_admin(self, login_user, user_object_id):
+    def set_user_admin(self, user_object_id, **kwargs):
         return
 
     def set_target_firewall(self, add_new_rule, ip_name):
@@ -120,22 +131,35 @@ class TargetHandler:
 
 class MysqlFlexibleHandler(TargetHandler):
 
-    aad_user = generate_random_string(
-        prefix="aad_" + RESOURCE.Mysql.value + '_')
-
-    db_server = ""
+    server = ""
     dbname = ""
 
-    def __init__(self, cmd, target_id, target_type, auth_type):
-        super().__init__(cmd, target_id, target_type, auth_type)
+    def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
+        super().__init__(cmd, target_id, target_type, auth_type, connection_name)
         self.endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
         target_segments = parse_resource_id(target_id)
-        self.db_server = target_segments.get('name')
+        self.server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
 
-    def set_user_admin(self, login_user, user_object_id):
-        # not implemented yet
-        return
+    def set_user_admin(self, user_object_id, **kwargs):
+        identity_resource_id = kwargs['identity_resource_id']
+        admins = run_cli_cmd(
+            'az mysql flexible-server ad-admin list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription)
+        )
+        is_admin = any(ad.get('sid') == user_object_id for ad in admins)
+        if is_admin:
+            return
+        
+        logger.warning('Set current user as DB Server AAD Administrators.')
+        # set user as AAD admin
+        if identity_resource_id is None:
+            # identity_resource_id = "/subscriptions/d82d7763-8e12-4f39-a7b6-496a983ec2f4/resourcegroups/zxf-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-aad-umi"
+            raise ValidationError("Provide --identity-resource-id to set %s as AAD administrator.", self.user)
+        mysql_umi = run_cli_cmd(
+            'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
+        if (not mysql_umi) and True:
+            run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(self.resource_group, self.server, self.subscription, identity_resource_id) )
+        run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(self.resource_group, self.server, self.subscription, self.login_username, user_object_id ,identity_resource_id) )
 
     def create_aad_user(self, identity_name, client_id):
         query_list = self.get_create_query(client_id)
@@ -152,7 +176,7 @@ class MysqlFlexibleHandler(TargetHandler):
             self.create_aad_user_in_mysql(connection_kwargs, query_list)
 
         # remove firewall rule
-        if ip_name is not None:
+        if not ip_name:
             try:
                 self.set_target_firewall(False, ip_name)
             # pylint: disable=bare-except
@@ -170,7 +194,7 @@ class MysqlFlexibleHandler(TargetHandler):
             run_cli_cmd(
                 'az mysql flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
-                    self.rg, self.db_server, ip_name, self.sub)
+                    self.resource_group, self.server, ip_name, self.subscription)
             )
             return False
         # logger.warning("Remove database server firewall rules to recover...")
@@ -204,7 +228,7 @@ class MysqlFlexibleHandler(TargetHandler):
         except pymysql.Error as e:
             logger.debug(e)
             raise AzureConnectionError("Fail to connect mysql. " + str(e))
-        if cursor is not None:
+        if not cursor:
             try:
                 cursor.close()
             except Exception as e:  # pylint: disable=broad-except
@@ -215,9 +239,9 @@ class MysqlFlexibleHandler(TargetHandler):
             'az account get-access-token --resource-type oss-rdbms').get('accessToken')
 
         return {
-            'host': self.db_server + self.endpoint,
+            'host': self.server + self.endpoint,
             'database': self.dbname,
-            'user': self.user,
+            'user': self.login_username,
             'password': password,
             'ssl': {"fake_flag_to_enable_tls": True},
             'autocommit': True
@@ -226,10 +250,10 @@ class MysqlFlexibleHandler(TargetHandler):
     def get_create_query(self, client_id):
         return [
             "SET aad_auth_validate_oids_in_tenant = OFF;",
-            "DROP USER IF EXISTS '{}'@'%';".format(self.aad_user),
+            "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
             "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
-                self.aad_user, client_id),
-            "GRANT ALL PRIVILEGES ON Db.* TO '{}'@'%';".format(self.aad_user),
+                self.aad_username, client_id),
+            "GRANT ALL PRIVILEGES ON Db.* TO '{}'@'%';".format(self.aad_username),
             "FLUSH privileges;"
         ]
 
@@ -237,7 +261,7 @@ class MysqlFlexibleHandler(TargetHandler):
         if self.auth_type in {'systemAssignedIdentity'}:
             return {
                 'auth_type': 'secret',
-                'name': self.aad_user,
+                'name': self.aad_username,
                 'secret_info': {
                     'secret_type': 'rawValue'
                 }
@@ -245,32 +269,30 @@ class MysqlFlexibleHandler(TargetHandler):
 
 
 class SqlHandler(TargetHandler):
-    aad_user = generate_random_string(
-        prefix="aad_" + RESOURCE.Sql.value + '_')
 
-    db_server = ""
+    server = ""
     dbname = ""
 
-    def __init__(self, cmd, target_id, target_type, auth_type):
-        super().__init__(cmd, target_id, target_type, auth_type)
+    def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
+        super().__init__(cmd, target_id, target_type, auth_type, connection_name)
         self.endpoint = cmd.cli_ctx.cloud.suffixes.sql_server_hostname
         target_segments = parse_resource_id(target_id)
-        self.db_server = target_segments.get('name')
+        self.server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
 
-    def set_user_admin(self, login_user, user_object_id):
+    def set_user_admin(self, user_object_id, **kwargs):
         # pylint: disable=not-an-iterable
         admins = run_cli_cmd(
             'az sql server ad-admin list --ids {}'.format(self.target_id))
         is_admin = any(ad.get('sid') == user_object_id for ad in admins)
         if not is_admin:
             logger.warning('Setting current user as database server AAD admin:'
-                           ' user=%s object id=%s', login_user, user_object_id)
-            run_cli_cmd('az sql server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
-                        ' --subscription {}'.format(self.rg, self.db_server, login_user, user_object_id, self.sub)).get('objectId')
+                           ' user=%s object id=%s', self.login_username, user_object_id)
+            run_cli_cmd('az sql server ad-admin create -g {} --server-name {} --display-name {} --object-id {} --subscription {}'.format(
+                            self.resource_group, self.server, self.login_username, user_object_id, self.subscription)).get('objectId')
 
     def create_aad_user(self, identity_name, client_id):
-        self.aad_user = identity_name
+        self.aad_username = identity_name
 
         query_list = self.get_create_query(client_id)
         connection_string = self.get_connection_string()
@@ -286,7 +308,7 @@ class SqlHandler(TargetHandler):
             self.create_aad_user_in_sql(connection_string, query_list)
 
         # remove firewall rule
-        if ip_name is not None:
+        if not ip_name:
             try:
                 self.set_target_firewall(False, ip_name)
             # pylint: disable=bare-except
@@ -304,7 +326,7 @@ class SqlHandler(TargetHandler):
             run_cli_cmd(
                 'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
-                    self.rg, self.db_server, ip_name, self.sub)
+                    self.resource_group, self.server, ip_name, self.subscription)
             )
             return False
         # logger.warning("Remove database server firewall rules to recover...")
@@ -344,29 +366,28 @@ class SqlHandler(TargetHandler):
 
     def get_connection_string(self):
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
-            self.db_server + self.endpoint + ';database=' + self.dbname + ';UID=' + self.user + \
+            self.server + self.endpoint + ';database=' + self.dbname + ';UID=' + self.login_username + \
             ';Authentication=ActiveDirectoryInteractive;'
         return conn_string
 
     def get_create_query(self, client_id):
         role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
-            self.aad_user)
+            self.aad_username)
         grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(
-            self.dbname, self.aad_user)
+            self.dbname, self.aad_username)
 
         return [role_q, grant_q]
 
 
 class PostgresFlexHandler(TargetHandler):
-    aad_user = generate_random_string(prefix="aad_psqlflex_")
 
     db_server = ""
     host = ""
     dbname = ""
     ip = ""
 
-    def __init__(self, cmd, target_id, target_type, auth_type):
-        super().__init__(cmd, target_id, target_type, auth_type)
+    def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
+        super().__init__(cmd, target_id, target_type, auth_type, connection_name)
         self.endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
         target_segments = parse_resource_id(target_id)
         self.db_server = target_segments.get('name')
@@ -375,7 +396,7 @@ class PostgresFlexHandler(TargetHandler):
 
     def enable_target_aad_auth(self):
         rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(
-            self.sub, self.rg, self.db_server)
+            self.subscription, self.resource_group, self.db_server)
         server_info = run_cli_cmd(rq)
         if server_info.get("properties").get("authConfig").get("activeDirectoryAuthEnabled"):
             return
@@ -413,11 +434,11 @@ class PostgresFlexHandler(TargetHandler):
         deployment = Deployment(properties=properties)
 
         LongRunningOperation(cmd.cli_ctx)(
-            client.begin_create_or_update(self.rg, deployment_name, deployment))
+            client.begin_create_or_update(self.resource_group, deployment_name, deployment))
 
-    def set_user_admin(self, login_user, user_object_id):
+    def set_user_admin(self, user_object_id, **kwargs):
         rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/administrators?api-version=2022-03-08-privatepreview'.format(
-            self.sub, self.rg, self.db_server)
+            self.subscription, self.resource_group, self.db_server)
         admins = run_cli_cmd(rq).get("value")
         is_admin = any(user_object_id in u.get(
             "properties").get("objectId") for u in admins)
@@ -432,7 +453,7 @@ class PostgresFlexHandler(TargetHandler):
             'name': self.db_server + "/" + user_object_id,
             'location': "East US",
             'properties': {
-                'principalName': login_user,
+                'principalName': self.login_username,
                 'principalType': 'User',
                 'tenantId': self.tenant_id,
                 'createMode': "Update"
@@ -455,7 +476,7 @@ class PostgresFlexHandler(TargetHandler):
         deployment = Deployment(properties=properties)
 
         LongRunningOperation(cmd.cli_ctx)(
-            client.begin_create_or_update(self.rg, deployment_name, deployment))
+            client.begin_create_or_update(self.resource_group, deployment_name, deployment))
 
     def create_aad_user(self, identity_name, client_id):
         # self.aad_user = identity_name or self.aad_user
@@ -474,7 +495,7 @@ class PostgresFlexHandler(TargetHandler):
             self.create_aad_user_in_pg(connection_string, query_list)
 
         # remove firewall rule
-        if ip_name is not None:
+        if not ip_name:
             try:
                 self.set_target_firewall(False, ip_name)
             # pylint: disable=bare-except
@@ -494,7 +515,7 @@ class PostgresFlexHandler(TargetHandler):
             run_cli_cmd(
                 'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
                 '--subscription {3} --start-ip-address {4} --end-ip-address {5}'.format(
-                    self.rg, self.db_server, ip_name, self.sub, start_ip, end_ip)
+                    self.resource_group, self.db_server, ip_name, self.subscription, start_ip, end_ip)
             )
             return False
         # logger.warning("Remove database server firewall rules to recover...")
@@ -522,13 +543,13 @@ class PostgresFlexHandler(TargetHandler):
             logger.warning(e)
             search_ip = re.search(
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
-            if search_ip is not None:
+            if not search_ip:
                 self.ip = search_ip.group(1)
             raise AzureConnectionError("Fail to connect to postgresql. " + str(e))
 
         conn.autocommit = True
         cursor = conn.cursor()
-        logger.warning("Adding new AAD user %s to database...", self.aad_user)
+        logger.warning("Adding new AAD user %s to database...", self.aad_username)
         for execution_query in query_list:
             try:
                 logger.debug(execution_query)
@@ -547,22 +568,22 @@ class PostgresFlexHandler(TargetHandler):
 
         # extension functions require the extension to be available, which is the case for postgres (default) database.
         conn_string = "host={} user={} dbname=postgres password={} sslmode=require".format(
-            self.host, self.user, password)
+            self.host, self.login_username, password)
         return conn_string
 
     def get_create_query(self, client_id):
         return [
-            'drop role IF EXISTS "{0}";'.format(self.aad_user),
+            'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
-                self.aad_user, client_id),
+                self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";'.format(
-                self.dbname, self.aad_user)]
+                self.dbname, self.aad_username)]
 
     def get_auth_config(self):
         if self.auth_type in {'systemAssignedIdentity'}:
             return {
                 'auth_type': 'secret',
-                'name': self.aad_user,
+                'name': self.aad_username,
                 'secret_info': {
                     'secret_type': 'rawValue'
                 }
@@ -570,16 +591,16 @@ class PostgresFlexHandler(TargetHandler):
 
 
 class PostgresSingleHandler(PostgresFlexHandler):
-    def __init__(self, cmd, target_id, target_type, auth_type):
-        super().__init__(cmd, target_id, target_type, auth_type)
-        self.user = self.profile.get_current_account_user() + '@' + self.db_server
+    def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
+        super().__init__(cmd, target_id, target_type, auth_type, connection_name)
+        self.login_username = self.profile.get_current_account_user() + '@' + self.db_server
 
     def enable_target_aad_auth(self):
         return
 
-    def set_user_admin(self, login_user, user_object_id):
-        sub = self.sub
-        rg = self.rg
+    def set_user_admin(self, user_object_id, **kwargs):
+        sub = self.subscription
+        rg = self.resource_group
         server = self.db_server
         is_admin = True
 
@@ -589,13 +610,13 @@ class PostgresSingleHandler(PostgresFlexHandler):
         is_admin = any(ad.get('sid') == user_object_id for ad in admins)
         if not is_admin:
             logger.warning('Setting current user as database server AAD admin:'
-                           ' user=%s object id=%s', login_user, user_object_id)
+                           ' user=%s object id=%s', self.login_username, user_object_id)
             run_cli_cmd('az postgres server ad-admin create -g {} --server-name {} --display-name {} --object-id {}'
-                        ' --subscription {}'.format(rg, server, login_user, user_object_id, sub)).get('objectId')
+                        ' --subscription {}'.format(rg, server, self.login_username, user_object_id, sub)).get('objectId')
 
     def set_target_firewall(self, add_new_rule, ip_name):
-        sub = self.sub
-        rg = self.rg
+        sub = self.subscription
+        rg = self.resource_group
         server = self.db_server
         target_id = self.target_id
         if add_new_rule:
@@ -622,11 +643,11 @@ class PostgresSingleHandler(PostgresFlexHandler):
 
         return [
             'SET aad_validate_oids_in_tenant = off;',
-            'drop role IF EXISTS "{0}";'.format(self.aad_user),
+            'drop role IF EXISTS "{0}";'.format(self.aad_username),
             'CREATE ROLE "{0}" WITH LOGIN PASSWORD "{1}" IN ROLE azure_ad_user;'.format(
-                self.aad_user, client_id),
+                self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";'.format(
-                self.dbname, self.aad_user)
+                self.dbname, self.aad_username)
         ]
 
 
@@ -671,7 +692,7 @@ class SpringHandler(SourceHandler):
             while (cnt < 15):
                 identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
                     self.source_type, rg, spring, app, sub))
-                if identity is not None:
+                if not identity:
                     break
                 time.sleep(5)
                 cnt += 1
@@ -693,7 +714,7 @@ class WebappHandler(SourceHandler):
             while (cnt < 15):
                 identity = run_cli_cmd(
                     'az webapp identity show --ids {}'.format(self.source_id))
-                if identity is not None:
+                if not identity:
                     break
                 time.sleep(5)
                 cnt += 1
@@ -715,7 +736,7 @@ class ContainerappHandler(SourceHandler):
             while (cnt < 15):
                 identity = run_cli_cmd(
                     'az containerapp identity show --ids {}'.format(self.source_id))
-                if identity is not None:
+                if not identity:
                     break
                 time.sleep(5)
                 cnt += 1
