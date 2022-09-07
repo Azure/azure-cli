@@ -43,6 +43,9 @@ BuildRequires:  %{python_package}-devel
 #      https://src.fedoraproject.org/rpms/redhat-rpm-config//blob/rawhide/f/buildflags.md
 %undefine _package_note_file
 
+# Do not generate build_id links to prevent conflicts with other package.
+%define _build_id_links none
+
 %description
 A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
