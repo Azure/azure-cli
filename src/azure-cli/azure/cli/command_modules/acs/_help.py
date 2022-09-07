@@ -544,9 +544,21 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --disable-disk-driver
+    type: bool
+    short-summary: Disable AzureDisk CSI Driver.
+  - name: --disable-file-driver
+    type: bool
+    short-summary: Disable AzureFile CSI Driver.
+  - name: --disable-snapshot-controller
+    type: bool
+    short-summary: Disable CSI Snapshot Controller.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --gpu-instance-profile
+    type: string
+    short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -619,7 +631,7 @@ examples:
 
 helps['aks update'] = """
 type: command
-short-summary: Update a managed Kubernetes cluster.
+short-summary: Update a managed Kubernetes cluster. When called with no optional arguments this attempts to move the cluster to its goal state without changing the current cluster configuration. This can be used to move out of a non succeeded state.
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
@@ -793,11 +805,31 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-disk-driver
+    type: bool
+    short-summary: Enable AzureDisk CSI Driver.
+  - name: --disable-disk-driver
+    type: bool
+    short-summary: Disable AzureDisk CSI Driver.
+  - name: --enable-file-driver
+    type: bool
+    short-summary: Enable AzureFile CSI Driver.
+  - name: --disable-file-driver
+    type: bool
+    short-summary: Disable AzureFile CSI Driver.
+  - name: --enable-snapshot-controller
+    type: bool
+    short-summary: Enable Snapshot Controller.
+  - name: --disable-snapshot-controller
+    type: bool
+    short-summary: Disable CSI Snapshot Controller.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
 
 examples:
+  - name: Reconcile the cluster back to its current state.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
@@ -1041,7 +1073,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2022 for Windows Server 2022.
+    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -1099,6 +1131,9 @@ parameters:
   - name: --host-group-id
     type: string
     short-summary: The fully qualified dedicated host group id used to provision agent node pool.
+  - name: --gpu-instance-profile
+    type: string
+    short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1155,7 +1190,8 @@ short-summary: Show the details for a node pool in the managed Kubernetes cluste
 
 helps['aks nodepool update'] = """
 type: command
-short-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count
+short-summary: Update a node pool properties.
+long-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count. When called with no optional arguments this attempts to move the node pool to its goal state without changing the current node pool configuration. This can be used to move out of a non succeeded state.
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
@@ -1183,7 +1219,7 @@ parameters:
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool.
+    short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
@@ -1191,6 +1227,8 @@ parameters:
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
+  - name: Reconcile the nodepool back to its current state.
+    text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Disable cluster-autoscaler for an existing cluster

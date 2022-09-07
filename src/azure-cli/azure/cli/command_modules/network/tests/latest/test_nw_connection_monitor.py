@@ -112,7 +112,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
         self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
 
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westeurope')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_creation(self, resource_group, resource_group_location):
         # create a V2 connection monitor with --location and TCP configuration
