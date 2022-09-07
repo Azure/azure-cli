@@ -101,7 +101,6 @@ class SBNamespaceMSITesting(ScenarioTest):
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 2
 
-
         namespace = self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
@@ -152,6 +151,4 @@ class SBNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
-
-
 

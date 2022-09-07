@@ -24,10 +24,6 @@ def cf_app_gateway_waf_policy(cli_ctx, _):
     return network_client_factory(cli_ctx).web_application_firewall_policies
 
 
-def cf_application_security_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).application_security_groups
-
-
 def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
@@ -148,24 +144,8 @@ def cf_public_ip_prefixes(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_prefixes
 
 
-def cf_route_tables(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_tables
-
-
-def cf_routes(cli_ctx, _):
-    return network_client_factory(cli_ctx).routes
-
-
 def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
-
-
-def cf_service_endpoint_policies(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_endpoint_policies
-
-
-def cf_service_endpoint_policy_definitions(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_endpoint_policy_definitions
 
 
 def cf_service_tags(cli_ctx, _):
@@ -236,18 +216,6 @@ def cf_dns_mgmt_record_sets(cli_ctx, _):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
 
 
-def cf_route_filters(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_filters
-
-
-def cf_route_filter_rules(cli_ctx, _):
-    return network_client_factory(cli_ctx).route_filter_rules
-
-
-def cf_service_community(cli_ctx, _):
-    return network_client_factory(cli_ctx).bgp_service_communities
-
-
 def cf_virtual_router(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_routers
 
@@ -270,22 +238,6 @@ def cf_virtual_router_peering(cli_ctx, _):
 
 def cf_bastion_hosts(cli_ctx, _):
     return network_client_factory(cli_ctx).bastion_hosts
-
-
-def cf_security_partner_providers(cli_ctx, _):
-    return network_client_factory(cli_ctx).security_partner_providers
-
-
-def cf_network_virtual_appliances(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_virtual_appliances
-
-
-def cf_virtual_appliance_skus(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_appliance_skus
-
-
-def cf_virtual_appliance_sites(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_appliance_sites
 
 
 def cf_custom_ip_prefixes(cli_ctx, _):

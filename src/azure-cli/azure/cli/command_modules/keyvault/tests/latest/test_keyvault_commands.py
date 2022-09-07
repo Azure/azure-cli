@@ -282,12 +282,11 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
-
-    def test_keyvault_hsm_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitest-mhsm-rg', location='uksouth')
+    def test_keyvault_hsm_mgmt(self, resource_group):
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
-            'rg': 'clitest-mhsm-rg',
-            'loc': 'eastus2',
+            'loc': 'uksouth',
             'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
         })
 
@@ -317,6 +316,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('[0].sku.name', 'Standard_B1'),
             self.check('length([0].properties.initialAdminObjectIds)', 1),
             self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
+            self.check('[0].properties.networkAcls.bypass', 'None'),
             self.exists('[0].properties.hsmUri')
         ]
 
@@ -325,15 +325,25 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[?name==\'{hsm_name}\'&&properties.location==\'{loc}\'&&properties.deletionDate]'),
         ]
 
-        self.cmd('group create -g {rg} -l {loc}'),
-        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin}')
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7')
+
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = self.create_temp_dir()
+
+        self.kwargs.update({
+            'cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'clitest-mhsm-SD.json').replace('\\', '\\\\')
+        })
+
+        self.cmd('keyvault security-domain download --hsm-name {hsm_name} --sd-wrapping-keys {cert0} {cert1} {cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
 
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None', checks=[
-            self.check('properties.networkAcls.bypass', 'None')
-        ])
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None')
 
         self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
@@ -349,7 +359,6 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
-        self.cmd('group delete -n {rg} --yes')
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
@@ -420,6 +429,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+        # test clear policy with set
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions',
+                 checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 0))
         # test policy for compound identity set
         result = self.cmd('ad app create --display-name {kv}').get_output_in_json()
         self.kwargs['app_id'] = result['appId']

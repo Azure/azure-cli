@@ -15,7 +15,8 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
+                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None,
+                         mi_user_assigned=None, encryption_config=None, minimum_tls_version=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -51,6 +52,9 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         parameter.encryption = Encryption()
         parameter.encryption.key_vault_properties = encryption_config
 
+    if minimum_tls_version:
+        parameter.minimum_tls_version = minimum_tls_version
+
     client.begin_create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -65,7 +69,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None):
+def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None, minimum_tls_version=None):
     from msrestazure.tools import parse_resource_id
 
     if tags is not None:
@@ -77,6 +81,9 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
 
     if capacity is not None:
         instance.sku.capacity = capacity
+
+    if minimum_tls_version:
+        instance.minimum_tls_version = minimum_tls_version
 
     if default_action:
         resourcegroup = parse_resource_id(instance.id)['resource_group']
@@ -618,6 +625,7 @@ def return_valid_duration(update_value, current_value=None):
     from datetime import timedelta
     from isodate import parse_duration
     from isodate import Duration
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         value_toreturn = update_value
@@ -625,7 +633,10 @@ def return_valid_duration(update_value, current_value=None):
         return current_value
 
     if iso8601pattern.match(value_toreturn):
-        time_duration = parse_duration(value_toreturn)
+        try:
+            time_duration = parse_duration(value_toreturn)
+        except:
+            raise InvalidArgumentValueError("Unable to parse provided ISO 8601 format duration %r" % value_toreturn)
 
         if isinstance(time_duration, timedelta):
             if time_duration <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
@@ -693,6 +704,22 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
         netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action=action))
 
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_networkrule_update(client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
+                           default_action=None):
+    networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if trusted_service_access_enabled is not None:
+        networkruleset.trusted_service_access_enabled = trusted_service_access_enabled
+
+    if public_network_access:
+        networkruleset.public_network_access = public_network_access
+
+    if default_action:
+        networkruleset.default_action = default_action
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, networkruleset)
 
 
 def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):

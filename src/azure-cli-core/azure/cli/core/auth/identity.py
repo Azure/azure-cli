@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import sys
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -94,7 +95,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return {
             "authority": self._msal_authority,
             "token_cache": Identity._msal_token_cache,
-            "http_cache": Identity._msal_http_cache
+            "http_cache": Identity._msal_http_cache,
+            # CP1 means we can handle claims challenges (CAE)
+            "client_capabilities": None if "AZURE_IDENTITY_DISABLE_CP1" in os.environ else ["CP1"]
         }
 
     @property
@@ -148,7 +151,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
-        logger.warning(flow["message"])
+        from azure.cli.core.style import print_styled_text, Style
+        print_styled_text((Style.WARNING, flow["message"]), file=sys.stderr)
         result = self._msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 

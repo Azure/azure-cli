@@ -6,13 +6,16 @@
 import os
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
 
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
-                " as 'MyRegistry.azurecr.io/hello-world'."
+                " as 'myregistry.azurecr.io/hello-world'."
+BAD_PERM_REPO_FQDN = "The positional parameter 'perm_repo_id' must be a fully qualified repository specifier such"\
+                     " as 'myregistry.azurecr.io/hello-world'. It may optionally specify a"\
+                     " tag such as 'myregistry.azurecr.io/hello-world:latest'."
 BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qualified"\
-                    " manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest' or"\
-                    " 'MyRegistry.azurecr.io/hello-world@sha256:abc123'."
+                    " manifest specifier such as 'myregistry.azurecr.io/hello-world:latest' or"\
+                    " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
 
 logger = get_logger(__name__)
 
@@ -128,6 +131,15 @@ def validate_repo_id(namespace):
             raise InvalidArgumentValueError(BAD_REPO_FQDN)
 
 
+def validate_permissive_repo_id(namespace):
+    if namespace.perm_repo_id:
+        perm_repo_id = namespace.perm_repo_id[0]
+        if '.' not in perm_repo_id or '/' not in perm_repo_id:
+            raise InvalidArgumentValueError(BAD_PERM_REPO_FQDN)
+        if '@' in perm_repo_id:
+            raise InvalidArgumentValueError(BAD_PERM_REPO_FQDN)
+
+
 def validate_manifest_id(namespace):
     if namespace.manifest_id:
         manifest_id = namespace.manifest_id[0]
@@ -140,3 +152,8 @@ def validate_repository(namespace):
         if ':' in namespace.repository:
             raise InvalidArgumentValueError("Parameter 'name' refers to a repository and"
                                             " should not include a tag or digest.")
+
+
+def validate_docker_file_path(docker_file_path):
+    if not os.path.isfile(docker_file_path):
+        raise FileOperationError("Unable to find '{}'.".format(docker_file_path))

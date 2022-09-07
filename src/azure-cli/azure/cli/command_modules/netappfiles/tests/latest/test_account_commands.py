@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "southcentralusstage"
+ADLOCATION = "northeurope"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -105,7 +106,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_active_directory(self):
         self.kwargs.update({
-            'loc': LOCATION,
+            'loc': ADLOCATION,
             'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
             'ad_name': 'cli-ad-name',
             'kdc_ip': '172.16.254.1',
@@ -154,7 +155,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
                      self.check('activeDirectories[0].adName', '{ad_name}'),
                      self.check('activeDirectories[0].aesEncryption', False),
                      self.check('activeDirectories[0].ldapSigning', '{ldap}'),
-                     self.check('activeDirectories[0].allowLocalNFSUsersWithLdap', '{ldap_users}')
+                     #self.check('activeDirectories[0].allowLocalNFSUsersWithLdap', '{ldap_users}')
                  ])
 
         # remove active directory using the previously obtained details
@@ -189,4 +190,14 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account update -g {rg} -a {acc2_name} --encryption {encryption}", checks=[
             self.check('name', '{acc2_name}'),
             self.check('encryption.keySource', '{encryption}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus')
+    def test_create_account_with_no_location(self):
+        self.kwargs.update({
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24)
+        })
+        self.cmd("az netappfiles account create -g {rg} -a {acc_name}")
+        self.cmd("az netappfiles account show --resource-group {rg} -a {acc_name}", checks=[
+            self.check('location', 'eastus')
         ])

@@ -23,7 +23,8 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_gossip_certificates,
     validate_client_certificates,
     validate_seednodes,
-    validate_node_count)
+    validate_node_count,
+    validate_client_encryption_policy)
 
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation, CreateDatabaseRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
@@ -35,6 +36,9 @@ SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consiste
 """
 
 SQL_UNIQUE_KEY_POLICY_EXAMPLE = """--unique-key-policy "{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"
+"""
+
+SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE = """--cep "{\\"includedPaths\\": [{\\"path\\": \\"/path1\\",\\"clientEncryptionKeyId\\": \\"key1\\",\\"encryptionAlgorithm\\": \\"AEAD_AES_256_CBC_HMAC_SHA256\\",\\"encryptionType\\": \\"Deterministic\\"}],\\"policyFormatVersion\\": 2}"
 """
 
 SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE = """--conflict-resolution-policy "{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"
@@ -129,6 +133,7 @@ def load_arguments(self, _):
         c.argument('collection_id', options_list=['--collection-name', '-c'], help='Collection Name')
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
+        c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
         c.argument('default_ttl', type=int, help='Default TTL. Provide 0 to disable.')
 
@@ -182,6 +187,7 @@ def load_arguments(self, _):
         c.argument('partition_key_version', type=int, options_list=['--partition-key-version'], help='The version of partition key.')
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
+        c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
         c.argument('unique_key_policy', options_list=['--unique-key-policy', '-u'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Unique Key Policy, you can enter it as a string or as a file, e.g., --unique-key-policy @policy-file.json or ' + SQL_UNIQUE_KEY_POLICY_EXAMPLE)
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
@@ -265,6 +271,7 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
         c.argument('throughput', help='The throughput of Gremlin graph (RU/s). Default value is 400. Omit this parameter if the database has shared throughput unless the graph should have dedicated throughput.')
+        c.argument('analytical_storage_ttl', type=int, help='Analytical TTL, when analytical storage is enabled.')
 
 # Table
     with self.argument_context('cosmosdb table') as c:
@@ -508,3 +515,11 @@ def load_arguments(self, _):
     # Managed Cassandra Datacenter
     with self.argument_context('managed-cassandra datacenter list') as c:
         c.argument('cluster_name', options_list=['--cluster-name', '-c'], help="Cluster Name", required=True)
+
+    # ComputeV2 Services
+    with self.argument_context('cosmosdb service') as c:
+        c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the Cosmos DB database account.', id_part=None)
+        c.argument('resource_group_name', completer=None, options_list=['--resource-group-name', '-g'], help='Name of the resource group of the database account.', id_part=None)
+        c.argument('service_name', options_list=['--name', '-n'], help="Service Name.")
+        c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
+        c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")

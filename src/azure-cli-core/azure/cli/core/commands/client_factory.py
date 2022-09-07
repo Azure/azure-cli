@@ -168,11 +168,11 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
 
     # Enable CAE support in mgmt SDK
-    from azure.core.pipeline.policies import BearerTokenCredentialPolicy
+    from azure.mgmt.core.policies import ARMChallengeAuthenticationPolicy
 
     # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
     scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
-    policy = BearerTokenCredentialPolicy(cred, *scopes)
+    policy = ARMChallengeAuthenticationPolicy(cred, *scopes)
 
     client_kwargs['credential_scopes'] = scopes
     client_kwargs['authentication_policy'] = policy

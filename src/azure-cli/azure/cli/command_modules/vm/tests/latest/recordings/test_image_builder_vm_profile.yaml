@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001","name":"img_tmpl_vmprofile000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-12T19:44:28Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001","name":"img_tmpl_vmprofile000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-01T02:26:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:31 GMT
+      - Thu, 01 Sep 2022 02:26:31 GMT
       expires:
       - '-1'
       pragma:
@@ -44,7 +44,7 @@ interactions:
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet_000004", "properties":
-      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Disabled",
       "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
@@ -56,30 +56,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '304'
+      - '305'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002\",\r\n
-        \ \"etag\": \"W/\\\"a77b6cb8-21dc-497b-8c77-88dd6ed2252a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"f5d33b97-e0a9-48bb-9264-9b219edb990d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"7fd8b31a-1ad9-4391-a207-6af888ceebfd\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"9b81cedd-c54b-4e79-9260-a2e890676b74\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet_000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002/subnets/subnet_000004\",\r\n
-        \       \"etag\": \"W/\\\"a77b6cb8-21dc-497b-8c77-88dd6ed2252a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f5d33b97-e0a9-48bb-9264-9b219edb990d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -87,15 +87,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/022ebc32-e7e0-424c-9c91-3e11860c5667?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f71976e5-fc29-49e1-b4b4-d5689a66c28a?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1331'
+      - '1332'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:35 GMT
+      - Thu, 01 Sep 2022 02:26:37 GMT
       expires:
       - '-1'
       pragma:
@@ -108,9 +108,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5ec4f384-0aab-4afc-943a-c221151b5557
+      - 06cfa305-187e-4cc0-a57a-23bb99280f25
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -128,9 +128,9 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/022ebc32-e7e0-424c-9c91-3e11860c5667?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f71976e5-fc29-49e1-b4b4-d5689a66c28a?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -142,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:39 GMT
+      - Thu, 01 Sep 2022 02:26:40 GMT
       expires:
       - '-1'
       pragma:
@@ -159,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bb89c865-f239-41db-af2a-55c9eeeec346
+      - c148ca08-abb3-4e85-b837-610729348e45
     status:
       code: 200
       message: OK
@@ -177,24 +177,24 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002\",\r\n
-        \ \"etag\": \"W/\\\"3d3ca5d7-4371-441d-9600-60148f7970a6\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"71551f12-30a4-419d-a89f-663c91981227\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"7fd8b31a-1ad9-4391-a207-6af888ceebfd\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"9b81cedd-c54b-4e79-9260-a2e890676b74\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet_000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002/subnets/subnet_000004\",\r\n
-        \       \"etag\": \"W/\\\"3d3ca5d7-4371-441d-9600-60148f7970a6\\\"\",\r\n
+        \       \"etag\": \"W/\\\"71551f12-30a4-419d-a89f-663c91981227\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -202,13 +202,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1333'
+      - '1334'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:39 GMT
+      - Thu, 01 Sep 2022 02:26:40 GMT
       etag:
-      - W/"3d3ca5d7-4371-441d-9600-60148f7970a6"
+      - W/"71551f12-30a4-419d-a89f-663c91981227"
       expires:
       - '-1'
       pragma:
@@ -225,7 +225,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d67c03e5-d3c9-4e5b-b7ea-1b75bff7d411
+      - ecd392df-49aa-478f-9ecc-acf8ba1cdae4
     status:
       code: 200
       message: OK
@@ -243,12 +243,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001","name":"img_tmpl_vmprofile000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-12T19:44:28Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001","name":"img_tmpl_vmprofile000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-01T02:26:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -257,7 +257,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:41 GMT
+      - Thu, 01 Sep 2022 02:26:41 GMT
       expires:
       - '-1'
       pragma:
@@ -289,12 +289,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-msi/6.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-msi/6.1.0 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003?api-version=2021-09-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003?api-version=2022-01-31-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003","name":"id_000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"a0fc92a6-96e2-4af7-8a1e-6df353ffb28a","clientId":"571cc4f1-a409-46c3-9b2f-35c2d2180a87"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003","name":"id_000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"7e3e3168-24b4-425b-8a09-fa18fd29392d","clientId":"afd3d0ac-a2a2-453c-a06b-62fec961d76c"}}'
     headers:
       cache-control:
       - no-cache
@@ -303,7 +303,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:46 GMT
+      - Thu, 01 Sep 2022 02:26:48 GMT
       expires:
       - '-1'
       location:
@@ -315,7 +315,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1190'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -334,12 +334,12 @@ interactions:
       - -g -n --image-source --managed-image-destinations --identity --subnet --proxy-vm-size
         --build-vm-identities
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001","name":"img_tmpl_vmprofile000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-12T19:44:28Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001","name":"img_tmpl_vmprofile000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-01T02:26:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -348,7 +348,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:47 GMT
+      - Thu, 01 Sep 2022 02:26:49 GMT
       expires:
       - '-1'
       pragma:
@@ -377,7 +377,7 @@ interactions:
       - -g -n --image-source --managed-image-destinations --identity --subnet --proxy-vm-size
         --build-vm-identities
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -412,11 +412,16 @@ interactions:
         Central\",\"regionalDisplayName\":\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Canada\",\"longitude\":\"-79.383\",\"latitude\":\"43.653\",\"physicalLocation\":\"Toronto\",\"pairedRegion\":[{\"name\":\"canadaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\",\"name\":\"francecentral\",\"displayName\":\"France
         Central\",\"regionalDisplayName\":\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\":[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\",\"name\":\"germanywestcentral\",\"displayName\":\"Germany
         West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"displayName\":\"Norway
-        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
+        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
+        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
+        North\",\"regionalDisplayName\":\"(Middle East) UAE North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle
+        East\",\"longitude\":\"55.316666\",\"latitude\":\"25.266666\",\"physicalLocation\":\"Dubai\",\"pairedRegion\":[{\"name\":\"uaecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
         South\",\"regionalDisplayName\":\"(South America) Brazil South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South
         America\",\"longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao
         Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\",\"name\":\"eastus2euap\",\"displayName\":\"East
-        US 2 EUAP\",\"regionalDisplayName\":\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"pairedRegion\":[{\"name\":\"centraluseuap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralusstage\",\"name\":\"centralusstage\",\"displayName\":\"Central
+        US 2 EUAP\",\"regionalDisplayName\":\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"pairedRegion\":[{\"name\":\"centraluseuap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\",\"name\":\"qatarcentral\",\"displayName\":\"Qatar
+        Central\",\"regionalDisplayName\":\"(Middle East) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle
+        East\",\"longitude\":\"51.439327\",\"latitude\":\"25.551462\",\"physicalLocation\":\"Doha\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralusstage\",\"name\":\"centralusstage\",\"displayName\":\"Central
         US (Stage)\",\"regionalDisplayName\":\"(US) Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstage\",\"name\":\"eastusstage\",\"displayName\":\"East
         US (Stage)\",\"regionalDisplayName\":\"(US) East US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2stage\",\"name\":\"eastus2stage\",\"displayName\":\"East
         US 2 (Stage)\",\"regionalDisplayName\":\"(US) East US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralusstage\",\"name\":\"northcentralusstage\",\"displayName\":\"North
@@ -424,7 +429,7 @@ interactions:
         Central US (Stage)\",\"regionalDisplayName\":\"(US) South Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westusstage\",\"name\":\"westusstage\",\"displayName\":\"West
         US (Stage)\",\"regionalDisplayName\":\"(US) West US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2stage\",\"name\":\"westus2stage\",\"displayName\":\"West
         US 2 (Stage)\",\"regionalDisplayName\":\"(US) West US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asia\",\"name\":\"asia\",\"displayName\":\"Asia\",\"regionalDisplayName\":\"Asia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asiapacific\",\"name\":\"asiapacific\",\"displayName\":\"Asia
-        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
+        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/singapore\",\"name\":\"singapore\",\"displayName\":\"Singapore\",\"regionalDisplayName\":\"Singapore\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
         Africa\",\"regionalDisplayName\":\"South Africa\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerland\",\"name\":\"switzerland\",\"displayName\":\"Switzerland\",\"regionalDisplayName\":\"Switzerland\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uae\",\"name\":\"uae\",\"displayName\":\"United
         Arab Emirates\",\"regionalDisplayName\":\"United Arab Emirates\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uk\",\"name\":\"uk\",\"displayName\":\"United
         Kingdom\",\"regionalDisplayName\":\"United Kingdom\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/unitedstates\",\"name\":\"unitedstates\",\"displayName\":\"United
@@ -437,10 +442,7 @@ interactions:
         Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-87.6278\",\"latitude\":\"41.8819\",\"physicalLocation\":\"Illinois\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\",\"name\":\"westus\",\"displayName\":\"West
         US\",\"regionalDisplayName\":\"(US) West US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-122.417\",\"latitude\":\"37.783\",\"physicalLocation\":\"California\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\",\"name\":\"jioindiawest\",\"displayName\":\"Jio
         India West\",\"regionalDisplayName\":\"(Asia Pacific) Jio India West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
-        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
-        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
-        North\",\"regionalDisplayName\":\"(Middle East) UAE North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
-        East\",\"longitude\":\"55.316666\",\"latitude\":\"25.266666\",\"physicalLocation\":\"Dubai\",\"pairedRegion\":[{\"name\":\"uaecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\",\"name\":\"centraluseuap\",\"displayName\":\"Central
+        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\",\"name\":\"centraluseuap\",\"displayName\":\"Central
         US EUAP\",\"regionalDisplayName\":\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\",\"name\":\"westcentralus\",\"displayName\":\"West
         Central US\",\"regionalDisplayName\":\"(US) West Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-110.234\",\"latitude\":\"40.890\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"westus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\",\"name\":\"southafricawest\",\"displayName\":\"South
         Africa West\",\"regionalDisplayName\":\"(Africa) South Africa West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Africa\",\"longitude\":\"18.843266\",\"latitude\":\"-34.075691\",\"physicalLocation\":\"Cape
@@ -472,17 +474,19 @@ interactions:
         East\",\"longitude\":\"54.366669\",\"latitude\":\"24.466667\",\"physicalLocation\":\"Abu
         Dhabi\",\"pairedRegion\":[{\"name\":\"uaenorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\",\"name\":\"brazilsoutheast\",\"displayName\":\"Brazil
         Southeast\",\"regionalDisplayName\":\"(South America) Brazil Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
-        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\",\"name\":\"qatarcentral\",\"displayName\":\"Qatar
-        Central\",\"regionalDisplayName\":\"(Europe) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"51.439327\",\"latitude\":\"25.551462\",\"physicalLocation\":\"Doha\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}}]}"
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusslv\",\"name\":\"eastusslv\",\"displayName\":\"East
+        US SLV\",\"regionalDisplayName\":\"(South America) East US SLV\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Silverstone\",\"pairedRegion\":[{\"name\":\"eastusslv\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusslv\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\",\"name\":\"polandcentral\",\"displayName\":\"Poland
+        Central\",\"regionalDisplayName\":\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"14.6512702\",\"latitude\":\"51.8685079\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"}]}}]}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29683'
+      - '30880'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:44:50 GMT
+      - Thu, 01 Sep 2022 02:26:51 GMT
       expires:
       - '-1'
       pragma:
@@ -501,8 +505,8 @@ interactions:
       "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003":
       {}}}, "properties": {"source": {"type": "PlatformImage", "publisher": "Canonical",
       "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "18.04.201808140"},
-      "customize": [], "distribute": [{"type": "ManagedImage", "runOutputName": "image_1",
-      "imageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Compute/images/image_1",
+      "distribute": [{"type": "ManagedImage", "runOutputName": "image_1", "imageId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Compute/images/image_1",
       "location": "westus"}], "vmProfile": {"userAssignedIdentities": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003"],
       "vnetConfig": {"subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002/subnets/subnet_000004",
       "proxyVmSize": "Standard_A1_v1"}}}}'
@@ -516,16 +520,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1121'
+      - '1104'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --image-source --managed-image-destinations --identity --subnet --proxy-vm-size
         --build-vm-identities
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-imagebuilder/1.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005?api-version=2022-02-14
   response:
     body:
       string: "{\n \"properties\": {\n  \"source\": {\n   \"exactVersion\": \"18.04.201808140\",\n
@@ -538,22 +542,22 @@ interactions:
         0,\n  \"vmProfile\": {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0,\n   \"userAssignedIdentities\":
         [\n    \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003\"\n
         \  ],\n   \"vnetConfig\": {\n    \"subnetId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002/subnets/subnet_000004\",\n
-        \   \"proxyVmSize\": \"Standard_A1_v1\"\n   }\n  }\n },\n \"identity\": {\n
-        \ \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\": {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003\":
-        {}\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005\",\n
-        \"name\": \"ib_000005\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
-        \"location\": \"westus\",\n \"tags\": {}\n}"
+        \   \"proxyVmSize\": \"Standard_A1_v1\"\n   }\n  },\n  \"stagingResourceGroup\":
+        \"\",\n  \"exactStagingResourceGroup\": \"\"\n },\n \"identity\": {\n  \"type\":
+        \"UserAssigned\",\n  \"userAssignedIdentities\": {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003\":
+        {}\n  }\n },\n \"tags\": {},\n \"location\": \"westus\",\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005\",\n
+        \"name\": \"ib_000005\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/c26ad36f-32ec-426f-89bc-5c0da2feaad9?api-version=2021-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/cd249ee6-83e2-49d0-b790-1443c349b843?api-version=2022-02-14
       cache-control:
       - no-cache
       content-length:
-      - '1626'
+      - '1691'
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 19:44:58 GMT
+      - Thu, 01 Sep 2022 02:26:59 GMT
       expires:
       - '-1'
       pragma:
@@ -565,7 +569,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -584,14 +588,14 @@ interactions:
       - -g -n --image-source --managed-image-destinations --identity --subnet --proxy-vm-size
         --build-vm-identities
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-imagebuilder/1.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/c26ad36f-32ec-426f-89bc-5c0da2feaad9?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/cd249ee6-83e2-49d0-b790-1443c349b843?api-version=2022-02-14
   response:
     body:
-      string: "{\n \"name\": \"C26AD36F-32EC-426F-89BC-5C0DA2FEAAD9\",\n \"status\":
-        \"Failed\",\n \"startTime\": \"2022-05-12T19:44:57.7566666Z\",\n \"endTime\":
-        \"2022-05-12T19:45:09.4412704Z\",\n \"error\": {\n  \"code\": \"Unauthorized\",\n
+      string: "{\n \"name\": \"CD249EE6-83E2-49D0-B790-1443C349B843\",\n \"status\":
+        \"Failed\",\n \"startTime\": \"2022-09-01T02:26:58.5013779Z\",\n \"endTime\":
+        \"2022-09-01T02:27:09.8292451Z\",\n \"error\": {\n  \"code\": \"Unauthorized\",\n
         \ \"message\": \"Not authorized to access the resource: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002.
         Please check the user assigned identity has the correct permissions. For more
         details, go to https://aka.ms/azvmimagebuilderts.\"\n }\n}"
@@ -603,7 +607,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 19:45:29 GMT
+      - Thu, 01 Sep 2022 02:27:30 GMT
       expires:
       - '-1'
       pragma:
@@ -635,9 +639,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-imagebuilder/1.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005?api-version=2022-02-14
   response:
     body:
       string: "{\n \"properties\": {\n  \"source\": {\n   \"exactVersion\": \"18.04.201808140\",\n
@@ -654,21 +658,23 @@ interactions:
         0,\n  \"vmProfile\": {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0,\n   \"userAssignedIdentities\":
         [\n    \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003\"\n
         \  ],\n   \"vnetConfig\": {\n    \"subnetId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.Network/virtualNetworks/vnet_000002/subnets/subnet_000004\",\n
-        \   \"proxyVmSize\": \"Standard_A1_v1\"\n   }\n  }\n },\n \"identity\": {\n
-        \ \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\": {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003\":
-        {\n    \"principalId\": \"a0fc92a6-96e2-4af7-8a1e-6df353ffb28a\",\n    \"clientId\":
-        \"571cc4f1-a409-46c3-9b2f-35c2d2180a87\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005\",\n
-        \"name\": \"ib_000005\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
-        \"location\": \"westus\",\n \"tags\": {}\n}"
+        \   \"proxyVmSize\": \"Standard_A1_v1\"\n   }\n  },\n  \"stagingResourceGroup\":
+        \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_vmprofilez4tbgrjjmly23pyizpzqnc_e58102ba-9388-4980-b22f-2c9075596f9a\"\n
+        },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
+        {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_vmprofile000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id_000003\":
+        {\n    \"principalId\": \"7e3e3168-24b4-425b-8a09-fa18fd29392d\",\n    \"clientId\":
+        \"afd3d0ac-a2a2-453c-a06b-62fec961d76c\"\n   }\n  }\n },\n \"tags\": {},\n
+        \"location\": \"westus\",\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_vmprofile000001/providers/Microsoft.VirtualMachineImages/imageTemplates/ib_000005\",\n
+        \"name\": \"ib_000005\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2141'
+      - '2353'
       content-type:
       - application/json
       date:
-      - Thu, 12 May 2022 19:45:32 GMT
+      - Thu, 01 Sep 2022 02:27:31 GMT
       expires:
       - '-1'
       pragma:

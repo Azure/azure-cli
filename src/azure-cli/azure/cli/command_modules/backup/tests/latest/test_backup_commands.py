@@ -24,10 +24,10 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
-    @StorageAccountPreparer(location="southeastasia")
+    @StorageAccountPreparer(location="eastasia")
     def test_backup_scenario(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -71,7 +71,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastasia")
+    @ResourceGroupPreparer(location="eastus")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
     def test_backup_vault(self, resource_group, resource_group_location, vault1, vault2):
@@ -87,7 +87,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('name', '{vault3}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
-            self.check('properties.provisioningState', 'Succeeded')
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
+            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
@@ -151,6 +153,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.enhancedSecurityState", 'Enabled'),
         ])
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --classic-alerts Disable --job-failure-alerts Disable', checks=[
+            self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
+            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
+        ])
+
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 
         self.cmd('backup vault list', checks=[
@@ -160,7 +167,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -194,7 +201,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
@@ -288,7 +295,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -372,7 +379,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
@@ -396,7 +403,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp1_json['id'].lower())
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
@@ -451,7 +458,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(protection_check == '')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
@@ -515,13 +522,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="southeastasia")
-    @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer(location="southeastasia")
+    @StorageAccountPreparer(location="eastasia")
     def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -627,6 +634,58 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastasia")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="eastasia")
+    @ResourceGroupPreparer(parameter_name="storage_account_resource_group", location="eastasia")
+    @VaultPreparer(soft_delete=False)
+    @VMPreparer()
+    @ItemPreparer()
+    @RPPreparer()
+    @StorageAccountPreparer(location="eastasia", resource_group_parameter_name="storage_account_resource_group")
+    def test_backup_restore_when_storage_in_different_rg(self, resource_group, target_resource_group, vault_name, vm_name, storage_account, storage_account_resource_group):
+
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group,
+            'sa': storage_account,
+            'sa_rg': storage_account_resource_group,
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'vnet_name': self.create_random_name('clitest-vnet', 30),
+            'subnet_name': self.create_random_name('clitest-subnet', 30),
+            'target_vm_name': self.create_random_name('clitest-tvm', 15)
+        })
+
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        # Trigger Restore Disks
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --storage-account-resource-group {sa_rg}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        trigger_restore_job_details = self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        property_bag = trigger_restore_job_details['properties']['extendedInfo']['propertyBag']
+        self.assertEqual(property_bag['Target Storage Account Name'], storage_account)
+
+        self.kwargs['container'] = property_bag['Config Blob Container Name']
+        self.kwargs['blob'] = property_bag['Config Blob Name']
+
+        self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}', checks=self.check("exists", True))
+
 
     #@AllowLargeResponse()
     #@ResourceGroupPreparer(location="centraluseuap")
@@ -670,12 +729,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     #        self.check("properties.status", "Completed")
     #    ])
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer(location="southeastasia")
+    @StorageAccountPreparer(location="eastasia")
     def test_backup_job(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -748,10 +807,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
-    @StorageAccountPreparer(location="southeastasia")
+    @StorageAccountPreparer(location="eastasia")
     def test_backup_disk_exclusion(self, resource_group, vault_name, vm_name, storage_account):
         self.kwargs.update({
             'vault': vault_name,
@@ -843,12 +902,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer(location="southeastasia")
+    @StorageAccountPreparer(location="eastasia")
     def test_backup_archive (self, resource_group, vault_name, vm_name, storage_account):
         self.kwargs.update({
             'vault': vault_name,

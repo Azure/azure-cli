@@ -605,6 +605,35 @@ examples:
         az functionapp deployment user set --user-name MyUserName
 """
 
+helps['functionapp deployment github-actions'] = """
+type: group
+short-summary: Configure GitHub Actions for a functionapp
+"""
+
+helps['functionapp deployment github-actions add'] = """
+type: command
+short-summary: Add a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified functionapp.
+examples:
+  - name: Add GitHub Actions to a specified repository, providing personal access token
+    text: >
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
+  - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+"""
+
+helps['functionapp deployment github-actions remove'] = """
+type: command
+short-summary: Remove and disconnect the GitHub Actions workflow file from the specified repository.
+examples:
+  - name: Remove GitHub Actions from a specified repository, providing personal access token
+    text: >
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
+  - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+"""
+
 helps['functionapp function'] = """
 type: group
 short-summary: Manage function app functions.
@@ -1441,15 +1470,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime using '|' delimiter. (not recommended for powershell; use the ":" delimiter instead)
-    text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
-  - name: Create a web app with a Java 11 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|12LTS" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -2015,10 +2041,7 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter (not recommended for powershell; use the ":" delimiter instead)
-    text: >
-        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
-  - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime
     text: >
         az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
@@ -2603,6 +2626,26 @@ helps['staticwebapp functions show'] = """
     examples:
     - name: Show static app functions.
       text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
+"""
+
+helps['staticwebapp enterprise-edge'] = """
+    type: group
+    short-summary: Manage the Azure Front Door CDN for static webapps. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge enable'] = """
+    type: command
+    short-summary: Enable the Azure Front Door CDN for a static webapp. Enabling enterprise-grade edge requires re-registration for the Azure Front Door Microsoft.CDN resource provider. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge disable'] = """
+    type: command
+    short-summary: Disable the Azure Front Door CDN for a static webapp. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge show'] = """
+    type: command
+    short-summary: Show the status (Enabled, Disabled, Enabling, Disabling) of the Azure Front Door CDN for a webapp. For optimal experience and availability please check our documentation https://aka.ms/swaedge
 """
 
 helps['webapp deploy'] = """

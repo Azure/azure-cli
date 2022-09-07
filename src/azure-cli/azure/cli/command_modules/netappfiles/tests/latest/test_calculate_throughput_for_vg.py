@@ -87,4 +87,3 @@ def test_log_backup_volume_throughput_is_always_250():
     assert throughput == 250
     throughput = calculate_throughput(10248, VolumeType.LOG_BACKUP)
     assert throughput == 250
-

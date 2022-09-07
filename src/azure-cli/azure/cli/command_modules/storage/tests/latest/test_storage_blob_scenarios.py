@@ -204,6 +204,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
                                 JMESPathCheck('properties.lease.state', 'leased'),
                                 JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage blob metadata update -n {} -c {} --metadata key1=value1 --lease-id {}',
+                         account_info, b, c, new_lease_id)
+        self.storage_cmd('storage blob show -n {} -c {} --lease-id {}', account_info, b, c, new_lease_id)\
+            .assert_with_checks(JMESPathCheck('metadata.key1', 'value1'))
         self.storage_cmd('storage blob lease break -b {} -c {} --lease-break-period 30',
                          account_info, b, c)
         self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
@@ -597,6 +601,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_name = self.create_random_name(prefix='blob', length=24)
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --content-md5 {}', account_info,
                          container, local_file, blob_name, md5_base64_encode)
+        self.storage_cmd('storage blob update -c {} -n {} --content-md5 0000', account_info, container, blob_name)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -658,6 +663,22 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                              container, blob_name).\
                 assert_with_checks(JMESPathCheck("properties.contentSettings.contentType", contentType))
             os.remove(path)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_upload_socket_timeout_scenarios(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        container = self.create_container(account_info)
+        local_file = self.create_temp_file(128)
+
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --socket-timeout 50', account_info,
+                         container, local_file, blob_name)
+        self.storage_cmd('storage blob exists -c {} -n {}', account_info,
+                         container, blob_name).\
+            assert_with_checks(JMESPathCheck("exists", True))
+
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')

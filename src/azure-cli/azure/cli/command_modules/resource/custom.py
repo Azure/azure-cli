@@ -10,7 +10,6 @@ from collections import OrderedDict
 import codecs
 import json
 import os
-import platform
 import re
 import ssl
 import sys
@@ -909,24 +908,7 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
     if no_pretty_print:
         return what_if_result
 
-    try:
-        if cli_ctx.enable_color:
-            # Disabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-            # is using. Unfortunately, the colors that colorama supports are very limited, which doesn't meet our needs.
-            from colorama import deinit
-            deinit()
-
-            # Enable virtual terminal mode for Windows console so it processes color codes.
-            if platform.system() == "Windows":
-                from ._win_vt import enable_vt_mode
-                enable_vt_mode()
-
-        print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
-    finally:
-        if cli_ctx.enable_color:
-            from colorama import init
-            init()
-
+    print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
     return what_if_result
 
 
@@ -3725,6 +3707,29 @@ def show_bicep_cli_version(cmd):
 
 def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
+
+
+def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation()
+
+    minimum_supported_version = "0.7.4"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["generate-params", file]
+        if no_restore:
+            args += ["--no-restore"]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+
+        output = run_bicep_command(args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep generate-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def create_resourcemanager_privatelink(

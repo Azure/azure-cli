@@ -153,7 +153,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '12.13.0'),
+            JMESPathCheck('[0].value', '~14'),
         ])
 
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -178,7 +178,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|12LTS"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|16LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -340,19 +340,19 @@ class BackupWithName(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_config_backup_restore(self, resource_group):
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    def test_config_backup_restore(self, resource_group, storage_account_info):
         plan = self.create_random_name(prefix='plan-backup', length=24)
         webapp = self.create_random_name(prefix='backup-webapp', length=24)
-        storage_account = self.create_random_name(prefix='backup', length=24)
         container = self.create_random_name(prefix='backupcontainer', length=24)
         backup_name = self.create_random_name(prefix='backup-name', length=24)
 
         expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
         slot_name = "slot"
 
-        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --sku Standard_LRS')
-        self.cmd(f'storage container create --account-name {storage_account} --name {container}')
-        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv').output.strip()
+        storage_account, account_key = storage_account_info
+        self.cmd(f'storage container create --account-name {storage_account} --name {container} --account-key {account_key}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv --account-key {account_key}').output.strip()
         sasurl = f'\"https://{storage_account}.blob.core.windows.net/{container}?{sastoken}\"'
 
         self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')
@@ -378,7 +378,7 @@ class AppServiceLogTest(ScenarioTest):
             prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|12LTS"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|16LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -605,7 +605,7 @@ class WebappConfigureTest(ScenarioTest):
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.2'),
+            JMESPathCheck('phpVersion', '7.4'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
@@ -614,7 +614,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('http20Enabled', True),
             JMESPathCheck('ftpsState', 'Disabled')]
 
-        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.2 '
+        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
                  '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
@@ -1047,7 +1047,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         if platform.system() == "Windows":
             return
 
-        runtime = 'node|12-lts'
+        runtime = 'node|16-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
@@ -1065,7 +1065,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
-        runtime = 'node|12-lts'
+        runtime = 'node|16-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-ssh-plan', length=40)
         webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
@@ -1490,7 +1490,6 @@ class WebappSSLCertTest(ScenarioTest):
 
 
 class WebappSSLImportCertTest(ScenarioTest):
-    @unittest.skip("Flaky test")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
     def test_webapp_ssl_import(self, resource_group, key_vault):
@@ -1523,7 +1522,6 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), cert_thumbprint)
         ])
 
-    @unittest.skip("Flaky test")
     @ResourceGroupPreparer(parameter_name='kv_resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_ssl_import_crossrg(self, resource_group, kv_resource_group):
@@ -1666,12 +1664,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
-            JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'ZipDeploy'),
-            JMESPathCheck('message', 'Created via a push deployment'),
-            JMESPathCheck('complete', True)
-        ])
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
 
 class WebappImplictIdentityTest(ScenarioTest):
@@ -2337,13 +2330,12 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].id', deployment_1['id']),
         ])
 
-        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 2)
         ])
@@ -2475,6 +2467,34 @@ class TunnelProxyTest(unittest.TestCase):
         http = get_pool_manager('https://scm.azurewebsites.net')
 
         self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_NONE')
+
+
+class WebappSlotTest(ScenarioTest):
+    @live_only()  # Uses storage account keys, so must be live_only to not fail credscan
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_slot_create_from_configuration_source(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
+        storage_account = self.create_random_name(prefix='storage', length=24)
+        container = self.create_random_name(prefix='container', length=24)
+        store_id = "store"
+        store_type = "AzureBlob"
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1 --is-linux')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_name} --plan {plan} --runtime "python|3.9"')
+        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --location {LINUX_ASP_LOCATION_WEBAPP}')
+        self.cmd(f"storage container create -n {container} -g {resource_group} --account-name {storage_account}")
+        key = self.cmd(f"storage account keys list -n {storage_account}").get_output_in_json()[0]["value"]
+        self.cmd(f'webapp config storage-account add -g {resource_group} -n {webapp_name} -k {key} -a {storage_account} -i {store_id} --sn {container} -t {store_type}')
+
+        self.cmd(f'webapp deployment slot create -g {resource_group} -n {webapp_name} -s "slot" --configuration-source {webapp_name}')
+
+        self.cmd(f'webapp show -g {resource_group} -n {webapp_name} -s "slot"', checks=[
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.accessKey", None),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.accountName", storage_account),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.state", "Ok"),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.type", store_type),
+        ])
 
 
 if __name__ == '__main__':

@@ -13,11 +13,12 @@ import uuid
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
+from azure.cli.core.intercept_survey import prompt_survey_message
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.37.0"
+__version__ = "2.40.0"
 
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
@@ -117,6 +118,11 @@ finally:
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning("Auto upgrade failed. %s", str(ex))
         telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
+
+    try:
+        prompt_survey_message(az_cli)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug("Intercept survey prompt failed. %s", str(ex))
 
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))

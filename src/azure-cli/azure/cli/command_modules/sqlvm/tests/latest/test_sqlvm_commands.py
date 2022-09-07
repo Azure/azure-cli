@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import string
 from azure.cli.core.azclierror import (
     RequiredArgumentMissingError
 )
@@ -20,7 +21,6 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from time import sleep
 
 
 # Constants
@@ -65,8 +65,6 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class DomainPreparer(AbstractPreparer, SingleValueReplacer):
-    import string
-
     def __init__(self, name_prefix=sqlvm_domain_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='domainvm',
                  resource_group_parameter_name='resource_group', skip_delete=True):
@@ -79,8 +77,11 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
         self.skip_delete = skip_delete
 
     def id_generator(self, size=6, chars=string.ascii_lowercase + string.digits):
+        '''
+        dns name must conform to the following regular expression: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$.'}
+        '''
         import random
-        return ''.join(random.choice(chars) for _ in range(size))
+        return random.choice(string.ascii_lowercase) + ''.join(random.choice(chars) for _ in range(size))
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
