@@ -24,7 +24,7 @@ class Update(AAZCommand):
         az network traffic-manager profile update --name MyTmProfile --resource-group MyResourceGroup --status Enabled
 
     :example: Update a traffic manager profile.
-        az network traffic-manager profile update -n MyTmProfile -g MyResourceGroup --status-code-ranges [{{min:200,max:204}}] --custom-headers  [{{name:foo,value:doo}},{{name:test,value:best}}]
+        az network traffic-manager profile update -n MyTmProfile -g MyResourceGroup --status-code-ranges [{min:200,max:204}] --custom-headers  [{name:foo,value:doo},{name:test,value:best}]
     """
 
     _aaz_info = {
@@ -100,13 +100,13 @@ class Update(AAZCommand):
         _args_schema.custom_headers = AAZListArg(
             options=["--custom-headers"],
             arg_group="Monitor Configuration",
-            help="Space-separated list of NAME=VALUE pairs.",
+            help="Space-separated list of names or values.",
             nullable=True,
         )
         _args_schema.status_code_ranges = AAZListArg(
             options=["--status-code-ranges"],
             arg_group="Monitor Configuration",
-            help="Space-separated list of status codes in MIN-MAX or VAL format.",
+            help="Space-separated list of status codes in shorthand-syntax format.",
             nullable=True,
         )
         _args_schema.interval = AAZIntArg(

@@ -21,7 +21,7 @@ class Create(AAZCommand):
         az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/"
 
     :example: Create a traffic manager profile.
-        az network traffic-manager profile create -n MyTmProfile -g MyResourceGroup --routing-method subnet --unique-dns-name mywebapp --custom-headers [{{name:foo,value:bar}}] --status-code-ranges [{{min:200,max:202}}] --path "/"
+        az network traffic-manager profile create -n MyTmProfile -g MyResourceGroup --routing-method subnet --unique-dns-name mywebapp --custom-headers [{name:foo,value:bar}] --status-code-ranges [{min:200,max:202}] --path "/"
     """
 
     _aaz_info = {
@@ -94,12 +94,12 @@ class Create(AAZCommand):
         _args_schema.custom_headers = AAZListArg(
             options=["--custom-headers"],
             arg_group="Monitor Configuration",
-            help="Space-separated list of NAME=VALUE pairs.",
+            help="Space-separated list of names or values.",
         )
         _args_schema.status_code_ranges = AAZListArg(
             options=["--status-code-ranges"],
             arg_group="Monitor Configuration",
-            help="Space-separated list of status codes in MIN-MAX or VAL format.",
+            help="Space-separated list of status codes in shorthand-syntax format.",
         )
         _args_schema.interval = AAZIntArg(
             options=["--interval"],

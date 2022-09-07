@@ -21,7 +21,7 @@ class Create(AAZCommand):
         az network traffic-manager endpoint create -g MyResourceGroup --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints --target-resource-id $MyWebApp1Id --endpoint-status enabled
 
     :example: Create an endpoint.
-        az network traffic-manager endpoint create -n MyTmEndpoint --profile-name MyTmProfile -g MyResourceGroup --type azureEndpoints --target-resource-id $MyWebApp1Id --subnets [{{first:10.0.0.0}}] --custom-headers [{{name:test,value:best}}]
+        az network traffic-manager endpoint create -n MyTmEndpoint --profile-name MyTmProfile -g MyResourceGroup --type azureEndpoints --target-resource-id $MyWebApp1Id --subnets [{first:10.0.0.0}] --custom-headers [{name:test,value:best}]
     """
 
     _aaz_info = {
@@ -109,7 +109,7 @@ class Create(AAZCommand):
         )
         _args_schema.subnets = AAZListArg(
             options=["--subnets"],
-            help="Space-separated list of subnet CIDR prefixes (10.0.0.0/24) or subnet ranges (10.0.0.0-11.0.0.0).",
+            help="Space-separated list of subnet CIDR prefixes or subnet ranges.",
         )
         _args_schema.target = AAZStrArg(
             options=["--target"],

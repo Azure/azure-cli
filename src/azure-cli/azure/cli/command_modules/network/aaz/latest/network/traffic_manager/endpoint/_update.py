@@ -27,8 +27,8 @@ class Update(AAZCommand):
         az network traffic-manager endpoint update --endpoint-status Enabled --name MyEndpoint --profile-name MyTmProfile --resource-group MyResourceGroup --type azureEndpoints
 
     :example: Update a traffic manager endpoint.
-        az network traffic-manager endpoint update -n MyTmEndpoint --type azureEndpoints --profile-name MyTmProfile -g MyResourceGroup --subnets [{{first:10.0.0.0,scope:24}}]
-        az network traffic-manager endpoint update -n MyTmEndpoint --type azureEndpoints --profile-name MyTmProfile -g MyResourceGroup --subnets [{{first:10.0.0.0,last:11.0.0.0}}]
+        az network traffic-manager endpoint update -n MyTmEndpoint --type azureEndpoints --profile-name MyTmProfile -g MyResourceGroup --subnets [{first:10.0.0.0,scope:24}]
+        az network traffic-manager endpoint update -n MyTmEndpoint --type azureEndpoints --profile-name MyTmProfile -g MyResourceGroup --subnets [{first:10.0.0.0,last:11.0.0.0}]
     """
 
     _aaz_info = {
@@ -143,7 +143,7 @@ class Update(AAZCommand):
         _args_schema.subnets = AAZListArg(
             options=["--subnets"],
             arg_group="Properties",
-            help="Space-separated list of subnet CIDR prefixes (10.0.0.0/24) or subnet ranges (10.0.0.0-11.0.0.0).",
+            help="Space-separated list of subnet CIDR prefixes or subnet ranges.",
             nullable=True,
         )
         _args_schema.target = AAZStrArg(
