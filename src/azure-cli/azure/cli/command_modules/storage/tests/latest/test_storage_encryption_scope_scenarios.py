@@ -132,3 +132,21 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         blob2 = self.create_random_name(prefix='blob', length=12)
         self.cmd('storage blob upload -c {} -n {} -f "{}" --encryption-scope {} --connection-string "{}"'.format(
             self.kwargs['con'], blob2, file, self.kwargs['encryption'], result['connectionString']))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_adls_encryption')
+    @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2", hns=True)
+    def test_storage_adls_gen2_encryption_scope(self, resource_group, storage_account_info):
+        # Create with default Microsoft.Storage key source
+        self.cmd("storage account encryption-scope create -i --account-name {sa} -g {rg} -n testencryption", checks=[
+            JMESPathCheck("name", "testencryption"),
+            JMESPathCheck("resourceGroup", self.kwargs["rg"]),
+            JMESPathCheck("source", "Microsoft.Storage"),
+            JMESPathCheck("state", "Enabled"),
+            JMESPathCheck("requireInfrastructureEncryption", True)
+        ])
+        # Specify encryption scope for adls gen2 file system
+        self.storage_cmd("storage fs create -n testfs --default-encryption-scope testencryption --prevent-encryption-scope-override false", storage_account_info)
+        self.storage_cmd("storage fs show -n testfs", storage_account_info).assert_with_checks([
+            JMESPathCheck('encryptionScope.defaultEncryptionScope', 'testencryption'),
+            JMESPathCheck('encryptionScope.preventEncryptionScopeOverride', False)
+        ])

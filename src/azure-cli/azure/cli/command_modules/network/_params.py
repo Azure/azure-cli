@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._validators import (
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
     validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-    get_network_watcher_from_vm, get_network_watcher_from_location, validate_capture_size_and_limit,
+    get_network_watcher_from_vm, get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
@@ -62,7 +62,7 @@ def load_arguments(self, _):
      ExpressRouteLinkMacSecCipher,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
-     GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState) = self.get_models(
+     GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState, PacketCaptureTargetType) = self.get_models(
          'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction', 'VpnAuthenticationType',
@@ -74,7 +74,7 @@ def load_arguments(self, _):
          'ExpressRouteLinkMacSecCipher',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType', 'GatewayLoadBalancerTunnelProtocol',
-         'GatewayLoadBalancerTunnelInterfaceType', 'VpnNatRuleType', 'VpnNatRuleMode', 'LoadBalancerBackendAddressAdminState')
+         'GatewayLoadBalancerTunnelInterfaceType', 'VpnNatRuleType', 'VpnNatRuleMode', 'LoadBalancerBackendAddressAdminState', 'PacketCaptureTargetType')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -1674,7 +1674,7 @@ def load_arguments(self, _):
             c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
 
     with self.argument_context('network watcher packet-capture create') as c:
-        c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
+        c.argument('watcher_name', ignore_type, validator=get_network_watcher_for_pcap_creation)
         c.ignore('location')
         c.ignore('watcher_rg')
         c.argument('capture_limit', type=int, validator=validate_capture_size_and_limit, help='The maximum size in bytes of the capture output.')
@@ -1683,6 +1683,10 @@ def load_arguments(self, _):
         c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
         c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
         c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
+        c.argument('target_type', help='Target Resource Type, only \'AzureVM\' and \'AzureVMSS\' are supported now', arg_type=get_enum_type(PacketCaptureTargetType))
+        c.argument('target', help='Name or ID of the target, it could be virtual machine or virtual machine scale sets')
+        c.argument('include', nargs='+', help='Space-separated list of VMSS Instances to include in Packet capture like 0 1 2')
+        c.argument('exclude', nargs='+', help='Space-separated list of VMSS Instances to exclude in Packet capture')
 
     with self.argument_context('network watcher test-connectivity') as c:
         c.argument('source_port', type=int)
@@ -2191,9 +2195,16 @@ def load_arguments(self, _):
         c.argument('scale_units', type=int, min_api='2021-03-01', options_list=['--scale-units'],
                    validator=validate_scale_unit_ranges,
                    help='The scale units for the Bastion Host resource, which minimum is 2 and maximum is 50.')
-        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
+        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), min_api='2021-03-01',
                    options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
+    with self.argument_context('network bastion create') as c:
+        c.argument('sku', default='Standard')
+    for scope in ['create', 'update']:
+        with self.argument_context('network bastion {}'.format(scope)) as c:
+            c.argument('disable_copy_paste', help='Disable copy and paste for all sessions on this Azure Bastion resource', arg_type=get_three_state_flag())
+            c.argument('enable_tunneling', help='Enable Native Client Support on this Azure Bastion resource', arg_type=get_three_state_flag())
+            c.argument('enable_ip_connect', help='Enable IP-based Connections on this Azure Bastion resource', arg_type=get_three_state_flag())
     with self.argument_context('network bastion ssh') as c:
         c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
         c.argument('username', help='User name for SSH connections.', options_list=['--username'])
