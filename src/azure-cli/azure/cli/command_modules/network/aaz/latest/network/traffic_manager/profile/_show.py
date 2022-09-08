@@ -44,8 +44,8 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
+        _args_schema.profile_name = AAZStrArg(
+            options=["-n", "--name", "--profile-name"],
             help="The name of the Traffic Manager profile.",
             required=True,
             id_part="name",
@@ -92,7 +92,7 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "profileName", self.ctx.args.name,
+                    "profileName", self.ctx.args.profile_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

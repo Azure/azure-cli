@@ -6728,10 +6728,14 @@ def update_public_ip_prefix(instance, tags=None):
 
 # region TrafficManagers
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = client.get(resource_group_name, profile_name)
-    return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
+    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.profile import Show
+    Show_profiles = Show(cmd.loader)
+    args = {
+        "resource_group": resource_group_name,
+        "profile_name": profile_name
+    }
+    profile = Show_profiles(args)
+    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
 # endregion
 
 

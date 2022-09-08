@@ -17,7 +17,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
-    cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
+    cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
@@ -254,11 +254,6 @@ def load_command_table(self, _):
     network_subnet_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
         client_factory=cf_subnets
-    )
-
-    network_tme_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.trafficmanager.operations#EndpointsOperations.{}',
-        client_factory=cf_traffic_manager_mgmt_endpoints
     )
 
     network_vgw_sdk = CliCommandType(

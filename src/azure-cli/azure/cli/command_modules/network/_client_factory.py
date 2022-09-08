@@ -180,12 +180,6 @@ def cf_service_aliases(cli_ctx, _):
     return network_client_factory(cli_ctx).available_service_aliases
 
 
-def cf_traffic_manager_mgmt_endpoints(cli_ctx, _):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).endpoints
-
-
 def cf_dns_references(cli_ctx, _):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
