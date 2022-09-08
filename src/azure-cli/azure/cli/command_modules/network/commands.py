@@ -1196,7 +1196,7 @@ def load_command_table(self, _):
     from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.profile import Create
     self.command_table['network traffic-manager profile create'] = Create(loader=self, transform=transform_traffic_manager_create_output)
 
-    with self.command_group('network traffic-manager endpoint', network_tme_sdk) as g:
+    with self.command_group('network traffic-manager endpoint') as g:
         g.custom_command('list', 'list_traffic_manager_endpoints')
 
     from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.endpoint import ShowGeographicHierarchy
