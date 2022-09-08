@@ -1932,7 +1932,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('destination_path', options_list=('--dest',), type=file_type, required=False,
                 help='Path of the file to write to. The source filename will be used if not specified.',
                 completer=FilesCompleter())
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
         c.extra('start_range', type=int, help='Start of byte range to use for downloading a section of the file. '
                                               'If no --end-range is given, all bytes after the --start-range will be '
@@ -2036,7 +2036,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                              process_md5=True)
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
                    help='Path of the local file to upload as the file content.')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
         c.extra('share_name', share_name_type, required=True)
         c.argument('validate_content', action='store_true', min_api='2016-05-31',
@@ -2057,7 +2057,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
 
     with self.argument_context('storage file download-batch') as c:
         from ._validators import process_file_download_batch_parameters
@@ -2065,7 +2065,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the snapshot.')
 

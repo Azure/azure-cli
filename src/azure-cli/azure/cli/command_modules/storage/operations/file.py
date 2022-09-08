@@ -147,7 +147,7 @@ def storage_file_upload(client, local_file_path, content_settings=None,
         'timeout': timeout
     }
     if progress_callback:
-        upload_args['raw_response_hook'] = progress_callback
+        upload_args['progress_hook'] = progress_callback
     # Because the contents of the uploaded file may be too large, it should be passed into the a stream object,
     # upload_file() read file data in batches to avoid OOM problems
     count = os.path.getsize(local_file_path)
@@ -220,7 +220,7 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
         destination_path = os.path.join(destination_path, file_name) \
             if destination_path else file_name
 
-    kwargs['raw_response_hook'] = kwargs.pop("progress_callback", None)
+    kwargs['progress_hook'] = kwargs.pop("progress_callback", None)
 
     with open(destination_path, open_mode) as stream:
         start_range = kwargs.pop('start_range', None)
