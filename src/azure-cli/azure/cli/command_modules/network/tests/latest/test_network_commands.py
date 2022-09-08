@@ -5439,8 +5439,8 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         })
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method priority --unique-dns-name {dns} --tags foo=doo --path "/"',
-                 checks=self.check('trafficRoutingMethod', 'Priority'))
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method priority --unique-dns-name {dns} --tags foo=doo',
+                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
         self.cmd('network traffic-manager profile show -g {rg} -n {tm}',
                  checks=self.check('dnsConfig.relativeName', '{dns}'))
         self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method weighted --tags foo=boo',
@@ -5478,8 +5478,8 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             'tm': 'mytmprofile2',
             'dns': 'mytrafficmanager001100a2'
         })
-        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo --path "/"',
-                 checks=self.check('trafficRoutingMethod', 'MultiValue'))
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo',
+                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'MultiValue'))
 
         self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method MultiValue  --max-return 4 --tags foo=boo',
                  checks=self.check('maxReturn', 4))
@@ -5495,11 +5495,11 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             'ip_dns': self.create_random_name('testpip', 20)
         })
 
-        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method subnet --unique-dns-name {dns} --custom-headers [{{name:foo,value:bar}}] --status-code-ranges [{{min:200,max:202}}] --path "/"', checks=[
-            self.check('monitorConfig.expectedStatusCodeRanges[0].min', 200),
-            self.check('monitorConfig.expectedStatusCodeRanges[0].max', 202),
-            self.check('monitorConfig.customHeaders[0].name', 'foo'),
-            self.check('monitorConfig.customHeaders[0].value', 'bar')
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method subnet --unique-dns-name {dns} --custom-headers foo=bar --status-code-ranges 200-202', checks=[
+            self.check('TrafficManagerProfile.monitorConfig.expectedStatusCodeRanges[0].min', 200),
+            self.check('TrafficManagerProfile.monitorConfig.expectedStatusCodeRanges[0].max', 202),
+            self.check('TrafficManagerProfile.monitorConfig.customHeaders[0].name', 'foo'),
+            self.check('TrafficManagerProfile.monitorConfig.customHeaders[0].value', 'bar')
         ])
         self.kwargs['ip_id'] = self.cmd('network public-ip create -g {rg} -n {pip} --dns-name {ip_dns} --query publicIp.id').get_output_in_json()
         self.cmd('network traffic-manager profile update -n {tm} -g {rg} --status-code-ranges [{{min:200,max:204}}] --custom-headers  [{{name:foo,value:doo}},{{name:test,value:best}}]', checks=[

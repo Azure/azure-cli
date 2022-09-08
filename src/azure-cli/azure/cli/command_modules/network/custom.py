@@ -6736,6 +6736,40 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
     }
     profile = Show_profiles(args)
     return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
+
+
+def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
+                                   routing_method, unique_dns_name, monitor_path=None,
+                                   monitor_port=80, monitor_protocol="HTTP",
+                                   profile_status="Enabled",
+                                   ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+    from .aaz.latest.network.traffic_manager.profile import Create
+    Create_Profile = Create(cmd.loader)
+
+    if monitor_path is None and monitor_protocol == 'HTTP':
+        monitor_path = '/'
+    args = {
+        "name": traffic_manager_profile_name,
+        "location": "global",
+        "resource_group": resource_group_name,
+        "unique_dns_name": unique_dns_name,
+        "ttl": ttl,
+        "max_return": max_return,
+        "status": profile_status,
+        "routing_method": routing_method,
+        "tags": tags,
+        "custom_headers": monitor_custom_headers,
+        "status_code_ranges": status_code_ranges,
+        "interval": interval,
+        "path": monitor_path,
+        "port": monitor_port,
+        "protocol": monitor_protocol,
+        "timeout": timeout,
+        "max_failures": max_failures
+    }
+
+    return Create_Profile(args)
 # endregion
 
 
