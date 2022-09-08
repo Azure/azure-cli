@@ -655,7 +655,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret, AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -683,7 +683,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret, AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -739,7 +739,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.PostgresFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.Sql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret, AUTH_TYPE.Secret],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 

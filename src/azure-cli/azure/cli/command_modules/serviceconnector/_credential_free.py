@@ -176,7 +176,7 @@ class MysqlFlexibleHandler(TargetHandler):
             self.create_aad_user_in_mysql(connection_kwargs, query_list)
 
         # remove firewall rule
-        if not ip_name:
+        if ip_name is not None:
             try:
                 self.set_target_firewall(False, ip_name)
             # pylint: disable=bare-except
@@ -189,14 +189,13 @@ class MysqlFlexibleHandler(TargetHandler):
             target = run_cli_cmd(
                 'az mysql flexible-server show --ids {}'.format(self.target_id))
             # logger.warning("Update database server firewall rule to connect...")
-            if target.get('publicNetworkAccess') == "Disabled":
-                return True
+            if target.get('network').get('publicNetworkAccess') == "Disabled":
+                return
             run_cli_cmd(
                 'az mysql flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
                     self.resource_group, self.server, ip_name, self.subscription)
             )
-            return False
         # logger.warning("Remove database server firewall rules to recover...")
         # run_cli_cmd('az mysql server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
         # if deny_public_access:
@@ -226,9 +225,8 @@ class MysqlFlexibleHandler(TargetHandler):
                     logger.warning(
                         "Query %s, error: %s", q, str(e))
         except pymysql.Error as e:
-            logger.debug(e)
             raise AzureConnectionError("Fail to connect mysql. " + str(e))
-        if not cursor:
+        if cursor is not None:
             try:
                 cursor.close()
             except Exception as e:  # pylint: disable=broad-except
@@ -298,7 +296,7 @@ class SqlHandler(TargetHandler):
         connection_string = self.get_connection_string()
         ip_name = None
         try:
-            logger.warning("Connecting to database...")
+            logger.warning("Connecting to database...(Please login in on the popup dialog)")
             self.create_aad_user_in_sql(connection_string, query_list)
         except AzureConnectionError:
             # allow public access
@@ -308,7 +306,7 @@ class SqlHandler(TargetHandler):
             self.create_aad_user_in_sql(connection_string, query_list)
 
         # remove firewall rule
-        if not ip_name:
+        if ip_name is not None:
             try:
                 self.set_target_firewall(False, ip_name)
             # pylint: disable=bare-except
@@ -319,20 +317,16 @@ class SqlHandler(TargetHandler):
     def set_target_firewall(self, add_new_rule, ip_name):
         if add_new_rule:
             target = run_cli_cmd(
-                'az postgres flexible-server show --ids {}'.format(self.target_id))
+                'az sql server show --ids {}'.format(self.target_id))
             # logger.warning("Update database server firewall rule to connect...")
             if target.get('publicNetworkAccess') == "Disabled":
-                return True
+                run_cli_cmd('az sql server update -e true --ids {}'.format(self.target_id))
             run_cli_cmd(
-                'az postgres flexible-server firewall-rule create --resource-group {0} --name {1} --rule-name {2} '
+                'az sql server firewall-rule create -g {0} -s {1} -n {2} '
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
                     self.resource_group, self.server, ip_name, self.subscription)
             )
             return False
-        # logger.warning("Remove database server firewall rules to recover...")
-        # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
-        # if deny_public_access:
-        #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def create_aad_user_in_sql(self, conn_string, query_list):
         import pkg_resources
@@ -495,7 +489,7 @@ class PostgresFlexHandler(TargetHandler):
             self.create_aad_user_in_pg(connection_string, query_list)
 
         # remove firewall rule
-        if not ip_name:
+        if ip_name is not None:
             try:
                 self.set_target_firewall(False, ip_name)
             # pylint: disable=bare-except
@@ -508,7 +502,7 @@ class PostgresFlexHandler(TargetHandler):
             target = run_cli_cmd(
                 'az postgres flexible-server show --ids {}'.format(self.target_id))
             # logger.warning("Update database server firewall rule to connect...")
-            if target.get('publicNetworkAccess') == "Disabled":
+            if target.get('network').get('publicNetworkAccess') == "Disabled":
                 return True
             start_ip = self.ip or '0.0.0.0'
             end_ip = self.ip or '255.255.255.255'
@@ -543,7 +537,7 @@ class PostgresFlexHandler(TargetHandler):
             logger.warning(e)
             search_ip = re.search(
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
-            if not search_ip:
+            if search_ip is not None:
                 self.ip = search_ip.group(1)
             raise AzureConnectionError("Fail to connect to postgresql. " + str(e))
 
@@ -692,7 +686,7 @@ class SpringHandler(SourceHandler):
             while (cnt < 15):
                 identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
                     self.source_type, rg, spring, app, sub))
-                if not identity:
+                if identity is not None:
                     break
                 time.sleep(5)
                 cnt += 1
@@ -714,7 +708,7 @@ class WebappHandler(SourceHandler):
             while (cnt < 15):
                 identity = run_cli_cmd(
                     'az webapp identity show --ids {}'.format(self.source_id))
-                if not identity:
+                if identity is not None:
                     break
                 time.sleep(5)
                 cnt += 1
@@ -736,7 +730,7 @@ class ContainerappHandler(SourceHandler):
             while (cnt < 15):
                 identity = run_cli_cmd(
                     'az containerapp identity show --ids {}'.format(self.source_id))
-                if not identity:
+                if identity is not None:
                     break
                 time.sleep(5)
                 cnt += 1
