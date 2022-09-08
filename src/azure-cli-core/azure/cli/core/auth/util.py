@@ -182,3 +182,46 @@ def read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def msal_exception_handler(ex):
+    # This exception handler is implemented according to the discussion at
+    # https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/482
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    import traceback
+    logger.debug(traceback.format_exc())
+
+    from azure.cli.core.azclierror import AuthenticationError
+    from msal_extensions.persistence import PersistenceError
+    msg = str(ex)
+    recommendation = None
+
+    if 'Unable to get authority configuration' in msg:
+        # ValueError. To trigger it, run: az login --tenant 54826b22-38d6-4fb2-bad9-b7b93a3e0000
+        recommendation = 'For more information, see https://github.com/Azure/azure-cli/issues/20507'
+        raise AuthenticationError(msg) from ex
+
+    elif 'Unable to find wstrust endpoint from MEX' in msg:
+        # ValueError. To trigger it, run: az login --username testuser@outlook.com --password testpass
+        recommendation = 'Please run `az login` to launch auth code flow. '\
+                         'For more information, see https://github.com/Azure/azure-cli/issues/20221'
+        raise AuthenticationError(msg, recommendation=recommendation) from ex
+
+    elif '0. The ID token is not yet valid' in msg:
+        # RuntimeError. To tigger it, set your computer to 1 hour later than the standard time
+        recommendation = 'For more information, see https://github.com/Azure/azure-cli/issues/20388'
+        raise AuthenticationError(msg, recommendation=recommendation) from ex
+
+    elif isinstance(ex, PersistenceError):
+        if ex.errno == 0:
+            recommendation = "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20278"
+        elif ex.errno == -2146893813:
+            recommendation = "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20231"
+        elif ex.errno == -2146892987:
+            recommendation = "Please report to us via Github: https://github.com/Azure/azure-cli/issues/21010"
+        # errno is already in strerror. str(ex) gives duplicated errno.
+        raise AuthenticationError(ex.strerror, recommendation=recommendation)
+
+    # Unhandled error. Raise it as-is
+    raise ex
