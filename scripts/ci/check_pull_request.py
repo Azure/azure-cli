@@ -84,18 +84,24 @@ def check_pull_request(title, body):
         # only check title which start with `[`
         if title.startswith('['):
             error_flag = check_line(title)
-        is_edit_history_note = False
-        history_note_error_flag = False
-        for line in body:
-            if line.startswith('['):
-                # get component name in []
-                ref = re.findall(r'[\[](.*?)[\]]', line)
-                if ref and ref[0] not in ['Component Name 1', 'Component Name 2']:
-                    is_edit_history_note = True
-                    history_note_error_flag = check_line(line) or history_note_error_flag
-        # If the `History Notes` is edited:
-        # Use the history notes check result (history_note_error_flag), ignore the title check result (error_flag).
-        error_flag = error_flag if not is_edit_history_note else history_note_error_flag
+        if '**History Notes**' in body:
+            is_edit_history_note = False
+            history_note_error_flag = False
+            for line in body:
+                if line.startswith('['):
+                    # get component name in []
+                    ref = re.findall(r'[\[](.*?)[\]]', line)
+                    # exclude ['-c', 'a b', 'a b']
+                    # exclude ["-c"]
+                    char_not_allowed = ["'", '"', ',']
+                    if ref and ref[0] not in ['Component Name 1', 'Component Name 2'] \
+                            and all([i not in ref[0] for i in char_not_allowed]) \
+                            and not re.findall(r'[\[](.*?)[\]]\((.*)\)', line):  # exclude [Markdown](url)
+                        is_edit_history_note = True
+                        history_note_error_flag = check_line(line) or history_note_error_flag
+            # If the `History Notes` is edited:
+            # Use the history notes check result (history_note_error_flag), ignore the title check result (error_flag).
+            error_flag = error_flag if not is_edit_history_note else history_note_error_flag
     else:
         logger.error('Pull Request title should start with [ or { , Please follow https://aka.ms/submitAzPR')
         error_flag = True
