@@ -246,6 +246,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{enhanced}'])", 1)
         ])
 
+        self.cmd('backup policy list -g {rg} -v {vault} --move-to-archive-tier Enabled', checks=[
+            self.check("length(@)", 0)
+        ])
+
         self.cmd('backup policy list-associated-items -g {rg} -v {vault} -n {default}', checks=[
             self.check("length(@)", 2),
             self.check("length([?properties.friendlyName == '{}'])".format(vm1), 1),
@@ -270,6 +274,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
             self.kwargs['policy1_json']['properties']['instantRpDetails'] = {'azureBackupRgNamePrefix': 'RG_prefix', 'azureBackupRgNameSuffix': 'RG_suffix'}
+
+        # set monthly retention policy
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"] = {}
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionDuration"] = {"count": 60, "durationType": "Months"}
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionScheduleDaily"] = {"daysOfTheMonth": [{"date": 1, "isLast": False}]}
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionScheduleFormatType"] = "Daily"
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionScheduleWeekly"] = None
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionTimes"] = self.kwargs['policy1_json']['properties']["retentionPolicy"]["dailySchedule"]["retentionTimes"]
+
+        # set smart tiering policy
+        self.kwargs['policy1_json']['properties']["tieringPolicy"] = {"ArchivedRP": {"duration": 0, "durationType": "Invalid", "tieringMode": "TierRecommended"}}
+
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
 
         self.cmd("backup policy set -g {rg} -v {vault} --policy '{policy1_json}'", checks=[
@@ -281,6 +297,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1),
+            self.check("length([?name == '{policy3}'])", 1)
+        ])
+
+        self.cmd('backup policy list -g {rg} -v {vault} --move-to-archive-tier Enabled', checks=[
             self.check("length([?name == '{policy3}'])", 1)
         ])
 
