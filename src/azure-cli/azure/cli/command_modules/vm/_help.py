@@ -3864,6 +3864,15 @@ disks are specified, all disks will be included."
                az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour\
                ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" \
                --collection-name "rpcName" --name "rpName"
+      - name: Create a restore point with --consistency-mode CrashConsistent
+        text: |-
+               az vm create -n vm -g rg --image UbuntuLTS --tag EnableCrashConsistentRestorePoint=True
+
+               az restore-point collection create --source-id "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM"\
+                -g rg --collection-name "myRpc"
+
+               az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" \
+               --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
 """
 
 helps['restore-point delete'] = """

@@ -1558,7 +1558,7 @@ def load_arguments(self, _):
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
         c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
-        c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
+        c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), is_preview=True, min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
