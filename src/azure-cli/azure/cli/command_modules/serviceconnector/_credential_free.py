@@ -74,8 +74,6 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
 def getTargetHandler(cmd, target_id, target_type, auth_type, client_type, connection_name):
     if target_type in {RESOURCE.Sql}:
         return SqlHandler(cmd, target_id, target_type, auth_type, connection_name)
-    if client_type not in {CLIENT_TYPE.Java.value, CLIENT_TYPE.SpringBoot.value}:
-        return
     if target_type in {RESOURCE.Postgres}:
         return PostgresSingleHandler(cmd, target_id, target_type, auth_type, connection_name)
     if target_type in {RESOURCE.PostgresFlexible}:
