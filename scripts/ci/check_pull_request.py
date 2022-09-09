@@ -5,6 +5,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
+import ast
 import logging
 import re
 import sys
@@ -78,6 +80,21 @@ def main():
     sys.exit(1) if check_pull_request(title, body) else sys.exit(0)
 
 
+def get_list(line):
+    # exclude list
+    # ['app']
+    # ['-c', 'a b', 'a b']
+    # ["-c"]
+    # [1]
+    # ['-c', 'System.Object[] System.Object[]', 'System.Object[] System.Object[]']
+    ref = re.findall(r'([\[].*[\]])', line)
+    try:
+        if isinstance(ast.literal_eval(ref[0]), list):
+            return True
+    except:
+        return False
+
+
 def check_pull_request(title, body):
     if title.startswith('[') or title.startswith('{'):
         error_flag = False
@@ -91,11 +108,8 @@ def check_pull_request(title, body):
                 if line.startswith('['):
                     # get component name in []
                     ref = re.findall(r'[\[](.*?)[\]]', line)
-                    # exclude ['-c', 'a b', 'a b']
-                    # exclude ["-c"]
-                    char_not_allowed = ["'", '"', ',']
                     if ref and ref[0] not in ['Component Name 1', 'Component Name 2'] \
-                            and all([i not in ref[0] for i in char_not_allowed]) \
+                            and not get_list(line) \
                             and not re.findall(r'[\[](.*?)[\]]\((.*)\)', line):  # exclude [Markdown](url)
                         is_edit_history_note = True
                         history_note_error_flag = check_line(line) or history_note_error_flag
