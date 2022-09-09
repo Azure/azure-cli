@@ -24,7 +24,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
                           blob_tier_validator_track2, services_type_v2, resource_type_type_v2, PermissionScopeAddAction,
-                          SshPublicKeyAddAction, add_progress_callback_v2)
+                          SshPublicKeyAddAction)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
