@@ -3756,9 +3756,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             }
         else:
             if priority_count is not None:
-                vmss.priority_mix_policy.proprity_count = priority_count
+                vmss.priority_mix_policy.base_regular_priority_count = priority_count
             if priority_percentage is not None:
-                vmss.priority_mix_policy.priority_percentage = priority_percentage
+                vmss.priority_mix_policy.regular_priority_percentage_above_base = priority_percentage
 
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}

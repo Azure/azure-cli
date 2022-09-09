@@ -8044,6 +8044,12 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('vmss.priorityMixPolicy.regularPriorityPercentageAboveBase', 50),
         ])
 
+        self.cmd('vmss update -n {vmss} -g {rg} --priority-count 2 --priority-percentage 25', checks=[
+            self.check('priorityMixPolicy.baseRegularPriorityCount', 2),
+            self.check('priorityMixPolicy.regularPriorityPercentageAboveBase', 25),
+        ])
+
+
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
