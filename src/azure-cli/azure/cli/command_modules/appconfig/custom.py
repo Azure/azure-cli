@@ -17,8 +17,6 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 RegenerateKeyParameters,
                                                 CreateMode,
                                                 Replica)
-from azure.cli.core.util import user_confirmation
-
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
 
 logger = get_logger(__name__)
