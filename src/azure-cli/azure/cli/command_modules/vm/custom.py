@@ -307,8 +307,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
+    Disk, CreationData, DiskCreateOption, Encryption, DiskSecurityTypes = cmd.get_models(
+        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption', 'DiskSecurityTypes')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
@@ -348,12 +348,25 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 if disk_version.lower() == 'latest':
                     disk_version = _get_latest_image_version(cmd.cli_ctx, location, disk_publisher, disk_offer,
                                                              disk_sku)
-                client = _compute_client_factory(cmd.cli_ctx)
-                response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
-                                                             disk_version)
-                image_reference = response.id
             else:  # error
                 raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
+        else:
+            from msrestazure.tools import parse_resource_id
+            terms = parse_resource_id(image_reference)
+            disk_publisher, disk_offer, disk_sku, disk_version = \
+                terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
+
+        client = _compute_client_factory(cmd.cli_ctx)
+        response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
+                                                     disk_version)
+        image_reference = response.id
+        if hasattr(response, 'hyper_v_generation') and response.hyper_v_generation == 'V2' and not image_reference_lun:
+            # TODO log
+            if hasattr(response, 'features') and 'SecurityType' in response.features \
+                    and response.features['SecurityType'] == 'TrustedLaunchSupported':
+                # TODO log
+                pass
+
         # image_reference is an ID now
         image_reference = {'id': image_reference}
         if image_reference_lun is not None:
@@ -404,6 +417,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
     if hyper_v_generation:
+        if option == DiskCreateOption.empty:
+            # TODO log
+            pass
         disk.hyper_v_generation = hyper_v_generation
 
     if zone:
