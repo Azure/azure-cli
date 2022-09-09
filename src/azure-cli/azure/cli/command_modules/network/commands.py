@@ -233,12 +233,6 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
-    network_service_tags_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ServiceTagsOperations.{}',
-        client_factory=cf_service_tags,
-        min_api='2019-04-01'
-    )
-
     network_subnet_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
         client_factory=cf_subnets
@@ -325,12 +319,6 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
-    network_service_aliases_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#AvailableServiceAliasesOperations.{}',
-        client_factory=cf_service_aliases,
-        min_api='2019-08-01'
-    )
-
     network_bastion_hosts_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
         client_factory=cf_bastion_hosts,
@@ -362,10 +350,6 @@ def load_command_table(self, _):
     usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
     with self.command_group('network') as g:
         g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
-
-    with self.command_group('network', network_service_tags_sdk) as g:
-        g.command('list-service-tags', 'list')
-        g.custom_command('list-service-aliases', 'list_service_aliases', command_type=network_service_aliases_sdk)
     # endregion
 
     # region ApplicationGateways
