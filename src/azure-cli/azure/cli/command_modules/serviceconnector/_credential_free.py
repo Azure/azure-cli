@@ -290,14 +290,14 @@ class SqlHandler(TargetHandler):
         connection_args = self.get_connection_string()
         ip_name = None
         try:
-            logger.warning("Connecting to database...(Please login in on the popup dialog)")
+            logger.warning("Connecting to database...")
             self.create_aad_user_in_sql(connection_args, query_list)
         except AzureConnectionError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
             self.set_target_firewall(True, ip_name)
             # create again
-            self.create_aad_user_in_sql(connection_string, query_list)
+            self.create_aad_user_in_sql(connection_args, query_list)
 
         # remove firewall rule
         if ip_name is not None:
