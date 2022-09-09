@@ -1258,8 +1258,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if spot_restore_timeout:
             vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
 
-    if (regular_priority_count is not None or regular_priority_percentage is not None) and \
-            cmd.supported_api_version(min_api='2022-08-01', operation_group='virtual_machine_scale_sets'):
+    if regular_priority_count is not None or regular_priority_percentage is not None:
         priority_mix_policy = {}
         if regular_priority_count is not None:
             priority_mix_policy['baseRegularPriorityCount'] = regular_priority_count
