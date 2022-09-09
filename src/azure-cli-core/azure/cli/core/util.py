@@ -536,7 +536,7 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
         raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
 
 
-def get_file_yaml(file_path, throw_on_empty=True, preserve_order=False):
+def get_file_yaml(file_path, throw_on_empty=True):
     content = read_file_content(file_path)
     if not content:
         if throw_on_empty:
