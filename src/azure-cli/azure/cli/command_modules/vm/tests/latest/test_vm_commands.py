@@ -8039,12 +8039,12 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10),
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Centos --orchestration-mode flexible --priority-count 4 --priority-percentage 50 --orchestration-mode flexible --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
+        self.cmd('vmss create -n {vmss} -g {rg} --image Centos --orchestration-mode flexible --regular-priority-count 4 --regular-priority-percentage 50 --orchestration-mode flexible --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
             self.check('vmss.priorityMixPolicy.baseRegularPriorityCount', 4),
             self.check('vmss.priorityMixPolicy.regularPriorityPercentageAboveBase', 50),
         ])
 
-        self.cmd('vmss update -n {vmss} -g {rg} --priority-count 2 --priority-percentage 25', checks=[
+        self.cmd('vmss update -n {vmss} -g {rg} --regular-priority-count 2 --regular-priority-percentage 25', checks=[
             self.check('priorityMixPolicy.baseRegularPriorityCount', 2),
             self.check('priorityMixPolicy.regularPriorityPercentageAboveBase', 25),
         ])

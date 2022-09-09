@@ -1573,10 +1573,10 @@ def process_vmss_create_namespace(cmd, namespace):
             raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
                                             ' available for VMSS with flexible orchestration mode')
 
-    if namespace.priority_count is not None or namespace.priority_percentage is not None:
+    if namespace.regular_priority_count is not None or namespace.regular_priority_percentage is not None:
         if namespace.orchestration_mode.lower() != flexible_str.lower():
-            raise InvalidArgumentValueError('usage error: --priority-count/--priority-percentage is only'
-                                            ' available for VMSS with flexible orchestration mode')
+            raise InvalidArgumentValueError('usage error: --regular-priority-count/--regular-priority-percentage is'
+                                            ' only available for VMSS with flexible orchestration mode')
 
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
