@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
+import struct
 import time
 from knack.log import get_logger
 from knack.util import CLIError
@@ -32,7 +32,6 @@ logger = get_logger(__name__)
 
 
 def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name, identity_resource_id):
-    cli_ctx = cmd.cli_ctx
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
         return
@@ -45,15 +44,12 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     if target_handler is None:
         return
 
-    # get login user info
-    login_user = Profile(cli_ctx=cli_ctx).get_current_account_user()
-    # Get login user info
-    user_info = run_cli_cmd('az ad user show --id {}'.format(login_user))
+    user_info = run_cli_cmd('az ad user show --id {}'.format(target_handler.login_username))
     user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
         else user_info.get('id')
     if user_object_id is None:
         raise Exception(
-            "no object id found for user {}".format(login_user))
+            " no object id found for user {}".format(target_handler.login_username))
 
     # enable source mi
     source_object_id = source_handler.get_identity_pid()
@@ -109,7 +105,7 @@ class TargetHandler:
         self.subscription = target_segments.get('subscription')
         self.resource_group = target_segments.get('resource_group')
         self.auth_type = auth_type
-        self.login_username = self.profile.get_current_account_user()
+        self.login_username = run_cli_cmd('az account show').get("user").get("name")
 
     def enable_target_aad_auth(self):
         return
@@ -291,11 +287,11 @@ class SqlHandler(TargetHandler):
         self.aad_username = identity_name
 
         query_list = self.get_create_query(client_id)
-        connection_string = self.get_connection_string()
+        connection_args = self.get_connection_string()
         ip_name = None
         try:
             logger.warning("Connecting to database...(Please login in on the popup dialog)")
-            self.create_aad_user_in_sql(connection_string, query_list)
+            self.create_aad_user_in_sql(connection_args, query_list)
         except AzureConnectionError:
             # allow public access
             ip_name = generate_random_string(prefix='svc_')
@@ -326,26 +322,28 @@ class SqlHandler(TargetHandler):
             )
             return False
 
-    def create_aad_user_in_sql(self, conn_string, query_list):
+    def create_aad_user_in_sql(self, connection_args, query_list):
+        import platform
+        system = platform.system()
+        if system != 'Windows':
+            logger.warning(
+                "Only windows supports login to SQL by AAD authentication")
         import pkg_resources
         installed_packages = pkg_resources.working_set
         psy_installed = any(('pyodbc') in d.key.lower()
                             for d in installed_packages)
+
         if not psy_installed:
-            import platform
-            system = platform.system()
-            if system != 'Windows':
-                logger.error(
-                    "Only windows supports AAD authentication by pyodbc")
             import pip
             pip.main(['install', 'pyodbc'])
-            logger.error(
-                "please manually install odbc 18 for sql server and run 'pip install pyodbc'")
+            logger.warning(
+                "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16 "
+                "and run 'pip install pyodbc'")
 
         import pyodbc
-
         try:
-            with pyodbc.connect(conn_string) as conn:
+            # with pyodbc.connect(connection_args.get("connection_string")) as conn:
+            with pyodbc.connect(connection_args.get("connection_string"), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:
                     for execution_query in query_list:
                         try:
@@ -357,10 +355,22 @@ class SqlHandler(TargetHandler):
             raise AzureConnectionError("Fail to connect sql. " + str(e))
 
     def get_connection_string(self):
+        import pkg_resources
+        installed_packages = pkg_resources.working_set
+        psy_installed = any(('azure-identity') in d.key.lower()
+                            for d in installed_packages)
+        if not psy_installed:
+            import pip
+            pip.main(['install', 'azure-identity'])
+        from azure import identity
+        azure_credential = identity.AzureCliCredential()
+
+        token_bytes = azure_credential.get_token('https://database.windows.net/').token.encode('utf-16-le')
+        token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
+        SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
-            self.server + self.endpoint + ';database=' + self.dbname + ';UID=' + self.login_username + \
-            ';Authentication=ActiveDirectoryInteractive;'
-        return conn_string
+            self.server + self.endpoint + ';database=' + self.dbname+';'
+        return {'connection_string': conn_string, 'attrs_before':{SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
     def get_create_query(self, client_id):
         role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
@@ -585,7 +595,7 @@ class PostgresFlexHandler(TargetHandler):
 class PostgresSingleHandler(PostgresFlexHandler):
     def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
         super().__init__(cmd, target_id, target_type, auth_type, connection_name)
-        self.login_username = self.profile.get_current_account_user() + '@' + self.db_server
+        self.login_username += '@' + self.db_server
 
     def enable_target_aad_auth(self):
         return
