@@ -13,7 +13,7 @@ class TestTemplateBuilder(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm._template_builder.get_target_network_api', autospec=True)
     def test_build_load_balancer_resource(self, mock_get_api):
-        mock_get_api.returtn_value = '1970-01-01'
+        mock_get_api.return_value = '1970-01-01'
         cmd_mock = mock.MagicMock()
         cmd_mock.supported_api_version.return_value = False
 
