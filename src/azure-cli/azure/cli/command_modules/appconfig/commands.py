@@ -63,19 +63,19 @@ def load_command_table(self, _):
     # Management Plane Commands
     with self.command_group('appconfig', configstore_custom_util) as g:
         g.command('create', 'create_configstore')
-        g.command('delete', 'delete_configstore')
+        g.command('delete', 'delete_configstore', confirmation=True)
         g.command('update', 'update_configstore')
         g.command('list', 'list_configstore')
         g.command('list-deleted', 'list_deleted_configstore', table_transformer=deleted_configstore_output_format)
-        g.command('recover', 'recover_deleted_configstore')
-        g.command('purge', 'purge_deleted_configstore')
+        g.command('recover', 'recover_deleted_configstore', confirmation=True)
+        g.command('purge', 'purge_deleted_configstore', confirmation=True)
         g.show_command('show', 'show_configstore')
         g.show_command('show-deleted', 'show_deleted_configstore', table_transformer=deleted_configstore_output_format)
 
     with self.command_group('appconfig replica', configstore_replica_util, is_preview=True) as g:
         g.command('list', 'list_replica')
         g.command('create', 'create_replica')
-        g.command('delete', 'delete_replica')
+        g.command('delete', 'delete_replica', confirmation=True)
         g.show_command('show', 'show_replica')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
