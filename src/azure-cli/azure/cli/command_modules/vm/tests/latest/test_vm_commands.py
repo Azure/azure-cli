@@ -8033,6 +8033,17 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', self.kwargs['vmss'][:8]),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_create_flexible_vmss_with_priority_mix_policy', location='NorthEurope')
+    def test_create_flexible_vmss_with_priority_mix_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image Centos --orchestration-mode flexible --priority-count 4 --priority-percentage 50 --orchestration-mode flexible --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
+            self.check('vmss.priorityMixPolicy.baseRegularPriorityCount', 4),
+            self.check('vmss.priorityMixPolicy.regularPriorityPercentageAboveBase', 50),
+        ])
+
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
