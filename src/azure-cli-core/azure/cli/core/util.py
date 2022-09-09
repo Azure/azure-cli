@@ -538,10 +538,10 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
 
 def get_file_yaml(file_path, throw_on_empty=True, preserve_order=False):
     content = read_file_content(file_path)
-    if not content and not throw_on_empty:
+    if not content:
+        if throw_on_empty:
+            raise CLIError("Failed to parse file '{}' with exception:\nNo content in the file.".format(file_path))
         return None
-    else:
-        raise CLIError("Failed to parse file '{}' with exception:\nNo content in the file.".format(file_path))
     try:
         return yaml.safe_load(content)
     except yaml.parser.ParserError as ex:
