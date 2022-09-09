@@ -2129,16 +2129,3 @@ def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused
         raise CLIError('--rules and --rule-group-name must be provided at the same time')
     if rules is not None and rule_group_name is None:
         raise CLIError('--rules and --rule-group-name must be provided at the same time')
-
-
-def _is_bastion_connectable_resource(rid):
-    from azure.mgmt.core.tools import is_valid_resource_id
-    from azure.cli.command_modules.vm._vm_utils import is_valid_vm_resource_id, is_valid_vmss_resource_id
-
-    if is_valid_resource_id(rid):
-        if is_valid_vmss_resource_id(rid):
-            return True
-        if is_valid_vm_resource_id(rid):
-            return True
-
-    return False

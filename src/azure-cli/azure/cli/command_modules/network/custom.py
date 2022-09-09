@@ -8342,14 +8342,13 @@ def _build_args(cert_file, private_key_file):
 
 def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
     import os
-    from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
 
     _test_extension(SSH_EXTENSION_NAME)
 
     if not resource_port:
         resource_port = 22
-    if not _is_bastion_connectable_resource(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
@@ -8394,12 +8393,11 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
-    from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
 
     if not resource_port:
         resource_port = 3389
-    if not _is_bastion_connectable_resource(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
     if platform.system() == 'Windows':
         if disable_gateway:
             tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
