@@ -1312,6 +1312,12 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+            c.argument('target_edge_zone_encryption', nargs='+', min_api='2022-01-03',
+                       help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. '
+                            'Format for each edge zone: <edge zone>, <os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>.')
+            c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
+                       help='Space-separated list of regions, edge zones, replica counts, and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
+                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used.')
 
     with self.argument_context('sig show-community') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
