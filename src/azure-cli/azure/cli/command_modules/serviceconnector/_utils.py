@@ -72,7 +72,7 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
     return randstr.lower()
 
 
-def run_cli_cmd(cmd, retry=0, interval=0):
+def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     '''Run a CLI command
     :param cmd: The CLI command to be executed
     :param retry: The times to re-try
@@ -84,13 +84,13 @@ def run_cli_cmd(cmd, retry=0, interval=0):
     output = subprocess.run(cmd, shell=True, check=False,
                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     logger.debug(output)
-    if output.returncode != 0:
+    # print(output)
+    if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
         if retry:
             time.sleep(interval)
             return run_cli_cmd(cmd, retry - 1, interval)
-        else:
-            raise CLIInternalError('Command execution failed, command is: '
-                                   '{}, error message is: {}'.format(cmd, output.stderr))
+        raise CLIInternalError('Command execution failed, command is: '
+                               '{}, error message is: {}'.format(cmd, output.stderr))
 
     return json.loads(output.stdout) if output.stdout else None
 

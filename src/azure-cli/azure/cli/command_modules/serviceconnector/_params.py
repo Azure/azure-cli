@@ -134,7 +134,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     def add_mysql_umi_argument(context, target):
         if target in [RESOURCE.MysqlFlexible]:
-            context.argument('identity_resource_id', options_list=['--identity-resource-id'], help='The ID of identity used for MySQL flexible server AAD Authentication')
+            context.argument('identity_resource_id', options_list=['--identity-resource-id'],
+                             help='The ID of identity used for MySQL flexible server AAD Authentication')
         else:
             c.ignore('identity_resource_id')
 

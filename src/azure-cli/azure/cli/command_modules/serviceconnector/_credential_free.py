@@ -4,13 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import struct
-import time
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     AzureConnectionError,
-    CLIInternalError,
     ValidationError
 )
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2
@@ -23,7 +21,6 @@ from azure.cli.core.commands.arm import ArmTemplateBuilder
 from ._utils import run_cli_cmd, generate_random_string
 from ._resource_config import (
     RESOURCE,
-    CLIENT_TYPE,
 )
 
 # pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member
@@ -44,7 +41,8 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     if target_handler is None:
         return
 
-    user_info = run_cli_cmd('az ad user show --id {}'.format(target_handler.login_username))
+    user_info = run_cli_cmd(
+        'az ad user show --id {}'.format(target_handler.login_username))
     user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
         else user_info.get('id')
     if user_object_id is None:
@@ -54,13 +52,15 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     # enable source mi
     source_object_id = source_handler.get_identity_pid()
 
-    identity_info = run_cli_cmd('az ad sp show --id {}'.format(source_object_id), 15, 10)
+    identity_info = run_cli_cmd(
+        'az ad sp show --id {}'.format(source_object_id), 15, 10)
     client_id = identity_info.get('appId')
     identity_name = identity_info.get('displayName')
 
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
-    target_handler.set_user_admin(user_object_id, identity_resource_id=identity_resource_id)
+    target_handler.set_user_admin(
+        user_object_id, identity_resource_id=identity_resource_id)
 
     # create an aad user in db
     target_handler.create_aad_user(identity_name, client_id)
@@ -105,7 +105,8 @@ class TargetHandler:
         self.subscription = target_segments.get('subscription')
         self.resource_group = target_segments.get('resource_group')
         self.auth_type = auth_type
-        self.login_username = run_cli_cmd('az account show').get("user").get("name")
+        self.login_username = run_cli_cmd(
+            'az account show').get("user").get("name")
 
     def enable_target_aad_auth(self):
         return
@@ -138,22 +139,26 @@ class MysqlFlexibleHandler(TargetHandler):
     def set_user_admin(self, user_object_id, **kwargs):
         identity_resource_id = kwargs['identity_resource_id']
         admins = run_cli_cmd(
-            'az mysql flexible-server ad-admin list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription)
+            'az mysql flexible-server ad-admin list -g {} -s {} --subscription {}'.format(
+                self.resource_group, self.server, self.subscription)
         )
         is_admin = any(ad.get('sid') == user_object_id for ad in admins)
         if is_admin:
             return
-        
+
         logger.warning('Set current user as DB Server AAD Administrators.')
         # set user as AAD admin
         if identity_resource_id is None:
             # identity_resource_id = "/subscriptions/d82d7763-8e12-4f39-a7b6-496a983ec2f4/resourcegroups/zxf-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-aad-umi"
-            raise ValidationError("Provide --identity-resource-id to set %s as AAD administrator.", self.user)
+            raise ValidationError(
+                "Provide --identity-resource-id to set {} as AAD administrator.".format(self.user))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
         if (not mysql_umi) and True:
-            run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(self.resource_group, self.server, self.subscription, identity_resource_id) )
-        run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(self.resource_group, self.server, self.subscription, self.login_username, user_object_id ,identity_resource_id) )
+            run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(
+                self.resource_group, self.server, self.subscription, identity_resource_id))
+        run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(
+            self.resource_group, self.server, self.subscription, self.login_username, user_object_id, identity_resource_id))
 
     def create_aad_user(self, identity_name, client_id):
         query_list = self.get_create_query(client_id)
@@ -245,7 +250,8 @@ class MysqlFlexibleHandler(TargetHandler):
             "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
             "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
                 self.aad_username, client_id),
-            "GRANT ALL PRIVILEGES ON Db.* TO '{}'@'%';".format(self.aad_username),
+            "GRANT ALL PRIVILEGES ON Db.* TO '{}'@'%';".format(
+                self.aad_username),
             "FLUSH privileges;"
         ]
 
@@ -281,7 +287,7 @@ class SqlHandler(TargetHandler):
             logger.warning('Setting current user as database server AAD admin:'
                            ' user=%s object id=%s', self.login_username, user_object_id)
             run_cli_cmd('az sql server ad-admin create -g {} --server-name {} --display-name {} --object-id {} --subscription {}'.format(
-                            self.resource_group, self.server, self.login_username, user_object_id, self.subscription)).get('objectId')
+                self.resource_group, self.server, self.login_username, user_object_id, self.subscription)).get('objectId')
 
     def create_aad_user(self, identity_name, client_id):
         self.aad_username = identity_name
@@ -314,7 +320,8 @@ class SqlHandler(TargetHandler):
                 'az sql server show --ids {}'.format(self.target_id))
             # logger.warning("Update database server firewall rule to connect...")
             if target.get('publicNetworkAccess') == "Disabled":
-                run_cli_cmd('az sql server update -e true --ids {}'.format(self.target_id))
+                run_cli_cmd(
+                    'az sql server update -e true --ids {}'.format(self.target_id))
             run_cli_cmd(
                 'az sql server firewall-rule create -g {0} -s {1} -n {2} '
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
@@ -365,12 +372,15 @@ class SqlHandler(TargetHandler):
         from azure import identity
         azure_credential = identity.AzureCliCredential()
 
-        token_bytes = azure_credential.get_token('https://database.windows.net/').token.encode('utf-16-le')
-        token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
-        SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
+        token_bytes = azure_credential.get_token(
+            'https://database.windows.net/').token.encode('utf-16-le')
+        token_struct = struct.pack(
+            f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
+        # This connection option is defined by microsoft in msodbcsql.h
+        SQL_COPT_SS_ACCESS_TOKEN = 1256
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
             self.server + self.endpoint + ';database=' + self.dbname+';'
-        return {'connection_string': conn_string, 'attrs_before':{SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
+        return {'connection_string': conn_string, 'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
     def get_create_query(self, client_id):
         role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
@@ -547,11 +557,13 @@ class PostgresFlexHandler(TargetHandler):
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
             if search_ip is not None:
                 self.ip = search_ip.group(1)
-            raise AzureConnectionError("Fail to connect to postgresql. " + str(e))
+            raise AzureConnectionError(
+                "Fail to connect to postgresql. " + str(e))
 
         conn.autocommit = True
         cursor = conn.cursor()
-        logger.warning("Adding new AAD user %s to database...", self.aad_username)
+        logger.warning("Adding new AAD user %s to database...",
+                       self.aad_username)
         for execution_query in query_list:
             try:
                 logger.debug(execution_query)
@@ -674,6 +686,10 @@ class SourceHandler:
         return
 
 
+def output_is_none(output):
+    return not output.stdout
+
+
 class SpringHandler(SourceHandler):
     def get_identity_pid(self):
         segments = parse_resource_id(self.source_id)
@@ -681,7 +697,8 @@ class SpringHandler(SourceHandler):
         spring = segments.get('name')
         app = segments.get('child_name_1')
         rg = segments.get('resource_group')
-        logger.warning('Checking if Spring Cloud app enables System Identity...')
+        logger.warning(
+            'Checking if Spring Cloud app enables System Identity...')
         identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
             self.source_type, rg, spring, app, sub))
         if (identity is None or identity.get('type') != "SystemAssigned"):
@@ -690,58 +707,50 @@ class SpringHandler(SourceHandler):
             run_cli_cmd(
                 'az {} app identity assign -g {} -s {} -n {} --subscription {}'.format(
                     self.source_type, rg, spring, app, sub))
-            cnt = 0
-            while (cnt < 15):
-                identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
-                    self.source_type, rg, spring, app, sub))
-                if identity is not None:
-                    break
-                time.sleep(5)
-                cnt += 1
+
+            identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
+                self.source_type, rg, spring, app, sub), 15, 5, output_is_none)
+
         if identity is None:
-            raise CLIError("Unable to get system identity of Spring. Please try it later.")
+            raise CLIError(
+                "Unable to get system identity of Spring. Please try it later.")
         return identity.get('principalId')
 
 
 class WebappHandler(SourceHandler):
     def get_identity_pid(self):
         logger.warning('Checking if WebApp enables System Identity...')
-        identity = run_cli_cmd('az webapp identity show --ids {}'.format(self.source_id))
+        identity = run_cli_cmd(
+            'az webapp identity show --ids {}'.format(self.source_id))
         if (identity is None or "SystemAssigned" not in identity.get('type')):
             # assign system identity for spring-cloud
             logger.warning('Enabling WebApp System Identity...')
             run_cli_cmd(
                 'az webapp identity assign --ids {}'.format(self.source_id))
-            cnt = 0
-            while (cnt < 15):
-                identity = run_cli_cmd(
-                    'az webapp identity show --ids {}'.format(self.source_id))
-                if identity is not None:
-                    break
-                time.sleep(5)
-                cnt += 1
+
+            identity = run_cli_cmd(
+                'az webapp identity show --ids {}'.format(self.source_id), 15, 5, output_is_none)
+
         if identity is None:
-            raise CLIError("Unable to get system identity of Web App. Please try it later.")
+            raise CLIError(
+                "Unable to get system identity of Web App. Please try it later.")
         return identity.get('principalId')
 
 
 class ContainerappHandler(SourceHandler):
     def get_identity_pid(self):
         logger.warning('Checking if Container App enables System Identity...')
-        identity = run_cli_cmd('az containerapp identity show --ids {}'.format(self.source_id))
+        identity = run_cli_cmd(
+            'az containerapp identity show --ids {}'.format(self.source_id))
         if (identity is None or "SystemAssigned" not in identity.get('type')):
             # assign system identity for spring-cloud
             logger.warning('Enabling Container App System Identity...')
             run_cli_cmd(
                 'az containerapp identity assign --ids {} --system-assigned'.format(self.source_id))
-            cnt = 0
-            while (cnt < 15):
-                identity = run_cli_cmd(
-                    'az containerapp identity show --ids {}'.format(self.source_id))
-                if identity is not None:
-                    break
-                time.sleep(5)
-                cnt += 1
+            identity = run_cli_cmd(
+                'az containerapp identity show --ids {}'.format(self.source_id), 15, 5, output_is_none)
+
         if identity is None:
-            raise CLIError("Unable to get system identity of Container App. Please try it later.")
+            raise CLIError(
+                "Unable to get system identity of Container App. Please try it later.")
         return identity.get('principalId')
