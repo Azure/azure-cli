@@ -766,7 +766,7 @@ class SubscriptionFinder:
                     # The tenant requires MFA and can't be accessed with home tenant's refresh token
                     mfa_tenants.append(t)
                 else:
-                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                    logger.warning("Failed to authenticate %s due to error '%s'", t.tenant_id_name, ex)
                 continue
 
             if not subscriptions:
@@ -856,4 +856,8 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
     # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
     use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
 
-    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, **kwargs)
+    # PREVIEW: On Windows, use core.allow_broker=true to use broker (WAM) for authentication.
+    allow_broker = cli_ctx.config.getboolean('core', 'allow_broker', fallback=False)
+
+    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, allow_broker=allow_broker,
+                    **kwargs)
