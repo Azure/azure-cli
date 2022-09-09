@@ -4465,43 +4465,12 @@ examples:
     crafted: true
 """
 
-helps['network nsg'] = """
-type: group
-short-summary: Manage Azure Network Security Groups (NSGs).
-long-summary: >
-    You can control network traffic to resources in a virtual network using a network security group.
-    A network security group contains a list of security rules that allow or deny inbound or
-    outbound network traffic based on source or destination IP addresses, Application Security
-    Groups, ports, and protocols. For more information visit https://docs.microsoft.com/azure/virtual-network/virtual-networks-create-nsg-arm-cli
-"""
-
 helps['network nsg create'] = """
 type: command
 short-summary: Create a network security group.
 examples:
   - name: Create an NSG in a resource group within a region with tags.
     text: az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
-"""
-
-helps['network nsg delete'] = """
-type: command
-short-summary: Delete a network security group.
-examples:
-  - name: Delete an NSG in a resource group.
-    text: az network nsg delete -g MyResourceGroup -n MyNsg
-"""
-
-helps['network nsg list'] = """
-type: command
-short-summary: List network security groups.
-examples:
-  - name: List all NSGs in the 'westus' region.
-    text: az network nsg list --query "[?location=='westus']"
-"""
-
-helps['network nsg rule'] = """
-type: group
-short-summary: Manage network security group rules.
 """
 
 helps['network nsg rule create'] = """
@@ -4527,14 +4496,6 @@ examples:
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg \\
             --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080 \\
             --destination-asgs Web --access Allow --protocol Tcp --description "Allow Internet to Web ASG on ports 80,8080."
-"""
-
-helps['network nsg rule delete'] = """
-type: command
-short-summary: Delete a network security group rule.
-examples:
-  - name: Delete a network security group rule.
-    text: az network nsg rule delete -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule
 """
 
 helps['network nsg rule list'] = """
@@ -4563,18 +4524,6 @@ examples:
     text: |
         az network nsg rule update --name MyNsgRule --nsg-name MyNsg --resource-group MyResourceGroup --source-address-prefixes 208.130.28/24
     crafted: true
-"""
-
-helps['network nsg show'] = """
-type: command
-short-summary: Get information about a network security group.
-examples:
-  - name: Get basic information about an NSG.
-    text: az network nsg show -g MyResourceGroup -n MyNsg
-  - name: Get the default security rules of an NSG and format the output as a table.
-    text: az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[]" -o table
-  - name: Get all default NSG rules with "Allow" access and format the output as a table.
-    text: az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[?access=='Allow']" -o table
 """
 
 helps['network nsg update'] = """
@@ -6873,6 +6822,14 @@ parameters:
     short-summary: Name or ID of the VM to target.
   - name: --filters
     short-summary: JSON encoded list of packet filters. Use `@{path}` to load from file.
+  - name: --target
+    short-summary: Name or ID of the Target Resource. If TargetType is AzureVMSS, then target field is mandatory.
+  - name: --target-type
+    short-summary: Resource type of Target. Only AzureVM and AzureVMSS are supported now. Default Value is AzureVM.
+  - name: --include
+    short-summary: Space-separated list of VMSS Instances to include in Packet capture like 0 1 2
+  - name: --exclude
+    short-summary: Space-separated list of VMSS Instances to exclude in Packet capture
 examples:
   - name: Create a packet capture session on a VM.
     text: az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm --storage-account MyStorageAccount
@@ -6901,6 +6858,18 @@ examples:
                 { \\
                     "protocol":"UDP" \\
                 }]'
+  - name: Create a packet capture session on a VMSS.
+    text: |
+        az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVmVMSS \\
+            --storage-account MyStorageAccount --target-type "AzureVMSS"
+  - name: Create a packet capture session on a VMSS with including particular instances.
+    text: |
+        az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --target MyVmVMSS \\
+            --storage-account MyStorageAccount --target-type "AzureVMSS" --include "0" "1"
+  - name: Create a packet capture session on a VMSS with excluding particular instances.
+    text: |
+        az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVmVMSS \\
+            --storage-account MyStorageAccount --target-type "AzureVMSS" --exclude "0" "1"
 """
 
 helps['network watcher packet-capture delete'] = """
@@ -7124,6 +7093,16 @@ examples:
   - name: Create a Azure Bastion host machine. (autogenerated)
     text: |
         az network bastion create --location westus2 --name MyBastionHost --public-ip-address MyPublicIpAddress --resource-group MyResourceGroup --vnet-name MyVnet
+    crafted: true
+"""
+
+helps['network bastion update'] = """
+type: command
+short-summary: Update a Azure Bastion host machine.
+examples:
+  - name: Update a Azure Bastion host machine to enable native client support
+    text: |
+        az network bastion update --name MyBastionHost --resource-group MyResourceGroup --enable-tunneling
     crafted: true
 """
 

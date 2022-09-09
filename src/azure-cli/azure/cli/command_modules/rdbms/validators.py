@@ -264,7 +264,7 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
         raise ArgumentUsageError("Data encryption cannot be disabled if key or backup key is provided.")
 
     if not disable_data_encryption and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
-       backup_byok_identity is None:
+       (byok_identity is not None and backup_byok_identity is None):
         raise ArgumentUsageError("Backup identity and key need to be provided for geo-redundant server.")
 
     if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
@@ -558,3 +558,36 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
         raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
+
+
+def _validate_identity(cmd, namespace, identity):
+    if is_valid_resource_id(identity):
+        return identity
+
+    if _is_resource_name(identity):
+        return resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.ManagedIdentity',
+            type='userAssignedIdentities',
+            name=identity)
+
+    raise ValidationError('Invalid identity name or ID.')
+
+
+def validate_identity(cmd, namespace):
+    if namespace.identity:
+        namespace.identity = _validate_identity(cmd, namespace, namespace.identity)
+
+
+def validate_byok_identity(cmd, namespace):
+    if namespace.byok_identity:
+        namespace.byok_identity = _validate_identity(cmd, namespace, namespace.byok_identity)
+
+    if namespace.backup_byok_identity:
+        namespace.backup_byok_identity = _validate_identity(cmd, namespace, namespace.backup_byok_identity)
+
+
+def validate_identities(cmd, namespace):
+    if namespace.identities:
+        namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
