@@ -20,6 +20,7 @@ def get_appconfig_service_client(cli_ctx):
 def cf_configstore(cli_ctx, *_):
     return get_appconfig_service_client(cli_ctx).configuration_stores
 
+
 def cf_replicas(cli_ctx, *_):
     return get_appconfig_service_client(cli_ctx).replicas
 
