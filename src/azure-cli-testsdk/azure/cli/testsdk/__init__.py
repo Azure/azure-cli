@@ -6,7 +6,7 @@
 from .scenario_tests import live_only, record_only, get_sha1_hash
 
 from .base import ScenarioTest, LiveScenarioTest, LocalContextScenarioTest
-from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
+from .preparers import (ApiManagementPreparer, StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
                         KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer,
                         VnetNicPreparer, LogAnalyticsWorkspacePreparer)
 from .exceptions import CliTestError
@@ -16,7 +16,7 @@ from .decorators import api_version_constraint
 from .utilities import create_random_name, MSGraphNameReplacer
 from .patches import MOCKED_USER_NAME
 
-__all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'StorageAccountPreparer',
+__all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'ApiManagementPreparer', 'StorageAccountPreparer',
            'RoleBasedServicePrincipalPreparer', 'KeyVaultPreparer', 'ManagedHSMPreparer',
            'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck', 'JMESPathCheckNotExists',
            'JMESPathCheckExists', 'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck',

@@ -15,12 +15,13 @@ from azure.cli.command_modules.apim._help import helps  # pylint: disable=unused
 
 
 class ApimCommandsLoader(AzCommandsLoader):
-
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         from azure.cli.command_modules.apim._client_factory import cf_apim
+        from azure.cli.command_modules.apim.operations import ApimSubgroupsLoader
 
+        self.subgroups_loader = ApimSubgroupsLoader(self)
         apim_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.apim.custom#{}', client_factory=cf_apim)
 
         super(ApimCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=apim_custom,
@@ -29,11 +30,11 @@ class ApimCommandsLoader(AzCommandsLoader):
     def load_command_table(self, args):
         from azure.cli.command_modules.apim.commands import load_command_table
         load_command_table(self, args)
+        self.subgroups_loader.load_command_table(args)
+
         try:
             from .generated.commands import load_command_table as load_command_table_generated
             load_command_table_generated(self, args)
-            from .manual.commands import load_command_table as load_command_table_manual
-            load_command_table_manual(self, args)
         except ImportError:
             pass
         return self.command_table
@@ -41,11 +42,11 @@ class ApimCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         from azure.cli.command_modules.apim._params import load_arguments
         load_arguments(self, command)
+        self.subgroups_loader.load_arguments(command)
+
         try:
             from .generated._params import load_arguments as load_arguments_generated
             load_arguments_generated(self, command)
-            from .manual._params import load_arguments as load_arguments_manual
-            load_arguments_manual(self, command)
         except ImportError:
             pass
 

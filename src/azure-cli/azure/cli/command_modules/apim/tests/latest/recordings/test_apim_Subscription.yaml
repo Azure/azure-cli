@@ -1,0 +1,633 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/master\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/subscriptions\",\r\n      \"name\":
+        \"master\",\r\n      \"properties\": {\r\n        \"scope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/\",\r\n
+        \       \"displayName\": \"Built-in all-access subscription\",\r\n        \"state\":
+        \"active\",\r\n        \"createdDate\": \"2022-08-30T21:00:49.013Z\",\r\n
+        \       \"startDate\": null,\r\n        \"expirationDate\": null,\r\n        \"endDate\":
+        null,\r\n        \"notificationDate\": null,\r\n        \"stateComment\":
+        null,\r\n        \"allowTracing\": false\r\n      }\r\n    }\r\n  ],\r\n  \"count\":
+        1\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '870'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sid --scope -d
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003?api-version=2021-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003","name":"clitest000003","type":"Microsoft.ApiManagement/service","tags":{},"location":"West
+        US","etag":"AAAAAAA6O3A=","properties":{"publisherEmail":"publisher@contsoso.com","publisherName":"Contoso","notificationSenderEmail":"publisher@contsoso.com","provisioningState":"Succeeded","targetProvisioningState":"","createdAtUtc":"2022-08-30T21:00:43.0663764Z","gatewayUrl":"https://clitest000003.azure-api.net","gatewayRegionalUrl":null,"portalUrl":null,"developerPortalUrl":null,"managementApiUrl":null,"scmUrl":null,"hostnameConfigurations":[{"type":"Proxy","hostName":"clitest000003.azure-api.net","encodedCertificate":null,"keyVaultId":null,"certificatePassword":null,"negotiateClientCertificate":false,"certificate":null,"defaultSslBinding":true,"identityClientId":null,"certificateSource":"BuiltIn","certificateStatus":null}],"publicIPAddresses":null,"privateIPAddresses":null,"additionalLocations":null,"virtualNetworkConfiguration":null,"customProperties":{"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30":"False","Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2":"False"},"virtualNetworkType":"None","certificates":null,"disableGateway":false,"apiVersionConstraint":{"minApiVersion":null},"publicIpAddressId":null,"publicNetworkAccess":"Enabled","privateEndpointConnections":null,"platformVersion":"mtv1"},"sku":{"name":"Consumption","capacity":0},"identity":null,"zones":null,"systemData":{"createdBy":"kehilli@microsoft.com","createdByType":"User","createdAt":"2022-08-30T21:00:43.0159965Z","lastModifiedBy":"kehilli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-30T21:00:43.0159965Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2169'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:47 GMT
+      etag:
+      - '"AAAAAAA6O3A="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/apis",
+      "displayName": "foo-bar"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '216'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sid --scope -d
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/subscriptions\",\r\n  \"name\":
+        \"apim_subscription-000001\",\r\n  \"properties\": {\r\n    \"scope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/apis\",\r\n
+        \   \"displayName\": \"foo-bar\",\r\n    \"state\": \"active\",\r\n    \"createdDate\":
+        \"2022-08-30T21:01:49.0342463Z\",\r\n    \"startDate\": null,\r\n    \"expirationDate\":
+        null,\r\n    \"endDate\": null,\r\n    \"notificationDate\": null,\r\n    \"primaryKey\":
+        \"c9cfada0479542b0a7d162ae2e3711f3\",\r\n    \"secondaryKey\": \"e3e29ffc60204a99b66baadbae3443d9\",\r\n
+        \   \"stateComment\": null\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '865'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:48 GMT
+      etag:
+      - '"AAAAAADnpH8="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sid
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/subscriptions\",\r\n  \"name\":
+        \"apim_subscription-000001\",\r\n  \"properties\": {\r\n    \"scope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/apis\",\r\n
+        \   \"displayName\": \"foo-bar\",\r\n    \"state\": \"active\",\r\n    \"createdDate\":
+        \"2022-08-30T21:01:49.033Z\",\r\n    \"startDate\": null,\r\n    \"expirationDate\":
+        null,\r\n    \"endDate\": null,\r\n    \"notificationDate\": null,\r\n    \"stateComment\":
+        null\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '749'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:49 GMT
+      etag:
+      - '"AAAAAADnpH8="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"displayName": "bar-foo"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/json
+      If-Match:
+      - '*'
+      ParameterSetName:
+      - -n -g --sid -d
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/subscriptions\",\r\n  \"name\":
+        \"apim_subscription-000001\",\r\n  \"properties\": {\r\n    \"scope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/apis\",\r\n
+        \   \"displayName\": \"bar-foo\",\r\n    \"state\": \"active\",\r\n    \"createdDate\":
+        \"2022-08-30T21:01:49.033Z\",\r\n    \"startDate\": null,\r\n    \"expirationDate\":
+        null,\r\n    \"endDate\": null,\r\n    \"notificationDate\": null,\r\n    \"primaryKey\":
+        \"c9cfada0479542b0a7d162ae2e3711f3\",\r\n    \"secondaryKey\": \"e3e29ffc60204a99b66baadbae3443d9\",\r\n
+        \   \"stateComment\": null\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '861'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:50 GMT
+      etag:
+      - '"AAAAAADnpII="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sid -d
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001\",\r\n
+        \ \"type\": \"Microsoft.ApiManagement/service/subscriptions\",\r\n  \"name\":
+        \"apim_subscription-000001\",\r\n  \"properties\": {\r\n    \"scope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/apis\",\r\n
+        \   \"displayName\": \"bar-foo\",\r\n    \"state\": \"active\",\r\n    \"createdDate\":
+        \"2022-08-30T21:01:49.033Z\",\r\n    \"startDate\": null,\r\n    \"expirationDate\":
+        null,\r\n    \"endDate\": null,\r\n    \"notificationDate\": null,\r\n    \"stateComment\":
+        null\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '749'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:50 GMT
+      etag:
+      - '"AAAAAADnpII="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --sid
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001/listSecrets?api-version=2021-08-01
+  response:
+    body:
+      string: '{"primaryKey":"c9cfada0479542b0a7d162ae2e3711f3","secondaryKey":"e3e29ffc60204a99b66baadbae3443d9"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '99'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:50 GMT
+      etag:
+      - '"AAAAAADnpII="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription keys regenerate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --key-kind -n -g --sid
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001/regeneratePrimaryKey?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Tue, 30 Aug 2022 21:01:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription keys regenerate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --key-kind -n -g --sid
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001/regenerateSecondaryKey?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Tue, 30 Aug 2022 21:01:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --sid
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001/listSecrets?api-version=2021-08-01
+  response:
+    body:
+      string: '{"primaryKey":"4c7b756076fa4b25b2b0aca7d3c2410e","secondaryKey":"b9c42e0ea8f143fcb3442074fd0fc160"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '99'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:52 GMT
+      etag:
+      - '"AAAAAADnpJg="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-Match:
+      - '*'
+      ParameterSetName:
+      - -n -g --sid --yes
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/apim_subscription-000001?api-version=2021-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 30 Aug 2022 21:01:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.39.0 azsdk-python-mgmt-apimanagement/3.0.0 Python/3.10.5 (macOS-12.5.1-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions?api-version=2021-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/subscriptions/master\",\r\n
+        \     \"type\": \"Microsoft.ApiManagement/service/subscriptions\",\r\n      \"name\":
+        \"master\",\r\n      \"properties\": {\r\n        \"scope\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim_subscription-000002/providers/Microsoft.ApiManagement/service/clitest000003/\",\r\n
+        \       \"displayName\": \"Built-in all-access subscription\",\r\n        \"state\":
+        \"active\",\r\n        \"createdDate\": \"2022-08-30T21:00:49.013Z\",\r\n
+        \       \"startDate\": null,\r\n        \"expirationDate\": null,\r\n        \"endDate\":
+        null,\r\n        \"notificationDate\": null,\r\n        \"stateComment\":
+        null,\r\n        \"allowTracing\": false\r\n      }\r\n    }\r\n  ],\r\n  \"count\":
+        1\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '870'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Aug 2022 21:01:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

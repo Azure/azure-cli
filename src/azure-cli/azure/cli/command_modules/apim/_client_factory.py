@@ -22,29 +22,45 @@ def cf_product(cli_ctx, *_):
     return cf_apim(cli_ctx).product
 
 
-def cf_nv(cli_ctx, *_):
+def cf_product_api(cli_ctx, *_):
+    return cf_apim(cli_ctx).product_api
+
+
+def cf_policy(cli_ctx, *_):
+    return cf_apim(cli_ctx).policy
+
+
+def cf_subscription(cli_ctx, *_):
+    return cf_apim(cli_ctx).subscription
+
+
+def cf_api_policy(cli_ctx, *_):
+    return cf_apim(cli_ctx).api_policy
+
+
+def cf_named_value(cli_ctx, *_):
     return cf_apim(cli_ctx).named_value
 
 
-def cf_apiops(cli_ctx, *_):
+def cf_api_operation(cli_ctx, *_):
     return cf_apim(cli_ctx).api_operation
 
 
-def cf_apirelease(cli_ctx, *_):
+def cf_api_release(cli_ctx, *_):
     return cf_apim(cli_ctx).api_release
 
 
-def cf_apirevision(cli_ctx, *_):
+def cf_api_revision(cli_ctx, *_):
     return cf_apim(cli_ctx).api_revision
 
 
-def cf_apiversionset(cli_ctx, *_):
+def cf_api_version_set(cli_ctx, *_):
     return cf_apim(cli_ctx).api_version_set
 
 
-def cf_apischema(cli_ctx, *_):
+def cf_api_schema(cli_ctx, *_):
     return cf_apim(cli_ctx).api_schema
 
 
-def cf_ds(cli_ctx, *_):
+def cf_deleted_services(cli_ctx, *_):
     return cf_apim(cli_ctx).deleted_services
