@@ -71,6 +71,12 @@ def compute_sha256(resource_url: str) -> str:
 
 def collect_resources() -> str:
     nodes = make_graph('azure-cli')
+    # `Pygments`, `PyYAML`, `six`, and `typing-extensions` are provided by separate Homebrew packages,
+    # and so should not be included in the resources section
+    already_packaged = ["Pygments", "PyYAML", "six", "typing-extensions"]
+    for package_name in already_packaged:
+        del nodes[package_name]
+
     nodes_render = []
     for node_name in sorted(nodes):
         if not resource_filter(node_name):
