@@ -222,7 +222,7 @@ def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, i
     if replication_role not in ('None', None) and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for replica server cannot be disabled.")
     # if ha, cannot be disabled
-    if high_availability in ['Enabled', 'ZoneRedundant'] and auto_grow.lower() == 'disabled':
+    if high_availability == 'ZoneRedundant' and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
 
 
