@@ -153,6 +153,13 @@ def is_sku_available(cmd, sku_info, zone):
     return is_available
 
 
+def is_os_disk(DiskCreateOption, disk_create_option, os_type):
+    if disk_create_option == DiskCreateOption.from_image or disk_create_option in \
+            [DiskCreateOption.import_enum, DiskCreateOption.upload, DiskCreateOption.empty] and os_type:
+        return True
+    return False
+
+
 # pylint: disable=too-many-statements, too-many-branches
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,

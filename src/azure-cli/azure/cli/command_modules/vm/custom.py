@@ -307,8 +307,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    Disk, CreationData, DiskCreateOption, Encryption, DiskSecurityTypes = cmd.get_models(
-        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption', 'DiskSecurityTypes')
+    Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
@@ -359,20 +359,62 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         client = _compute_client_factory(cmd.cli_ctx)
         response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
                                                      disk_version)
-        image_reference = response.id
+
         if hasattr(response, 'hyper_v_generation') and response.hyper_v_generation == 'V2' and not image_reference_lun:
-            # TODO log
-            if hasattr(response, 'features') and 'SecurityType' in response.features \
+            # will set default value of hyper_v_generation
+            logger.warning('Starting 05/xx/2023 az disk create command will deploy Trusted Launch VM by default. '
+                           'To know more about Trusted Launch, please visit '
+                           'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+            if hasattr(response, 'features') and response.features \
+                    and 'SecurityType' in response.features \
                     and response.features['SecurityType'] == 'TrustedLaunchSupported':
-                # TODO log
+                # will set default value of security_type
                 pass
 
         # image_reference is an ID now
+        image_reference = response.id
         image_reference = {'id': image_reference}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
 
     if gallery_image_reference is not None:
+        from azure.cli.command_modules.vm._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id
+        if is_shared_gallery_image_id(gallery_image_reference):
+            # the gallery image reference is shared gallery image id
+            from azure.cli.command_modules.vm._vm_utils import parse_shared_gallery_image_id
+            image_info = parse_shared_gallery_image_id(gallery_image_reference)
+            from ._client_factory import cf_shared_gallery_image
+            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+        elif is_community_gallery_image_id(gallery_image_reference):
+            # the gallery image reference is community gallery image id
+            from azure.cli.command_modules.vm._vm_utils import parse_community_gallery_image_id
+            image_info = parse_community_gallery_image_id(gallery_image_reference)
+            from ._client_factory import cf_community_gallery_image
+            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+                location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+        else:
+            # the gallery image reference is compute gallery image id
+            from msrestazure.tools import parse_resource_id
+            terms = parse_resource_id(gallery_image_reference)
+            gallery_image_reference_rg, gallery_name, gallery_image_definition = \
+                terms['resource_group'], terms['name'], terms['child_name_1']
+            client = _compute_client_factory(cmd.cli_ctx)
+            gallery_image_info = client.gallery_images.get(resource_group_name=gallery_image_reference_rg,
+                                                           gallery_name=gallery_name,
+                                                           gallery_image_name=gallery_image_definition)
+        if hasattr(gallery_image_info, 'hyper_v_generation') \
+                and gallery_image_info.hyper_v_generation == 'V2' and not gallery_image_reference_lun:
+            # will set default value of hyper_v_generation
+            logger.warning('Starting 05/xx/2023 az disk create command will deploy Trusted Launch VM by default. '
+                           'To know more about Trusted Launch, please visit '
+                           'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+            if hasattr(gallery_image_info, 'features') and gallery_image_info.features \
+                    and 'SecurityType' in gallery_image_info.features \
+                    and gallery_image_info.features['SecurityType'] == 'TrustedLaunchSupported':
+                # will set default value of security_type
+                pass
+
         key = gallery_image_reference_type if gallery_image_reference_type else 'id'
         gallery_image_reference = {key: gallery_image_reference}
         if gallery_image_reference_lun is not None:
@@ -416,11 +458,17 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
+    if option == DiskCreateOption.empty and os_type:
+        # will set default value of hyper_v_generation and security_type
+        logger.warning('Starting 05/xx/2023 az disk create command will deploy Trusted Launch VM by default. '
+                       'To know more about Trusted Launch, please visit '
+                       'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
     if hyper_v_generation:
-        if option == DiskCreateOption.empty:
-            # TODO log
-            pass
         disk.hyper_v_generation = hyper_v_generation
+        from azure.cli.command_modules.vm._vm_utils import is_os_disk
+        if hyper_v_generation == 'V1' and is_os_disk(DiskCreateOption, option, os_type):
+            # creating OS disk with Generation 1 will be recommended to upgrade security for user workloads
+            pass
 
     if zone:
         disk.zones = zone
