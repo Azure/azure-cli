@@ -524,6 +524,13 @@ def validate_default_params(cmd, namespace):
     return missing_args
 
 
+def validate_connection_name(name):
+    if not re.match(r'^[A-Za-z0-9\._]+$', name):
+        raise InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
+                                        "numbers (0-9), periods ('.'), and underscores ('_')")
+    return True
+
+
 def apply_source_args(cmd, namespace, arg_values):
     '''Set source resource id by arg_values
     '''
@@ -635,12 +642,14 @@ def validate_params(cmd, namespace):
     # for command: 'create'
     elif 'create' in cmd.name:
         # if --new is specified
+        if getattr(namespace, 'connection_name', None) is None:
+            namespace.connection_name = generate_connection_name(cmd)
+        else:
+            validate_connection_name(namespace.connection_name)
         if getattr(namespace, 'new_addon'):
             _validate_and_apply(validate_addon_params, apply_addon_params)
         else:
             _validate_and_apply(validate_create_params, apply_create_params)
-        if getattr(namespace, 'connection_name', None) is None:
-            namespace.connection_name = generate_connection_name(cmd)
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)
     # for command: update
@@ -665,6 +674,8 @@ def validate_kafka_params(cmd, namespace):
         elif namespace.connection_name.endswith('_schema'):
             raise InvalidArgumentValueError("Connection name of {} can not end with "
                                             "'_schema'".format(RESOURCE.ConfluentKafka.value))
+        else:
+            validate_connection_name(namespace.connection_name)
 
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)

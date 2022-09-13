@@ -6060,6 +6060,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])
 
+
 class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi")
@@ -6130,3 +6131,144 @@ class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
                         JMESPathCheckExists("[] | [?name == 'DATABASE_MIRRORING']"),
                         JMESPathCheckExists("[] | [?name == 'SERVICE_BROKER']"),
                         JMESPathCheck('length(@)', 2)]).get_output_in_json()
+
+
+class SqlManagedInstanceServerTrustCertificateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_partner_cert_mgmt(self, mi, rg):
+        cert_blob = '0x308202A63082018EA003020102021030F974B5FBF8D0974FECE3DD42A58835300D06092A864886F70D01010B0500300F310D300B060355040313046A656A65301E170D3232303630383133323032335A170D3330313231323030303030305A300F310D300B060355040313046A656A6530820122300D06092A864886F70D01010105000382010F003082010A0282010100933AF1C5A349DE07C40DDF2235F4EDCCC2F363CB7078ECA21C370082C91A5832593D58CAF169200EE20C58BA7E7B076ECB504CCEE7EB45CAAEE9E5D221F00FCADB54B12623BC45B7CEDB979F4B969BDEA477C70A6B6A9DA21F2F94B7D217C6B9A3B201E3C58B582A51208DDF53E8E8C852AA658606063BDC41AE7DD27E7491838CE3D177A85D9C0DDA2ABE7C07E3EB309D4AFDC1ABE3540281B60236CB5C992D097B9ABFCCE00B37827284E297AF898D9F52C1B5CE7D409C3EF86D41B175EDE8E21061DC93369342FD70511F0CECF2886B4587CE3DFE36580AEA8F693B3F861797D68EA67E2DA6E112D6A0F1DA4E168EC170BF1295C4AB3E4D7A26E4B144D25D0203010001300D06092A864886F70D01010B050003820101002C4F13A2DA48638D2EEDDCDA7FE9B5ADBB4EF4F79FC49E1224C22922E3F4F9337E499125139D8BE26A172C709463B81AFF9C06990C0A6C6373B3A8F9ACD58B042DA0AA6C2295544B2FB08F35AD0E8ABFBE71BCAD6DEFD922CA5B3273965FEC3E7D4CC33CC4D31436B998236B3FDEDC6CB356B0A90CA569EBAB6669250380C17C73C8120E5F755FEB5584B9F6C30DCF649882679C9E56F7214175E1CABA38B847A979EF12C8A3147B26EA2C2CB0DFDC9D2013072E20FC1763D55D4AB5CA96A2C28B2E86879FCEAA42B411379460ECC831F27D866A5E331CFE4481A33380267762EC952F99A00A722A9592F0D2EBE0F282BD53B2960D61AE7DF770B63E1BF2BCF4'
+        thumbprint = '0x36C1816C8235E575F969DB3F0EDC7716184BC25A'
+        cert_name = 'partner_cert'
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'cert_blob': cert_blob,
+            'thumbprint': thumbprint,
+            'cert_name': cert_name,
+        })
+        hex_blob = cert_blob[2:]
+        hex_thumb = thumbprint[2:]
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        # no partner certificates on the instance
+        self.cmd('sql mi partner-cert list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert partner cert 
+        cert_upsert = self.cmd('sql mi partner-cert create -g {rg} --instance-name {mi} --name {cert_name} --public-blob {cert_blob}',
+                    checks=[
+                        JMESPathCheck('name', cert_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverTrustCertificates'),
+                        JMESPathCheck('thumbprint', hex_thumb),
+                        JMESPathCheck('publicBlob', hex_blob),
+                        ]).get_output_in_json()
+
+        cert_id = cert_upsert['id']
+        self.kwargs.update({
+            'cert_id': cert_id
+        })
+
+        # show partner cert
+        self.cmd('sql mi partner-cert show -g {rg} --instance-name {mi} --name {cert_name}',
+                    checks=[
+                        JMESPathCheck('name', cert_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverTrustCertificates'),
+                        JMESPathCheck('thumbprint', hex_thumb),
+                        JMESPathCheck('publicBlob', hex_blob),
+                        JMESPathCheck('id', cert_id),
+                        ]).get_output_in_json()
+
+        # show command with --ids parameter
+        self.cmd('sql mi partner-cert show --ids {cert_id}',
+                    checks=[
+                        JMESPathCheck('name', cert_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverTrustCertificates'),
+                        JMESPathCheck('thumbprint', hex_thumb),
+                        JMESPathCheck('publicBlob', hex_blob),
+                        ]).get_output_in_json()
+
+        # delete partner cert
+        self.cmd('sql mi partner-cert delete -g {rg} --instance-name {mi} -n {cert_name} --yes')
+
+        # list server trust certificates
+        self.cmd('sql mi partner-cert list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json()
+
+
+class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_link_mgmt(self, mi, rg):
+        link_name = 'dag'
+        primary_ag = 'ag_primary'
+        replication_mode = 'Async'
+        secondary_ag = 'ag_secondary'
+        source_endpoint = 'TCP://localhost:7022'
+        target_database = 'db'
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'link_name': link_name,
+            'primary_ag': primary_ag,
+            'replication_mode': replication_mode,
+            'secondary_ag': secondary_ag,
+            'source_endpoint': source_endpoint,
+            'target_database': target_database,
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert link (copying state)
+        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --replication-mode {replication_mode} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
+
+        # wait a bit for the resource creation (this doesn't mean the link is fully established)
+        time.sleep(60)
+        # show link
+        link = self.cmd('sql mi link show -g {rg} --instance-name {mi} --name {link_name}',
+                    checks=[
+                        JMESPathCheck('name', link_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+                        JMESPathCheck('targetDatabase', target_database),
+                        JMESPathCheck('sourceEndpoint', source_endpoint),
+                        JMESPathCheck('linkState', 'Copying'),
+                        ]).get_output_in_json()
+
+        link_id = link['id']
+        self.kwargs.update({
+            'link_id': link_id
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi link show --ids {link_id}',
+                    checks=[
+                        JMESPathCheck('name', link_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+                        JMESPathCheck('targetDatabase', target_database),
+                        JMESPathCheck('sourceEndpoint', source_endpoint),
+                        JMESPathCheck('linkState', 'Copying'),
+                        ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
