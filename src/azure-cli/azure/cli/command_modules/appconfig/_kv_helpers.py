@@ -698,7 +698,6 @@ def __print_preview(old_json, new_json, strict=False):
 def __export_kvset_to_file(file_path, keyvalues, yes):
     kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, ImportExportProfiles.KVSET)
     obj = {KVSetConstants.KVSETRootElementName: kvset}
-    json_string = json.dumps(obj, indent=2, ensure_ascii=False)
     if not yes:
         logger.warning('\n---------------- KVSet Preview ----------------')
         if len(kvset) == 0:
@@ -708,7 +707,7 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
         user_confirmation('Do you want to continue? \n')
     try:
         with open(file_path, 'w', encoding='utf-8') as fp:
-            fp.write(json_string)
+            json.dump(obj, fp, indent=2, ensure_ascii=False)
     except Exception as exception:
         raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
