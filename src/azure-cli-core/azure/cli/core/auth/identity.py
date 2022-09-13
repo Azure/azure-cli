@@ -136,7 +136,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
 
-        def _prompt_launching_ui(ui=None):
+        def _prompt_launching_ui(ui=None, **_):
             if ui == 'browser':
                 logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
                                "If no web browser is available or if the web browser fails to open, use device code "
