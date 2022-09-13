@@ -128,7 +128,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         "westus2": "westus2",
         "westus3": "westus3",
         "eastus2euap": "eastus2euap",
-        "centraluseuap": "eastus2euap",    
+        "centraluseuap": "eastus2euap",
     }
 
     # mapping for azure china cloud
