@@ -2114,22 +2114,6 @@ def load_arguments(self, _):
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
 
-    with self.argument_context('network routeserver peering') as c:
-        c.argument('virtual_hub_name', options_list=[
-            '--routeserver', c.deprecate(target='--vrouter-name', redirect='--routeserver', hide=True)
-        ], id_part='name', help='The name of the Route Server.')
-        c.argument('connection_name', options_list=['--name', '-n'], id_part='child_name_1',
-                   help='The name of the Route Server Peering')
-        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
-        c.argument('peer_ip', help='Peer IP address.')
-
-    with self.argument_context('network routeserver peering create') as c:
-        c.argument('virtual_hub_name', id_part=None)
-        c.argument('connection_name', id_part=None)
-
-    with self.argument_context('network routeserver peering list') as c:
-        c.argument('virtual_hub_name', id_part=None)
-
     for scope in ['vpn-connection', 'vnet-gateway', 'vnet-gateway vpn-client']:
         with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='Security Association') as c:
             c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int, help='The payload size in KB for P2S client.')
