@@ -47,7 +47,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
         else user_info.get('id')
     if user_object_id is None:
         raise Exception(
-            " no object id found for user {}".format(target_handler.login_username))
+            "No object id found for user {}".format(target_handler.login_username))
 
     # enable source mi
     source_object_id = source_handler.get_identity_pid()
@@ -330,11 +330,11 @@ class SqlHandler(TargetHandler):
             return False
 
     def create_aad_user_in_sql(self, connection_args, query_list):
-        import platform
-        system = platform.system()
-        if system != 'Windows':
-            logger.warning(
-                "Only windows supports login to SQL by AAD authentication")
+        # import platform
+        # system = platform.system()
+        # if system != 'Windows':
+        #     logger.warning(
+        #         "Only windows supports login to SQL by AAD authentication")
         import pkg_resources
         installed_packages = pkg_resources.working_set
         psy_installed = any(('pyodbc') in d.key.lower()
@@ -362,18 +362,20 @@ class SqlHandler(TargetHandler):
             raise AzureConnectionError("Fail to connect sql. " + str(e))
 
     def get_connection_string(self):
-        import pkg_resources
-        installed_packages = pkg_resources.working_set
-        psy_installed = any(('azure-identity') in d.key.lower()
-                            for d in installed_packages)
-        if not psy_installed:
-            import pip
-            pip.main(['install', 'azure-identity'])
-        from azure import identity
-        azure_credential = identity.AzureCliCredential()
-
-        token_bytes = azure_credential.get_token(
-            'https://database.windows.net/').token.encode('utf-16-le')
+        # import pkg_resources
+        # installed_packages = pkg_resources.working_set
+        # psy_installed = any(('azure-identity') in d.key.lower()
+        #                     for d in installed_packages)
+        # if not psy_installed:
+        #     import pip
+        #     pip.main(['install', 'azure-identity'])
+        # from azure import identity
+        # azure_credential = identity.AzureCliCredential()
+        # token_bytes = azure_credential.get_token(
+        #     'https://database.windows.net/').token.encode('utf-16-le')
+        token_bytes = run_cli_cmd(
+                'az account get-access-token --output json --resource https://database.windows.net/').get('accessToken').encode('utf-16-le')
+        
         token_struct = struct.pack(
             f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
         # This connection option is defined by microsoft in msodbcsql.h
