@@ -2669,7 +2669,7 @@ def _create_user_assigned_identity(test, kwargs):
 
 
 def _setup_key_vault(test, kwargs):
-    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --rentention-days 7').get_output_in_json()
+    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --retention-days 7').get_output_in_json()
     test.cmd('keyvault key create --vault-name {keyvault_name} -n {encryption_key}')
     test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
 
