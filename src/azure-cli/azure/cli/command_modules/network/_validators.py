@@ -1933,6 +1933,33 @@ def validate_capture_size_and_limit(namespace):
             raise CLIError('usage error: --time-limit cannot be a negative value.')
 
 
+def validate_subnet_ranges(namespace):
+    if not namespace.subnets:
+        return
+
+    values = []
+    for item in namespace.subnets:
+        try:
+            item_split = item.split('-', 1)
+            if len(item_split) == 2:
+                values.append({'first': item_split[0], 'last': item_split[1]})
+                continue
+        except ValueError:
+            pass
+
+        try:
+            item_split = item.split(':', 1)
+            if len(item_split) == 2:
+                values.append({'first': item_split[0], 'scope': int(item_split[1])})
+                continue
+        except ValueError:
+            pass
+
+        values.append({'first': item})
+
+    namespace.subnets = values
+
+
 # pylint: disable=too-few-public-methods
 class WafConfigExclusionAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):

@@ -5502,7 +5502,7 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             self.check('TrafficManagerProfile.monitorConfig.customHeaders[0].value', 'bar')
         ])
         self.kwargs['ip_id'] = self.cmd('network public-ip create -g {rg} -n {pip} --dns-name {ip_dns} --query publicIp.id').get_output_in_json()
-        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --status-code-ranges [{{min:200,max:204}}] --custom-headers  [{{name:foo,value:doo}},{{name:test,value:best}}]', checks=[
+        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --status-code-ranges 200-204 --custom-headers foo=doo test=best', checks=[
             self.check('monitorConfig.expectedStatusCodeRanges[0].min', 200),
             self.check('monitorConfig.expectedStatusCodeRanges[0].max', 204),
             self.check('monitorConfig.customHeaders[0].name', 'foo'),
@@ -5512,16 +5512,16 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         ])
 
         # Endpoint tests
-        self.cmd('network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} --type azureEndpoints --target-resource-id {ip_id} --subnets [{{first:10.0.0.0}}] --custom-headers [{{name:test,value:best}}]', checks=[
+        self.cmd('network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} --type azureEndpoints --target-resource-id {ip_id} --subnets 10.0.0.0 --custom-headers test=best', checks=[
             self.check('customHeaders[0].name', 'test'),
             self.check('customHeaders[0].value', 'best'),
             self.check('subnets[0].first', '10.0.0.0')
         ])
-        self.cmd('network traffic-manager endpoint update -n {endpoint} --type azureEndpoints --profile-name {tm} -g {rg} --subnets [{{first:10.0.0.0,scope:24}}]', checks=[
+        self.cmd('network traffic-manager endpoint update -n {endpoint} --type azureEndpoints --profile-name {tm} -g {rg} --subnets 10.0.0.0:24', checks=[
             self.check('subnets[0].first', '10.0.0.0'),
             self.check('subnets[0].scope', '24')
         ])
-        self.cmd('network traffic-manager endpoint update -n {endpoint} --type azureEndpoints --profile-name {tm} -g {rg} --subnets [{{first:10.0.0.0,last:11.0.0.0}}]', checks=[
+        self.cmd('network traffic-manager endpoint update -n {endpoint} --type azureEndpoints --profile-name {tm} -g {rg} --subnets 10.0.0.0-11.0.0.0', checks=[
             self.check('subnets[0].first', '10.0.0.0'),
             self.check('subnets[0].last', '11.0.0.0')
         ])
@@ -5535,7 +5535,6 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
         self.cmd('network watcher configure --locations westus westus2 eastus canadaeast --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
-
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):

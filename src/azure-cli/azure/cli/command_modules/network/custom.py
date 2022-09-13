@@ -6727,17 +6727,6 @@ def update_public_ip_prefix(instance, tags=None):
 
 
 # region TrafficManagers
-def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
-    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.profile import Show
-    Show_profiles = Show(cmd.loader)
-    args = {
-        "resource_group": resource_group_name,
-        "profile_name": profile_name
-    }
-    profile = Show_profiles(args)
-    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
-
-
 def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path=None,
                                    monitor_port=80, monitor_protocol="HTTP",
@@ -6770,6 +6759,139 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
     }
 
     return Create_Profile(args)
+
+
+def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
+                                   profile_status=None, routing_method=None, tags=None,
+                                   monitor_protocol=None, monitor_port=None, monitor_path=None,
+                                   ttl=None, timeout=None, interval=None, max_failures=None,
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+    from .aaz.latest.network.traffic_manager.profile import Update
+    Update_Profile = Update(cmd.loader)
+
+    args = {
+        "name": traffic_manager_profile_name,
+        "resource_group": resource_group_name
+    }
+    if ttl is not None:
+        args["ttl"] = ttl
+    if max_return is not None:
+        args["max_return"] = max_return
+    if profile_status is not None:
+        args["status"] = profile_status
+    if routing_method is not None:
+        args["routing_method"] = routing_method
+    if tags is not None:
+        args["tags"] = tags
+    if monitor_custom_headers is not None:
+        args["custom_headers"] = monitor_custom_headers
+    if status_code_ranges is not None:
+        args["status_code_ranges"] = status_code_ranges
+    if interval is not None:
+        args["interval"] = interval
+    if monitor_path is not None:
+        args["path"] = monitor_path
+    if monitor_port is not None:
+        args["port"] = monitor_port
+    if monitor_protocol is not None:
+        args["protocol"] = monitor_protocol
+    if timeout is not None:
+        args["timeout"] = timeout
+    if max_failures is not None:
+        args["max_failures"] = max_failures
+
+    return Update_Profile(args)
+
+
+def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_type, endpoint_name,
+                                    target_resource_id=None, target=None,
+                                    endpoint_status=None, weight=None, priority=None,
+                                    endpoint_location=None, endpoint_monitor_status=None,
+                                    min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
+    from .aaz.latest.network.traffic_manager.endpoint import Create
+    Create_Endpoint = Create(cmd.loader)
+
+    args = {
+        "name": endpoint_name,
+        "type": endpoint_type,
+        "profile_name": profile_name,
+        "resource_group": resource_group_name,
+        "custom_headers": monitor_custom_headers,
+        "endpoint_location": endpoint_location,
+        "endpoint_monitor_status": endpoint_monitor_status,
+        "endpoint_status": endpoint_status,
+        "geo_mapping": geo_mapping,
+        "min_child_endpoints": min_child_endpoints,
+        "min_child_ipv4": min_child_ipv4,
+        "min_child_ipv6": min_child_ipv6,
+        "priority": priority,
+        "subnets": subnets,
+        "target": target,
+        "target_resource_id": target_resource_id,
+        "weight": weight
+    }
+
+    return Create_Endpoint(args)
+
+
+def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_name,
+                                    endpoint_type, endpoint_location=None,
+                                    endpoint_status=None, endpoint_monitor_status=None,
+                                    priority=None, target=None, target_resource_id=None,
+                                    weight=None, min_child_endpoints=None, min_child_ipv4=None,
+                                    min_child_ipv6=None, geo_mapping=None,
+                                    subnets=None, monitor_custom_headers=None):
+    from .aaz.latest.network.traffic_manager.endpoint import Update
+    Update_Endpoint = Update(cmd.loader)
+
+    args = {
+        "name": endpoint_name,
+        "type": endpoint_type,
+        "profile_name": profile_name,
+        "resource_group": resource_group_name
+    }
+    if monitor_custom_headers is not None:
+        args["custom_headers"] = monitor_custom_headers
+    if endpoint_location is not None:
+        args["endpoint_location"] = endpoint_location
+    if endpoint_monitor_status is not None:
+        args["endpoint_monitor_status"] = endpoint_monitor_status
+    if endpoint_status is not None:
+        args["endpoint_status"] = endpoint_status
+    if geo_mapping is not None:
+        args["geo_mapping"] = geo_mapping
+    if min_child_endpoints is not None:
+        args["min_child_endpoints"] = min_child_endpoints
+    if min_child_ipv4 is not None:
+        args["min_child_ipv4"] = min_child_ipv4
+    if min_child_ipv6 is not None:
+        args["min_child_ipv6"] = min_child_ipv6
+    if priority is not None:
+        args["priority"] = priority
+    if subnets is not None:
+        args["subnets"] = subnets
+    if target is not None:
+        args["target"] = target
+    if target_resource_id is not None:
+        args["target_resource_id"] = target_resource_id
+    if weight is not None:
+        args["weight"] = weight
+
+    return Update_Endpoint(args)
+
+
+def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
+    from .aaz.latest.network.traffic_manager.profile import Show
+    Show_Profile = Show(cmd.loader)
+
+    args = {
+        "resource_group": resource_group_name,
+        "profile_name": profile_name
+    }
+    profile = Show_Profile(args)
+
+    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
 # endregion
 
 
