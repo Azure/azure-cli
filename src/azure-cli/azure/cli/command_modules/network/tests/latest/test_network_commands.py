@@ -5537,7 +5537,6 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
         self.cmd('network watcher list')
 
 
-
 class NetworkWatcherScenarioTest(ScenarioTest):
     from unittest import mock
 
