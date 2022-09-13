@@ -364,14 +364,11 @@ def _get_user_url(id_or_upn):
 
     # UPN
     if '@' in id_or_upn:
-        from urllib.parse import quote
-        encoded_upn = quote(id_or_upn, safe='')
+        # According to the doc, only encode #, but not @ and $
+        id_or_upn = id_or_upn.replace('#', '%23')
 
-        if id_or_upn.startswith('$'):
-            return f"/users('{encoded_upn}')"
-        return f"/users/{encoded_upn}"
-
-    # Object ID
+    if id_or_upn.startswith('$'):
+        return f"/users('{id_or_upn}')"
     return f"/users/{id_or_upn}"
 
 

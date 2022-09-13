@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 
 from azure.cli.testsdk import MSGraphNameReplacer
+from ..util import MSGraphUpnReplacer
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
@@ -966,6 +967,7 @@ class MiscellaneousScenarioTest(GraphScenarioTestBase):
         if self.in_recording:
             display_name = create_random_name(prefix=prefix, length=32)
             self.recording_processors.append(MSGraphNameReplacer(display_name, mock_name))
+            self.recording_processors.append(MSGraphUpnReplacer(display_name, mock_name))
         else:
             display_name = mock_name
 
