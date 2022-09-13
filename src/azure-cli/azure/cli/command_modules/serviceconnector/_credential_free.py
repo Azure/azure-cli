@@ -554,7 +554,6 @@ class PostgresFlexHandler(TargetHandler):
             conn = psycopg2.connect(conn_string)
         except (psycopg2.Error, psycopg2.OperationalError) as e:
             import re
-            logger.warning("connection string = " + conn_string)
             logger.warning(e)
             search_ip = re.search(
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
