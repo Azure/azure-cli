@@ -11,7 +11,6 @@ import math
 import os
 import re
 import struct
-import sys
 import time
 import uuid
 from ipaddress import ip_network
