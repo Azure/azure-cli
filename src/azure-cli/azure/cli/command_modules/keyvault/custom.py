@@ -518,7 +518,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         enabled_for_disk_encryption=None,
                         enabled_for_template_deployment=None,
                         enable_rbac_authorization=None,
-                        enable_soft_delete=None,
                         enable_purge_protection=None,
                         retention_days=None,
                         network_acls=None,
@@ -542,7 +541,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             enabled_for_disk_encryption=enabled_for_disk_encryption,
                             enabled_for_template_deployment=enabled_for_template_deployment,
                             enable_rbac_authorization=enable_rbac_authorization,
-                            enable_soft_delete=enable_soft_delete,
                             enable_purge_protection=enable_purge_protection,
                             retention_days=retention_days,
                             network_acls=network_acls,
@@ -635,7 +633,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  network_acls=None,
@@ -753,11 +750,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if not sku:
         sku = 'standard'
 
-    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-        enable_soft_delete = True
-        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-              'The value will be changed to true.', file=sys.stderr)
-
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
@@ -766,7 +758,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_rbac_authorization=enable_rbac_authorization,
-                                 enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
                                  soft_delete_retention_in_days=int(retention_days),
                                  public_network_access=public_network_access)
@@ -817,7 +808,6 @@ def update_vault(cmd, instance,
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
@@ -834,13 +824,6 @@ def update_vault(cmd, instance,
 
     if enable_rbac_authorization is not None:
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
-
-    if enable_soft_delete is not None:
-        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-            enable_soft_delete = True
-            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-                  'The value will be changed to true.', file=sys.stderr)
-        instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
