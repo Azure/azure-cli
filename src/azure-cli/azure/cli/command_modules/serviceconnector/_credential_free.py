@@ -554,6 +554,7 @@ class PostgresFlexHandler(TargetHandler):
             conn = psycopg2.connect(conn_string)
         except (psycopg2.Error, psycopg2.OperationalError) as e:
             import re
+            logger.warning("connection string = " + conn_string)
             logger.warning(e)
             search_ip = re.search(
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
@@ -609,7 +610,6 @@ class PostgresFlexHandler(TargetHandler):
 class PostgresSingleHandler(PostgresFlexHandler):
     def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
         super().__init__(cmd, target_id, target_type, auth_type, connection_name)
-        self.login_username += '@' + self.db_server
 
     def enable_target_aad_auth(self):
         return
@@ -654,15 +654,24 @@ class PostgresSingleHandler(PostgresFlexHandler):
         # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
         # if deny_public_access:
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
+    
+    def get_connection_string(self):
+        password = run_cli_cmd(
+            'az account get-access-token --resource-type oss-rdbms').get('accessToken')
+
+        # extension functions require the extension to be available, which is the case for postgres (default) database.
+        conn_string = "host={} user={} dbname=postgres password={} sslmode=require".format(
+            self.host, self.login_username + '@' + self.db_server, password)
+        return conn_string
 
     def get_create_query(self, client_id):
 
         return [
             'SET aad_validate_oids_in_tenant = off;',
             'drop role IF EXISTS "{0}";'.format(self.aad_username),
-            'CREATE ROLE "{0}" WITH LOGIN PASSWORD "{1}" IN ROLE azure_ad_user;'.format(
+            "CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
                 self.aad_username, client_id),
-            'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";'.format(
+            "GRANT ALL PRIVILEGES ON DATABASE {0} TO {1};".format(
                 self.dbname, self.aad_username)
         ]
 
