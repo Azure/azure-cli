@@ -8,6 +8,7 @@ import base64
 import binascii
 import getpass
 import json
+import yaml
 import logging
 import os
 import platform
@@ -533,6 +534,18 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     except CLIError as ex:
         # Reading file bypasses shell interpretation, so we discard the recommendation for shell quoting.
         raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
+
+
+def get_file_yaml(file_path, throw_on_empty=True):
+    content = read_file_content(file_path)
+    if not content:
+        if throw_on_empty:
+            raise CLIError("Failed to parse file '{}' with exception:\nNo content in the file.".format(file_path))
+        return None
+    try:
+        return yaml.safe_load(content)
+    except yaml.parser.ParserError as ex:
+        raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex)) from ex
 
 
 def read_file_content(file_path, allow_binary=False):
