@@ -983,7 +983,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('no_progress', progress_type)
 
     with self.argument_context('storage file delete-batch') as c:
-        from ._validators import process_file_batch_source_parameters
+        from ._validators_azure_stack import process_file_batch_source_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
 
     with self.argument_context('storage file copy start') as c:
