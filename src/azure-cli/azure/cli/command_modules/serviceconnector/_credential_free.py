@@ -207,7 +207,7 @@ class MysqlFlexibleHandler(TargetHandler):
         if not pym_installed:
             import pip
             pip.main(['install', 'mycli'])
-
+        # pylint: disable=import-error
         import pymysql
         from pymysql.constants import CLIENT
 
@@ -340,7 +340,7 @@ class SqlHandler(TargetHandler):
             logger.warning(
                 "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16 "
                 "and run 'pip install pyodbc'")
-
+        # pylint: disable=import-error
         import pyodbc
         try:
             # with pyodbc.connect(connection_args.get("connection_string")) as conn:
@@ -396,7 +396,7 @@ class PostgresFlexHandler(TargetHandler):
         server_info = run_cli_cmd(rq)
         if server_info.get("properties").get("authConfig").get("activeDirectoryAuthEnabled"):
             return
-        logger.warning('Enable service aad authentication')
+        logger.warning('Enabling Postgres flexible server AAD authentication')
         server = self.db_server
         master_template = ArmTemplateBuilder()
         master_template.add_resource({
@@ -528,7 +528,7 @@ class PostgresFlexHandler(TargetHandler):
             _install_deps_for_psycopg2()
             import pip
             pip.main(['install', 'psycopg2-binary'])
-
+        # pylint: disable=import-error
         import psycopg2
 
         # pylint: disable=protected-access

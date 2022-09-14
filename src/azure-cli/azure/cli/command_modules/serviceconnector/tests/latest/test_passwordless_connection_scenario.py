@@ -97,41 +97,43 @@ class PasswordlessConnectionScenarioTest(ScenarioTest):
         self.cmd('spring connection delete --id {} --yes'.format(connection_id))
         self.cmd('mysql flexible-server db delete -y -g {target_resource_group} --server-name {server} --database-name {database}')
 
-    def test_aad_webapp_postgresflexible(self):
+    def test_aad_containerapp_postgresflexible(self):
+        default_container_name = 'simple-hello-world-container'
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'zxf-test',
             'target_resource_group': 'zxf-test',
-            'site': 'xf-pg-app',
+            'app': 'servicelinker-mysql-aca',
             'server': 'xf-pgflex-clitest',
-            'database': 'testdb1'
+            'database': 'testdb1',
+            'containerapp_env': '/subscriptions/d82d7763-8e12-4f39-a7b6-496a983ec2f4/resourceGroups/container-app/providers/Microsoft.App/managedEnvironments/north-europe'
         })
 
         # prepare params
         name = 'testconn'
-        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        source_id = SOURCE_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.PostgresFlexible).format(**self.kwargs)
         connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
 
         # prepare
-        self.cmd('webapp identity remove --ids {}'.format(source_id))
-        # self.cmd('postgres flexible-server delete -y -g {target_resource_group} -n {server}')
-        # self.cmd('postgres flexible-server create -y -g {target_resource_group} -n {server}')
-        # self.cmd('postgres flexible-server db create -g {target_resource_group} -s {server} -d {database}')
+        self.cmd('containerapp delete -n {app} -g {source_resource_group}')
+        self.cmd('containerapp create -n {app} -g {source_resource_group} --environment {containerapp_env} --image nginx')
+        self.cmd('postgres flexible-server delete -y -g {target_resource_group} -n {server}')
+        self.cmd('postgres flexible-server create -y -g {target_resource_group} -n {server}')
+        self.cmd('postgres flexible-server db create -g {target_resource_group} -s {server} -d {database}')
 
         # create
-        self.cmd('webapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type springboot'.format(name, source_id, target_id))
-        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json();
-        print(configs)
+        self.cmd('containerapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type springboot -c {}'.format(name, source_id, target_id, default_container_name))
+        configs = self.cmd('containerapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json();
         # clean
-        # self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+        self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
         #
         # # recreate and test
-        # self.cmd('webapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
-        #          '--system-identity --client-type dotnet'.format(name, source_id, target_id))
+        # self.cmd('containerapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
+        #          '--system-identity --client-type dotnet -c {}'.format(name, source_id, target_id, default_container_name))
         # clean
-        # self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+        # self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
         # self.cmd('postgres flexible-server delete -y -g {target_resource_group} -n {server}')
 
 
