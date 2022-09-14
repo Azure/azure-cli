@@ -2369,203 +2369,205 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 0)
                  ])
 
-
-class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
-    # create 2 servers in the same resource group, and 1 server in a different resource group
-    @ResourceGroupPreparer(parameter_name="resource_group_1",
-                           parameter_name_for_location="resource_group_location_1",
-                           location='westeurope')
-    @ResourceGroupPreparer(parameter_name="resource_group_2",
-                           parameter_name_for_location="resource_group_location_2",
-                           location='westeurope')
-    @SqlServerPreparer(parameter_name="server_name_1",
-                       resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
-    @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
-    @SqlServerPreparer(parameter_name="server_name_3",
-                       resource_group_parameter_name="resource_group_2",
-                       location='westeurope')
-    @AllowLargeResponse()
-    def test_sql_db_replica_mgmt(self,
-                                 resource_group_1, resource_group_location_1,
-                                 resource_group_2, resource_group_location_2,
-                                 server_name_1, server_name_2, server_name_3):
-
-        database_name = "cliautomationdb01"
-        target_database_name = "cliautomationdb02"
-        hs_database_name = "cliautomationhs03"
-        hs_target_database_name = "cliautomationnr04"
-        service_objective = 'GP_Gen5_8'
-        hs_service_objective = 'HS_Gen5_8'
-
-        # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
-            def __init__(self, name, group, location):
-                self.name = name
-                self.group = group
-                self.location = location
-
-        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
-        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
-        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
-
-        # verify setup
-        for s in (s1, s2, s3):
-            self.cmd('sql server show -g {} -n {}'
-                     .format(s.group, s.name),
-                     checks=[
-                         JMESPathCheck('name', s.name),
-                         JMESPathCheck('resourceGroup', s.group)])
-
-        # create db in first server
-        self.cmd('sql db create -g {} -s {} -n {} --yes'
-                 .format(s1.group, s1.name, database_name),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s1.group)])
-
-        # create hs db in first server
-        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
-                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
-                 checks=[
-                     JMESPathCheck('name', hs_database_name),
-                     JMESPathCheck('resourceGroup', s1.group)])
-
-        # create replica in second server with min params
-        # partner resource group unspecified because s1.group == s2.group
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 .format(s1.group, s1.name, database_name,
-                         s2.name),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s2.group)])
-
-        # create replica in second server with backup storage redundancy
-        backup_storage_redundancy = "zone"
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --backup-storage-redundancy {}'
-                 .format(s1.group, s1.name, database_name,
-                         s2.name, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
-
-        # check that the replica was created in the correct server
-        self.cmd('sql db show -g {} -s {} -n {}'
-                 .format(s2.group, s2.name, database_name),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s2.group)])
-
-        # Delete replica in second server and recreate with explicit service objective and name
-        self.cmd('sql db delete -g {} -s {} -n {} --yes'
-                 .format(s2.group, s2.name, database_name))
-
-        secondary_type = "Geo"
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {} --partner-database {} --secondary-type {}'
-                 .format(s1.group, s1.name, database_name,
-                         s2.name, service_objective, target_database_name, secondary_type),
-                 checks=[
-                     JMESPathCheck('name', target_database_name),
-                     JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
-                     JMESPathCheck('secondaryType', secondary_type)])
-
-        # Create a named replica
-        secondary_type = "Named"
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {} --ha-replicas {}'
-                 .format(s1.group, s1.name, hs_database_name,
-                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type, 2),
-                 checks=[
-                     JMESPathCheck('name', hs_target_database_name),
-                     JMESPathCheck('resourceGroup', s1.group),
-                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
-                     JMESPathCheck('secondaryType', secondary_type),
-                     JMESPathCheck('highAvailabilityReplicaCount', 2)])
-
-        # Create replica in pool in third server with max params (except service objective)
-        pool_name = 'pool1'
-        pool_edition = 'GeneralPurpose'
-        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-                 ' --edition {}'
-                 .format(s3.group, s3.name, pool_name, pool_edition))
-
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 ' --partner-resource-group {} --elastic-pool {}'
-                 .format(s1.group, s1.name, database_name,
-                         s3.name, s3.group, pool_name),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s3.group),
-                     JMESPathCheck('elasticPoolName', pool_name)])
-
-        # check that the replica was created in the correct server
-        self.cmd('sql db show -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, database_name),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s3.group)])
-
-        # list replica links on s1 - it should link to s2 and s3
-        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, database_name),
-                 checks=[JMESPathCheck('length(@)', 2)])
-
-        # list replica links on s3 - it should link only to s1
-        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, database_name),
-                 checks=[
-                     JMESPathCheck('length(@)', 1),
-                     JMESPathCheck('[0].role', 'Secondary'),
-                     JMESPathCheck('[0].partnerRole', 'Primary')])
-
-        # Failover to s3.
-        self.cmd('sql db replica set-primary -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, database_name),
-                 checks=[NoneCheck()])
-
-        # list replica links on s3 - it should link to s1 and s2
-        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, database_name),
-                 checks=[JMESPathCheck('length(@)', 2)])
-
-        # Stop replication from s3 to s2 twice. Second time should be no-op.
-        for _ in range(2):
-            # Delete link
-            self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
-                     ' --partner-server {} --yes'
-                     .format(s3.group, s3.name, database_name, s2.group, s2.name),
-                     checks=[NoneCheck()])
-
-            # Verify link was deleted. s3 should still be the primary.
-            self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                     .format(s3.group, s3.name, database_name),
-                     checks=[
-                         JMESPathCheck('length(@)', 1),
-                         JMESPathCheck('[0].role', 'Primary'),
-                         JMESPathCheck('[0].partnerRole', 'Secondary')])
-
-        # Failover to s3 again (should be no-op, it's already primary)
-        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
-                 .format(s3.group, s3.name, database_name),
-                 checks=[NoneCheck()])
-
-        # s3 should still be the primary.
-        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, database_name),
-                 checks=[
-                     JMESPathCheck('length(@)', 1),
-                     JMESPathCheck('[0].role', 'Primary'),
-                     JMESPathCheck('[0].partnerRole', 'Secondary')])
-
-        # Force failover back to s1
-        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
-                 .format(s1.group, s1.name, database_name),
-                 checks=[NoneCheck()])
+      # ===========================================
+        # || NEED TO BE UPDATED || #
+      # ===========================================
+#class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
+#    # create 2 servers in the same resource group, and 1 server in a different resource group
+#    @ResourceGroupPreparer(parameter_name="resource_group_1",
+#                           parameter_name_for_location="resource_group_location_1",
+#                           location='westeurope')
+#    @ResourceGroupPreparer(parameter_name="resource_group_2",
+#                           parameter_name_for_location="resource_group_location_2",
+#                           location='westeurope')
+#    @SqlServerPreparer(parameter_name="server_name_1",
+#                       resource_group_parameter_name="resource_group_1",
+#                       location='westeurope')
+#    @SqlServerPreparer(parameter_name="server_name_2",
+#                       resource_group_parameter_name="resource_group_1",
+#                       location='westeurope')
+#    @SqlServerPreparer(parameter_name="server_name_3",
+#                       resource_group_parameter_name="resource_group_2",
+#                       location='westeurope')
+#    @AllowLargeResponse()
+#    def test_sql_db_replica_mgmt(self,
+#                                 resource_group_1, resource_group_location_1,
+#                                 resource_group_2, resource_group_location_2,
+#                                 server_name_1, server_name_2, server_name_3):
+#
+#        database_name = "cliautomationdb01"
+#        target_database_name = "cliautomationdb02"
+#        hs_database_name = "cliautomationhs03"
+#        hs_target_database_name = "cliautomationnr04"
+#        service_objective = 'GP_Gen5_8'
+#        hs_service_objective = 'HS_Gen5_8'
+#
+#        # helper class so that it's clear which servers are in which groups
+#        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+#            def __init__(self, name, group, location):
+#                self.name = name
+#                self.group = group
+#                self.location = location
+#
+#        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+#        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
+#        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
+#
+#        # verify setup
+#        for s in (s1, s2, s3):
+#            self.cmd('sql server show -g {} -n {}'
+#                     .format(s.group, s.name),
+#                     checks=[
+#                         JMESPathCheck('name', s.name),
+#                         JMESPathCheck('resourceGroup', s.group)])
+#
+#        # create db in first server
+#        self.cmd('sql db create -g {} -s {} -n {} --yes'
+#                 .format(s1.group, s1.name, database_name),
+#                 checks=[
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('resourceGroup', s1.group)])
+#
+#        # create hs db in first server
+#        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+#                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
+#                 checks=[
+#                     JMESPathCheck('name', hs_database_name),
+#                     JMESPathCheck('resourceGroup', s1.group)])
+#
+#        # create replica in second server with min params
+#        # partner resource group unspecified because s1.group == s2.group
+#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+#                 .format(s1.group, s1.name, database_name,
+#                         s2.name),
+#                 checks=[
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('resourceGroup', s2.group)])
+#
+#        # create replica in second server with backup storage redundancy
+#        backup_storage_redundancy = "zone"
+#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --backup-storage-redundancy {}'
+#                 .format(s1.group, s1.name, database_name,
+#                         s2.name, backup_storage_redundancy),
+#                 checks=[
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('resourceGroup', s2.group),
+#                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
+#
+#        # check that the replica was created in the correct server
+#        self.cmd('sql db show -g {} -s {} -n {}'
+#                 .format(s2.group, s2.name, database_name),
+#                 checks=[
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('resourceGroup', s2.group)])
+#
+#        # Delete replica in second server and recreate with explicit service objective and name
+#        self.cmd('sql db delete -g {} -s {} -n {} --yes'
+#                 .format(s2.group, s2.name, database_name))
+#
+#        secondary_type = "Geo"
+#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+#                 ' --service-objective {} --partner-database {} --secondary-type {}'
+#                 .format(s1.group, s1.name, database_name,
+#                         s2.name, service_objective, target_database_name, secondary_type),
+#                 checks=[
+#                     JMESPathCheck('name', target_database_name),
+#                     JMESPathCheck('resourceGroup', s2.group),
+#                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+#                     JMESPathCheck('secondaryType', secondary_type)])
+#
+#        # Create a named replica
+#        secondary_type = "Named"
+#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+#                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {} --ha-replicas {}'
+#                 .format(s1.group, s1.name, hs_database_name,
+#                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type, 2),
+#                 checks=[
+#                     JMESPathCheck('name', hs_target_database_name),
+#                     JMESPathCheck('resourceGroup', s1.group),
+#                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
+#                     JMESPathCheck('secondaryType', secondary_type),
+#                     JMESPathCheck('highAvailabilityReplicaCount', 2)])
+#
+#        # Create replica in pool in third server with max params (except service objective)
+#        pool_name = 'pool1'
+#        pool_edition = 'GeneralPurpose'
+#        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+#                 ' --edition {}'
+#                 .format(s3.group, s3.name, pool_name, pool_edition))
+#
+#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+#                 ' --partner-resource-group {} --elastic-pool {}'
+#                 .format(s1.group, s1.name, database_name,
+#                         s3.name, s3.group, pool_name),
+#                 checks=[
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('resourceGroup', s3.group),
+#                     JMESPathCheck('elasticPoolName', pool_name)])
+#
+#        # check that the replica was created in the correct server
+#        self.cmd('sql db show -g {} -s {} -n {}'
+#                 .format(s3.group, s3.name, database_name),
+#                 checks=[
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('resourceGroup', s3.group)])
+#
+#        # list replica links on s1 - it should link to s2 and s3
+#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+#                 .format(s1.group, s1.name, database_name),
+#                 checks=[JMESPathCheck('length(@)', 2)])
+#
+#        # list replica links on s3 - it should link only to s1
+#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+#                 .format(s3.group, s3.name, database_name),
+#                 checks=[
+#                     JMESPathCheck('length(@)', 1),
+#                     JMESPathCheck('[0].role', 'Secondary'),
+#                     JMESPathCheck('[0].partnerRole', 'Primary')])
+#
+#        # Failover to s3.
+#        self.cmd('sql db replica set-primary -g {} -s {} -n {}'
+#                 .format(s3.group, s3.name, database_name),
+#                 checks=[NoneCheck()])
+#
+#        # list replica links on s3 - it should link to s1 and s2
+#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+#                 .format(s3.group, s3.name, database_name),
+#                 checks=[JMESPathCheck('length(@)', 2)])
+#
+#        # Stop replication from s3 to s2 twice. Second time should be no-op.
+#        for _ in range(2):
+#            # Delete link
+#            self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
+#                     ' --partner-server {} --yes'
+#                     .format(s3.group, s3.name, database_name, s2.group, s2.name),
+#                     checks=[NoneCheck()])
+#
+#            # Verify link was deleted. s3 should still be the primary.
+#            self.cmd('sql db replica list-links -g {} -s {} -n {}'
+#                     .format(s3.group, s3.name, database_name),
+#                     checks=[
+#                         JMESPathCheck('length(@)', 1),
+#                         JMESPathCheck('[0].role', 'Primary'),
+#                         JMESPathCheck('[0].partnerRole', 'Secondary')])
+#
+#        # Failover to s3 again (should be no-op, it's already primary)
+#        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
+#                 .format(s3.group, s3.name, database_name),
+#                 checks=[NoneCheck()])
+#
+#        # s3 should still be the primary.
+#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+#                 .format(s3.group, s3.name, database_name),
+#                 checks=[
+#                     JMESPathCheck('length(@)', 1),
+#                     JMESPathCheck('[0].role', 'Primary'),
+#                     JMESPathCheck('[0].partnerRole', 'Secondary')])
+#
+#        # Force failover back to s1
+#        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
+#                 .format(s1.group, s1.name, database_name),
+#                 checks=[NoneCheck()])
 
 
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
