@@ -78,6 +78,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
+    MGMT_APPCONFIGURATION = ('azure.mgmt.appconfiguration', 'AppConfigurationManagementClient')
+
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -242,7 +244,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_MSI: '2021-09-30-preview',
+        ResourceType.MGMT_MSI: '2022-01-31-preview',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
@@ -250,10 +252,13 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-06-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-07-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        })
+        }),
+        ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
+            'replicas': '2022-03-01-preview'
+        }),
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',

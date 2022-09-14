@@ -17,7 +17,6 @@ from azure.cli.command_modules.acs.base_decorator import (
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
 from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.profiles import ResourceType
-from msrest.exceptions import ValidationError
 
 
 class BaseDecoratorHelperFunctionsTestCase(unittest.TestCase):
@@ -48,17 +47,6 @@ class BaseAKSModelsTestCase(unittest.TestCase):
         models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.assertEqual(models.model_module, module)
         self.assertEqual(models.AgentPool, module.AgentPool)
-
-    def test_serialize(self):
-        models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
-
-        agentpool = models.AgentPool(os_disk_size_gb=2049)
-        # fail on os_disk_size_gb > 2048
-        with self.assertRaises(ValidationError):
-            models.serialize(agentpool, "AgentPool")
-
-        agentpool_upgrade_settings = models.AgentPoolUpgradeSettings()
-        self.assertEqual(models.serialize(agentpool_upgrade_settings, "AgentPoolUpgradeSettings"), {})
 
 
 class BaseAKSParamDictTestCase(unittest.TestCase):

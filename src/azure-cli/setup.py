@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.39.0"
+VERSION = "2.40.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -64,7 +64,7 @@ DEPENDENCIES = [
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement~=3.0.0',
-    'azure-mgmt-appconfiguration==2.1.0',
+    'azure-mgmt-appconfiguration==2.2.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai==7.0.0b1',
@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==10.0.0',
-    'azure-mgmt-containerservice~=20.2.0',
+    'azure-mgmt-containerservice~=20.3.0',
     'azure-mgmt-cosmosdb==7.0.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -103,13 +103,13 @@ DEPENDENCIES = [
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=4.0.1',
-    'azure-mgmt-msi~=6.0.1',
+    'azure-mgmt-msi~=6.1.0',
     'azure-mgmt-netapp~=8.1.0',
     'azure-mgmt-network~=21.0.1',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.2.0b3',
-    'azure-mgmt-recoveryservicesbackup~=5.0.0',
+    'azure-mgmt-recoveryservicesbackup~=5.1.0b1',
     'azure-mgmt-recoveryservices~=2.1.0',
     'azure-mgmt-redhatopenshift==1.1.0',
     'azure-mgmt-redis~=13.1.0',
@@ -176,7 +176,7 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.6.0',
+    python_requires='>=3.7.0',
     package_data={
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],

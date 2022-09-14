@@ -11,7 +11,7 @@ from knack.util import CLIError
 
 class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_sas_scenario(self, resource_group, storage_account):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
