@@ -1774,13 +1774,6 @@ def load_arguments(self, _):
         c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
-    # region NetworkProfile
-    network_profile_name = CLIArgumentType(options_list='--profile-name', metavar='NAME', help='The network profile name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkProfiles'))
-
-    with self.argument_context('network profile') as c:
-        c.argument('network_profile_name', network_profile_name, options_list=['--name', '-n'])
-    # endregion
-
     # region CustomIpPrefix
     with self.argument_context('network custom-ip prefix') as c:
         c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')

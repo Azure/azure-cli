@@ -21,7 +21,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
-    cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
+    cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
@@ -216,12 +216,6 @@ def load_command_table(self, _):
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
-    )
-
-    network_profile_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkProfilesOperations.{}',
-        client_factory=cf_network_profiles,
-        min_api='2018-08-01'
     )
 
     network_nsg_sdk = CliCommandType(
@@ -1022,13 +1016,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
-    # endregion
-
-    # region NetworkProfiles
-    with self.command_group('network profile', network_profile_sdk) as g:
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('list', 'list_network_profiles')
-        g.show_command('show')
     # endregion
 
     # region NetworkWatchers

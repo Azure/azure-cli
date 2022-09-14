@@ -5302,15 +5302,6 @@ def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=No
 # endregion
 
 
-# region NetworkProfiles
-def list_network_profiles(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_profiles
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_all()
-# endregion
-
-
 # region NetworkWatchers
 def _create_network_watchers(cmd, client, resource_group_name, locations, tags):
     if resource_group_name is None:
