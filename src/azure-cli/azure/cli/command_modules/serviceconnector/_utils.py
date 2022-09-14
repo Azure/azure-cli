@@ -84,15 +84,16 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     output = subprocess.run(cmd, shell=True, check=False,
                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     logger.debug(output)
-    # print(output)
     if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
         if retry:
             time.sleep(interval)
             return run_cli_cmd(cmd, retry - 1, interval)
         raise CLIInternalError('Command execution failed, command is: '
                                '{}, error message is: {}'.format(cmd, output.stderr))
-
-    return json.loads(output.stdout) if output.stdout else None
+    try:
+        return json.loads(output.stdout) if output.stdout else None
+    except ValueError:
+        return output.stdout or None
 
 
 def set_user_token_header(client, cli_ctx):
