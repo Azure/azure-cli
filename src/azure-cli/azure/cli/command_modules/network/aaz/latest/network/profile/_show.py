@@ -55,8 +55,7 @@ class Show(AAZCommand):
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="Expands referenced resources.",
-            default="None",
+            help="Expands referenced resources. Default value is None.",
         )
         return cls._args_schema
 
