@@ -23,7 +23,7 @@ from ._resource_config import (
     RESOURCE,
 )
 
-# pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member
+# pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member, broad-except
 
 logger = get_logger(__name__)
 
@@ -149,12 +149,11 @@ class MysqlFlexibleHandler(TargetHandler):
         logger.warning('Set current user as DB Server AAD Administrators.')
         # set user as AAD admin
         if identity_resource_id is None:
-            # identity_resource_id = "/subscriptions/d82d7763-8e12-4f39-a7b6-496a983ec2f4/resourcegroups/zxf-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-aad-umi"
             raise ValidationError(
                 "Provide --identity-resource-id to set {} as AAD administrator.".format(self.user))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
-        if (not mysql_umi) and True:
+        if (not mysql_umi) or identity_resource_id not in mysql_umi.get("userAssignedIdentities"):
             run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(
                 self.resource_group, self.server, self.subscription, identity_resource_id))
         run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(
@@ -330,11 +329,6 @@ class SqlHandler(TargetHandler):
             return False
 
     def create_aad_user_in_sql(self, connection_args, query_list):
-        # import platform
-        # system = platform.system()
-        # if system != 'Windows':
-        #     logger.warning(
-        #         "Only windows supports login to SQL by AAD authentication")
         import pkg_resources
         installed_packages = pkg_resources.working_set
         psy_installed = any(('pyodbc') in d.key.lower()
@@ -362,26 +356,14 @@ class SqlHandler(TargetHandler):
             raise AzureConnectionError("Fail to connect sql. " + str(e))
 
     def get_connection_string(self):
-        # import pkg_resources
-        # installed_packages = pkg_resources.working_set
-        # psy_installed = any(('azure-identity') in d.key.lower()
-        #                     for d in installed_packages)
-        # if not psy_installed:
-        #     import pip
-        #     pip.main(['install', 'azure-identity'])
-        # from azure import identity
-        # azure_credential = identity.AzureCliCredential()
-        # token_bytes = azure_credential.get_token(
-        #     'https://database.windows.net/').token.encode('utf-16-le')
         token_bytes = run_cli_cmd(
-                'az account get-access-token --output json --resource https://database.windows.net/').get('accessToken').encode('utf-16-le')
-        
-        token_struct = struct.pack(
-            f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
+            'az account get-access-token --output json --resource https://database.windows.net/').get('accessToken').encode('utf-16-le')
+
+        token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
         # This connection option is defined by microsoft in msodbcsql.h
         SQL_COPT_SS_ACCESS_TOKEN = 1256
         conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
-            self.server + self.endpoint + ';database=' + self.dbname+';'
+            self.server + self.endpoint + ';database=' + self.dbname + ';'
         return {'connection_string': conn_string, 'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
     def get_create_query(self, client_id):
@@ -607,8 +589,6 @@ class PostgresFlexHandler(TargetHandler):
 
 
 class PostgresSingleHandler(PostgresFlexHandler):
-    def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
-        super().__init__(cmd, target_id, target_type, auth_type, connection_name)
 
     def enable_target_aad_auth(self):
         return
@@ -653,10 +633,9 @@ class PostgresSingleHandler(PostgresFlexHandler):
         # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
         # if deny_public_access:
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
-    
+
     def get_connection_string(self):
-        password = run_cli_cmd(
-            'az account get-access-token --resource-type oss-rdbms').get('accessToken')
+        password = run_cli_cmd('az account get-access-token --resource-type oss-rdbms').get('accessToken')
 
         # extension functions require the extension to be available, which is the case for postgres (default) database.
         conn_string = "host={} user={} dbname=postgres password={} sslmode=require".format(
