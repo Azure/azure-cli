@@ -562,7 +562,14 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
                                             reset_properties_envelope=reset_envelope)
 
 
-def link_user_function(cmd, name, resource_group_name, function_resource_id, force=False):
+def link_user_function(
+    cmd,
+    name,
+    resource_group_name,
+    function_resource_id,
+    environment_name: str = "default",
+    force=False,
+):
     from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
 
     if force:
@@ -581,6 +588,7 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
         name=name,
         resource_group_name=resource_group_name,
         function_app_name=function_name,
+        environment_name=environment_name,
         static_site_user_provided_function_envelope=function,
         is_forced=force)
 

@@ -597,7 +597,7 @@ class TestStaticAppCommands(unittest.TestCase):
         functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
             self.rg1, functionapp_name
         )
-        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id)
+        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id, self.environment1)
 
         self.staticapp_client.begin_register_user_provided_function_app_with_static_site.assert_called_once()
 
