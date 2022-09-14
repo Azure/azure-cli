@@ -2373,7 +2373,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
         return rcf.deployment_stacks.export_template_at_resource_group(stack_arr[4], stack_arr[-1])
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
-def create_deployment_stack_at_management_group(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, subscription_switch=False, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -2415,11 +2415,9 @@ def create_deployment_stack_at_management_group(cmd, name, location, delete_reso
     except:
         pass
 
-    #"/providers/Microsoft.Management/managementGroups/f686d426-8d16-42db-81b7-ab578e110ccdp/subscriptions/" + get_subscription_id(cmd.cli_ctx)
-    if not resource_group:
+    deployment_scope = None
+    if subscription_switch:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
-    else:
-        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
     
     t_spec, t_uri = None, None
     template_obj = None
@@ -2465,19 +2463,19 @@ def create_deployment_stack_at_management_group(cmd, name, location, delete_reso
     parameters = json.loads(json.dumps(parameters))
     deployment_stack_model.parameters = parameters
 
-    return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_management_group,name, deployment_stack_model)
+    return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
 
-def show_deployment_stack_at_management_group(cmd, name=None, id=None):
+def show_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
-            return rcf.deployment_stacks.get_at_management_group(name)
-        return rcf.deployment_stacks.get_at_management_group(id.split('/')[-1])
+            return rcf.deployment_stacks.get_at_management_group(management_group_id, name)
+        return rcf.deployment_stacks.get_at_management_group(management_group_id, id.split('/')[-1])
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
-def list_deployment_stack_at_management_group(cmd):
+def list_deployment_stack_at_management_group(cmd, management_group_id):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    return rcf.deployment_stacks.list_at_management_group()
+    return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
 def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, id=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)

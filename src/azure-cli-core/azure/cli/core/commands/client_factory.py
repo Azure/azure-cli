@@ -227,7 +227,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred))
 
     if subscription_bound:
-        client = client_type(cred, subscription_id,subscription_id, **client_kwargs)
+        client = client_type(cred, subscription_id, **client_kwargs)
     else:
         client = client_type(cred, **client_kwargs)
 

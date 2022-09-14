@@ -2084,6 +2084,7 @@ class DeploymentStacksTest(ScenarioTest):
     location = "westus2"
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_create_deployment_stack_subscription(self, resource_group):
+        print("hekdkkkdkddkdkdk")
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-subscription', 60)
         template_spec_name = self.create_random_name('cli-test-template-spec', 60)
