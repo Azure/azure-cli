@@ -919,11 +919,12 @@ class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
             'location': 'centraluseuap',
             'approve_description_msg': 'Approved!',
             'reject_description_msg': 'Rejected!',
-            'body': '{\\"location\\":\\"centraluseuap\\",\\"tags\\":{\\"awesomeness\\":\\"100\\",\\"farm\\":\\"beats\\"}}',
-            'api_version': '2021-09-01-preview'
+            'body': '{\\"location\\":\\"centraluseuap\\",\\"tags\\":{\\"awesomeness\\":\\"100\\",\\"farm\\":\\"beats\\"},\\"sku\\":{\\"name\\":\\"S0\\"}}',
+            'api_version': '2021-09-01-preview',
+            'type': 'Microsoft.AgFoodPlatform/farmBeats'
         })
 
-        # Create farmbeats resource
+        # Create farmbeats resource S0 sku in centraluseuap
         # This API only accepts the creation request, provisioning state of the resource has to be polled
         self.cmd('az rest --method "PUT" \
                 --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/{namespace}/{resource_type}/{resource_name}?api-version={api_version}" \
@@ -961,22 +962,19 @@ class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
         # Test get private endpoint connection
         private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {resource_id}').get_output_in_json()
 
-        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
-           
-        
-        self.kwargs['private-endpoint'] = private_endpoint['id']
+        self.kwargs['private_endpoint_connection_id'] = private_endpoint_connections[0]['id']
 
-        # # Test reject private endpoint connection
+        # Test reject private endpoint connection
         self.cmd(
-            'network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+            'network private-endpoint-connection reject --id {private_endpoint_connection_id}'
             ' --description {reject_description_msg}', checks=[
                   self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
             ])
 
         # Test delete
-        self.cmd('az network private-endpoint-connection delete --id {private-endpoint-connection-id} -y')
+        self.cmd('az network private-endpoint-connection delete --id {private_endpoint_connection_id} -y')
         time.sleep(30)
-        self.cmd('az network private-endpoint-connection list --id {private-endpoint-connection-id}', checks=[
+        self.cmd('az network private-endpoint-connection list --id {private_endpoint_connection_id}', checks=[
             self.check('length(@)', '0'),
         ])
 
