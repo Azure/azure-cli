@@ -69,7 +69,7 @@ class PasswordlessConnectionScenarioTest(ScenarioTest):
             'server': 'xf-mysqlflex-test',
             'database': 'mysqlDB',
         })
-        identity_resource_id = '/subscriptions/d82d7763-8e12-4f39-a7b6-496a983ec2f4/resourcegroups/zxf-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-aad-umi'
+        mysql_identity_id = '/subscriptions/d82d7763-8e12-4f39-a7b6-496a983ec2f4/resourcegroups/zxf-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-aad-umi'
 
         # prepare params
         name = 'testconn'
@@ -81,18 +81,18 @@ class PasswordlessConnectionScenarioTest(ScenarioTest):
         self.cmd('spring app identity remove -n {app} -s {spring} -g {source_resource_group} --system-assigned')
         self.cmd('mysql flexible-server ad-admin delete -g {target_resource_group} -s {server} -y')
         self.cmd('mysql flexible-server db create -g {target_resource_group} --server-name {server} --database-name {database}')
-        # self.cmd('mysql flexible-server identity remove -g {target_resource_group} -s {server} -y --identity ' + identity_resource_id)
+        # self.cmd('mysql flexible-server identity remove -g {target_resource_group} -s {server} -y --identity ' + mysql_identity_id)
 
         # create connection
         self.cmd('spring connection create mysql-flexible --connection {} --source-id {} --target-id {} '
-                 '--client-type springboot --identity-resource-id {}'.format(name, source_id, target_id, identity_resource_id))
+                 '--client-type springboot --mysql-identity-id {}'.format(name, source_id, target_id, mysql_identity_id))
         # delete connection
         self.cmd('spring connection delete --id {} --yes'.format(connection_id))
 
 
         # create connection
         self.cmd('spring connection create mysql-flexible --connection {} --source-id {} --target-id {} '
-                 '--client-type springboot --identity-resource-id {}'.format(name, source_id, target_id, identity_resource_id))
+                 '--client-type springboot --mysql-identity-id {}'.format(name, source_id, target_id, mysql_identity_id))
         # delete connection
         self.cmd('spring connection delete --id {} --yes'.format(connection_id))
         self.cmd('mysql flexible-server db delete -y -g {target_resource_group} --server-name {server} --database-name {database}')

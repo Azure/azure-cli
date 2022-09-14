@@ -28,7 +28,7 @@ from ._resource_config import (
 logger = get_logger(__name__)
 
 
-def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name, identity_resource_id):
+def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name, mysql_identity_id):
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
         return
@@ -60,7 +60,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
     target_handler.set_user_admin(
-        user_object_id, identity_resource_id=identity_resource_id)
+        user_object_id, mysql_identity_id=mysql_identity_id)
 
     # create an aad user in db
     target_handler.create_aad_user(identity_name, client_id)
@@ -137,7 +137,7 @@ class MysqlFlexibleHandler(TargetHandler):
         self.dbname = target_segments.get('child_name_1')
 
     def set_user_admin(self, user_object_id, **kwargs):
-        identity_resource_id = kwargs['identity_resource_id']
+        mysql_identity_id = kwargs['mysql_identity_id']
         admins = run_cli_cmd(
             'az mysql flexible-server ad-admin list -g {} -s {} --subscription {}'.format(
                 self.resource_group, self.server, self.subscription)
@@ -148,16 +148,16 @@ class MysqlFlexibleHandler(TargetHandler):
 
         logger.warning('Set current user as DB Server AAD Administrators.')
         # set user as AAD admin
-        if identity_resource_id is None:
+        if mysql_identity_id is None:
             raise ValidationError(
-                "Provide --identity-resource-id to set {} as AAD administrator.".format(self.user))
+                "Provide --mysql-identity-id to set {} as AAD administrator.".format(self.user))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
-        if (not mysql_umi) or identity_resource_id not in mysql_umi.get("userAssignedIdentities"):
+        if (not mysql_umi) or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
             run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(
-                self.resource_group, self.server, self.subscription, identity_resource_id))
+                self.resource_group, self.server, self.subscription, mysql_identity_id))
         run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(
-            self.resource_group, self.server, self.subscription, self.login_username, user_object_id, identity_resource_id))
+            self.resource_group, self.server, self.subscription, self.login_username, user_object_id, mysql_identity_id))
 
     def create_aad_user(self, identity_name, client_id):
         query_list = self.get_create_query(client_id)
