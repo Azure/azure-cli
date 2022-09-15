@@ -116,6 +116,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_georestore_update_mgmt(self, resource_group):
+        self._test_flexible_server_georestore_update_mgmt('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=mysql_location, additional_params='--enable-purge-protection true --retention-days 90')
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location='westeurope', additional_params='--enable-purge-protection true --retention-days 90')
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
@@ -410,7 +415,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'postgres':
             location = self.postgres_location
         elif database_engine == 'mysql':
-            location = 'northeurope'
+            location = self.mysql_location
             target_location = 'westeurope'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -513,6 +518,43 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
+
+    def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
+            target_location = 'westeurope'
+
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
+
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+
+        result = self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
+                          .format(database_engine, resource_group, source_server),
+                          checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')]).get_output_in_json()
+
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = result['backup']['earliestRestoreDate']
+        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
+
+        self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {}'
+                 .format(database_engine, resource_group, target_location, target_server, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
+
+        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Disabled'
+                 .format(database_engine, resource_group, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
 
     def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name):
         key_name = self.create_random_name('rdbmskey', 32)
