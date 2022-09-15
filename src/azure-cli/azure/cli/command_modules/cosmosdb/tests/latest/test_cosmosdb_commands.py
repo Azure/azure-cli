@@ -1607,7 +1607,7 @@ class CosmosDBTests(ScenarioTest):
         assert default_id_acct["defaultIdentity"] == "UserAssignedIdentity=" + id1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_role')
-    def test_cosmosdb_mongo_role(self, resource_group):
+    def test_cosmosdb_mongodb_role(self, resource_group):
         acc_name = self.create_random_name(prefix='cli', length=15)
         db_name = self.create_random_name(prefix='cli', length=15)
 

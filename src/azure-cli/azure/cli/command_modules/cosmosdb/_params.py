@@ -63,6 +63,7 @@ MONGO_ROLE_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958
 MONGO_USER_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\",\\"UserName\\": \\"MyUserName\\",\\"Password\\": \\"MyPass\\",\\"CustomData\\": \\"MyCustomData\\",\\"Mechanisms\\": \\"SCRAM-SHA-256\\"\\"DatabaseName\\": \\"MyDb\\",\\"Roles\\": [ {\\"Role\\": \\"myReadRole\\",\\"Db\\": \\"MyDb\\"}]}"
 """
 
+
 class ThroughputTypes(str, Enum):
     autoscale = "autoscale"
     manual = "manual"
@@ -379,7 +380,7 @@ def load_arguments(self, _):
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to.")
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
-    
+
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:
         c.argument('account_name', account_name_type, id_part=None)

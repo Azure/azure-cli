@@ -2072,6 +2072,7 @@ def cli_cosmosdb_collection_update(client,
         result['offer'] = client.ReplaceOffer(offer['_self'], offer)
     return result
 
+
 def cli_cosmosdb_mongo_role_definition_create(client,
                                               resource_group_name,
                                               account_name,
@@ -2096,7 +2097,7 @@ def cli_cosmosdb_mongo_role_definition_update(client,
     mongo_role_definition = client.get_mongo_role_definition(mongo_role_definition_body['Id'], resource_group_name, account_name)
 
     if mongo_role_definition_body['RoleName'] != mongo_role_definition.role_name:
-        raise InvalidArgumentValueError('Cannot update Mongo Role Definition Name.')
+        raise CLIError('No Mongo Role Definition found with name [{}].'.format(mongo_role_definition_body['RoleName']))
 
     mongo_role_definition_update_resource = MongoRoleDefinitionCreateUpdateParameters(
         role_name=mongo_role_definition.role_name,
@@ -2115,8 +2116,8 @@ def cli_cosmosdb_mongo_role_definition_exists(client,
     """Checks if an Azure Cosmos DB Mongo Role Definition exists"""
     try:
         client.get_mongo_role_definition(mongo_role_definition_id, resource_group_name, account_name)
-    except Exception as ex:
-        return _handle_exists_exception(ex.response)
+    except ResourceNotFoundError:
+        return False
 
     return True
 
@@ -2140,23 +2141,21 @@ def cli_cosmosdb_mongo_user_definition_create(client,
 def cli_cosmosdb_mongo_user_definition_update(client,
                                               resource_group_name,
                                               account_name,
-                                              mongo_user_definition_body):
+                                              mongo_user_definition_body,
+                                              no_wait=False):
     '''Update an existing Azure Cosmos DB Mongo User Definition'''
     logger.debug('reading Mongo user definition')
-    try:
-        mongo_user_definition = client.get_mongo_user_definition(mongo_user_definition_body['Id'], resource_group_name, account_name)
+    mongo_user_definition = client.get_mongo_user_definition(mongo_user_definition_body['Id'], resource_group_name, account_name)
 
-        mongo_user_definition_update_resource = MongoUserDefinitionCreateUpdateParameters(
-            user_name=mongo_user_definition.user_name,
-            password=mongo_user_definition_body['Password'],
-            database_name=mongo_user_definition_body['DatabaseName'],
-            custom_data=mongo_user_definition_body['CustomData'],
-            mechanisms=mongo_user_definition_body['Mechanisms'],
-            roles=mongo_user_definition_body['Roles'])
+    mongo_user_definition_update_resource = MongoUserDefinitionCreateUpdateParameters(
+        user_name=mongo_user_definition.user_name,
+        password=mongo_user_definition_body['Password'],
+        database_name=mongo_user_definition_body['DatabaseName'],
+        custom_data=mongo_user_definition_body['CustomData'],
+        mechanisms=mongo_user_definition_body['Mechanisms'],
+        roles=mongo_user_definition_body['Roles'])
 
-        return client.begin_create_update_mongo_user_definition(mongo_user_definition_body['Id'], resource_group_name, account_name, mongo_user_definition_update_resource)
-    except Exception as ex:
-        return _handle_exists_exception(ex.response)
+    return sdk_no_wait(no_wait, client.begin_create_update_mongo_user_definition, mongo_user_definition_body['Id'], resource_group_name, account_name, mongo_user_definition_update_resource)
 
 
 def cli_cosmosdb_mongo_user_definition_exists(client,
@@ -2166,10 +2165,11 @@ def cli_cosmosdb_mongo_user_definition_exists(client,
     """Checks if an Azure Cosmos DB Mongo User Definition exists"""
     try:
         client.get_mongo_user_definition(mongo_user_definition_id, resource_group_name, account_name)
-    except Exception as ex:
-        return _handle_exists_exception(ex.response)
+    except ResourceNotFoundError:
+        return False
 
     return True
+
 
 def cli_cosmosdb_sql_role_definition_create(client,
                                             resource_group_name,
