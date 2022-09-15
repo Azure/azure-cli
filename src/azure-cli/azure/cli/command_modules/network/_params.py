@@ -1389,11 +1389,11 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(CoverageLevel),
                    help='Test coverage for the endpoint')
         c.argument('endpoint_dest_address_include',
-                    nargs='+',
-                    help='List of address of the destination endpoint item which needs to be included to the endpoint scope')
+                   nargs='+',
+                   help='List of address of the destination endpoint item which needs to be included to the endpoint scope')
         c.argument('endpoint_dest_address_exclude',
-                    nargs='+',
-                    help='List of address of the destination endpoint item which needs to be excluded from the endpoint scope')
+                   nargs='+',
+                   help='List of address of the destination endpoint item which needs to be excluded from the endpoint scope')
         c.argument('endpoint_source_name',
                    help='The name of the source of connection monitor endpoint. '
                         'If you are creating a V2 Connection Monitor, it\'s required')
@@ -1409,11 +1409,11 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(CoverageLevel),
                    help='Test coverage for the endpoint')
         c.argument('endpoint_source_address_include',
-                    nargs='+',
-                    help='List of address of the source endpoint item which needs to be included to the endpoint scope')
+                   nargs='+',
+                   help='List of address of the source endpoint item which needs to be included to the endpoint scope')
         c.argument('endpoint_source_address_exclude',
-                    nargs='+',
-                    help='List of address of the source endpoint item which needs to be excluded from the endpoint scope')
+                   nargs='+',
+                   help='List of address of the source endpoint item which needs to be excluded from the endpoint scope')
 
     # Argument Group for test configuration to create a V2 connection monitor
     with self.argument_context('network watcher connection-monitor',

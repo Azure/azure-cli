@@ -85,7 +85,6 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         })
 
         vmss1_info = self._prepare_vmss(resource_group, 'vmss1', location)
-        print(vmss1_info)
         self.kwargs.update({
             'vmss1_id': vmss1_info['id']
         })
