@@ -2222,7 +2222,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
             if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
-            # At least the region is specified
+            # At least the region and edge zone are specified
             if len(parts) >= 2:
                 edge_zone_info.append(
                     GalleryTargetExtendedLocation(name=parts[0], extended_location_replica_count=replica_count,
