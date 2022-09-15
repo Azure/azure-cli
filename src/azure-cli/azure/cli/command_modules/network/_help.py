@@ -6305,6 +6305,17 @@ examples:
     text: |
         az network watcher connection-monitor create --endpoint-dest-address bing.com --endpoint-dest-name bing --endpoint-source-name "vm01" --endpoint-source-resource-id MyVM01ResourceID --location westus2 --name MyConnectionMonitorName --protocol Tcp --tcp-port 2048 --test-config-name TCPTestConfig
     crafted: true
+  - name : Create a connection monitor with VMSS as source
+    text: |
+        az network watcher connection-monitor create
+        --location centralus --name MyV2ConnectionMonitor
+        --endpoint-source-name vmss1
+        --endpoint-source-resource-id MyVMSSSourceId
+        --endpoint-source-address-include 10.0.0.25 10.0.0.30
+        --endpoint-source-type AzureVMSS --endpoint-dest-name bing
+        --endpoint-dest-address bing.com
+        --test-config-name DefaultTestConfig
+        --tcp-port 2048  --protocol Tcp
 """
 
 helps['network watcher connection-monitor delete'] = """
@@ -6396,6 +6407,17 @@ examples:
       --resource-id MySubnetID
       --source-test-groups DefaultTestGroup
       --type AzureSubnet
+      --address-exclude 10.0.0.25 10.0.0.30
+      --coverage-level BelowAverage
+  - name: Add a VMSS as a source endpoint with addresses excluded
+    text: >
+      az network watcher connection-monitor endpoint add
+      --connection-monitor MyConnectionMonitor
+      --location westus
+      --name MySubnetEndpoint
+      --resource-id myVMSSId
+      --source-test-groups DefaultTestGroup
+      --type AzureVMSS
       --address-exclude 10.0.0.25 10.0.0.30
       --coverage-level BelowAverage
 """

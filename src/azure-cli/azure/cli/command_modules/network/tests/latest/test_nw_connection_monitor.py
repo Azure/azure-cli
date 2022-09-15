@@ -28,6 +28,26 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
 
         return vm_info
 
+    def _prepare_vmss(self, resource_group, vmss, location):
+        import time
+        vmss_create_cmd_tpl = 'vmss create -g {rg} --name {vmss} ' \
+                              '--image UbuntuLTS --location {loc} ' \
+                              '--admin-username azureuser --generate-ssh-keys ' \
+                              '--upgrade-policy-mode Automatic'
+
+        self.cmd(vmss_create_cmd_tpl.format(rg=resource_group, vmss=vmss, loc=location))
+
+        vmss_enable_ext_tpl = 'vmss extension set --name NetworkWatcherAgentLinux ' \
+                            ' --publisher Microsoft.Azure.NetworkWatcher --resource-group {rg} ' \
+                            ' --vmss-name  {vmss} --extension-instance-name AzureNetworkWatcherExtension'
+        self.cmd(vmss_enable_ext_tpl.format(rg=resource_group, vmss=vmss))
+        time.sleep(60)
+
+        vmss_get_cmd_tpl = 'vmss show --name {vmss} -g {rg}'
+        vmss_info = self.cmd(vmss_get_cmd_tpl.format(vmss=vmss, rg=resource_group)).get_output_in_json()
+
+        return vmss_info
+
     def _prepare_connection_monitor_v2_env(self, resource_group, location):
         self.kwargs.update({
             'rg': resource_group,
@@ -55,6 +75,20 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--test-config-name DefaultTestConfig '
                  '--protocol Tcp '
                  '--tcp-port 2048 ')
+
+    def _prepare_connection_monitor_v2_env_vmss(self, resource_group, location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': location,
+            'cmv2': 'CMv2-01-vmss',
+            'test_group': 'DefaultTestGroup'
+        })
+
+        vmss1_info = self._prepare_vmss(resource_group, 'vmss1', location)
+        print(vmss1_info)
+        self.kwargs.update({
+            'vmss1_id': vmss1_info['id']
+        })
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='eastus')
     @AllowLargeResponse()
@@ -131,6 +165,29 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor list -l {location}')
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
         self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01')
+
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westeurope')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_creation_vmss(self, resource_group, resource_group_location):
+        # creating vmss for cm endpoints
+        self._prepare_connection_monitor_v2_env_vmss(resource_group, resource_group_location)
+
+        # create a connection monitor v2 with TCP monitoring
+        self.cmd('network watcher connection-monitor create '
+                 '--name {cmv2} '
+                 '--endpoint-source-name vmss1 '
+                 '--endpoint-source-resource-id {vmss1_id} '
+                 '--endpoint-source-type AzureVMSS '
+                 '--endpoint-dest-name bing '
+                 '--endpoint-dest-address bing.com '
+                 '--test-config-name DefaultTestConfig '
+                 '--protocol Tcp '
+                 '--tcp-port 2048')
+
+        self.cmd('network watcher connection-monitor list -l {location}')
+        self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
+        self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01-vmss')
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()

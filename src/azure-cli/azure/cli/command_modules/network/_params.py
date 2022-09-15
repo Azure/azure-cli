@@ -1388,6 +1388,12 @@ def load_arguments(self, _):
         c.argument('endpoint_dest_coverage_level',
                    arg_type=get_enum_type(CoverageLevel),
                    help='Test coverage for the endpoint')
+        c.argument('endpoint_dest_address_include',
+                    nargs='+',
+                    help='List of address of the destination endpoint item which needs to be included to the endpoint scope')
+        c.argument('endpoint_dest_address_exclude',
+                    nargs='+',
+                    help='List of address of the destination endpoint item which needs to be excluded from the endpoint scope')
         c.argument('endpoint_source_name',
                    help='The name of the source of connection monitor endpoint. '
                         'If you are creating a V2 Connection Monitor, it\'s required')
@@ -1402,6 +1408,12 @@ def load_arguments(self, _):
         c.argument('endpoint_source_coverage_level',
                    arg_type=get_enum_type(CoverageLevel),
                    help='Test coverage for the endpoint')
+        c.argument('endpoint_source_address_include',
+                    nargs='+',
+                    help='List of address of the source endpoint item which needs to be included to the endpoint scope')
+        c.argument('endpoint_source_address_exclude',
+                    nargs='+',
+                    help='List of address of the source endpoint item which needs to be excluded from the endpoint scope')
 
     # Argument Group for test configuration to create a V2 connection monitor
     with self.argument_context('network watcher connection-monitor',
@@ -1515,7 +1527,7 @@ def load_arguments(self, _):
                    help='List of address of the endpoint item which needs to be included to the endpoint scope')
         c.argument('address_exclude',
                    nargs='+',
-                   help='List of address of the endpoint item which needs to be included to the endpoint scope')
+                   help='List of address of the endpoint item which needs to be excluded from the endpoint scope')
         c.argument('endpoint_type',
                    options_list=['--type'],
                    help='The endpoint type',
