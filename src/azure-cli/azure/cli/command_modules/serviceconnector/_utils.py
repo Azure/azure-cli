@@ -17,7 +17,6 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
-# pylint: disable=unused-argument, not-an-iterable, too-many-statements
 
 
 logger = get_logger(__name__)
@@ -69,7 +68,7 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
         if not ensure_complexity or (lowers and uppers and numbers):
             break
 
-    return randstr.lower()
+    return randstr
 
 
 def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):

@@ -85,14 +85,14 @@ class PasswordlessConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('spring connection create mysql-flexible --connection {} --source-id {} --target-id {} '
-                 '--client-type springboot --mysql-identity-id {}'.format(name, source_id, target_id, mysql_identity_id))
+                 '--client-type springboot --system-identity mysql-identity-id={}'.format(name, source_id, target_id, mysql_identity_id))
         # delete connection
         self.cmd('spring connection delete --id {} --yes'.format(connection_id))
 
 
         # create connection
         self.cmd('spring connection create mysql-flexible --connection {} --source-id {} --target-id {} '
-                 '--client-type springboot --mysql-identity-id {}'.format(name, source_id, target_id, mysql_identity_id))
+                 '--client-type springboot --system-identity mysql-identity-id={}'.format(name, source_id, target_id, mysql_identity_id))
         # delete connection
         self.cmd('spring connection delete --id {} --yes'.format(connection_id))
         self.cmd('mysql flexible-server db delete -y -g {target_resource_group} --server-name {server} --database-name {database}')

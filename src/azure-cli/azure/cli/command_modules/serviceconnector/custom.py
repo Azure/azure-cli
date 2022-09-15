@@ -160,7 +160,6 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=to
                       service_endpoint=None,
                       private_endpoint=None,
                       store_in_connection_string=False,
-                      mysql_identity_id=None,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None,                                             # Resource.WebApp
@@ -266,7 +265,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=to
 
     validate_service_state(parameters)
     new_auth_info = enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type,
-                                            connection_name, mysql_identity_id)
+                                            connection_name)
     parameters['auth_info'] = new_auth_info if new_auth_info is not None else parameters['auth_info']
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,

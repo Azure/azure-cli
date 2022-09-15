@@ -132,13 +132,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     def add_secret_store_argument(context):
         context.argument('key_vault_id', options_list=['--vault-id'], help='The id of key vault to store secret value')
 
-    def add_mysql_umi_argument(context, target):
-        if target in [RESOURCE.MysqlFlexible]:
-            context.argument('mysql_identity_id', options_list=['--mysql-identity-id'],
-                             help='The ID of identity used for MySQL flexible server AAD Authentication')
-        else:
-            c.ignore('mysql_identity_id')
-
     def add_vnet_block(context, target):
         if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
             c.ignore('service_endpoint')
@@ -213,7 +206,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
-                add_mysql_umi_argument(c, target)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)

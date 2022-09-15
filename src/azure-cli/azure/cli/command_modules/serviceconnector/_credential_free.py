@@ -23,12 +23,14 @@ from ._resource_config import (
     RESOURCE,
 )
 
-# pylint: disable=unused-argument, not-an-iterable, too-many-statements, too-few-public-methods, no-self-use, too-many-instance-attributes, line-too-long, c-extension-no-member, broad-except
 
 logger = get_logger(__name__)
 
 
-def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name, mysql_identity_id):
+# pylint: disable=line-too-long
+# For db(mysqlFlex/psql/psqlFlex/sql) linker with auth type=systemAssignedIdentity, enable AAD auth and create db user on data plane
+# For other linker, ignore the steps
+def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name):
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
         return
@@ -60,13 +62,14 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, t
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
     target_handler.set_user_admin(
-        user_object_id, mysql_identity_id=mysql_identity_id)
+        user_object_id, mysql_identity_id=auth_info['mysql-identity-id'])
 
     # create an aad user in db
     target_handler.create_aad_user(identity_name, client_id)
     return target_handler.get_auth_config()
 
 
+# pylint: disable=no-self-use, unused-argument, too-many-instance-attributes
 def getTargetHandler(cmd, target_id, target_type, auth_type, client_type, connection_name):
     if target_type in {RESOURCE.Sql}:
         return SqlHandler(cmd, target_id, target_type, auth_type, connection_name)
@@ -150,7 +153,7 @@ class MysqlFlexibleHandler(TargetHandler):
         # set user as AAD admin
         if mysql_identity_id is None:
             raise ValidationError(
-                "Provide --mysql-identity-id to set {} as AAD administrator.".format(self.user))
+                "Provide '--system-identity mysql-identity-id=xx' to set {} as AAD administrator.".format(self.user))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
         if (not mysql_umi) or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
@@ -168,7 +171,7 @@ class MysqlFlexibleHandler(TargetHandler):
             self.create_aad_user_in_mysql(connection_kwargs, query_list)
         except AzureConnectionError:
             # allow public access
-            ip_name = generate_random_string(prefix='svc_')
+            ip_name = generate_random_string(prefix='svc_').lower()
             self.set_target_firewall(True, ip_name)
             # create again
             self.create_aad_user_in_mysql(connection_kwargs, query_list)
@@ -202,6 +205,7 @@ class MysqlFlexibleHandler(TargetHandler):
     def create_aad_user_in_mysql(self, connection_kwargs, query_list):
         import pkg_resources
         installed_packages = pkg_resources.working_set
+        # pylint: disable=not-an-iterable
         pym_installed = any(('pymysql') in d.key.lower()
                             for d in installed_packages)
         if not pym_installed:
@@ -219,7 +223,7 @@ class MysqlFlexibleHandler(TargetHandler):
                 try:
                     logger.debug(q)
                     cursor.execute(q)
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     logger.warning(
                         "Query %s, error: %s", q, str(e))
         except pymysql.Error as e:
@@ -299,7 +303,7 @@ class SqlHandler(TargetHandler):
             self.create_aad_user_in_sql(connection_args, query_list)
         except AzureConnectionError:
             # allow public access
-            ip_name = generate_random_string(prefix='svc_')
+            ip_name = generate_random_string(prefix='svc_').lower()
             self.set_target_firewall(True, ip_name)
             # create again
             self.create_aad_user_in_sql(connection_args, query_list)
@@ -331,6 +335,7 @@ class SqlHandler(TargetHandler):
     def create_aad_user_in_sql(self, connection_args, query_list):
         import pkg_resources
         installed_packages = pkg_resources.working_set
+        # pylint: disable=not-an-iterable
         psy_installed = any(('pyodbc') in d.key.lower()
                             for d in installed_packages)
 
@@ -340,10 +345,9 @@ class SqlHandler(TargetHandler):
             logger.warning(
                 "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16 "
                 "and run 'pip install pyodbc'")
-        # pylint: disable=import-error
+        # pylint: disable=import-error, c-extension-no-member
         import pyodbc
         try:
-            # with pyodbc.connect(connection_args.get("connection_string")) as conn:
             with pyodbc.connect(connection_args.get("connection_string"), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:
                     for execution_query in query_list:
@@ -485,7 +489,7 @@ class PostgresFlexHandler(TargetHandler):
             self.create_aad_user_in_pg(connection_string, query_list)
         except AzureConnectionError:
             # allow public access
-            ip_name = generate_random_string(prefix='svc_')
+            ip_name = generate_random_string(prefix='svc_').lower()
             self.set_target_firewall(True, ip_name)
             # create again
             self.create_aad_user_in_pg(connection_string, query_list)
@@ -522,6 +526,7 @@ class PostgresFlexHandler(TargetHandler):
     def create_aad_user_in_pg(self, conn_string, query_list):
         import pkg_resources
         installed_packages = pkg_resources.working_set
+        # pylint: disable=not-an-iterable
         psy_installed = any(('psycopg2') in d.key.lower()
                             for d in installed_packages)
         if not psy_installed:
@@ -663,6 +668,7 @@ def getSourceHandler(source_id, source_type):
         return SpringHandler(source_id, source_type)
 
 
+# pylint: disable=too-few-public-methods
 class SourceHandler:
     source_id = ""
     source_type = ""
