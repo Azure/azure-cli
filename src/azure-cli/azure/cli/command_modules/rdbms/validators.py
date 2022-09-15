@@ -141,6 +141,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
 
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
+    if geo_redundant_backup is None and instance is not None:
+        geo_redundant_backup = instance.backup.geo_redundant_backup
     _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
     if tier is None and instance is not None:
         tier = instance.sku.tier
@@ -471,6 +473,8 @@ def validate_server_name(db_context, server_name, type_):
             if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
                 client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
                 result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+            else:
+                raise e
     else:
         result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 

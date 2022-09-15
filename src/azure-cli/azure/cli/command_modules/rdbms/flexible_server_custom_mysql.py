@@ -328,6 +328,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        iops=None,
                                        backup_retention=None,
+                                       geo_redundant_backup=None,
                                        administrator_login_password=None,
                                        high_availability=None,
                                        standby_availability_zone=None,
@@ -363,7 +364,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               auto_grow=auto_grow,
                               replication_role=replication_role,
                               instance=instance,
-                              geo_redundant_backup=instance.backup.geo_redundant_backup,
+                              geo_redundant_backup=geo_redundant_backup,
                               byok_identity=byok_identity,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
@@ -386,6 +387,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
+
+    if geo_redundant_backup:
+        instance.backup.geo_redundant_backup = geo_redundant_backup
 
     if maintenance_window:
         # if disabled is pass in reset to default values
