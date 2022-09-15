@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
-                                                               page_blob_service_factory, file_data_service_factory,
+                                                               page_blob_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
@@ -574,11 +574,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('migrate-vlw', 'begin_object_level_worm', supports_no_wait=True, is_preview=True)
 
-    file_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',
-        client_factory=file_data_service_factory,
-        resource_type=ResourceType.DATA_STORAGE)
-
     share_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.fileshare._share_client#ShareClient.{}',
         client_factory=cf_share_client,
@@ -691,24 +686,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
 
-    with self.command_group('storage file', command_type=file_sdk,
-                            custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
-        from ._format import transform_boolean_for_table, transform_file_output
-        from ._exception_handler import file_related_exception_handler
-        g.storage_command('download', 'get_file_to_path', exception_handler=file_related_exception_handler)
-        g.storage_custom_command(
-            'download-batch', 'storage_file_download_batch')
-        g.storage_custom_command('delete-batch', 'storage_file_delete_batch')
-
     with self.command_group('storage file', command_type=file_client_sdk,
                             custom_command_type=get_custom_sdk('file', cf_share_file_client)) as g:
         from ._transformers import transform_file_show_result
-        from ._format import transform_metadata_show
+        from ._format import transform_metadata_show, transform_boolean_for_table, transform_file_output
+        from ._exception_handler import file_related_exception_handler
         g.storage_custom_command('list', 'list_share_files', client_factory=cf_share_client,
                                  transform=transform_file_directory_result,
                                  table_transformer=transform_file_output)
         g.storage_command('delete', 'delete_file', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
+        g.storage_custom_command('delete-batch', 'storage_file_delete_batch', client_factory=cf_share_client)
         g.storage_command('resize', 'resize_file')
         g.storage_custom_command('url', 'create_file_url', transform=transform_url_without_encode,
                                  client_factory=cf_share_client)
@@ -724,11 +712,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('copy start', 'storage_file_copy', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_command('copy cancel', 'abort_copy')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch', client_factory=cf_share_client)
-
         g.storage_custom_command('upload', 'storage_file_upload', exception_handler=file_related_exception_handler,
                                  resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
                                  custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
+        g.storage_custom_command('download', 'download_file', exception_handler=file_related_exception_handler,
+                                 transform=transform_file_show_result)
+        g.storage_custom_command('download-batch', 'storage_file_download_batch', client_factory=cf_share_client)
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

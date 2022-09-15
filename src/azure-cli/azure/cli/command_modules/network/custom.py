@@ -8,8 +8,6 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
-
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
@@ -6729,82 +6727,80 @@ def update_public_ip_prefix(instance, tags=None):
 
 
 # region TrafficManagers
-def list_traffic_manager_profiles(cmd, resource_group_name=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-
-    return client.list_by_subscription()
-
-
 def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path=None,
-                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value,
-                                   profile_status=ProfileStatus.enabled.value,
+                                   monitor_port=80, monitor_protocol="HTTP",
+                                   profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
+    from .aaz.latest.network.traffic_manager.profile import Create
+    Create_Profile = Create(cmd.loader)
+
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
-    profile = Profile(location='global', tags=tags, profile_status=profile_status,
-                      traffic_routing_method=routing_method,
-                      dns_config=DnsConfig(relative_name=unique_dns_name, ttl=ttl),
-                      monitor_config=MonitorConfig(protocol=monitor_protocol,
-                                                   port=monitor_port,
-                                                   path=monitor_path,
-                                                   interval_in_seconds=interval,
-                                                   timeout_in_seconds=timeout,
-                                                   tolerated_number_of_failures=max_failures,
-                                                   custom_headers=monitor_custom_headers,
-                                                   expected_status_code_ranges=status_code_ranges),
-                      max_return=max_return)
-    return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
+    args = {
+        "name": traffic_manager_profile_name,
+        "location": "global",
+        "resource_group": resource_group_name,
+        "unique_dns_name": unique_dns_name,
+        "ttl": ttl,
+        "max_return": max_return,
+        "status": profile_status,
+        "routing_method": routing_method,
+        "tags": tags,
+        "custom_headers": monitor_custom_headers,
+        "status_code_ranges": status_code_ranges,
+        "interval": interval,
+        "path": monitor_path,
+        "port": monitor_port,
+        "protocol": monitor_protocol,
+        "timeout": timeout,
+        "max_failures": max_failures
+    }
+
+    return Create_Profile(args)
 
 
-def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
+def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
+                                   profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    if tags is not None:
-        instance.tags = tags
-    if profile_status is not None:
-        instance.profile_status = profile_status
-    if routing_method is not None:
-        instance.traffic_routing_method = routing_method
+    from .aaz.latest.network.traffic_manager.profile import Update
+    Update_Profile = Update(cmd.loader)
+
+    args = {
+        "name": traffic_manager_profile_name,
+        "resource_group": resource_group_name
+    }
     if ttl is not None:
-        instance.dns_config.ttl = ttl
-
-    if monitor_protocol is not None:
-        instance.monitor_config.protocol = monitor_protocol
-    if monitor_port is not None:
-        instance.monitor_config.port = monitor_port
-    if monitor_path == '':
-        instance.monitor_config.path = None
-    elif monitor_path is not None:
-        instance.monitor_config.path = monitor_path
-    if interval is not None:
-        instance.monitor_config.interval_in_seconds = interval
-    if timeout is not None:
-        instance.monitor_config.timeout_in_seconds = timeout
-    if max_failures is not None:
-        instance.monitor_config.tolerated_number_of_failures = max_failures
-    if monitor_custom_headers is not None:
-        instance.monitor_config.custom_headers = monitor_custom_headers
-    if status_code_ranges is not None:
-        instance.monitor_config.expected_status_code_ranges = status_code_ranges
+        args["ttl"] = ttl
     if max_return is not None:
-        instance.max_return = max_return
+        args["max_return"] = max_return
+    if profile_status is not None:
+        args["status"] = profile_status
+    if routing_method is not None:
+        args["routing_method"] = routing_method
+    if tags is not None:
+        args["tags"] = tags
+    if monitor_custom_headers is not None:
+        args["custom_headers"] = monitor_custom_headers
+    if status_code_ranges is not None:
+        args["status_code_ranges"] = status_code_ranges
+    if interval is not None:
+        args["interval"] = interval
+    if monitor_path is not None:
+        args["path"] = monitor_path
+    if monitor_port is not None:
+        args["port"] = monitor_port
+    if monitor_protocol is not None:
+        args["protocol"] = monitor_protocol
+    if timeout is not None:
+        args["timeout"] = timeout
+    if max_failures is not None:
+        args["max_failures"] = max_failures
 
-    # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
-    for endpoint in instance.endpoints:
-        endpoint._validation = {  # pylint: disable=protected-access
-            'name': {'readonly': False},
-            'type': {'readonly': False},
-        }
-    return instance
+    return Update_Profile(args)
 
 
 def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_type, endpoint_name,
@@ -6813,73 +6809,89 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.mgmt.trafficmanager.models import Endpoint
-    ncf = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).endpoints
+    from .aaz.latest.network.traffic_manager.endpoint import Create
+    Create_Endpoint = Create(cmd.loader)
 
-    endpoint = Endpoint(target_resource_id=target_resource_id, target=target,
-                        endpoint_status=endpoint_status, weight=weight, priority=priority,
-                        endpoint_location=endpoint_location,
-                        endpoint_monitor_status=endpoint_monitor_status,
-                        min_child_endpoints=min_child_endpoints,
-                        min_child_endpoints_i_pv4=min_child_ipv4,
-                        min_child_endpoints_i_pv6=min_child_ipv6,
-                        geo_mapping=geo_mapping,
-                        subnets=subnets,
-                        custom_headers=monitor_custom_headers)
+    args = {
+        "name": endpoint_name,
+        "type": endpoint_type,
+        "profile_name": profile_name,
+        "resource_group": resource_group_name,
+        "custom_headers": monitor_custom_headers,
+        "endpoint_location": endpoint_location,
+        "endpoint_monitor_status": endpoint_monitor_status,
+        "endpoint_status": endpoint_status,
+        "geo_mapping": geo_mapping,
+        "min_child_endpoints": min_child_endpoints,
+        "min_child_ipv4": min_child_ipv4,
+        "min_child_ipv6": min_child_ipv6,
+        "priority": priority,
+        "subnets": subnets,
+        "target": target,
+        "target_resource_id": target_resource_id,
+        "weight": weight
+    }
 
-    return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
-                                endpoint)
+    return Create_Endpoint(args)
 
 
-def update_traffic_manager_endpoint(instance, endpoint_type, endpoint_location=None,
+def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_name,
+                                    endpoint_type, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None):
-    if endpoint_location is not None:
-        instance.endpoint_location = endpoint_location
-    if endpoint_status is not None:
-        instance.endpoint_status = endpoint_status
-    if endpoint_monitor_status is not None:
-        instance.endpoint_monitor_status = endpoint_monitor_status
-    if priority is not None:
-        instance.priority = priority
-    if target is not None:
-        instance.target = target
-    if target_resource_id is not None:
-        instance.target_resource_id = target_resource_id
-    if weight is not None:
-        instance.weight = weight
-    if min_child_endpoints is not None:
-        instance.min_child_endpoints = min_child_endpoints
-    if min_child_ipv4 is not None:
-        instance.min_child_endpoints_i_pv4 = min_child_ipv4
-    if min_child_ipv6 is not None:
-        instance.min_child_endpoints_i_pv6 = min_child_ipv6
-    if geo_mapping is not None:
-        instance.geo_mapping = geo_mapping
-    if subnets is not None:
-        instance.subnets = subnets
-    if monitor_custom_headers:
-        instance.custom_headers = monitor_custom_headers
+    from .aaz.latest.network.traffic_manager.endpoint import Update
+    Update_Endpoint = Update(cmd.loader)
 
-    return instance
+    args = {
+        "name": endpoint_name,
+        "type": endpoint_type,
+        "profile_name": profile_name,
+        "resource_group": resource_group_name
+    }
+    if monitor_custom_headers is not None:
+        args["custom_headers"] = monitor_custom_headers
+    if endpoint_location is not None:
+        args["endpoint_location"] = endpoint_location
+    if endpoint_monitor_status is not None:
+        args["endpoint_monitor_status"] = endpoint_monitor_status
+    if endpoint_status is not None:
+        args["endpoint_status"] = endpoint_status
+    if geo_mapping is not None:
+        args["geo_mapping"] = geo_mapping
+    if min_child_endpoints is not None:
+        args["min_child_endpoints"] = min_child_endpoints
+    if min_child_ipv4 is not None:
+        args["min_child_ipv4"] = min_child_ipv4
+    if min_child_ipv6 is not None:
+        args["min_child_ipv6"] = min_child_ipv6
+    if priority is not None:
+        args["priority"] = priority
+    if subnets is not None:
+        args["subnets"] = subnets
+    if target is not None:
+        args["target"] = target
+    if target_resource_id is not None:
+        args["target_resource_id"] = target_resource_id
+    if weight is not None:
+        args["weight"] = weight
+
+    return Update_Endpoint(args)
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = client.get(resource_group_name, profile_name)
-    return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
+    from .aaz.latest.network.traffic_manager.profile import Show
+    Show_Profile = Show(cmd.loader)
 
+    args = {
+        "resource_group": resource_group_name,
+        "profile_name": profile_name
+    }
+    profile = Show_Profile(args)
 
-def check_traffic_manager_name(cmd, client, name):
-    from azure.mgmt.trafficmanager.models import CheckTrafficManagerRelativeDnsNameAvailabilityParameters
-    checknameParameters = CheckTrafficManagerRelativeDnsNameAvailabilityParameters(name=name, type='Microsoft.Network/trafficManagerProfiles')
-    return client.check_traffic_manager_relative_dns_name_availability(checknameParameters)
-
+    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
 # endregion
 
 
@@ -7810,19 +7822,6 @@ def create_virtual_hub(cmd, client,
     return client.get(resource_group_name, virtual_hub_name)
 
 
-def virtual_hub_update_setter(client, resource_group_name, virtual_hub_name, parameters):
-    return client.begin_create_or_update(resource_group_name, virtual_hub_name, parameters)
-
-
-def update_virtual_hub(cmd, instance,
-                       tags=None,
-                       allow_branch_to_branch_traffic=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-        c.set_param('allow_branch_to_branch_traffic', allow_branch_to_branch_traffic)
-    return instance
-
-
 def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
@@ -7832,46 +7831,6 @@ def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wa
         poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
         LongRunningOperation(cmd.cli_ctx)(poller)
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
-
-
-def list_virtual_hub(client, resource_group_name=None):
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
-def create_virtual_hub_bgp_connection(cmd, client, resource_group_name, virtual_hub_name, connection_name,
-                                      peer_asn, peer_ip, no_wait=False):
-    BgpConnection = cmd.get_models('BgpConnection')
-    vhub_bgp_conn = BgpConnection(name=connection_name, peer_asn=peer_asn, peer_ip=peer_ip)
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
-                       virtual_hub_name, connection_name, vhub_bgp_conn)
-
-
-def virtual_hub_bgp_connection_update_setter(client, resource_group_name,
-                                             virtual_hub_name, connection_name,
-                                             parameters):
-    return client.begin_create_or_update(resource_group_name, virtual_hub_name, connection_name, parameters)
-
-
-def update_virtual_hub_bgp_connection(cmd, instance, peer_asn=None, peer_ip=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('peer_asn', peer_asn)
-        c.set_param('peer_ip', peer_ip)
-    return instance
-
-
-def delete_virtual_hub_bgp_connection(client, resource_group_name,
-                                      virtual_hub_name, connection_name, no_wait=False):
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name, connection_name)
-
-
-def list_virtual_hub_bgp_connection_learned_routes(client, resource_group_name, virtual_hub_name, connection_name):
-    return client.begin_list_learned_routes(resource_group_name, virtual_hub_name, connection_name)
-
-
-def list_virtual_hub_bgp_connection_advertised_routes(client, resource_group_name, virtual_hub_name, connection_name):
-    return client.begin_list_advertised_routes(resource_group_name, virtual_hub_name, connection_name)
 # endregion
 
 
@@ -8342,14 +8301,13 @@ def _build_args(cert_file, private_key_file):
 
 def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
     import os
-    from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
 
     _test_extension(SSH_EXTENSION_NAME)
 
     if not resource_port:
         resource_port = 22
-    if not _is_bastion_connectable_resource(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
@@ -8394,12 +8352,11 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
-    from azure.cli.command_modules.network._validators import _is_bastion_connectable_resource
 
     if not resource_port:
         resource_port = 3389
-    if not _is_bastion_connectable_resource(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine or VMSS Instance resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
+    if not is_valid_resource_id(target_resource_id):
+        raise InvalidArgumentValueError("Please enter a valid resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
     if platform.system() == 'Windows':
         if disable_gateway:
             tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)

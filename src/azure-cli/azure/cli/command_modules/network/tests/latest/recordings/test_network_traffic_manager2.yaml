@@ -1,9 +1,9 @@
 interactions:
 - request:
-    body: '{"tags": {"foo": "doo"}, "location": "global", "properties": {"profileStatus":
-      "Enabled", "trafficRoutingMethod": "Multivalue", "dnsConfig": {"relativeName":
-      "mytrafficmanager001100a2", "ttl": 30}, "monitorConfig": {"protocol": "HTTP",
-      "port": 80, "path": "/"}, "maxReturn": 3}}'
+    body: '{"location": "global", "name": "mytmprofile2", "properties": {"dnsConfig":
+      {"relativeName": "mytrafficmanager001100a2", "ttl": 30}, "maxReturn": 3, "monitorConfig":
+      {"path": "/", "port": 80, "protocol": "HTTP"}, "profileStatus": "Enabled", "trafficRoutingMethod":
+      "Multivalue"}, "tags": {"foo": "doo"}}'
     headers:
       Accept:
       - application/json
@@ -14,13 +14,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '278'
+      - '302'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --routing-method --unique-dns-name --max-return --tags
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-trafficmanager/1.0.0 Python/3.10.2 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile2?api-version=2018-08-01
   response:
@@ -34,7 +34,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 25 Jan 2022 09:11:34 GMT
+      - Tue, 13 Sep 2022 03:30:55 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -44,7 +44,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '10799'
+      - '4499'
       x-powered-by:
       - ASP.NET
     status:
@@ -64,7 +64,7 @@ interactions:
       ParameterSetName:
       - -n -g --routing-method --max-return --tags
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-trafficmanager/1.0.0 Python/3.10.2 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile2?api-version=2018-08-01
   response:
@@ -78,7 +78,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 25 Jan 2022 09:11:35 GMT
+      - Tue, 13 Sep 2022 03:30:56 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -92,7 +92,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '10794'
+      - '1999'
       x-powered-by:
       - ASP.NET
     status:
@@ -100,13 +100,12 @@ interactions:
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficManagerProfiles/mytmprofile2",
-      "name": "mytmprofile2", "type": "Microsoft.Network/trafficManagerProfiles",
-      "tags": {"foo": "boo"}, "location": "global", "properties": {"profileStatus":
-      "Enabled", "trafficRoutingMethod": "Multivalue", "dnsConfig": {"relativeName":
-      "mytrafficmanager001100a2", "ttl": 30}, "monitorConfig": {"profileMonitorStatus":
-      "Inactive", "protocol": "HTTP", "port": 80, "path": "/", "intervalInSeconds":
-      30, "timeoutInSeconds": 10, "toleratedNumberOfFailures": 3}, "endpoints": [],
-      "trafficViewEnrollmentStatus": "Disabled", "maxReturn": 4}}'
+      "location": "global", "name": "mytmprofile2", "properties": {"dnsConfig": {"relativeName":
+      "mytrafficmanager001100a2", "ttl": 30}, "endpoints": [], "maxReturn": 4, "monitorConfig":
+      {"intervalInSeconds": 30, "path": "/", "port": 80, "profileMonitorStatus": "Inactive",
+      "protocol": "HTTP", "timeoutInSeconds": 10, "toleratedNumberOfFailures": 3},
+      "profileStatus": "Enabled", "trafficRoutingMethod": "Multivalue", "trafficViewEnrollmentStatus":
+      "Disabled"}, "tags": {"foo": "boo"}, "type": "Microsoft.Network/trafficManagerProfiles"}'
     headers:
       Accept:
       - application/json
@@ -123,7 +122,7 @@ interactions:
       ParameterSetName:
       - -n -g --routing-method --max-return --tags
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-trafficmanager/1.0.0 Python/3.10.2 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile2?api-version=2018-08-01
   response:
@@ -137,7 +136,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 25 Jan 2022 09:11:40 GMT
+      - Tue, 13 Sep 2022 03:31:00 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -151,7 +150,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '10799'
+      - '4499'
       x-powered-by:
       - ASP.NET
     status:

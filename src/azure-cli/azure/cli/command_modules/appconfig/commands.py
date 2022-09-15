@@ -3,17 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-statements
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import cf_configstore, cf_configstore_operations
+from ._client_factory import cf_configstore, cf_configstore_operations, cf_replicas
 from ._format import (configstore_credential_format,
                       configstore_identity_format,
                       configstore_output_format,
                       keyvalue_entry_format,
                       featureflag_entry_format,
-                      featurefilter_entry_format, deleted_configstore_output_format)
+                      featurefilter_entry_format,
+                      deleted_configstore_output_format,
+                      configstore_replica_output_format)
 
 
 def load_command_table(self, _):
@@ -42,6 +44,12 @@ def load_command_table(self, _):
         client_factory=cf_configstore_operations
     )
 
+    configstore_replica_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.custom#{}',
+        table_transformer=configstore_replica_output_format,
+        client_factory=cf_replicas
+    )
+
     def get_custom_sdk(custom_module, client_factory, table_transformer):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
@@ -55,14 +63,20 @@ def load_command_table(self, _):
     # Management Plane Commands
     with self.command_group('appconfig', configstore_custom_util) as g:
         g.command('create', 'create_configstore')
-        g.command('delete', 'delete_configstore')
+        g.command('delete', 'delete_configstore', confirmation=True)
         g.command('update', 'update_configstore')
         g.command('list', 'list_configstore')
         g.command('list-deleted', 'list_deleted_configstore', table_transformer=deleted_configstore_output_format)
-        g.command('recover', 'recover_deleted_configstore')
-        g.command('purge', 'purge_deleted_configstore')
+        g.command('recover', 'recover_deleted_configstore', confirmation=True)
+        g.command('purge', 'purge_deleted_configstore', confirmation=True)
         g.show_command('show', 'show_configstore')
         g.show_command('show-deleted', 'show_deleted_configstore', table_transformer=deleted_configstore_output_format)
+
+    with self.command_group('appconfig replica', configstore_replica_util, is_preview=True) as g:
+        g.command('list', 'list_replica')
+        g.command('create', 'create_replica')
+        g.command('delete', 'delete_replica', confirmation=True)
+        g.show_command('show', 'show_replica')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
