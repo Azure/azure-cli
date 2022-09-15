@@ -5807,10 +5807,7 @@ def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, funct
     if matched_runtime.github_actions_properties:
         gh_props = matched_runtime.github_actions_properties
         if gh_props.is_supported:
-            if not is_linux and runtime_string.lower() == "powershell":
-                return runtime_version
-            # when stacks api is fixed, return supported_version if not null else runtime_verson
-            return gh_props.supported_version
+            return gh_props.supported_version if gh_props.supported_version else runtime_version
     return None
 
 
