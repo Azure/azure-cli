@@ -22,7 +22,10 @@ from ._utils import run_cli_cmd, generate_random_string
 from ._resource_config import (
     RESOURCE,
 )
-
+from ._validators import (
+    get_source_resource_name,
+    get_target_resource_name,
+)
 
 logger = get_logger(__name__)
 
@@ -30,11 +33,13 @@ logger = get_logger(__name__)
 # pylint: disable=line-too-long
 # For db(mysqlFlex/psql/psqlFlex/sql) linker with auth type=systemAssignedIdentity, enable AAD auth and create db user on data plane
 # For other linker, ignore the steps
-def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, source_type, target_type, client_type, connection_name):
+def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name):
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
         return
 
+    source_type = get_source_resource_name(cmd)
+    target_type = get_target_resource_name(cmd)
     source_handler = getSourceHandler(source_id, source_type)
     if source_handler is None:
         return
