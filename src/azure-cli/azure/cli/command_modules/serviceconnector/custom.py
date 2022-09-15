@@ -148,7 +148,7 @@ def connection_validate(cmd, client,
     return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
-def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=too-many-statements
+def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None,
                       target_resource_group=None, target_id=None,
