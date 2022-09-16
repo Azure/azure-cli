@@ -90,7 +90,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
+        self.cmd('keyvault update -g {rg} -n {kv} --enable-purge-protection '
                  '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment ',
                  checks=[
                      self.check('name', '{kv}'),
@@ -676,7 +676,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+        vault = _create_keyvault(self, self.kwargs).get_output_in_json()
 
         # add all purge permissions to default the access policy
         default_policy = vault['properties']['accessPolicies'][0]

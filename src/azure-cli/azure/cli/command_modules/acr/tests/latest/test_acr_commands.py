@@ -449,7 +449,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         self.kwargs.update({
             'key_vault': key_vault,
@@ -460,8 +460,7 @@ class AcrCommandsTests(ScenarioTest):
             'registry_name': self.create_random_name('testreg', 20),
         })
 
-        # update kv key protection settings and create a new key
-        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
 
