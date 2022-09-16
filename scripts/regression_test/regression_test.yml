@@ -11,7 +11,7 @@ trigger:
 jobs:
 - job: UpdateVersionFiles
   displayName: CLI Bump Version Update Version Files
-  condition: ne($(PACKAGE), '')
+  condition: ne(variables['PACKAGE'], '')
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
