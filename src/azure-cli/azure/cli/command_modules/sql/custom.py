@@ -1824,7 +1824,7 @@ def _get_diagnostic_settings(
         server_name=server_name, database_name=database_name)
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
-    return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
+    return list(azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url))
 
 
 def _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name):
@@ -1920,8 +1920,8 @@ def _audit_policy_show(
         server_name=server_name, database_name=database_name)
 
     # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
-    diagnostic_settings.value.sort(key=lambda d: d.name)
-    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+    diagnostic_settings.sort(key=lambda d: d.name)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name)
 
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
@@ -2150,7 +2150,7 @@ def _audit_policy_update_diagnostic_settings(
     '''
 
     # Fetch all audit diagnostic settings
-    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value, category_name)
+    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings, category_name)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
 
     # If more than 1 audit diagnostic settings found then throw error
@@ -2378,8 +2378,8 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
     else:
         # Sort received diagnostic settings by name and get first element to ensure consistency
         # between command executions
-        diagnostic_settings.value.sort(key=lambda d: d.name)
-        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+        diagnostic_settings.sort(key=lambda d: d.name)
+        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name)
 
         # Determine value of is_azure_monitor_target_enabled
         if audit_diagnostic_setting is None:
