@@ -370,7 +370,7 @@ def load_arguments(self, _):
             c.argument('address_pool', help='The name or ID of the backend address pool.',
                        completer=get_ag_subresource_completion_list('backend_address_pools'))
             c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
-            c.argument('priority', type=int, help='Priority of the rule.')
+            c.argument('priority', type=int, help='Priority of the rule. Supported SKU tiers are Standard_v2, WAF_v2.')
 
     with self.argument_context('network application-gateway rule') as c:
         c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
