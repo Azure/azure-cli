@@ -67,7 +67,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
     target_handler.set_user_admin(
-        user_object_id, mysql_identity_id=auth_info['mysql-identity-id'])
+        user_object_id, mysql_identity_id=auth_info.get('mysql-identity-id'))
 
     # create an aad user in db
     target_handler.create_aad_user(identity_name, client_id)
