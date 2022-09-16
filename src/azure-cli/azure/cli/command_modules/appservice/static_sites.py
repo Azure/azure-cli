@@ -584,7 +584,7 @@ def link_user_function(
     function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
                                                             function_app_region=function_location)
 
-    return client.begin_register_user_provided_function_app_with_static_site(
+    return client.begin_register_user_provided_function_app_with_static_site_build(
         name=name,
         resource_group_name=resource_group_name,
         function_app_name=function_name,
