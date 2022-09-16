@@ -58,7 +58,7 @@ from azure.mgmt.cosmosdb.models import (
     ContinuousModeBackupPolicy,
     ContinuousBackupRestoreLocation,
     CreateMode,
-    Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties,
+    ManagedServiceIdentityUserAssignedIdentity,
     ClusterResource,
     ClusterResourceProperties,
     CommandPostBody,
@@ -243,7 +243,7 @@ def _create_database_account(client,
             user_identities = {}
             for x in assign_identity:
                 if x != SYSTEM_ID:
-                    user_identities[x] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+                    user_identities[x] = ManagedServiceIdentityUserAssignedIdentity()  # pylint: disable=line-too-long
                 else:
                     enable_system = True
             if enable_system:
@@ -1521,7 +1521,7 @@ def cli_cosmosdb_identity_assign(client,
     else:
         new_assigned_identities = existing.identity.user_assigned_identities or {}
         for identity in new_user_identities:
-            new_assigned_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+            new_assigned_identities[identity] = ManagedServiceIdentityUserAssignedIdentity()
 
         new_identity = ManagedServiceIdentity(type=identity_type.value, user_assigned_identities=new_assigned_identities)
 
@@ -1580,7 +1580,7 @@ def cli_cosmosdb_identity_remove(client,
 
     new_user_identities = {}
     for identity in identities_remaining:
-        new_user_identities[identity] = Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties()
+        new_user_identities[identity] = ManagedServiceIdentityUserAssignedIdentity()
     if set_type in [ResourceIdentityType.system_assigned_user_assigned, ResourceIdentityType.user_assigned]:
         for removed_identity in identities_to_remove:
             new_user_identities[removed_identity] = None
