@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from time import sleep
+
 from azure.cli.core.auth.util import decode_access_token
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.testsdk import LiveScenarioTest
@@ -80,3 +82,51 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
 
         self.cmd('logout')
         # endregion
+
+
+class CAEScenarioTest(LiveScenarioTest):
+
+    def setUp(self):
+        super().setUp()
+        # Clear MSAL cache to avoid unexpected tokens from cache
+        self.cmd('az account clear')
+
+    def tearDown(self):
+        self.cmd('az account clear')
+
+    def _retry_until_error(self, cmd):
+        remaining_reties = ARM_MAX_RETRY
+        while remaining_reties > 0:
+            remaining_reties -= 1
+            sleep(ARM_RETRY_INTERVAL)
+            self.cmd(cmd)
+        raise AssertionError("Retry chance exhausted.")
+
+    def test_client_capabilities(self):
+        # Verify the access token has CAE enabled
+        result = self.cmd('account get-access-token').get_output_in_json()
+        access_token = result['accessToken']
+        decoded = decode_access_token(access_token)
+        self.assertEqual(decoded['xms_cc'], ['CP1'])  # xms_cc: extension microsoft client capabilities
+
+    def test_cae_scenario(self):
+        arm_command = "group list"
+
+        self.cmd('login')
+        self.test_client_capabilities()
+
+        # Test access token is working
+        self.cmd(arm_command)
+
+        self._revoke_sign_in_sessions()
+
+        # Keep trying until failure
+        with self.assertRaises(AuthenticationError) as cm:
+            self._retry_until_error(arm_command)
+
+        assert 'AADSTS50173' in cm.exception.error_msg
+        assert 'az login' in cm.exception.recommendations[0]
+
+    def _revoke_sign_in_sessions(self):
+        # Manually revoke sign-in sessions
+        self.cmd('rest -m POST -u https://graph.microsoft.com/v1.0/me/revokeSignInSessions')

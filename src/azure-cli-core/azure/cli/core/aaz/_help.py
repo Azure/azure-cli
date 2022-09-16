@@ -21,7 +21,7 @@ except ImportError:
 
 shorthand_help_messages = {
     "show-help": 'Try `??` to show more.',
-    "short-summary": 'Shorthand syntax supported.',
+    "short-summary": 'Support shorthand-syntax, json-file and yaml-file.',
     "long-summary": 'See https://github.com/Azure/azure-cli/tree/dev/doc/shorthand_syntax.md '
                     'for more about shorthand syntax.'
 }

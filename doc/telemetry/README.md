@@ -1,4 +1,4 @@
-#Telemetry Documentation
+# Telemetry Documentation
 
 > Two types of telemetry are used to monitor and analyze execution of Azure CLI commands. One called ARM telemetry is recorded basing on HTTP traffic by ARM, and another is client side telemetry sent by Azure CLI.
 

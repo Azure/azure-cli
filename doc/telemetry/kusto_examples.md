@@ -1,4 +1,4 @@
-#Samples for kusto query
+# Samples for kusto query
 
 ## Query for new schema
 CLI telemetry has different schema after version 2.0.28

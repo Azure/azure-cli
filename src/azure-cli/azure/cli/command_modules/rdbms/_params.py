@@ -532,6 +532,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The replication role of the server.')
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
+                c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
                 c.argument('byok_key', arg_type=key_arg_type)
