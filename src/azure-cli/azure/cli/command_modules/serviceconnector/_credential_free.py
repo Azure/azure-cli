@@ -399,7 +399,12 @@ class PostgresFlexHandler(TargetHandler):
         self.host = self.db_server + self.endpoint
         self.dbname = target_segments.get('child_name_1')
 
+    def enable_pg_extension(self):
+        run_cli_cmd('az postgres flexible-server parameter set -g {} -s {} --subscription {} --name azure.extensions --value uuid-ossp'.format(self.resource_group, self.db_server, self.subscription))
+
     def enable_target_aad_auth(self):
+        self.enable_pg_extension()
+
         rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(
             self.subscription, self.resource_group, self.db_server)
         server_info = run_cli_cmd(rq)
