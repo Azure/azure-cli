@@ -11,12 +11,13 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
-    cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations
+    cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations, \
+    cf_postgres_flexible_get_cached_server_name
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id
@@ -233,6 +234,80 @@ def flexible_server_restore(cmd, client,
         raise ResourceNotFoundError(e)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+
+
+def flexible_server_fast_create(cmd, client, resource_group_name=None, location=None, backup_retention=None, tier=None,
+                                sku_name=None, storage_gb=None, version=None, administrator_login=None,
+                                administrator_login_password=None, tags=None, database_name=None, public_access=None,
+                                yes=False):
+    db_context = DbContext(
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
+        cf_availability=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb)
+    backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention)
+    sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    cached_server_request_param = postgresql_flexibleservers.models.CachedServerNameRequest(version=version,
+                                                                                            storage=storage,
+                                                                                            sku=sku)
+
+    cached_name_client = cf_postgres_flexible_get_cached_server_name(cmd.cli_ctx, '_')
+
+    try:
+        server_name = cached_name_client.execute(resource_group_name=resource_group_name,
+                                                 location_name=location,
+                                                 cached_server_name_request=cached_server_request_param).name
+    except HttpResponseError as e:
+        if e.status_code == 500:
+            raise CLIError('There is no available server for fast provisioning at the moment.')
+        raise CLIError(e)
+
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+    administrator_login_password = generate_password(administrator_login_password)
+
+    network = postgresql_flexibleservers.models.Network(public_access='Enabled')
+    start_ip, end_ip = prepare_public_network(public_access, yes=yes)
+    if start_ip != -1:
+        public_access = 'Enabled'
+
+    server_result = _create_server(db_context, cmd, resource_group_name, server_name,
+                                   tags=tags,
+                                   location=location,
+                                   sku=sku,
+                                   administrator_login=administrator_login,
+                                   administrator_login_password=administrator_login_password,
+                                   storage=storage,
+                                   backup=backup,
+                                   network=network,
+                                   version=version,
+                                   high_availability=None,
+                                   availability_zone=None)
+
+    if public_access is not None and str(public_access).lower() != 'none':
+        firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+
+    if database_name is None:
+        database_name = DEFAULT_DB_NAME
+    _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+
+    user = server_result.administrator_login
+    server_id = server_result.id
+    loc = server_result.location
+    version = server_result.version
+    sku = server_result.sku.name
+    host = server_result.fully_qualified_domain_name
+
+    logger.warning('Make a note of your password. If you forget, you would have to '
+                   'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                   server_name, resource_group_name)
+    logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
+
+    _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
+
+    return _form_response(user, sku, loc, server_id, host, version,
+                          administrator_login_password if administrator_login_password is not None else '*****',
+                          _create_postgresql_connection_string(host, user, administrator_login_password), database_name, firewall_id)
 
 
 def flexible_server_update_custom_func(cmd, client, instance,

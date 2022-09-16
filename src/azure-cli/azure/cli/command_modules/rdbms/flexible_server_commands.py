@@ -145,6 +145,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('delete', 'flexible_server_delete')
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
+        g.custom_command('fast-create', 'flexible_server_fast_create')
         g.generic_update_command('update',
                                  getter_name='flexible_server_update_get', getter_type=flexible_server_custom_common,
                                  setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,

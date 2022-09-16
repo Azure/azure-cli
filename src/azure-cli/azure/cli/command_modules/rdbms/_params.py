@@ -569,6 +569,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
 
+        if command_group == 'postgres':
+            with self.argument_context('{} flexible-server fast-create'.format(command_group)) as c:
+                c.argument('tier', default='Burstable', arg_type=tier_arg_type)
+                c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
+                c.argument('storage_gb', default='32', arg_type=storage_gb_arg_type)
+                c.argument('version', default='12', arg_type=version_arg_type)
+                c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
+                c.argument('location', arg_type=get_location_type(self.cli_ctx))
+                c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
+                c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
+                c.argument('public_access', arg_type=public_access_arg_type)
+                c.argument('database_name', arg_type=database_name_arg_type)
+                c.argument('tags', tags_type)
+                c.argument('yes', arg_type=yes_arg_type)
+
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)
             c.argument('yes', arg_type=yes_arg_type)

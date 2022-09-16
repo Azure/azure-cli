@@ -609,3 +609,11 @@ examples:
   - name: Wait for an Active Directory administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
 """
+
+helps['postgres flexible-server fast-create'] = """
+type: command
+short-summary: Create a new PostgreSQL flexible server using fast provisioning method.
+examples:
+  - name: Create a new PostgreSQL flexible server.
+    text: az postgres flexible-server fast-create -g testgroup -l westus --admin-user username --admin-password password --version 12 --storage-size 32 --tier Burstable --sku-name Standard_B1ms
+"""
