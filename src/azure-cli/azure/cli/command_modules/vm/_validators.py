@@ -2021,9 +2021,9 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType, \
-    GalleryTargetExtendedLocation = cmd.get_models(
+    GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
         'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-        'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation')
+        'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
     storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
     storage_account_types_str = ", ".join(storage_account_types_list)
 
@@ -2148,17 +2148,14 @@ def process_gallery_image_version_namespace(cmd, namespace):
         edge_zone_info = []
         for i, t in enumerate(namespace.target_edge_zones):
             parts = t.split('=', 3)
-            edge_zone = None
+            # At least the region and edge zone are specified
+            if len(parts) < 2:
+                continue
+
+            region = parts[0]
+            edge_zone = parts[1]
             replica_count = None
             storage_account_type = None
-
-            if len(parts) >= 2:
-                try:
-                    edge_zone = int(parts[1])
-                except ValueError:
-                    raise ArgumentUsageError(
-                        "usage error: {} is an invalid target edge zone argument. "
-                        "The second part is an integer edge zone.".format(t))
 
             # Region and edge zone specified, but also replica count or storage account type
             if len(parts) == 3:
@@ -2187,7 +2184,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         "usage error: {} is an invalid target edge zone argument. "
                         "The third part must be a valid integer replica count.".format(t))
 
-            # Parse target edge zone encryption, example: ['1', 'des1, 0, des2, 1, des3', 'null', 'des4']
+            # Parse target edge zone encryption,
+            # example: ['microsoftlosangeles1', 'des1, 0, des2, 1, des3', 'null', 'des4']
             encryption = None
             os_disk_image = None
             data_disk_images = None
@@ -2222,12 +2220,14 @@ def process_gallery_image_version_namespace(cmd, namespace):
             if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
-            # At least the region and edge zone are specified
-            if len(parts) >= 2:
-                edge_zone_info.append(
-                    GalleryTargetExtendedLocation(name=parts[0], extended_location_replica_count=replica_count,
-                                                  storage_account_type=storage_account_type,
-                                                  encryption=encryption))
+            extended_location = GalleryExtendedLocation(name=edge_zone, type='EdgeZone')
+
+            edge_zone_info.append(
+                GalleryTargetExtendedLocation(name=region, extended_location_replica_count=replica_count,
+                                              extended_location=extended_location,
+                                              storage_account_type=storage_account_type,
+                                              encryption=encryption)
+            )
 
         namespace.target_edge_zones = edge_zone_info
 
