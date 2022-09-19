@@ -258,8 +258,8 @@ class MysqlFlexibleHandler(TargetHandler):
             "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
             "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
                 self.aad_username, client_id),
-            "GRANT ALL PRIVILEGES ON Db.* TO '{}'@'%';".format(
-                self.aad_username),
+            "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'%';".format(
+                self.dbname, self.aad_username),
             "FLUSH privileges;"
         ]
 
