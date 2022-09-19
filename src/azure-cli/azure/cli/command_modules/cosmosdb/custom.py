@@ -1655,7 +1655,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
     virtual_network_rules = []
     rule_removed = False
     for rule in existing.virtual_network_rules:
-        if rule.id != subnet:
+        if rule.id.lower() != subnet.lower():
             virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
                                    ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))
