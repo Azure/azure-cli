@@ -222,6 +222,8 @@ for source in SOURCE_RESOURCES:
               short-summary: The secret auth info
               long-summary: |
                 Usage: --secret name=XX secret=XX
+                       --secret name=XX secret-uri=XX
+                       --secret name=XX secret-name=XX
 
                 name    : Required. Username or account name for secret auth.
                 secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
@@ -235,13 +237,25 @@ for source in SOURCE_RESOURCES:
                 Usage: --secret
 
         ''' if AUTH_TYPE.SecretAuto in auth_types else ''
-        system_identity_param = '''
+        system_identity_param = ''
+        if AUTH_TYPE.SystemIdentity in auth_types:
+            if target in {RESOURCE.MysqlFlexible}:
+                system_identity_param = '''
+            - name: --system-identity
+              short-summary: The system assigned identity auth info
+              long-summary: |
+                Usage: --system-identity mysql-identity-id=xx
+
+                mysql-identity-id      : Optional. ID of identity used for MySQL flexible server AAD Authentication. Ignore it if you are the server AAD administrator.
+            '''
+            else:
+                system_identity_param = '''
             - name: --system-identity
               short-summary: The system assigned identity auth info
               long-summary: |
                 Usage: --system-identity
 
-        ''' if AUTH_TYPE.SystemIdentity in auth_types else ''
+            '''
         user_identity_param = '''
             - name: --user-identity
               short-summary: The user assigned identity auth info
