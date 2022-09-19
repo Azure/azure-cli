@@ -56,62 +56,6 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--protocol Tcp '
                  '--tcp-port 2048 ')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='eastus')
-    @AllowLargeResponse()
-    def test_nw_connection_monitor_v1(self, resource_group, resource_group_location):
-        """
-        This is copied from Azure/azure-cli,
-        src/azure-cli/azure/cli/command_modules/network/tests/latest/test_network_commands.py,
-        test_network_watcher_connection_monitor()
-        """
-        import time
-        self.kwargs.update({
-            'loc': resource_group_location,
-            'vm2': 'vm2',
-            'vm3': 'vm3',
-            'cm': 'cm1'
-        })
-
-        self.cmd('vm create -g {rg} -n {vm2} '
-                 '--image UbuntuLTS '
-                 '--authentication-type password '
-                 '--admin-username deploy '
-                 '--admin-password PassPass10!) '
-                 '--nsg {vm2} '
-                 '--nsg-rule None')
-        self.cmd('vm extension set -g {rg} '
-                 '--vm-name {vm2} '
-                 '-n NetworkWatcherAgentLinux '
-                 '--publisher Microsoft.Azure.NetworkWatcher')
-        self.cmd('vm create -g {rg} -n {vm3} '
-                 '--image UbuntuLTS '
-                 '--authentication-type password '
-                 '--admin-username deploy '
-                 '--admin-password PassPass10!) '
-                 '--nsg {vm3} '
-                 '--nsg-rule None')
-        self.cmd('vm extension set -g {rg} '
-                 '--vm-name {vm3} '
-                 '-n NetworkWatcherAgentLinux '
-                 '--publisher Microsoft.Azure.NetworkWatcher')
-        time.sleep(20)
-        self.cmd('network watcher connection-monitor create '
-                 '-n {cm} '
-                 '--source-resource {vm2} '
-                 '-g {rg} '
-                 '--dest-resource {vm3} '
-                 '--dest-port 80 '
-                 '--tags foo=doo')
-        self.cmd('network watcher connection-monitor list -l {loc}')
-        self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
-        try:
-            self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
-            self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
-        except CLIError:
-            pass
-        self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
-
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westeurope')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_creation(self, resource_group, resource_group_location):
