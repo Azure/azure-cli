@@ -130,12 +130,13 @@ class AAZObject(AAZBaseValue):
 
             for schema in schemas:
                 for name, field_schema in schema._fields.items():
-                    v = self[name].to_serialized_data(processor=processor, **kwargs)
-                    if v == AAZUndefined:
-                        continue
-                    if field_schema._serialized_name:   # pylint: disable=protected-access
-                        name = field_schema._serialized_name  # pylint: disable=protected-access
-                    result[name] = v
+                    if name in self._data:
+                        v = self[name].to_serialized_data(processor=processor, **kwargs)
+                        if v == AAZUndefined:
+                            continue
+                        if field_schema._serialized_name:   # pylint: disable=protected-access
+                            name = field_schema._serialized_name  # pylint: disable=protected-access
+                        result[name] = v
 
         if not result and self._is_patch:
             result = AAZUndefined

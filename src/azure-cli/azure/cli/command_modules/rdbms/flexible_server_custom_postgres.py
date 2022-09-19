@@ -52,9 +52,6 @@ def flexible_server_create(cmd, client,
                                                                              server_name, 'postgres')
 
     server_name = server_name.lower()
-    if high_availability and high_availability.lower() == 'enabled':
-        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
-        high_availability = 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
@@ -248,10 +245,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
         cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
-
-    if high_availability and high_availability.lower() == 'enabled':
-        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
-        high_availability = 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
                            location=location,

@@ -138,14 +138,6 @@ def load_arguments(self, _):
                         'policies specified in vault properties, and any policy stored on Azure Resource Manager will '
                         'be ignored. If null or not specified, the vault is created with the default value of false. '
                         'Note that management actions are always authorized with RBAC.')
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
-            message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
-                                   'deprecated by December 2020. All key vaults will be required to have soft delete '
-                                   'enabled. Please see the following documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'),
-                   help='[Vault Only] Property to specify whether the \'soft delete\' functionality is enabled for '
-                        'this key vault. If it\'s not set to any value (true or false) when creating new key vault, it '
-                        'will be set to true by default. Once set to true, it cannot be reverted to false.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(),
                    help='Property specifying whether protection against purge is enabled for this vault/managed HSM '
                         'pool. Setting this property to true activates protection against purge for this vault/managed '
