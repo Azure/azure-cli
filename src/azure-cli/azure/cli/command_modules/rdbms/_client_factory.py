@@ -313,6 +313,10 @@ def cf_mysql_flexible_backups(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).backups
 
 
+def cf_mysql_flexible_adadmin(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).azure_ad_administrators
+
+
 def cf_mysql_check_resource_availability(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).check_name_availability
 

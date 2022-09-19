@@ -14,7 +14,8 @@ from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
-from ._arg import AAZArgumentsSchema, AAZBoolArg
+from ._arg import AAZArgumentsSchema, AAZBoolArg, \
+    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
@@ -79,12 +80,11 @@ class AAZCommand(CLICommand):
                 options=['--no-wait'],
                 help='Do not wait for the long-running operation to finish.'
             )
-        # TODO: Implement Generic Update
-        # if cls.AZ_SUPPORT_GENERIC_UPDATE:
-        #     schema.generic_update_add = AAZGenericUpdateAddArg()
-        #     schema.generic_update_set = AAZGenericUpdateSetArg()
-        #     schema.generic_update_remove = AAZGenericUpdateRemoveArg()
-        #     schema.generic_update_force_string = AAZGenericUpdateForceString()
+        if cls.AZ_SUPPORT_GENERIC_UPDATE:
+            schema.generic_update_add = AAZGenericUpdateAddArg()
+            schema.generic_update_set = AAZGenericUpdateSetArg()
+            schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+            schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
         return schema
 
     def __init__(self, loader=None, cli_ctx=None, **kwargs):

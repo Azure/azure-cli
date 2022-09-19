@@ -77,6 +77,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
+    MGMT_APPCONFIGURATION = ('azure.mgmt.appconfiguration', 'AppConfigurationManagementClient')
+
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -152,7 +154,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2022-05-01',
-        ResourceType.MGMT_NETWORK: '2021-08-01',
+        ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-01', {
             'resource_skus': '2019-04-01',
             'disks': '2022-03-02',
@@ -201,11 +203,11 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-06-08',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
         ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2022-06-01',
@@ -216,7 +218,7 @@ AZURE_API_PROFILES = {
             'autoscale_settings': '2015-04-01',
             'baseline': '2018-09-01',
             'baselines': '2019-03-01',
-            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings': '2021-05-01-preview',
             'diagnostic_settings_category': '2017-05-01-preview',
             'event_categories': '2015-04-01',
             'guest_diagnostics_settings': '2018-06-01-preview',
@@ -240,7 +242,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_MSI: '2021-09-30-preview',
+        ResourceType.MGMT_MSI: '2022-01-31-preview',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
         ResourceType.MGMT_IOTHUB: '2021-07-02',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
@@ -248,10 +250,13 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-06-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-07-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        })
+        }),
+        ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
+            'replicas': '2022-03-01-preview'
+        }),
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
@@ -295,7 +300,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -342,7 +347,7 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2021-06-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
@@ -409,7 +414,6 @@ AZURE_API_PROFILES = {
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
         'vm_default_target_network': '2018-01-01',
-        'nw_connection_monitor': '2019-06-01',
         'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'

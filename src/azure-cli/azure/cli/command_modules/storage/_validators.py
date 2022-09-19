@@ -1333,6 +1333,8 @@ def process_file_batch_source_parameters(cmd, namespace):
         if not namespace.account_name:
             namespace.account_name = identifier.account_name
 
+    namespace.share_name = namespace.source
+
 
 def process_file_download_namespace(namespace):
     get_file_path_validator()(namespace)
@@ -1819,7 +1821,7 @@ def validate_encryption_scope_parameter(ns):
             (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
                        "--prevent-encryption-scope-override to set encryption scope information "
-                       "when creating container.")
+                       "when creating container/file system.")
 
 
 def validate_encryption_scope_client_params(ns):

@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
-ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
+ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete', 'post']
 AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
 ALLOWS_BASIC_AUTH = "allows_basic_auth"
@@ -49,10 +49,18 @@ class RepoAccessTokenPermission(Enum):
     METADATA_READ = 'metadata_read'
     METADATA_WRITE = 'metadata_write'
     DELETE = 'delete'
+    DELETED_READ = 'deleted_read'
+    DELETED_RESTORE = 'deleted_restore'
+    PULL = 'pull'
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
-    PULL = 'pull'
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
+    DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE)
+
+
+class RegistryAccessTokenPermission(Enum):
+    CATALOG = 'catalog'
+    DELETED_CATALOG = 'deleted_catalog'
 
 
 class HelmAccessTokenPermission(Enum):
@@ -173,9 +181,8 @@ def _get_aad_token_after_challenge(cli_ctx,
     elif artifact_repository:
         scope = 'artifact-repository:{}:{}'.format(artifact_repository, permission)
     else:
-        # catalog only has * as permission, even for a read operation
-        scope = 'registry:catalog:*'
-
+        # Registry level permissions only have * as permission, even for a read operation
+        scope = 'registry:{}:*'.format(permission)
     content = {
         'grant_type': 'refresh_token',
         'service': login_server,
@@ -215,7 +222,6 @@ def _get_aad_token(cli_ctx,
     token_params = _handle_challenge_phase(
         login_server, repository, artifact_repository, permission, True, is_diagnostics_context
     )
-
     from ._errors import ErrorClass
     if isinstance(token_params, ErrorClass):
         if is_diagnostics_context:
@@ -271,8 +277,8 @@ def _get_token_with_username_and_password(login_server,
     elif artifact_repository:
         scope = 'artifact-repository:{}:{}'.format(artifact_repository, permission)
     else:
-        # catalog only has * as permission, even for a read operation
-        scope = 'registry:catalog:*'
+        # Registry level permissions only have * as permission, even for a read operation
+        scope = 'registry:{}:*'.format(permission)
 
     authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/token', '', '', ''))

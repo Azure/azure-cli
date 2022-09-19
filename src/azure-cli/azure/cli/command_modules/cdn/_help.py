@@ -1136,7 +1136,7 @@ examples:
 
 helps['afd origin-group update'] = """
 type: command
-short-summary: Creates a new origin group within the specified profile.
+short-summary: Updates an existing origin group within the specified profile.
 examples:
   - name: Update the probe setting of the specified origin group.
     text: >

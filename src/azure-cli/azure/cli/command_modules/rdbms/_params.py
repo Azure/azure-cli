@@ -16,7 +16,8 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator
+    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
+    high_availability_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -219,7 +220,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     _complex_params('postgres')
 
     # Flexible-server
-    # pylint: disable=too-many-statements, too-many-locals
+    # pylint: disable=too-many-statements, too-many-locals, too-many-branches
     def _flexible_server_params(command_group):
 
         server_name_arg_type = CLIArgumentType(
@@ -274,7 +275,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         sku_name_arg_type = CLIArgumentType(
             options_list=['--sku-name'],
-            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3'
+            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms'
         )
 
         storage_gb_arg_type = CLIArgumentType(
@@ -371,8 +372,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         high_availability_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled', 'Enabled']),
             options_list=['--high-availability'],
-            help='Enable (ZoneRedundant or SameZone) or disable high availability feature. '
-                 'Default value is Disabled. High availability can only be set during flexible server create time. '
+            help='Enable (ZoneRedundant or SameZone) or disable high availability feature.',
+            validator=high_availability_validator
         )
 
         mysql_version_upgrade_arg_type = CLIArgumentType(
@@ -408,6 +409,41 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Whether or not geo redundant backup is enabled.'
         )
 
+        identity_arg_type = CLIArgumentType(
+            options_list=['--identity'],
+            help='The name or resource ID of the user assigned identity for data encryption.',
+            validator=validate_byok_identity
+        )
+
+        backup_identity_arg_type = CLIArgumentType(
+            options_list=['--backup-identity'],
+            help='The name or resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
+            validator=validate_byok_identity
+        )
+
+        key_arg_type = CLIArgumentType(
+            options_list=['--key'],
+            help='The resource ID of the primary keyvault key for data encryption.'
+        )
+
+        backup_key_arg_type = CLIArgumentType(
+            options_list=['--backup-key'],
+            help='The resource ID of the geo backup keyvault key for data encryption. The key needs to be in the same region as the backup region.'
+        )
+
+        disable_data_encryption_arg_type = CLIArgumentType(
+            options_list=['--disable-data-encryption'],
+            arg_type=get_three_state_flag(),
+            help='Disable data encryption by removing key(s).'
+        )
+
+        identities_arg_type = CLIArgumentType(
+            options_list=['--identity', '-n'],
+            nargs='+',
+            help='Space-separated names or ID\'s of identities.',
+            validator=validate_identities
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -429,6 +465,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
                 c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -493,6 +533,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The replication role of the server.')
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
+                c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+                c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
 
@@ -632,6 +678,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        # identity
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+            with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
+                c.argument('identities', arg_type=identities_arg_type)
+
+            with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
+                c.argument('identities', arg_type=identities_arg_type)
+
+            with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
+                c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+
+        # ad-admin
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+            with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
+                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+                c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 

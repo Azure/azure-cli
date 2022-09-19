@@ -17,6 +17,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.core.exceptions import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -2656,6 +2657,73 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         os.remove(exported_file_path)
 
 
+class AppconfigReplicaLiveScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @AllowLargeResponse()
+    def test_azconfig_replica_mgmt(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='ReplicaStore', length=24)
+        replica_name = self.create_random_name(prefix='Replica', length=24)
+
+        store_location = 'eastus'
+        replica_location = 'westus'
+        sku = 'standard'
+        tag_key = "key"
+        tag_value = "value"
+        tag = tag_key + '=' + tag_value
+        structured_tag = {tag_key: tag_value}
+        system_assigned_identity = '[system]'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'replica_name': replica_name,
+            'rg_loc': store_location,
+            'replica_loc': replica_location,
+            'rg': resource_group,
+            'sku': sku,
+            'tags': tag,
+            'identity': system_assigned_identity,
+            'retention_days': 1,
+            'enable_purge_protection': False
+        })
+
+        store = self.cmd(
+            'appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sku.name', sku),
+                    self.check('tags', structured_tag),
+                    self.check('identity.type', 'SystemAssigned'),
+                    self.check('softDeleteRetentionInDays', '{retention_days}'),
+                    self.check('enablePurgeProtection', '{enable_purge_protection}')]).get_output_in_json()
+
+        self.cmd('appconfig replica create -s {config_store_name} -g {rg} -l {replica_loc} -n {replica_name}',
+                 checks=[self.check('name', '{replica_name}'),
+                         self.check('location', '{replica_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}',
+                 checks=[self.check('name', '{replica_name}'),
+                         self.check('location', '{replica_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('appconfig replica list -s {config_store_name}',
+                 checks=[self.check('[0].name', '{replica_name}'),
+                         self.check('[0].location', '{replica_loc}'),
+                         self.check('[0].resourceGroup', resource_group),
+                         self.check('[0].provisioningState', 'Succeeded')])
+
+        self.cmd('appconfig replica delete -s {config_store_name} -g {rg} -n {replica_name} -y')
+
+        with self.assertRaisesRegex(ResourceNotFoundError, f"The replica '{replica_name}' for App Configuration '{config_store_name}' not found."):
+            self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}')
+
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+
 def _create_config_store(test, kwargs):
     if 'retention_days' not in kwargs:
         kwargs.update({
@@ -2669,7 +2737,7 @@ def _create_user_assigned_identity(test, kwargs):
 
 
 def _setup_key_vault(test, kwargs):
-    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --enable-soft-delete').get_output_in_json()
+    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --retention-days 7').get_output_in_json()
     test.cmd('keyvault key create --vault-name {keyvault_name} -n {encryption_key}')
     test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
 
