@@ -413,5 +413,5 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             instance._data.update(data)
 
         if self.ctx.custom_update_func:
-            self.ctx.custom_update_func(instance)
+            self.ctx.custom_update_func(instance, ctx=self.ctx)
         return instance
