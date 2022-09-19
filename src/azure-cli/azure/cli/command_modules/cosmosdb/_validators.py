@@ -281,13 +281,13 @@ def validate_mongo_user_definition_body(ns):
                 raise InvalidArgumentValueError(
                     'User creation failed. Invalid Mongo Roles. A valid dictionary JSON representation is expected')
 
-        for Role in mongo_user_definition['Roles']:
-            if 'Role' not in Role or not isinstance(Role['Role'], str) or len(Role['Role']) == 0:
-                raise InvalidArgumentValueError(
-                    'User creation failed. Invalid Mongo Role. A valid string Role is expected.')
-            if 'Db' in Role and not isinstance(Role['Db'], str):
-                raise InvalidArgumentValueError(
-                    'User creation failed. Invalid Mongo Db. A valid string database name is expected.')
+            for Role in mongo_user_definition['Roles']:
+                if 'Role' not in Role or not isinstance(Role['Role'], str) or len(Role['Role']) == 0:
+                    raise InvalidArgumentValueError(
+                        'User creation failed. Invalid Mongo Role. A valid string Role is expected.')
+                if 'Db' in Role and not isinstance(Role['Db'], str):
+                    raise InvalidArgumentValueError(
+                        'User creation failed. Invalid Mongo Db. A valid string database name is expected.')
 
         ns.mongo_user_definition_body = mongo_user_definition
 
