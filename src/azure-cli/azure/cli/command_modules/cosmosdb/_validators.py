@@ -142,38 +142,6 @@ def validate_role_assignment_id(ns):
         ns.role_assignment_id = _gen_guid()
 
 
-def _parse_resource_path(resource,
-                         to_fully_qualified,
-                         resource_type=None,
-                         subscription_id=None,
-                         resource_group_name=None,
-                         account_name=None):
-    """Returns a properly formatted mongo role definition or user definition id."""
-    import re
-    regex = "/subscriptions/(?P<subscription>.*)/resourceGroups/(?P<resource_group>.*)/providers/" \
-            "Microsoft.DocumentDB/databaseAccounts/(?P<database_account>.*)"
-    formatted = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}"
-
-    if resource_type is not None:
-        regex += "/" + resource_type + "/(?P<resource_id>.*)"
-        formatted += "/" + resource_type + "/"
-
-    formatted += "{3}"
-
-    if to_fully_qualified:
-        result = re.match(regex, resource)
-        if result is not None:
-            return resource
-
-        return formatted.format(subscription_id, resource_group_name, account_name, resource)
-
-    result = re.match(regex, resource)
-    if result is None:
-        return resource
-
-    return result['resource_id']
-
-
 def validate_mongo_role_definition_body(ns):
     """ Extracts role definition body """
     from azure.mgmt.cosmosdb.models import RoleDefinitionType
