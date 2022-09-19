@@ -1452,10 +1452,10 @@ def db_export(
     kwargs['storage_key'] = storage_key
 
     return client.begin_export(
-        no_wait,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
+        no_wait=no_wait,
         parameters=kwargs)
 
 
@@ -1478,10 +1478,10 @@ def db_import(
     kwargs['storage_key'] = storage_key
 
     return client.begin_import_method(
-        no_wait,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
+        no_wait=no_wait,
         parameters=kwargs)
 
 
