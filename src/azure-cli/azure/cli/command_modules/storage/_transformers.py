@@ -491,4 +491,13 @@ def transform_file_show_result(result):
         new_result['properties']['contentSettings']['contentMd5'] = _encode_bytes(new_result['properties']
                                                                                   ['contentSettings']['contentMd5'])
     new_result.update(result)
+    _decode_bytearray(new_result)
     return new_result
+
+
+def _decode_bytearray(result):
+    for k, v in result.items():
+        if isinstance(v, bytearray):
+            result[k] = base64.urlsafe_b64encode(v).decode()
+        elif isinstance(v, dict):
+            _decode_bytearray(v)

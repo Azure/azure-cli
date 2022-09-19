@@ -167,7 +167,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     @classmethod
     def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
         from ._arg import AAZSimpleTypeArg
-        from azure.cli.core.util import get_file_json, shell_safe_json_parse
+        from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
 
         schema = cls._schema
         for item in key_items:
@@ -186,7 +186,12 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
                 # read from file
                 path = os.path.expanduser(value)
                 if os.path.exists(path):
-                    v = get_file_json(path, preserve_order=True)
+                    if path.endswith('.yml') or path.endswith('.yaml'):
+                        # read from yaml file
+                        v = get_file_yaml(path)
+                    else:
+                        # read from json file
+                        v = get_file_json(path, preserve_order=True)
                 else:
                     try:
                         v = cls._str_parser(value)

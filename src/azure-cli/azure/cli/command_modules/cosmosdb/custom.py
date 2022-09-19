@@ -266,6 +266,10 @@ def _create_database_account(client,
     backup_policy = None
     if backup_policy_type is not None:
         if backup_policy_type.lower() == 'periodic':
+            if backup_interval is None and backup_retention is None and backup_redundancy is None:
+                raise CLIError(
+                    '--backup-interval, --backup-retention or --backup-redundancy ' +
+                    'must be specified when Backup Policy Type is Periodic.')
             backup_policy = PeriodicModeBackupPolicy()
             if backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
                 periodic_mode_properties = PeriodicModeProperties(
@@ -278,7 +282,7 @@ def _create_database_account(client,
             backup_policy = ContinuousModeBackupPolicy()
         else:
             raise CLIError('backup-policy-type argument is invalid.')
-    elif backup_interval is not None or backup_retention is not None:
+    elif backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
         backup_policy = PeriodicModeBackupPolicy()
         periodic_mode_properties = PeriodicModeProperties(
             backup_interval_in_minutes=backup_interval,
