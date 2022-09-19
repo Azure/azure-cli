@@ -58,7 +58,7 @@ from azure.cli.command_modules.network._validators import (
     process_public_ip_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
+    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
@@ -1197,19 +1197,19 @@ def load_command_table(self, _):
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_peering')
         g.custom_command('sync', 'sync_vnet_peering')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('delete', 'begin_delete')
+        # g.show_command('show', 'get')
+        # g.command('list', 'list')
+        # g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
         g.custom_command('create', 'create_subnet', supports_local_cache=True)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+        # g.command('delete', 'begin_delete')
+        # g.show_command('show', 'get')
+        # g.command('list', 'list')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters',
                                  custom_func_name='update_subnet')
-        g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
+        # g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
         g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
     # endregion
 

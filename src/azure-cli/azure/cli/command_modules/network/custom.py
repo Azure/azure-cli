@@ -7181,7 +7181,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
         "name": virtual_network_name,
     }
     vnet = Show_VNet(args)
-    start_ip = vnet["addressSpace"]["addressPrefixes"][0].split('/')[0]
+    start_ip = vnet["addressSpace"]["addressPrefixes"][0].split("/")[0]
 
     Check_IP_Address = CheckIpAddress(cmd.loader)
     args = {
@@ -7195,16 +7195,28 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
-    client = network_client_factory(cmd.cli_ctx)
-    subnet = client.subnets.get(resource_group_name=resource_group_name,
-                                virtual_network_name=virtual_network_name,
-                                subnet_name=subnet_name)
-    if subnet.address_prefix is not None:
-        start_ip = subnet.address_prefix.split('/')[0]
-    available_ips = client.virtual_networks.check_ip_address_availability(resource_group_name=resource_group_name,
-                                                                          virtual_network_name=virtual_network_name,
-                                                                          ip_address=start_ip)
-    return available_ips.available_ip_addresses
+    from .aaz.latest.network.vnet import CheckIpAddress
+    from .aaz.latest.network.vnet.subnet import Show
+
+    Show_Subnet = Show(cmd.loader)
+    args = {
+        "resource_group": resource_group_name,
+        "name": subnet_name,
+        "vnet_name": virtual_network_name,
+    }
+    subnet = Show_Subnet(args)
+    if subnet["addressPrefix"]:
+        start_ip = subnet["addressPrefix"].split("/")[0]
+
+    Check_IP_Address = CheckIpAddress(cmd.loader)
+    args = {
+        "resource_group": resource_group_name,
+        "name": virtual_network_name,
+        "ip_address": start_ip,
+    }
+    available_ips = Check_IP_Address(args)
+
+    return available_ips["availableIPAddresses"]
 # endregion
 
 
