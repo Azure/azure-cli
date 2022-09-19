@@ -7173,14 +7173,25 @@ def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
 
 
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
-    client = network_client_factory(cmd.cli_ctx).virtual_networks
-    vnet = client.get(resource_group_name=resource_group_name,
-                      virtual_network_name=virtual_network_name)
-    start_ip = vnet.address_space.address_prefixes[0].split('/')[0]
-    available_ips = client.check_ip_address_availability(resource_group_name=resource_group_name,
-                                                         virtual_network_name=virtual_network_name,
-                                                         ip_address=start_ip)
-    return available_ips.available_ip_addresses
+    from .aaz.latest.network.vnet import Show, CheckIpAddress
+
+    Show_VNet = Show(cmd.loader)
+    args = {
+        "resource_group": resource_group_name,
+        "name": virtual_network_name,
+    }
+    vnet = Show_VNet(args)
+    start_ip = vnet["addressSpace"]["addressPrefixes"][0].split('/')[0]
+
+    Check_IP_Address = CheckIpAddress(cmd.loader)
+    args = {
+        "resource_group": resource_group_name,
+        "name": virtual_network_name,
+        "ip_address": start_ip,
+    }
+    available_ips = Check_IP_Address(args)
+
+    return available_ips["availableIPAddresses"]
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
