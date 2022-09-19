@@ -87,11 +87,12 @@ class AAZCommand(CLICommand):
             schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
         return schema
 
-    def __init__(self, loader=None, cli_ctx=None, **kwargs):
+    def __init__(self, loader=None, cli_ctx=None, custom_update_func=None, **kwargs):
         """
 
         :param loader: it is required for command registered in the command table
         :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
+        :param custom_update_func: callback function for custom instance update.
         """
         assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
@@ -119,6 +120,10 @@ class AAZCommand(CLICommand):
 
         self.ctx = None
 
+        if custom_update_func is not None and not self.AZ_SUPPORT_GENERIC_UPDATE:
+            raise NotImplementedError("custom_update_func callback only works when AZ_SUPPORT_GENERIC_UPDATE is enabled.")
+        self.custom_update_func = custom_update_func
+
         # help property will be assigned as help_file for command parser:
         # https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
         # help_file will be loaded as file_data in knack:
@@ -139,6 +144,7 @@ class AAZCommand(CLICommand):
             schema=self.get_arguments_schema(),
             command_args=command_args,
             no_wait_arg='no_wait' if self.supports_no_wait else None,
+            custom_update_func=self.custom_update_func,
         )
         self.ctx.format_args()
 

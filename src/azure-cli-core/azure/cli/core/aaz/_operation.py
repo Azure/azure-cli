@@ -368,8 +368,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    @staticmethod
-    def _update_instance_by_generic(instance, generic_update_args):  # pylint: disable=unused-argument
+    def _update_instance_by_generic(self, instance, generic_update_args):  # pylint: disable=unused-argument
         from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, \
             add_properties, remove_properties, set_properties
         from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -412,4 +411,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             assert isinstance(instance._data, dict)
             instance._data.clear()
             instance._data.update(data)
+
+        if self.ctx.custom_update_func:
+            self.ctx.custom_update_func(instance)
         return instance
