@@ -362,7 +362,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
         if hasattr(response, 'hyper_v_generation') and response.hyper_v_generation == 'V2' and not image_reference_lun:
             # will set default value of hyper_v_generation
-            logger.warning('Starting 05/xx/2023 az disk create command will deploy Trusted Launch VM by default. '
+            logger.warning('Starting next breaking window (sprint for 2023 Build Event) '
+                           'az disk create command will deploy Trusted Launch VM by default. '
                            'To know more about Trusted Launch, please visit '
                            'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             if hasattr(response, 'features') and response.features \
@@ -406,7 +407,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         if hasattr(gallery_image_info, 'hyper_v_generation') \
                 and gallery_image_info.hyper_v_generation == 'V2' and not gallery_image_reference_lun:
             # will set default value of hyper_v_generation
-            logger.warning('Starting 05/xx/2023 az disk create command will deploy Trusted Launch VM by default. '
+            logger.warning('Starting next breaking window (sprint for 2023 Build Event) '
+                           'az disk create command will deploy Trusted Launch VM by default. '
                            'To know more about Trusted Launch, please visit '
                            'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             if hasattr(gallery_image_info, 'features') and gallery_image_info.features \
@@ -460,7 +462,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if option == DiskCreateOption.empty and os_type:
         # will set default value of hyper_v_generation and security_type
-        logger.warning('Starting 05/xx/2023 az disk create command will deploy Trusted Launch VM by default. '
+        logger.warning('Starting next breaking window (sprint for 2023 Build Event) '
+                       'az disk create command will deploy Trusted Launch VM by default. '
                        'To know more about Trusted Launch, please visit '
                        'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
     if hyper_v_generation:
