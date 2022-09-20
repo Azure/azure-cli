@@ -27,6 +27,7 @@ class AAZOperation:
     def __init__(self, ctx):
         self.ctx = ctx
 
+
 class AAZLifeCycleCallback(AAZOperation):
 
     def __init__(self, ctx, name):
