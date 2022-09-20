@@ -9121,6 +9121,23 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('creationData.createOption', 'CopyStart')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_snapshot_ultra_ssd', location='eastus2euap')
+    def test_snapshot_ultra_ssd(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+        })
+
+        disk_info = self.cmd('disk create -g {rg} -n {disk} --size-gb 4 --sku UltraSSD_LRS', checks=[
+            self.check('sku.name', 'UltraSSD_LRS')
+        ]).get_output_in_json()
+        self.kwargs.update({
+            'disk_id': disk_info['id']
+        })
+        self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
+            self.check('creationData.sourceResourceId', '{disk_id}')
+        ])
+
 
 class RestorePointScenarioTest(ScenarioTest):
 
