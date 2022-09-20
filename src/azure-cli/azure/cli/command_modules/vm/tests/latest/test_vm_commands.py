@@ -1156,7 +1156,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('features[0].value', 'true', False)
         ])
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
-        self.cmd('snapshot create -g {rg} -n s1 --source disk')
+        self.cmd('snapshot create -g {rg} -n s1 --source disk --accelerated-network')
         gallery_image = self.cmd('sig image-version create -g {rg} --gallery-name {g1} --gallery-image-definition image --gallery-image-version 1.0.0 --os-snapshot s1').get_output_in_json()['id']
         self.kwargs.update({
             'gallery_image': gallery_image
