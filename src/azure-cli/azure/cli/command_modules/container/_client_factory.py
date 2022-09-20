@@ -52,9 +52,9 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
 
 
 def cf_network(cli_ctx):
-    from azure.mgmt.network import NetworkManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, NetworkManagementClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
 
 def cf_msi(cli_ctx):
