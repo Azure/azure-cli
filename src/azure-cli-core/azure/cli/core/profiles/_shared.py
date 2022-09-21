@@ -160,7 +160,7 @@ AZURE_API_PROFILES = {
             'disks': '2022-03-02',
             'disk_encryption_sets': '2022-03-02',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2021-12-01',
+            'snapshots': '2022-03-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
             'gallery_image_versions': '2021-10-01',
@@ -414,7 +414,6 @@ AZURE_API_PROFILES = {
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
         'vm_default_target_network': '2018-01-01',
-        'nw_connection_monitor': '2019-06-01',
         'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'

@@ -19,4 +19,5 @@ from ._base import AAZValuePatch, AAZUndefined
 from ._command import AAZCommand, AAZWaitCommand, AAZCommandGroup, \
     register_command, register_command_group, load_aaz_command_table
 from ._field_type import AAZIntType, AAZFloatType, AAZStrType, AAZBoolType, AAZDictType, AAZListType, AAZObjectType
-from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation
+from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation, \
+    AAZLifeCycleCallback

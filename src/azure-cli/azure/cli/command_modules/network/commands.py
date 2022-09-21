@@ -48,8 +48,7 @@ from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
-    process_lb_create_namespace, process_lb_frontend_ip_namespace,
-    process_nw_cm_create_namespace,
+    process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
@@ -1043,7 +1042,7 @@ def load_command_table(self, _):
         g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
-        g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_create_namespace)
+        g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('stop', 'begin_stop')

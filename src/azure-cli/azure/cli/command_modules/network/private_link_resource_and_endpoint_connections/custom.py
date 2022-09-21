@@ -13,7 +13,9 @@ TYPE_CLIENT_MAPPING = {
 }
 
 
+# pylint: disable=too-many-statements
 def register_providers():
+    _register_one_provider("Microsoft.AgFoodPlatform/farmBeats", "2021-09-01-preview", True)
     _register_one_provider("Microsoft.Automation/automationAccounts", "2020-01-13-preview", True)
     _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', True)
     _register_one_provider('Microsoft.ApiManagement/service', '2021-08-01', True)

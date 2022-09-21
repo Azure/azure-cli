@@ -915,6 +915,162 @@ examples:
     text: az cosmosdb update -n myaccount -g mygroup --locations regionName=eastus failoverPriority=0 isZoneRedundant=False --locations regionName=uksouth failoverPriority=1 isZoneRedundant=True --enable-multiple-write-locations --network-acl-bypass AzureServices --network-acl-bypass-resource-ids /subscriptions/subId/resourceGroups/rgName/providers/Microsoft.Synapse/workspaces/wsName
 """
 
+helps['cosmosdb mongodb role'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Mongo role resources.
+"""
+
+helps['cosmosdb mongodb role definition'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Mongo role definitions.
+"""
+
+helps['cosmosdb mongodb role definition create'] = """
+type: command
+short-summary: Create a Mongo DB role definition under an Azure Cosmos DB account.
+examples:
+  - name: Create a Mongo DB role definition under an Azure Cosmos DB account using a JSON string.
+    text: |
+      az cosmosdb mongodb role definition create --account-name MyAccount --resource-group MyResourceGroup --body '{
+        "Id": "MyDB.My_Read_Only_Role",
+        "RoleName": "My_Read_Only_Role",
+        "Type": "CustomRole",
+        "DatabaseName": "MyDB",
+        "Privileges": [{
+          "Resource": {
+              "Db": "MyDB",
+              "Collection": "MyCol"
+            },
+            "Actions": [
+              "insert",
+              "find"
+            ]
+        }],
+        "Roles": [
+          {
+            "Role": "myInheritedRole",
+            "Db": "MyTestDb"
+          }
+        ]
+      }'
+  - name: Create a Mongo DB role definition under an Azure Cosmos DB account using a JSON file.
+    text: az cosmosdb mongodb role definition create --account-name MyAccount --resource-group MyResourceGroup --body @mongo-role-definition.json
+"""
+
+helps['cosmosdb mongodb role definition delete'] = """
+type: command
+short-summary: Delete a CosmosDb MongoDb role definition under an Azure Cosmos DB account.
+examples:
+  - name: Delete a Mongo role definition under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb role definition delete --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb mongodb role definition exists'] = """
+type: command
+short-summary: Check if an Azure Cosmos DB MongoDb role definition exists.
+examples:
+  - name: Check if an Azure Cosmos DB MongoDb role definition exists.
+    text: az cosmosdb mongodb role definition exists --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb mongodb role definition list'] = """
+type: command
+short-summary: List all MongoDb role definitions under an Azure Cosmos DB account.
+examples:
+  - name: List all Mongodb role definitions under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb role definition list --account-name MyAccount --resource-group MyResourceGroup
+"""
+
+helps['cosmosdb mongodb role definition show'] = """
+type: command
+short-summary: Show the properties of a MongoDb role definition under an Azure Cosmos DB account.
+examples:
+  - name: Show the properties of a MongoDb role definition under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb role definition show --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb mongodb role definition update'] = """
+type: command
+short-summary: Update a MongoDb role definition under an Azure Cosmos DB account.
+examples:
+  - name: Update a MongoDb role definition under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb role definition update --account-name MyAccount --resource-group MyResourceGroup --body @mongo-role-definition.json
+"""
+
+helps['cosmosdb mongodb user'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Mongo user resources.
+"""
+
+helps['cosmosdb mongodb user definition'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Mongo user definitions.
+"""
+
+helps['cosmosdb mongodb user definition create'] = """
+type: command
+short-summary: Create a Mongo DB user definition under an Azure Cosmos DB account.
+examples:
+  - name: Create a Mongo DB user definition under an Azure Cosmos DB account using a JSON string.
+    text: |
+      az cosmosdb mongodb user definition create --account-name MyAccount --resource-group MyResourceGroup --body '{
+        "Id": "MyDB.MyUName",
+        "UserName": "MyUName",
+        "Password": "MyPass",
+        "DatabaseName": "MyDB",
+        "CustomData": "TestCustomData",
+        "Mechanisms": "SCRAM-SHA-256",
+        "Roles": [
+          {
+            "Role": "myReadRole",
+            "Db": "MyDB"
+          }
+        ]
+      }'
+  - name: Create a Mongo DB user definition under an Azure Cosmos DB account using a JSON file.
+    text: az cosmosdb mongodb user definition create --account-name MyAccount --resource-group MyResourceGroup --body @mongo-user-definition.json
+"""
+
+helps['cosmosdb mongodb user definition delete'] = """
+type: command
+short-summary: Delete a CosmosDb MongoDb user definition under an Azure Cosmos DB account.
+examples:
+  - name: Delete a Mongo user definition under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb user definition delete --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb mongodb user definition exists'] = """
+type: command
+short-summary: Check if an Azure Cosmos DB MongoDb user definition exists.
+examples:
+  - name: Check if an Azure Cosmos DB MongoDb user definition exists.
+    text: az cosmosdb mongodb user definition exists --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb mongodb user definition list'] = """
+type: command
+short-summary: List all MongoDb user definitions under an Azure Cosmos DB account.
+examples:
+  - name: List all Mongodb user definitions under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb user definition list --account-name MyAccount --resource-group MyResourceGroup
+"""
+
+helps['cosmosdb mongodb user definition show'] = """
+type: command
+short-summary: Show the properties of a MongoDb user definition under an Azure Cosmos DB account.
+examples:
+  - name: Show the properties of a MongoDb user definition under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb user definition show --account-name MyAccount --resource-group MyResourceGroup --id be79875a-2cc4-40d5-8958-566017875b39
+"""
+
+helps['cosmosdb mongodb user definition update'] = """
+type: command
+short-summary: Update a MongoDb user definition under an Azure Cosmos DB account.
+examples:
+  - name: Update a MongoDb user definition under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb user definition update --account-name MyAccount --resource-group MyResourceGroup --body @mongo-user-definition.json
+"""
+
 helps['cosmosdb sql role'] = """
 type: group
 short-summary: Manage Azure Cosmos DB SQL role resources.
