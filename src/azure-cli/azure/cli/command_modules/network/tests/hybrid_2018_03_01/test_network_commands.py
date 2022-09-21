@@ -1878,29 +1878,6 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
 
-    def _network_watcher_connection_monitor(self):
-        import time
-        self.kwargs.update({
-            'vm2': 'vm2',
-            'vm3': 'vm3',
-            'cm': 'cm1'
-        })
-        self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
-        self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
-        self.cmd('vm extension set -g {rg} --vm-name {vm3} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        time.sleep(20)
-        self.cmd('network watcher connection-monitor create -n {cm} --source-resource {vm2} -g {rg} --dest-resource {vm3} --dest-port 80 --tags foo=doo')
-        self.cmd('network watcher connection-monitor list -l {loc}')
-        self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
-        try:
-            self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
-            self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
-        except CLIError:
-            pass
-        self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
-
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
@@ -1914,7 +1891,6 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
             'capture': 'capture1'
         })
         self._network_watcher_configure()
-        self._network_watcher_connection_monitor()
         self._network_watcher_vm()
         self._network_watcher_flow_log()
         self._network_watcher_packet_capture()

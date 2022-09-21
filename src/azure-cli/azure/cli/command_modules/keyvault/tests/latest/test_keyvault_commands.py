@@ -53,11 +53,8 @@ SD_NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(SD_NEXT_ACTIVE
 
 def _create_keyvault(test, kwargs, additional_args=None):
     # need premium KeyVault to store keys in HSM
-    # if --enable-soft-delete is not specified, turn that off to prevent the tests from leaving waste behind
     if additional_args is None:
         additional_args = ''
-    if '--enable-soft-delete' not in additional_args:
-        additional_args += ' --enable-soft-delete false'
     kwargs['add'] = additional_args
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium --retention-days 7 {add}')
 
@@ -409,7 +406,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
+        self.cmd('keyvault update -g {rg} -n {kv} '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
@@ -478,9 +475,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault delete -n {kv2}')
         self.cmd('keyvault purge -n {kv2}')
 
-        # test explicitly set '--enable-soft-delete true --enable-purge-protection true'
+        # test explicitly set '--enable-purge-protection true'
         # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-purge-protection true --retention-days 7',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
@@ -491,7 +488,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
             'loc': 'eastus'
         })
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
+        _create_keyvault(self, self.kwargs)
         _create_hsm(self)
 
         # delete resources

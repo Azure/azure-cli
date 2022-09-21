@@ -160,7 +160,7 @@ AZURE_API_PROFILES = {
             'disks': '2022-03-02',
             'disk_encryption_sets': '2022-03-02',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2021-12-01',
+            'snapshots': '2022-03-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
             'gallery_image_versions': '2021-10-01',
@@ -218,7 +218,7 @@ AZURE_API_PROFILES = {
             'autoscale_settings': '2015-04-01',
             'baseline': '2018-09-01',
             'baselines': '2019-03-01',
-            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings': '2021-05-01-preview',
             'diagnostic_settings_category': '2017-05-01-preview',
             'event_categories': '2015-04-01',
             'guest_diagnostics_settings': '2018-06-01-preview',
@@ -414,7 +414,6 @@ AZURE_API_PROFILES = {
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
         'vm_default_target_network': '2018-01-01',
-        'nw_connection_monitor': '2019-06-01',
         'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'
