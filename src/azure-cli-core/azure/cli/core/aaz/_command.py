@@ -87,11 +87,20 @@ class AAZCommand(CLICommand):
             schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
         return schema
 
-    def __init__(self, loader=None, cli_ctx=None, **kwargs):
+    def __init__(self, loader=None, cli_ctx=None, callbacks=None, **kwargs):
         """
 
         :param loader: it is required for command registered in the command table
         :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
+        :param callbacks: a dict of customized lifecycle callback functions, supported callbacks:
+            'pre_operations': This callback runs before all the operations
+                pre_operations(ctx) -> void
+            'post_operations': This callback runs after all the operations
+                post_operations(ctx) -> void
+            'pre_instance_update': This callback runs before all the instance update operations
+                pre_instance_update(instance, ctx) -> void
+            'post_instance_update': This callback runs after all the instance update operations and before PUT
+                post_instance_update(instance, ctx) -> void
         """
         assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
@@ -118,6 +127,7 @@ class AAZCommand(CLICommand):
         self.help = self.AZ_HELP
 
         self.ctx = None
+        self._callbacks = callbacks
 
         # help property will be assigned as help_file for command parser:
         # https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
@@ -139,6 +149,7 @@ class AAZCommand(CLICommand):
             schema=self.get_arguments_schema(),
             command_args=command_args,
             no_wait_arg='no_wait' if self.supports_no_wait else None,
+            callbacks=self._callbacks
         )
         self.ctx.format_args()
 
