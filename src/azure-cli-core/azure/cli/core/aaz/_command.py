@@ -92,7 +92,15 @@ class AAZCommand(CLICommand):
 
         :param loader: it is required for command registered in the command table
         :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
-        :param callbacks: lifecycle callback functions
+        :param callbacks: a dict of customized lifecycle callback functions, supported callbacks:
+            'pre_operations': This callback runs before all the operations
+                pre_operations(ctx) -> void
+            'post_operations': This callback runs after all the operations
+                post_operations(ctx) -> void
+            'pre_instance_update': This callback runs before all the instance update operations
+                pre_instance_update(instance, ctx) -> void
+            'post_instance_update': This callback runs after all the instance update operations and before PUT
+                post_instance_update(instance, ctx) -> void
         """
         assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
