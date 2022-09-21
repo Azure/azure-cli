@@ -50,6 +50,15 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
                  checks=[self.check('status', "enabled")])
 
+        # test soft-delete
+        self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
+        self.cmd('acr config soft-delete show -r {}'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
         # test credential module
         credential = self.cmd(
             'acr credential show -n {} -g {}'.format(registry_name, resource_group)).get_output_in_json()
@@ -440,7 +449,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         self.kwargs.update({
             'key_vault': key_vault,
@@ -451,8 +460,7 @@ class AcrCommandsTests(ScenarioTest):
             'registry_name': self.create_random_name('testreg', 20),
         })
 
-        # update kv key protection settings and create a new key
-        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
 

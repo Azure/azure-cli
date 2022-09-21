@@ -61,7 +61,7 @@ class SBNamespaceMSITesting(ScenarioTest):
         identity4 = self.cmd('identity create --name {identity4} --resource-group {rg}').get_output_in_json()
         self.kwargs.update({'id4': identity4['id']})
 
-        keyvaultcreate = self.cmd('keyvault create --resource-group {rg} --name {kv_name} --location {loc} --enable-soft-delete --enable-purge-protection').get_output_in_json()
+        keyvaultcreate = self.cmd('keyvault create --resource-group {rg} --name {kv_name} --location {loc} --enable-purge-protection --retention-days 7').get_output_in_json()
 
         self.kwargs.update({
             'id1object': identity1['principalId'],
@@ -100,7 +100,6 @@ class SBNamespaceMSITesting(ScenarioTest):
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 2
-
 
         namespace = self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
@@ -152,6 +151,4 @@ class SBNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
-
-
 

@@ -267,7 +267,7 @@ class AutomaticScheduling(object):
 
     def run_instance_modules(self, instance_modules):
         # divide the modules that the current instance needs to execute into parallel or serial execution
-        error_flag = False
+        serial_error_flag = parallel_error_flag = False
         serial_tests = []
         parallel_tests = []
         for k, v in instance_modules.items():
@@ -279,13 +279,13 @@ class AutomaticScheduling(object):
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
-            error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
-            error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-        return error_flag
+            parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+        return serial_error_flag or parallel_error_flag
 
 
 def main():

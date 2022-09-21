@@ -737,6 +737,31 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
                  '--host-name-from-http-settings --path /test --timeout 100 '
                  '--http-settings appGatewayBackendHttpSettings --address-pool appGatewayBackendPool')
 
+    @ResourceGroupPreparer(name_prefix="cli_test_ag_with_non_v2_sku_", location="westus")
+    def test_ag_with_non_v2_sku(self):
+        self.kwargs.update({
+            "ag_name": self.create_random_name("ag-", 12),
+            "port_name": self.create_random_name("port-", 12),
+            "lisener_name": self.create_random_name("lisener-", 12),
+            "rule_name": self.create_random_name("rule-", 12),
+        })
+
+        self.cmd("network application-gateway create -n {ag_name} -g {rg} --sku WAF_Medium")
+
+        self.kwargs["front_ip"] = self.cmd("network application-gateway show -n {ag_name} -g {rg}").get_output_in_json()["frontendIpConfigurations"][0]["name"]
+        self.cmd("network application-gateway frontend-port create -n {port_name} -g {rg} --gateway-name {ag_name} --port 8080")
+        self.cmd("network application-gateway http-listener create -n {lisener_name} -g {rg} --gateway-name {ag_name} --frontend-ip {front_ip} --frontend-port {port_name}")
+
+        self.cmd(
+            "network application-gateway rule create -n {rule_name} -g {rg} --gateway-name {ag_name} --http-listener {lisener_name}",
+            checks=[
+                self.check("name", "{ag_name}"),
+                self.check("sku.tier", "WAF")
+            ]
+        )
+
+        self.cmd("network application-gateway delete -n {ag_name} -g {rg}")
+
     @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
     def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
         self.kwargs.update({
@@ -5537,7 +5562,6 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
         self.cmd('network watcher list')
 
 
-
 class NetworkWatcherScenarioTest(ScenarioTest):
     from unittest import mock
 
@@ -5642,18 +5666,50 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': resource_group_location,
             'vm': 'vm1',
-            'capture': 'capture1'
+            'capture1': 'capture1',
+            'capture2': 'capture2'
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
-        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture} --file-path capture/capture.cap')
+        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture1} --file-path capture/capture.cap')
+        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture2} --file-path capture/capture.cap --target-type AzureVM')
+        self.cmd('network watcher packet-capture show -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture stop -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture show-status -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture list -l {loc}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture2}')
+        self.cmd('network watcher packet-capture list -l {loc}')
+
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture_vmss_as_target', location='westcentralus')
+    @AllowLargeResponse()
+    def test_network_watcher_packet_capture_vmss_as_target(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vmss': 'vmssForPcap',
+            'capture': 'captureVmss',
+            'capture1': 'captureVMSS1',
+            'capture2': 'captureVMSS2'
+        })
+        self.cmd('vmss create -g {rg} --name {vmss} --image UbuntuLTS --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic')
+        self.cmd('vmss extension set --name NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher --resource-group {rg} --vmss-name  {vmss}')
+
+        self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture} --target-type AzureVMSS --file-path capture/capture.cap', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+        self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture1} --target-type AzureVMSS --file-path capture/capture.cap --exclude 1')
+        self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture2} --target-type AzureVMSS --file-path capture/capture.cap --include 0 1')
         self.cmd('network watcher packet-capture show -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture stop -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture show-status -l {loc} -n {capture}')
         self.cmd('network watcher packet-capture list -l {loc}')
         self.cmd('network watcher packet-capture delete -l {loc} -n {capture}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture1}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture2}')
         self.cmd('network watcher packet-capture list -l {loc}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_troubleshooting', location='westcentralus')
@@ -5764,7 +5820,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
-    def test_network_batsion_host_create(self, resource_group):
+    def test_network_bastion_host_create(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'vm': 'clivm',
@@ -5773,20 +5829,29 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             'subnet2': 'vmSubnet',
             'ip1': 'ip1',
             'num': 29,
+            'num2': 28,
             'bastion': 'clibastion'
-
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --tags a=b', checks=[
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --enable-tunneling --enable-ip-connect --disable-copy-paste --tags a=b', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
             self.check('name', '{bastion}'),
             self.check('scaleUnits', '{num}'),
             self.check('sku.name', 'Standard'),
+            self.check('disableCopyPaste', True),
+            self.check('enableTunneling', True),
+            self.check('enableIpConnect', True),
             self.check('tags.a', 'b')
+        ])
+        self.cmd('network bastion update -g {rg} -n {bastion} --scale-units {num2} --enable-tunneling false --enable-ip-connect false --disable-copy-paste false ', checks=[
+            self.check('scaleUnits', '{num2}'),
+            self.check('disableCopyPaste', False),
+            self.check('enableTunneling', False),
+            self.check('enableIpConnect', False)
         ])
         self.cmd('network bastion list')
         self.cmd('network bastion list -g {rg}', checks=[

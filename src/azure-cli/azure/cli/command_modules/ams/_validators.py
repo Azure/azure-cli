@@ -100,6 +100,10 @@ def validate_output_assets(ns):
         from azure.mgmt.media.models import JobOutputAsset
 
         name_and_label = asset_string.split('=')
+        if len(name_and_label) <= 1:
+            message = "Output assets are not in correct format. Output assets should be in 'assetName=label'" \
+                      " format. An asset without label can be sent like this: 'assetName='"
+            raise ValueError(message)
         name = name_and_label[0]
         label = name_and_label[1]
         return JobOutputAsset(asset_name=name, label=label)

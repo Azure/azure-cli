@@ -55,7 +55,8 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
-                           access_tier=None, https_only=None, enable_files_aadkerb=None,
+                           access_tier=None, https_only=None, enable_sftp=None, enable_local_user=None,
+                           enable_files_aadkerb=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
@@ -118,6 +119,10 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.enable_https_traffic_only = https_only
     if enable_hierarchical_namespace is not None:
         params.is_hns_enabled = enable_hierarchical_namespace
+    if enable_sftp is not None:
+        params.is_sftp_enabled = enable_sftp
+    if enable_local_user is not None:
+        params.is_local_user_enabled = enable_local_user
 
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
@@ -343,7 +348,8 @@ def get_storage_account_properties(cli_ctx, account_id):
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_version=None,
                            encryption_key_name=None, encryption_key_vault=None, enable_files_aadkerb=None,
-                           access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
+                           access_tier=None, https_only=None, enable_sftp=None, enable_local_user=None,
+                           enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
@@ -596,6 +602,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if public_network_access is not None:
         params.public_network_access = public_network_access
+
+    if enable_sftp is not None:
+        params.is_sftp_enabled = enable_sftp
+    if enable_local_user is not None:
+        params.is_local_user_enabled = enable_local_user
 
     return params
 
@@ -1020,3 +1031,41 @@ def update_blob_inventory_policy(cmd, client, resource_group_name, account_name,
     BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)
+
+
+def _generate_local_user(local_user, permission_scope=None, ssh_authorized_key=None,
+                         home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None):
+    if permission_scope is not None:
+        local_user.permission_scopes = permission_scope
+    if ssh_authorized_key is not None:
+        local_user.ssh_authorized_keys = ssh_authorized_key
+    if home_directory is not None:
+        local_user.home_directory = home_directory
+    if has_shared_key is not None:
+        local_user.has_shared_key = has_shared_key
+    if has_ssh_key is not None:
+        local_user.has_ssh_key = has_ssh_key
+    if has_ssh_password is not None:
+        local_user.has_ssh_password = has_ssh_password
+
+
+def create_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None, home_directory=None,
+                      has_shared_key=None, has_ssh_key=None, has_ssh_password=None, ssh_authorized_key=None, **kwargs):
+    LocalUser = cmd.get_models('LocalUser')
+    local_user = LocalUser()
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)
+
+
+def update_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None,
+                      home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None,
+                      ssh_authorized_key=None, **kwargs):
+    local_user = client.get(resource_group_name, account_name, username)
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)

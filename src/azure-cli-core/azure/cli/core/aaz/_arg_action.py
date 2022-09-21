@@ -167,7 +167,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     @classmethod
     def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
         from ._arg import AAZSimpleTypeArg
-        from azure.cli.core.util import get_file_json, shell_safe_json_parse
+        from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
 
         schema = cls._schema
         for item in key_items:
@@ -186,7 +186,12 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
                 # read from file
                 path = os.path.expanduser(value)
                 if os.path.exists(path):
-                    v = get_file_json(path, preserve_order=True)
+                    if path.endswith('.yml') or path.endswith('.yaml'):
+                        # read from yaml file
+                        v = get_file_yaml(path)
+                    else:
+                        # read from json file
+                        v = get_file_json(path, preserve_order=True)
                 else:
                     try:
                         v = cls._str_parser(value)
@@ -362,9 +367,29 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
 
 class AAZGenericUpdateAction(Action):  # pylint: disable=too-few-public-methods
-    DEST = '_generic_update_args'
+    DEST = 'generic_update_args'
+    ACTION_NAME = None
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not getattr(namespace, self.DEST, None):
-            setattr(namespace, self.DEST, [])
-        getattr(namespace, self.DEST).append((option_string, values))
+            setattr(namespace, self.DEST, {"actions": []})
+        getattr(namespace, self.DEST)["actions"].append((self.ACTION_NAME or option_string, values))
+
+
+class AAZGenericUpdateForceStringAction(AAZSimpleTypeArgAction):
+    DEST = 'generic_update_args'
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        dest_ops = AAZArgActionOperations()
+        try:
+            self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
+        except AAZShowHelp as aaz_help:
+            # show help message
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
+
+        if not getattr(namespace, self.DEST, None):
+            setattr(namespace, self.DEST, {"actions": []})
+        dest_ops.apply(getattr(namespace, self.DEST), dest='force_string')
