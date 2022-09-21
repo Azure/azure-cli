@@ -17,7 +17,6 @@ from ._arg_fmt import AAZStrArgFormat, AAZIntArgFormat, AAZFloatArgFormat, AAZBo
     AAZSubscriptionIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat
 from ._base import AAZValuePatch, AAZUndefined
 from ._command import AAZCommand, AAZWaitCommand, AAZCommandGroup, \
-    register_command, register_command_group, load_aaz_command_table
+    lifecycle_callback, register_command, register_command_group, load_aaz_command_table
 from ._field_type import AAZIntType, AAZFloatType, AAZStrType, AAZBoolType, AAZDictType, AAZListType, AAZObjectType
-from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation, \
-    AAZLifeCycleCallback
+from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation

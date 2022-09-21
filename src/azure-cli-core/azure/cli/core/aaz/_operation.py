@@ -28,28 +28,6 @@ class AAZOperation:
         self.ctx = ctx
 
 
-class AAZLifeCycleCallback(AAZOperation):
-
-    def __init__(self, ctx, name):
-        super().__init__(ctx)
-        self.callback = self.ctx.callbacks.get(name, None)
-
-    def __call__(self, *args, **kwargs):
-        if self.callback:
-            self.callback(*args, **kwargs)
-
-
-class AAZLifeCycleCallback(AAZOperation):
-
-    def __init__(self, ctx, name):
-        super().__init__(ctx)
-        self.callback = self.ctx.callbacks.get(name, None)
-
-    def __call__(self, *args, **kwargs):
-        if self.callback:
-            self.callback(*args, **kwargs)
-
-
 class AAZHttpOperation(AAZOperation):
     """ Http Operation
     """

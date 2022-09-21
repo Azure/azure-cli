@@ -253,6 +253,17 @@ class AAZWaitCommand(AAZCommand):
         )
 
 
+def lifecycle_callback(func):
+    def wrapper(self, *args, **kwargs):
+        callback = self.ctx.callbacks.get(func.__name__, None)
+        if callback is None:
+            return func(self, *args, **kwargs)
+        else:
+            kwargs.setdefault("ctx", self.ctx)
+            return callback(*args, **kwargs)
+    return wrapper
+
+
 def register_command_group(
         name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
     """This decorator is used to register an AAZCommandGroup as a cli command group.
