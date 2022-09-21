@@ -20,7 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_security_rules, cf_subnets, cf_usages,
-    cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
+    cf_public_ip_addresses, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
@@ -106,12 +106,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_endpoint_service_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#AvailableEndpointServicesOperations.{}',
-        client_factory=cf_endpoint_services,
-        min_api='2017-06-01'
     )
 
     network_er_sdk = CliCommandType(
