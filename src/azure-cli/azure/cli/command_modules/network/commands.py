@@ -17,9 +17,9 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
-    cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
-    cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages,
+    cf_virtual_network_gateways,
+    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
+    cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_endpoint_services, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
-    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
+    cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -48,14 +48,13 @@ from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
-    process_lb_create_namespace, process_lb_frontend_ip_namespace,
-    process_nw_cm_create_namespace,
+    process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
-    process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
+    process_public_ip_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
@@ -256,16 +255,6 @@ def load_command_table(self, _):
         client_factory=cf_subnets
     )
 
-    network_tmp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.trafficmanager.operations#ProfilesOperations.{}',
-        client_factory=cf_traffic_manager_mgmt_profiles
-    )
-
-    network_tme_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.trafficmanager.operations#EndpointsOperations.{}',
-        client_factory=cf_traffic_manager_mgmt_endpoints
-    )
-
     network_vgw_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
         client_factory=cf_virtual_network_gateways
@@ -320,30 +309,6 @@ def load_command_table(self, _):
     network_virtual_hub_update_sdk = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionOperations.{}',
-        client_factory=cf_virtual_hub_bgp_connection,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connection_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_hub_bgp_connection,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connections_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubBgpConnectionsOperations.{}',
-        client_factory=cf_virtual_hub_bgp_connections,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_bgp_connections_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_hub_bgp_connections,
         min_api='2020-07-01'
     )
 
@@ -1077,7 +1042,7 @@ def load_command_table(self, _):
         g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
-        g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_create_namespace)
+        g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('stop', 'begin_stop')
@@ -1203,24 +1168,17 @@ def load_command_table(self, _):
     # endregion
 
     # region TrafficManagers
-    with self.command_group('network traffic-manager profile', network_tmp_sdk) as g:
-        g.custom_command('check-dns', 'check_traffic_manager_name', client_factory=cf_traffic_manager_mgmt_profiles)
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_traffic_manager_profiles')
+    with self.command_group('network traffic-manager profile') as g:
         g.custom_command('create', 'create_traffic_manager_profile', transform=transform_traffic_manager_create_output)
-        g.generic_update_command('update', custom_func_name='update_traffic_manager_profile')
+        g.custom_command('update', 'update_traffic_manager_profile')
 
-    with self.command_group('network traffic-manager endpoint', network_tme_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.custom_command('create', 'create_traffic_manager_endpoint', validator=process_tm_endpoint_create_namespace)
+    with self.command_group('network traffic-manager endpoint') as g:
+        g.custom_command('create', 'create_traffic_manager_endpoint')
+        g.custom_command('update', 'update_traffic_manager_endpoint')
         g.custom_command('list', 'list_traffic_manager_endpoints')
-        g.generic_update_command('update', custom_func_name='update_traffic_manager_endpoint')
 
-        tm_geographic_path = 'azure.mgmt.trafficmanager.operations#GeographicHierarchiesOperations.{}'
-        g.command('show-geographic-hierarchy', 'get_default', client_factory=cf_tm_geographic, operations_tmpl=tm_geographic_path, table_transformer=transform_geographic_hierachy_table_output)
-
+    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.endpoint import ShowGeographicHierarchy
+    self.command_table['network traffic-manager endpoint show-geographic-hierarchy'] = ShowGeographicHierarchy(loader=self, table_transformer=transform_geographic_hierachy_table_output)
     # endregion
 
     # region VirtualNetworks
@@ -1373,31 +1331,7 @@ def load_command_table(self, _):
     with self.command_group('network routeserver', network_virtual_hub_sdk,
                             custom_command_type=network_virtual_hub_update_sdk) as g:
         g.custom_command('create', 'create_virtual_hub')
-        g.generic_update_command('update',
-                                 setter_name='virtual_hub_update_setter',
-                                 setter_type=network_virtual_hub_update_sdk,
-                                 custom_func_name='update_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_virtual_hub')
-        g.wait_command('wait')
-
-    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
-                            custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
-        g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
-        g.generic_update_command('update',
-                                 setter_name='virtual_hub_bgp_connection_update_setter',
-                                 setter_type=network_virtual_hub_bgp_connection_update_sdk,
-                                 custom_func_name='update_virtual_hub_bgp_connection')
-        g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
-        g.show_command('show', 'get')
-        g.wait_command('wait')
-
-    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
-                            custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
-        g.command('list', 'list')
-        g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')
-        g.custom_command('list-advertised-routes', 'list_virtual_hub_bgp_connection_advertised_routes')
     # endregion
 
     # region Bastion

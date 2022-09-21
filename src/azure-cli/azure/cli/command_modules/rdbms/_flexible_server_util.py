@@ -18,6 +18,7 @@ from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import AuthenticationError
+from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
@@ -271,9 +272,20 @@ def _create_resource_group(cmd, location, resource_group_name):
     return resource_group_name
 
 
-def _check_resource_group_existence(cmd, resource_group_name):
-    resource_client = resource_client_factory(cmd.cli_ctx)
-    return resource_client.resource_groups.check_existence(resource_group_name)
+# pylint: disable=protected-access
+def _check_resource_group_existence(cmd, resource_group_name, resource_client=None):
+    if resource_client is None:
+        resource_client = resource_client_factory(cmd.cli_ctx)
+
+    exists = False
+
+    try:
+        exists = resource_client.resource_groups.check_existence(resource_group_name)
+    except HttpResponseError as e:
+        if e.status_code == 403:
+            raise CLIError("You don't have authorization to perform action 'Microsoft.Resources/subscriptions/resourceGroups/read' over scope '/subscriptions/{}/resourceGroups/{}'.".format(resource_client._config.subscription_id, resource_group_name))
+
+    return exists
 
 
 # Map day_of_week string to integer to day of week
@@ -306,18 +318,21 @@ def get_id_components(rid):
 
 def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
-    from azure.core.exceptions import HttpResponseError
     parent_path = ''
     if parent_name and parent_type:
         parent_path = '{}/{}'.format(parent_type, parent_name)
 
     api_version = _resolve_api_version(resource_client, provider_namespace, resource_type, parent_path)
 
+    resource = None
+
     try:
-        resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
-    except HttpResponseError:
-        return False
-    return True
+        resource = resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
+    except HttpResponseError as e:
+        if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+            raise CLIError(e)
+
+    return resource is not None
 
 
 def _resolve_api_version(client, provider_namespace, resource_type, parent_path):

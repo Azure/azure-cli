@@ -342,6 +342,24 @@ def load_command_table(self, _):
         g.cosmosdb_custom('delete', 'cli_cosmosdb_collection_delete', confirmation=True)
         g.cosmosdb_custom('update', 'cli_cosmosdb_collection_update')
 
+    # Mongo role definition operations
+    with self.command_group('cosmosdb mongodb role definition', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_mongo_role_definition_create')
+        g.custom_command('update', 'cli_cosmosdb_mongo_role_definition_update')
+        g.custom_command('exists', 'cli_cosmosdb_mongo_role_definition_exists')
+        g.command('list', 'list_mongo_role_definitions')
+        g.show_command('show', 'get_mongo_role_definition')
+        g.command('delete', 'begin_delete_mongo_role_definition', confirmation=True)
+
+    # Mongo user definition operations
+    with self.command_group('cosmosdb mongodb user definition', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_mongo_user_definition_create')
+        g.custom_command('update', 'cli_cosmosdb_mongo_user_definition_update')
+        g.custom_command('exists', 'cli_cosmosdb_mongo_user_definition_exists')
+        g.command('list', 'list_mongo_user_definitions')
+        g.show_command('show', 'get_mongo_user_definition')
+        g.command('delete', 'begin_delete_mongo_user_definition', confirmation=True)
+
     # SQL role definition operations
     with self.command_group('cosmosdb sql role definition', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_role_definition_create', supports_no_wait=True)

@@ -37,7 +37,6 @@ from azure.cli.command_modules.network._validators import (
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
     process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
-from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
@@ -371,7 +370,7 @@ def load_arguments(self, _):
             c.argument('address_pool', help='The name or ID of the backend address pool.',
                        completer=get_ag_subresource_completion_list('backend_address_pools'))
             c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
-            c.argument('priority', type=int, help='Priority of the rule.')
+            c.argument('priority', type=int, help='Priority of the rule. Supported SKU tiers are Standard_v2, WAF_v2.')
 
     with self.argument_context('network application-gateway rule') as c:
         c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
@@ -1348,19 +1347,6 @@ def load_arguments(self, _):
         c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
         c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
 
-    # connection monitor V1 parameter set
-    with self.argument_context('network watcher connection-monitor', arg_group='V1 Endpoint') as c:
-        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic. '
-                                           'Currently only Virtual Machines are supported.')
-        c.argument('source_port', help='Port number from which to originate traffic.')
-        c.argument('dest_resource', help='Name of ID of the resource to receive traffic. '
-                                         'Currently only Virtual Machines are supported.')
-        c.argument('dest_port', help='Port number on which to receive traffic.')
-        c.argument('dest_address', help='The IP address or URI at which to receive traffic.')
-        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int, default=60)
-        c.argument('do_not_start', action='store_true',
-                   help='Create the connection monitor but do not start it immediately.')
-
     nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
     for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
         with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
@@ -1840,11 +1826,10 @@ def load_arguments(self, _):
     # endregion
 
     # region TrafficManagers
-    monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
     with self.argument_context('network traffic-manager profile') as c:
         c.argument('traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
         c.argument('profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
-        c.argument('profile_status', options_list=['--status'], help='Status of the Traffic Manager profile.', arg_type=get_enum_type(ProfileStatus))
+        c.argument('profile_status', options_list=['--status'], help='Status of the Traffic Manager profile.', arg_type=get_enum_type(['Enabled', 'Disabled']))
         c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic', 'Multivalue', 'Subnet']))
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
@@ -1853,23 +1838,16 @@ def load_arguments(self, _):
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
         c.argument('monitor_path', help='Path to monitor. Use ""(\'""\' in PowerShell) for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
         c.argument('monitor_port', help='Port to monitor.', type=int, options_list=['--port', c.deprecate(target='--monitor-port', redirect='--port', hide=True)])
-        c.argument('monitor_protocol', monitor_protocol_type, options_list=['--protocol', c.deprecate(target='--monitor-protocol', redirect='--protocol', hide=True)])
+        c.argument('monitor_protocol', help='Monitor protocol.', arg_type=get_enum_type(['HTTP', 'HTTPS', 'TCP']), options_list=['--protocol', c.deprecate(target='--monitor-protocol', redirect='--protocol', hide=True)])
         c.argument('timeout', help='The time in seconds allowed for endpoints to respond to a health check.', type=int)
         c.argument('interval', help='The interval in seconds at which health checks are conducted.', type=int)
         c.argument('max_failures', help='The number of consecutive failed health checks tolerated before an endpoint is considered degraded.', type=int)
         c.argument('monitor_custom_headers', options_list='--custom-headers', help='Space-separated list of NAME=VALUE pairs.', nargs='+', validator=validate_custom_headers)
         c.argument('status_code_ranges', help='Space-separated list of status codes in MIN-MAX or VAL format.', nargs='+', validator=validate_status_code_ranges)
 
-    with self.argument_context('network traffic-manager profile update') as c:
-        c.argument('monitor_protocol', monitor_protocol_type, default=None)
-
-    with self.argument_context('network traffic-manager profile check-dns') as c:
-        c.argument('name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
-
-    endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
     with self.argument_context('network traffic-manager endpoint') as c:
         c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Endpoint name.', completer=tm_endpoint_completion_list)
-        c.argument('endpoint_type', options_list=['--type', '-t'], help='Endpoint type.', id_part='child_name_1', arg_type=get_enum_type(endpoint_types))
+        c.argument('endpoint_type', options_list=['--type', '-t'], help='Endpoint type.', id_part='child_name_1', arg_type=get_enum_type(['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']))
         c.argument('profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
         c.argument('endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
         c.argument('endpoint_monitor_status', help='The monitoring status of the endpoint.')
@@ -1884,10 +1862,6 @@ def load_arguments(self, _):
         c.argument('geo_mapping', help="Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.", nargs='+')
         c.argument('subnets', nargs='+', help='Space-separated list of subnet CIDR prefixes (10.0.0.0/24) or subnet ranges (10.0.0.0-11.0.0.0).', validator=validate_subnet_ranges)
         c.argument('monitor_custom_headers', nargs='+', options_list='--custom-headers', help='Space-separated list of custom headers in KEY=VALUE format.', validator=validate_custom_headers)
-
-    with self.argument_context('network traffic-manager endpoint create') as c:
-        c.argument('target', help='Fully-qualified DNS name of the endpoint.')
-
     # endregion
 
     # region VirtualNetworks
@@ -2125,22 +2099,6 @@ def load_arguments(self, _):
                    min_api='2021-02-01')
 
     with self.argument_context('network routeserver create') as c:
-        c.argument('virtual_hub_name', id_part=None)
-
-    with self.argument_context('network routeserver peering') as c:
-        c.argument('virtual_hub_name', options_list=[
-            '--routeserver', c.deprecate(target='--vrouter-name', redirect='--routeserver', hide=True)
-        ], id_part='name', help='The name of the Route Server.')
-        c.argument('connection_name', options_list=['--name', '-n'], id_part='child_name_1',
-                   help='The name of the Route Server Peering')
-        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
-        c.argument('peer_ip', help='Peer IP address.')
-
-    with self.argument_context('network routeserver peering create') as c:
-        c.argument('virtual_hub_name', id_part=None)
-        c.argument('connection_name', id_part=None)
-
-    with self.argument_context('network routeserver peering list') as c:
         c.argument('virtual_hub_name', id_part=None)
 
     for scope in ['vpn-connection', 'vnet-gateway', 'vnet-gateway vpn-client']:
