@@ -242,7 +242,9 @@ class List(AAZCommand):
             )
 
             associated_workspaces = cls._schema_on_200.value.Element.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType()
+            associated_workspaces.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.value.Element.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(
@@ -460,7 +462,9 @@ class List(AAZCommand):
             )
 
             associated_workspaces = cls._schema_on_200.value.Element.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType()
+            associated_workspaces.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.value.Element.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(

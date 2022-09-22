@@ -50,12 +50,12 @@ class ListDeletedWorkspaces(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
-            self.DeletedWorkspacesList(ctx=self.ctx)()
-        if condition_1:
             self.DeletedWorkspacesListByResourceGroup(ctx=self.ctx)()
+        if condition_1:
+            self.DeletedWorkspacesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,7 +70,7 @@ class ListDeletedWorkspaces(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
 
-    class DeletedWorkspacesList(AAZHttpOperation):
+    class DeletedWorkspacesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class ListDeletedWorkspaces(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/deletedWorkspaces",
+                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/deletedWorkspaces",
                 **self.url_parameters
             )
 
@@ -99,6 +99,10 @@ class ListDeletedWorkspaces(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
@@ -309,7 +313,7 @@ class ListDeletedWorkspaces(AAZCommand):
 
             return cls._schema_on_200
 
-    class DeletedWorkspacesListByResourceGroup(AAZHttpOperation):
+    class DeletedWorkspacesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -323,7 +327,7 @@ class ListDeletedWorkspaces(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/deletedWorkspaces",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/deletedWorkspaces",
                 **self.url_parameters
             )
 
@@ -338,10 +342,6 @@ class ListDeletedWorkspaces(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,

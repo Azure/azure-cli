@@ -45,21 +45,7 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.query_pack_name = AAZStrArg(
-            options=["-n", "--name", "--query-pack-name"],
-            help="The name of the log analytics query pack.",
-            required=True,
-            id_part="name",
-        )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            arg_group="Properties",
             help="Resource location",
             required=True,
             fmt=AAZResourceLocationArgFormat(
@@ -68,8 +54,16 @@ class Create(AAZCommand):
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="Properties",
             help="Resource tags",
+        )
+        _args_schema.query_pack_name = AAZStrArg(
+            options=["-n", "--name", "--query-pack-name"],
+            help="The name of the log analytics query pack.",
+            required=True,
+            id_part="name",
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
         )
 
         tags = cls._args_schema.tags

@@ -74,8 +74,6 @@ class Create(AAZCommand):
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
 
-        # define Arg Group "Parameters"
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema

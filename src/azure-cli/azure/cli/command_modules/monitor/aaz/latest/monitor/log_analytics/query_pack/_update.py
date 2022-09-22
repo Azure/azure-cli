@@ -47,6 +47,11 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Resource tags",
+            nullable=True,
+        )
         _args_schema.query_pack_name = AAZStrArg(
             options=["-n", "--name", "--query-pack-name"],
             help="The name of the log analytics query pack.",
@@ -55,16 +60,6 @@ class Update(AAZCommand):
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Properties",
-            help="Resource tags",
-            nullable=True,
         )
 
         tags = cls._args_schema.tags
@@ -292,7 +287,6 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             tags = _builder.get(".tags")
