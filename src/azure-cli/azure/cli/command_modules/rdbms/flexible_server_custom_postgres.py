@@ -284,6 +284,7 @@ def flexible_server_fast_create(cmd, client, resource_group_name=None, location=
                                    high_availability=None,
                                    availability_zone=None)
 
+    firewall_id = None
     if public_access is not None and str(public_access).lower() != 'none':
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 

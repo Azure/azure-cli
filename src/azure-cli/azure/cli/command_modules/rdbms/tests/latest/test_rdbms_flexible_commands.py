@@ -95,7 +95,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
-    
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_postgres_flexible_server_fast_create_mgmt(self, resource_group):
+        self._test_flexible_server_fast_create_mgmt('postgres', resource_group)
+
     # To run this test live, make sure that your role excludes the permission 'Microsoft.DBforMySQL/locations/checkNameAvailability/action'
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_check_name_availability_fallback_mgmt(self, resource_group):
@@ -236,6 +241,55 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
+
+    def _test_flexible_server_fast_create_mgmt(self, database_engine, resource_group):
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        if database_engine == 'postgres':
+            version = '12'
+            storage_size = 32
+            location = 'westcentralus'
+            location_result = 'West Central US'
+            sku_name = 'Standard_B1ms'
+        elif database_engine == 'mysql':
+            storage_size = 32
+            version = '5.7'
+            location = self.mysql_location
+            location_result = 'North Europe'
+            sku_name = 'Standard_D2ds_v4'
+        tier = 'Burstable'
+        backup_retention = 7
+        database_name = 'testdb'
+
+        result = self.cmd('{} flexible-server fast-create -g {} -l {} --backup-retention {} --sku-name {} --tier {} \
+                          --storage-size {} -u {} --version {} --tags key1=val1 -d {} --public-access None'.format(
+                          database_engine, resource_group, location, backup_retention, sku_name, tier, storage_size,
+                          'dbadmin', version, database_name)).get_output_in_json()
+        server_name = result['id'].split('/')[-1]
+
+        list_checks = [JMESPathCheck('name', server_name),
+                       JMESPathCheck('location', location_result),
+                       JMESPathCheck('resourceGroup', resource_group),
+                       JMESPathCheck('sku.name', sku_name),
+                       JMESPathCheck('sku.tier', tier),
+                       JMESPathCheck('version', version),
+                       JMESPathCheck('storage.storageSizeGb', storage_size),
+                       JMESPathCheck('backup.backupRetentionDays', backup_retention)]
+
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=list_checks)
+
+        self.cmd('{} flexible-server db show -g {} -s {} -d {}'
+                    .format(database_engine, resource_group, server_name, database_name), checks=[JMESPathCheck('name', database_name)])
+
+        self.cmd('{} flexible-server update -g {} -n {} -p {} --backup-retention {} --tags key2=val2 --storage-size {}'
+                 .format(database_engine, resource_group, server_name, 'randompw321##@!', backup_retention + 10, storage_size * 2),
+                 checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10),
+                         JMESPathCheck('tags.key2', 'val2'),
+                         JMESPathCheck('storage.storageSizeGb', storage_size * 2)])
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
     def _test_flexible_server_check_name_availability_fallback_mgmt(self, database_engine, resource_group):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
