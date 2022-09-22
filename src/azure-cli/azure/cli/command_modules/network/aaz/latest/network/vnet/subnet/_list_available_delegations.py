@@ -57,19 +57,29 @@ class ListAvailableDelegations(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
-        condition_0 = has_value(self.ctx.args.location) and has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        condition_1 = has_value(self.ctx.args.location) and has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        self.pre_operations()
+        condition_0 = has_value(self.ctx.args.location) and has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_1 = has_value(self.ctx.args.location) and has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
-            self.AvailableDelegationsList(ctx=self.ctx)()
-        if condition_1:
             self.AvailableResourceGroupDelegationsList(ctx=self.ctx)()
+        if condition_1:
+            self.AvailableDelegationsList(ctx=self.ctx)()
+        self.post_operations()
+
+    # @register_callback
+    def pre_operations(self):
+        pass
+
+    # @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class AvailableDelegationsList(AAZHttpOperation):
+    class AvailableResourceGroupDelegationsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -83,7 +93,7 @@ class ListAvailableDelegations(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/availableDelegations",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/locations/{location}/availableDelegations",
                 **self.url_parameters
             )
 
@@ -100,6 +110,10 @@ class ListAvailableDelegations(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "location", self.ctx.args.location,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -169,7 +183,7 @@ class ListAvailableDelegations(AAZCommand):
 
             return cls._schema_on_200
 
-    class AvailableResourceGroupDelegationsList(AAZHttpOperation):
+    class AvailableDelegationsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -183,7 +197,7 @@ class ListAvailableDelegations(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/locations/{location}/availableDelegations",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/availableDelegations",
                 **self.url_parameters
             )
 
@@ -200,10 +214,6 @@ class ListAvailableDelegations(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "location", self.ctx.args.location,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
