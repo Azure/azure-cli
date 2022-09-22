@@ -46,6 +46,11 @@ type: command
 short-summary: Upgrade Azure CLI and extensions
 """
 
+helps['icm'] = """
+type: command
+short-summary: Internal command to query which IcM service&team the specified command belongs to
+"""
+
 helps['demo'] = """
 type: group
 short-summary: Demos for designing, developing and demonstrating Azure CLI.

@@ -225,6 +225,20 @@ def _download_from_url(url):
     return tmp_dir, msi_path
 
 
+def get_icm_team(cmd, command_name):
+    if not command_name.startswith('az'):
+        command_name = 'az ' + command_name
+    from azure.cli.core.util import get_file_json
+    util_module_path = os.path.dirname(os.path.realpath(__file__))
+    azure_cli_root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(util_module_path))))
+    service_json_path = os.path.join(azure_cli_root_path, 'service_name.json')
+    services = get_file_json(service_json_path)
+    for service in services:
+        if command_name.startswith(service['Command']):
+            return service['IcM']
+    raise CLIError(f"No IcM service defined for command:{command_name}")
+
+
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text, format_styled_text
     if theme:
