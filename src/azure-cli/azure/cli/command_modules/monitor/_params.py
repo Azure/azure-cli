@@ -17,7 +17,7 @@ from azure.cli.command_modules.monitor.util import get_operator_map, get_aggrega
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
     get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
-    process_subscription_id, process_workspace_data_export_destination)
+    process_subscription_id)
 
 from knack.arguments import CLIArgumentType
 
@@ -469,20 +469,6 @@ def load_arguments(self, _):
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Table description.')
-    # endregion
-
-    # region Log Analytics Workspace Data Export
-    with self.argument_context('monitor log-analytics workspace data-export') as c:
-        c.argument('data_export_name', options_list=['--name', '-n'], help="Name of the data export rule")
-        c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
-                   help='An array of tables to export.')
-        c.argument('destination', validator=process_workspace_data_export_destination,
-                   help='The destination resource ID. It should be a storage account, an event hub namespace or an event hub. '
-                        'If event hub namespace is provided, event hub would be created for each table automatically.')
-        c.ignore('data_export_type')
-        c.ignore('event_hub_name')
-        c.argument('enable', arg_type=get_three_state_flag(), help='Enable this data export rule.')
     # endregion
 
     # region Log Analytics Workspace Linked Service

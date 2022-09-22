@@ -180,7 +180,9 @@ class List(AAZCommand):
             properties.data_export_id = AAZStrType(
                 serialized_name="dataExportId",
             )
-            properties.destination = AAZObjectType()
+            properties.destination = AAZObjectType(
+                flags={"required": True},
+            )
             properties.enable = AAZBoolType()
             properties.last_modified_date = AAZStrType(
                 serialized_name="lastModifiedDate",

@@ -349,11 +349,9 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace table restore', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_restore', supports_no_wait=True)
 
-    with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
-                            custom_command_type=log_analytics_workspace_custom) as g:
-        g.custom_command('create', 'create_log_analytics_workspace_data_exports',
-                         client_factory=cf_log_analytics_workspace_data_exports)
-        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_data_exports')
+    from .operations.log_analytics_workspace import WorkspaceDataExportCreate, WorkspaceDataExportUpdate
+    self.command_table['monitor log-analytics workspace data-export create'] = WorkspaceDataExportCreate(loader=self)
+    self.command_table['monitor log-analytics workspace data-export update'] = WorkspaceDataExportUpdate(loader=self)
 
     with self.command_group('monitor log-analytics workspace saved-search', log_analytics_workspace_saved_search_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)

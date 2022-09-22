@@ -12,10 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace data-export show",
+    "monitor log-analytics workspace data-export create",
 )
-class Show(AAZCommand):
-    """Show a data export rule for a given workspace.
+class Create(AAZCommand):
+    """Create a data export rule for a given workspace.
+
+    For more information, see
+    https://docs.microsoft.com/azure/azure-monitor/platform/logs-data-export
+
+    :example: Create a data export rule for a given workspace.
+        az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination <storage account id> --enable -t <table name>
     """
 
     _aaz_info = {
@@ -46,6 +52,11 @@ class Show(AAZCommand):
             help="The data export rule name.",
             required=True,
             id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="^[A-Za-z][A-Za-z0-9-]+[A-Za-z0-9]$",
+                max_length=63,
+                min_length=4,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -61,11 +72,44 @@ class Show(AAZCommand):
                 min_length=4,
             ),
         )
+
+        # define Arg Group "Destination"
+
+        _args_schema = cls._args_schema
+        _args_schema.event_hub_name = AAZStrArg(
+            options=["--event-hub-name"],
+            arg_group="Destination",
+            help="Optional. Allows to define an Event Hub name. Not applicable when destination is Storage Account.",
+        )
+        _args_schema.destination = AAZStrArg(
+            options=["--destination"],
+            arg_group="Destination",
+            help="The destination resource ID. It should be a storage account, an event hub namespace. If event hub namespace is provided without --event-hub-name, event hub would be created for each table automatically.",
+            required=True,
+        )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.enable = AAZBoolArg(
+            options=["--enable"],
+            arg_group="Properties",
+            help="Active when enabled.",
+        )
+        _args_schema.tables = AAZListArg(
+            options=["-t", "--tables"],
+            arg_group="Properties",
+            help="An array of tables to export.",
+            required=True,
+        )
+
+        tables = cls._args_schema.tables
+        tables.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.DataExportsGet(ctx=self.ctx)()
+        self.DataExportsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -80,14 +124,14 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DataExportsGet(AAZHttpOperation):
+    class DataExportsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [200, 201]:
+                return self.on_200_201(session)
 
             return self.on_error(session.http_response)
 
@@ -100,7 +144,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -142,43 +186,76 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("destination", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("enable", AAZBoolType, ".enable")
+                properties.set_prop("tableNames", AAZListType, ".tables", typ_kwargs={"flags": {"required": True}})
+
+            destination = _builder.get(".properties.destination")
+            if destination is not None:
+                destination.set_prop("metaData", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                destination.set_prop("resourceId", AAZStrType, ".destination", typ_kwargs={"flags": {"required": True}})
+
+            meta_data = _builder.get(".properties.destination.metaData")
+            if meta_data is not None:
+                meta_data.set_prop("eventHubName", AAZStrType, ".event_hub_name")
+
+            table_names = _builder.get(".properties.tableNames")
+            if table_names is not None:
+                table_names.set_elements(AAZStrType, ".")
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.name = AAZStrType(
+            _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
+            _schema_on_200_201.properties = AAZObjectType(
                 flags={"required": True, "client_flatten": True},
             )
-            _schema_on_200.type = AAZStrType(
+            _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200_201.properties
             properties.created_date = AAZStrType(
                 serialized_name="createdDate",
             )
@@ -197,7 +274,7 @@ class Show(AAZCommand):
                 flags={"required": True},
             )
 
-            destination = cls._schema_on_200.properties.destination
+            destination = cls._schema_on_200_201.properties.destination
             destination.meta_data = AAZObjectType(
                 serialized_name="metaData",
                 flags={"client_flatten": True},
@@ -210,15 +287,15 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            meta_data = cls._schema_on_200.properties.destination.meta_data
+            meta_data = cls._schema_on_200_201.properties.destination.meta_data
             meta_data.event_hub_name = AAZStrType(
                 serialized_name="eventHubName",
             )
 
-            table_names = cls._schema_on_200.properties.table_names
+            table_names = cls._schema_on_200_201.properties.table_names
             table_names.Element = AAZStrType()
 
-            return cls._schema_on_200
+            return cls._schema_on_200_201
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]

@@ -10,6 +10,9 @@ from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.util import CLIError
 
+from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.data_export import \
+    Create as _WorkspaceDataExportCreate, \
+    Update as _WorkspaceDataExportUpdate
 
 def list_deleted_log_analytics_workspaces(client, resource_group_name=None):
     if resource_group_name:
@@ -70,27 +73,61 @@ def update_log_analytics_workspace_saved_search(cmd, instance, category=None, di
     return instance
 
 
-def create_log_analytics_workspace_data_exports(client, workspace_name, resource_group_name, data_export_name,
-                                                destination, data_export_type, table_names,
-                                                event_hub_name=None, enable=None):
-    from azure.mgmt.loganalytics.models import DataExport
-    data_export = DataExport(resource_id=destination,
-                             data_export_type=data_export_type,
-                             table_names=table_names,
-                             event_hub_name=event_hub_name,
-                             enable=enable)
-    return client.create_or_update(resource_group_name, workspace_name, data_export_name, data_export)
+class WorkspaceDataExportCreate(_WorkspaceDataExportCreate):
+
+    def pre_operations(self):
+        args = self.ctx.args
+        destination = str(args.destination)
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        if not is_valid_resource_id(destination):
+            raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
+                                            ' an evenhug namespace or an event hub resource id.')
+        result = parse_resource_id(destination)
+        if result['namespace'].lower() == 'microsoft.eventhub' and result['type'].lower() == 'namespaces':
+            args.destination = resource_id(
+                subscription=result['subscription'],
+                resource_group=result['resource_group'],
+                namespace=result['namespace'],
+                type=result['type'],
+                name=result['name']
+            )
+            if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
+                args.event_hub_name = result['child_name_1']
+        elif result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
+            pass
+        else:
+            raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
+                                            ' an evenhug namespace or an event hub resource id.')
 
 
-def update_log_analytics_workspace_data_exports(cmd, instance, table_names, destination=None, data_export_type=None,
-                                                event_hub_name=None, enable=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('resource_id', destination)
-        c.set_param('data_export_type', data_export_type)
-        c.set_param('table_names', table_names)
-        c.set_param('event_hub_name', event_hub_name)
-        c.set_param('enable', enable)
-    return instance
+class WorkspaceDataExportUpdate(_WorkspaceDataExportUpdate):
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.destination:
+            destination = str(args.destination)
+            from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            if not is_valid_resource_id(destination):
+                raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
+                                                ' an evenhug namespace or an event hub resource id.')
+            result = parse_resource_id(destination)
+            if result['namespace'].lower() == 'microsoft.eventhub' and result['type'].lower() == 'namespaces':
+                args.destination = resource_id(
+                    subscription=result['subscription'],
+                    resource_group=result['resource_group'],
+                    namespace=result['namespace'],
+                    type=result['type'],
+                    name=result['name']
+                )
+                if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
+                    args.event_hub_name = result['child_name_1']
+            elif result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
+                pass
+            else:
+                raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
+                                                ' an evenhug namespace or an event hub resource id.')
 
 
 # pylint:disable=too-many-locals dangerous-default-value
