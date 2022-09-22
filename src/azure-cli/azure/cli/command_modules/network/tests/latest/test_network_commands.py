@@ -4420,37 +4420,6 @@ class NetworkVNetScenarioTest(ScenarioTest):
         ])
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
-    def test_network_vnet_caching(self, resource_group):
-        from time import sleep
-
-        self.kwargs.update({
-            'vnet': 'vnet1'
-        })
-
-        # test that custom commands work with caching
-        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --defer')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --defer')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --defer')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            # ensure vnet has not been created
-            self.cmd('network vnet show -g {rg} -n {vnet}')
-        self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
-        self.cmd('network vnet show -g {rg} -n {vnet}',
-                 checks=self.check('length(subnets)', 3))
-        with self.assertRaisesRegex(CLIError, 'Not found in cache'):
-            self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
-
-        # test that generic update works with caching
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --defer')
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2')
-        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-            self.check('length(tags)', 2),
-            self.check('length(subnets)', 3)  # should reflect the write-through behavior from the earlier PUT
-        ])
-
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
@@ -5862,32 +5831,6 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             self.check('name', '{bastion}')
         ])
         self.cmd('network bastion delete -g {rg} -n {bastion}')
-
-
-class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
-
-    @ResourceGroupPreparer()
-    def test_network_vnet_local_context(self):
-        self.kwargs.update({
-            'vnet': self.create_random_name(prefix='vnet-', length=12),
-            'subnet': self.create_random_name(prefix='subnet-', length=12)
-        })
-
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
-                 checks=[self.check('newVNet.name', self.kwargs['vnet'])])
-        self.cmd('network vnet show', checks=[
-            self.check('name', self.kwargs['vnet'])
-        ])
-        self.cmd('network vnet subnet show', checks=[
-            self.check('name', self.kwargs['subnet'])
-        ])
-        with self.assertRaises(CLIError):
-            self.cmd('network vnet delete')
-        with self.assertRaises(CLIError):
-            self.cmd('network vnet subnet delete')
-
-        self.cmd('network vnet subnet delete -n {subnet}')
-        self.cmd('network vnet delete -n {vnet}')
 
 
 class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
