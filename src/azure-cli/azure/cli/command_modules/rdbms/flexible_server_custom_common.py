@@ -40,8 +40,8 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None):
     days = 30 if isinstance(client, MySqlServersOperations) else 7
-    logger.warning("Server will be automatically started after {} days "
-                   "if you do not perform a manual start operation".format(days))
+    logger.warning("Server will be automatically started after %d days "
+                   "if you do not perform a manual start operation", days)
     return client.begin_stop(resource_group_name, server_name)
 
 
