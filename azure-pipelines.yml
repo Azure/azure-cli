@@ -643,12 +643,12 @@ jobs:
         image: registry.access.redhat.com/ubi9/ubi:9.0.0
         artifact: rpm-ubi9
         python_package: python3.9
-      Fedora35:
+      Fedora 35:
         dockerfile: fedora
         image: fedora:35
         artifact: rpm-fedora35
         python_package: python3
-      Fedora36:
+      Fedora 36:
         dockerfile: fedora
         image: fedora:36
         artifact: rpm-fedora36
@@ -673,7 +673,9 @@ jobs:
 - job: TestRpmPackage
   displayName: Test Rpm Package
   timeoutInMinutes: 120
-  dependsOn: BuildRpmPackages
+  dependsOn:
+    - BuildRpmPackages
+    - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -693,14 +695,14 @@ jobs:
         python_package: python3.9
         python_cmd: python3.9
         pip_cmd: pip3.9
-      Fedora35:
+      Fedora 35:
         artifact: rpm-fedora35
         distro: fc35
         image: fedora:35
         python_package: python3
         python_cmd: python3
         pip_cmd: pip3
-      Fedora36:
+      Fedora 36:
         artifact: rpm-fedora36
         distro: fc36
         image: fedora:36
@@ -714,13 +716,11 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
-
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
       artifactName: $(artifact)
-
 
   - bash: |
       set -ex

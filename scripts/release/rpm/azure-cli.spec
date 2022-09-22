@@ -27,7 +27,6 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
-BuildArch:      x86_64
 Requires:       %{python_package}
 Prefix:         /usr
 Prefix:         /etc
