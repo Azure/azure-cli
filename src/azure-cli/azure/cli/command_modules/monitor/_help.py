@@ -903,6 +903,22 @@ examples:
         az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
 """
 
+helps['monitor log-analytics workspace saved-search create'] = """
+type: command
+short-summary: Create a saved search for a given workspace.
+examples:
+  - name: Create a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
+"""
+
+helps['monitor log-analytics workspace saved-search update'] = """
+type: command
+short-summary: Update a saved search for a given workspace.
+examples:
+  - name: Update a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
+"""
+
 helps['monitor log-analytics workspace linked-storage add'] = """
 type: command
 short-summary: Add some linked storage accounts with specific data source type for log analytics workspace.

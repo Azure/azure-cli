@@ -39,38 +39,61 @@ def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=Non
 def _format_tags(tags):
     from azure.mgmt.loganalytics.models import Tag
     if tags:
-        tags = [Tag(name=key, value=value) for key, value in tags.items()]
+        tags = [{"name":key, "value":value} for key, value in tags.items()]
     return tags
 
 
-def create_log_analytics_workspace_saved_search(client, workspace_name, resource_group_name, saved_search_id,
+def create_log_analytics_workspace_saved_search(cmd, workspace_name, resource_group_name, saved_search_id,
                                                 category, display_name, saved_query,
                                                 function_alias=None, function_parameters=None,
                                                 tags=None):
-    from azure.mgmt.loganalytics.models import SavedSearch
-    saved_search = SavedSearch(category=category,
-                               display_name=display_name,
-                               query=saved_query,
-                               function_alias=function_alias,
-                               function_parameters=function_parameters,
-                               tags=_format_tags(tags))
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   workspace_name=workspace_name,
-                                   saved_search_id=saved_search_id,
-                                   parameters=saved_search)
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.saved_search import Create
+
+    command_args = {
+        "resource_group": resource_group_name,
+        "saved_search_name": saved_search_id,
+        "workspace_name": workspace_name,
+        "category": category,
+        "display_name": display_name,
+        "saved_query": saved_query,
+    }
+    if function_alias is not None:
+        command_args['func_alias'] = function_alias
+    if function_parameters is not None:
+        command_args['func_param'] = function_parameters
+    if tags is not None:
+        command_args['tags'] = _format_tags(tags)
+    return Create(cli_ctx=cmd.cli_ctx)(
+        command_args=command_args
+    )
 
 
-def update_log_analytics_workspace_saved_search(cmd, instance, category=None, display_name=None, saved_query=None,
+def update_log_analytics_workspace_saved_search(cmd, workspace_name, resource_group_name, saved_search_id,
+                                                category=None, display_name=None, saved_query=None,
                                                 function_alias=None, function_parameters=None,
                                                 tags=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('category', category)
-        c.set_param('display_name', display_name)
-        c.set_param('query', saved_query)
-        c.set_param('function_alias', function_alias)
-        c.set_param('function_parameters', function_parameters)
-        c.set_param('tags', _format_tags(tags))
-    return instance
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.saved_search import Update
+    command_args = {
+        "resource_group": resource_group_name,
+        "saved_search_name": saved_search_id,
+        "workspace_name": workspace_name,
+    }
+
+    if category is not None:
+        command_args['category'] = category
+    if display_name is not None:
+        command_args['display_name'] = display_name
+    if saved_query is not None:
+        command_args['saved_query'] = saved_query
+    if function_alias is not None:
+        command_args['func_alias'] = function_alias
+    if function_parameters is not None:
+        command_args['func_param'] = function_parameters
+    if tags is not None:
+        command_args['tags'] = _format_tags(tags)
+    return Update(cli_ctx=cmd.cli_ctx)(
+        command_args=command_args
+    )
 
 
 class WorkspaceDataExportCreate(_WorkspaceDataExportCreate):

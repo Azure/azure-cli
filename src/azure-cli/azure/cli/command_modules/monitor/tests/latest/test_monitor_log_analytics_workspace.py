@@ -342,25 +342,23 @@ class TestLogProfileScenarios(ScenarioTest):
                  '--category {category} --display-name {display_name} -q "{query}" --fa {function_alias} '
                  '--fp "{function_param}" --tags a=b c=d',
                  checks=[
-                     # self.check('category', '{category}'),
-                     # self.check('displayName', '{display_name}'),
-                     # self.check('query', "{query}"),
-                     # self.check('functionAlias', '{function_alias}'),
-                     # self.check('functionParameters', '{function_param}'),
-                     # self.check('length(tags)', 2)
+                     self.check('category', '{category}'),
+                     self.check('displayName', '{display_name}'),
+                     self.check('query', "{query}"),
+                     self.check('functionAlias', '{function_alias}'),
+                     self.check('functionParameters', '{function_param}'),
+                     self.check('length(tags)', 2)
                  ])
 
-
         self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}', checks=[
-            # self.check('category', '{category}'),
-            # self.check('displayName', '{display_name}'),
-            # self.check('query', "Heartbeat | getschema"),
-            # self.check('functionAlias', '{function_alias}'),
-            # self.check('functionParameters', '{function_param}'),
-            # self.check('length(tags)', 2)
+            self.check('category', '{category}'),
+            self.check('displayName', '{display_name}'),
+            self.check('query', "Heartbeat | getschema"),
+            self.check('functionAlias', '{function_alias}'),
+            self.check('functionParameters', '{function_param}'),
+            self.check('length(tags)', 2)
         ])
         self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
-            self.check('length(@)', 1)
         ])
 
         self.cmd(
@@ -368,20 +366,17 @@ class TestLogProfileScenarios(ScenarioTest):
             '--category {category_2} --display-name {display_name_2} -q "{query_2}" --fa {function_alias_2} '
             '--fp "{function_param_2}" --tags a=c f=e',
             checks=[
-                # self.check('category', '{category_2}'),
-                # self.check('displayName', '{display_name_2}'),
-                # self.check('query', "{query_2}"),
-                # self.check('functionAlias', '{function_alias_2}'),
-                # self.check('functionParameters', '{function_param_2}'),
-                # self.check('length(tags)', 2),
-                # self.check('tags[0].value', 'c'),
-                # self.check('tags[1].value', 'e')
+                self.check('category', '{category_2}'),
+                self.check('displayName', '{display_name_2}'),
+                self.check('query', "{query_2}"),
+                self.check('functionAlias', '{function_alias_2}'),
+                self.check('functionParameters', '{function_param_2}'),
+                self.check('length(tags)', 2),
+                self.check('tags[0].value', 'c'),
+                self.check('tags[1].value', 'e')
             ])
 
         self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
-        self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
-            self.check('length(@)', 0)
-        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
     @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
