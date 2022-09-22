@@ -65,7 +65,17 @@ class Disable(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.IntelligencePacksDisable(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     class IntelligencePacksDisable(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
