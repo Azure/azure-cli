@@ -183,6 +183,7 @@ class List(AAZCommand):
             )
             properties.storage_account_ids = AAZListType(
                 serialized_name="storageAccountIds",
+                flags={"required": True},
             )
 
             storage_account_ids = cls._schema_on_200.value.Element.properties.storage_account_ids

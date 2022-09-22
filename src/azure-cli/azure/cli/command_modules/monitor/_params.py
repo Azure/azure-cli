@@ -486,7 +486,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace linked-storage') as c:
         from azure.mgmt.loganalytics.models import DataSourceType
         c.argument('data_source_type', help='Data source type for the linked storage account.',
-                   options_list=['--type'], arg_type=get_enum_type(DataSourceType))
+                   options_list=['--type'], arg_type=get_enum_type(["Alerts", "AzureWatson", "CustomLogs", "Ingestion", "Query"]))
         c.argument('storage_account_ids', nargs='+', options_list=['--storage-accounts'],
                    help='List of Name or ID of Azure Storage Account.',
                    validator=validate_storage_accounts_name_or_id)

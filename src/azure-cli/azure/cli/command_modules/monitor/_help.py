@@ -843,16 +843,6 @@ type: command
 short-summary: Update diagnostic settings for a subscription.
 """
 
-helps['monitor log-analytics'] = """
-type: group
-short-summary: Manage Azure log analytics.
-"""
-
-helps['monitor log-analytics workspace'] = """
-type: group
-short-summary: Manage Azure log analytics workspace
-"""
-
 helps['monitor log-analytics workspace recover'] = """
 type: command
 short-summary: Recover a workspace in a soft-delete state within 14 days.
@@ -904,7 +894,6 @@ examples:
         az monitor log-analytics workspace table restore create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT" --restore-source-table MyTable
 """
 
-
 helps['monitor log-analytics workspace table update'] = """
 type: command
 short-summary: Update the properties of a Log Analytics workspace table.
@@ -912,12 +901,6 @@ examples:
   - name: Update the properties of a Log Analytics workspace table.
     text: |
         az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
-"""
-
-
-helps['monitor log-analytics workspace linked-storage'] = """
-type: group
-short-summary: Manage linked storage account for log analytics workspace.
 """
 
 helps['monitor log-analytics workspace linked-storage add'] = """

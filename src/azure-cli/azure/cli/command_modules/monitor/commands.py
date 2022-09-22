@@ -357,8 +357,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
 
-    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:
-        g.custom_command('create', 'create_log_analytics_workspace_linked_storage_accounts')
+    from .operations.log_analytics_linked_storage_account import WorkspaceLinkedStorageAccountCreate
+    self.command_table['monitor log-analytics workspace linked-storage create'] = WorkspaceLinkedStorageAccountCreate(loader=self)
+    with self.command_group('monitor log-analytics workspace linked-storage', custom_command_type=log_analytics_linked_storage_custom) as g:
         g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
 

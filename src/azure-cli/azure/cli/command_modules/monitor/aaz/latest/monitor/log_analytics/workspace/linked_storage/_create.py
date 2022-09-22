@@ -12,13 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace linked-storage show",
+    "monitor log-analytics workspace linked-storage create",
 )
-class Show(AAZCommand):
-    """Show all linked storage accounts with specific data source type for a log analytics workspace.
+class Create(AAZCommand):
+    """Create some linked storage accounts for log analytics workspace.
 
-    :example: Show all linked storage accounts with a specific type for a log analytics workspace
-        az monitor log-analytics workspace linked-storage show --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
+    :example: Create two linked storage accounts for a log analytics workspace using the name of the storage account.
+        az monitor log-analytics workspace linked-storage create --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts StorageAccount1 StorageAccount2
+
+    :example: Create one linked storage accounts for a log analytics workspace using the resource id of the storage account.
+        az monitor log-analytics workspace linked-storage create --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000001
     """
 
     _aaz_info = {
@@ -65,11 +68,24 @@ class Show(AAZCommand):
                 min_length=4,
             ),
         )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.storage_accounts = AAZListArg(
+            options=["--storage-accounts"],
+            arg_group="Properties",
+            help="List of Name or ID of Azure Storage Account.",
+            required=True,
+        )
+
+        storage_accounts = cls._args_schema.storage_accounts
+        storage_accounts.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.LinkedStorageAccountsGet(ctx=self.ctx)()
+        self.LinkedStorageAccountsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -84,7 +100,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class LinkedStorageAccountsGet(AAZHttpOperation):
+    class LinkedStorageAccountsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -104,7 +120,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -146,10 +162,32 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("storageAccountIds", AAZListType, ".storage_accounts", typ_kwargs={"flags": {"required": True}})
+
+            storage_account_ids = _builder.get(".properties.storageAccountIds")
+            if storage_account_ids is not None:
+                storage_account_ids.set_elements(AAZStrType, ".")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -198,4 +236,4 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]
