@@ -7198,7 +7198,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
     from .aaz.latest.network.vnet import CheckIpAddress
     from .aaz.latest.network.vnet.subnet import Show
 
-    Show_Subnet = Show(cmd.loader)
+    Show_Subnet = Show(cli_ctx=cmd.cli_ctx)
     args = {
         "resource_group": resource_group_name,
         "name": subnet_name,
