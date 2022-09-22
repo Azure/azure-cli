@@ -7208,7 +7208,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
     if subnet["addressPrefix"]:
         start_ip = subnet["addressPrefix"].split("/")[0]
 
-    Check_IP_Address = CheckIpAddress(cmd.loader)
+    Check_IP_Address = CheckIpAddress(cli_ctx=cmd.cli_ctx)
     args = {
         "resource_group": resource_group_name,
         "name": virtual_network_name,
