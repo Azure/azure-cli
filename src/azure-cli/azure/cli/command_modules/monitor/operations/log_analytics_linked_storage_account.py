@@ -15,7 +15,7 @@ class WorkspaceLinkedStorageAccountCreate(_WorkspaceLinkedStorageAccountCreate):
         cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         storage_accounts = cls._args_schema.storage_accounts
-        storage_accounts._element = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(
+        storage_accounts._element = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(  # pylint: disable=protected-access
             template='/subscriptions/{subscription}/resourceGroups/{resource_group}/'
                      'providers/Microsoft.Storage/storageAccounts/{}'))
         return cls._args_schema
@@ -43,7 +43,7 @@ def remove_log_analytics_workspace_linked_storage_accounts(cmd, resource_group_n
             storage_account_ids_set = set(str.lower(storage_account_id) for storage_account_id in storage_account_ids)
             new_storage_account_ids = []
             for existed_storage_account_id in instance.properties.storage_account_ids:
-                if (str(existed_storage_account_id).lower()) in storage_account_ids_set:
+                if str(existed_storage_account_id).lower() in storage_account_ids_set:
                     continue
                 new_storage_account_ids.append(existed_storage_account_id)
             instance.properties.storage_account_ids = new_storage_account_ids

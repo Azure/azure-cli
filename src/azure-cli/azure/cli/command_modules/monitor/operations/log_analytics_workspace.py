@@ -2,17 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import cmd
-
-from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
-from azure.cli.core.commands.transform import _parse_id
-from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
-from knack.util import CLIError
 
 from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.data_export import \
     Create as _WorkspaceDataExportCreate, \
     Update as _WorkspaceDataExportUpdate
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.commands.transform import _parse_id
 
 
 def list_deleted_log_analytics_workspaces(client, resource_group_name=None):
@@ -46,7 +41,7 @@ def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=Non
 
 def _format_tags(tags):
     if tags:
-        tags = [{"name":key, "value":value} for key, value in tags.items()]
+        tags = [{"name": key, "value": value} for key, value in tags.items()]
     return tags
 
 
@@ -109,7 +104,6 @@ class WorkspaceDataExportCreate(_WorkspaceDataExportCreate):
         args = self.ctx.args
         destination = str(args.destination)
         from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
-        from azure.cli.core.azclierror import InvalidArgumentValueError
         if not is_valid_resource_id(destination):
             raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
                                             ' an evenhug namespace or an event hub resource id.')
@@ -138,7 +132,6 @@ class WorkspaceDataExportUpdate(_WorkspaceDataExportUpdate):
         if args.destination:
             destination = str(args.destination)
             from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
-            from azure.cli.core.azclierror import InvalidArgumentValueError
             if not is_valid_resource_id(destination):
                 raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
                                                 ' an evenhug namespace or an event hub resource id.')
@@ -177,9 +170,8 @@ def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
                 n, t = col.split('=', 1)
             else:
                 raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
-            columns_list.append({"name":n, "type":t})
+            columns_list.append({"name": n, "type": t})
 
-    schema = None
     if columns or description is not None:
         if not columns:
             raise RequiredArgumentMissingError('Usage error: When using --description, --columns must be provided')
@@ -251,7 +243,7 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
                 n, t = col.split('=', 1)
             else:
                 raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
-            columns_list.append({"name":n, "type":t})
+            columns_list.append({"name": n, "type": t})
 
     command_args = {
         "resource_group": resource_group_name,

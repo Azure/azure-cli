@@ -84,14 +84,14 @@ class Create(AAZCommand):
             default="SystemAssigned",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
         )
-        _args_schema.user_assigned_identities = AAZDictArg(
-            options=["--user-assigned-identities"],
+        _args_schema.user_assigned = AAZDictArg(
+            options=["--user-assigned"],
             arg_group="Identity",
             help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
         )
 
-        user_assigned_identities = cls._args_schema.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectArg(
+        user_assigned = cls._args_schema.user_assigned
+        user_assigned.Element = AAZObjectArg(
             blank={},
         )
 
@@ -262,7 +262,7 @@ class Create(AAZCommand):
             identity = _builder.get(".identity")
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
-                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned")
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
