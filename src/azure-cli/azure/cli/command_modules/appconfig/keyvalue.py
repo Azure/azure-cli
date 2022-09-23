@@ -245,7 +245,7 @@ def export_config(cmd,
     src_kvs = __read_kv_from_config_store(azconfig_client,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                          prefix_to_remove=prefix,
+                                          prefix_to_remove=prefix if not export_as_reference else "",
                                           cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     if skip_keyvault:
@@ -253,9 +253,10 @@ def export_config(cmd,
 
     if destination == 'appservice' and export_as_reference:
         if endpoint is None:
+            # Endpoint will not be None as it is already resolved in creating azconfig_client
             endpoint = get_store_endpoint_from_connection_string(connection_string) or resolve_store_metadata(cmd, name)[1]
 
-        src_kvs = [__map_to_appservice_config_reference(kv, endpoint) for kv in src_kvs]
+        src_kvs = [__map_to_appservice_config_reference(kv, endpoint, prefix) for kv in src_kvs]
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.

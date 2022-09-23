@@ -21,6 +21,7 @@ class KeyVaultConstants:
 class AppServiceConstants:
     APPSVC_CONFIG_REFERENCE_PREFIX = "@Microsoft.AppConfiguration("
     APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
+    APPSVC_SLOT_SETTING_KEY = "AppService:SlotSetting"
 
 
 class SearchFilterOptions:

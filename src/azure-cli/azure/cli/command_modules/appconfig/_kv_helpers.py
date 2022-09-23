@@ -281,16 +281,16 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
         raise CLIError("Failed to export key-values to file. " + str(exception))
 
 
-# Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Value=<kvValue>; Label=<kvLabel>).
+# Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Label=<kvLabel>).
 # Label is optional
 
-def __map_to_appservice_config_reference(key_value, endpoint):
-    if endpoint is None:
-        raise CLIError("No endpoint provided.")
-
+def __map_to_appservice_config_reference(key_value, endpoint, prefix):
     label = key_value.label
     key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + 'Endpoint={0}; Key={1}'.format(
         endpoint, key_value.key) + ('; Label={0}'.format(label) if label is not None else '') + ')'
+
+    if key_value.key.startswith(prefix):
+        key_value.key = key_value.key[len(prefix):]
     return key_value
 
 
@@ -430,8 +430,13 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
         for item in settings:
             key = prefix_to_add + item['name']
             value = item['value']
-            if validate_import_key(key) and not value.strip().lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()):  # Exclude app configuration references.
-                tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
+
+            if value.strip().lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()):   # Exclude app configuration references.
+                logger.warning('Ignoring app configuration reference with Key "%s" and Value "%s"', key, value)
+                continue
+
+            if validate_import_key(key) :
+                tags = {AppServiceConstants.APPSVC_SLOT_SETTING_KEY: str(item['slotSetting']).lower()} if item['slotSetting'] else {}
 
                 # Value will look like one of the following if it is a KeyVault reference:
                 # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
@@ -505,7 +510,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
                     logger.debug(
                         'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', name, value, str(e))
 
-            if 'AppService:SlotSetting' in kv.tags and kv.tags['AppService:SlotSetting'] == 'true':
+            if AppServiceConstants.APPSVC_SLOT_SETTING_KEY in kv.tags and kv.tags[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] == 'true':
                 slot_settings.append(name + '=' + value)
             else:
                 non_slot_settings.append(name + '=' + value)
@@ -534,8 +539,8 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
             # Explicitly assign slot settings for comparison.
             slot_setting = 'false'
             if kv.tags:
-                slot_setting = kv.tags.get('AppService:SlotSetting', 'false')
-            kv_json['AppService:SlotSetting'] = slot_setting
+                slot_setting = kv.tags.get(AppServiceConstants.APPSVC_SLOT_SETTING_KEY, 'false')
+            kv_json[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] = slot_setting
 
             res[kv.key] = kv_json
     # import/export key, value, content-type, and tags (as a sub group)
