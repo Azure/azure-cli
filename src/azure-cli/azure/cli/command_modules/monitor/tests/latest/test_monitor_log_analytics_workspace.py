@@ -498,6 +498,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'ws_name':self.create_random_name('ws-', 10),
             'table_name': self.create_random_name('TB', 10) + '_CL',
             'table2_name': self.create_random_name('TB', 10) + '_SRCH',
+            'table3_name': self.create_random_name('TB', 10) + '_RST'
         })
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')

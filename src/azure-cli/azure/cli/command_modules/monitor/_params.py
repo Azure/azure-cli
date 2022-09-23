@@ -417,11 +417,6 @@ def load_arguments(self, _):
         c.argument('capacity_reservation_level', options_list=['--capacity-reservation-level', '--level'], help='The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.')
         c.argument('daily_quota_gb', options_list=['--quota'], help='The workspace daily quota for ingestion in gigabytes. The minimum value is 0.023 and default is -1 which means unlimited.')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
-        from azure.mgmt.loganalytics.models import PublicNetworkAccessType
-        c.argument('public_network_access_for_ingestion', options_list=['--ingestion-access'], help='The public network access type to access workspace ingestion.',
-                   arg_type=get_enum_type(PublicNetworkAccessType))
-        c.argument('public_network_access_for_query', options_list=['--query-access'], help='The public network access type to access workspace query.',
-                   arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
     with self.argument_context('monitor log-analytics workspace saved-search') as c:
@@ -444,13 +439,12 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace')
+        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 4 and 730. Setting this property to null will default to the workspace')
         c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
-        from azure.mgmt.loganalytics.models import TablePlanEnum
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
-        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('plan', arg_type=get_enum_type(["Basic", "Analytics"]), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Schema description.')
 
     with self.argument_context('monitor log-analytics workspace table search-job create') as c:
@@ -465,9 +459,8 @@ def load_arguments(self, _):
         c.argument('restore_source_table', help='The table to restore data from.')
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
-        from azure.mgmt.loganalytics.models import TablePlanEnum
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
-        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('plan', arg_type=get_enum_type(["Basic", "Analytics"]), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Table description.')
     # endregion
 
@@ -484,7 +477,6 @@ def load_arguments(self, _):
 
     # region Log Analytics Linked Storage Account
     with self.argument_context('monitor log-analytics workspace linked-storage') as c:
-        from azure.mgmt.loganalytics.models import DataSourceType
         c.argument('data_source_type', help='Data source type for the linked storage account.',
                    options_list=['--type'], arg_type=get_enum_type(["Alerts", "AzureWatson", "CustomLogs", "Ingestion", "Query"]))
         c.argument('storage_account_ids', nargs='+', options_list=['--storage-accounts'],

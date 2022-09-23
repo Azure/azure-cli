@@ -339,14 +339,14 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace', custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
 
-    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace table', custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
 
-    with self.command_group('monitor log-analytics workspace table search-job', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace table search-job', custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
 
-    with self.command_group('monitor log-analytics workspace table restore', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace table restore', custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_restore', supports_no_wait=True)
 
     from .operations.log_analytics_workspace import WorkspaceDataExportCreate, WorkspaceDataExportUpdate

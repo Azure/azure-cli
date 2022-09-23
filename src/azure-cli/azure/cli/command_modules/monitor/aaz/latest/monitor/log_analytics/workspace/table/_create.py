@@ -11,23 +11,33 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "monitor log-analytics workspace table wait",
-)
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class Create(AAZCommand):
+    """Create a Log Analytics workspace table.
+
+    The name of custom log table needs to end with '_CL'. The name of search job table needs to end with '_SRCH'. The name of restore logs table needs to end with '_RST'.
+
+    :example: Create a Log Analytics workspace custom log table.
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL --retention-time 45 --cols "[{name:MyColumn1,type:string},{name:TimeGenerated,type:datetime}]"
+
+    :example: Create a Log Analytics workspace search result table.
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-job "{query:'Heartbeat |  where SourceSystem != '/'/ | project SourceSystem',limit:1000,start-search-time:'Sat, 28 Aug 2021 05:29:18 GMT',end-search-time:'Sat, 28 Aug 2021 08:29:18 GMT'}"
+
+    :example: Create a Log Analytics workspace restore logs table.
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --restore-logs "{restore-source-table:MyTable,start-restore-time:'Sat, 28 Aug 2021 05:29:18 GMT',end-restore-time:'Sat, 28 Aug 2021 08:29:18 GMT'}"
     """
 
     _aaz_info = {
+        "version": "2021-12-01-preview",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}", "2021-12-01-preview"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -60,11 +70,135 @@ class Wait(AAZWaitCommand):
                 min_length=4,
             ),
         )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.plan = AAZStrArg(
+            options=["--plan"],
+            arg_group="Properties",
+            help="Instruct the system how to handle and charge the logs ingested to this table.",
+            enum={"Analytics": "Analytics", "Basic": "Basic"},
+        )
+        _args_schema.restore = AAZObjectArg(
+            options=["--restore"],
+            arg_group="Properties",
+            help="Parameters of the restore operation that initiated this table.",
+        )
+        _args_schema.retention_time = AAZIntArg(
+            options=["--retention-time"],
+            arg_group="Properties",
+            help="The table retention in days, between 4 and 730.",
+            fmt=AAZIntArgFormat(
+                maximum=730,
+                minimum=4,
+            ),
+        )
+        _args_schema.schema = AAZObjectArg(
+            options=["--schema"],
+            arg_group="Properties",
+            help="Table schema.",
+        )
+        _args_schema.search_job = AAZObjectArg(
+            options=["--search-job"],
+            arg_group="Properties",
+            help="Parameters of the search job that initiated this table.",
+        )
+        _args_schema.total_retention_time = AAZIntArg(
+            options=["--total-retention-time"],
+            arg_group="Properties",
+            help="The table total retention in days, between 4 and 2555.",
+            fmt=AAZIntArgFormat(
+                maximum=2555,
+                minimum=4,
+            ),
+        )
+
+        restore = cls._args_schema.restore
+        restore.end_restore_time = AAZDateTimeArg(
+            options=["end-restore-time"],
+            help="The timestamp to end the restore by (UTC).",
+        )
+        restore.source_table = AAZStrArg(
+            options=["source-table"],
+            help="The table to restore data from.",
+        )
+        restore.start_restore_time = AAZDateTimeArg(
+            options=["start-restore-time"],
+            help="The timestamp to start the restore from (UTC).",
+        )
+
+        schema = cls._args_schema.schema
+        schema.columns = AAZListArg(
+            options=["columns"],
+            help="A list of table custom columns.",
+        )
+        schema.description = AAZStrArg(
+            options=["description"],
+            help="Table description.",
+        )
+        schema.display_name = AAZStrArg(
+            options=["display-name"],
+            help="Table display name.",
+        )
+        schema.name = AAZStrArg(
+            options=["name"],
+            help="Table name.",
+        )
+
+        columns = cls._args_schema.schema.columns
+        columns.Element = AAZObjectArg()
+
+        _element = cls._args_schema.schema.columns.Element
+        _element.data_type_hint = AAZStrArg(
+            options=["data-type-hint"],
+            help="Column data type logical hint.",
+            enum={"armPath": "armPath", "guid": "guid", "ip": "ip", "uri": "uri"},
+        )
+        _element.description = AAZStrArg(
+            options=["description"],
+            help="Column description.",
+        )
+        _element.display_name = AAZStrArg(
+            options=["display-name"],
+            help="Column display name.",
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Column name.",
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="Column data type.",
+            enum={"boolean": "boolean", "dateTime": "dateTime", "dynamic": "dynamic", "guid": "guid", "int": "int", "long": "long", "real": "real", "string": "string"},
+        )
+
+        search_job = cls._args_schema.search_job
+        search_job.description = AAZStrArg(
+            options=["description"],
+            help="Search job Description.",
+        )
+        search_job.end_search_time = AAZDateTimeArg(
+            options=["end-search-time"],
+            help="The timestamp to end the search by (UTC)",
+        )
+        search_job.limit = AAZIntArg(
+            options=["limit"],
+            help="Limit the search job to return up to specified number of rows.",
+        )
+        search_job.query = AAZStrArg(
+            options=["query"],
+            help="Search job query.",
+        )
+        search_job.start_search_time = AAZDateTimeArg(
+            options=["start-search-time"],
+            help="The timestamp to start the search from (UTC)",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.TablesGet(ctx=self.ctx)()
+        yield self.TablesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     # @register_callback
@@ -76,17 +210,33 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class TablesGet(AAZHttpOperation):
+    class TablesCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
@@ -99,7 +249,7 @@ class Wait(AAZWaitCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -141,10 +291,66 @@ class Wait(AAZWaitCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("plan", AAZStrType, ".plan")
+                properties.set_prop("restoredLogs", AAZObjectType, ".restore")
+                properties.set_prop("retentionInDays", AAZIntType, ".retention_time")
+                properties.set_prop("schema", AAZObjectType, ".schema")
+                properties.set_prop("searchResults", AAZObjectType, ".search_job")
+                properties.set_prop("totalRetentionInDays", AAZIntType, ".total_retention_time")
+
+            restored_logs = _builder.get(".properties.restoredLogs")
+            if restored_logs is not None:
+                restored_logs.set_prop("endRestoreTime", AAZStrType, ".end_restore_time")
+                restored_logs.set_prop("sourceTable", AAZStrType, ".source_table")
+                restored_logs.set_prop("startRestoreTime", AAZStrType, ".start_restore_time")
+
+            schema = _builder.get(".properties.schema")
+            if schema is not None:
+                schema.set_prop("columns", AAZListType, ".columns")
+                schema.set_prop("description", AAZStrType, ".description")
+                schema.set_prop("displayName", AAZStrType, ".display_name")
+                schema.set_prop("name", AAZStrType, ".name")
+
+            columns = _builder.get(".properties.schema.columns")
+            if columns is not None:
+                columns.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.schema.columns[]")
+            if _elements is not None:
+                _elements.set_prop("dataTypeHint", AAZStrType, ".data_type_hint")
+                _elements.set_prop("description", AAZStrType, ".description")
+                _elements.set_prop("displayName", AAZStrType, ".display_name")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            search_results = _builder.get(".properties.searchResults")
+            if search_results is not None:
+                search_results.set_prop("description", AAZStrType, ".description")
+                search_results.set_prop("endSearchTime", AAZStrType, ".end_search_time")
+                search_results.set_prop("limit", AAZIntType, ".limit")
+                search_results.set_prop("query", AAZStrType, ".query")
+                search_results.set_prop("startSearchTime", AAZStrType, ".start_search_time")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -428,4 +634,4 @@ def _build_schema_search_results_read(_schema):
     _schema.start_search_time = _schema_search_results_read.start_search_time
 
 
-__all__ = ["Wait"]
+__all__ = ["Create"]

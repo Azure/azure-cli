@@ -2,10 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import cmd
+
 from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
 from azure.cli.core.commands.transform import _parse_id
-from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table,\
-    Schema, Column, SearchResults, RestoredLogs, ColumnTypeEnum
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.util import CLIError
@@ -40,12 +40,11 @@ def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=Non
                 "no_wait": no_wait,
             })
 
-    raise CLIError('{} is not a deleted workspace and you can only recover a deleted workspace within 14 days.'
-                   .format(workspace_name))
+    raise InvalidArgumentValueError('{} is not a deleted workspace and you can only recover a deleted workspace '
+                                    'within 14 days.'.format(workspace_name))
 
 
 def _format_tags(tags):
-    from azure.mgmt.loganalytics.models import Tag
     if tags:
         tags = [{"name":key, "value":value} for key, value in tags.items()]
     return tags
@@ -161,84 +160,115 @@ class WorkspaceDataExportUpdate(_WorkspaceDataExportUpdate):
                                                 ' an evenhug namespace or an event hub resource id.')
 
 
-# pylint:disable=too-many-locals dangerous-default-value
-def create_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns=[],
+# pylint:disable=too-many-locals
+def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_name, table_name, columns=None,
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
     if retention_in_days and total_retention_in_days:
         if total_retention_in_days < retention_in_days:
             InvalidArgumentValueError('InvalidArgumentValueError: The specified value of --retention-time'
                                       ' should be less than --total-retention-time')
-    columns_list = [] if columns else None
-    for col in columns:
-        if '=' in col:
-            n, t = col.split('=', 1)
-            if t.lower() not in [x.value.lower() for x in ColumnTypeEnum]:
-                raise InvalidArgumentValueError('InvalidArgumentValueError: "{}" is not a valid value for type_name. '
-                                                'Allowed values: string, int, long, real, boolean, dateTime, guid, '
-                                                'dynamic".'.format(t))
-        else:
-            raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
-        columns_list.append(Column(name=n, type=t))
+    columns_list = None
+    if columns:
+        columns_list = []
+        for col in columns:
+            if '=' in col:
+                n, t = col.split('=', 1)
+            else:
+                raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
+            columns_list.append({"name":n, "type":t})
+
     schema = None
     if columns or description is not None:
         if not columns:
             raise RequiredArgumentMissingError('Usage error: When using --description, --columns must be provided')
-        schema = Schema(name=table_name, columns=columns_list, description=description)
-    table = Table(retention_in_days=retention_in_days,
-                  total_retention_in_days=total_retention_in_days,
-                  schema=schema,
-                  plan=plan
-                  )
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
-                       workspace_name, table_name, table)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "table_name": table_name,
+        "workspace_name": workspace_name,
+        "retention_time": retention_in_days,
+        "total_retention_time": total_retention_in_days,
+        "plan": plan,
+        "schema": {
+            "columns": columns_list,
+            "description": description,
+            "name": table_name,
+        },
+        "no_wait": no_wait,
+    })
 
 
-def create_log_analytics_workspace_table_search_job(client, resource_group_name, workspace_name, table_name,
+def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, workspace_name, table_name,
                                                     search_query, start_search_time, end_search_time,
                                                     retention_in_days=None, total_retention_in_days=None, limit=None,
                                                     no_wait=False):
-    search_results = SearchResults(query=search_query, limit=limit, start_search_time=start_search_time,
-                                   end_search_time=end_search_time)
-    table = Table(retention_in_days=retention_in_days,
-                  total_retention_in_days=total_retention_in_days,
-                  search_results=search_results,
-                  )
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
-                       workspace_name, table_name, table)
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "table_name": table_name,
+        "workspace_name": workspace_name,
+        "retention_time": retention_in_days,
+        "total_retention_time": total_retention_in_days,
+        "search_job": {
+            "query": search_query,
+            "limit": limit,
+            "start_search_time": start_search_time,
+            "end_search_time": end_search_time,
+        },
+        "no_wait": no_wait,
+    })
 
 
-def create_log_analytics_workspace_table_restore(client, resource_group_name, workspace_name, table_name,
+def create_log_analytics_workspace_table_restore(cmd, resource_group_name, workspace_name, table_name,
                                                  start_restore_time, end_restore_time, restore_source_table,
                                                  no_wait=False):
-    restored_logs = RestoredLogs(start_restore_time=start_restore_time,
-                                 end_restore_time=end_restore_time,
-                                 source_table=restore_source_table)
-    table = Table(restored_logs=restored_logs)
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
-                       workspace_name, table_name, table)
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
+
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "table_name": table_name,
+        "workspace_name": workspace_name,
+        "restore": {
+            "start_restore_time": start_restore_time,
+            "end_restore_time": end_restore_time,
+            "source_table": restore_source_table,
+        },
+        "no_wait": no_wait,
+    })
 
 
-def update_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns=[],
+def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_name, table_name, columns=None,
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
-    columns_list = [] if columns else None
-    for col in columns:
-        if '=' in col:
-            n, t = col.split('=', 1)
-            if t.lower() not in [x.value.lower() for x in ColumnTypeEnum]:
-                raise InvalidArgumentValueError('InvalidArgumentValueError: "{}" is not a valid value for type_name. '
-                                                'Allowed values: string, int, long, real, boolean, dateTime, guid, '
-                                                'dynamic".'.format(t))
-        else:
-            raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
-        columns_list.append(Column(name=n, type=t))
-    schema = None
-    if columns or description is not None:
-        schema = Schema(name=table_name, columns=columns_list, description=description)
-    table = Table(retention_in_days=retention_in_days,
-                  total_retention_in_days=total_retention_in_days,
-                  schema=schema,
-                  plan=plan
-                  )
-    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, workspace_name, table_name, table)
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Update
+
+    columns_list = None
+    if columns:
+        columns_list = []
+        for col in columns:
+            if '=' in col:
+                n, t = col.split('=', 1)
+            else:
+                raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
+            columns_list.append({"name":n, "type":t})
+
+    command_args = {
+        "resource_group": resource_group_name,
+        "table_name": table_name,
+        "workspace_name": workspace_name,
+        "no_wait": no_wait,
+    }
+    if retention_in_days is not None:
+        command_args["retention_time"] = retention_in_days
+    if total_retention_in_days is not None:
+        command_args["total_retention_time"] = total_retention_in_days
+    if plan is not None:
+        command_args["plan"] = plan
+    if columns_list or description is not None:
+        command_args["schema"] = {"name": table_name}
+    if columns_list is not None:
+        command_args["schema"]["columns"] = columns_list
+    if description is not None:
+        command_args["schema"]["description"] = description
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
