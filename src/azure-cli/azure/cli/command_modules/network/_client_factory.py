@@ -36,10 +36,6 @@ def cf_ddos_protection_plans(cli_ctx, _):
     return network_client_factory(cli_ctx).ddos_protection_plans
 
 
-def cf_endpoint_services(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_endpoint_services
-
-
 def cf_express_route_circuit_authorizations(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_authorizations
 
@@ -180,24 +176,6 @@ def cf_service_aliases(cli_ctx, _):
     return network_client_factory(cli_ctx).available_service_aliases
 
 
-def cf_traffic_manager_mgmt_profiles(cli_ctx, _):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).profiles
-
-
-def cf_traffic_manager_mgmt_endpoints(cli_ctx, _):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).endpoints
-
-
-def cf_tm_geographic(cli_ctx, _):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).geographic_hierarchies
-
-
 def cf_dns_references(cli_ctx, _):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -222,14 +200,6 @@ def cf_virtual_router(cli_ctx, _):
 
 def cf_virtual_hub(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_hubs
-
-
-def cf_virtual_hub_bgp_connection(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_hub_bgp_connection
-
-
-def cf_virtual_hub_bgp_connections(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_hub_bgp_connections
 
 
 def cf_virtual_router_peering(cli_ctx, _):

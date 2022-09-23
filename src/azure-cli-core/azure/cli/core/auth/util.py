@@ -37,18 +37,23 @@ def aad_error_handler(error, **kwargs):
         # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
         # we let the user explicitly log in to AAD with MSAL.
         "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
-        else "To re-authenticate, please run:\n{}").format(login_command)
+        else "Interactive authentication is needed. Please run:\n{}").format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(error_description, recommendation=login_message)
+    raise AuthenticationError(error_description, msal_error=error, recommendation=login_message)
 
 
-def _generate_login_command(scopes=None):
+def _generate_login_command(scopes=None, claims=None):
     login_command = ['az login']
 
     # Rejected by Conditional Access policy, like MFA
     if scopes:
         login_command.append('--scope {}'.format(' '.join(scopes)))
+
+    # Rejected by CAE
+    if claims:
+        # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
+        return 'az logout\n' + ' '.join(login_command)
 
     return ' '.join(login_command)
 

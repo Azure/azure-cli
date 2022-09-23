@@ -99,23 +99,25 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def test_mysql_flexible_server_check_name_availability_fallback_mgmt(self, resource_group):
         self._test_flexible_server_check_name_availability_fallback_mgmt('mysql', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_restore_mgmt(self, resource_group):
         self._test_flexible_server_restore_mgmt('postgres', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_restore_mgmt(self, resource_group):
         self._test_flexible_server_restore_mgmt('mysql', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_georestore_mgmt(self, resource_group):
         self._test_flexible_server_georestore_mgmt('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_georestore_update_mgmt(self, resource_group):
+        self._test_flexible_server_georestore_update_mgmt('mysql', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -329,7 +331,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-        sleep(max(0, seconds_to_wait + 180))
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
 
         # default vnet resources
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
@@ -413,7 +415,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'postgres':
             location = self.postgres_location
         elif database_engine == 'mysql':
-            location = 'northeurope'
+            location = self.mysql_location
             target_location = 'westeurope'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -516,6 +518,43 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
+
+    def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
+            target_location = 'westeurope'
+
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
+
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+
+        result = self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
+                          .format(database_engine, resource_group, source_server),
+                          checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')]).get_output_in_json()
+
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = result['backup']['earliestRestoreDate']
+        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
+
+        self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {}'
+                 .format(database_engine, resource_group, target_location, target_server, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
+
+        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Disabled'
+                 .format(database_engine, resource_group, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
 
     def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name):
         key_name = self.create_random_name('rdbmskey', 32)
@@ -1165,33 +1204,28 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_2')
@@ -1623,7 +1657,6 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     def test_postgres_flexible_server_existing_private_dns_zone(self, server_resource_group, vnet_resource_group):
         self._test_flexible_server_existing_private_dns_zone('postgres', server_resource_group, vnet_resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location, parameter_name='server_resource_group')
     @ResourceGroupPreparer(location=mysql_location, parameter_name='vnet_resource_group')
@@ -1637,7 +1670,6 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     def test_postgres_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
         self._test_flexible_server_new_private_dns_zone('postgres', server_resource_group, vnet_resource_group, dns_resource_group)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location, parameter_name='server_resource_group')
     @ResourceGroupPreparer(location=mysql_location, parameter_name='vnet_resource_group')

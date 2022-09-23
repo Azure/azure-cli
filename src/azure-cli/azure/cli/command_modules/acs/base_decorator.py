@@ -12,7 +12,6 @@ from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
-from msrest import Serializer
 
 logger = get_logger(__name__)
 
@@ -86,16 +85,6 @@ class BaseAKSModels:
         """
         for model_name, model_class in self.models_dict.items():
             setattr(self, model_name, model_class)
-
-    def serialize(self, data: Any, model_type: str) -> Dict:
-        """Serialize the data according to the provided model type.
-
-        :return: dictionary
-        """
-        if self.__serializer is None:
-            self.__serializer = Serializer(self.models_dict)
-        # will also perfrom client side validation
-        return self.__serializer.body(data, model_type)
 
 
 class BaseAKSParamDict:

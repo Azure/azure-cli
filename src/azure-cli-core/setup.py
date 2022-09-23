@@ -51,7 +51,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.10.0',
     'msal-extensions~=1.0.0',
-    'msal==1.18.0b1',
+    'msal[broker]==1.20.0b1',
     'msrestazure~=0.6.4',
     'packaging>=20.9,<22.0',
     'paramiko>=2.0.8,<3.0.0',
@@ -79,6 +79,6 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.6.0',
+    python_requires='>=3.7.0',
     package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )
