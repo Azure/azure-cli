@@ -14,6 +14,7 @@ from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspac
     Create as _WorkspaceDataExportCreate, \
     Update as _WorkspaceDataExportUpdate
 
+
 def list_deleted_log_analytics_workspaces(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -21,16 +22,23 @@ def list_deleted_log_analytics_workspaces(client, resource_group_name=None):
 
 
 def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=None, no_wait=False):
-    deleted_workspaces_client = _log_analytics_client_factory(cmd.cli_ctx).deleted_workspaces
-    workspace_client = _log_analytics_client_factory(cmd.cli_ctx).workspaces
-    deleted_workspaces = list(list_deleted_log_analytics_workspaces(deleted_workspaces_client, resource_group_name))
-    for deleted_workspace in deleted_workspaces:
-        if deleted_workspace.name.lower() == workspace_name.lower():
-            workspace_instance = Workspace(location=deleted_workspace.location)
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace import Create, \
+        ListDeletedWorkspaces
 
-            return sdk_no_wait(no_wait, workspace_client.begin_create_or_update,
-                               _parse_id(deleted_workspace.id)['resource-group'],
-                               workspace_name, workspace_instance)
+    deleted_workspaces = ListDeletedWorkspaces(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name
+    })
+
+    for deleted_workspace in deleted_workspaces:
+        if deleted_workspace['name'].lower() == workspace_name.lower():
+            resource_group_name = _parse_id(deleted_workspace['id'])['resource-group']
+            location = deleted_workspace['location']
+            return Create(cli_ctx=cmd.cli_ctx)(command_args={
+                "workspace_name": deleted_workspace['name'],
+                "resource_group": resource_group_name,
+                "location": location,
+                "no_wait": no_wait,
+            })
 
     raise CLIError('{} is not a deleted workspace and you can only recover a deleted workspace within 14 days.'
                    .format(workspace_name))

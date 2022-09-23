@@ -336,7 +336,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_metric_alert_condition', custom_command_type=alert_custom,
                          validator=validate_metrics_alert_condition, is_preview=True)
 
-    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+    with self.command_group('monitor log-analytics workspace', custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
 
     with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
