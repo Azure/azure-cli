@@ -8,7 +8,7 @@ expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPAC
 
 aggregation         : WORD WHITESPACE ;
 
-namespace           : (NUMBER | WORD | '/' | '.')+;
+namespace           : (NUMBER | WORD | '/' | '.' | '-')+;
 
 metric              : (NUMBER | WORD | WHITESPACE | '.' | '/' | '_' | '\\' | ':' | '%' | '-' | ',' | '|')+;
 

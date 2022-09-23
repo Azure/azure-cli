@@ -5,6 +5,7 @@
 
 # pylint: disable=protected-access
 
+import copy
 import os
 from argparse import Action
 from collections import OrderedDict
@@ -117,7 +118,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            data = cls._schema._blank
+            data = copy.deepcopy(cls._schema._blank)
 
         if isinstance(data, str):
             # transfer string into correct data
@@ -145,7 +146,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
-            dest_ops.add(cls._schema._blank, *prefix_keys)
+            dest_ops.add(copy.deepcopy(cls._schema._blank), *prefix_keys)
         else:
             assert isinstance(values, list)
             for _, key_parts, value in cls.decode_values(values):
@@ -209,7 +210,7 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            data = cls._schema._blank
+            data = copy.deepcopy(cls._schema._blank)
 
         if data is None:
             if cls._schema._nullable:
@@ -236,7 +237,7 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            data = cls._schema._blank
+            data = copy.deepcopy(cls._schema._blank)
 
         if data is None:
             if cls._schema._nullable:
@@ -284,7 +285,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
-            dest_ops.add(cls._schema._blank, *prefix_keys)
+            dest_ops.add(copy.deepcopy(cls._schema._blank), *prefix_keys)
         else:
             assert isinstance(values, list)
             ops = []
@@ -340,7 +341,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            data = cls._schema._blank
+            data = copy.deepcopy(cls._schema._blank)
 
         if data is None:
             if cls._schema._nullable:
@@ -361,9 +362,29 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
 
 
 class AAZGenericUpdateAction(Action):  # pylint: disable=too-few-public-methods
-    DEST = '_generic_update_args'
+    DEST = 'generic_update_args'
+    ACTION_NAME = None
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not getattr(namespace, self.DEST, None):
-            setattr(namespace, self.DEST, [])
-        getattr(namespace, self.DEST).append((option_string, values))
+            setattr(namespace, self.DEST, {"actions": []})
+        getattr(namespace, self.DEST)["actions"].append((self.ACTION_NAME or option_string, values))
+
+
+class AAZGenericUpdateForceStringAction(AAZSimpleTypeArgAction):
+    DEST = 'generic_update_args'
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        dest_ops = AAZArgActionOperations()
+        try:
+            self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
+        except AAZShowHelp as aaz_help:
+            # show help message
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
+
+        if not getattr(namespace, self.DEST, None):
+            setattr(namespace, self.DEST, {"actions": []})
+        dest_ops.apply(getattr(namespace, self.DEST), dest='force_string')

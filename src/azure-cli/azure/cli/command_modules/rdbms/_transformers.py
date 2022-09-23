@@ -142,3 +142,17 @@ def table_transform_output_parameters(result):
         table_result.append(new_entry)
 
     return table_result
+
+
+def transform_backup(result):
+    if result.type == 'Microsoft.DBforMySQL/flexibleServers/backups' and len(result.name) > 62:
+        result.name = result.name[62:]
+
+    if hasattr(result, 'system_data'):
+        delattr(result, 'system_data')
+
+    return result
+
+
+def transform_backups_list(results):
+    return [transform_backup(result) for result in results]

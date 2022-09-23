@@ -50,6 +50,15 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
                  checks=[self.check('status', "enabled")])
 
+        # test soft-delete
+        self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
+        self.cmd('acr config soft-delete show -r {}'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
         # test credential module
         credential = self.cmd(
             'acr credential show -n {} -g {}'.format(registry_name, resource_group)).get_output_in_json()
@@ -261,7 +270,7 @@ class AcrCommandsTests(ScenarioTest):
         # create a resource group for the source registry
         self.cmd('group create -n {source_registry_rg} -l {source_loc}')
 
-        # create a source registry 
+        # create a source registry
         self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
                  checks=[self.check('name', '{source_registry_name}'),
                          self.check('location', '{source_loc}'),

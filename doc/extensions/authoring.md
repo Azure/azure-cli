@@ -1,6 +1,6 @@
 # Authoring
 
-The commands for Command modules and Extensions are authored in the same way. See [Authoring Commands](https://github.com/Azure/azure-cli/blob/master/doc/authoring_command_modules/authoring_commands.md) for authoring guidance.
+The commands for Command modules and Extensions are authored in the same way. See [Authoring Commands](https://github.com/Azure/azure-cli/blob/main/doc/authoring_command_modules/authoring_commands.md) for authoring guidance.
 
 ## Common Flows
 
@@ -41,7 +41,7 @@ Address comments as appropriate and consult the Azure CLI team if something is u
 
 ### Publish
 
-**For the extension whose source code is hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions)**, we will release for you once your code is merged into `master` branch. You must not update [index.json](https://github.com/Azure/azure-cli-extensions/blob/master/src/index.json) manually in this case.
+**For the extension whose source code is hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions)**, we will release for you once your code is merged into `main` branch. You must not update [index.json](https://github.com/Azure/azure-cli-extensions/blob/main/src/index.json) manually in this case.
 
 We detect Python package version via `python setup.py --version`. Only when the version is upgraded, the release process is triggered to help you build and upload the extension WHL file, then update the `index.json` automatically. Subsequently, a PR with newer extension info will be created to update `index.json`, we will merge it once CI passes. Then, the new extension is published.
 
@@ -115,12 +115,12 @@ See [Extension Metadata](metadata.md) for more information.
 ### What can I import in my extension?
 
 - You can import any of the modules available inside of azure-cli-core.
-- You can also import any of its dependencies (see [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/master/src/azure-cli-core/setup.py)).
+- You can also import any of its dependencies (see [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/main/src/azure-cli-core/setup.py)).
 - You can choose to add your own dependencies if required but keep the next point in mind...
 
 ### Limit dependencies in setup.py
 
-- Before adding a dependency to your setup.py, check that it's not already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/master/src/azure-cli-core/setup.py).
+- Before adding a dependency to your setup.py, check that it's not already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/main/src/azure-cli-core/setup.py).
 - Azure SDK or Azure Management SDK dependencies may be overridden by the versions installed as requirements of azure-cli-core. If you use any, test carefully, gracefully handle API changes, and be prepared to release updates. You might also consider rebasing the libraries under a different namespace (besides `azure`) to avoid conflicting with core Azure CLI functionality. You can use [autorest](https://github.com/azure/autorest) to generate your SDK into a package that isn't under the `azure` directory.
 
 ### How do I know I'm using my dev extension(s)?

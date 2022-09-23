@@ -1315,9 +1315,13 @@ def _validate_trusted_launch(namespace):
     if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
         return
 
-    if not namespace.enable_vtpm or not namespace.enable_secure_boot:
-        logger.warning('It is recommended to specify "--enable-secure-boot True" and "--enable-secure-boot True"'
-                       ' to receive the full suite of security features that comes with Trusted Launch.')
+    if not namespace.enable_secure_boot:
+        logger.warning('It is recommended to specify "--enable-secure-boot True" to receive the full suite of security'
+                       ' features that comes with Trusted Launch. Please note that the "--enable-secure-boot" will'
+                       ' be enabled by default in Microsoft Ignite Event (around November)')
+
+    if namespace.enable_vtpm is None:
+        namespace.enable_vtpm = True
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -2151,9 +2155,8 @@ def _disk_encryption_set_format(cmd, namespace, name):
 
 
 def process_ppg_create_namespace(namespace):
-    """
-    The availability zone can be provided only when an intent is provided
-    """
+    validate_tags(namespace)
+    # The availability zone can be provided only when an intent is provided
     if namespace.zone and not namespace.intent_vm_sizes:
         raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
                                            'Please use parameter --intent-vm-sizes to specify possible sizes of '
@@ -2162,6 +2165,7 @@ def process_ppg_create_namespace(namespace):
 
 
 def process_image_version_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     process_gallery_image_version_namespace(cmd, namespace)
     process_image_resource_id_namespace(namespace)
 # endregion
