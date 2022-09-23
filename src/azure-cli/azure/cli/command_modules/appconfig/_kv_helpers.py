@@ -435,7 +435,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                 logger.warning('Ignoring app configuration reference with Key "%s" and Value "%s"', key, value)
                 continue
 
-            if validate_import_key(key) :
+            if validate_import_key(key):
                 tags = {AppServiceConstants.APPSVC_SLOT_SETTING_KEY: str(item['slotSetting']).lower()} if item['slotSetting'] else {}
 
                 # Value will look like one of the following if it is a KeyVault reference:
