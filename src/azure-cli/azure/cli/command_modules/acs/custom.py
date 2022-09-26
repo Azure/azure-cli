@@ -2514,12 +2514,16 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 # the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
     arch = platform.processor().lower()
-    logger.warning(
-        "The detected arch is %s, which may not match the actual situation due to translation and other reasons. "
-        "If there is any problem, please download the appropriate binary by yourself.", arch)
+    formatted_arch = "amd64"
     if "arm" in arch:
-        return "arm64"
-    return "amd64"
+        formatted_arch == "arm64"
+    logger.warning(
+        "The detected arch is %s, would be treated as %s, which may not match the actual situation due to translation "
+        "and other reasons. If there is any problem, please download the appropriate binary by yourself.",
+        arch,
+        formatted_arch,
+    )
+    return formatted_arch
 
 
 # install kubectl
