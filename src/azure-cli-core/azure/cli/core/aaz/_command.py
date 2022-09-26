@@ -14,7 +14,8 @@ from knack.experimental import ExperimentalItem
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
-from ._arg import AAZArgumentsSchema, AAZBoolArg
+from ._arg import AAZArgumentsSchema, AAZBoolArg, \
+    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
@@ -79,18 +80,23 @@ class AAZCommand(CLICommand):
                 options=['--no-wait'],
                 help='Do not wait for the long-running operation to finish.'
             )
-        # TODO: Implement Generic Update
-        # if cls.AZ_SUPPORT_GENERIC_UPDATE:
-        #     schema.generic_update_add = AAZGenericUpdateAddArg()
-        #     schema.generic_update_set = AAZGenericUpdateSetArg()
-        #     schema.generic_update_remove = AAZGenericUpdateRemoveArg()
-        #     schema.generic_update_force_string = AAZGenericUpdateForceString()
+        if cls.AZ_SUPPORT_GENERIC_UPDATE:
+            schema.generic_update_add = AAZGenericUpdateAddArg()
+            schema.generic_update_set = AAZGenericUpdateSetArg()
+            schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+            schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
         return schema
 
-    def __init__(self, loader):
+    def __init__(self, loader=None, cli_ctx=None, **kwargs):
+        """
+
+        :param loader: it is required for command registered in the command table
+        :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
+        """
+        assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
         super().__init__(
-            cli_ctx=loader.cli_ctx,
+            cli_ctx=cli_ctx or loader.cli_ctx,
             name=self.AZ_NAME,
             confirmation=self.AZ_CONFIRMATION,
             arguments_loader=self._cli_arguments_loader,
@@ -98,6 +104,7 @@ class AAZCommand(CLICommand):
             # knack use cmd.handler to check whether it is group or command,
             # however this property will not be used in AAZCommand. So use True value for it.
             # https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
+            **kwargs
         )
         self.command_kwargs = {}
 
@@ -127,7 +134,12 @@ class AAZCommand(CLICommand):
 
     def _handler(self, command_args):
         # command_args will be parsed by AAZCommandCtx
-        self.ctx = AAZCommandCtx(cli_ctx=self.cli_ctx, schema=self.get_arguments_schema(), command_args=command_args)
+        self.ctx = AAZCommandCtx(
+            cli_ctx=self.cli_ctx,
+            schema=self.get_arguments_schema(),
+            command_args=command_args,
+            no_wait_arg='no_wait' if self.supports_no_wait else None,
+        )
         self.ctx.format_args()
 
     def _cli_arguments_loader(self):
@@ -190,11 +202,15 @@ class AAZCommand(CLICommand):
 
         return value.to_serialized_data(processor=processor)
 
-    @staticmethod
-    def build_lro_poller(executor, extract_result):
+    def build_lro_poller(self, executor, extract_result):
         """ Build AAZLROPoller instance to support long running operation
         """
-        return AAZLROPoller(polling_generator=executor, result_callback=extract_result)
+        polling_generator = executor()
+        if self.ctx.lro_no_wait:
+            # run until yield the first polling
+            _ = next(polling_generator)
+            return None
+        return AAZLROPoller(polling_generator=polling_generator, result_callback=extract_result)
 
     def build_paging(self, executor, extract_result):
         """ Build AAZPaged instance to support paging
@@ -204,6 +220,26 @@ class AAZCommand(CLICommand):
             executor()
 
         return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
+
+
+class AAZWaitCommand(AAZCommand):
+    """Support wait command"""
+
+    def __init__(self, loader):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        super().__init__(loader)
+
+        # add wait args in commands
+        for param_name, argtype in WaitCommandOperation.wait_args().items():
+            self.arguments[param_name] = argtype
+
+    def __call__(self, *args, **kwargs):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        return WaitCommandOperation.wait(
+            *args, **kwargs,
+            cli_ctx=self.cli_ctx,
+            getter=lambda **command_args: self._handler(command_args)
+        )
 
 
 def register_command_group(

@@ -12,18 +12,24 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_flexible_db,
     cf_mysql_flexible_replica,
     cf_mysql_flexible_location_capabilities,
+    cf_mysql_flexible_log,
+    cf_mysql_flexible_backups,
+    cf_mysql_flexible_adadmin,
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
     cf_postgres_flexible_db,
-    cf_postgres_flexible_location_capabilities)
+    cf_postgres_flexible_location_capabilities,
+    cf_postgres_flexible_backups)
 
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
     postgres_table_transform_output_list_skus,
     mysql_table_transform_output_list_skus,
-    table_transform_output_parameters)
+    table_transform_output_parameters,
+    transform_backup,
+    transform_backups_list)
 
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
@@ -62,6 +68,21 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_mysql_flexible_location_capabilities
     )
 
+    mysql_flexible_log_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LogFilesOperations.{}',
+        client_factory=cf_mysql_flexible_log
+    )
+
+    mysql_flexible_backups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupsOperations.{}',
+        client_factory=cf_mysql_flexible_backups
+    )
+
+    mysql_flexible_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AzureADAdministratorsOperations.{}',
+        client_factory=cf_mysql_flexible_adadmin
+    )
+
     postgres_flexible_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServersOperations.{}',
         client_factory=cf_postgres_flexible_servers
@@ -85,6 +106,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_location_capabilities_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms..postgresql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_postgres_flexible_location_capabilities
+    )
+
+    postgres_flexible_backups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#BackupsOperations.{}',
+        client_factory=cf_postgres_flexible_backups
     )
 
     # MERU COMMANDS
@@ -166,6 +192,11 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')
 
+    with self.command_group('postgres flexible-server backup', postgres_flexible_backups_sdk,
+                            client_factory=cf_postgres_flexible_backups) as g:
+        g.command('list', 'list_by_server', transform=transform_backups_list)
+        g.show_command('show', 'get', transform=transform_backup)
+
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
@@ -183,6 +214,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
+        g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=flexible_server_custom_common)
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
 
@@ -236,3 +268,32 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')
+
+    with self.command_group('mysql flexible-server server-logs', mysql_flexible_log_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_log) as g:
+        g.custom_command('list', 'flexible_server_log_list')
+        g.custom_command('download', 'flexible_server_log_download')
+
+    with self.command_group('mysql flexible-server backup', mysql_flexible_backups_sdk,
+                            client_factory=cf_mysql_flexible_backups) as g:
+        g.command('create', 'put', transform=transform_backup)
+        g.command('list', 'list_by_server', transform=transform_backups_list)
+        g.show_command('show', 'get', transform=transform_backup)
+
+    with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_servers) as g:
+        g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
+        g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'flexible_server_identity_show')
+        g.custom_command('list', 'flexible_server_identity_list')
+
+    with self.command_group('mysql flexible-server ad-admin', mysql_flexible_adadmin_sdk,
+                            custom_command_type=flexible_server_custom_common,
+                            client_factory=cf_mysql_flexible_adadmin) as g:
+        g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
+        g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('list', 'flexible_server_ad_admin_list')
+        g.custom_show_command('show', 'flexible_server_ad_admin_show')
+        g.custom_wait_command('wait', 'flexible_server_ad_admin_show')

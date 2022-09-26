@@ -135,11 +135,6 @@ short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testserver' to a specific point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver --restore-time "2017-06-15T13:10:00Z"
-  - name: Restore 'testserver2' to 'testserverNew', where 'testserverNew' is in a different resource group from 'testserver2'.
-    text: |
-        az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
-          --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testserver2" \\
-          --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testserver' to current point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
 """
@@ -403,16 +398,16 @@ examples:
 
 helps['postgres flexible-server deploy'] = """
 type: group
-short-summary: Enable and run github action workflow for PostgreSQL server
+short-summary: Enable and run GitHub Actions workflow for PostgreSQL server
 """
 
 helps['postgres flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for PostgreSQL server.
+short-summary: Create GitHub Actions workflow file for PostgreSQL server.
 examples:
-  - name: Create github action workflow file for PostgreSQL server.
+  - name: Create GitHub Actions workflow file for PostgreSQL server.
     text: az postgres flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
-  - name: Create github action workflow file for PostgreSQL server and push it to the remote repository
+  - name: Create GitHub Actions workflow file for PostgreSQL server and push it to the remote repository
     text: az postgres flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
 """
 
@@ -422,4 +417,25 @@ short-summary: Run an existing workflow in your github repository
 examples:
   - name: Run an existing workflow in your github repository
     text: az postgres flexible-server deploy run --action-name testAction --branch userBranch
+"""
+
+helps['postgres flexible-server backup'] = """
+type: group
+short-summary: Manage flexible server backups.
+"""
+
+helps['postgres flexible-server backup list'] = """
+type: command
+short-summary: List all the backups for a given server.
+examples:
+  - name: List all backups for 'testsvr'.
+    text: az postgres flexible-server backup list -g testgroup -n testsvr
+"""
+
+helps['postgres flexible-server backup show'] = """
+type: command
+short-summary: Show the details of a specific backup for a given server.
+examples:
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
 """

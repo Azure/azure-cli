@@ -39,7 +39,8 @@ from ._validators import (
     validate_expiration_time,
     validate_manifest_id,
     validate_repo_id,
-    validate_repository
+    validate_repository,
+    validate_permissive_repo_id
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
@@ -47,14 +48,21 @@ repo_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_repo_id,
-    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
+    help="A fully qualified repository specifier such as 'myregistry.azurecr.io/hello-world'."
+)
+
+permissive_repo_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_permissive_repo_id,
+    help="A fully qualified repository specifier such as 'myregistry.azurecr.io/hello-world'. May include a tag such as myregistry.azurecr.io/hello-world:latest"
 )
 
 manifest_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_manifest_id,
-    help="A fully qualified manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest'."
+    help="A fully qualified manifest specifier such as 'myregistry.azurecr.io/hello-world:latest'."
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -126,6 +134,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
         c.argument('no_wait', help="Do not wait for the import to complete and return immediately after queuing the import.", action='store_true')
 
+    with self.argument_context('acr config authentication-as-arm') as c:
+        c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
+        c.argument('status', help="Indicate whether authentication-as-arm is enabled.", arg_type=get_enum_type(PolicyStatus))
+
     with self.argument_context('acr config content-trust') as c:
         c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
         c.argument('status', help="Indicates whether content-trust is enabled.", arg_type=get_enum_type(PolicyStatus))
@@ -135,6 +147,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
         c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', arg_type=get_enum_type(RetentionType))
+
+    with self.argument_context('acr config soft-delete') as c:
+        c.argument('status', help="Indicates whether soft-delete policy is enabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('days', type=int, help='The number of days to retain a soft-deleted manifest or tag after which it gets purged (Range: 1 to 90). Default is 7.')
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
@@ -188,6 +205,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr manifest update-metadata') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
+    with self.argument_context('acr manifest list-deleted') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest list-deleted-tags') as c:
+        c.positional('perm_repo_id', arg_type=permissive_repo_id_type)
+        c.argument('permissive_repo', options_list=['--name', '-n'], help="The name of the repository. May include a tag in the format 'name:tag'")
+
     with self.argument_context('acr manifest metadata show') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
 
@@ -196,6 +220,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr manifest metadata update') as c:
         c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest restore') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('digest', options_list=['--digest', '-d'], help="The digest of the manifest such as 'sha256@abc123'.")
+        c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
+        c.argument('manifest_spec', options_list=['--name', '-n'], help="The name of the artifact. May include a tag in the format 'name:tag'.")
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
@@ -371,8 +401,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('yes', help='Agree to the license of Helm, and do not prompt for confirmation.')
 
     with self.argument_context('acr network-rule') as c:
-        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-        c.argument('vnet_name', help='Name of a virtual network.')
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.', deprecate_info=c.deprecate(hide=True))
+        c.argument('vnet_name', help='Name of a virtual network.', deprecate_info=c.deprecate(hide=True))
         c.argument('ip_address', help='IPv4 address or CIDR range.')
 
     with self.argument_context('acr check-health') as c:
@@ -391,7 +421,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repository', options_list=['--remove-repository', c.deprecate(target='--remove', redirect='--remove-repository', hide=True)], nargs='+', action='append', required=False,
-                   help='respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+                   help='repository permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('add_gateway', options_list=['--add-gateway'], nargs='+', action='append', required=False,
                    help='gateway permissions to be added. Use the format "--add-gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
         c.argument('remove_gateway', options_list=['--remove-gateway'], nargs='+', action='append', required=False,
@@ -505,13 +535,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repos', options_list=['--remove'], nargs='*',
-                   help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+                   help='repository permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
     with self.argument_context('acr connected-registry repo') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repos', options_list=['--remove'], nargs='*',
-                   help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+                   help='repository permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
 
 def _get_helm_default_install_location():

@@ -10,6 +10,7 @@ import argparse
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -658,8 +659,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
         # content_md5 value to bytearray. And track2 SDK will serialize it into the right value with str type in header.
         if is_storagev2(prefix):
             if process_md5 and new_props.content_md5:
-                from .track2_util import _str_to_bytearray
-                new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
+                # During update, the content_md5 might be bytearray, we do not need to convert again.
+                if not isinstance(new_props.content_md5, bytearray):
+                    from .track2_util import _str_to_bytearray
+                    new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
 
         ns['content_settings'] = new_props
 
@@ -1304,6 +1307,8 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
     namespace.source = os.path.realpath(namespace.source)
     namespace.share_name = namespace.destination
+    # Ignore content_md5 for batch upload
+    namespace.content_md5 = None
 
 
 def process_file_download_batch_parameters(cmd, namespace):
@@ -1814,7 +1819,7 @@ def validate_encryption_scope_parameter(ns):
             (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
                        "--prevent-encryption-scope-override to set encryption scope information "
-                       "when creating container.")
+                       "when creating container/file system.")
 
 
 def validate_encryption_scope_client_params(ns):
@@ -2206,3 +2211,65 @@ def validate_blob_arguments(namespace):
     if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
         raise RequiredArgumentMissingError(
             "Please specify --blob-url or combination of blob name, container name and storage account arguments.")
+
+
+def encode_deleted_path(namespace):
+    from urllib.parse import quote
+    namespace.deleted_path_name = quote(namespace.deleted_path_name)
+
+
+def validate_fs_file_set_expiry(namespace):
+    try:
+        namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
+    except ValueError:
+        pass
+
+
+# pylint: disable=too-few-public-methods
+class PermissionScopeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.permission_scope:
+            namespace.permission_scope = []
+        PermissionScope = namespace._cmd.get_models('PermissionScope')
+        try:
+            permissions, service, resource_name = '', '', ''
+            for s in values:
+                k, v = s.split('=', 1)
+                if k == "permissions":
+                    permissions = v
+                elif k == "service":
+                    service = v
+                elif k == "resource-name":
+                    resource_name = v
+                else:
+                    raise UnrecognizedArgumentError(
+                        'key error: key must be one of permissions, service, resource-name for --permission-scope')
+        except (ValueError, TypeError, IndexError):
+            raise CLIError('usage error: --permission-scope [Key=Value ...]')
+        namespace.permission_scope.append(PermissionScope(
+            permissions=permissions,
+            service=service,
+            resource_name=resource_name
+        ))
+
+
+# pylint: disable=too-few-public-methods
+class SshPublicKeyAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.ssh_authorized_key:
+            namespace.ssh_authorized_key = []
+        SshPublicKey = namespace._cmd.get_models('SshPublicKey')
+        try:
+            description, key = '', ''
+            for s in values:
+                k, v = s.split('=', 1)
+                if k == "description":
+                    description = v
+                elif k == "key":
+                    key = v
+                else:
+                    raise UnrecognizedArgumentError(
+                        'key error: key must be one of description, key for --ssh-authorized-key')
+        except (ValueError, TypeError, IndexError):
+            raise CLIError('usage error: --ssh-authorized-key [Key=Value ...]')
+        namespace.ssh_authorized_key.append(SshPublicKey(description=description, key=key))

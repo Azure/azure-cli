@@ -9,7 +9,7 @@ from datetime import datetime
 
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import AzureResponseError
+from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
                                                     normalize_blob_file_path, check_precondition_success)
@@ -408,7 +408,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
-                                progress_callback=None, **kwargs):
+                                progress_callback=None, overwrite=False, **kwargs):
     @check_precondition_success
     def _download_blob(*args, **kwargs):
         blob = download_blob(*args, **kwargs)
@@ -441,7 +441,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
     results = []
     for index, blob_normed in enumerate(blobs_to_download):
-        from azure.cli.core.azclierror import FileOperationError
         # add blob name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
@@ -451,13 +450,13 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         destination_path = os.path.join(destination, os.path.normpath(blob_normed))
         destination_folder = os.path.dirname(destination_path)
         # Failed when there is same name for file and folder
-        if os.path.isfile(destination_path) and os.path.exists(destination_folder):
+        if os.path.isfile(destination_path) and os.path.exists(destination_folder) and not overwrite:
             raise FileOperationError("%s already exists in %s. Please rename existing file or choose another "
-                                     "destination folder. ")
+                                     "destination folder. " % (blob_normed, destination))
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
         include, result = _download_blob(client=blob_client, file_path=destination_path,
-                                         progress_callback=progress_callback, **kwargs)
+                                         progress_callback=progress_callback, overwrite=overwrite, **kwargs)
         if include:
             results.append(result)
 
@@ -666,7 +665,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
 
 
 def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_range=None,
-                  progress_callback=None, **kwargs):
+                  progress_callback=None, overwrite=True, **kwargs):
     offset = None
     length = None
     if start_range is not None and end_range is not None:
@@ -678,6 +677,8 @@ def download_blob(client, file_path=None, open_mode='wb', start_range=None, end_
         kwargs['max_concurrency'] = 1
     download_stream = client.download_blob(offset=offset, length=length, **kwargs)
     if file_path:
+        if os.path.isfile(file_path) and not overwrite:
+            raise FileOperationError("%s already exists. Please rename existing file or use --overwrite" % (file_path))
         with open(file_path, open_mode) as stream:
             download_stream.readinto(stream)
         return download_stream.properties
@@ -925,12 +926,12 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
         raise CLIError(error_template.format(source_path, destination_container, ex))
 
 
-def show_blob_v2(cmd, client, lease_id=None, **kwargs):
-    blob = client.get_blob_properties(lease=lease_id, **kwargs)
+def show_blob_v2(cmd, client, **kwargs):
+    blob = client.get_blob_properties(**kwargs)
 
     page_ranges = None
     if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(lease=lease_id, **kwargs)
+        page_ranges = client.get_page_ranges(**kwargs)
 
     blob.page_ranges = page_ranges
 

@@ -3,6 +3,26 @@
 Release History
 ===============
 
+2.40.0
+++++++
+* `aaz`: Support using `cli_ctx` to initiate AAZCommand class (#23459)
+* `aaz`: Fix AAZBearerTokenCredentialPolicy to support MSIAuthenticationWrapper credential (#23471)
+* Allow adding dedicated key for collecting CLI Telemetry (#23530)
+* Add `az.ps1` entry script for PowerShell (#23514)
+* `aaz`: Support generic update arguments (#23701)
+* Add CLI survey invitation (#23460)
+
+2.39.0
+++++++
+* `az extension add`: Improve feedback shown to users when installation is unsuccessful (#22941)
+* `aaz`: Fix early exit for long running commands run with `--no-wait` parameter (#23092)
+* `aaz`: Feature Atomic Azure Command support argument validation (#23126)
+* `aaz`: Implement wait command (#23189)
+* `aaz`: Support blank value expression in `full value` of shorthand syntax (#23268)
+* `aaz`: Support `singular quota string` for special property names in `partial value` key of shorthand synatx (#23268)
+* `aaz`: Support `AAZDurationArg`, `AAZDateArg`, `AAZTimeArg`, `AAZDateTimeArg` and `AAZUuidArg` (#23280)
+* Support specifying `telemetry.push_interval_in_hours` to force push telemetry cache file (#23205)
+
 2.38.0
 ++++++
 * Shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)

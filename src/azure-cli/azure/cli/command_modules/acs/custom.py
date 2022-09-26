@@ -37,7 +37,7 @@ import yaml
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    cf_container_registry_service,
+    get_container_registry_client,
     cf_container_services,
     get_auth_management_client,
     get_graph_rbac_management_client,
@@ -46,7 +46,6 @@ from azure.cli.command_modules.acs._client_factory import (
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-    CONST_ACR_DOMAIN_NAME,
     CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_CANIPULL_IMAGE,
     CONST_CONFCOM_ADDON_NAME,
@@ -1533,6 +1532,13 @@ def aks_create(
     node_resource_group=None,
     enable_defender=False,
     defender_config=None,
+    disable_disk_driver=False,
+    disable_file_driver=False,
+    disable_snapshot_controller=False,
+    enable_azure_keyvault_kms=False,
+    azure_keyvault_kms_key_id=None,
+    azure_keyvault_kms_key_vault_network_access=None,
+    azure_keyvault_kms_key_vault_resource_id=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -1566,6 +1572,7 @@ def aks_create(
     vm_set_type=None,
     zones=None,
     ppg=None,
+    http_proxy_config=None,
     max_pods=0,
     enable_encryption_at_host=False,
     enable_ultra_ssd=False,
@@ -1575,6 +1582,8 @@ def aks_create(
     no_wait=False,
     yes=False,
     aks_custom_headers=None,
+    host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1638,6 +1647,17 @@ def aks_update(
     enable_defender=False,
     disable_defender=False,
     defender_config=None,
+    enable_disk_driver=False,
+    disable_disk_driver=False,
+    enable_file_driver=False,
+    disable_file_driver=False,
+    enable_snapshot_controller=False,
+    disable_snapshot_controller=False,
+    enable_azure_keyvault_kms=False,
+    disable_azure_keyvault_kms=False,
+    azure_keyvault_kms_key_id=None,
+    azure_keyvault_kms_key_vault_network_access=None,
+    azure_keyvault_kms_key_vault_resource_id=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -1649,6 +1669,7 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
+    http_proxy_config=None,
     no_wait=False,
     yes=False,
     aks_custom_headers=None,
@@ -2356,8 +2377,6 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
-    if not acr.endswith(CONST_ACR_DOMAIN_NAME):
-        acr = acr + CONST_ACR_DOMAIN_NAME
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
@@ -2548,7 +2567,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         if not found:
             # pylint: disable=logging-format-interpolation
             logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
+                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
                            'This is good for the current command session.\n'
                            '    2. Update system PATH environment variable by following '
                            '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
@@ -2972,6 +2991,8 @@ def aks_agentpool_add(
     linux_os_config=None,
     no_wait=False,
     aks_custom_headers=None,
+    host_group_id=None,
+    gpu_instance_profile=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3440,7 +3461,7 @@ def _ensure_aks_acr(cmd,
     if is_valid_resource_id(acr_name_or_id):
         try:
             parsed_registry = parse_resource_id(acr_name_or_id)
-            acr_client = cf_container_registry_service(
+            acr_client = get_container_registry_client(
                 cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
             registry = acr_client.registries.get(
                 parsed_registry['resource_group'], parsed_registry['name'])

@@ -41,17 +41,7 @@
     </Feature>
 
     <!--Custom action to propagate path env variable change-->
-    <Binary Id="PropagateEnvChangeExe" SourceFile=".\propagate_env_change\propagate_env_change.exe" />
-    <Property Id="WixQuietExecCmdLine" Value="propagate_env_change.exe"/>
-    <!--Ignoring the return value if case there is app-hang we can't control -->
-    <CustomAction Id="PropagateEnvChange"
-                  BinaryKey="PropagateEnvChangeExe"
-                  ExeCommand="propagate_env_change.exe"
-                  Execute="commit"
-                  Return="ignore"/>
-    <InstallExecuteSequence>
-      <Custom Action="PropagateEnvChange" Before="InstallFinalize" />
-    </InstallExecuteSequence>
+    <CustomActionRef Id="WixBroadcastEnvironmentChange" />
 
     <!-- User Interface -->
     <WixVariable Id="WixUILicenseRtf" Value="$(var.ProductResources)CLI_LICENSE.rtf"/>
@@ -60,6 +50,12 @@
 
     <UIRef Id="WixUI_Minimal"/>
     <UIRef Id="WixUI_ErrorProgressText"/>
+
+    <!-- Show message to restart any terminals only if the PATH is changed -->
+    <CustomAction Id="Set_WIXUI_EXITDIALOGOPTIONALTEXT" Property="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Please close and reopen any active terminal window to use Azure CLI." />
+    <InstallUISequence>
+      <Custom Action="Set_WIXUI_EXITDIALOGOPTIONALTEXT" After="CostFinalize">NOT Installed AND NOT WIX_UPGRADE_DETECTED</Custom>
+    </InstallUISequence>
 
   </Product>
 

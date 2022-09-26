@@ -1268,26 +1268,13 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
 
 
 def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_type=None):
-    from ._vm_utils import list_sku_info
+    from ._vm_utils import list_sku_info, is_sku_available
     result = list_sku_info(cmd.cli_ctx, location)
     # pylint: disable=too-many-nested-blocks
     if not show_all:
         available_skus = []
         for sku_info in result:
-            is_available = True
-            if sku_info.restrictions:
-                for restriction in sku_info.restrictions:
-                    if restriction.reason_code == 'NotAvailableForSubscription':
-                        # The attribute location_info is not supported in versions 2017-03-30 and earlier
-                        if cmd.supported_api_version(max_api='2017-03-30'):
-                            is_available = False
-                            break
-                        # This SKU is not available only if all zones are restricted
-                        if not (set(sku_info.location_info[0].zones or []) -
-                                set(restriction.restriction_info.zones or [])):
-                            is_available = False
-                            break
-            if is_available:
+            if is_sku_available(cmd, sku_info, zone):
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
@@ -1916,13 +1903,39 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     set_vm(cmd, vm)
 
 
-def detach_data_disk(cmd, resource_group_name, vm_name, disk_name):
-    # here we handle both unmanaged or managed disk
+def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
+    # here we handle unmanaged disk
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     # pylint: disable=no-member
     leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
     if len(vm.storage_profile.data_disks) == len(leftovers):
         raise CLIError("No disk with the name '{}' was found".format(disk_name))
+    vm.storage_profile.data_disks = leftovers
+    set_vm(cmd, vm)
+# endregion
+
+
+def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name, force_detach=None):
+    # here we handle managed disk
+    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    if not force_detach:
+        # pylint: disable=no-member
+        leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+        if len(vm.storage_profile.data_disks) == len(leftovers):
+            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+    else:
+        DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
+                                               operation_group='virtual_machines')
+        leftovers = vm.storage_profile.data_disks
+        is_contains = False
+        for d in leftovers:
+            if d.name.lower() == disk_name.lower():
+                d.to_be_detached = True
+                d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
+                is_contains = True
+                break
+        if not is_contains:
+            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
     vm.storage_profile.data_disks = leftovers
     set_vm(cmd, vm)
 # endregion
@@ -2479,7 +2492,7 @@ def vm_run_command_create(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -2553,7 +2566,7 @@ def vm_run_command_update(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -2600,10 +2613,13 @@ def vm_run_command_list(client,
                         vm_name=None,
                         expand=None,
                         location=None):
-    if resource_group_name or vm_name is not None:
-        return client.list_by_virtual_machine(resource_group_name=resource_group_name,
-                                              vm_name=vm_name,
-                                              expand=expand)
+
+    if not location and not (resource_group_name and vm_name):
+        raise RequiredArgumentMissingError("Please specify --location or specify --vm-name and --resource-group")
+
+    if vm_name:
+        return client.list_by_virtual_machine(resource_group_name=resource_group_name, vm_name=vm_name, expand=expand)
+
     return client.list(location=location)
 
 
@@ -2615,15 +2631,18 @@ def vm_run_command_show(client,
                         instance_view=False,
                         location=None,
                         command_id=None):
-    if resource_group_name or vm_name is not None or run_command_name is not None:
+
+    if not (resource_group_name and vm_name and run_command_name) and not (location and command_id):
+        raise RequiredArgumentMissingError(
+            "Please specify --location and --command-id or specify --vm-name, --resource-group and --run-command-name")
+
+    if vm_name:
         if instance_view:
             expand = 'instanceView'
-        return client.get_by_virtual_machine(resource_group_name=resource_group_name,
-                                             vm_name=vm_name,
-                                             run_command_name=run_command_name,
-                                             expand=expand)
-    return client.get(location=location,
-                      command_id=command_id)
+        return client.get_by_virtual_machine(resource_group_name=resource_group_name, vm_name=vm_name,
+                                             run_command_name=run_command_name, expand=expand)
+
+    return client.get(location=location, command_id=command_id)
 
 # endregion
 
@@ -2975,7 +2994,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
-                os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
+                os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
+                os_disk_delete_option=None, data_disk_delete_option=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3257,7 +3277,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
             v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
-            os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set)
+            os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
+            os_disk_delete_option=os_disk_delete_option)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -4039,7 +4060,7 @@ def vmss_run_command_create(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -4115,7 +4136,7 @@ def vmss_run_command_update(client,
     if protected_parameters is not None:
         auto_arg_name_num = 0
         run_command['protected_parameters'] = []
-        for p in parameters:
+        for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
             else:
@@ -4221,13 +4242,28 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 # from azure.mgmt.compute.models import Gallery, SharingProfile
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
-                           soft_delete=None, **kwargs):
+                           soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
+                           public_name_prefix=None, **kwargs):
     if permissions:
         if gallery.sharing_profile is None:
             SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
+        community_gallery_info = None
+        if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+            community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                          publisher_contact=publisher_contact,
+                                                          eula=eula,
+                                                          public_name_prefix=public_name_prefix)
+        gallery.sharing_profile.community_gallery_info = community_gallery_info
+
     if soft_delete is not None:
         gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
 
@@ -4496,7 +4532,7 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
 # region proximity placement groups
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
-                                     ppg_type=None, location=None, tags=None):
+                                     ppg_type=None, location=None, tags=None, zone=None, intent_vm_sizes=None):
     from knack.arguments import CaseInsensitiveList
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -4509,10 +4545,23 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
         raise CLIError("Usage error: invalid value for --type/-t")
 
     ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
-                                         location=location, tags=(tags or {}))
+                                         location=location, tags=(tags or {}), zones=zone)
+
+    if intent_vm_sizes:
+        Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
+        intent = Intent(vm_sizes=intent_vm_sizes)
+        ppg_params.intent = intent
 
     return client.create_or_update(resource_group_name=resource_group_name,
                                    proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
+
+
+def update_ppg(cmd, instance, intent_vm_sizes=None):
+    if intent_vm_sizes:
+        Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
+        intent = Intent(vm_sizes=intent_vm_sizes)
+        instance.intent = intent
+    return instance
 
 
 def list_proximity_placement_groups(client, resource_group_name=None):

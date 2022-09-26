@@ -490,9 +490,9 @@ def show_updates(updates_available_components, only_show_when_updates_available=
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
-            warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
+            warning_msg = 'You have %i update(s) available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = "You have %i updates available."
+            warning_msg = "You have %i update(s) available."
             if CLI_PACKAGE_NAME in updates_available_components:
                 warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
         logger.warning(warning_msg, len(updates_available_components))
@@ -523,7 +523,8 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     try:
         return shell_safe_json_parse(content, preserve_order)
     except CLIError as ex:
-        raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
+        # Reading file bypasses shell interpretation, so we discard the recommendation for shell quoting.
+        raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -563,12 +564,13 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
         except Exception as ex:
             logger.debug(ex)  # log the exception which could be a python dict parsing error.
 
-            # Echo the JSON received by CLI
-            msg = "Failed to parse JSON: {}\nError detail: {}".format(json_or_dict_string, json_ex)
+            # Echo the string received by CLI. Because the user may intend to provide a file path, we don't decisively
+            # say it is a JSON string.
+            msg = "Failed to parse string as JSON:\n{}\nError detail: {}".format(json_or_dict_string, json_ex)
 
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
-            recommendation = "The JSON may have been parsed by the shell. See " \
+            recommendation = "The provided JSON string may have been parsed by the shell. See " \
                              "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
 
             # Recommendation especially for PowerShell
