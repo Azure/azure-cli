@@ -2512,8 +2512,11 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 
 # determine architecture for kubectl based on platform.processor()
 # the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
-def get_arch_for_kubectl():
+def get_arch_for_cli_binary():
     arch = platform.processor().lower()
+    logger.warning(
+        "The detected arch is %s, which may not match the actual situation due to translation and other reasons. "
+        "If there is any problem, please download the appropriate binary by yourself.", arch)
     if "arm" in arch:
         return "arm64"
     return "amd64"
@@ -2540,7 +2543,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
     file_url = ''
     system = platform.system()
-    arch = get_arch_for_kubectl()
+    arch = get_arch_for_cli_binary()
     base_url = source_url + f"/{{}}/bin/{{}}/{arch}/{{}}"
 
     # ensure installation directory exists
@@ -2554,9 +2557,6 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     elif system == 'Linux':
         file_url = base_url.format(client_version, 'linux', 'kubectl')
     elif system == 'Darwin':
-        logger.warning(
-            "The detected arch is %s, which may not match the actual situation due to translation and other reasons. "
-            "If there is any problem, please download the appropriate binary by yourself.", arch)
         file_url = base_url.format(client_version, 'darwin', 'kubectl')
     else:
         raise CLIError(
@@ -2622,16 +2622,13 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         os.makedirs(install_dir)
 
     system = platform.system()
+    arch = get_arch_for_cli_binary()
     if system == 'Windows':
         sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
     elif system == 'Linux':
-        # TODO: Support ARM CPU here
-        sub_dir, binary_name = 'linux_amd64', 'kubelogin'
+        sub_dir, binary_name = f'linux_{arch}', 'kubelogin'
     elif system == 'Darwin':
-        if platform.machine() == 'arm64':
-            sub_dir, binary_name = 'darwin_arm64', 'kubelogin'
-        else:
-            sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+        sub_dir, binary_name = f'darwin_{arch}', 'kubelogin'
     else:
         raise CLIError(
             'Proxy server ({}) does not exist on the cluster.'.format(system))
