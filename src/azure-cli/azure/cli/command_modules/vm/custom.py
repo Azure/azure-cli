@@ -475,8 +475,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
-        from azure.cli.command_modules.vm._vm_utils import is_os_disk
-        if hyper_v_generation == 'V1' and is_os_disk(DiskCreateOption, option, os_type):
+        from azure.cli.command_modules.vm._vm_utils import is_empty_or_image_os_disk
+        if hyper_v_generation == 'V1' and is_empty_or_image_os_disk(DiskCreateOption, option, os_type):
             # creating OS disk with Generation 1 will be recommended to upgrade security for user workloads
             logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
                            'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
