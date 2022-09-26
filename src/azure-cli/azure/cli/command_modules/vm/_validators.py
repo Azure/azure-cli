@@ -1321,6 +1321,7 @@ def _validate_trusted_launch(namespace):
     if namespace.enable_secure_boot is None:
         namespace.enable_secure_boot = True
 
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
