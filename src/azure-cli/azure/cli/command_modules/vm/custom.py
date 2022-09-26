@@ -360,6 +360,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
                                                      disk_version)
 
+        if hyper_v_generation and hyper_v_generation == 'V1' and not image_reference_lun:
+            logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+                           'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+                           'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+                           'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
         if hasattr(response, 'hyper_v_generation') and not image_reference_lun:
             if response.hyper_v_generation == 'V1':
                 logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
@@ -408,6 +413,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             gallery_image_info = client.gallery_images.get(resource_group_name=gallery_image_reference_rg,
                                                            gallery_name=gallery_name,
                                                            gallery_image_name=gallery_image_definition)
+        if hyper_v_generation and hyper_v_generation == 'V1' and not gallery_image_reference_lun:
+            logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+                           'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+                           'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+                           'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
         if hasattr(gallery_image_info, 'hyper_v_generation') and not gallery_image_reference_lun:
             if gallery_image_info.hyper_v_generation == 'V1':
                 logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
@@ -475,13 +485,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
-        from azure.cli.command_modules.vm._vm_utils import is_empty_or_image_os_disk
-        if hyper_v_generation == 'V1' and is_empty_or_image_os_disk(DiskCreateOption, option, os_type):
-            # creating OS disk with Generation 1 will be recommended to upgrade security for user workloads
-            logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                           'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                           'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                           'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+        # from azure.cli.command_modules.vm._vm_utils import is_empty_or_image_os_disk
+        # if hyper_v_generation == 'V1' and is_empty_or_image_os_disk(DiskCreateOption, option, os_type):
+        #     # creating OS disk with Generation 1 will be recommended to upgrade security for user workloads
+        #     logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+        #                    'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+        #                    'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+        #                    'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
 
     if zone:
         disk.zones = zone
