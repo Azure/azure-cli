@@ -657,7 +657,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --smb-encryption
     short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
   - name: --smb-continuously-avl
@@ -916,7 +916,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --chown-mode
     short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:

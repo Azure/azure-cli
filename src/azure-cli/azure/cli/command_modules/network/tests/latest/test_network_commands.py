@@ -737,6 +737,31 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
                  '--host-name-from-http-settings --path /test --timeout 100 '
                  '--http-settings appGatewayBackendHttpSettings --address-pool appGatewayBackendPool')
 
+    @ResourceGroupPreparer(name_prefix="cli_test_ag_with_non_v2_sku_", location="westus")
+    def test_ag_with_non_v2_sku(self):
+        self.kwargs.update({
+            "ag_name": self.create_random_name("ag-", 12),
+            "port_name": self.create_random_name("port-", 12),
+            "lisener_name": self.create_random_name("lisener-", 12),
+            "rule_name": self.create_random_name("rule-", 12),
+        })
+
+        self.cmd("network application-gateway create -n {ag_name} -g {rg} --sku WAF_Medium")
+
+        self.kwargs["front_ip"] = self.cmd("network application-gateway show -n {ag_name} -g {rg}").get_output_in_json()["frontendIpConfigurations"][0]["name"]
+        self.cmd("network application-gateway frontend-port create -n {port_name} -g {rg} --gateway-name {ag_name} --port 8080")
+        self.cmd("network application-gateway http-listener create -n {lisener_name} -g {rg} --gateway-name {ag_name} --frontend-ip {front_ip} --frontend-port {port_name}")
+
+        self.cmd(
+            "network application-gateway rule create -n {rule_name} -g {rg} --gateway-name {ag_name} --http-listener {lisener_name}",
+            checks=[
+                self.check("name", "{ag_name}"),
+                self.check("sku.tier", "WAF")
+            ]
+        )
+
+        self.cmd("network application-gateway delete -n {ag_name} -g {rg}")
+
     @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
     def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
         self.kwargs.update({
@@ -4395,37 +4420,6 @@ class NetworkVNetScenarioTest(ScenarioTest):
         ])
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
-    def test_network_vnet_caching(self, resource_group):
-        from time import sleep
-
-        self.kwargs.update({
-            'vnet': 'vnet1'
-        })
-
-        # test that custom commands work with caching
-        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --defer')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --defer')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --defer')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            # ensure vnet has not been created
-            self.cmd('network vnet show -g {rg} -n {vnet}')
-        self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
-        self.cmd('network vnet show -g {rg} -n {vnet}',
-                 checks=self.check('length(subnets)', 3))
-        with self.assertRaisesRegex(CLIError, 'Not found in cache'):
-            self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
-
-        # test that generic update works with caching
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --defer')
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2')
-        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-            self.check('length(tags)', 2),
-            self.check('length(subnets)', 3)  # should reflect the write-through behavior from the earlier PUT
-        ])
-
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
@@ -5837,32 +5831,6 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             self.check('name', '{bastion}')
         ])
         self.cmd('network bastion delete -g {rg} -n {bastion}')
-
-
-class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
-
-    @ResourceGroupPreparer()
-    def test_network_vnet_local_context(self):
-        self.kwargs.update({
-            'vnet': self.create_random_name(prefix='vnet-', length=12),
-            'subnet': self.create_random_name(prefix='subnet-', length=12)
-        })
-
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
-                 checks=[self.check('newVNet.name', self.kwargs['vnet'])])
-        self.cmd('network vnet show', checks=[
-            self.check('name', self.kwargs['vnet'])
-        ])
-        self.cmd('network vnet subnet show', checks=[
-            self.check('name', self.kwargs['subnet'])
-        ])
-        with self.assertRaises(CLIError):
-            self.cmd('network vnet delete')
-        with self.assertRaises(CLIError):
-            self.cmd('network vnet subnet delete')
-
-        self.cmd('network vnet subnet delete -n {subnet}')
-        self.cmd('network vnet delete -n {vnet}')
 
 
 class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
