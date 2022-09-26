@@ -247,6 +247,16 @@ for source in SOURCE_RESOURCES:
                 Usage: --system-identity mysql-identity-id=xx
 
                 mysql-identity-id      : Optional. ID of identity used for MySQL flexible server AAD Authentication. Ignore it if you are the server AAD administrator.
+                signed-in-user-oid     : Optional. Object ID of signed in user.
+            '''
+            elif target in {RESOURCE.Sql, RESOURCE.Postgres, RESOURCE.PostgresFlexible}:
+                system_identity_param = '''
+            - name: --system-identity
+              short-summary: The system assigned identity auth info
+              long-summary: |
+                Usage: --system-identity mysql-identity-id=xx
+
+                signed-in-user-oid     : Optional. Object ID of signed in user.
             '''
             else:
                 system_identity_param = '''

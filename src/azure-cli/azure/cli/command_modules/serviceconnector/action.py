@@ -121,6 +121,8 @@ class AddSystemAssignedIdentityAuthInfo(argparse.Action):
             v = properties[k]
             if k.lower() == 'mysql-identity-id':
                 d['mysql-identity-id'] = v[0]
+            if k.lower() == 'signed-in-user-oid':
+                d['signed-in-user-oid'] = v[0]
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter --system-identity')
         d['auth_type'] = 'systemAssignedIdentity'

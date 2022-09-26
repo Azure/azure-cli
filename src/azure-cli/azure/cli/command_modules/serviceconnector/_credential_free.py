@@ -48,13 +48,13 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
     if target_handler is None:
         return
 
-    user_info = run_cli_cmd(
-        'az ad user show --id {}'.format(target_handler.login_username))
-    user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
-        else user_info.get('id')
+    user_object_id = auth_info.get('signed-in-user-oid')
     if user_object_id is None:
-        raise Exception(
-            "No object id found for user {}".format(target_handler.login_username))
+        user_info = run_cli_cmd('az ad user show --id {}'.format(target_handler.login_username))
+        user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None else user_info.get('id')
+        if user_object_id is None:
+            raise Exception(
+                "No object id found for user {}".format(target_handler.login_username))
 
     # enable source mi
     source_object_id = source_handler.get_identity_pid()
