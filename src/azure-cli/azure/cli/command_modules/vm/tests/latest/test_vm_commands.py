@@ -8460,9 +8460,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
 
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4} --enable-secure-boot')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4}')
         self.cmd('vm show -g {rg} -n {vm4}', checks=[
-            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True)
         ])
         self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
@@ -8485,9 +8486,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot')
+        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch')
         self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
-            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True)
         ])
 
 
