@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/workspaces", "2021-12-01-preview"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/workspaces", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces", "2022-10-01"],
         ]
     }
 
@@ -111,7 +111,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -150,12 +150,11 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
+            _element.etag = AAZStrType()
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -171,6 +170,35 @@ class List(AAZCommand):
             )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -350,7 +378,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -389,12 +417,11 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
+            _element.etag = AAZStrType()
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -410,6 +437,35 @@ class List(AAZCommand):
             )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 

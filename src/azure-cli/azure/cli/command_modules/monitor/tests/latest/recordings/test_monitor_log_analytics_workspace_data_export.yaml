@@ -18,7 +18,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-22T06:54:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-26T08:44:08Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:54:56 GMT
+      - Mon, 26 Sep 2022 08:44:51 GMT
       expires:
       - '-1'
       pragma:
@@ -42,8 +42,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"capacityReservationLevel":
-      100, "name": "CapacityReservation"}, "workspaceCapping": {"dailyQuotaGb": 1.0}}}'
+    body: '{"location": "eastus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"capacityReservationLevel": 100, "name": "CapacityReservation"}, "workspaceCapping":
+      {"dailyQuotaGb": 1.0}}}'
     headers:
       Accept:
       - application/json
@@ -54,7 +56,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '177'
+      - '265'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -62,21 +64,21 @@ interactions:
       User-Agent:
       - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2022-10-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"937dbacc-9755-4f8f-b958-3a45059bab0c\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \"3060cb48-fc3b-4cfd-93ea-856676a21e6e\",\r\n    \"provisioningState\": \"Creating\",\r\n
         \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
-        100,\r\n      \"lastSkuUpdate\": \"Thu, 22 Sep 2022 06:55:02 GMT\"\r\n    },\r\n
+        100,\r\n      \"lastSkuUpdate\": \"Mon, 26 Sep 2022 08:45:01 GMT\"\r\n    },\r\n
         \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n
         \     \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\":
         true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n
-        \     \"quotaNextResetTime\": \"Fri, 23 Sep 2022 05:00:00 GMT\",\r\n      \"dataIngestionStatus\":
+        \     \"quotaNextResetTime\": \"Tue, 27 Sep 2022 00:00:00 GMT\",\r\n      \"dataIngestionStatus\":
         \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n
         \   \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
-        \"Thu, 22 Sep 2022 06:55:02 GMT\",\r\n    \"modifiedDate\": \"Thu, 22 Sep
-        2022 06:55:02 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \"Mon, 26 Sep 2022 08:45:01 GMT\",\r\n    \"modifiedDate\": \"Mon, 26 Sep
+        2022 08:45:01 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
         \ \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\"\r\n}"
     headers:
@@ -89,7 +91,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 22 Sep 2022 06:55:03 GMT
+      - Mon, 26 Sep 2022 08:45:03 GMT
       pragma:
       - no-cache
       request-context:
@@ -124,21 +126,21 @@ interactions:
       User-Agent:
       - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2022-10-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"937dbacc-9755-4f8f-b958-3a45059bab0c\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"3060cb48-fc3b-4cfd-93ea-856676a21e6e\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
-        100,\r\n      \"lastSkuUpdate\": \"Thu, 22 Sep 2022 06:55:02 GMT\"\r\n    },\r\n
+        100,\r\n      \"lastSkuUpdate\": \"Mon, 26 Sep 2022 08:45:01 GMT\"\r\n    },\r\n
         \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n
         \     \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\":
         true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 1.0,\r\n
-        \     \"quotaNextResetTime\": \"Fri, 23 Sep 2022 05:00:00 GMT\",\r\n      \"dataIngestionStatus\":
+        \     \"quotaNextResetTime\": \"Tue, 27 Sep 2022 00:00:00 GMT\",\r\n      \"dataIngestionStatus\":
         \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n
         \   \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
-        \"Thu, 22 Sep 2022 06:55:02 GMT\",\r\n    \"modifiedDate\": \"Thu, 22 Sep
-        2022 06:55:04 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \"Mon, 26 Sep 2022 08:45:01 GMT\",\r\n    \"modifiedDate\": \"Mon, 26 Sep
+        2022 08:45:02 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
         \ \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\"\r\n}"
     headers:
@@ -151,7 +153,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 22 Sep 2022 06:55:33 GMT
+      - Mon, 26 Sep 2022 08:45:32 GMT
       pragma:
       - no-cache
       request-context:
@@ -196,12 +198,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"5f28fc74-467f-4770-ff56-08da9c677455\",\r\n
+      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"d16b62b9-d9d3-45f5-7f91-08da9f9b7c07\",\r\n
         \   \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\",\r\n
         \     \"type\": \"StorageAccount\",\r\n      \"metaData\": {}\r\n    },\r\n
         \   \"tableNames\": [\r\n      \"Syslog\"\r\n    ],\r\n    \"enable\": true,\r\n
-        \   \"createdDate\": \"Thu, 22 Sep 2022 06:55:37 GMT\",\r\n    \"lastModifiedDate\":
-        \"Thu, 22 Sep 2022 06:55:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
+        \   \"createdDate\": \"Mon, 26 Sep 2022 08:45:37 GMT\",\r\n    \"lastModifiedDate\":
+        \"Mon, 26 Sep 2022 08:45:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
         \ \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\r\n}"
     headers:
       access-control-allow-origin:
@@ -215,7 +217,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:55:37 GMT
+      - Mon, 26 Sep 2022 08:45:37 GMT
       expires:
       - '-1'
       pragma:
@@ -226,8 +228,10 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:
@@ -279,7 +283,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:55:47 GMT
+      - Mon, 26 Sep 2022 08:45:48 GMT
       expires:
       - '-1'
       pragma:
@@ -342,7 +346,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:55:56 GMT
+      - Mon, 26 Sep 2022 08:45:58 GMT
       expires:
       - '-1'
       pragma:
@@ -358,7 +362,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -405,7 +409,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:56:06 GMT
+      - Mon, 26 Sep 2022 08:46:08 GMT
       expires:
       - '-1'
       pragma:
@@ -468,7 +472,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:56:15 GMT
+      - Mon, 26 Sep 2022 08:46:18 GMT
       expires:
       - '-1'
       pragma:
@@ -484,7 +488,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -511,12 +515,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"5f28fc74-467f-4770-ff56-08da9c677455\",\r\n
+      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"d16b62b9-d9d3-45f5-7f91-08da9f9b7c07\",\r\n
         \   \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\",\r\n
         \     \"type\": \"StorageAccount\",\r\n      \"metaData\": {}\r\n    },\r\n
         \   \"tableNames\": [\r\n      \"Syslog\"\r\n    ],\r\n    \"enable\": true,\r\n
-        \   \"createdDate\": \"Thu, 22 Sep 2022 06:55:37 GMT\",\r\n    \"lastModifiedDate\":
-        \"Thu, 22 Sep 2022 06:55:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
+        \   \"createdDate\": \"Mon, 26 Sep 2022 08:45:37 GMT\",\r\n    \"lastModifiedDate\":
+        \"Mon, 26 Sep 2022 08:45:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
         \ \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\r\n}"
     headers:
       access-control-allow-origin:
@@ -530,7 +534,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:56:17 GMT
+      - Mon, 26 Sep 2022 08:46:18 GMT
       expires:
       - '-1'
       pragma:
@@ -575,12 +579,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n        \"dataExportId\":
-        \"5f28fc74-467f-4770-ff56-08da9c677455\",\r\n        \"destination\": {\r\n
+        \"d16b62b9-d9d3-45f5-7f91-08da9f9b7c07\",\r\n        \"destination\": {\r\n
         \         \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\",\r\n
         \         \"type\": \"StorageAccount\",\r\n          \"metaData\": {}\r\n
         \       },\r\n        \"tableNames\": [\r\n          \"Syslog\"\r\n        ],\r\n
-        \       \"enable\": true,\r\n        \"createdDate\": \"Thu, 22 Sep 2022 06:55:37
-        GMT\",\r\n        \"lastModifiedDate\": \"Thu, 22 Sep 2022 06:55:37 GMT\"\r\n
+        \       \"enable\": true,\r\n        \"createdDate\": \"Mon, 26 Sep 2022 08:45:37
+        GMT\",\r\n        \"lastModifiedDate\": \"Mon, 26 Sep 2022 08:45:37 GMT\"\r\n
         \     },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
         \     \"name\": \"clitest\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\r\n
         \   }\r\n  ]\r\n}"
@@ -596,7 +600,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:56:19 GMT
+      - Mon, 26 Sep 2022 08:46:20 GMT
       expires:
       - '-1'
       pragma:
@@ -607,10 +611,8 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:
@@ -640,7 +642,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-22T06:54:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-26T08:44:08Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -649,7 +651,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:56:20 GMT
+      - Mon, 26 Sep 2022 08:46:21 GMT
       expires:
       - '-1'
       pragma:
@@ -688,16 +690,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-22T06:56:30.127Z","updatedAt":"2022-09-22T06:56:30.127Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-26T08:46:30.46Z","updatedAt":"2022-09-26T08:46:30.46Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:56:30 GMT
+      - Mon, 26 Sep 2022 08:46:31 GMT
       expires:
       - '-1'
       pragma:
@@ -740,16 +742,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-22T06:56:30.127Z","updatedAt":"2022-09-22T06:56:30.127Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-26T08:46:30.46Z","updatedAt":"2022-09-26T08:46:30.46Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:00 GMT
+      - Mon, 26 Sep 2022 08:47:01 GMT
       expires:
       - '-1'
       pragma:
@@ -790,7 +792,7 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-22T06:56:30.127Z","updatedAt":"2022-09-22T06:57:23.2Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-26T08:46:30.46Z","updatedAt":"2022-09-26T08:47:23.68Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -799,7 +801,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:32 GMT
+      - Mon, 26 Sep 2022 08:47:31 GMT
       expires:
       - '-1'
       pragma:
@@ -840,7 +842,7 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-22T06:56:30.127Z","updatedAt":"2022-09-22T06:57:23.2Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2022-09-26T08:46:30.46Z","updatedAt":"2022-09-26T08:47:23.68Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -849,7 +851,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:32 GMT
+      - Mon, 26 Sep 2022 08:47:32 GMT
       expires:
       - '-1'
       pragma:
@@ -893,16 +895,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/Namespaces/EventHubs","location":"eastus","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2022-09-22T06:57:35.783Z","updatedAt":"2022-09-22T06:57:36.097Z","partitionIds":["0","1","2","3"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2022-09-26T08:47:36.467Z","updatedAt":"2022-09-26T08:47:36.74Z","partitionIds":["0","1","2","3"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '478'
+      - '477'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:36 GMT
+      - Mon, 26 Sep 2022 08:47:36 GMT
       expires:
       - '-1'
       pragma:
@@ -941,12 +943,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"5f28fc74-467f-4770-ff56-08da9c677455\",\r\n
+      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"d16b62b9-d9d3-45f5-7f91-08da9f9b7c07\",\r\n
         \   \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\",\r\n
         \     \"type\": \"StorageAccount\",\r\n      \"metaData\": {}\r\n    },\r\n
         \   \"tableNames\": [\r\n      \"Syslog\"\r\n    ],\r\n    \"enable\": true,\r\n
-        \   \"createdDate\": \"Thu, 22 Sep 2022 06:55:37 GMT\",\r\n    \"lastModifiedDate\":
-        \"Thu, 22 Sep 2022 06:55:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
+        \   \"createdDate\": \"Mon, 26 Sep 2022 08:45:37 GMT\",\r\n    \"lastModifiedDate\":
+        \"Mon, 26 Sep 2022 08:45:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
         \ \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\r\n}"
     headers:
       access-control-allow-origin:
@@ -960,7 +962,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:36 GMT
+      - Mon, 26 Sep 2022 08:47:37 GMT
       expires:
       - '-1'
       pragma:
@@ -986,10 +988,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"createdDate": "Thu, 22 Sep 2022 06:55:37 GMT", "dataExportId":
-      "5f28fc74-467f-4770-ff56-08da9c677455", "destination": {"metaData": {}, "resourceId":
+    body: '{"properties": {"createdDate": "Mon, 26 Sep 2022 08:45:37 GMT", "dataExportId":
+      "d16b62b9-d9d3-45f5-7f91-08da9f9b7c07", "destination": {"metaData": {}, "resourceId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004"},
-      "enable": true, "lastModifiedDate": "Thu, 22 Sep 2022 06:55:37 GMT", "tableNames":
+      "enable": true, "lastModifiedDate": "Mon, 26 Sep 2022 08:45:37 GMT", "tableNames":
       ["Usage", "Alert"]}}'
     headers:
       Accept:
@@ -1012,12 +1014,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"5f28fc74-467f-4770-ff56-08da9c677455\",\r\n
+      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"d16b62b9-d9d3-45f5-7f91-08da9f9b7c07\",\r\n
         \   \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004\",\r\n
         \     \"type\": \"EventHub\",\r\n      \"metaData\": {}\r\n    },\r\n    \"tableNames\":
         [\r\n      \"Usage\",\r\n      \"Alert\"\r\n    ],\r\n    \"enable\": true,\r\n
-        \   \"createdDate\": \"Thu, 22 Sep 2022 06:55:37 GMT\",\r\n    \"lastModifiedDate\":
-        \"Thu, 22 Sep 2022 06:57:39 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
+        \   \"createdDate\": \"Mon, 26 Sep 2022 08:45:37 GMT\",\r\n    \"lastModifiedDate\":
+        \"Mon, 26 Sep 2022 08:47:40 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
         \ \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\r\n}"
     headers:
       access-control-allow-origin:
@@ -1031,7 +1033,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:40 GMT
+      - Mon, 26 Sep 2022 08:47:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1077,16 +1079,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/Namespaces/EventHubs","location":"eastus","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2022-09-22T06:57:35.783","updatedAt":"2022-09-22T06:57:36.097","partitionIds":["0","1","2","3"]}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2022-09-26T08:47:36.467","updatedAt":"2022-09-26T08:47:36.74","partitionIds":["0","1","2","3"]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '488'
+      - '487'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:42 GMT
+      - Mon, 26 Sep 2022 08:47:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1134,7 +1136,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 22 Sep 2022 06:57:43 GMT
+      - Mon, 26 Sep 2022 08:47:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1150,7 +1152,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -1182,12 +1184,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"d3877109-42d7-4550-8ff1-08da9c67c15d\",\r\n
+      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"ae2326a0-3ecc-4d05-652b-08da9f9bca0a\",\r\n
         \   \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004\",\r\n
         \     \"type\": \"EventHub\",\r\n      \"metaData\": {\r\n        \"eventHubName\":
         \"hub_name\"\r\n      }\r\n    },\r\n    \"tableNames\": [\r\n      \"Syslog\"\r\n
-        \   ],\r\n    \"enable\": false,\r\n    \"createdDate\": \"Thu, 22 Sep 2022
-        06:57:46 GMT\",\r\n    \"lastModifiedDate\": \"Thu, 22 Sep 2022 06:57:46 GMT\"\r\n
+        \   ],\r\n    \"enable\": false,\r\n    \"createdDate\": \"Mon, 26 Sep 2022
+        08:47:48 GMT\",\r\n    \"lastModifiedDate\": \"Mon, 26 Sep 2022 08:47:48 GMT\"\r\n
         \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\",\r\n
         \ \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\r\n}"
     headers:
@@ -1202,7 +1204,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:46 GMT
+      - Mon, 26 Sep 2022 08:47:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1222,7 +1224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -1261,7 +1263,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 22 Sep 2022 06:57:47 GMT
+      - Mon, 26 Sep 2022 08:47:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1316,7 +1318,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 06:57:48 GMT
+      - Mon, 26 Sep 2022 08:47:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1327,10 +1329,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:

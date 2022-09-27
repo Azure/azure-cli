@@ -18,7 +18,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --retention-time 100", checks=[
@@ -247,7 +247,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('publicNetworkAccessForQuery', 'Disabled')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='WestEurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='westus')
     @AllowLargeResponse()
     def test_monitor_log_analytics_workspace_recover(self, resource_group):
         workspace_name = self.create_random_name('clitest', 20)
@@ -258,7 +258,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --level 100 --sku CapacityReservation", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 100),
             self.check('workspaceCapping.dailyQuotaGb', 1.0)
         ])
@@ -273,7 +273,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'table_name': 'Syslog'
         })
 
-        self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30 --debug", checks=[
+        self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30", checks=[
             self.check('retentionInDays', 30)
         ])
 
@@ -290,7 +290,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 200),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
@@ -298,7 +298,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 200),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
@@ -490,7 +490,7 @@ class TestLogProfileScenarios(ScenarioTest):
             # self.check('defaultDataCollectionRuleResourceId', '{rule_id}')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='WestEurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='westus')
     @AllowLargeResponse()
     def test_monitor_log_analytics_workspace_table(self, resource_group):
 
@@ -528,7 +528,7 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace table search-job create -n {table2_name} -g {rg} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --start-search-time "2021-08-01 05:29:18" --end-search-time "2021-08-02 05:29:18" --search-query "Heartbeat" --limit 1', checks=[
             self.check('name', '{table2_name}'),
-            self.check('schema.searchResults.query', 'Heartbeat'),
-            self.check('schema.searchResults.limit', 1),
-            self.check('schema.searchResults.sourceTable', "Heartbeat"),
+            self.check('searchResults.query', 'Heartbeat'),
+            self.check('searchResults.limit', 1),
+            self.check('searchResults.sourceTable', "Heartbeat"),
         ])

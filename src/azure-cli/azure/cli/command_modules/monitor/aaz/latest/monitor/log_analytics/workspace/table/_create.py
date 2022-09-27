@@ -13,23 +13,12 @@ from azure.cli.core.aaz import *
 
 class Create(AAZCommand):
     """Create a Log Analytics workspace table.
-
-    The name of custom log table needs to end with '_CL'. The name of search job table needs to end with '_SRCH'. The name of restore logs table needs to end with '_RST'.
-
-    :example: Create a Log Analytics workspace custom log table.
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL --retention-time 45 --cols "[{name:MyColumn1,type:string},{name:TimeGenerated,type:datetime}]"
-
-    :example: Create a Log Analytics workspace search result table.
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-job "{query:'Heartbeat |  where SourceSystem != '/'/ | project SourceSystem',limit:1000,start-search-time:'Sat, 28 Aug 2021 05:29:18 GMT',end-search-time:'Sat, 28 Aug 2021 08:29:18 GMT'}"
-
-    :example: Create a Log Analytics workspace restore logs table.
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --restore-logs "{restore-source-table:MyTable,start-restore-time:'Sat, 28 Aug 2021 05:29:18 GMT',end-restore-time:'Sat, 28 Aug 2021 08:29:18 GMT'}"
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}", "2022-10-01"],
         ]
     }
 
@@ -243,7 +232,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}",
                 **self.url_parameters
             )
 
@@ -281,7 +270,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -404,20 +393,42 @@ class Create(AAZCommand):
             properties.restored_logs = AAZObjectType(
                 serialized_name="restoredLogs",
             )
-            _build_schema_restored_logs_read(properties.restored_logs)
             properties.result_statistics = AAZObjectType(
                 serialized_name="resultStatistics",
+                flags={"read_only": True},
             )
             properties.retention_in_days = AAZIntType(
                 serialized_name="retentionInDays",
+            )
+            properties.retention_in_days_as_default = AAZBoolType(
+                serialized_name="retentionInDaysAsDefault",
+                flags={"read_only": True},
             )
             properties.schema = AAZObjectType()
             properties.search_results = AAZObjectType(
                 serialized_name="searchResults",
             )
-            _build_schema_search_results_read(properties.search_results)
             properties.total_retention_in_days = AAZIntType(
                 serialized_name="totalRetentionInDays",
+            )
+            properties.total_retention_in_days_as_default = AAZBoolType(
+                serialized_name="totalRetentionInDaysAsDefault",
+                flags={"read_only": True},
+            )
+
+            restored_logs = cls._schema_on_200.properties.restored_logs
+            restored_logs.azure_async_operation_id = AAZStrType(
+                serialized_name="azureAsyncOperationId",
+                flags={"read_only": True},
+            )
+            restored_logs.end_restore_time = AAZStrType(
+                serialized_name="endRestoreTime",
+            )
+            restored_logs.source_table = AAZStrType(
+                serialized_name="sourceTable",
+            )
+            restored_logs.start_restore_time = AAZStrType(
+                serialized_name="startRestoreTime",
             )
 
             result_statistics = cls._schema_on_200.properties.result_statistics
@@ -426,6 +437,10 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             result_statistics.progress = AAZFloatType(
+                flags={"read_only": True},
+            )
+            result_statistics.scanned_gb = AAZFloatType(
+                serialized_name="scannedGb",
                 flags={"read_only": True},
             )
 
@@ -442,14 +457,6 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             schema.name = AAZStrType()
-            schema.restored_logs = AAZObjectType(
-                serialized_name="restoredLogs",
-            )
-            _build_schema_restored_logs_read(schema.restored_logs)
-            schema.search_results = AAZObjectType(
-                serialized_name="searchResults",
-            )
-            _build_schema_search_results_read(schema.search_results)
             schema.solutions = AAZListType(
                 flags={"read_only": True},
             )
@@ -491,6 +498,25 @@ class Create(AAZCommand):
             standard_columns = cls._schema_on_200.properties.schema.standard_columns
             standard_columns.Element = AAZObjectType()
             _build_schema_column_read(standard_columns.Element)
+
+            search_results = cls._schema_on_200.properties.search_results
+            search_results.azure_async_operation_id = AAZStrType(
+                serialized_name="azureAsyncOperationId",
+                flags={"read_only": True},
+            )
+            search_results.description = AAZStrType()
+            search_results.end_search_time = AAZStrType(
+                serialized_name="endSearchTime",
+            )
+            search_results.limit = AAZIntType()
+            search_results.query = AAZStrType()
+            search_results.source_table = AAZStrType(
+                serialized_name="sourceTable",
+                flags={"read_only": True},
+            )
+            search_results.start_search_time = AAZStrType(
+                serialized_name="startSearchTime",
+            )
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
@@ -564,74 +590,6 @@ def _build_schema_column_read(_schema):
     _schema.is_hidden = _schema_column_read.is_hidden
     _schema.name = _schema_column_read.name
     _schema.type = _schema_column_read.type
-
-
-_schema_restored_logs_read = None
-
-
-def _build_schema_restored_logs_read(_schema):
-    global _schema_restored_logs_read
-    if _schema_restored_logs_read is not None:
-        _schema.end_restore_time = _schema_restored_logs_read.end_restore_time
-        _schema.source_table = _schema_restored_logs_read.source_table
-        _schema.start_restore_time = _schema_restored_logs_read.start_restore_time
-        return
-
-    _schema_restored_logs_read = AAZObjectType()
-
-    restored_logs_read = _schema_restored_logs_read
-    restored_logs_read.end_restore_time = AAZStrType(
-        serialized_name="endRestoreTime",
-    )
-    restored_logs_read.source_table = AAZStrType(
-        serialized_name="sourceTable",
-    )
-    restored_logs_read.start_restore_time = AAZStrType(
-        serialized_name="startRestoreTime",
-    )
-
-    _schema.end_restore_time = _schema_restored_logs_read.end_restore_time
-    _schema.source_table = _schema_restored_logs_read.source_table
-    _schema.start_restore_time = _schema_restored_logs_read.start_restore_time
-
-
-_schema_search_results_read = None
-
-
-def _build_schema_search_results_read(_schema):
-    global _schema_search_results_read
-    if _schema_search_results_read is not None:
-        _schema.description = _schema_search_results_read.description
-        _schema.end_search_time = _schema_search_results_read.end_search_time
-        _schema.limit = _schema_search_results_read.limit
-        _schema.query = _schema_search_results_read.query
-        _schema.source_table = _schema_search_results_read.source_table
-        _schema.start_search_time = _schema_search_results_read.start_search_time
-        return
-
-    _schema_search_results_read = AAZObjectType()
-
-    search_results_read = _schema_search_results_read
-    search_results_read.description = AAZStrType()
-    search_results_read.end_search_time = AAZStrType(
-        serialized_name="endSearchTime",
-    )
-    search_results_read.limit = AAZIntType()
-    search_results_read.query = AAZStrType()
-    search_results_read.source_table = AAZStrType(
-        serialized_name="sourceTable",
-        flags={"read_only": True},
-    )
-    search_results_read.start_search_time = AAZStrType(
-        serialized_name="startSearchTime",
-    )
-
-    _schema.description = _schema_search_results_read.description
-    _schema.end_search_time = _schema_search_results_read.end_search_time
-    _schema.limit = _schema_search_results_read.limit
-    _schema.query = _schema_search_results_read.query
-    _schema.source_table = _schema_search_results_read.source_table
-    _schema.start_search_time = _schema_search_results_read.start_search_time
 
 
 __all__ = ["Create"]

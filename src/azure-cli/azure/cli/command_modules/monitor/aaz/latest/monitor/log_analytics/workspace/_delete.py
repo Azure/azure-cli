@@ -28,9 +28,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
         ]
     }
 
@@ -160,7 +160,7 @@ class Delete(AAZCommand):
                     "force", self.ctx.args.force,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }

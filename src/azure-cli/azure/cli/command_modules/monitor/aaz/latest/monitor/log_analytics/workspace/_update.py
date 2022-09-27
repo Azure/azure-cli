@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
         ]
     }
 
@@ -64,8 +64,35 @@ class Update(AAZCommand):
                 min_length=4,
             ),
         )
+
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity_type = AAZStrArg(
+            options=["--identity-type"],
+            arg_group="Identity",
+            help="Type of managed service identity.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        )
+        _args_schema.user_assigned = AAZDictArg(
+            options=["--user-assigned"],
+            arg_group="Identity",
+            help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+            nullable=True,
+        )
+
+        user_assigned = cls._args_schema.user_assigned
+        user_assigned.Element = AAZObjectArg(
+            nullable=True,
+            blank={},
+        )
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
+            arg_group="Parameters",
             help="Resource tags.",
             nullable=True,
         )
@@ -201,7 +228,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -300,7 +327,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -358,8 +385,18 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
+            _builder.set_prop("identity", AAZObjectType)
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned")
+
+            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
+            if user_assigned_identities is not None:
+                user_assigned_identities.set_elements(AAZObjectType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -399,8 +436,9 @@ _schema_workspace_read = None
 def _build_schema_workspace_read(_schema):
     global _schema_workspace_read
     if _schema_workspace_read is not None:
-        _schema.e_tag = _schema_workspace_read.e_tag
+        _schema.etag = _schema_workspace_read.etag
         _schema.id = _schema_workspace_read.id
+        _schema.identity = _schema_workspace_read.identity
         _schema.location = _schema_workspace_read.location
         _schema.name = _schema_workspace_read.name
         _schema.properties = _schema_workspace_read.properties
@@ -412,12 +450,11 @@ def _build_schema_workspace_read(_schema):
     _schema_workspace_read = AAZObjectType()
 
     workspace_read = _schema_workspace_read
-    workspace_read.e_tag = AAZStrType(
-        serialized_name="eTag",
-    )
+    workspace_read.etag = AAZStrType()
     workspace_read.id = AAZStrType(
         flags={"read_only": True},
     )
+    workspace_read.identity = AAZObjectType()
     workspace_read.location = AAZStrType(
         flags={"required": True},
     )
@@ -433,6 +470,35 @@ def _build_schema_workspace_read(_schema):
     )
     workspace_read.tags = AAZDictType()
     workspace_read.type = AAZStrType(
+        flags={"read_only": True},
+    )
+
+    identity = _schema_workspace_read.identity
+    identity.principal_id = AAZStrType(
+        serialized_name="principalId",
+        flags={"read_only": True},
+    )
+    identity.tenant_id = AAZStrType(
+        serialized_name="tenantId",
+        flags={"read_only": True},
+    )
+    identity.type = AAZStrType(
+        flags={"required": True},
+    )
+    identity.user_assigned_identities = AAZDictType(
+        serialized_name="userAssignedIdentities",
+    )
+
+    user_assigned_identities = _schema_workspace_read.identity.user_assigned_identities
+    user_assigned_identities.Element = AAZObjectType()
+
+    _element = _schema_workspace_read.identity.user_assigned_identities.Element
+    _element.client_id = AAZStrType(
+        serialized_name="clientId",
+        flags={"read_only": True},
+    )
+    _element.principal_id = AAZStrType(
+        serialized_name="principalId",
         flags={"read_only": True},
     )
 
@@ -570,8 +636,9 @@ def _build_schema_workspace_read(_schema):
     tags = _schema_workspace_read.tags
     tags.Element = AAZStrType()
 
-    _schema.e_tag = _schema_workspace_read.e_tag
+    _schema.etag = _schema_workspace_read.etag
     _schema.id = _schema_workspace_read.id
+    _schema.identity = _schema_workspace_read.identity
     _schema.location = _schema_workspace_read.location
     _schema.name = _schema_workspace_read.name
     _schema.properties = _schema_workspace_read.properties

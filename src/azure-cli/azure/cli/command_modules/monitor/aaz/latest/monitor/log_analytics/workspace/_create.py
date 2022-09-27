@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
         ]
     }
 
@@ -59,7 +59,32 @@ class Create(AAZCommand):
                 min_length=4,
             ),
         )
+
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity_type = AAZStrArg(
+            options=["--identity-type"],
+            arg_group="Identity",
+            help="Type of managed service identity.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        )
+        _args_schema.user_assigned = AAZDictArg(
+            options=["--user-assigned"],
+            arg_group="Identity",
+            help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+        )
+
+        user_assigned = cls._args_schema.user_assigned
+        user_assigned.Element = AAZObjectArg(
+            blank={},
+        )
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
+            arg_group="Parameters",
             help="The geo-location where the resource lives",
             required=True,
             fmt=AAZResourceLocationArgFormat(
@@ -68,6 +93,7 @@ class Create(AAZCommand):
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
+            arg_group="Parameters",
             help="Resource tags.",
         )
 
@@ -81,12 +107,14 @@ class Create(AAZCommand):
             options=["--ingestion-access"],
             arg_group="Properties",
             help="The public network access type to access workspace ingestion.",
+            default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.query_access = AAZStrArg(
             options=["--query-access"],
             arg_group="Properties",
             help="The public network access type to access workspace query.",
+            default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.retention_time = AAZIntArg(
@@ -201,7 +229,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -226,9 +254,19 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("identity", AAZObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned")
+
+            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
+            if user_assigned_identities is not None:
+                user_assigned_identities.set_elements(AAZObjectType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -271,12 +309,11 @@ class Create(AAZCommand):
             cls._schema_on_200_201 = AAZObjectType()
 
             _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
+            _schema_on_200_201.etag = AAZStrType()
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200_201.identity = AAZObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -292,6 +329,35 @@ class Create(AAZCommand):
             )
             _schema_on_200_201.tags = AAZDictType()
             _schema_on_200_201.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200_201.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 

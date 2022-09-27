@@ -12,25 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace table delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "monitor log-analytics workspace table search-job cancel",
 )
-class Delete(AAZCommand):
-    """Delete a Log Analytics workspace table.
+class Cancel(AAZCommand):
+    """Cancel a log analytics workspace search results table query run.
     """
 
     _aaz_info = {
         "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}/cancelsearch", "2022-10-01"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        self._execute_operations()
+        return None
 
     _args_schema = None
 
@@ -50,13 +48,11 @@ class Delete(AAZCommand):
             options=["-n", "--name", "--table-name"],
             help="The name of the table.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.workspace_name = AAZStrArg(
             options=["--workspace-name"],
             help="The name of the workspace.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -67,7 +63,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.TablesDelete(ctx=self.ctx)()
+        self.TablesCancelSearch(ctx=self.ctx)()
         self.post_operations()
 
     # @register_callback
@@ -78,52 +74,27 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class TablesDelete(AAZHttpOperation):
+    class TablesCancelSearch(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}/cancelSearch",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -164,8 +135,5 @@ class Delete(AAZCommand):
         def on_200(self, session):
             pass
 
-        def on_204(self, session):
-            pass
 
-
-__all__ = ["Delete"]
+__all__ = ["Cancel"]

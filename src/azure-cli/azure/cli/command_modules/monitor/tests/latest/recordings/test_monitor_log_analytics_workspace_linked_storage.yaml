@@ -18,7 +18,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-22T08:27:21Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-26T08:46:23Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,21 +27,24 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:29:20 GMT
+      - Mon, 26 Sep 2022 08:48:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"name":
-      "PerGB2018"}}, "tags": {"clitest": "myron"}}'
+    body: '{"location": "eastus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"name": "PerGB2018"}}, "tags": {"clitest": "myron"}}'
     headers:
       Accept:
       - application/json
@@ -52,7 +55,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '121'
+      - '209'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -60,20 +63,20 @@ interactions:
       User-Agent:
       - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006?api-version=2022-10-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"35539163-a0e2-45ff-ad33-a899bdea037c\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \"109f9b9f-0156-46b5-a480-5fc3fa1cf752\",\r\n    \"provisioningState\": \"Creating\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Thu, 22 Sep 2022 08:29:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Mon, 26 Sep 2022 08:48:26 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Thu, 22 Sep 2022 19:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Tue, 27 Sep 2022 07:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Thu, 22 Sep 2022 08:29:27 GMT\",\r\n
-        \   \"modifiedDate\": \"Thu, 22 Sep 2022 08:29:27 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Mon, 26 Sep 2022 08:48:26 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 26 Sep 2022 08:48:26 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000006\",\r\n
         \ \"name\": \"clitest000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
@@ -88,7 +91,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 22 Sep 2022 08:29:29 GMT
+      - Mon, 26 Sep 2022 08:48:27 GMT
       pragma:
       - no-cache
       request-context:
@@ -123,20 +126,20 @@ interactions:
       User-Agent:
       - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006?api-version=2022-10-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"35539163-a0e2-45ff-ad33-a899bdea037c\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"109f9b9f-0156-46b5-a480-5fc3fa1cf752\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Thu, 22 Sep 2022 08:29:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Mon, 26 Sep 2022 08:48:26 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Thu, 22 Sep 2022 19:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Tue, 27 Sep 2022 07:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Thu, 22 Sep 2022 08:29:27 GMT\",\r\n
-        \   \"modifiedDate\": \"Thu, 22 Sep 2022 08:29:29 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Mon, 26 Sep 2022 08:48:26 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 26 Sep 2022 08:48:27 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000006\",\r\n
         \ \"name\": \"clitest000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
@@ -151,7 +154,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 22 Sep 2022 08:30:00 GMT
+      - Mon, 26 Sep 2022 08:48:57 GMT
       pragma:
       - no-cache
       request-context:
@@ -160,8 +163,10 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-powered-by:
@@ -209,7 +214,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:03 GMT
+      - Mon, 26 Sep 2022 08:49:00 GMT
       expires:
       - '-1'
       pragma:
@@ -227,7 +232,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -269,7 +274,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:06 GMT
+      - Mon, 26 Sep 2022 08:49:02 GMT
       expires:
       - '-1'
       pragma:
@@ -337,7 +342,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:08 GMT
+      - Mon, 26 Sep 2022 08:49:03 GMT
       expires:
       - '-1'
       pragma:
@@ -357,7 +362,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -401,7 +406,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:09 GMT
+      - Mon, 26 Sep 2022 08:49:04 GMT
       expires:
       - '-1'
       pragma:
@@ -412,8 +417,10 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:
@@ -465,7 +472,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:10 GMT
+      - Mon, 26 Sep 2022 08:49:06 GMT
       expires:
       - '-1'
       pragma:
@@ -476,14 +483,16 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -526,7 +535,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:11 GMT
+      - Mon, 26 Sep 2022 08:49:06 GMT
       expires:
       - '-1'
       pragma:
@@ -568,7 +577,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-22T08:27:21Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-26T08:46:23Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -577,21 +586,24 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:12 GMT
+      - Mon, 26 Sep 2022 08:49:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"name":
-      "PerGB2018"}}, "tags": {"clitest": "myron"}}'
+    body: '{"location": "eastus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"name": "PerGB2018"}}, "tags": {"clitest": "myron"}}'
     headers:
       Accept:
       - application/json
@@ -602,7 +614,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '121'
+      - '209'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -610,20 +622,20 @@ interactions:
       User-Agent:
       - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000007?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000007?api-version=2022-10-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"b9976924-6731-4368-8e89-e108cd2e1587\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \"abf88fab-1eb9-44fc-be29-ad24c275334e\",\r\n    \"provisioningState\": \"Creating\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Thu, 22 Sep 2022 08:30:19 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Mon, 26 Sep 2022 08:49:12 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Thu, 22 Sep 2022 15:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Tue, 27 Sep 2022 08:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Thu, 22 Sep 2022 08:30:19 GMT\",\r\n
-        \   \"modifiedDate\": \"Thu, 22 Sep 2022 08:30:19 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Mon, 26 Sep 2022 08:49:12 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 26 Sep 2022 08:49:12 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000007\",\r\n
         \ \"name\": \"clitest000007\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
@@ -638,7 +650,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 22 Sep 2022 08:30:20 GMT
+      - Mon, 26 Sep 2022 08:49:14 GMT
       pragma:
       - no-cache
       request-context:
@@ -650,7 +662,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -673,20 +685,20 @@ interactions:
       User-Agent:
       - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000007?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000007?api-version=2022-10-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"b9976924-6731-4368-8e89-e108cd2e1587\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"abf88fab-1eb9-44fc-be29-ad24c275334e\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Thu, 22 Sep 2022 08:30:19 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Mon, 26 Sep 2022 08:49:12 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Thu, 22 Sep 2022 15:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Tue, 27 Sep 2022 08:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Thu, 22 Sep 2022 08:30:19 GMT\",\r\n
-        \   \"modifiedDate\": \"Thu, 22 Sep 2022 08:30:20 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Mon, 26 Sep 2022 08:49:12 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 26 Sep 2022 08:49:13 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000007\",\r\n
         \ \"name\": \"clitest000007\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
@@ -701,7 +713,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 22 Sep 2022 08:30:50 GMT
+      - Mon, 26 Sep 2022 08:49:45 GMT
       pragma:
       - no-cache
       request-context:
@@ -710,8 +722,10 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-powered-by:
@@ -759,7 +773,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:52 GMT
+      - Mon, 26 Sep 2022 08:49:48 GMT
       expires:
       - '-1'
       pragma:
@@ -779,7 +793,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -827,7 +841,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:52 GMT
+      - Mon, 26 Sep 2022 08:49:48 GMT
       expires:
       - '-1'
       pragma:
@@ -838,8 +852,10 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:
@@ -882,7 +898,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 22 Sep 2022 08:30:55 GMT
+      - Mon, 26 Sep 2022 08:49:49 GMT
       expires:
       - '-1'
       pragma:
@@ -898,7 +914,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -942,7 +958,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Sep 2022 08:30:56 GMT
+      - Mon, 26 Sep 2022 08:49:50 GMT
       expires:
       - '-1'
       pragma:
@@ -953,8 +969,10 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-ams-apiversion:
       - WebAPI1.0
       x-content-type-options:
