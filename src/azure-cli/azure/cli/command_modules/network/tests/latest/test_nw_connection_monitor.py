@@ -54,7 +54,10 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--endpoint-dest-address bing.com '
                  '--test-config-name DefaultTestConfig '
                  '--protocol Tcp '
-                 '--tcp-port 2048 ')
+                 '--tcp-port 2048 --tags tag=test',
+                 checks=[
+                     self.check('tags', {'tag': 'test'})
+                 ])
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westeurope')
     @AllowLargeResponse()
