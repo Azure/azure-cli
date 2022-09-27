@@ -365,12 +365,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
                                'Trusted Launch security type. To know more about Trusted Launch, please visit '
                                'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
-            elif hyper_v_generation and hyper_v_generation == 'V1':
-                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                               'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                               'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                               'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             elif response.hyper_v_generation == 'V2':
+                if hyper_v_generation == 'V1':
+                    logger.warning(
+                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
                 # will set default value of hyper_v_generation
                 if hasattr(response, 'features') and response.features \
                         and 'SecurityType' in response.features \
@@ -418,12 +419,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
                                'Trusted Launch security type. To know more about Trusted Launch, please visit '
                                'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
-            elif hyper_v_generation and hyper_v_generation == 'V1':
-                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                               'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                               'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                               'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             elif gallery_image_info.hyper_v_generation == 'V2':
+                if hyper_v_generation == 'V1':
+                    logger.warning(
+                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
                 # will set default value of hyper_v_generation
                 if hasattr(gallery_image_info, 'features') and gallery_image_info.features \
                         and 'SecurityType' in gallery_image_info.features \
