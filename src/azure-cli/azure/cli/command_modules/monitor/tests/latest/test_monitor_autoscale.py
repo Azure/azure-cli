@@ -155,7 +155,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}')
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -168,7 +168,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
@@ -176,7 +176,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -189,7 +189,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
@@ -197,7 +197,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -210,7 +210,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
