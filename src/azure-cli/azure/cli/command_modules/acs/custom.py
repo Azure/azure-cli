@@ -2516,7 +2516,7 @@ def get_arch_for_cli_binary():
     arch = platform.processor().lower()
     formatted_arch = "amd64"
     if "arm" in arch:
-        formatted_arch == "arm64"
+        formatted_arch = "arm64"
     logger.warning(
         "The detected arch is %s, would be treated as %s, which may not match the actual situation due to translation "
         "and other reasons. If there is any problem, please download the appropriate binary by yourself.",
