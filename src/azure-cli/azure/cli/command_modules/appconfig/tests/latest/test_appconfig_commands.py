@@ -942,11 +942,18 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         entry_key = 'TestKey'
         entry_value = 'TestValue'
         entry_label = 'AppServiceReferenceExport'
-        expected_reference = '{}Endpoint=https://{}.azconfig.io; Key={}; Label={})'.format(
+        expected_reference = '{}(Endpoint=https://{}.azconfig.io; Key={}; Label={})'.format(
             AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX,
             config_store_name.lower(),
             entry_key,
             entry_label)
+
+        entry_key2 = 'TestKey2'
+        entry_value2 = 'TestValue2'
+        expected_reference2 = '{}(Endpoint=https://{}.azconfig.io; Key={})'.format(
+            AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX,
+            config_store_name.lower(),
+            entry_key2)
 
         self.kwargs.update({
             'key': entry_key,
@@ -960,23 +967,44 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
                          self.check('value', entry_value),
                          self.check('label', entry_label)])
 
-        # Export key-value reference to AppService
+        self.kwargs.update({
+            'key': entry_key2,
+            'value': entry_value2,
+        })
+
+        # Add second key-value entry (No label)
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y',
+                 checks=[self.check('key', entry_key2),
+                         self.check('value', entry_value2)])
+
+        # Export app configuration reference to App Service
         self.kwargs.update({
             'export_dest': 'appservice',
             'appservice_account': webapp_name
         })
 
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
+        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference')
+
+        # Assert first reference is in the right format
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
         exported_keys = next(x for x in app_settings if x['name'] == entry_key)
         self.assertEquals(exported_keys['name'], entry_key)
         self.assertEquals(exported_keys['value'], expected_reference)
         self.assertEquals(exported_keys['slotSetting'], False)
 
+        # Assert second reference is of right format    
+        exported_keys = next(x for x in app_settings if x['name'] == entry_key2)
+        self.assertEquals(exported_keys['name'], entry_key2)
+        self.assertEquals(exported_keys['value'], expected_reference2)
+        self.assertEquals(exported_keys['slotSetting'], False)
+
+
+        # Test to confirm the right app configuration reference
         # Verify that app configuration references are ignored during import
         ref_entry_key = entry_key
-        entry_key = 'TestKey2'
-        entry_value = 'TestValue2'
+        entry_key = 'TestKey3'
+        entry_value = 'TestValue3'
         import_label = 'AppServiceImport'
 
         self.kwargs.update({

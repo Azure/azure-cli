@@ -286,11 +286,14 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
 
 def __map_to_appservice_config_reference(key_value, endpoint, prefix):
     label = key_value.label
-    key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + 'Endpoint={0}; Key={1}'.format(
+    key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + '(Endpoint={0}; Key={1}'.format(
         endpoint, key_value.key) + ('; Label={0}'.format(label) if label is not None else '') + ')'
 
     if key_value.key.startswith(prefix):
         key_value.key = key_value.key[len(prefix):]
+
+    # We set content type to an empty string to ensure that this key-value is not treated as a key-vault reference or feature flag down the line.
+    key_value.content_type = "" 
     return key_value
 
 
