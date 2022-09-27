@@ -251,6 +251,9 @@ def flexible_server_fast_create(cmd, client, resource_group_name=None, location=
                                                                                             storage=storage,
                                                                                             sku=sku)
 
+    location, resource_group_name, _ = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                   None, 'postgres')
+
     cached_name_client = cf_postgres_flexible_get_cached_server_name(cmd.cli_ctx, '_')
 
     try:
@@ -262,8 +265,6 @@ def flexible_server_fast_create(cmd, client, resource_group_name=None, location=
             raise CLIError('There is no available server for fast provisioning at the moment.')
         raise CLIError(e)
 
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'postgres')
     administrator_login_password = generate_password(administrator_login_password)
 
     network = postgresql_flexibleservers.models.Network(public_access='Enabled')
