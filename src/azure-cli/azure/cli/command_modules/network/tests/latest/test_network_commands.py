@@ -2596,7 +2596,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection')
+    @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection', location='eastus2')
     def test_network_ddos_protection_plan(self, resource_group):
 
         self.kwargs.update({
@@ -2609,7 +2609,10 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
         self.kwargs['vnet2_id'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
         # can be attached through DDoS create
         self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos} --vnets {vnet1} {vnet2_id} --tags foo=doo').get_output_in_json()['id']
-        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}',
+                 checks=[self.check('name', '{ddos}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('length(virtualNetworks)', 2)])
 
         # can be detached through VNet update
         self.cmd('network vnet update -g {rg} -n {vnet1} --ddos-protection-plan ""')
@@ -2623,13 +2626,19 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
         # can be detached through DDoS update
         self.cmd('network ddos-protection update -g {rg} -n {ddos} --tags doo=foo --vnets ""')
-        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}',
+                 checks=[self.check('name', '{ddos}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('virtualNetworks', None)])
 
         # can be attached through DDoS update
         self.cmd('network ddos-protection update -g {rg} -n {ddos} --vnets {vnet2_id} --tags foo=boo')
-        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}',
+                 checks=[self.check('name', '{ddos}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('length(virtualNetworks)', 1)])
 
-        self.cmd('network ddos-protection list -g {rg}')
+        self.cmd('network ddos-protection list -g {rg}', checks=[self.check('length(@)', 1)])
         with self.assertRaises(Exception):
             self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 

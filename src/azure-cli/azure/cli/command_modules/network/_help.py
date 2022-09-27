@@ -1787,11 +1787,6 @@ examples:
     text: az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
-helps['network ddos-protection'] = """
-type: group
-short-summary: Manage DDoS Protection Plans.
-"""
-
 helps['network ddos-protection create'] = """
 type: command
 short-summary: Create a DDoS protection plan.
@@ -1808,30 +1803,6 @@ examples:
     text: |
         az network ddos-protection create --location westus2 --name MyDdosPlan --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['network ddos-protection delete'] = """
-type: command
-short-summary: Delete a DDoS protection plan.
-examples:
-  - name: Delete a DDoS protection plan.
-    text: az network ddos-protection delete -g MyResourceGroup -n MyDdosPlan
-"""
-
-helps['network ddos-protection list'] = """
-type: command
-short-summary: List DDoS protection plans.
-examples:
-  - name: List DDoS protection plans
-    text: az network ddos-protection list
-"""
-
-helps['network ddos-protection show'] = """
-type: command
-short-summary: Show details of a DDoS protection plan.
-examples:
-  - name: Show details of a DDoS protection plan.
-    text: az network ddos-protection show -g MyResourceGroup -n MyDdosPlan
 """
 
 helps['network ddos-protection update'] = """
