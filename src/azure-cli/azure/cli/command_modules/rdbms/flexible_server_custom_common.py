@@ -92,7 +92,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None,cutover=None, start_data_migration=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, start_data_migration=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -115,13 +115,13 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
-    
+
     if cutover is True:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
-        
+
     if start_data_migration is True:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
