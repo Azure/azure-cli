@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import importlib
 import unittest
-from unittest import mock
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer

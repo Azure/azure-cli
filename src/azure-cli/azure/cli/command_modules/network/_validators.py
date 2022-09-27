@@ -1827,14 +1827,6 @@ def process_lb_outbound_rule_namespace(cmd, namespace):
                 cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
 
 
-def process_list_delegations_namespace(cmd, namespace):
-    if not namespace.resource_group_name and not namespace.location:
-        raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
-
-    if not namespace.location:
-        get_default_location_from_resource_group(cmd, namespace)
-
-
 def validate_ag_address_pools(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     address_pools = namespace.app_gateway_backend_address_pools

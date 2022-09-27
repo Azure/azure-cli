@@ -589,7 +589,7 @@ class PostgresFlexHandler(TargetHandler):
             'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
                 self.aad_username, client_id),
-            'GRANT ALL PRIVILEGES ON DATABASE {0} TO "{1}";'.format(
+            'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
                 self.dbname, self.aad_username)]
 
     def get_auth_config(self):
@@ -664,7 +664,7 @@ class PostgresSingleHandler(PostgresFlexHandler):
             'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
                 self.aad_username, client_id),
-            "GRANT ALL PRIVILEGES ON DATABASE {0} TO {1};".format(
+            'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
                 self.dbname, self.aad_username)
         ]
 
@@ -703,12 +703,12 @@ class SpringHandler(SourceHandler):
         app = segments.get('child_name_1')
         rg = segments.get('resource_group')
         logger.warning(
-            'Checking if Spring Cloud app enables System Identity...')
+            'Checking if Spring app enables System Identity...')
         identity = run_cli_cmd('az {} app identity show -g {} -s {} -n {} --subscription {}'.format(
             self.source_type, rg, spring, app, sub))
         if (identity is None or identity.get('type') != "SystemAssigned"):
             # assign system identity for spring-cloud
-            logger.warning('Enabling Spring Cloud app System Identity...')
+            logger.warning('Enabling Spring app System Identity...')
             run_cli_cmd(
                 'az {} app identity assign -g {} -s {} -n {} --subscription {}'.format(
                     self.source_type, rg, spring, app, sub))
