@@ -766,7 +766,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
             # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 2)  # 3 warnings, one for download result
+            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
         finally:
             shutil.rmtree(temp_dir)
 
