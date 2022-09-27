@@ -878,6 +878,15 @@ class CosmosDBTests(ScenarioTest):
 
         assert not self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
 
+        # Create a mongo collection with only analytical-storage-ttl defined and make sure the ttl
+        # is properly reflected (bug 1598738)
+        ttl = -1
+        collName = f'{col_name}_ttl_only'
+        collection_create = self.cmd(
+            f'az cosmosdb mongodb collection create -g {{rg}} -a {{acc}} -d {{db_name}} -n {collName} --analytical-storage-ttl {ttl}').get_output_in_json()
+        assert collection_create["resource"]["analyticalStorageTtl"] == ttl
+        self.cmd(f'az cosmosdb mongodb collection delete -g {{rg}} -a {{acc}} -d {{db_name}} -n {collName} --yes')
+
         collection_create = self.cmd(
             'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert collection_create["name"] == col_name
