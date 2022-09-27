@@ -122,7 +122,7 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
-
+        
     if start_data_migration is True:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
