@@ -293,7 +293,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
         key_value.key = key_value.key[len(prefix):]
 
     # We set content type to an empty string to ensure that this key-value is not treated as a key-vault reference or feature flag down the line.
-    key_value.content_type = "" 
+    key_value.content_type = ""
     return key_value
 
 
