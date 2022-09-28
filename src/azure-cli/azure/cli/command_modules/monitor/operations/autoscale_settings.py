@@ -50,7 +50,7 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
     if scale_mode is not None and scale_look_ahead_time is not None:
         predictive_policy = PredictiveAutoscalePolicy(
             scale_mode=scale_mode,
-            scale_look_ahead_time=scale_look_ahead_time or None
+            scale_look_ahead_time=scale_look_ahead_time
         )
     elif scale_mode is not None:
         predictive_policy = PredictiveAutoscalePolicy(
@@ -77,9 +77,9 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
 # pylint: disable=too-many-locals
 def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None,
                      add_actions=None, remove_actions=None, email_administrator=None,
-                     email_coadministrators=None):
+                     email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
     import json
-    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification
+    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification, PredictiveAutoscalePolicy
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
 
     if tags is not None:
@@ -145,7 +145,11 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
         notification.email.send_to_subscription_administrator = email_administrator
     if email_coadministrators is not None:
         notification.email.send_to_subscription_co_administrators = email_coadministrators
-
+    predictive_policy = instance.predictive_autoscale_policy
+    if scale_mode is not None:
+        predictive_policy.scale_mode = scale_mode
+    if scale_look_ahead_time is not None:
+        predictive_policy.scale_look_ahead_time = scale_look_ahead_time
     return instance
 
 

@@ -318,7 +318,8 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1',
             'scale-look-ahead-time': 'PT1M',
-            'scale-mode': 'Enabled'
+            'scale-mode': 'Enabled',
+            'new-scale-mode': 'ForecastOnly'
         })
         self.cmd(
             'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
@@ -330,9 +331,20 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('profiles[0].capacity.minimum', 3),
             self.check('profiles[0].capacity.maximum', 3)
         ])
-        self.cmd('monitor autoscale list -g {rg}',
-                 checks=self.check('length(@)', 1))
+        self.cmd('monitor autoscale list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('monitor autoscale show -g {rg} -n {vmss}')
+
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --count 2 --scale-look-ahead-time {scale-look-ahead-time}',
+                 checks=[
+                     # self.check('predictiveAutoscalePolicy.scaleLookAheadTime', 'PT1M'),
+                     self.check('profiles[0].capacity.default', 2),
+                     self.check('profiles[0].capacity.minimum', 2),
+                     self.check('profiles[0].capacity.maximum', 2)
+                 ])
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --scale-mode {new-scale-mode}', checks=[
+            self.check('predictiveAutoscalePolicy.scaleMode', 'ForecastOnly'),
+        ])
+        self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
 # inexplicably fails on CI so making into a live test
 class TestMonitorAutoscaleTimezones(LiveScenarioTest):

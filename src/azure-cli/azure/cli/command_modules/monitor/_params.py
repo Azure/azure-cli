@@ -214,8 +214,9 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, help='The maximum number of instances.')
 
     with self.argument_context('monitor autoscale', arg_group='Predictive Policy') as c:
-        c.argument('scale_look_ahead_time', help='the amount of time to specify by which instances are launched in advance. '
-                                                 'It must be between 1 minute and 60 minutes in ISO 8601 format.')
+        c.argument('scale_look_ahead_time', help='The amount of time to specify by which instances are launched in advance. '
+                                                 'It must be between 1 minute and 60 minutes in ISO 8601 format '
+                                                 '(for example, 100 days would be P100D).')
         scale_mode_options = [x[1] for x in PredictiveAutoscalePolicyScaleMode.__members__.items()]
         c.argument('scale_mode', arg_type=get_enum_type(scale_mode_options), help='The predictive autoscale mode')
 
