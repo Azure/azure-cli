@@ -3006,7 +3006,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 class _AbstractStackRuntimeHelper:
     def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
-        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-15")
+        self._client = web_client_factory(cmd.cli_ctx)
         self._linux = linux
         self._windows = windows
         self._stacks = []
@@ -3861,14 +3861,13 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
 
 def list_consumption_locations(cmd):
-    # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
-    client = web_client_factory(cmd.cli_ctx, api_version='2020-09-01')
+    client = web_client_factory(cmd.cli_ctx)
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    web_client = web_client_factory(cmd.cli_ctx, api_version="2020-09-01")
+    web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_tier(sku)
     # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
     web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
@@ -4340,7 +4339,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                    resource_group_name=resource_group_name,
                                    subnet=subnet,
                                    vnet=vnet)
-    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
+    client = web_client_factory(cmd.cli_ctx)
 
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
