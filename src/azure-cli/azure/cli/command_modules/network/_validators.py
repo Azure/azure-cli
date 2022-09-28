@@ -1285,6 +1285,7 @@ def process_nw_cm_v1_create_namespace(cmd, namespace):
 
 
 def process_nw_cm_v2_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     if namespace.location is None:  # location is None only occurs in creating a V2 connection monitor
         endpoint_source_resource_id = namespace.endpoint_source_resource_id
 

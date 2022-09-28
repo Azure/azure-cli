@@ -562,17 +562,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_waf_custom_rule_match_cond')
         g.custom_command('remove', 'remove_waf_custom_rule_match_cond')
 
-    with self.command_group('network application-gateway waf-policy managed-rule rule-set', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
+    with self.command_group('network application-gateway waf-policy managed-rule rule-set', min_api='2019-09-01') as g:
         g.custom_command('add', 'add_waf_managed_rule_set')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_managed_rule_set',
-                                 validator=process_appgw_waf_policy_update)
         g.custom_command('remove', 'remove_waf_managed_rule_set')
         g.custom_command('list', 'list_waf_managed_rule_set')
+        g.custom_command('update', 'update_waf_managed_rule_set')
 
     with self.command_group('network application-gateway waf-policy managed-rule exclusion', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,

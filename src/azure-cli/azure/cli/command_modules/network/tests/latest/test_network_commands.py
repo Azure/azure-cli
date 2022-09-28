@@ -2148,10 +2148,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rules 921100 921110')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp2} --rules 913100')
+                 '--group-name {csr_grp2} --rule rule-id=913100')
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type Microsoft_BotManagerRuleSet --version 0.1',
@@ -2351,7 +2351,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rules 921100 921110')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
@@ -2363,7 +2363,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rules 921150')
+                 '--group-name {csr_grp1} --rule rule-id=921150')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
@@ -2376,7 +2376,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 3: Add another managed rule set of different rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp2} --rules 913100')
+                 '--group-name {csr_grp2} --rule rule-id=913100')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
@@ -2389,7 +2389,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 4: override(update) existing managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rules 921100 921150')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921150')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
@@ -2426,7 +2426,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.1 '
                  '--group-name REQUEST-911-METHOD-ENFORCEMENT '
-                 '--rules 911100')
+                 '--rule rule-id=911100')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}', checks=[
             self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
@@ -2450,7 +2450,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.1 '
-                 '--group-name {csr_grp1} --rules 921120 921110')
+                 '--group-name {csr_grp1} --rule rule-id=921120 --rule rule-id=921110')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.1'),
@@ -2462,7 +2462,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.1 '
-                 '--group-name {csr_grp1} --rules 921150')
+                 '--group-name {csr_grp1} --rule rule-id=921150')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
@@ -2475,7 +2475,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # # case 3: Add another managed rule set of different rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.1 '
-                 '--group-name {csr_grp2} --rules 913100')
+                 '--group-name {csr_grp2} --rule rule-id=913100')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
@@ -2488,7 +2488,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 4: override(update) existing managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.1 '
-                 '--group-name {csr_grp1} --rules 921130 921140')
+                 '--group-name {csr_grp1} --rule rule-id=921130 --rule rule-id=921140')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
