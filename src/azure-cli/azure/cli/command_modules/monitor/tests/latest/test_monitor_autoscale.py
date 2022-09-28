@@ -313,6 +313,26 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_predictive_policy')
+    def test_monitor_autoscale_predictive_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'scale-look-ahead-time': 'PT1M',
+            'scale-mode': 'Enabled'
+        })
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --scale-mode {scale-mode}', checks=[
+            self.check('predictiveAutoscalePolicy.scaleMode', 'Enabled'),
+            self.check('profiles[0].capacity.default', 3),
+            self.check('profiles[0].capacity.minimum', 3),
+            self.check('profiles[0].capacity.maximum', 3)
+        ])
+        self.cmd('monitor autoscale list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('monitor autoscale show -g {rg} -n {vmss}')
 
 # inexplicably fails on CI so making into a live test
 class TestMonitorAutoscaleTimezones(LiveScenarioTest):

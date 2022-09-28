@@ -24,7 +24,7 @@ from knack.arguments import CLIArgumentType
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
+    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, PredictiveAutoscalePolicyScaleMode
     from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -212,6 +212,12 @@ def load_arguments(self, _):
         c.argument('count', type=int, help='The numer of instances to use. If used with --min/max-count, the default number of instances to use.')
         c.argument('min_count', type=int, help='The minimum number of instances.')
         c.argument('max_count', type=int, help='The maximum number of instances.')
+
+    with self.argument_context('monitor autoscale', arg_group='Predictive Policy') as c:
+        c.argument('scale_look_ahead_time', help='the amount of time to specify by which instances are launched in advance. '
+                                                 'It must be between 1 minute and 60 minutes in ISO 8601 format.')
+        scale_mode_options = [x[1] for x in PredictiveAutoscalePolicyScaleMode.__members__.items()]
+        c.argument('scale_mode', arg_type=get_enum_type(scale_mode_options), help='The predictive autoscale mode')
 
     with self.argument_context('monitor autoscale profile') as c:
         c.argument('autoscale_name', arg_type=autoscale_name_type, id_part=None)
