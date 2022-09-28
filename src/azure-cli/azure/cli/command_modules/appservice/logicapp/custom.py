@@ -69,7 +69,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
     plan_info = None
     if runtime is not None:
         runtime = runtime.lower()
-    
+
     logicapp_def.kind = 'functionapp,workflowapp'
 
     if not plan:  # no plan passed in, so create a WS1 ASP
