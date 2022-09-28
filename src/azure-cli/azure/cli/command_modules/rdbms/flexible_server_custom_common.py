@@ -482,7 +482,8 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
-    if all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+    if not (instance.identity and instance.identity.user_assigned_identities) or \
+       all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
         parameters = {
             'identity': mysql_flexibleservers.models.Identity(
                 type="None")}
@@ -516,7 +517,7 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
         cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
     )
 
-    return result.identity
+    return result.identity or mysql_flexibleservers.models.Identity()
 
 
 def flexible_server_identity_list(client, resource_group_name, server_name):
@@ -555,7 +556,8 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
-        if not (replica.identity and replica.identity.user_assigned_identities and identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
+        if not (replica.identity and replica.identity.user_assigned_identities and
+           identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
             resolve_poller(
                 server_operations_client.begin_update(
                     resource_group_name=resource_group_name,
@@ -564,7 +566,8 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
                 cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
             )
 
-    if not (instance.identity and instance.identity.user_assigned_identities and identity.lower() in [key.lower() for key in instance.identity.user_assigned_identities.keys()]):
+    if not (instance.identity and instance.identity.user_assigned_identities and
+       identity.lower() in [key.lower() for key in instance.identity.user_assigned_identities.keys()]):
         resolve_poller(
             server_operations_client.begin_update(
                 resource_group_name=resource_group_name,
