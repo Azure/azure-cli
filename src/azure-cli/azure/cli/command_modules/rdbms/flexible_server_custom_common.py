@@ -24,7 +24,7 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._azure_ad_administrators_operations import AzureADAdministratorsOperations as MySqlAzureADAdministratorsOperations
 from ._client_factory import cf_mysql_flexible_replica, cf_mysql_flexible_servers, cf_postgres_flexible_servers, \
-    cf_mysql_flexible_adadmin
+    cf_mysql_flexible_adadmin, cf_mysql_flexible_config
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
@@ -593,10 +593,36 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     if instance.replication_role == 'Replica':
         raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
 
-    return client.begin_delete(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        administrator_name='ActiveDirectory')
+    if isinstance(client, MySqlAzureADAdministratorsOperations):
+        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+        config_operations_client = cf_mysql_flexible_config(cmd.cli_ctx, '_')
+    else:
+        # pending postgres
+        pass
+
+    resolve_poller(
+        client.begin_delete(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            administrator_name='ActiveDirectory'),
+        cmd.cli_ctx, 'Dropping AD admin in server {}'.format(server_name))
+
+    configuration_name = 'aad_auth_only'
+    parameters = mysql_flexibleservers.models.Configuration(
+        name=configuration_name,
+        value='OFF',
+        source='user-override'
+    )
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        resolve_poller(
+            config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
+            cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
+
+    resolve_poller(
+        config_operations_client.begin_update(resource_group_name, server_name, configuration_name, parameters),
+        cmd.cli_ctx, 'Disabling aad_auth_only in server {}'.format(server_name))
 
 
 def flexible_server_ad_admin_list(client, resource_group_name, server_name):
