@@ -54,10 +54,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--endpoint-dest-address bing.com '
                  '--test-config-name DefaultTestConfig '
                  '--protocol Tcp '
-                 '--tcp-port 2048 --tags tag=test',
-                 checks=[
-                     self.check('tags', {'tag': 'test'})
-                 ])
+                 '--tcp-port 2048 ')
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westeurope')
     @AllowLargeResponse()
@@ -73,7 +70,10 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--endpoint-dest-name bing '
                  '--endpoint-dest-address bing.com '
                  '--test-config-name DefaultIcmp '
-                 '--protocol Icmp ')
+                 '--protocol Icmp --tags tag=test',
+                 checks=[
+                     self.check('tags', {'tag': 'test'})
+                 ])
 
         self.cmd('network watcher connection-monitor list -l {location}')
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
