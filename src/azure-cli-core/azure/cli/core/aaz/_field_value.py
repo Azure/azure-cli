@@ -101,7 +101,7 @@ class AAZObject(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            return sellf._data == other._data
+            return self._data == other._data
 
         # other is buld-in type value
         if other is None:

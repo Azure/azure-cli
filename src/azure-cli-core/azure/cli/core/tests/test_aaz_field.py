@@ -690,3 +690,44 @@ class TestAAZField(unittest.TestCase):
 
         self.assertTrue(v_copy.subnets[0]._is_patch and not v_copy.subnets[0].score._is_patch and not v_copy.subnets[0].count._is_patch)
         self.assertTrue(v_copy.subnets[1]._is_patch and v_copy.subnets[1].score._is_patch and v_copy.subnets[1].count._is_patch)
+
+    def test_aaz_equal_comparison(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZDictType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
+        model_schema.name = AAZStrType()
+        model_schema.list = AAZListType()
+        element = model_schema.list.Element = AAZObjectType()
+        element.name = AAZStrType()
+        model_schema.props = AAZObjectType()
+        model_schema.props.name = AAZStrType()
+
+        model_schema.dict = AAZDictType()
+        element = model_schema.dict.Element = AAZObjectType()
+        element.name = AAZStrType()
+        data = {
+            "name": "name",
+            "list": [
+                {
+                    "name": "a"
+                },
+                {
+                    "name": "b"
+                }
+            ],
+            "props": {
+                "name": "props"
+            },
+            "dict": {
+                "key1": {
+                    "name": "key1"
+                },
+                "key2": {
+                    "name": "key2"
+                }
+            }
+        }
+        v1 = AAZObject(model_schema, data=model_schema.process_data(data))
+        v2 = AAZObject(model_schema, data=model_schema.process_data(data))
+        self.assertEqual(v1, v2)
+        self.assertEqual(v1, data)
