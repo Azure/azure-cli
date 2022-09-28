@@ -677,7 +677,8 @@ class FunctionAppASPZoneRedundant(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_functionapp_zone_redundant_plan(self, resource_group):
         plan = self.create_random_name('plan', 24)
-        self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku P1V2'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+        # changing this region since eastus2 was throwing an error that region is not supported for zone redundancy
+        self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku P1V2'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
