@@ -2646,26 +2646,49 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
-            'dns': 'woot1'
+            'ip3': 'ip3',
+            'ddos': 'ddos1',
+            'dns': 'woot1',
+            'idle': 10,
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Static'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
-        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout {idle} --tags foo=doo', checks=[
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', 'wowza2'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')
         ])
 
+        self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
+
+        self.cmd('network public-ip create -g {rg} -n {ip3} --protection-mode Enabled --ddos-protection-plan {ddos_id} --sku Standard',
+                 checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static')
+        ])
+
+         # self.cmd('network public-ip update -g {rg} -n {ip3} --protection-mode Enabled --ddos-protection-plan {ddos_id}',
+         #          checks=[
+         #     self.check('publicIp.provisioningState', 'Succeeded'),
+         #     self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
+         #     self.check('publicIp.dnsSettings', None)
+         # ])
+
         self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+
+        self.cmd('network public-ip ddos-protection-status -g {rg} --public-ip-address-name ', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])

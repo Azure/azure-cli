@@ -1788,7 +1788,7 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
-        c.argument('idle_timeout', help='Idle timeout in minutes.')
+        c.argument('idle_timeout', type=int, help='Idle timeout in minutes.')
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
@@ -1805,6 +1805,8 @@ def load_arguments(self, _):
         with self.argument_context('network public-ip {}'.format(item)) as c:
             c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+            c.argument('ddos_protection_plan', min_api='2022-05-01', help='The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled')
+            c.argument('protection_mode', min_api='2022-05-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
 
     with self.argument_context('network public-ip update') as c:
         c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))

@@ -6496,17 +6496,20 @@ def update_custom_ip_prefix(instance,
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None):
-    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
-        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
+                     public_ip_prefix=None, edge_zone=None, ip_address=None, ddos_protection_plan=None,
+                     protection_mode=None):
+    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
+    from azure.cli.command_modules.network.aaz.latest.network.public_ip import Create
+    Create_Public_IP = Create(cmd.loader)
     public_ip_args = {
+        'name': public_ip_address_name,
+        "resource_group": resource_group_name,
         'location': location,
         'tags': tags,
-        'public_ip_allocation_method': allocation_method,
-        'idle_timeout_in_minutes': idle_timeout,
+        'allocation_method': allocation_method,
+        'idle_timeout': idle_timeout,
         'ip_address': ip_address,
-        'dns_settings': None
     }
 
     if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
@@ -6522,7 +6525,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                 name=public_ip_prefix
             )
             public_ip_prefix_name = public_ip_prefix
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
+        public_ip_args['public_ip_prefix'] = {'id': public_ip_prefix_id}
 
         # reuse prefix information
         pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
@@ -6537,68 +6540,76 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
             "in the future."
         )
 
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
     if not allocation_method:
         if sku and sku.lower() == 'standard':
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
+            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
         else:
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
+            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
 
     if cmd.supported_api_version(min_api='2016-09-01'):
-        public_ip_args['public_ip_address_version'] = version
+        public_ip_args['version'] = version
     if cmd.supported_api_version(min_api='2017-06-01'):
         public_ip_args['zones'] = zone
     if cmd.supported_api_version(min_api='2017-11-01'):
         public_ip_args['ip_tags'] = ip_tags
 
     if sku:
-        public_ip_args['sku'] = {'name': sku}
+        public_ip_args['sku'] = sku
     if tier:
         if not sku:
-            public_ip_args['sku'] = {'name': 'Basic'}
-        public_ip_args['sku'].update({'tier': tier})
-
-    public_ip = PublicIPAddress(**public_ip_args)
+            public_ip_args['sku'] = 'Basic'
+        public_ip_args['tier'] = tier
 
     if dns_name or reverse_fqdn:
-        public_ip.dns_settings = PublicIPAddressDnsSettings(
-            domain_name_label=dns_name,
-            reverse_fqdn=reverse_fqdn)
+        public_ip_args['dns_name'] = dns_name
+        public_ip_args['reverse_fqdn'] = reverse_fqdn
 
     if edge_zone:
-        public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
+        public_ip_args['edge_zone'] = edge_zone
+        public_ip_args['type'] = 'EdgeZone'
+    if protection_mode:
+        public_ip_args['protection_mode'] = protection_mode
+        if protection_mode == 'Enabled' and ddos_protection_plan:
+            public_ip_args['ddos_protection_plan'] = {'id': ddos_protection_plan}
+            print(public_ip_args)
+
+    return Create_Public_IP(public_ip_args)
 
 
-def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
+def update_public_ip(cmd, resource_group_name, public_ip_address_name, dns_name=None, allocation_method=None, version=None,
                      idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
-                     public_ip_prefix=None):
+                     public_ip_prefix=None, ddos_protection_plan=None,
+                     protection_mode=None):
+    from azure.cli.command_modules.network.aaz.latest.network.public_ip import Update
+    Update_Public_IP = Update(cmd.loader)
+    args = {
+        'name': public_ip_address_name,
+        "resource_group": resource_group_name
+    }
     if dns_name is not None or reverse_fqdn is not None:
-        if instance.dns_settings:
-            if dns_name is not None:
-                instance.dns_settings.domain_name_label = dns_name
-            if reverse_fqdn is not None:
-                instance.dns_settings.reverse_fqdn = reverse_fqdn
-        else:
-            PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
-                                                               reverse_fqdn=reverse_fqdn)
+        if dns_name is not None:
+            args['dns_name'] = dns_name
+        if reverse_fqdn is not None:
+            args['reverse_fqdn'] = reverse_fqdn
     if allocation_method is not None:
-        instance.public_ip_allocation_method = allocation_method
+        args['allocation_method'] = allocation_method
     if version is not None:
-        instance.public_ip_address_version = version
+        args['version'] = version
     if idle_timeout is not None:
-        instance.idle_timeout_in_minutes = idle_timeout
+        args['idle_timeout'] = idle_timeout
     if tags is not None:
-        instance.tags = tags
+        args['tags'] = tags
     if sku is not None:
-        instance.sku.name = sku
+        args['sku'] = sku
     if ip_tags:
-        instance.ip_tags = ip_tags
+        args['ip_tags'] = ip_tags
     if public_ip_prefix:
-        SubResource = cmd.get_models('SubResource')
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    return instance
+        args['public_ip_prefix'] = {'id': public_ip_prefix}
+    if ddos_protection_plan is not None:
+        args['ddos_protection_plan'] = ddos_protection_plan
+    if protection_mode is not None:
+        args['protection_mode'] = protection_mode
+    return Update_Public_IP(args)
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
