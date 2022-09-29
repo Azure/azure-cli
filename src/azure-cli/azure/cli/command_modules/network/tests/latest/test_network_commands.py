@@ -2344,7 +2344,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'ag': 'ag1',
             'rg': resource_group,
             'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
-            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
+            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION',
+            'csr_grp3': 'REQUEST-931-APPLICATION-ATTACK-RFI'
         })
         self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
 
@@ -2434,6 +2435,29 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 1),
             self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '911100')
         ])
+
+        # case 8: validate per rule action
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.2')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.2 '
+                 '--group-name {csr_grp3} '
+                 '--rule rule-id=931120 state=Enabled action=Log '
+                 '--rule rule-id=931130 state=Disabled action=AnomalyScoring')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.2'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp3']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '931120'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].state', 'Enabled'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].action', 'Log'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].ruleId', '931130'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].state', 'Disabled'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].action', 'AnomalyScoring')
+        ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_with_version_and_type(self, resource_group):
