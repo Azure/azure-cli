@@ -1822,26 +1822,44 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, client, resource_group_name, policy_name,
-                         location=None, tags=None, rule_set_type='OWASP',
-                         rule_set_version='3.0'):
-    WebApplicationFirewallPolicy, ManagedRulesDefinition, \
-        ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
-                                        'ManagedRulesDefinition',
-                                        'ManagedRuleSet')
-    #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
+def create_ag_waf_policy(cmd, resource_group_name, policy_name,
+                         location=None, tags=None, rule_set_type='OWASP', rule_set_version='3.0'):
+    # https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
 
     # mandatory default rule with empty rule sets
-    managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type, rule_set_version=rule_set_version)
-    managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
-    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version
+    }
+    managed_rule_definition = {
+        "managed_rule_sets": [managed_rule_set]
+    }
+
+    from .aaz.latest.network.application_gateway.waf_policy import Create
+
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "policy_name": policy_name,
+        "location": location,
+        "tags": tags,
+        "managed_rules": managed_rule_definition
+    })
 
 
-def update_ag_waf_policy(cmd, instance, tags=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-    return instance
+def update_ag_waf_policy(cmd, resource_group_name, policy_name,
+                         tags=None):
+    command_args = {
+        "resource_group": resource_group_name,
+        "policy_name": policy_name,
+        "tags": tags
+    }
+
+    if tags is not None:
+        command_args["tags"] = tags
+
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def list_ag_waf_policies(cmd, resource_group_name=None):
@@ -2124,7 +2142,7 @@ def list_waf_managed_rule_set(cmd, resource_group_name, policy_name):
 
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
-        "policy_name": policy_name
+        "name": policy_name
     })["managedRules"]
 # endregion
 

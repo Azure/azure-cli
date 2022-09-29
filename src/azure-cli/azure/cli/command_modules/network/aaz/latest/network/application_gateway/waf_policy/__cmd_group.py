@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "network application-gateway waf-policy",
+)
 class __CMDGroup(AAZCommandGroup):
     """Manage application gateway web application firewall (WAF) policies.
     """

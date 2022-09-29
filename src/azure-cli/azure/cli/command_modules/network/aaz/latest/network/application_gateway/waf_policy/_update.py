@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 class Update(AAZCommand):
-    """Update policy with specified rule set name within a resource group.
+    """Update an application gateway WAF policy.
     """
 
     _aaz_info = {
@@ -42,7 +42,7 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.policy_name = AAZStrArg(
             options=["-n", "--name", "--policy-name"],
-            help="The name of the policy.",
+            help="The name of the application gateway WAF policy.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
@@ -144,8 +144,8 @@ class Update(AAZCommand):
             options=["match-variables"],
             help="List of match variables.",
         )
-        _element.negation_conditon = AAZBoolArg(
-            options=["negation-conditon"],
+        _element.negation_condition = AAZBoolArg(
+            options=["negation-condition"],
             help="Whether this is negate condition or not.",
             nullable=True,
         )
@@ -616,7 +616,7 @@ class Update(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("matchValues", AAZListType, ".match_values", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("matchVariables", AAZListType, ".match_variables", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("negationConditon", AAZBoolType, ".negation_conditon")
+                _elements.set_prop("negationCondition", AAZBoolType, ".negation_condition")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("transforms", AAZListType, ".transforms")
 
@@ -5355,8 +5355,8 @@ def _build_schema_web_application_firewall_policy_read(_schema):
         serialized_name="matchVariables",
         flags={"required": True},
     )
-    _element.negation_conditon = AAZBoolType(
-        serialized_name="negationConditon",
+    _element.negation_condition = AAZBoolType(
+        serialized_name="negationCondition",
     )
     _element.operator = AAZStrType(
         flags={"required": True},

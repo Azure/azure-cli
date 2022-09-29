@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "network application-gateway",
+)
 class __CMDGroup(AAZCommandGroup):
     """Manage application-level routing and load balancing services.
 
