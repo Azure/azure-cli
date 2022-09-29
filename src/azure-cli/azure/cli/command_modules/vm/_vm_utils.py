@@ -25,8 +25,10 @@ MSI_LOCAL_ID = '[system]'
 def get_target_network_api(cli_ctx):
     """
     The fixed version of network used by ARM template deployment.
-    This is consistent with the version settings of other RP to ensure the stability of core commands "az vm create" and "az vmss create".
-    In addition, it can also reduce the workload of re-recording a large number of vm tests after bumping the network api-version.
+    This is consistent with the version settings of other RP to ensure the stability of core commands "az vm create"
+    and "az vmss create".
+    In addition, it can also reduce the workload of re-recording a large number of vm tests after bumping the
+    network api-version.
     Since it does not use the Python SDK, so it will not increase the dependence on the Python SDK
     """
     if cli_ctx.cloud.profile == 'latest':
