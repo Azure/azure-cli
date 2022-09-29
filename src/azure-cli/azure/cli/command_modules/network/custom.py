@@ -1860,10 +1860,6 @@ def update_ag_waf_policy(cmd, resource_group_name, policy_name,
     from .aaz.latest.network.application_gateway.waf_policy import Update
 
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-
-
-def list_ag_waf_policies(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'web_application_firewall_policies', resource_group_name)
 # endregion
 
 
@@ -2008,6 +2004,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     }
 
     from .aaz.latest.network.application_gateway.waf_policy import Update
+
     class WAFManagedRuleSetAdd(Update):
         def pre_instance_update(self, instance):
             for rule_set in instance.properties.managed_rules.managed_rule_sets:
@@ -2026,7 +2023,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                 # add new rule set
                 instance.properties.managed_rules.managed_rule_sets.append(new_managed_rule_set)
 
-    return  WAFManagedRuleSetAdd(cli_ctx=cmd.cli_ctx)(command_args={
+    return WAFManagedRuleSetAdd(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "policy_name": policy_name
     })
@@ -2056,6 +2053,7 @@ def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     }
 
     from .aaz.latest.network.application_gateway.waf_policy import Update
+
     class WAFManagedRuleSetUpdate(Update):
         def pre_instance_update(self, instance):
             updated_rule_set = None
@@ -2098,6 +2096,7 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     """
     from .aaz.latest.network.application_gateway.waf_policy import Update
+
     class WAFManagedRuleSetRemove(Update):
         def pre_instance_update(self, instance):
             delete_rule_set = None
