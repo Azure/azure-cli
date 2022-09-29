@@ -1839,27 +1839,11 @@ def create_ag_waf_policy(cmd, resource_group_name, policy_name,
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
-        "policy_name": policy_name,
+        "name": policy_name,
         "location": location,
         "tags": tags,
         "managed_rules": managed_rule_definition
     })
-
-
-def update_ag_waf_policy(cmd, resource_group_name, policy_name,
-                         tags=None):
-    command_args = {
-        "resource_group": resource_group_name,
-        "policy_name": policy_name,
-        "tags": tags
-    }
-
-    if tags is not None:
-        command_args["tags"] = tags
-
-    from .aaz.latest.network.application_gateway.waf_policy import Update
-
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 # endregion
 
 
@@ -2025,7 +2009,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
 
     return WAFManagedRuleSetAdd(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
-        "policy_name": policy_name
+        "name": policy_name
     })
 
 
@@ -2086,7 +2070,7 @@ def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
 
     return WAFManagedRuleSetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
-        "policy_name": policy_name
+        "name": policy_name
     })
 
 
@@ -2132,7 +2116,7 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
 
     return WAFManagedRuleSetRemove(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
-        "policy_name": policy_name
+        "name": policy_name
     })
 
 

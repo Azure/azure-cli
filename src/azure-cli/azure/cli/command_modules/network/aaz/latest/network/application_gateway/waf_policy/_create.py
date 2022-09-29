@@ -38,8 +38,8 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.policy_name = AAZStrArg(
-            options=["-n", "--name", "--policy-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="The name of the application gateway WAF policy.",
             required=True,
             id_part="name",
@@ -386,7 +386,7 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policyName", self.ctx.args.policy_name,
+                    "policyName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

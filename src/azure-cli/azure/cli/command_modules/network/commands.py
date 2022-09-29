@@ -519,7 +519,6 @@ def load_command_table(self, _):
     # region ApplicationGatewayWAFPolicy
     with self.command_group('network application-gateway waf-policy', min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_waf_policy')
-        g.custom_command('update', 'update_ag_waf_policy')
 
     with self.command_group('network application-gateway waf-policy policy-setting', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
