@@ -584,13 +584,13 @@ class NetworkPublicIpPrefix(ScenarioTest):
         # Test public IP create with prefix
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
-                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix}')", True))
         self.cmd('network public-ip prefix create -n {prefix_v6} -g {rg} --version IPv6 --length 126 -z 1 3 2')
         self.cmd(
             'network public-ip create -n {pip_v6} -g {rg} --public-ip-prefix {prefix_v6}',
             checks=[
                 self.check('publicIp.name', '{pip_v6}'),
-                self.check('publicIp.publicIpAddressVersion', 'IPv6'),
+                self.check('publicIp.publicIPAddressVersion', 'IPv6'),
                 self.check('publicIp.zones', ['1', '3', '2'])
             ]
         )
@@ -644,7 +644,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
         # Create public ip with ip address
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
-                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
 
     @live_only()
     @ResourceGroupPreparer(name_prefix="cli_test_network_public_ip_prefix_", location="eastus2", subscription=AUX_SUBSCRIPTION)
@@ -2651,14 +2651,10 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
     def test_network_public_ip(self, resource_group):
-
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
-            'ip3': 'ip3',
-            'ddos': 'ddos1',
-            'dns': 'woot1',
-            'idle': 10,
+            'dns': 'woot1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -2670,34 +2666,16 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
-        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout {idle} --tags foo=doo', checks=[
-            self.check('publicIPAllocationMethod', 'Static'),
-            self.check('dnsSettings.domainNameLabel', 'wowza2'),
-            self.check('idleTimeoutInMinutes', 10),
-            self.check('tags.foo', 'doo')
-        ])
-
-        self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
-
-        self.cmd('network public-ip create -g {rg} -n {ip3} --protection-mode Enabled --ddos-protection-plan {ddos_id} --sku Standard',
-                 checks=[
-            self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIPAllocationMethod', 'Static')
-        ])
-
-         # self.cmd('network public-ip update -g {rg} -n {ip3} --protection-mode Enabled --ddos-protection-plan {ddos_id}',
-         #          checks=[
-         #     self.check('publicIp.provisioningState', 'Succeeded'),
-         #     self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
-         #     self.check('publicIp.dnsSettings', None)
-         # ])
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
 
         self.cmd('network public-ip list -g {rg}', checks=[
-            self.check('type(@)', 'array'),
-            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
-        ])
-
-        self.cmd('network public-ip ddos-protection-status -g {rg} --public-ip-address-name ', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
@@ -2718,17 +2696,46 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('length(publicIp.zones)', 3)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_ddos_settings', location='eastus2')
+    def test_network_public_ip_ddos_settings(self, resource_group):
+
+        self.kwargs.update({
+            'ip1': 'pubipddos',
+            'ddos': 'ddos1',
+        })
+
+        self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
+
+        self.cmd(
+            'network public-ip create -g {rg} -n {ip1} --protection-mode Enabled --ddos-protection-plan {ddos_id} --sku Standard',
+            checks=[
+                self.check('publicIp.ddosSettings.ddosProtectionPlan.id', '{ddos_id}'),
+                self.check('publicIp.name', '{ip1}'),
+                self.check('publicIp.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Enabled --ddos-protection-plan ""',
+                 checks=[
+                     self.check('ddosSettings.protectionMode', 'Enabled'),
+                     self.check('name', '{ip1}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+        self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
+
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))
 
 class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
     def test_network_zoned_public_ip(self, resource_group):
         self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2',
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku Standard',
                  checks=self.check('publicIp.zones[0]', '2'))
-
+        ip_address = self.cmd('network public-ip show -g {rg} -n {ip}').get_output_in_json()['ipAddress']
         table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
-        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', ip_address, 'IPv4', 'Static', '4', 'Succeeded'])
 
 
 class NetworkRouteFilterScenarioTest(ScenarioTest):
