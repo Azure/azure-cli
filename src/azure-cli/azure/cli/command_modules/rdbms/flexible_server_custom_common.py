@@ -24,7 +24,7 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._azure_ad_administrators_operations import AzureADAdministratorsOperations as MySqlAzureADAdministratorsOperations
 from ._client_factory import cf_mysql_flexible_replica, cf_mysql_flexible_servers, cf_postgres_flexible_servers, \
-    cf_mysql_flexible_adadmin
+    cf_mysql_flexible_adadmin, cf_mysql_flexible_config
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
@@ -39,8 +39,9 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None):
-    logger.warning("Server will be automatically started after 7 days "
-                   "if you do not perform a manual start operation")
+    days = 30 if isinstance(client, MySqlServersOperations) else 7
+    logger.warning("Server will be automatically started after %d days "
+                   "if you do not perform a manual start operation", days)
     return client.begin_stop(resource_group_name, server_name)
 
 
@@ -62,9 +63,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         raise FileOperationError("Properties file does not exist in the given location")
     with open(properties_filepath, "r") as f:
         try:
-            request_payload = json.load(f)
-            request_payload.get("properties")['TriggerCutover'] = 'true'
-            json_data = json.dumps(request_payload)
+            json_data = json.dumps(json.load(f))
         except ValueError as err:
             logger.error(err)
             raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
@@ -94,7 +93,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, start_data_migration=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, start_data_migration=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -117,6 +116,12 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
+
+    if cutover is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
 
     if start_data_migration is True:
         if operationSpecified is True:
@@ -592,10 +597,36 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     if instance.replication_role == 'Replica':
         raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
 
-    return client.begin_delete(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        administrator_name='ActiveDirectory')
+    if isinstance(client, MySqlAzureADAdministratorsOperations):
+        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+        config_operations_client = cf_mysql_flexible_config(cmd.cli_ctx, '_')
+    else:
+        # pending postgres
+        pass
+
+    resolve_poller(
+        client.begin_delete(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            administrator_name='ActiveDirectory'),
+        cmd.cli_ctx, 'Dropping AD admin in server {}'.format(server_name))
+
+    configuration_name = 'aad_auth_only'
+    parameters = mysql_flexibleservers.models.Configuration(
+        name=configuration_name,
+        value='OFF',
+        source='user-override'
+    )
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        resolve_poller(
+            config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
+            cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
+
+    resolve_poller(
+        config_operations_client.begin_update(resource_group_name, server_name, configuration_name, parameters),
+        cmd.cli_ctx, 'Disabling aad_auth_only in server {}'.format(server_name))
 
 
 def flexible_server_ad_admin_list(client, resource_group_name, server_name):

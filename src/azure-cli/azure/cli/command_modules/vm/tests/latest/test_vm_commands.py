@@ -8460,9 +8460,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
 
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4} --enable-secure-boot')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4}')
         self.cmd('vm show -g {rg} -n {vm4}', checks=[
-            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True)
         ])
         self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
@@ -8485,9 +8486,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot')
+        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch')
         self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
-            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True)
         ])
 
 
@@ -9141,7 +9143,7 @@ class DiskRPTestScenario(ScenarioTest):
 
 class RestorePointScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collections', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point', location='EASTUS2EUAP')
     def test_restore_point(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -9150,35 +9152,36 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_name': self.create_random_name('vm_', 15)
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS --admin-username vmtest --admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True').get_output_in_json()
         self.kwargs.update({
             'vm_id': vm['id']
         })
 
-        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id} -l eastus', checks=[
-            self.check('location', 'eastus'),
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
+            self.check('location', 'eastus2euap'),
             self.check('name', '{collection_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}')
         ])
 
-        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name} --consistency-mode CrashConsistent', checks=[
             self.check('name', '{point_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('consistencyMode', 'CrashConsistent')
         ]).get_output_in_json()
 
         self.kwargs.update({
             'point_id': point['id']
         })
 
-        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name} --instance-view', checks=[
+        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
             self.check('id', '{point_id}'),
             self.check('name', '{point_name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('instanceView.diskRestorePoints[0].replicationStatus.status.code', 'ReplicationState/replicating')
         ])
 
         self.cmd('restore-point collection show -g {rg} --collection-name {collection_name} --restore-points', checks=[
-            self.check('location', 'eastus'),
+            self.check('location', 'eastus2euap'),
             self.check('name', '{collection_name}'),
             self.check('restorePoints[0].id', '{point_id}'),
             self.check('restorePoints[0].name', '{point_name}'),
