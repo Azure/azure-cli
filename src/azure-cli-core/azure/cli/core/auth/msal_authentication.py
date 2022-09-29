@@ -53,16 +53,19 @@ class UserCredential(PublicClientApplication):
 
         self._account = accounts[0]
 
-    def get_token(self, *scopes, **kwargs):
+    def get_token(self, *scopes, claims=None, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
-        logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        logger.debug("UserCredential.get_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
 
-        result = self.acquire_token_silent_with_error(list(scopes), self._account, **kwargs)
+        if claims:
+            logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
+                           self.authority.tenant, claims)
+        result = self.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims, **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
             # Check if an access token is returned.
-            check_result(result, scopes=scopes)
+            check_result(result, scopes=scopes, claims=claims)
         except AuthenticationError as ex:
             # For VM SSH ('data' is passed), if getting access token fails because
             # Conditional Access MFA step-up or compliance check is required, re-launch

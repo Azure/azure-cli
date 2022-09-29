@@ -154,10 +154,10 @@ def get_client_type(cmd, namespace):
         return client_type
 
     def _infer_springcloud(source_id):
-        client_type = None
+        client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring-cloud app show -g {} -s {} -n {}'
+            output = run_cli_cmd('az spring app show -g {} -s {} -n {}'
                                  ' -o json'.format(segments.get('resource_group'), segments.get('name'),
                                                    segments.get('child_name_1')))
             prop_val = output.get('properties')\
@@ -180,7 +180,7 @@ def get_client_type(cmd, namespace):
     client_type = None
     if 'webapp' in cmd.name:
         client_type = _infer_webapp(namespace.source_id)
-    elif 'spring-cloud' in cmd.name:
+    elif 'spring-cloud' in cmd.name or 'spring' in cmd.name:
         client_type = _infer_springcloud(namespace.source_id)
 
     method = 'detected'
@@ -247,12 +247,12 @@ def interactive_input(arg, hint):
 def get_local_context_value(cmd, arg):
     '''Get local context values
     '''
-    groups = ['all', 'cupertino', 'serviceconnector']
+    groups = ['all', 'cupertino', 'serviceconnector', 'postgres']
     arg_map = {
         'source_resource_group': ['resource_group_name'],
         'target_resource_group': ['resource_group_name'],
-        'server': ['postgres_server_name'],
-        'database': ['postgres_database_name'],
+        'server': ['server_name', "server"],
+        'database': ['database_name', "database"],
         'site': ['webapp_name']
     }
     for group in groups:
@@ -524,6 +524,13 @@ def validate_default_params(cmd, namespace):
     return missing_args
 
 
+def validate_connection_name(name):
+    if not re.match(r'^[A-Za-z0-9\._]+$', name):
+        raise InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
+                                        "numbers (0-9), periods ('.'), and underscores ('_')")
+    return True
+
+
 def apply_source_args(cmd, namespace, arg_values):
     '''Set source resource id by arg_values
     '''
@@ -635,12 +642,14 @@ def validate_params(cmd, namespace):
     # for command: 'create'
     elif 'create' in cmd.name:
         # if --new is specified
+        if getattr(namespace, 'connection_name', None) is None:
+            namespace.connection_name = generate_connection_name(cmd)
+        else:
+            validate_connection_name(namespace.connection_name)
         if getattr(namespace, 'new_addon'):
             _validate_and_apply(validate_addon_params, apply_addon_params)
         else:
             _validate_and_apply(validate_create_params, apply_create_params)
-        if getattr(namespace, 'connection_name', None) is None:
-            namespace.connection_name = generate_connection_name(cmd)
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)
     # for command: update
@@ -665,6 +674,8 @@ def validate_kafka_params(cmd, namespace):
         elif namespace.connection_name.endswith('_schema'):
             raise InvalidArgumentValueError("Connection name of {} can not end with "
                                             "'_schema'".format(RESOURCE.ConfluentKafka.value))
+        else:
+            validate_connection_name(namespace.connection_name)
 
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)

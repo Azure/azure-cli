@@ -14,7 +14,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
                           add_progress_callback, process_resource_group,
-                          storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
+                          storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
@@ -1928,14 +1928,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file download') as c:
         c.register_path_argument()
-        c.argument('file_path', options_list=('--dest',), type=file_type, required=False,
-                   help='Path of the file to write to. The source filename will be used if not specified.',
-                   validator=process_file_download_namespace, completer=FilesCompleter())
-        c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
-        c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int)
-        c.argument('start_range', type=int)
-        c.argument('end_range', type=int)
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('destination_path', options_list=('--dest',), type=file_type, required=False,
+                help='Path of the file to write to. The source filename will be used if not specified.',
+                completer=FilesCompleter())
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
+        c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
+        c.extra('start_range', type=int, help='Start of byte range to use for downloading a section of the file. '
+                                              'If no --end-range is given, all bytes after the --start-range will be '
+                                              'downloaded. The --start-range and --end-range params are inclusive. Ex: '
+                                              '--start-range=0, --end-range=511 will download first 512 bytes of file.')
+        c.extra('end_range', type=int, help='End of byte range to use for downloading a section of the file. If '
+                                            '--end-range is given, --start-range must be provided. The --start-range '
+                                            'and --end-range params are inclusive. Ex: --start-range=0, '
+                                            '--end-range=511 will download first 512 bytes of file.')
+        c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.argument('open_mode', help="Mode to use when opening the file. Note that specifying append only "
+                                     "open_mode prevents parallel download. So, --max-connections must be "
+                                     "set to 1 if this --open-mode is used.")
+        c.extra('validate_content', help="If set to true, validates an MD5 hash for each retrieved portion of the file."
+                                         " This is primarily valuable for detecting bitflips on the wire if using "
+                                         "http instead of https as https (the default) will already validate. "
+                                         "As computing the MD5 takes processing time and more requests will "
+                                         "need to be done due to the reduced chunk size there may be some increase "
+                                         "in latency.")
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()
@@ -2012,7 +2029,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
-        from ._validators import add_progress_callback_v2
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
         c.register_path_argument(default_file_param='local_file_path')
@@ -2020,7 +2036,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                              process_md5=True)
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
                    help='Path of the local file to upload as the file content.')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
         c.extra('share_name', share_name_type, required=True)
         c.argument('validate_content', action='store_true', min_api='2016-05-31',
@@ -2035,13 +2051,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage file upload-batch') as c:
-        from ._validators import process_file_upload_batch_parameters, add_progress_callback_v2
+        from ._validators import process_file_upload_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
 
     with self.argument_context('storage file download-batch') as c:
         from ._validators import process_file_download_batch_parameters
@@ -2049,7 +2065,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the snapshot.')
 
     with self.argument_context('storage file delete-batch') as c:
         from ._validators import process_file_batch_source_parameters

@@ -5,6 +5,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
+import ast
 import logging
 import re
 import sys
@@ -78,24 +80,42 @@ def main():
     sys.exit(1) if check_pull_request(title, body) else sys.exit(0)
 
 
+def get_list(line):
+    # exclude list
+    # ['app']
+    # ['-c', 'a b', 'a b']
+    # ["-c"]
+    # [1]
+    # ['-c', 'System.Object[] System.Object[]', 'System.Object[] System.Object[]']
+    ref = re.findall(r'([\[].*[\]])', line)
+    try:
+        if isinstance(ast.literal_eval(ref[0]), list):
+            return True
+    except:
+        return False
+
+
 def check_pull_request(title, body):
     if title.startswith('[') or title.startswith('{'):
         error_flag = False
         # only check title which start with `[`
         if title.startswith('['):
             error_flag = check_line(title)
-        is_edit_history_note = False
-        history_note_error_flag = False
-        for line in body:
-            if line.startswith('['):
-                # get component name in []
-                ref = re.findall(r'[\[](.*?)[\]]', line)
-                if ref and ref[0] not in ['Component Name 1', 'Component Name 2']:
-                    is_edit_history_note = True
-                    history_note_error_flag = check_line(line) or history_note_error_flag
-        # If the `History Notes` is edited:
-        # Use the history notes check result (history_note_error_flag), ignore the title check result (error_flag).
-        error_flag = error_flag if not is_edit_history_note else history_note_error_flag
+        if '**History Notes**' in body:
+            is_edit_history_note = False
+            history_note_error_flag = False
+            for line in body:
+                if line.startswith('['):
+                    # get component name in []
+                    ref = re.findall(r'[\[](.*?)[\]]', line)
+                    if ref and ref[0] not in ['Component Name 1', 'Component Name 2'] \
+                            and not get_list(line) \
+                            and not re.findall(r'[\[](.*?)[\]]\((.*)\)', line):  # exclude [Markdown](url)
+                        is_edit_history_note = True
+                        history_note_error_flag = check_line(line) or history_note_error_flag
+            # If the `History Notes` is edited:
+            # Use the history notes check result (history_note_error_flag), ignore the title check result (error_flag).
+            error_flag = error_flag if not is_edit_history_note else history_note_error_flag
     else:
         logger.error('Pull Request title should start with [ or { , Please follow https://aka.ms/submitAzPR')
         error_flag = True
@@ -150,10 +170,15 @@ def check_line(line):
                 logger.error(' ' * index + '↑')
                 error_flag = True
         # --xxx parameters must be enclosed in `, e.g., `--size`
+        # Add check to ensure parameters use --x-x-x format
         if i == '-' and line[idx + 1] == '-':
             param = '--'
             index = idx + 2
             while index < len(line) and line[index] != ' ':
+                if line[index] == '_':
+                    logger.info('%s%s: parameter should use --x-x-x format, please replace _ with -', line, yellow)
+                    logger.error(' ' * index + '↑')
+                    error_flag = True
                 param += line[index]
                 index += 1
             try:
