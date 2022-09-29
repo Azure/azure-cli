@@ -79,7 +79,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
                      add_actions=None, remove_actions=None, email_administrator=None,
                      email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
     import json
-    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification, PredictiveAutoscalePolicy
+    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
 
     if tags is not None:
