@@ -3896,7 +3896,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
             'config2': 'ipconfig2'
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --defer')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
@@ -4040,7 +4040,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
             'pool': 'pool1'
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --defer')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
