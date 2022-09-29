@@ -155,7 +155,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2022-05-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2022-08-01', {
             'resource_skus': '2019-04-01',
             'disks': '2022-03-02',
             'disk_encryption_sets': '2022-03-02',
@@ -163,11 +163,11 @@ AZURE_API_PROFILES = {
             'snapshots': '2022-03-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2021-10-01',
+            'gallery_image_versions': '2022-01-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2022-03-01',
+            'virtual_machine_scale_sets': '2022-08-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -413,7 +413,6 @@ AZURE_API_PROFILES = {
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
-        'vm_default_target_network': '2018-01-01',
         'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'
