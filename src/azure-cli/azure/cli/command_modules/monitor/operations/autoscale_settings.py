@@ -22,6 +22,7 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
     from azure.mgmt.monitor.models import (
         AutoscaleSettingResource, AutoscaleProfile, AutoscaleNotification, ScaleCapacity,
         EmailNotification, WebhookNotification, PredictiveAutoscalePolicy)
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     if not autoscale_name:
         from msrestazure.tools import parse_resource_id
         autoscale_name = parse_resource_id(resource)['name']
@@ -56,6 +57,8 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
         predictive_policy = PredictiveAutoscalePolicy(
             scale_mode=scale_mode
         )
+    elif scale_look_ahead_time is not None:
+        raise InvalidArgumentValueError('scale-mode is required for setting predictive autoscale policy.')
 
     autoscale = AutoscaleSettingResource(
         location=location,
@@ -79,6 +82,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
     import json
     from azure.mgmt.monitor.models import EmailNotification, WebhookNotification, PredictiveAutoscalePolicy
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
+    from azure.cli.core.azclierror import InvalidArgumentValueError
 
     if tags is not None:
         instance.tags = tags
@@ -151,6 +155,8 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
             predictive_policy.scale_mode = scale_mode
     if scale_look_ahead_time is not None and predictive_policy is not None:
         predictive_policy.scale_look_ahead_time = scale_look_ahead_time
+    elif scale_look_ahead_time is not None and predictive_policy is None:
+        raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
     return instance
 
 
