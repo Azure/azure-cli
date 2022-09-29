@@ -23,14 +23,19 @@ MSI_LOCAL_ID = '[system]'
 
 
 def get_target_network_api(cli_ctx):
-    """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
-        necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
-        (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
-    version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
+    The fixed version of network used by ARM template deployment.
+    This is consistent with the version settings of other RP to ensure the stability of core commands "az vm create"
+    and "az vmss create".
+    In addition, it can also reduce the workload of re-recording a large number of vm tests after bumping the
+    network api-version.
+    Since it does not use the Python SDK, so it will not increase the dependence on the Python SDK
+    """
     if cli_ctx.cloud.profile == 'latest':
-        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
+        version = '2022-01-01'
+    else:
+        from azure.cli.core.profiles import get_api_version, ResourceType
+        version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     return version
 
 

@@ -225,6 +225,10 @@ def cf_blob_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
+    if account_name and account_key:
+        # For non-standard account URL such as Edge Zone, account_name can't be parsed from account_url. Use credential
+        # dict instead.
+        credential = {'account_key': account_key, 'account_name': account_name}
 
     return t_blob_service(account_url=account_url, credential=credential,
                           connection_timeout=kwargs.pop('connection_timeout', None), **client_kwargs)

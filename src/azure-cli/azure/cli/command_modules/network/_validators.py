@@ -1285,6 +1285,7 @@ def process_nw_cm_v1_create_namespace(cmd, namespace):
 
 
 def process_nw_cm_v2_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     if namespace.location is None:  # location is None only occurs in creating a V2 connection monitor
         endpoint_source_resource_id = namespace.endpoint_source_resource_id
 
@@ -1327,15 +1328,6 @@ def process_nw_cm_v2_create_namespace(cmd, namespace):
             raise CLIError('usage error: --output-type is specified but no other resource id provided')
 
     return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_create_namespace(cmd, namespace):
-    # V2 parameter set
-    if namespace.source_resource is None:
-        return process_nw_cm_v2_create_namespace(cmd, namespace)
-
-    # V1 parameter set
-    return process_nw_cm_v1_create_namespace(cmd, namespace)
 
 
 def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
@@ -1834,14 +1826,6 @@ def process_lb_outbound_rule_namespace(cmd, namespace):
         if not is_valid_resource_id(namespace.backend_address_pool):
             namespace.backend_address_pool = _generate_lb_subproperty_id(
                 cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
-
-
-def process_list_delegations_namespace(cmd, namespace):
-    if not namespace.resource_group_name and not namespace.location:
-        raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
-
-    if not namespace.location:
-        get_default_location_from_resource_group(cmd, namespace)
 
 
 def validate_ag_address_pools(cmd, namespace):

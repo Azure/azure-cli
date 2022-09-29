@@ -768,13 +768,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
-                                                  deployment_name=None, mode=DeploymentMode.incremental,
+                                                  deployment_name=None, mode=None,
                                                   aux_tenants=None, result_format=None,
                                                   no_pretty_print=None, no_prompt=False,
                                                   exclude_change_types=None, template_spec=None, query_string=None):
     return _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name,
                                                                template_file, template_uri, parameters,
-                                                               deployment_name, DeploymentMode.incremental,
+                                                               deployment_name, mode,
                                                                aux_tenants, result_format,
                                                                no_pretty_print, no_prompt,
                                                                exclude_change_types, template_spec, query_string)

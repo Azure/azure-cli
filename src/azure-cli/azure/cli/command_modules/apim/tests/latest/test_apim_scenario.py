@@ -383,9 +383,22 @@ class ApimScenarioTest(ScenarioTest):
             'graphql_protocol': 'https',
             'graphql_api_type': 'graphql',
             'graphql_path': 'graphqltestpath',
-            'graphql_service_url': 'https://api.spacex.land/graphql/'
+            'graphql_service_url': 'https://api.spacex.land/graphql/',
+            'graphql_im_api_id': self.create_random_name('gr-imp', 10),
+            'path3' : 'testingImportApiPath',
+            'graphql' : 'GraphQL'
         })
-        
+
+        # import api
+        self.cmd(
+            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path3}" --api-id "{graphql_im_api_id}" --specification-url "{graphql_service_url}" --specification-format "{graphql}" --display-name "{graphql_im_api_id}"',
+            checks=[self.check('displayName', '{graphql_im_api_id}'),
+                    self.check('path', '{path3}'),
+                    self.check('apiType','{graphql_api_type}')])
+
+        # api delete command
+        self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {graphql_im_api_id} --delete-revisions true -y')
+
         self.cmd(
             'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{graphql_display_name}" --path "{graphql_path}" --api-id "{graphql_api_id}" --protocols "{graphql_protocol}" --service-url "{graphql_service_url}" --api-type "{graphql_api_type}"',
             checks=[self.check('displayName', '{graphql_display_name}'),

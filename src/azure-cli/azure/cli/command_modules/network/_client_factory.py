@@ -32,14 +32,6 @@ def cf_flow_logs(cli_ctx, _):
     return network_client_factory(cli_ctx).flow_logs
 
 
-def cf_ddos_protection_plans(cli_ctx, _):
-    return network_client_factory(cli_ctx).ddos_protection_plans
-
-
-def cf_endpoint_services(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_endpoint_services
-
-
 def cf_express_route_circuit_authorizations(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_authorizations
 

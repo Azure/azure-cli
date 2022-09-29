@@ -139,13 +139,13 @@ def _is_v2_sku(sku):
 
 
 # pylint: disable=too-many-statements
-def create_application_gateway(cmd, application_gateway_name, resource_group_name, priority, location=None,
+def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
-                               sku=None, private_ip_address=None, public_ip_address=None,
+                               sku=None, priority=None, private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1420,9 +1420,9 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
     return parent
 
 
-def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
-                                   address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
+def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, address_pool=None,
+                                   http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
+                                   rule_type='Basic', no_wait=False, rewrite_rule_set=None, priority=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1475,9 +1475,9 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
+def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                            address_pool=None, settings=None, listener=None,
-                           rule_type='Basic', no_wait=False):
+                           rule_type='Basic', no_wait=False, priority=None):
     ApplicationGatewayRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -2198,20 +2198,22 @@ def list_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name):
 # region DdosProtectionPlans
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation
-
-    ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    ddos_protection_plan = cmd.get_models('DdosProtectionPlan')()
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Create
+    Create_Ddos_Protection = Create(cli_ctx=cmd.cli_ctx)
+    args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
     if location:
-        ddos_protection_plan.location = location
+        args['location'] = location
     if tags:
-        ddos_protection_plan.tags = tags
+        args['tags'] = tags
     if not vnets:
         # if no VNETs can do a simple PUT
-        return ddos_client.begin_create_or_update(resource_group_name, ddos_plan_name, parameters=ddos_protection_plan)
+        return Create_Ddos_Protection(args)
 
     # if VNETs specified, have to create the protection plan and then add the VNETs
-    plan_id = LongRunningOperation(cmd.cli_ctx)(
-        ddos_client.begin_create_or_update(resource_group_name, ddos_plan_name, parameters=ddos_protection_plan)).id
+    plan_id = LongRunningOperation(cmd.cli_ctx)(Create_Ddos_Protection(args))['id']
 
     SubResource = cmd.get_models('SubResource')
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
@@ -2221,28 +2223,50 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
         vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
         vnet.ddos_protection_plan = SubResource(id=plan_id)
         vnet_client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-    return ddos_client.get(resource_group_name, ddos_plan_name)
+
+    show_args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+    Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
+    return Show_Ddos_Protection(show_args)
 
 
-def update_ddos_plan(cmd, instance, tags=None, vnets=None):
+def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=None):
     SubResource = cmd.get_models('SubResource')
-
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Update
+    Update_Ddos_Protection = Update(cli_ctx=cmd.cli_ctx)
+    args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
     if tags is not None:
-        instance.tags = tags
+        args['tags'] = tags
     if vnets is not None:
+        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+        show_args = {
+            "name": ddos_plan_name,
+            "resource_group": resource_group_name,
+        }
+        Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
+        show_args = Show_Ddos_Protection(show_args)
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
         vnet_ids = set([])
         if len(vnets) == 1 and not vnets[0]:
             pass
         else:
             vnet_ids = {x.id for x in vnets}
-        existing_vnet_ids = {x.id for x in instance.virtual_networks} if instance.virtual_networks else set([])
+        if 'virtualNetworks' in show_args:
+            existing_vnet_ids = {x['id'] for x in show_args['virtualNetworks']}
+        else:
+            existing_vnet_ids = set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
-            vnet.ddos_protection_plan = SubResource(id=instance.id)
+            vnet.ddos_protection_plan = SubResource(id=show_args['id'])
             client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
         for vnet_id in existing_vnet_ids.difference(vnet_ids):
             logger.info("Removing VNet '%s' from plan.", vnet_id)
@@ -2250,7 +2274,7 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
             vnet.ddos_protection_plan = None
             client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-    return instance
+    return Update_Ddos_Protection(args)
 
 
 def list_ddos_plans(cmd, resource_group_name=None):
@@ -5373,14 +5397,7 @@ def create_nw_connection_monitor(cmd,
                                  watcher_name,
                                  resource_group_name=None,
                                  location=None,
-                                 source_resource=None,
-                                 source_port=None,
-                                 dest_resource=None,
-                                 dest_port=None,
-                                 dest_address=None,
                                  tags=None,
-                                 do_not_start=None,
-                                 monitoring_interval=None,
                                  endpoint_source_name=None,
                                  endpoint_source_resource_id=None,
                                  endpoint_source_address=None,
@@ -5411,118 +5428,41 @@ def create_nw_connection_monitor(cmd,
                                  output_type=None,
                                  workspace_ids=None,
                                  notes=None):
-    v1_required_parameter_set = [
-        source_resource, source_port,
-        dest_resource, dest_address, dest_port
-    ]
-
-    v2_required_parameter_set = [
-        endpoint_source_name, endpoint_source_resource_id, endpoint_source_type, endpoint_source_coverage_level,
-        endpoint_dest_name, endpoint_dest_address, endpoint_dest_type, endpoint_dest_coverage_level,
-        test_config_name, test_config_protocol,
-        output_type, workspace_ids,
-    ]
-
-    if any(v1_required_parameter_set):  # V1 creation
-        connection_monitor = _create_nw_connection_monitor_v1(cmd,
-                                                              connection_monitor_name,
-                                                              watcher_rg,
-                                                              watcher_name,
-                                                              source_resource,
-                                                              resource_group_name,
-                                                              source_port,
-                                                              location,
-                                                              dest_resource,
-                                                              dest_port,
-                                                              dest_address,
-                                                              tags,
-                                                              do_not_start,
-                                                              monitoring_interval)
-        from azure.cli.core.profiles._shared import AD_HOC_API_VERSIONS
-        client = get_mgmt_service_client(
-            cmd.cli_ctx,
-            ResourceType.MGMT_NETWORK,
-            api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['nw_connection_monitor']
-        ).connection_monitors
-    elif any(v2_required_parameter_set):  # V2 creation
-        connection_monitor = _create_nw_connection_monitor_v2(cmd,
-                                                              location,
-                                                              tags,
-                                                              endpoint_source_name,
-                                                              endpoint_source_resource_id,
-                                                              endpoint_source_address,
-                                                              endpoint_source_type,
-                                                              endpoint_source_coverage_level,
-                                                              endpoint_dest_name,
-                                                              endpoint_dest_resource_id,
-                                                              endpoint_dest_address,
-                                                              endpoint_dest_type,
-                                                              endpoint_dest_coverage_level,
-                                                              test_config_name,
-                                                              test_config_frequency,
-                                                              test_config_protocol,
-                                                              test_config_preferred_ip_version,
-                                                              test_config_threshold_failed_percent,
-                                                              test_config_threshold_round_trip_time,
-                                                              test_config_tcp_port,
-                                                              test_config_tcp_port_behavior,
-                                                              test_config_tcp_disable_trace_route,
-                                                              test_config_icmp_disable_trace_route,
-                                                              test_config_http_port,
-                                                              test_config_http_method,
-                                                              test_config_http_path,
-                                                              test_config_http_valid_status_codes,
-                                                              test_config_http_prefer_https,
-                                                              test_group_name,
-                                                              test_group_disable,
-                                                              output_type,
-                                                              workspace_ids,
-                                                              notes)
-    else:
-        raise CLIError('Unknown operation')
+    connection_monitor = _create_nw_connection_monitor_v2(cmd,
+                                                          location,
+                                                          tags,
+                                                          endpoint_source_name,
+                                                          endpoint_source_resource_id,
+                                                          endpoint_source_address,
+                                                          endpoint_source_type,
+                                                          endpoint_source_coverage_level,
+                                                          endpoint_dest_name,
+                                                          endpoint_dest_resource_id,
+                                                          endpoint_dest_address,
+                                                          endpoint_dest_type,
+                                                          endpoint_dest_coverage_level,
+                                                          test_config_name,
+                                                          test_config_frequency,
+                                                          test_config_protocol,
+                                                          test_config_preferred_ip_version,
+                                                          test_config_threshold_failed_percent,
+                                                          test_config_threshold_round_trip_time,
+                                                          test_config_tcp_port,
+                                                          test_config_tcp_port_behavior,
+                                                          test_config_tcp_disable_trace_route,
+                                                          test_config_icmp_disable_trace_route,
+                                                          test_config_http_port,
+                                                          test_config_http_method,
+                                                          test_config_http_path,
+                                                          test_config_http_valid_status_codes,
+                                                          test_config_http_prefer_https,
+                                                          test_group_name,
+                                                          test_group_disable,
+                                                          output_type,
+                                                          workspace_ids,
+                                                          notes)
 
     return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def _create_nw_connection_monitor_v1(cmd,
-                                     connection_monitor_name,
-                                     watcher_rg,
-                                     watcher_name,
-                                     source_resource,
-                                     resource_group_name=None,
-                                     source_port=None,
-                                     location=None,
-                                     dest_resource=None,
-                                     dest_port=None,
-                                     dest_address=None,
-                                     tags=None,
-                                     do_not_start=None,
-                                     monitoring_interval=60):
-    ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
-        'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
-
-    cmv1 = ConnectionMonitor(
-        location=location,
-        tags=tags,
-        source=ConnectionMonitorSource(
-            resource_id=source_resource,
-            port=source_port
-        ),
-        destination=ConnectionMonitorDestination(
-            resource_id=dest_resource,
-            port=dest_port,
-            address=dest_address
-        ),
-        auto_start=not do_not_start,
-        monitoring_interval_in_seconds=monitoring_interval,
-        endpoints=None,
-        test_configurations=None,
-        test_groups=None,
-        outputs=None,
-        notes=None
-    )
-
-    return cmv1
 
 
 def _create_nw_connection_monitor_v2(cmd,
