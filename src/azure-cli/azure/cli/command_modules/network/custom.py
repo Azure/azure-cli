@@ -8082,15 +8082,6 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
 # endregion
 
 
-# region service aliases
-def list_service_aliases(cmd, location, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).available_service_aliases
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
-    return client.list(location=location)
-# endregion
-
-
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
                         public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None,

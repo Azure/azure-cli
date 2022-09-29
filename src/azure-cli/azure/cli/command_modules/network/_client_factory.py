@@ -140,10 +140,6 @@ def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
 
 
-def cf_service_tags(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_tags
-
-
 def cf_subnets(cli_ctx, _):
     return network_client_factory(cli_ctx).subnets
 
@@ -166,10 +162,6 @@ def cf_virtual_networks(cli_ctx, _):
 
 def cf_virtual_network_peerings(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_peerings
-
-
-def cf_service_aliases(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_service_aliases
 
 
 def cf_dns_references(cli_ctx, _):
