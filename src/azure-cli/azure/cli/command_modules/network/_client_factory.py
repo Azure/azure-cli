@@ -108,10 +108,6 @@ def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
 
 
-def cf_network_profiles(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_profiles
-
-
 def cf_network_security_groups(cli_ctx, _):
     return network_client_factory(cli_ctx).network_security_groups
 
