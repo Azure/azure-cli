@@ -312,21 +312,21 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
-        option = DiskCreateOption.import_secure
+        option = getattr(DiskCreateOption, 'import_secure')
     elif source_blob_uri:
-        option = DiskCreateOption.import_enum
+        option = getattr(DiskCreateOption, 'import')
     elif source_disk or source_snapshot:
-        option = DiskCreateOption.copy
+        option = getattr(DiskCreateOption, 'copy')
     elif source_restore_point:
-        option = DiskCreateOption.restore
+        option = getattr(DiskCreateOption, 'restore')
     elif upload_type == 'Upload':
-        option = DiskCreateOption.upload
+        option = getattr(DiskCreateOption, 'upload')
     elif upload_type == 'UploadWithSecurityData':
-        option = DiskCreateOption.upload_prepared_secure
+        option = getattr(DiskCreateOption, 'upload_prepared_secure')
     elif image_reference or gallery_image_reference:
-        option = DiskCreateOption.from_image
+        option = getattr(DiskCreateOption, 'from_image')
     else:
-        option = DiskCreateOption.empty
+        option = getattr(DiskCreateOption, 'empty')
 
     if source_storage_account_id is None and source_blob_uri is not None:
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1231,10 +1231,8 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
 
 def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     from msrestazure.tools import parse_resource_id
-    from azure.cli.command_modules.vm._vm_utils import get_target_network_api
     result = get_instance_view(cmd, resource_group_name, vm_name, include_user_data)
-    network_client = get_mgmt_service_client(
-        cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cmd.cli_ctx))
+    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
     public_ips = []
     fqdns = []
     private_ips = []
@@ -5311,14 +5309,17 @@ def restore_point_create(client,
                          restore_point_name,
                          exclude_disks=None,
                          source_restore_point=None,
+                         consistency_mode=None,
                          no_wait=False):
     parameters = {}
     if exclude_disks is not None:
-        parameters['exclude_disks'] = []
+        parameters['excludeDisks'] = []
         for disk in exclude_disks:
-            parameters['exclude_disks'].append({'id': disk})
+            parameters['excludeDisks'].append({'id': disk})
     if source_restore_point is not None:
-        parameters['source_restore_point'] = {'id': source_restore_point}
+        parameters['sourceRestorePoint'] = {'id': source_restore_point}
+    if consistency_mode is not None:
+        parameters['consistencyMode'] = consistency_mode
     return sdk_no_wait(no_wait,
                        client.begin_create,
                        resource_group_name=resource_group_name,
