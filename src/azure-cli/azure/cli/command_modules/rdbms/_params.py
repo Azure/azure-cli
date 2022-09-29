@@ -718,6 +718,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Request properties. Use double or no quotes to pass in filepath as argument.')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
+                    c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
+                               help='Either offline or online(with CDC) migration. Deafult is offline', choices=['offline', 'online'], default='offline')
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
@@ -732,17 +734,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                     c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
-                               help='Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.')
+                               help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
-                    c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
-                               help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
-                    c.argument('start_data_migration', options_list=['--start-data-migration'], action='store_true', required=False,
-                               help='Reschedule the data migration to start right now.')
-                elif scope == "delete":
-                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                               help='Name of the migration.')
-                    c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+                    c.argument('cutover', nargs='+', options_list=['--cutover'], required=False,
+                               help='Cut-over the data migration for either all databases or few selected ones. After this is complete, subsequent updates to the selected databases will not be migrated to the target.')
+                    c.argument('cancel', nargs='+', options_list=['--cancel'], required=False,
+                               help='Cancel the data migration for either all databases or few selected ones.')
                 elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
