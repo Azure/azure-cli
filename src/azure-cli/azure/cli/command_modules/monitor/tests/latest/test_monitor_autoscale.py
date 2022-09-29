@@ -361,12 +361,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                  '--scale-mode {scale-mode} --scale-look-ahead-time {scale-look-ahead-time}',
                  checks=[
                      self.check('predictiveAutoscalePolicy.scaleMode', 'Enabled'),
-                     #self.check('predictiveAutoscalePolicy.scaleLookAheadTime', 'PT1M'),
                      self.check('profiles[0].capacity.default', 3),
                      self.check('profiles[0].capacity.minimum', 1),
                      self.check('profiles[0].capacity.maximum', 5)
                  ])
-        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}')
 
         self.cmd(
             'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m" --scale to 5',
@@ -383,10 +381,12 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('scaleAction.type', 'ExactCount'),
                 self.check('scaleAction.value', '5')
             ])
-        # self.cmd('monitor autoscale show-predictive-metric -g {rg} --autoscale-setting-name {vmss} --aggregation Total --interva PT1H ',
-        #          checks=[
-        #              self.check('interval', "PT1M")
-        #          ])
+        self.cmd('monitor autoscale show-predictive-metric -g {rg} --autoscale-setting-name {vmss} --aggregation Total --interva PT1H '
+                 '--metric-name "PercentageCPU" --metric-namespace "Microsoft.Compute/virtualMachineScaleSets" '
+                 '--timespan "2022-01-14T22:00:00.000Z/2022-01-16T22:00:00.000Z" ',
+                 checks=[
+                     self.check('interval', "PT1H")
+                 ])
 
 # inexplicably fails on CI so making into a live test
 class TestMonitorAutoscaleTimezones(LiveScenarioTest):
