@@ -61,14 +61,9 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="Parameters",
-            help="Resource tags.",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
             nullable=True,
         )
 
@@ -76,6 +71,8 @@ class Update(AAZCommand):
         tags.Element = AAZStrArg(
             nullable=True,
         )
+
+        # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
 
