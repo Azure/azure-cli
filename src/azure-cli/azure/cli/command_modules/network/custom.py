@@ -6591,7 +6591,7 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
     if protection_mode:
         public_ip_args['protection_mode'] = protection_mode
         if protection_mode == 'Enabled' and ddos_protection_plan:
-            public_ip_args['ddos_protection_plan'] =ddos_protection_plan
+            public_ip_args['ddos_protection_plan'] = ddos_protection_plan
 
     return Create_Public_IP(public_ip_args)
 
@@ -6671,66 +6671,6 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     if edge_zone:
         public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
     return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
-
-
-def update_public_ip(cmd, resource_group_name, public_ip_address_name, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
-                     public_ip_prefix=None, ddos_protection_plan=None,
-                     protection_mode=None):
-    from azure.cli.command_modules.network.aaz.latest.network.public_ip import Update
-    Update_Public_IP = Update(cli_ctx=cmd.cli_ctx)
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    instance = client.get(resource_group_name, public_ip_address_name)
-
-    args = {
-        'name': public_ip_address_name,
-        "resource_group": resource_group_name
-    }
-    if dns_name is not None or reverse_fqdn is not None:
-        if instance.dns_settings:
-            if dns_name is not None:
-                instance.dns_settings.domain_name_label = dns_name
-            if reverse_fqdn is not None:
-                instance.dns_settings.reverse_fqdn = reverse_fqdn
-        else:
-            PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
-                                                               reverse_fqdn=reverse_fqdn)
-        if dns_name is not None:
-            args['dns_name'] = dns_name
-        if reverse_fqdn is not None:
-            args['reverse_fqdn'] = reverse_fqdn
-    if allocation_method is not None:
-        args['allocation_method'] = allocation_method
-        instance.public_ip_allocation_method = allocation_method
-    if version is not None:
-        args['version'] = version
-        instance.public_ip_address_version = version
-    if idle_timeout is not None:
-        args['idle_timeout'] = idle_timeout
-        instance.idle_timeout_in_minutes = idle_timeout
-    if tags is not None:
-        args['tags'] = tags
-        instance.tags = tags
-    if sku is not None:
-        args['sku'] = sku
-        instance.sku.name = sku
-    if ip_tags:
-        args['ip_tags'] = ip_tags
-        instance.ip_tags = ip_tags
-    if public_ip_prefix:
-        args['public_ip_prefix'] = {'id': public_ip_prefix}
-        SubResource = cmd.get_models('SubResource')
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    if ddos_protection_plan is not None:
-        args['ddos_protection_plan'] = {'id': ddos_protection_plan}
-    if protection_mode is not None:
-        args['protection_mode'] = protection_mode
-
-    if cmd.supported_api_version(max_api='2021-08-01'):
-        return client.begin_create_or_update(resource_group_name, public_ip_address_name, instance)
-    else:
-        return Update_Public_IP(args)
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,

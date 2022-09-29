@@ -13,13 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --sku -z
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_public_ip_zone000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001","name":"cli_test_public_ip_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-28T14:04:55Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001","name":"cli_test_public_ip_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-09-29T08:40:58Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:05:00 GMT
+      - Thu, 29 Sep 2022 08:41:07 GMT
       expires:
       - '-1'
       pragma:
@@ -43,9 +42,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "sku": {"name": "Standard"}, "zones": ["1", "2",
-      "3"], "properties": {"publicIPAllocationMethod": "Static", "publicIPAddressVersion":
-      "IPv4", "idleTimeoutInMinutes": 4}}'
+    body: '{"location": "eastus2", "properties": {"idleTimeoutInMinutes": 4, "publicIPAddressVersion":
+      "IPv4", "publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"},
+      "zones": ["1", "2", "3"]}'
     headers:
       Accept:
       - application/json
@@ -62,34 +61,34 @@ interactions:
       ParameterSetName:
       - -g -n --sku -z
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001/providers/Microsoft.Network/publicIPAddresses/ip?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001/providers/Microsoft.Network/publicIPAddresses/ip?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"ip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001/providers/Microsoft.Network/publicIPAddresses/ip\",\r\n
-        \ \"etag\": \"W/\\\"74c31898-762e-4d7f-b961-d33d4e6c08a1\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"f58c7190-16d0-47fe-8c09-c943453b548f\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n
         \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"e1118cd9-127a-4b56-b5e6-f3059616f8ef\",\r\n    \"publicIPAddressVersion\":
+        \   \"resourceGuid\": \"a4a0ea10-00c0-4454-9905-4bdc79a70bd0\",\r\n    \"publicIPAddressVersion\":
         \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        4,\r\n    \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
+        \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/62cdfeef-01f9-4ed5-94f6-5e3a591e34f5?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/3570d4da-d9e6-4184-a6db-01009060a177?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '683'
+      - '765'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:05:06 GMT
+      - Thu, 29 Sep 2022 08:41:13 GMT
       expires:
       - '-1'
       pragma:
@@ -102,12 +101,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 02153305-32f8-423c-ab84-6fab439a752d
+      - f4d11eb8-7999-49bc-86f7-413db3f29f66
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -122,10 +121,9 @@ interactions:
       ParameterSetName:
       - -g -n --sku -z
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/62cdfeef-01f9-4ed5-94f6-5e3a591e34f5?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/3570d4da-d9e6-4184-a6db-01009060a177?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -137,7 +135,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:05:07 GMT
+      - Thu, 29 Sep 2022 08:41:15 GMT
       expires:
       - '-1'
       pragma:
@@ -147,17 +145,13 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c5d69c4c-9e71-443f-ac26-3d21d3592a7b
+      - e8a62574-eab1-4a9e-be27-3ea913b4fb2d
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -172,32 +166,33 @@ interactions:
       ParameterSetName:
       - -g -n --sku -z
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001/providers/Microsoft.Network/publicIPAddresses/ip?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001/providers/Microsoft.Network/publicIPAddresses/ip?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"ip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_zone000001/providers/Microsoft.Network/publicIPAddresses/ip\",\r\n
-        \ \"etag\": \"W/\\\"ec1ce877-07b2-48e3-ae17-0a72fbba776d\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"17724284-7e8e-4169-9e4f-d5c6a504cf0c\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n
         \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"e1118cd9-127a-4b56-b5e6-f3059616f8ef\",\r\n    \"ipAddress\":
-        \"52.177.241.199\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
-        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
-        {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+        \   \"resourceGuid\": \"a4a0ea10-00c0-4454-9905-4bdc79a70bd0\",\r\n    \"ipAddress\":
+        \"20.10.105.34\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
+        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"VirtualNetworkInherited\"\r\n
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '800'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:05:08 GMT
+      - Thu, 29 Sep 2022 08:41:15 GMT
       etag:
-      - W/"ec1ce877-07b2-48e3-ae17-0a72fbba776d"
+      - W/"17724284-7e8e-4169-9e4f-d5c6a504cf0c"
       expires:
       - '-1'
       pragma:
@@ -207,15 +202,11 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 85ff669c-f154-47e9-83ac-eea30527430c
+      - a5c0b62a-2557-4c02-848b-927289ae9dd2
     status:
       code: 200
-      message: OK
+      message: ''
 version: 1

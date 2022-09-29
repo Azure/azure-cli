@@ -1137,19 +1137,9 @@ def load_command_table(self, _):
             g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
         else:
             g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        # g.custom_command('update', 'update_public_ip')
         g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
         g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
 
-    # with self.command_group('network public-ip') as g:
-        # if self.cli_ctx.cloud.profile == 'latest':
-        #     g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        # else:
-        #     g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        # g.custom_command('update', 'update_public_ip')
-    # from azure.cli.command_modules.network.aaz.latest.network.public_ip import Show, List
-    # self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
-    # self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
         g.custom_command('create', 'create_public_ip_prefix')
         g.command('delete', 'begin_delete')

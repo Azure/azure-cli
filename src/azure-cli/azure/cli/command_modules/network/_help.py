@@ -4948,13 +4948,6 @@ examples:
         az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --tags foo=doo
 """
 
-helps['network public-ip'] = """
-type: group
-short-summary: Manage public IP addresses.
-long-summary: >
-    To learn more about public IP addresses visit https://docs.microsoft.com/azure/virtual-network/virtual-network-public-ip-address
-"""
-
 helps['network public-ip create'] = """
 type: command
 short-summary: Create a public IP address.
@@ -4965,14 +4958,6 @@ examples:
     text: az network public-ip create -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
   - name: Create a public IP resource in an availability zone in the current resource group region.
     text: az network public-ip create -g MyResourceGroup -n MyIp --zone 2
-"""
-
-helps['network public-ip delete'] = """
-type: command
-short-summary: Delete a public IP address.
-examples:
-  - name: Delete a public IP address.
-    text: az network public-ip delete -g MyResourceGroup -n MyIp
 """
 
 helps['network public-ip list'] = """
@@ -5046,14 +5031,6 @@ examples:
   - name: Get the FQDN and IP address of a public IP resource.
     text: >
         az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
-"""
-
-helps['network public-ip update'] = """
-type: command
-short-summary: Update a public IP address.
-examples:
-  - name: Update a public IP resource with a DNS name label and static allocation.
-    text: az network public-ip update -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
 """
 
 helps['network traffic-manager endpoint create'] = """
