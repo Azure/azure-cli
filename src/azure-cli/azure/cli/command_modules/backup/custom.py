@@ -959,7 +959,7 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
                recovery_point.properties.is_managed_virtual_machine and
-               not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
+               not(recovery_point.properties.is_source_vm_encrypted)):
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
