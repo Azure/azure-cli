@@ -136,7 +136,7 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": cancel}})
 
     if operationSpecified is False:
-        raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
+        raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")
 
     r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
     return r.json()

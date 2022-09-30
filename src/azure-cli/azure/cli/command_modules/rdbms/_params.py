@@ -719,15 +719,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                     c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
-                               help='Either offline or online(with CDC) migration. Deafult is offline', choices=['offline', 'online'], default='offline')
+                               help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
-                    c.argument('level', options_list=['--level'], required=False,
-                               help='Specify the level of migration details requested. Valid values are Active and All. Active is the default.')
+                    c.argument('level', options_list=['--level'], choices=['Active', 'All'], default='Active', required=False,
+                               help='Specify the level of migration details requested. Valid values are Active and All.')
                 elif scope == "list":
-                    c.argument('migration_filter', options_list=['--filter'], required=False,
-                               help='Indicate whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
+                    c.argument('migration_filter', options_list=['--filter'], required=False, choices=['Active', 'All'], default='Active',
+                               help='Indicate whether all the migrations or just the Active migrations are returned. Valid values are: Active and All.')
                 elif scope == "update":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
