@@ -141,3 +141,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
         g.wait_command('wait')
+
+    with self.command_group('aks oidc-issuer', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('rotate-signing-keys', 'aks_rotate_service_account_signing_keys',supports_no_wait=True,
+                         confirmation='Be careful that rotate oidc issuer signing keys twice within short period will invalidate service accounts token immediately. Please refer to doc for details.\n' +
+                         'Are you sure you want to perform this operation?')
