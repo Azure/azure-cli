@@ -5079,8 +5079,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
-
-        mc.oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        if oidc_issuer_profile is not None:
+            mc.oidc_issuer_profile = oidc_issuer_profile
 
         return mc
 
@@ -5865,8 +5866,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
-
-        mc.oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        if oidc_issuer_profile is not None:
+            mc.oidc_issuer_profile = oidc_issuer_profile
 
         return mc
 
