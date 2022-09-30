@@ -21,11 +21,11 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_connection_monitor,
-    cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints, cf_network_profiles,
+    cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
-    cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
+    cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
+    cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
     cf_custom_ip_prefixes)
 from azure.cli.command_modules.network._util import (
@@ -206,12 +206,6 @@ def load_command_table(self, _):
         client_factory=cf_network_interfaces
     )
 
-    network_profile_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkProfilesOperations.{}',
-        client_factory=cf_network_profiles,
-        min_api='2018-08-01'
-    )
-
     network_nsg_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
         client_factory=cf_network_security_groups
@@ -231,12 +225,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PublicIPPrefixesOperations.{}',
         client_factory=cf_public_ip_prefixes,
         min_api='2018-07-01'
-    )
-
-    network_service_tags_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ServiceTagsOperations.{}',
-        client_factory=cf_service_tags,
-        min_api='2019-04-01'
     )
 
     network_subnet_sdk = CliCommandType(
@@ -325,12 +313,6 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
-    network_service_aliases_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#AvailableServiceAliasesOperations.{}',
-        client_factory=cf_service_aliases,
-        min_api='2019-08-01'
-    )
-
     network_bastion_hosts_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
         client_factory=cf_bastion_hosts,
@@ -362,10 +344,6 @@ def load_command_table(self, _):
     usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
     with self.command_group('network') as g:
         g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
-
-    with self.command_group('network', network_service_tags_sdk) as g:
-        g.command('list-service-tags', 'list')
-        g.custom_command('list-service-aliases', 'list_service_aliases', command_type=network_service_aliases_sdk)
     # endregion
 
     # region ApplicationGateways
@@ -1007,13 +985,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
-    # endregion
-
-    # region NetworkProfiles
-    with self.command_group('network profile', network_profile_sdk) as g:
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('list', 'list_network_profiles')
-        g.show_command('show')
     # endregion
 
     # region NetworkWatchers
