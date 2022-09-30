@@ -1139,6 +1139,7 @@ def load_command_table(self, _):
             g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
         g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
         g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
+        g.custom_command('update', 'update_public_ip')
 
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
         g.custom_command('create', 'create_public_ip_prefix')

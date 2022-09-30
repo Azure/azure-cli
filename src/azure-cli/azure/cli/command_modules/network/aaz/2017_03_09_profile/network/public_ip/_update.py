@@ -76,7 +76,6 @@ class Update(AAZCommand):
         _args_schema.idle_timeout = AAZIntArg(
             options=["--idle-timeout"],
             help="Idle timeout in minutes.",
-            default=4,
             nullable=True,
         )
         _args_schema.ip_address = AAZStrArg(
