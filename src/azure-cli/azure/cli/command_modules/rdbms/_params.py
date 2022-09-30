@@ -726,6 +726,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('level', options_list=['--level'], choices=['Active', 'All'], default='Active', required=False,
                                help='Specify the level of migration details requested. Valid values are Active and All.')
                 elif scope == "list":
+                    c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
                     c.argument('migration_filter', options_list=['--filter'], required=False, choices=['Active', 'All'], default='Active',
                                help='Indicate whether all the migrations or just the Active migrations are returned. Valid values are: Active and All.')
                 elif scope == "update":
