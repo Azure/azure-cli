@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network public-ip delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "network public-ip delete"
 )
 class Delete(AAZCommand):
     """Delete a public IP address.

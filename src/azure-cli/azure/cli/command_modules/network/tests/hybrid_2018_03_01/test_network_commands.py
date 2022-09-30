@@ -605,7 +605,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
-            'dns': 'woot'
+            'dns': 'woot1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -618,7 +618,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('publicIp.dnsSettings', None)
         ])
         self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza --idle-timeout 10 --tags foo=doo', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', 'wowza'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')
