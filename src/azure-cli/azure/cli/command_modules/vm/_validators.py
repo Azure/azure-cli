@@ -15,14 +15,14 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError, CLIInternalError)
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (
-    check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys
+from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
@@ -234,20 +234,24 @@ def _validate_secrets(secrets, os_type):
 # region VM Create Validators
 
 
+# pylint: disable=too-many-return-statements
 def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
     from msrestazure.tools import is_valid_resource_id
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     import re
 
     # 1 - check if a fully-qualified ID (assumes it is an image ID)
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
-    from ._vm_utils import is_shared_gallery_image_id
+    from ._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id
     if is_shared_gallery_image_id(namespace.image):
         return 'shared_gallery_image_id'
+
+    if is_community_gallery_image_id(namespace.image):
+        return 'community_gallery_image_id'
 
     # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
@@ -282,6 +286,12 @@ def _parse_image_argument(cmd, namespace):
             namespace.os_offer = matched['offer']
             namespace.os_sku = matched['sku']
             namespace.os_version = matched['version']
+            if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
+                image_plan = _get_image_plan_info_if_exists(cmd, namespace)
+                if image_plan:
+                    namespace.plan_name = image_plan.name
+                    namespace.plan_product = image_plan.product
+                    namespace.plan_publisher = image_plan.publisher
             return 'urn'
     except requests.exceptions.ConnectionError:
         pass
@@ -293,7 +303,7 @@ def _parse_image_argument(cmd, namespace):
         namespace.image = _get_resource_id(cmd.cli_ctx, namespace.image, namespace.resource_group_name,
                                            'images', 'Microsoft.Compute')
         return 'image_id'
-    except CloudError:
+    except HttpResponseError:
         if images is not None:
             err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, ' \
                   'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
@@ -306,7 +316,6 @@ def _parse_image_argument(cmd, namespace):
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     try:
         compute_client = _compute_client_factory(cmd.cli_ctx)
         if namespace.os_version.lower() == 'latest':
@@ -323,7 +332,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 
         # pylint: disable=no-member
         return image.plan
-    except CloudError as ex:
+    except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
                        "will be skipped", namespace.image, ex.message)
 
@@ -344,12 +353,14 @@ def _get_storage_profile_description(profile):
         return 'attach existing managed OS disk'
     if profile == StorageProfile.SharedGalleryImage:
         return 'create OS disk from shared gallery image'
+    if profile == StorageProfile.CommunityGalleryImage:
+        return 'create OS disk from community gallery image'
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
-        if zone_info:
+        if zone_info and size_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
             temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
             # For Stack (compute - 2017-03-30), Resource_sku doesn't implement location_info property
@@ -361,9 +372,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
                                "used to find such locations".format(namespace.resource_group_name))
 
 
-# pylint: disable=too-many-branches, too-many-statements
+# pylint: disable=too-many-branches, too-many-statements, too-many-locals
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
+
+    _validate_vm_vmss_create_ephemeral_placement(namespace)
 
     # specialized is only for image
     if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
@@ -387,6 +400,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.storage_profile = StorageProfile.ManagedCustomImage
         elif image_type == 'shared_gallery_image_id':
             namespace.storage_profile = StorageProfile.SharedGalleryImage
+        elif image_type == 'community_gallery_image_id':
+            namespace.storage_profile = StorageProfile.CommunityGalleryImage
         elif image_type == 'urn':
             if namespace.use_unmanaged_disk:
                 # STORAGE PROFILE #1
@@ -420,6 +435,10 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             forbidden.append('os_disk_name')
 
     elif namespace.storage_profile == StorageProfile.SharedGalleryImage:
+        required = ['image']
+        forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
+
+    elif namespace.storage_profile == StorageProfile.CommunityGalleryImage:
         required = ['image']
         forbidden = ['attach_os_disk', 'storage_account', 'storage_container_name', 'use_unmanaged_disk']
 
@@ -517,29 +536,62 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.attach_data_disks = [_get_resource_id(cmd.cli_ctx, d, namespace.resource_group_name, 'disks',
                                                             'Microsoft.Compute') for d in namespace.attach_data_disks]
 
+    if namespace.storage_profile == StorageProfile.SharedGalleryImage:
+
+        if namespace.location is None:
+            raise RequiredArgumentMissingError(
+                'Please input the location of the shared gallery image through the parameter --location.')
+
+        from ._vm_utils import parse_shared_gallery_image_id
+        image_info = parse_shared_gallery_image_id(namespace.image)
+
+        from ._client_factory import cf_shared_gallery_image
+        shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+            location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+
+        if namespace.os_type and namespace.os_type.lower() != shared_gallery_image_info.os_type.lower():
+            raise ArgumentUsageError("The --os-type is not the correct os type of this shared gallery image, "
+                                     "the os type of this image should be {}".format(shared_gallery_image_info.os_type))
+        namespace.os_type = shared_gallery_image_info.os_type
+
+    if namespace.storage_profile == StorageProfile.CommunityGalleryImage:
+
+        if namespace.location is None:
+            raise RequiredArgumentMissingError(
+                'Please input the location of the community gallery image through the parameter --location.')
+
+        from ._vm_utils import parse_community_gallery_image_id
+        image_info = parse_community_gallery_image_id(namespace.image)
+
+        from ._client_factory import cf_community_gallery_image
+        community_gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+            location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+
+        if namespace.os_type and namespace.os_type.lower() != community_gallery_image_info.os_type.lower():
+            raise ArgumentUsageError(
+                "The --os-type is not the correct os type of this community gallery image, "
+                "the os type of this image should be {}".format(community_gallery_image_info.os_type))
+        namespace.os_type = community_gallery_image_info.os_type
+
+    if getattr(namespace, 'security_type', None) == 'ConfidentialVM' and \
+            not getattr(namespace, 'os_disk_security_encryption_type', None):
+        raise RequiredArgumentMissingError('usage error: "--os-disk-security-encryption-type" is required '
+                                           'when "--security-type" is specified as "ConfidentialVM"')
+
+    if getattr(namespace, 'os_disk_secure_vm_disk_encryption_set', None) and \
+            getattr(namespace, 'os_disk_security_encryption_type', None) != 'DiskWithVMGuestState':
+        raise ArgumentUsageError(
+            'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
+            'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
+
     if not namespace.os_type:
-        if namespace.storage_profile == StorageProfile.SharedGalleryImage:
-
-            if namespace.location is None:
-                from azure.cli.core.azclierror import RequiredArgumentMissingError
-                raise RequiredArgumentMissingError(
-                    'Please input the location of the shared gallery image through the parameter --location.')
-
-            from ._vm_utils import parse_shared_gallery_image_id
-            image_info = parse_shared_gallery_image_id(namespace.image)
-
-            from ._client_factory import cf_shared_gallery_image
-            shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-            namespace.os_type = shared_gallery_image_info.os_type
-
-        else:
-            namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
 
+    # pylint: disable=line-too-long
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
@@ -548,6 +600,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               os_disk_caching=namespace.os_caching,
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
+                                              ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
                                               data_disk_delete_option=getattr(
                                                   namespace, 'data_disk_delete_option', None))
 
@@ -1012,6 +1065,19 @@ def _validate_vm_create_nics(cmd, namespace):
     logger.debug('existing NIC(s) will be used')
 
 
+def _validate_vm_nic_delete_option(namespace):
+    if not namespace.nics and namespace.nic_delete_option:
+        if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+            namespace.nic_delete_option = namespace.nic_delete_option[0]
+        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+            from azure.cli.core.parser import InvalidArgumentValueError
+            raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
+                                            "specified. Either specify a list of nics and their delete option like: "
+                                            "--nics nic1 nic2 --nic-delete-option nic1=Delete nic2=Detach or specify "
+                                            "delete option for all: --nics nic1 nic2 --nic-delete-option Delete or "
+                                            "specify delete option for the new nic created: --nic-delete-option Delete")
+
+
 def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
@@ -1187,29 +1253,87 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
     return content
 
 
-def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
-    if from_set_command or namespace.assign_identity is not None:
+def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
+
+    # For the creation of VM and VMSS, "--role" and "--scope" should be passed in at the same time
+    # when assigning a role to the managed identity
+    if not is_identity_assign and namespace.assign_identity is not None:
+        if (namespace.identity_scope and not namespace.identity_role) or \
+                (not namespace.identity_scope and namespace.identity_role):
+            raise ArgumentUsageError(
+                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
+
+    # For "az vm identity assign", "--scope" must be passed in when assigning a role to the managed identity
+    if is_identity_assign:
+        role_is_explicitly_specified = getattr(namespace.identity_role, 'is_default', None) is None
+        if not namespace.identity_scope and role_is_explicitly_specified:
+            raise ArgumentUsageError(
+                "usage error: please specify --scope when assigning a role to the managed identity")
+
+    # Assign managed identity
+    if is_identity_assign or namespace.assign_identity is not None:
         identities = namespace.assign_identity or []
         from ._vm_utils import MSI_LOCAL_ID
         for i, _ in enumerate(identities):
             if identities[i] != MSI_LOCAL_ID:
                 identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
                                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
-        if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
-                namespace.identity_role))
+
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
-            raise CLIError('usage error: user assigned identity is only available under profile '
-                           'with minimum Compute API version of 2017-12-01')
+            raise ArgumentUsageError('usage error: user assigned identity is only available under profile '
+                                     'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
-                raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
+                raise ArgumentUsageError("usage error: '--scope'/'--role' is only applicable when "
+                                         "assign system identity")
             # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
-    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
-        raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+    elif namespace.identity_scope or namespace.identity_role:
+        raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+
+    if not is_identity_assign:
+        _enable_msi_for_trusted_launch(namespace)
+
+
+def _enable_msi_for_trusted_launch(namespace):
+    # Enable system assigned msi by default when Trusted Launch configuration is met
+    is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
+        and namespace.enable_vtpm and namespace.enable_secure_boot
+    if is_trusted_launch and not namespace.disable_integrity_monitoring:
+        from ._vm_utils import MSI_LOCAL_ID
+        logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
+        if namespace.assign_identity is None:
+            namespace.assign_identity = [MSI_LOCAL_ID]
+        elif '[system]' not in namespace.assign_identity:
+            namespace.assign_identity.append(MSI_LOCAL_ID)
+
+
+def _validate_trusted_launch(namespace):
+    if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
+        return
+
+    if namespace.enable_vtpm is None:
+        namespace.enable_vtpm = True
+
+    if namespace.enable_secure_boot is None:
+        namespace.enable_secure_boot = True
+
+
+def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.application_configuration_overrides and \
+       len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
+        raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
+                                 ' --application-version-ids')
+    if namespace.treat_deployment_as_failure:
+        if len(namespace.application_version_ids) != len(namespace.treat_deployment_as_failure):
+            raise ArgumentUsageError('usage error: --treat-deployment-as-failure should have the same number of items'
+                                     ' as --application-version-ids')
+        for boolean_value_in_string in namespace.treat_deployment_as_failure:
+            if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
+                raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or'
+                                         ' "false" values')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1268,17 +1392,22 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_nic_delete_option(namespace)
+    _validate_community_gallery_legal_agreement_acceptance(cmd, namespace)
 
 # endregion
 
 
 def process_vm_update_namespace(cmd, namespace):
+    _validate_vm_create_dedicated_host(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1419,7 +1548,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cli_ctx))
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
@@ -1435,6 +1564,12 @@ def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
+                                            ' available for VMSS with flexible orchestration mode')
+
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
         # The commentted parameters are also forbidden, but they have default values.
@@ -1442,78 +1577,44 @@ def process_vmss_create_namespace(cmd, namespace):
 
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
-        # namespace.disable_overprovision = True  # overprovisioning must be false for vmss flex preview
-        # namespace.single_placement_group = False  # SPG must be false for VMSS flex
+
         namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
-        banned_params = [
-            # namespace.accelerated_networking,
-            # namespace.admin_password,
-            # namespace.admin_username,
-            # namespace.application_gateway,
-            # namespace.app_gateway_capacity,
-            # namespace.app_gateway_sku,
-            # namespace.app_gateway_subnet_address_prefix,
-            # namespace.application_security_groups,
-            # namespace.assign_identity,
-            # namespace.authentication_type,
-            # namespace.backend_pool_name,
-            # namespace.backend_port,
-            # namespace.computer_name_prefix,
-            # namespace.custom_data,
-            # namespace.data_caching,
-            # namespace.data_disk_sizes_gb,
-            # namespace.disable_overprovision,
-            # namespace.dns_servers,
-            # namespace.ephemeral_os_disk,
-            # namespace.eviction_policy,
-            # namespace.generate_ssh_keys,
-            namespace.health_probe,
-            namespace.host_group,
-            # namespace.image,
-            # namespace.instance_count,
-            # namespace.load_balancer,
-            namespace.nat_pool_name,
-            # namespace.load_balancer_sku,
-            # namespace.license_type,
-            # namespace.max_price,
-            # namespace.nsg,
-            # namespace.os_caching,
-            # namespace.os_disk_name,
-            # namespace.os_type,
-            # namespace.plan_name,
-            # namespace.plan_product,
-            # namespace.plan_promotion_code,
-            # namespace.plan_publisher,
-            # namespace.priority,
-            # namespace.public_ip_address,
-            # namespace.public_ip_address_allocation,
-            # namespace.public_ip_address_dns_name,
-            # namespace.public_ip_per_vm,
-            # namespace.identity_role,
-            # namespace.identity_scope,
-            namespace.scale_in_policy,
-            # namespace.secrets,
-            # namespace.ssh_dest_key_path,
-            # namespace.ssh_key_value,
-            # namespace.storage_container_name,
-            # namespace.storage_sku,
-            # namespace.subnet,
-            # namespace.subnet_address_prefix,
-            # namespace.terminate_notification_time,
-            # namespace.ultra_ssd_enabled,
-            # namespace.upgrade_policy_mode,
-            # namespace.use_unmanaged_disk,
-            # namespace.vm_domain_name,
-            # namespace.vm_sku,
-            # namespace.vnet_address_prefix,
-            # namespace.vnet_name,
-            namespace.user_data
-        ]
-        if any(param is not None for param in banned_params):
-            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+        banned_params = {
+            '--disable-overprovision': namespace.disable_overprovision,
+            '--health-probe': namespace.health_probe,
+            '--host-group': namespace.host_group,
+            '--nat-pool-name': namespace.nat_pool_name,
+            '--scale-in-policy': namespace.scale_in_policy,
+            '--user-data': namespace.user_data
+        }
+
+        for param, value in banned_params.items():
+            if value is not None:
+                raise ArgumentUsageError(f'usage error: {param} is not supported for Flex mode')
+
+        if namespace.vm_sku and not namespace.image:
+            raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
+
+        _validate_trusted_launch(namespace)
+        if namespace.image:
+
+            if namespace.vm_sku is None:
+                from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
+                if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
+                    namespace.vm_sku = 'Standard_DS1_v2'
+                else:
+                    namespace.vm_sku = 'Standard_D1_v2'
+
+            if namespace.network_api_version is None:
+                namespace.network_api_version = '2020-11-01'
+
+            if namespace.platform_fault_domain_count is None:
+                namespace.platform_fault_domain_count = 1
+
+            if namespace.computer_name_prefix is None:
+                namespace.computer_name_prefix = namespace.vmss_name[:8]
 
         # if namespace.platform_fault_domain_count is None:
         #     raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
@@ -1521,18 +1622,23 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.tags is not None:
             validate_tags(namespace)
         _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
-        # validate_edge_zone(cmd, namespace)
+        validate_edge_zone(cmd, namespace)
         if namespace.application_security_groups is not None:
             validate_asg_names_or_ids(cmd, namespace)
+
         if getattr(namespace, 'attach_os_disk', None) or namespace.image is not None:
             _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
-        if namespace.vnet_name or namespace.subnet:
-            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
-        if namespace.load_balancer is not None or namespace.application_gateway is not None:
+        if namespace.vnet_name or namespace.subnet or namespace.image:
+            _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
+            _validate_vmss_create_subnet(namespace)
+
+        if namespace.load_balancer or namespace.application_gateway or namespace.image:
             _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
-        if namespace.public_ip_address is not None:
+
+        if namespace.public_ip_address or namespace.image:
             _validate_vmss_create_public_ip(cmd, namespace)
+
         if namespace.nsg is not None:
             _validate_vmss_create_nsg(cmd, namespace)
         if namespace.accelerated_networking is not None:
@@ -1555,6 +1661,7 @@ def process_vmss_create_namespace(cmd, namespace):
 
         if namespace.eviction_policy and not namespace.priority:
             raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
         return
 
     # Uniform mode
@@ -1580,6 +1687,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace, cmd)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
@@ -1590,12 +1698,13 @@ def process_vmss_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise ArgumentUsageError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_community_gallery_legal_agreement_acceptance(cmd, namespace)
 
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
@@ -1606,13 +1715,30 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 # endregion
 
 
 # region disk, snapshot, image validators
-def validate_vm_disk(cmd, namespace):
-    namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
-                                      namespace.resource_group_name, 'disks', 'Microsoft.Compute')
+def process_vm_disk_attach_namespace(cmd, namespace):
+    disks = []
+    if not namespace.disks:
+        if not namespace.disk:
+            raise RequiredArgumentMissingError("Please use --name or --disks to specify the disk names")
+
+        disks = [_get_resource_id(cmd.cli_ctx, namespace.disk, namespace.resource_group_name,
+                                  'disks', 'Microsoft.Compute')]
+    else:
+        if namespace.disk:
+            raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
+
+        for disk in namespace.disks:
+            disks.append(_get_resource_id(cmd.cli_ctx, disk, namespace.resource_group_name,
+                                          'disks', 'Microsoft.Compute'))
+    namespace.disks = disks
+
+    if len(disks) > 1 and namespace.lun:
+        raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disks")
 
 
 def validate_vmss_disk(cmd, namespace):
@@ -1625,19 +1751,154 @@ def validate_vmss_disk(cmd, namespace):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
-def process_disk_or_snapshot_create_namespace(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
+def _validate_gallery_image_reference(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None \
+                  and cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
+                                                operation_group='disks', min_api='2022-03-02')
+    if not is_validate:
+        return
+
+    from azure.cli.command_modules.vm._image_builder import GalleryImageReferenceType
+    from ._vm_utils import is_compute_gallery_image_id, is_community_gallery_image_id, \
+        is_shared_gallery_image_id
+
+    gallery_image_reference = namespace.gallery_image_reference
+    if is_compute_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMPUTE.backend_key
+        return
+    if is_community_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMMUNITY.backend_key
+        return
+    if is_shared_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.SHARED.backend_key
+        return
+
+    from azure.cli.core.parser import InvalidArgumentValueError
+    raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
+                                    'compute, shared or community gallery image version. For details about valid '
+                                    'format, please refer to the help sample'.format(gallery_image_reference))
+
+
+def process_disk_create_namespace(cmd, namespace):
+    from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
+    _validate_security_data_uri(namespace)
+    _validate_upload_type(cmd, namespace)
+    _validate_secure_vm_disk_encryption_set(namespace)
+    _validate_hyper_v_generation(namespace)
+    if namespace.source:
+        usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
+                      '--source VHD_BLOB_URI [--source-storage-account-id ID]'
+        try:
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
+                namespace.source_restore_point, _ = _figure_out_storage_source(
+                    cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            if not namespace.source_blob_uri and namespace.source_storage_account_id:
+                raise ArgumentUsageError(usage_error)
+        except HttpResponseError:
+            raise ArgumentUsageError(usage_error)
+
+
+def _validate_security_data_uri(namespace):
+    if 'security_data_uri' not in namespace or not namespace.security_data_uri:
+        return
+
+    if not namespace.security_type:
+        raise RequiredArgumentMissingError(
+            'Please specify --security-type when using the --security-data-uri parameter')
+
+    if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+        raise ArgumentUsageError(
+            "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
+
+    if not namespace.source:
+        raise RequiredArgumentMissingError(
+            'Please specify --source when using the --security-data-uri parameter')
+
+
+def _validate_upload_type(cmd, namespace):
+    if 'upload_type' not in namespace:
+        return
+
+    if not namespace.upload_type and namespace.for_upload:
+        namespace.upload_type = 'Upload'
+
+    if namespace.upload_type == 'UploadWithSecurityData':
+
+        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+            raise ArgumentUsageError(
+                "'UploadWithSecurityData' is not supported in the current profile. "
+                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
+
+        if not namespace.security_type:
+            raise RequiredArgumentMissingError(
+                "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
+
+        if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+            raise ArgumentUsageError(
+                "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
+
+
+def _validate_secure_vm_disk_encryption_set(namespace):
+    if 'secure_vm_disk_encryption_set' not in namespace:
+        return
+
+    if namespace.secure_vm_disk_encryption_set:
+        if not namespace.security_type or \
+                namespace.security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
+            raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set can only be specified only '
+                                     'when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+    elif namespace.security_type and namespace.security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
+        raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set is mandatory when '
+                                 '--security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+
+def _validate_hyper_v_generation(namespace):
+    if namespace.security_type and (not namespace.hyper_v_generation or namespace.hyper_v_generation == 'V1'):
+        logger.warning(
+            'Enabling security features by using parameter "--security-type" requires UEFI support with Generation 2 '
+            'VMs, please set the parameter "--hyper-v-generation" to "V2" for enabling Generation 2 VM support.')
+
+
+def process_snapshot_create_namespace(cmd, namespace):
+    from azure.core.exceptions import HttpResponseError
+    validate_tags(namespace)
+    validate_edge_zone(cmd, namespace)
+    _validate_gallery_image_reference(cmd, namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
-            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(
-                cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, _, source_info = \
+                _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError(usage_error)
-        except CloudError:
-            raise CLIError(usage_error)
+                raise ArgumentUsageError(usage_error)
+            # autodetect copy_start for `az snapshot create`
+            if 'snapshot create' in cmd.name and hasattr(namespace, 'copy_start') and namespace.copy_start is None:
+                if not source_info:
+                    from azure.cli.core.util import parse_proxy_resource_id
+                    result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
+                    try:
+                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                                                                    result['resource_group'],
+                                                                    result['name'])
+                    except Exception:  # pylint: disable=broad-except
+                        # There's a chance that the source doesn't exist, eg, vmss os disk.
+                        # You can get the id of vmss os disk by
+                        #   `az vmss show -g {} -n {} --instance-id {} --query storageProfile.osDisk.managedDisk.id`
+                        # But `az disk show --ids {}` will return ResourceNotFound error
+                        # We don't autodetect copy_start in this situation
+                        return
+                if not namespace.location:
+                    get_default_location_from_resource_group(cmd, namespace)
+                # if the source location differs from target location, then it's copy_start scenario
+                if namespace.incremental:
+                    namespace.copy_start = source_info.location != namespace.location
+        except HttpResponseError:
+            raise ArgumentUsageError(usage_error)
 
 
 def process_image_create_namespace(cmd, namespace):
@@ -1665,13 +1926,13 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -1688,23 +1949,37 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
+    source_info = None
+    source_restore_point = None
     if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
     elif '/snapshots/' in source.lower():
         source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
     else:
-        compute_client = _compute_client_factory(cli_ctx)
-        # pylint: disable=no-member
-        try:
-            info = compute_client.snapshots.get(resource_group_name, source)
-            source_snapshot = info.id
-        except ResourceNotFoundError:
-            info = compute_client.disks.get(resource_group_name, source)
-            source_disk = info.id
+        source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
+        if is_snapshot:
+            source_snapshot = source_info.id
+        else:
+            source_disk = source_info.id
 
-    return (source_blob_uri, source_disk, source_snapshot)
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
+
+
+def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
+    compute_client = _compute_client_factory(cli_ctx)
+    is_snapshot = True
+
+    try:
+        info = compute_client.snapshots.get(resource_group_name, source)
+    except ResourceNotFoundError:
+        is_snapshot = False
+        info = compute_client.disks.get(resource_group_name, source)
+
+    return info, is_snapshot
 
 
 def process_disk_encryption_namespace(cmd, namespace):
@@ -1722,7 +1997,7 @@ def process_disk_encryption_namespace(cmd, namespace):
 
 
 def process_assign_identity_namespace(cmd, namespace):
-    _validate_vm_vmss_msi(cmd, namespace, from_set_command=True)
+    _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=True)
 
 
 def process_remove_identity_namespace(cmd, namespace):
@@ -1736,17 +2011,31 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
+def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    _validate_vm_vmss_set_applications(cmd, namespace)
+
+
 def process_gallery_image_version_namespace(cmd, namespace):
-    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption = cmd.get_models(
-        'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption')
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType = \
+        cmd.get_models('TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
+                       'ConfidentialVMEncryptionType')
     storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
     storage_account_types_str = ", ".join(storage_account_types_list)
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
             if len(namespace.target_regions) != len(namespace.target_region_encryption):
-                raise CLIError(
+                raise InvalidArgumentValueError(
                     'usage error: Length of --target-region-encryption should be as same as length of target regions')
+
+        if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+            OSDiskImageSecurityProfile = cmd.get_models('OSDiskImageSecurityProfile')
+            if len(namespace.target_regions) != len(namespace.target_region_cvm_encryption):
+                raise InvalidArgumentValueError(
+                    'usage error: Length of --target_region_cvm_encryption should be as same as '
+                    'length of target regions')
+
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
             parts = t.split('=', 2)
@@ -1760,10 +2049,10 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 except ValueError:
                     storage_account_type = parts[1]
                     if parts[1].lower() not in storage_account_types_list:
-                        raise CLIError("usage error: {} is an invalid target region argument. The second part is "
-                                       "neither an integer replica count or a valid storage account type. "
-                                       "Storage account types must be one of {}."
-                                       .format(t, storage_account_types_str))
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target region argument. "
+                            "The second part is neither an integer replica count or a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
 
             # Region specified, but also replica count and storage account type
             elif len(parts) == 3:
@@ -1771,15 +2060,19 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     replica_count = int(parts[1])   # raises ValueError if this is not a replica count, try other order.
                     storage_account_type = parts[2]
                     if storage_account_type not in storage_account_types_list:
-                        raise CLIError("usage error: {} is an invalid target region argument. The third part is "
-                                       "not a valid storage account type. Storage account types must be one of {}."
-                                       .format(t, storage_account_types_str))
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target region argument. "
+                            "The third part is not a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
                 except ValueError:
-                    raise CLIError("usage error: {} is an invalid target region argument. "
-                                   "The second part must be a valid integer replica count.".format(t))
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region argument. "
+                        "The second part must be a valid integer replica count.".format(t))
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
+            os_disk_image = None
+            data_disk_images = None
             if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
                 terms = namespace.target_region_encryption[i].split(',')
                 # OS disk
@@ -1794,8 +2087,9 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     data_disk_images = terms[1:]
                     data_disk_images_len = len(data_disk_images)
                     if data_disk_images_len % 2 != 0:
-                        raise CLIError('usage error: LUN and disk encryption set for data disk should appear '
-                                       'in pair in --target-region-encryption. Example: osdes,0,datades0,1,datades1')
+                        raise ArgumentUsageError(
+                            'usage error: LUN and disk encryption set for data disk should appear in pair in '
+                            '--target-region-encryption. Example: osdes,0,datades0,1,datades1')
                     data_disk_image_encryption_list = []
                     for j in range(int(data_disk_images_len / 2)):
                         lun = data_disk_images[j * 2]
@@ -1804,8 +2098,32 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         data_disk_image_encryption_list.append(DataDiskImageEncryption(
                             lun=lun, disk_encryption_set_id=des_id))
                     data_disk_images = data_disk_image_encryption_list
+
+            if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+                cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
+                if not cvm_terms or len(cvm_terms) != 2:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region cvm encryption. "
+                        "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+
+                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types_str = ", ".join(storage_profile_types)
+                if cvm_terms[0] not in storage_profile_types:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid os_cvm_encryption_type. "
+                        "The valid values for os_cvm_encryption_type are {}".format(
+                            cvm_terms, storage_profile_types_str))
+                cvm_des_id = None
+                if cvm_terms[1]:
+                    cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
+                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
+                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                if os_disk_image:
+                    os_disk_image.security_profile = security_profile
                 else:
-                    data_disk_images = None
+                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+
+            if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
             # At least the region is specified
@@ -1830,6 +2148,56 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
+# endregion
+
+
+def process_ppg_create_namespace(namespace):
+    validate_tags(namespace)
+    # The availability zone can be provided only when an intent is provided
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
+# endregion
+
+
+def process_image_version_create_namespace(cmd, namespace):
+    validate_tags(namespace)
+    process_gallery_image_version_namespace(cmd, namespace)
+    process_image_resource_id_namespace(namespace)
+# endregion
+
+
+def process_image_version_update_namespace(cmd, namespace):
+    process_gallery_image_version_namespace(cmd, namespace)
+# endregion
+
+
+def process_image_resource_id_namespace(namespace):
+    """
+    Validate the resource id from different sources
+    Only one of these arguments is allowed to provide
+    Check the format of resource id whether meets requirement
+    """
+    input_num = (1 if namespace.managed_image else 0) + (1 if namespace.virtual_machine else 0) + \
+                (1 if namespace.image_version else 0)
+    if input_num > 1:
+        raise MutuallyExclusiveArgumentError(
+            r'usage error: please specify only one of the --managed-image\--virtual-machine\--image-version arguments')
+
+    if namespace.managed_image or input_num == 0:
+        return
+
+    from ._vm_utils import is_valid_vm_resource_id, is_valid_image_version_id
+    is_vm = namespace.virtual_machine is not None
+    is_valid_function = is_valid_vm_resource_id if is_vm else is_valid_image_version_id
+    resource_id = namespace.virtual_machine if is_vm else namespace.image_version
+
+    if not is_valid_function(resource_id):
+        from azure.cli.core.parser import InvalidArgumentValueError
+        raise InvalidArgumentValueError('usage error: {} is an invalid {} id'
+                                        .format(resource_id, 'VM resource' if is_vm else 'gallery image version'))
+    namespace.managed_image = resource_id
 # endregion
 
 
@@ -1864,18 +2232,21 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
 
 
 def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.automatic_repairs_grace_period is not None:
+    if namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
-            raise CLIError("usage error: --load-balancer and --health-probe are required "
-                           "when creating vmss with automatic repairs")
+            raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
+                                     "when creating vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
-        raise CLIError("usage error: please enable --enable-automatic-repairs")
-    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
-        raise CLIError("usage error: please set --automatic-repairs-grace-period")
+    if namespace.enable_automatic_repairs is False and \
+            (namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None):
+        raise ArgumentUsageError("usage error: please enable --enable-automatic-repairs")
+    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None\
+            and namespace.automatic_repairs_action is None:
+        raise ArgumentUsageError("usage error: please set --automatic-repairs-grace-period or"
+                                 " --automatic-repairs-action")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
@@ -1950,10 +2321,7 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
 
 def _validate_capacity_reservation_group(cmd, namespace):
 
-    if namespace.capacity_reservation_group == 'None':
-        namespace.capacity_reservation_group = ''
-
-    elif namespace.capacity_reservation_group:
+    if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
         from msrestazure.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1965,3 +2333,57 @@ def _validate_capacity_reservation_group(cmd, namespace):
                 type='CapacityReservationGroups',
                 name=namespace.capacity_reservation_group
             )
+
+
+def _validate_vm_vmss_create_ephemeral_placement(namespace):
+    ephemeral_os_disk = getattr(namespace, 'ephemeral_os_disk', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    if ephemeral_os_disk_placement and not ephemeral_os_disk:
+        raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                 '--ephemeral-os-disk is specified.')
+
+
+def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
+    size = getattr(namespace, 'size', None)
+    vm_sku = getattr(namespace, 'vm_sku', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    source = getattr(namespace, 'command').split()[0]
+    if ephemeral_os_disk_placement:
+        if source == 'vm' and not size:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--size is specified.')
+        if source == 'vmss' and not vm_sku:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--vm-sku is specified.')
+
+
+def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
+    from ._vm_utils import is_community_gallery_image_id, parse_community_gallery_image_id
+    if not is_community_gallery_image_id(namespace.image) or namespace.accept_term:
+        return
+
+    community_gallery_name, _ = parse_community_gallery_image_id(namespace.image)
+    from ._client_factory import cf_community_gallery
+    try:
+        community_gallery_info = cf_community_gallery(cmd.cli_ctx).get(namespace.location, community_gallery_name)
+        eula = community_gallery_info.additional_properties['communityMetadata']['eula']
+    except Exception as err:
+        raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
+
+    from knack.prompting import prompt_y_n
+    msg = "To create the VM/VMSS from community gallery image, you must accept the license agreement and " \
+          "privacy statement: {}. (If you want to accept the legal terms by default, " \
+          "please use the option '--accept-term' when creating VM/VMSS)".format(eula)
+
+    if not prompt_y_n(msg, default="y"):
+        import sys
+        sys.exit(0)
+
+
+def validate_secure_vm_guest_state_sas(cmd, namespace):
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
+    DiskCreateOption = cmd.get_models('DiskCreateOption')
+
+    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+        namespace.secure_vm_guest_state_sas = True

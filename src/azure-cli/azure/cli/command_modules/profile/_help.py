@@ -10,25 +10,24 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['login'] = """
 type: command
 short-summary: Log in to Azure.
+long-summary: >-
+    By default, this command logs in with a user account. CLI will try to launch a web browser to log in interactively.
+    If a web browser is not available, CLI will fall back to device code login.
+
+    To login with a service principal, specify --service-principal.
 examples:
     - name: Log in interactively.
-      text: >
-        az login
+      text: az login
     - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
-      text: >
-        az login -u johndoe@contoso.com -p VerySecret
+      text: az login -u johndoe@contoso.com -p VerySecret
     - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
-      text: >
-        az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
+      text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
     - name: Log in with a service principal using client certificate.
-      text: >
-        az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
-    - name: Log in using a VM's system assigned identity
-      text: >
-        az login --identity
-    - name: Log in using a VM's user assigned identity. Client or object ids of the service identity also work
-      text: >
-        az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+      text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+    - name: Log in using a VM's system-assigned managed identity.
+      text: az login --identity
+    - name: Log in using a VM's user-assigned managed identity. Client or object ids of the service identity also work.
+      text: az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
 """
 
 helps['account'] = """
@@ -44,7 +43,9 @@ long-summary: To clear the current subscription, use 'az logout'.
 
 helps['account list'] = """
 type: command
-short-summary: Get a list of subscriptions for the logged in account.
+short-summary: >-
+    Get a list of subscriptions for the logged in account. By default, only 'Enabled' subscriptions from the current
+    cloud is shown.
 """
 
 helps['account list-locations'] = """
@@ -66,14 +67,7 @@ short-summary: Set a subscription to be the current active subscription.
 helps['account show'] = """
 type: command
 short-summary: Get the details of a subscription.
-long-summary: >-
-    If the subscription isn't specified, shows the details of the default subscription.
-
-
-    When --sdk-auth is used,
-    the output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an alternative, consider using
-    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+long-summary: If the subscription isn't specified, shows the details of the default subscription.
 """
 
 helps['account get-access-token'] = """

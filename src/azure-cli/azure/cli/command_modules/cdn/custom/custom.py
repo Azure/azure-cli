@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import sys
+
 from typing import Optional
 
 from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, ProfileUpdateParameters,
@@ -29,13 +31,22 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    UrlRewriteAction, UrlRewriteActionParameters, PurgeParameters,
                                    CheckNameAvailabilityInput, CustomDomainParameters, ProbeProtocol,
                                    HealthProbeRequestType, RequestMethodOperator, OriginGroupOverrideAction,
-                                   OriginGroupOverrideActionParameters, ResourceReference)
+                                   OriginGroupOverrideActionParameters, ResourceReference, CacheConfiguration,
+                                   OriginGroupOverride, DeliveryRuleRouteConfigurationOverrideAction,
+                                   RouteConfigurationOverrideActionParameters, RuleIsCompressionEnabled,
+                                   SocketAddrMatchConditionParameters, DeliveryRuleSocketAddrCondition,
+                                   DeliveryRuleClientPortCondition, ClientPortMatchConditionParameters,
+                                   DeliveryRuleServerPortCondition, ServerPortMatchConditionParameters,
+                                   DeliveryRuleHostNameCondition, HostNameMatchConditionParameters,
+                                   DeliveryRuleSslProtocolCondition, SslProtocolMatchConditionParameters,
+                                   SslProtocol, ResourceType)
 
 from azure.mgmt.cdn.models._cdn_management_client_enums import CacheType
 from azure.mgmt.cdn.operations import (OriginsOperations, OriginGroupsOperations)
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import (sdk_no_wait)
+from azure.cli.core.azclierror import (InvalidArgumentValueError)
 from azure.core.exceptions import (ResourceNotFoundError)
 
 from knack.util import CLIError
@@ -45,6 +56,49 @@ from msrest.polling import LROPoller, NoPolling
 from msrestazure.tools import is_valid_resource_id
 
 logger = get_logger(__name__)
+
+
+def _check_condition_allowed_opertors(conditon_name, operator):
+    if conditon_name is not None and operator is not None:
+        conditon_allowed_operators = []
+        if conditon_name == "RequestScheme":
+            conditon_allowed_operators = ["Equal"]
+        else:
+            try:
+                attr = getattr(sys.modules["azure.mgmt.cdn.models"], conditon_name + "Operator")
+                conditon_allowed_operators = [operator.value for _, operator in attr.__members__.items()]
+            except AttributeError:
+                pass
+
+        if len(conditon_allowed_operators) > 0 and operator not in conditon_allowed_operators:
+            allowed_operators = ", ".join(conditon_allowed_operators)
+            raise InvalidArgumentValueError(
+                f"{operator} is not a valid operator for {conditon_name}, allowed values are: {allowed_operators}.")
+
+
+def _check_condition_allowed_match_values_opertors(conditon_name, match_values):
+    if conditon_name is not None and match_values is not None and len(match_values) > 0:
+        conditon_allowed_match_values = []
+        if conditon_name == "SslProtocol":
+            conditon_allowed_match_values = [protocol.value for protocol in SslProtocol]
+        else:
+            try:
+                attr = getattr(
+                    sys.modules["azure.mgmt.cdn.models"],
+                    conditon_name + "MatchConditionParametersMatchValuesItem")
+                conditon_allowed_match_values = [match_value.value for _, match_value in attr.__members__.items()]
+            except AttributeError:
+                pass
+
+        if len(conditon_allowed_match_values) > 0:
+            invalid_match_values = [match_value for match_value in match_values
+                                    if match_value not in conditon_allowed_match_values]
+            if len(invalid_match_values) > 0:
+                allowed_match_values = ", ".join(conditon_allowed_match_values)
+                invalid_match_values = ", ".join(invalid_match_values)
+                raise InvalidArgumentValueError(
+                    f'Below match values: {invalid_match_values} are invalid for {conditon_name}, '
+                    f'allowed values are: {allowed_match_values}.')
 
 
 def default_content_types():
@@ -59,8 +113,12 @@ def default_content_types():
 
 
 def _update_mapper(existing, new, keys):
+    if existing is None:
+        return
+
     for key in keys:
         existing_value = getattr(existing, key)
+
         new_value = getattr(new, key)
         setattr(new, key, new_value if new_value is not None else existing_value)
 
@@ -70,10 +128,10 @@ def _convert_to_unified_delivery_rules(policy):
         if existing_rule.conditions:
             for con in existing_rule.conditions:
                 if con.parameters.operator is None and con.parameters.match_values is None:
-                    if con.parameters.odata_type == UrlPathMatchConditionParameters.odata_type:
+                    if con.parameters.type_name == UrlPathMatchConditionParameters.type_name:
                         con.parameters.operator = con.parameters.additional_properties["matchType"]
                         con.parameters.match_values = con.parameters.additional_properties["path"].split(',')
-                    if con.parameters.odata_type == UrlFileExtensionMatchConditionParameters.odata_type:
+                    if con.parameters.type_name == UrlFileExtensionMatchConditionParameters.type_name:
                         con.parameters.operator = "Any"
                         con.parameters.match_values = con.parameters.additional_properties["extensions"]
 
@@ -95,7 +153,7 @@ def check_name_availability(client, name):
     :type name: str
     """
 
-    validate_input = CheckNameAvailabilityInput(name=name)
+    validate_input = CheckNameAvailabilityInput(name=name, type=ResourceType.MICROSOFT_CDN_PROFILES_ENDPOINTS.value)
 
     return client.check_name_availability(validate_input)
 
@@ -181,14 +239,18 @@ def update_endpoint(instance,
 
 # pylint: disable=too-many-return-statements
 def create_condition(match_variable=None, operator=None, match_values=None,
-                     selector=None, negate_condition=None, transform=None):
+                     selector=None, negate_condition=None, transforms=None):
+
+    _check_condition_allowed_opertors(match_variable, operator)
+    _check_condition_allowed_match_values_opertors(match_variable, match_values)
+
     if match_variable == 'RemoteAddress':
         return DeliveryRuleRemoteAddressCondition(
             parameters=RemoteAddressMatchConditionParameters(
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'RequestMethod':
         return DeliveryRuleRequestMethodCondition(
@@ -203,7 +265,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'PostArgs':
         return DeliveryRulePostArgsCondition(
@@ -212,7 +274,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 selector=selector,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'RequestHeader':
         return DeliveryRuleRequestHeaderCondition(
@@ -221,7 +283,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 selector=selector,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'RequestUri':
         return DeliveryRuleRequestUriCondition(
@@ -229,7 +291,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'RequestBody':
         return DeliveryRuleRequestBodyCondition(
@@ -237,7 +299,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'RequestScheme':
         return DeliveryRuleRequestSchemeCondition(
@@ -252,7 +314,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'UrlFileExtension':
         return DeliveryRuleUrlFileExtensionCondition(
@@ -260,7 +322,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'UrlFileName':
         return DeliveryRuleUrlFileNameCondition(
@@ -268,21 +330,23 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
     if match_variable == 'HttpVersion':
         return DeliveryRuleHttpVersionCondition(
             parameters=HttpVersionMatchConditionParameters(
                 match_values=match_values,
                 negate_condition=negate_condition,
-                operator=RequestMethodOperator.EQUAL
+                operator=operator,
+                transforms=transforms
             ))
     if match_variable == 'IsDevice':
         return DeliveryRuleIsDeviceCondition(
             parameters=IsDeviceMatchConditionParameters(
                 match_values=match_values,
                 negate_condition=negate_condition,
-                operator=RequestMethodOperator.EQUAL
+                operator=operator,
+                transforms=transforms
             ))
     if match_variable == 'Cookies':
         return DeliveryRuleCookiesCondition(
@@ -291,18 +355,65 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 selector=selector,
                 match_values=match_values,
                 negate_condition=negate_condition,
-                transforms=transform
+                transforms=transforms
             ))
+    if match_variable == 'SocketAddr':
+        return DeliveryRuleSocketAddrCondition(
+            parameters=SocketAddrMatchConditionParameters(
+                operator=operator,
+                match_values=match_values,
+                negate_condition=negate_condition,
+                transforms=transforms
+            ))
+
+    if match_variable == 'ClientPort':
+        return DeliveryRuleClientPortCondition(
+            parameters=ClientPortMatchConditionParameters(
+                operator=operator,
+                match_values=match_values,
+                negate_condition=negate_condition,
+                transforms=transforms
+            ))
+
+    if match_variable == 'ServerPort':
+        return DeliveryRuleServerPortCondition(
+            parameters=ServerPortMatchConditionParameters(
+                operator=operator,
+                match_values=match_values,
+                negate_condition=negate_condition,
+                transforms=transforms
+            ))
+
+    if match_variable == 'HostName':
+        return DeliveryRuleHostNameCondition(
+            parameters=HostNameMatchConditionParameters(
+                operator=operator,
+                match_values=match_values,
+                negate_condition=negate_condition,
+                transforms=transforms
+            ))
+
+    if match_variable == 'SslProtocol':
+        return DeliveryRuleSslProtocolCondition(
+            parameters=SslProtocolMatchConditionParameters(
+                operator=operator,
+                match_values=match_values,
+                negate_condition=negate_condition,
+                transforms=transforms
+            ))
+
     return None
 
 
 # pylint: disable=too-many-return-statements
+# pylint: disable=too-many-locals
 def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                   custom_query_string=None, custom_fragment=None, source_pattern=None, destination=None,
                   preserve_unmatched_path=None, cmd=None, resource_group_name=None, profile_name=None,
-                  endpoint_name=None, origin_group=None):
+                  endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
+                  is_compression_enabled=None, enable_caching=None, forwarding_protocol=None):
     if action_name == "CacheExpiration":
         return DeliveryRuleCacheExpirationAction(
             parameters=CacheExpirationActionParameters(
@@ -358,6 +469,36 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         return OriginGroupOverrideAction(
             parameters=OriginGroupOverrideActionParameters(
                 origin_group=ResourceReference(id=origin_group)
+            ))
+
+    if action_name == 'RouteConfigurationOverride':
+        origin_group_override = None
+        if origin_group is not None:
+            if is_valid_resource_id(origin_group):
+                origin_group_override = OriginGroupOverride(
+                    origin_group=ResourceReference(id=origin_group),
+                    forwarding_protocol=forwarding_protocol)
+            else:
+                origin_group_refernce = f'/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourcegroups/' \
+                                        f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/' \
+                                        f'origingroups/{origin_group}'
+
+                origin_group_override = OriginGroupOverride(
+                    origin_group=ResourceReference(id=origin_group_refernce),
+                    forwarding_protocol=forwarding_protocol)
+
+        return DeliveryRuleRouteConfigurationOverrideAction(
+            parameters=RouteConfigurationOverrideActionParameters(
+                origin_group_override=origin_group_override,
+
+                cache_configuration=CacheConfiguration(
+                    query_string_caching_behavior=query_string_caching_behavior,
+                    query_parameters=query_parameters,
+                    is_compression_enabled=RuleIsCompressionEnabled.ENABLED.value if is_compression_enabled
+                    else RuleIsCompressionEnabled.DISABLED.value,
+                    cache_behavior=cache_behavior,
+                    cache_duration=cache_duration
+                ) if enable_caching else None
             ))
 
     return DeliveryRuleAction()

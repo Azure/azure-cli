@@ -8,7 +8,7 @@ from knack.util import CLIError
 
 from azure.cli.core.util import ScopedConfig
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 
 logger = get_logger(__name__)
 

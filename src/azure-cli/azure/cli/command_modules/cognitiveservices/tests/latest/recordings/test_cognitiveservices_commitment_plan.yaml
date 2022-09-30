@@ -1,0 +1,659 @@
+interactions:
+- request:
+    body: '{"kind": "TextAnalytics", "sku": {"name": "S"}, "location": "CentralUSEUAP",
+      "properties": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '94'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0300dc9d-0000-3300-0000-624238810000\"","location":"CentralUSEUAP","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","internalId":"823dacb8515945e1a3a5ab5fdf75ca9d","dateCreated":"2022-03-28T22:36:49.6385422Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":60,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
+        Analytics":"https://centraluseuap.api.cognitive.microsoft.com/","LanguageAuthoring":"https://centraluseuap.api.cognitive.microsoft.com/","ConversationalLanguageUnderstanding":"https://centraluseuap.api.cognitive.microsoft.com/","Custom
+        Text Authoring Internal APIs":"https://centraluseuap.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring Internal APIs":"https://centraluseuap.api.cognitive.microsoft.com/","Custom
+        Text Authoring":"https://centraluseuap.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://centraluseuap.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://centraluseuap.api.cognitive.microsoft.com/","Language":"https://centraluseuap.api.cognitive.microsoft.com/","QnAMaker":"https://centraluseuap.api.cognitive.microsoft.com/","turing":"https://centraluseuap.api.cognitive.microsoft.com/","Turing
+        DeepWrite":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnswering":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://centraluseuap.api.cognitive.microsoft.com/","LUIS.Authoring":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:36:49.3988738Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:36:49.3988738Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/CentralUSEUAP/operationResults/13a8aa12-0ed3-4f85-b7bb-5d53342d72c0?api-version=2017-04-18
+      cache-control:
+      - no-cache
+      content-length:
+      - '6666'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:36:49 GMT
+      etag:
+      - '"0300dc9d-0000-3300-0000-624238810000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '452'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/CentralUSEUAP/operationResults/13a8aa12-0ed3-4f85-b7bb-5d53342d72c0?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/CentralUSEUAP/operationResults/13a8aa12-0ed3-4f85-b7bb-5d53342d72c0","name":"13a8aa12-0ed3-4f85-b7bb-5d53342d72c0","status":"Creating","startTime":"2022-03-28T22:36:50Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '277'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '7'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/CentralUSEUAP/operationResults/13a8aa12-0ed3-4f85-b7bb-5d53342d72c0?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/CentralUSEUAP/operationResults/13a8aa12-0ed3-4f85-b7bb-5d53342d72c0","name":"13a8aa12-0ed3-4f85-b7bb-5d53342d72c0","status":"Succeeded","startTime":"2022-03-28T22:36:50Z","endTime":"2022-03-28T22:37:21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '311'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '6'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0300e69d-0000-3300-0000-624238a10000\"","location":"CentralUSEUAP","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","internalId":"823dacb8515945e1a3a5ab5fdf75ca9d","dateCreated":"2022-03-28T22:36:49.6385422Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":60,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
+        Analytics":"https://centraluseuap.api.cognitive.microsoft.com/","LanguageAuthoring":"https://centraluseuap.api.cognitive.microsoft.com/","ConversationalLanguageUnderstanding":"https://centraluseuap.api.cognitive.microsoft.com/","Custom
+        Text Authoring Internal APIs":"https://centraluseuap.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring Internal APIs":"https://centraluseuap.api.cognitive.microsoft.com/","Custom
+        Text Authoring":"https://centraluseuap.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://centraluseuap.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://centraluseuap.api.cognitive.microsoft.com/","Language":"https://centraluseuap.api.cognitive.microsoft.com/","QnAMaker":"https://centraluseuap.api.cognitive.microsoft.com/","turing":"https://centraluseuap.api.cognitive.microsoft.com/","Turing
+        DeepWrite":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnswering":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://centraluseuap.api.cognitive.microsoft.com/","LUIS.Authoring":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:36:49.3988738Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:36:49.3988738Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6667'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:50 GMT
+      etag:
+      - '"0300e69d-0000-3300-0000-624238a10000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0300e69d-0000-3300-0000-624238a10000\"","location":"CentralUSEUAP","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","internalId":"823dacb8515945e1a3a5ab5fdf75ca9d","dateCreated":"2022-03-28T22:36:49.6385422Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":60,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
+        Analytics":"https://centraluseuap.api.cognitive.microsoft.com/","LanguageAuthoring":"https://centraluseuap.api.cognitive.microsoft.com/","ConversationalLanguageUnderstanding":"https://centraluseuap.api.cognitive.microsoft.com/","Custom
+        Text Authoring Internal APIs":"https://centraluseuap.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring Internal APIs":"https://centraluseuap.api.cognitive.microsoft.com/","Custom
+        Text Authoring":"https://centraluseuap.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://centraluseuap.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://centraluseuap.api.cognitive.microsoft.com/","Language":"https://centraluseuap.api.cognitive.microsoft.com/","QnAMaker":"https://centraluseuap.api.cognitive.microsoft.com/","turing":"https://centraluseuap.api.cognitive.microsoft.com/","Turing
+        DeepWrite":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnswering":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://centraluseuap.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://centraluseuap.api.cognitive.microsoft.com/","LUIS.Authoring":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:36:49.3988738Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:36:49.3988738Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6667'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:50 GMT
+      etag:
+      - '"0300e69d-0000-3300-0000-624238a10000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '11'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices commitment-tier list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/commitmentTiers?api-version=2022-03-01
+  response:
+    body:
+      string: '{"value":[{"kind":"ComputerVision","skuName":"S1","hostingModel":"Web","planType":"Read","tier":"T1","quota":{"quantity":500000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"S1","hostingModel":"Web","planType":"Read","tier":"T2","quota":{"quantity":2000000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"S1","hostingModel":"Web","planType":"Read","tier":"T3","quota":{"quantity":8000000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"S1","hostingModel":"ConnectedContainer","planType":"Read","tier":"T1","quota":{"quantity":500000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"S1","hostingModel":"ConnectedContainer","planType":"Read","tier":"T2","quota":{"quantity":2000000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"S1","hostingModel":"ConnectedContainer","planType":"Read","tier":"T3","quota":{"quantity":8000000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Read","tier":"T1","maxCount":10,"quota":{"quantity":500000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Read","tier":"T2","maxCount":10,"quota":{"quantity":2000000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Read","tier":"T3","maxCount":10,"quota":{"quantity":8000000,"unit":"Transaction"},"cost":{}},{"kind":"ComputerVision","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Read","tier":"T4","maxCount":10,"quota":{"quantity":16000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"S","hostingModel":"Web","planType":"TA","tier":"T1","quota":{"quantity":1000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"S","hostingModel":"Web","planType":"TA","tier":"T2","quota":{"quantity":3000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"S","hostingModel":"Web","planType":"TA","tier":"T3","quota":{"quantity":10000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"S","hostingModel":"ConnectedContainer","planType":"TA","tier":"T1","quota":{"quantity":1000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"S","hostingModel":"ConnectedContainer","planType":"TA","tier":"T2","quota":{"quantity":3000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"S","hostingModel":"ConnectedContainer","planType":"TA","tier":"T3","quota":{"quantity":10000000,"unit":"Transaction"},"cost":{}},{"kind":"TextAnalytics","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"TA","tier":"T1","maxCount":10,"quota":{"quantity":1000000,"unit":"TextRecords"},"cost":{}},{"kind":"TextAnalytics","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"TA","tier":"T2","maxCount":10,"quota":{"quantity":2500000,"unit":"TextRecords"},"cost":{}},{"kind":"TextAnalytics","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"TA","tier":"T3","maxCount":10,"quota":{"quantity":10000000,"unit":"TextRecords"},"cost":{}},{"kind":"TextAnalytics","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"TA","tier":"T4","maxCount":10,"quota":{"quantity":25000000,"unit":"TextRecords"},"cost":{}},{"kind":"LUIS","skuName":"S0","hostingModel":"Web","planType":"LanguageTransaction","tier":"T1","quota":{"quantity":1000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"S0","hostingModel":"Web","planType":"LanguageTransaction","tier":"T2","quota":{"quantity":5000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"S0","hostingModel":"Web","planType":"LanguageTransaction","tier":"T3","quota":{"quantity":25000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"S0","hostingModel":"ConnectedContainer","planType":"LanguageTransaction","tier":"T1","quota":{"quantity":1000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"S0","hostingModel":"ConnectedContainer","planType":"LanguageTransaction","tier":"T2","quota":{"quantity":5000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"S0","hostingModel":"ConnectedContainer","planType":"LanguageTransaction","tier":"T3","quota":{"quantity":25000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"LanguageTransaction","tier":"T1","maxCount":10,"quota":{"quantity":1000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"LanguageTransaction","tier":"T2","maxCount":10,"quota":{"quantity":5000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"LanguageTransaction","tier":"T3","maxCount":10,"quota":{"quantity":25000000,"unit":"Transaction"},"cost":{}},{"kind":"LUIS","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"LanguageTransaction","tier":"T4","maxCount":10,"quota":{"quantity":50000000,"unit":"Transaction"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"Web","planType":"STT","tier":"T1","quota":{"quantity":7200000,"unit":"Second"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"Web","planType":"STT","tier":"T2","quota":{"quantity":36000000,"unit":"Second"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"Web","planType":"STT","tier":"T3","quota":{"quantity":180000000,"unit":"Second"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"ConnectedContainer","planType":"STT","tier":"T1","quota":{"quantity":7200000,"unit":"Second"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"ConnectedContainer","planType":"STT","tier":"T2","quota":{"quantity":36000000,"unit":"Second"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"ConnectedContainer","planType":"STT","tier":"T3","quota":{"quantity":180000000,"unit":"Second"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"Web","planType":"NTTS","tier":"T1","quota":{"quantity":80000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"Web","planType":"NTTS","tier":"T2","quota":{"quantity":400000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"Web","planType":"NTTS","tier":"T3","quota":{"quantity":2000000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"ConnectedContainer","planType":"NTTS","tier":"T1","quota":{"quantity":80000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"ConnectedContainer","planType":"NTTS","tier":"T2","quota":{"quantity":400000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"S0","hostingModel":"ConnectedContainer","planType":"NTTS","tier":"T3","quota":{"quantity":2000000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"STT","tier":"T1","maxCount":10,"quota":{"quantity":2000,"unit":"Hour"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"STT","tier":"T2","maxCount":10,"quota":{"quantity":10000,"unit":"Hour"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"STT","tier":"T3","maxCount":10,"quota":{"quantity":50000,"unit":"Hour"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"STT","tier":"T4","maxCount":10,"quota":{"quantity":100000,"unit":"Hour"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"NTTS","tier":"T1","maxCount":10,"quota":{"quantity":80000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"NTTS","tier":"T2","maxCount":10,"quota":{"quantity":400000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"NTTS","tier":"T3","maxCount":10,"quota":{"quantity":2000000000,"unit":"Characters"},"cost":{}},{"kind":"SpeechServices","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"NTTS","tier":"T4","maxCount":10,"quota":{"quantity":4000000000,"unit":"Characters"},"cost":{}},{"kind":"FormRecognizer","skuName":"S0","hostingModel":"Web","planType":"CustomInvoice","tier":"T1","quota":{"quantity":20000,"unit":"Transaction"},"cost":{}},{"kind":"FormRecognizer","skuName":"S0","hostingModel":"Web","planType":"CustomInvoice","tier":"T2","quota":{"quantity":100000,"unit":"Transaction"},"cost":{}},{"kind":"FormRecognizer","skuName":"S0","hostingModel":"Web","planType":"CustomInvoice","tier":"T3","quota":{"quantity":500000,"unit":"Transaction"},"cost":{}},{"kind":"FormRecognizer","skuName":"S0","hostingModel":"ConnectedContainer","planType":"CustomInvoice","tier":"T1","quota":{"quantity":20000,"unit":"Transaction"},"cost":{}},{"kind":"FormRecognizer","skuName":"S0","hostingModel":"ConnectedContainer","planType":"CustomInvoice","tier":"T2","quota":{"quantity":100000,"unit":"Transaction"},"cost":{}},{"kind":"FormRecognizer","skuName":"S0","hostingModel":"ConnectedContainer","planType":"CustomInvoice","tier":"T3","quota":{"quantity":500000,"unit":"Transaction"},"cost":{}},{"kind":"FormRecognizer","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"CustomInvoice","tier":"T1","maxCount":10,"quota":{"quantity":20000,"unit":"Pages"},"cost":{}},{"kind":"FormRecognizer","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"CustomInvoice","tier":"T2","maxCount":10,"quota":{"quantity":100000,"unit":"Pages"},"cost":{}},{"kind":"FormRecognizer","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"CustomInvoice","tier":"T3","maxCount":10,"quota":{"quantity":500000,"unit":"Pages"},"cost":{}},{"kind":"FormRecognizer","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"CustomInvoice","tier":"T4","maxCount":10,"quota":{"quantity":1000000,"unit":"Pages"},"cost":{}},{"kind":"TextTranslation","skuName":"S1","hostingModel":"Web","planType":"Characters","tier":"T1","quota":{"quantity":250000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"S1","hostingModel":"Web","planType":"Characters","tier":"T2","quota":{"quantity":1000000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"S1","hostingModel":"Web","planType":"Characters","tier":"T3","quota":{"quantity":4000000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"S1","hostingModel":"ConnectedContainer","planType":"Characters","tier":"T1","quota":{"quantity":250000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"S1","hostingModel":"ConnectedContainer","planType":"Characters","tier":"T2","quota":{"quantity":1000000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"S1","hostingModel":"ConnectedContainer","planType":"Characters","tier":"T3","quota":{"quantity":4000000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Characters","tier":"T1","maxCount":10,"quota":{"quantity":250000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Characters","tier":"T2","maxCount":10,"quota":{"quantity":1000000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Characters","tier":"T3","maxCount":10,"quota":{"quantity":4000000000,"unit":"Transaction"},"cost":{}},{"kind":"TextTranslation","skuName":"DC0","hostingModel":"DisconnectedContainer","planType":"Characters","tier":"T4","maxCount":10,"quota":{"quantity":10000000000,"unit":"Transaction"},"cost":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12003'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '16'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account commitment-plan list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentPlans?api-version=2022-03-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '9'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"hostingModel": "Web", "planType": "TA", "current": {"tier":
+      "T1"}, "autoRenew": false, "next": {"tier": "T2"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account commitment-plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '128'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --commitment-plan-name --hosting-model --plan-type --auto-renew --current-tier
+        --next-tier
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentPlans/plan?api-version=2022-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentplans/plan","type":"Microsoft.CognitiveServices/accounts/commitmentplans","name":"plan","properties":{"hostingModel":"Web","planType":"TA","current":{"tier":"T1","startDate":"2022-03-28T00:00:00Z","endDate":"2022-04-01T00:00:00Z","quota":{"quantity":129032,"unit":"Transaction"}},"autoRenew":false,"next":{"tier":"T2","startDate":"2022-04-01T00:00:00Z","endDate":"2022-05-01T00:00:00Z","quota":{"quantity":3000000,"unit":"Transaction"}}},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:37:52.5767818Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:37:52.5767818Z"},"etag":"\"e39f6796-7cb5-43f7-9dfc-307281757d80\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '891'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:52 GMT
+      etag:
+      - '"e39f6796-7cb5-43f7-9dfc-307281757d80"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '52'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account commitment-plan list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentPlans?api-version=2022-03-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentplans/plan","type":"Microsoft.CognitiveServices/accounts/commitmentplans","name":"plan","properties":{"hostingModel":"Web","planType":"TA","current":{"tier":"T1","startDate":"2022-03-28T00:00:00Z","endDate":"2022-04-01T00:00:00Z","quota":{"quantity":129032,"unit":"Transaction"}},"autoRenew":false,"next":{"tier":"T2","startDate":"2022-04-01T00:00:00Z","endDate":"2022-05-01T00:00:00Z","quota":{"quantity":3000000,"unit":"Transaction"}}},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:37:52.5767818Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:37:52.5767818Z"},"etag":"\"e39f6796-7cb5-43f7-9dfc-307281757d80\""}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '903'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account commitment-plan show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --commitment-plan-name
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentPlans/plan?api-version=2022-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentplans/plan","type":"Microsoft.CognitiveServices/accounts/commitmentplans","name":"plan","properties":{"hostingModel":"Web","planType":"TA","current":{"tier":"T1","startDate":"2022-03-28T00:00:00Z","endDate":"2022-04-01T00:00:00Z","quota":{"quantity":129032,"unit":"Transaction"}},"autoRenew":false,"next":{"tier":"T2","startDate":"2022-04-01T00:00:00Z","endDate":"2022-05-01T00:00:00Z","quota":{"quantity":3000000,"unit":"Transaction"}}},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:37:52.5767818Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:37:52.5767818Z"},"etag":"\"e39f6796-7cb5-43f7-9dfc-307281757d80\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '891'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:53 GMT
+      etag:
+      - '"e39f6796-7cb5-43f7-9dfc-307281757d80"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '16'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account commitment-plan delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --commitment-plan-name
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentPlans/plan?api-version=2022-03-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 28 Mar 2022 22:37:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '21'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account commitment-plan list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/commitmentPlans?api-version=2022-03-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Mar 2022 22:37:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '13'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 28 Mar 2022 22:37:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '98'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

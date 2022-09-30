@@ -15,7 +15,7 @@ from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory
-from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation
+from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
 from .validators import validate_private_dns_zone, validate_vnet_location
 
 logger = get_logger(__name__)
@@ -75,7 +75,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
 def process_private_network_with_id_input(cmd, rid, nw_client, resource_client, server_name, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes):
     id_subscription, id_resource_group, id_vnet, id_subnet = get_id_components(rid)
     nw_client, resource_client = _change_client_with_different_subscription(cmd, id_subscription, nw_client, resource_client)
-    _create_and_verify_resource_group(resource_client, id_resource_group, location, yes)
+    _create_and_verify_resource_group(cmd, resource_client, id_resource_group, location, yes)
     if id_subnet is None:
         id_subnet = 'Subnet' + server_name
 
@@ -92,8 +92,8 @@ def _change_client_with_different_subscription(cmd, subscription, nw_client, res
     return nw_client, resource_client
 
 
-def _create_and_verify_resource_group(resource_client, resource_group, location, yes):
-    if not resource_client.resource_groups.check_existence(resource_group):
+def _create_and_verify_resource_group(cmd, resource_client, resource_group, location, yes):
+    if not _check_resource_group_existence(cmd, resource_group, resource_client):
         logger.warning("Provided resource group in the resource ID doesn't exist.")
         user_confirmation("Do you want to create a new resource group {0}".format(resource_group), yes=yes)
         resource_client.resource_groups.create_or_update(resource_group, {'location': location})
@@ -176,10 +176,14 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
     if db_context.command_group == 'mysql':
         private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
 
+    # suffix should start with .
+    if private_dns_zone_suffix[0] != '.':
+        private_dns_zone_suffix = '.' + private_dns_zone_suffix
+
     # Get Vnet Components
-    vnet_sub, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
-    nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
-    vnet_id = resource_id(subscription=vnet_sub,
+    vnet_subscription, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
+    nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_subscription)
+    vnet_id = resource_id(subscription=vnet_subscription,
                           resource_group=vnet_rg,
                           namespace='Microsoft.Network',
                           type='virtualNetworks',
@@ -188,12 +192,12 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
 
     # Process private dns zone (no input or Id input)
     dns_rg = None
-    dns_subscription = get_subscription_id(cmd.cli_ctx)
+    dns_subscription = vnet_subscription
     if private_dns_zone is None:
         if 'private' in private_dns_zone_suffix:
-            private_dns_zone = server_name + '.' + private_dns_zone_suffix
+            private_dns_zone = server_name + private_dns_zone_suffix
         else:
-            private_dns_zone = server_name + '.private.' + private_dns_zone_suffix
+            private_dns_zone = server_name + '.private' + private_dns_zone_suffix
     elif not _is_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
         dns_subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
 
@@ -202,34 +206,33 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
                               private_dns_zone=private_dns_zone,
                               private_dns_zone_suffix=private_dns_zone_suffix)
 
-    # client factories
-    if dns_subscription != get_subscription_id(cmd.cli_ctx):
-        logger.warning('The provided private DNS zone ID is in different subscription from the server')
-        subscription_id = dns_subscription
-    else:
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-    resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
-    private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
-    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=subscription_id)
+    server_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=get_subscription_id(cmd.cli_ctx))
+    vnet_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=vnet_subscription)
+    dns_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
 
     # check existence DNS zone and change resource group
     if dns_rg is not None:
-        _create_and_verify_resource_group(resource_client, dns_rg, location, yes)
+        _create_and_verify_resource_group(cmd, dns_sub_resource_client, dns_rg, location, yes)
 
     # decide which resource group the dns zone provision
     zone_exist_flag = False
-    if dns_rg is not None and check_existence(resource_client, private_dns_zone, dns_rg, 'Microsoft.Network', 'privateDnsZones'):
+    if dns_rg is not None and check_existence(dns_sub_resource_client, private_dns_zone, dns_rg, 'Microsoft.Network', 'privateDnsZones'):
         zone_exist_flag = True
-    elif dns_rg is None and check_existence(resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
+    elif dns_rg is None and check_existence(server_sub_resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
         zone_exist_flag = True
         dns_rg = resource_group
-    elif dns_rg is None and check_existence(resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
+        dns_subscription = get_subscription_id(cmd.cli_ctx)
+    elif dns_rg is None and check_existence(vnet_sub_resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
         zone_exist_flag = True
+        dns_subscription = vnet_subscription
         dns_rg = vnet_rg
     elif dns_rg is None:
         zone_exist_flag = False
+        dns_subscription = vnet_subscription
         dns_rg = vnet_rg
 
+    private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
+    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
     link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet.id))
     link.registration_enabled = False
 
@@ -285,7 +288,7 @@ def prepare_public_network(public_access, yes):
 
     if str(public_access).lower() == 'all':
         start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-    elif str(public_access).lower() == 'none' or str(public_access) == 'Disabled' or str(public_access) == 'Enabled':
+    elif str(public_access).lower() in ['none', 'disabled', 'enabled']:
         start_ip, end_ip = -1, -1
     else:
         start_ip, end_ip = parse_public_access_input(public_access)

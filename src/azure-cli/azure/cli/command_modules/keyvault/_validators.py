@@ -18,6 +18,8 @@ from knack.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -41,7 +43,6 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
     if vault_name:
@@ -84,7 +85,6 @@ def process_secret_set_namespace(cmd, namespace):
     if (content and file_path) or (not content and not file_path):
         raise use_error
 
-    from azure.cli.core.profiles import ResourceType
     SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     namespace.secret_attributes = SecretAttributes()
     if namespace.expires:
@@ -133,8 +133,6 @@ def process_secret_set_namespace(cmd, namespace):
 
 
 def process_sas_token_parameter(cmd, ns):
-    from azure.cli.core.profiles import ResourceType
-
     SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
@@ -211,13 +209,107 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
+def process_key_release_policy(cmd, ns):
+    default_cvm_policy = None
+    if hasattr(ns, 'default_cvm_policy'):
+        default_cvm_policy = ns.default_cvm_policy
+        del ns.default_cvm_policy
+
+    immutable = None
+    if hasattr(ns, 'immutable'):
+        immutable = ns.immutable
+        del ns.immutable
+
+    if not ns.release_policy and not default_cvm_policy:
+        if immutable is not None:
+            raise InvalidArgumentValueError('Please provide policy when setting `--immutable`')
+        return
+
+    if ns.release_policy and default_cvm_policy:
+        raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-cvm-policy`')
+
+    import json
+    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
+                                          resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    if default_cvm_policy:
+        policy = {
+            'version': '1.0.0',
+            'anyOf': [
+                {
+                    'authority': 'https://sharedeus.eus.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                },
+                {
+                    'authority': 'https://sharedwus.wus.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                },
+                {
+                    'authority': 'https://sharedneu.neu.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                },
+                {
+                    'authority': 'https://sharedweu.weu.attest.azure.net/',
+                    'allOf': [
+                        {
+                            'claim': 'x-ms-attestation-type',
+                            'equals': 'sevsnpvm'
+                        },
+                        {
+                            'claim': 'x-ms-compliance-status',
+                            'equals': 'azure-compliant-cvm'
+                        }
+                    ]
+                }
+            ]
+        }
+        ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
+                                             immutable=immutable)
+        return
+
+    import os
+    if os.path.exists(ns.release_policy):
+        data = get_file_json(ns.release_policy)
+    else:
+        data = shell_safe_json_parse(ns.release_policy)
+
+    ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(data).encode('utf-8'),
+                                         immutable=immutable)
+
+
 def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
     secret_perms = ns.secret_permissions
     cert_perms = ns.certificate_permissions
     storage_perms = ns.storage_permissions
 
-    if not any([key_perms, secret_perms, cert_perms, storage_perms]):
+    if key_perms is None and secret_perms is None and cert_perms is None and storage_perms is None:
         raise argparse.ArgumentError(
             None,
             'specify at least one: --key-permissions, --secret-permissions, '
@@ -290,7 +382,6 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
     vault_name = getattr(ns, 'vault_name', None)
@@ -493,14 +584,14 @@ def _show_vault_only_deprecate_message(ns):
                        'Warning! If you have soft-delete protection enabled on this key vault, you will '
                        'not be able to reuse this key vault name until the key vault has been purged from '
                        'the soft deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
         'keyvault key delete':
             Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
                        'Warning! If you have soft-delete protection enabled on this key vault, this key '
                        'will be moved to the soft deleted state. You will not be able to create a key with '
                        'the same name within this key vault until the key has been purged from the '
                        'soft-deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview')
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
     }
     cmds = ['keyvault delete', 'keyvault key delete']
     for cmd in cmds:
@@ -544,6 +635,40 @@ def validate_key_id(entity_type):
             setattr(ns, 'vault_base_url', ident.vault)
             if ident.version and hasattr(ns, pure_entity_type + '_version'):
                 setattr(ns, pure_entity_type + '_version', ident.version)
+        elif not (name and vault):
+            raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
+                           '--name/-n NAME [--version VERSION]')
+
+    return _validate
+
+
+def validate_keyvault_resource_id(entity_type):
+    def _validate(ns):
+        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+        pure_entity_type = entity_type.replace('deleted', '')
+        name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
+        vault = getattr(ns, 'vault_base_url', None)
+        if not vault:
+            vault = getattr(ns, 'hsm_name', None)
+        identifier = getattr(ns, 'identifier', None)
+
+        if identifier:
+            vault_base_url = getattr(ns, 'vault_base_url', None)
+            hsm_name = getattr(ns, 'hsm_name', None)
+            if vault_base_url:
+                raise CLIError('--vault-name and --id are mutually exclusive.')
+            if hsm_name:
+                raise CLIError('--hsm-name and --id are mutually exclusive.')
+
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
+                setattr(ns, 'key_name', ident.name)
+            else:
+                setattr(ns, 'name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')

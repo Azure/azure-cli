@@ -13,21 +13,22 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001","name":"cli_nic_convenience_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-07T10:43:51Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001","name":"cli_nic_convenience_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-23T12:13:17Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '338'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:43:53 GMT
+      - Fri, 23 Sep 2022 12:13:19 GMT
       expires:
       - '-1'
       pragma:
@@ -51,9 +52,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.25.1
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -61,36 +62,47 @@ interactions:
         {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
         \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
         {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
-        \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Debian\": {\n            \"publisher\": \"Debian\",\n            \"offer\":
-        \"debian-10\",\n            \"sku\": \"10\",\n            \"version\": \"latest\"\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
+        \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
-        \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
-        \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
-        \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
-        \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
+        \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
+        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
+        \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
         \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
-        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n
-        \           \"version\": \"latest\"\n          },\n          \"Win2012R2Datacenter\":
+        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
         {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2012-R2-Datacenter\",\n            \"version\":
-        \"latest\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"Win2022AzureEditionCore\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-Datacenter\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Win2008R2SP1\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
-        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n
-        \           \"version\": \"latest\"\n          }\n        }\n      }\n    }\n
-        \ }\n}\n"
+        \"2019-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2016Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2016-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
     headers:
       accept-ranges:
       - bytes
@@ -101,23 +113,23 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '3463'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:43:54 GMT
+      - Fri, 23 Sep 2022 12:13:20 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
       expires:
-      - Tue, 07 Sep 2021 10:48:54 GMT
+      - Fri, 23 Sep 2022 12:18:20 GMT
       source-age:
-      - '274'
+      - '127'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding,Origin
       via:
       - 1.1 varnish
       x-cache:
@@ -127,15 +139,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 107ef92e0e1da1128d39e6ef79ad0f524d4ec56b
+      - e6e1cea8a47f13bf90afc86677f1b2f2c5a49215
       x-frame-options:
       - deny
       x-github-request-id:
-      - CF08:4DCB:A36BE:F7291:613630DC
+      - A2EC:0B0B:1F60B4:30D50C:632D031B
       x-served-by:
-      - cache-qpg1229-QPG
+      - cache-iad-kiad7000086-IAD
       x-timer:
-      - S1631011435.717186,VS0,VE0
+      - S1663935200.119503,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -145,7 +157,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -155,9 +167,124 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2022-08-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"18.04.202209210\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202209210\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 23 Sep 2022 12:13:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15991,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43991
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
+      User-Agent:
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202209210?api-version=2022-08-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI, NVMe\"\r\n      },\r\n      {\r\n        \"name\":
+        \"IsHibernateSupported\",\r\n        \"value\": \"True\"\r\n      }\r\n    ],\r\n
+        \   \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\":
+        31,\r\n      \"sizeInBytes\": 32213303808\r\n    },\r\n    \"dataDiskImages\":
+        []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"18.04.202209210\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202209210\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1048'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 23 Sep 2022 12:13:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12995,Microsoft.Compute/GetVMImageFromLocation30Min;73995
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
+      User-Agent:
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -169,7 +296,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:43:54 GMT
+      - Fri, 23 Sep 2022 12:13:20 GMT
       expires:
       - '-1'
       pragma:
@@ -193,7 +320,7 @@ interactions:
       [{"name": "conveniencevm1Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}},
       {"type": "Microsoft.Network/networkSecurityGroups", "name": "conveniencevm1NSG",
       "apiVersion": "2015-06-15", "location": "westus", "tags": {}, "dependsOn": []},
-      {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      {"apiVersion": "2022-01-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "conveniencevm1PublicIP", "location": "westus", "tags": {}, "dependsOn":
       [], "properties": {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces", "name": "conveniencevm1VMNic",
@@ -203,7 +330,7 @@ interactions:
       {"privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET/subnets/conveniencevm1Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG"}}},
-      {"apiVersion": "2021-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2022-08-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "conveniencevm1", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/conveniencevm1VMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic",
@@ -224,29 +351,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3261'
+      - '3081'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_CtkAPbAESQnNYtd9F6qzQYwmrUoqLLQa","name":"vm_deploy_CtkAPbAESQnNYtd9F6qzQYwmrUoqLLQa","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10113090240389006053","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-09-07T10:43:59.5576709Z","duration":"PT2.3265535S","correlationId":"4ee470dd-57a1-41a6-918b-66e5ab8c6976","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_XKIt2QlytwjEPBUsdwN9NJwiNzZWY1G4","name":"vm_deploy_XKIt2QlytwjEPBUsdwN9NJwiNzZWY1G4","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18140418621475961398","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-09-23T12:13:24.231437Z","duration":"PT0.0001708S","correlationId":"74be0c2e-b2f4-4557-a4f2-08d1dc56a79d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_CtkAPbAESQnNYtd9F6qzQYwmrUoqLLQa/operationStatuses/08585705954482465246?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_XKIt2QlytwjEPBUsdwN9NJwiNzZWY1G4/operationStatuses/08585376716828636477?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2914'
+      - '2598'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:43:59 GMT
+      - Fri, 23 Sep 2022 12:13:23 GMT
       expires:
       - '-1'
       pragma:
@@ -256,7 +384,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -274,51 +402,10 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585705954482465246?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 07 Sep 2021 10:44:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
-      User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585705954482465246?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585376716828636477?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -330,7 +417,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:01 GMT
+      - Fri, 23 Sep 2022 12:13:54 GMT
       expires:
       - '-1'
       pragma:
@@ -358,21 +445,22 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_CtkAPbAESQnNYtd9F6qzQYwmrUoqLLQa","name":"vm_deploy_CtkAPbAESQnNYtd9F6qzQYwmrUoqLLQa","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10113090240389006053","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-09-07T10:44:37.8146175Z","duration":"PT40.5835001S","correlationId":"4ee470dd-57a1-41a6-918b-66e5ab8c6976","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_XKIt2QlytwjEPBUsdwN9NJwiNzZWY1G4","name":"vm_deploy_XKIt2QlytwjEPBUsdwN9NJwiNzZWY1G4","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18140418621475961398","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-09-23T12:13:44.4761943Z","duration":"PT20.2449281S","correlationId":"74be0c2e-b2f4-4557-a4f2-08d1dc56a79d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4034'
+      - '3494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:02 GMT
+      - Fri, 23 Sep 2022 12:13:54 GMT
       expires:
       - '-1'
       pragma:
@@ -400,59 +488,62 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1?$expand=instanceView&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1?$expand=instanceView&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"82d68e7e-def3-438c-93f3-6dc4a51bebcb\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"f8b34c84-b4d1-42d3-bf84-06dfd5ca5577\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202107200\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_d35da5ba62994a4aae2e671f0668f340\",\r\n
+        \"18.04.202209210\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_62eb66e820664c46afc2f1e3e0818296\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/disks/conveniencevm1_disk1_d35da5ba62994a4aae2e671f0668f340\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/disks/conveniencevm1_disk1_62eb66e820664c46afc2f1e3e0818296\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"conveniencevm1\",\r\n      \"adminUsername\":
         \"myusername\",\r\n      \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
         false,\r\n        \"provisionVMAgent\": true,\r\n        \"patchSettings\":
         {\r\n          \"patchMode\": \"ImageDefault\",\r\n          \"assessmentMode\":
-        \"ImageDefault\"\r\n        }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
+        \"ImageDefault\"\r\n        },\r\n        \"enableVMAgentPlatformUpdates\":
+        false\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
         \"conveniencevm1\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\":
-        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.4.0.2\",\r\n
+        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.8.0.11\",\r\n
         \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2021-09-07T10:44:46+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"conveniencevm1_disk1_d35da5ba62994a4aae2e671f0668f340\",\r\n
+        \"2022-09-23T12:13:49+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"conveniencevm1_disk1_62eb66e820664c46afc2f1e3e0818296\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-07T10:44:24.2612939+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-09-23T12:13:31.9371342+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-09-07T10:44:34.4492468+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-09-23T12:13:41.109009+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-09-23T12:13:30.7495215+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3421'
+      - '3391'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:03 GMT
+      - Fri, 23 Sep 2022 12:13:54 GMT
       expires:
       - '-1'
       pragma:
@@ -469,7 +560,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3986,Microsoft.Compute/LowCostGet30Min;31929
+      - Microsoft.Compute/LowCostGet3Min;3992,Microsoft.Compute/LowCostGet30Min;31976
     status:
       code: 200
       message: OK
@@ -477,7 +568,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -487,18 +578,19 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"2dd65d09-f8fa-4c6d-97bd-2cf1acf3cf86\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"b9fe85e9-fb68-4beb-8cd4-cd2de468c614\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigconveniencevm1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/ipConfigurations/ipconfigconveniencevm1\",\r\n
-        \       \"etag\": \"W/\\\"2dd65d09-f8fa-4c6d-97bd-2cf1acf3cf86\\\"\",\r\n
+        \ \"etag\": \"W/\\\"20a3b843-0e7b-4a41-b33b-ad4eb98c142f\\\"\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"8bbf2cbd-b452-4d14-a036-65c584f17e64\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfigconveniencevm1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/ipConfigurations/ipconfigconveniencevm1\",\r\n
+        \       \"etag\": \"W/\\\"20a3b843-0e7b-4a41-b33b-ad4eb98c142f\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -507,24 +599,26 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"qr5en42i31audio5pdrydkv4db.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-03-C4-7C\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
-        \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG\"\r\n
+        \"x3ywapp1k1nunaf1f2ym4ikpuc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-0B-B4-36\",\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
+        false,\r\n    \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
+        \   },\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
+        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"westus\",\r\n
+        \ \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2678'
+      - '2541'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:03 GMT
+      - Fri, 23 Sep 2022 12:13:55 GMT
       etag:
-      - W/"2dd65d09-f8fa-4c6d-97bd-2cf1acf3cf86"
+      - W/"20a3b843-0e7b-4a41-b33b-ad4eb98c142f"
       expires:
       - '-1'
       pragma:
@@ -541,7 +635,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1f888e88-0449-485b-93d1-6a96f10cb3bd
+      - 70f317ef-3128-4b09-84a1-87eaf86a9342
     status:
       code: 200
       message: OK
@@ -549,7 +643,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -559,31 +653,33 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"6718223b-a3f6-4c9a-b81f-4c3ae8c37808\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"6af2f9e5-4f5c-481d-a8f7-aba45beb2178\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"5c2807c9-9b6d-483a-8830-9ee3b8204a92\",\r\n
-        \   \"ipAddress\": \"23.99.84.134\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"f4742715-093c-4f65-a266-c2902b1e8855\",\r\n
+        \   \"ipAddress\": \"20.253.184.36\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/ipConfigurations/ipconfigconveniencevm1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1040'
+      - '976'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:04 GMT
+      - Fri, 23 Sep 2022 12:13:55 GMT
       etag:
-      - W/"6718223b-a3f6-4c9a-b81f-4c3ae8c37808"
+      - W/"6af2f9e5-4f5c-481d-a8f7-aba45beb2178"
       expires:
       - '-1'
       pragma:
@@ -600,7 +696,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0fccbb6f-a7df-4cf9-b0b7-9c075ae46f2e
+      - c7b8e92c-fd89-442a-97f7-fd21379f735a
     status:
       code: 200
       message: OK
@@ -618,42 +714,45 @@ interactions:
       ParameterSetName:
       - -g -n --query
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"82d68e7e-def3-438c-93f3-6dc4a51bebcb\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"f8b34c84-b4d1-42d3-bf84-06dfd5ca5577\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202107200\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_d35da5ba62994a4aae2e671f0668f340\",\r\n
+        \"18.04.202209210\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_62eb66e820664c46afc2f1e3e0818296\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/disks/conveniencevm1_disk1_d35da5ba62994a4aae2e671f0668f340\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/disks/conveniencevm1_disk1_62eb66e820664c46afc2f1e3e0818296\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"conveniencevm1\",\r\n      \"adminUsername\":
         \"myusername\",\r\n      \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
         false,\r\n        \"provisionVMAgent\": true,\r\n        \"patchSettings\":
         {\r\n          \"patchMode\": \"ImageDefault\",\r\n          \"assessmentMode\":
-        \"ImageDefault\"\r\n        }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
+        \"ImageDefault\"\r\n        },\r\n        \"enableVMAgentPlatformUpdates\":
+        false\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-09-23T12:13:30.7495215+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2109'
+      - '2079'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:05 GMT
+      - Fri, 23 Sep 2022 12:13:56 GMT
       expires:
       - '-1'
       pragma:
@@ -670,7 +769,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3985,Microsoft.Compute/LowCostGet30Min;31928
+      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31975
     status:
       code: 200
       message: OK
@@ -690,9 +789,10 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveNetworkSecurityGroups?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveNetworkSecurityGroups?api-version=2022-01-01
   response:
     body:
       string: 'null'
@@ -704,11 +804,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:05 GMT
+      - Fri, 23 Sep 2022 12:13:56 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f74c5036-708f-44f2-9ee7-a189ce405875?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/84441ac8-b3f5-4f18-96d6-fee6c32d03b1?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -719,7 +819,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4a921d18-2ce2-4217-a345-dab312baaa20
+      - 5e6cc321-4fa6-4404-9d10-0e7e61c66ffc
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -739,9 +839,10 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f74c5036-708f-44f2-9ee7-a189ce405875?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/84441ac8-b3f5-4f18-96d6-fee6c32d03b1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"networkSecurityGroup\": {\r\n
@@ -803,94 +904,100 @@ interactions:
         \"Internet\",\r\n          \"sourceAddressPrefixes\": [\r\n            \"0.0.0.0/0\",\r\n
         \           \"0.0.0.0/0\"\r\n          ],\r\n          \"destinationAddressPrefixes\":
         [\r\n            \"Internet\"\r\n          ],\r\n          \"expandedDestinationAddressPrefix\":
-        [\r\n            \"1.0.0.0/8\",\r\n            \"2.0.0.0/7\",\r\n            \"4.0.0.0/6\",\r\n
-        \           \"8.0.0.0/7\",\r\n            \"11.0.0.0/8\",\r\n            \"12.0.0.0/8\",\r\n
-        \           \"13.0.0.0/10\",\r\n            \"13.64.0.0/11\",\r\n            \"13.104.0.0/13\",\r\n
-        \           \"13.112.0.0/12\",\r\n            \"13.128.0.0/9\",\r\n            \"14.0.0.0/7\",\r\n
-        \           \"16.0.0.0/6\",\r\n            \"20.0.0.0/11\",\r\n            \"20.32.0.0/15\",\r\n
-        \           \"20.34.0.0/16\",\r\n            \"20.35.0.0/17\",\r\n            \"20.35.128.0/18\",\r\n
-        \           \"20.35.192.0/19\",\r\n            \"20.35.224.0/20\",\r\n            \"20.35.240.0/21\",\r\n
-        \           \"20.35.248.0/22\",\r\n            \"20.36.0.0/14\",\r\n            \"20.40.0.0/13\",\r\n
-        \           \"20.48.0.0/12\",\r\n            \"20.64.0.0/10\",\r\n            \"20.129.0.0/16\",\r\n
-        \           \"20.131.0.0/16\",\r\n            \"20.132.0.0/14\",\r\n            \"20.136.0.0/13\",\r\n
-        \           \"20.148.0.0/14\",\r\n            \"20.152.0.0/13\",\r\n            \"20.160.0.0/12\",\r\n
-        \           \"20.184.0.0/13\",\r\n            \"20.192.0.0/10\",\r\n            \"23.0.0.0/10\",\r\n
-        \           \"23.64.0.0/11\",\r\n            \"23.96.0.0/14\",\r\n            \"23.100.0.0/15\",\r\n
-        \           \"23.102.0.0/16\",\r\n            \"23.103.64.0/18\",\r\n            \"23.103.128.0/17\",\r\n
-        \           \"23.104.0.0/13\",\r\n            \"23.112.0.0/12\",\r\n            \"23.128.0.0/9\",\r\n
-        \           \"24.0.0.0/8\",\r\n            \"25.1.0.0/16\",\r\n            \"25.2.0.0/15\",\r\n
-        \           \"25.8.0.0/13\",\r\n            \"25.16.0.0/13\",\r\n            \"25.24.0.0/14\",\r\n
-        \           \"25.32.0.0/16\",\r\n            \"25.34.0.0/15\",\r\n            \"25.36.0.0/14\",\r\n
-        \           \"25.40.0.0/16\",\r\n            \"25.41.16.0/20\",\r\n            \"25.41.32.0/19\",\r\n
-        \           \"25.41.64.0/18\",\r\n            \"25.41.128.0/17\",\r\n            \"25.42.0.0/15\",\r\n
-        \           \"25.44.0.0/14\",\r\n            \"25.132.0.0/14\",\r\n            \"25.136.0.0/14\",\r\n
-        \           \"25.140.0.0/15\",\r\n            \"25.240.0.0/14\",\r\n            \"25.250.86.0/23\",\r\n
-        \           \"25.250.88.0/21\",\r\n            \"25.250.96.0/19\",\r\n            \"25.250.128.0/17\",\r\n
-        \           \"25.254.9.0/24\",\r\n            \"25.254.10.0/23\",\r\n            \"25.254.12.0/22\",\r\n
-        \           \"25.254.32.0/19\",\r\n            \"26.0.0.0/7\",\r\n            \"28.0.0.0/6\",\r\n
-        \           \"32.0.0.0/5\",\r\n            \"40.0.0.0/10\",\r\n            \"40.64.0.0/15\",\r\n
-        \           \"40.66.0.0/17\",\r\n            \"40.67.0.0/16\",\r\n            \"40.68.0.0/14\",\r\n
-        \           \"40.72.0.0/13\",\r\n            \"40.80.0.0/12\",\r\n            \"40.96.0.0/13\",\r\n
-        \           \"40.104.0.0/14\",\r\n            \"40.108.128.0/17\",\r\n            \"40.110.0.0/15\",\r\n
-        \           \"40.112.0.0/12\",\r\n            \"40.128.0.0/9\",\r\n            \"41.0.0.0/8\",\r\n
-        \           \"42.0.0.0/7\",\r\n            \"44.0.0.0/6\",\r\n            \"48.0.0.0/6\",\r\n
-        \           \"52.0.0.0/9\",\r\n            \"52.128.0.0/14\",\r\n            \"52.136.0.0/13\",\r\n
-        \           \"52.144.0.0/16\",\r\n            \"52.146.0.0/15\",\r\n            \"52.148.0.0/14\",\r\n
-        \           \"52.152.0.0/13\",\r\n            \"52.160.0.0/11\",\r\n            \"52.192.0.0/10\",\r\n
-        \           \"53.0.0.0/8\",\r\n            \"54.0.0.0/7\",\r\n            \"56.0.0.0/5\",\r\n
-        \           \"64.0.0.0/3\",\r\n            \"96.0.0.0/6\",\r\n            \"100.0.0.0/10\",\r\n
-        \           \"100.128.0.0/9\",\r\n            \"101.0.0.0/8\",\r\n            \"102.0.0.0/7\",\r\n
-        \           \"104.0.0.0/9\",\r\n            \"104.128.0.0/12\",\r\n            \"104.144.0.0/15\",\r\n
-        \           \"104.146.128.0/17\",\r\n            \"104.148.0.0/14\",\r\n            \"104.152.0.0/13\",\r\n
-        \           \"104.160.0.0/11\",\r\n            \"104.192.0.0/12\",\r\n            \"104.208.0.0/14\",\r\n
-        \           \"104.212.0.0/19\",\r\n            \"104.212.32.0/22\",\r\n            \"104.212.40.0/21\",\r\n
-        \           \"104.212.48.0/22\",\r\n            \"104.212.56.0/21\",\r\n            \"104.212.64.0/18\",\r\n
-        \           \"104.212.128.0/17\",\r\n            \"104.213.0.0/16\",\r\n            \"104.214.0.0/15\",\r\n
-        \           \"104.216.0.0/13\",\r\n            \"104.224.0.0/11\",\r\n            \"105.0.0.0/8\",\r\n
-        \           \"106.0.0.0/7\",\r\n            \"108.0.0.0/6\",\r\n            \"112.0.0.0/5\",\r\n
-        \           \"120.0.0.0/6\",\r\n            \"124.0.0.0/7\",\r\n            \"126.0.0.0/8\",\r\n
-        \           \"128.0.0.0/8\",\r\n            \"129.0.0.0/10\",\r\n            \"129.64.0.0/13\",\r\n
-        \           \"129.72.0.0/15\",\r\n            \"129.74.0.0/16\",\r\n            \"129.76.0.0/14\",\r\n
-        \           \"129.80.0.0/12\",\r\n            \"129.96.0.0/11\",\r\n            \"129.128.0.0/9\",\r\n
-        \           \"130.0.0.0/7\",\r\n            \"132.0.0.0/7\",\r\n            \"134.0.0.0/9\",\r\n
-        \           \"134.128.0.0/11\",\r\n            \"134.160.0.0/12\",\r\n            \"134.176.0.0/16\",\r\n
-        \           \"134.178.0.0/15\",\r\n            \"134.180.0.0/14\",\r\n            \"134.184.0.0/13\",\r\n
-        \           \"134.192.0.0/10\",\r\n            \"135.0.0.0/8\",\r\n            \"136.0.0.0/7\",\r\n
-        \           \"138.0.0.0/9\",\r\n            \"138.128.0.0/10\",\r\n            \"138.192.0.0/14\",\r\n
-        \           \"138.197.0.0/16\",\r\n            \"138.198.0.0/15\",\r\n            \"138.200.0.0/13\",\r\n
-        \           \"138.208.0.0/12\",\r\n            \"138.224.0.0/11\",\r\n            \"139.0.0.0/8\",\r\n
-        \           \"140.0.0.0/8\",\r\n            \"141.0.0.0/9\",\r\n            \"141.128.0.0/10\",\r\n
-        \           \"141.192.0.0/11\",\r\n            \"141.224.0.0/12\",\r\n            \"141.240.0.0/13\",\r\n
-        \           \"141.248.0.0/15\",\r\n            \"141.250.0.0/16\",\r\n            \"141.252.0.0/14\",\r\n
-        \           \"142.0.0.0/7\",\r\n            \"144.0.0.0/7\",\r\n            \"146.0.0.0/9\",\r\n
-        \           \"146.128.0.0/12\",\r\n            \"146.144.0.0/15\",\r\n            \"146.146.0.0/16\",\r\n
-        \           \"146.148.0.0/14\",\r\n            \"146.152.0.0/13\",\r\n            \"146.160.0.0/11\",\r\n
-        \           \"146.192.0.0/10\",\r\n            \"147.0.0.0/8\",\r\n            \"148.0.0.0/6\",\r\n
-        \           \"152.0.0.0/6\",\r\n            \"156.0.0.0/8\",\r\n            \"157.0.0.0/11\",\r\n
-        \           \"157.32.0.0/12\",\r\n            \"157.48.0.0/13\",\r\n            \"157.56.0.0/15\",\r\n
-        \           \"157.58.0.0/16\",\r\n            \"157.60.0.0/14\",\r\n            \"157.64.0.0/10\",\r\n
-        \           \"157.128.0.0/9\",\r\n            \"158.0.0.0/7\",\r\n            \"160.0.0.0/5\",\r\n
-        \           \"168.0.0.0/8\",\r\n            \"169.0.0.0/9\",\r\n            \"169.128.0.0/10\",\r\n
-        \           \"169.192.0.0/11\",\r\n            \"169.224.0.0/12\",\r\n            \"169.240.0.0/13\",\r\n
-        \           \"169.248.0.0/14\",\r\n            \"169.252.0.0/15\",\r\n            \"169.255.0.0/16\",\r\n
-        \           \"170.0.0.0/7\",\r\n            \"172.0.0.0/12\",\r\n            \"172.32.0.0/11\",\r\n
-        \           \"172.64.0.0/10\",\r\n            \"172.128.0.0/9\",\r\n            \"173.0.0.0/8\",\r\n
-        \           \"174.0.0.0/7\",\r\n            \"176.0.0.0/4\",\r\n            \"192.0.0.0/23\",\r\n
-        \           \"192.0.3.0/24\",\r\n            \"192.0.4.0/22\",\r\n            \"192.0.8.0/21\",\r\n
-        \           \"192.0.16.0/20\",\r\n            \"192.0.32.0/19\",\r\n            \"192.0.64.0/18\",\r\n
-        \           \"192.0.128.0/17\",\r\n            \"192.1.0.0/16\",\r\n            \"192.2.0.0/15\",\r\n
-        \           \"192.4.0.0/14\",\r\n            \"192.8.0.0/13\",\r\n            \"192.16.0.0/12\",\r\n
-        \           \"192.33.0.0/16\",\r\n            \"192.34.0.0/15\",\r\n            \"192.36.0.0/14\",\r\n
-        \           \"192.40.0.0/13\",\r\n            \"192.48.0.0/12\",\r\n            \"192.64.0.0/10\",\r\n
-        \           \"192.128.0.0/11\",\r\n            \"192.160.0.0/13\",\r\n            \"192.169.0.0/16\",\r\n
-        \           \"192.170.0.0/15\",\r\n            \"192.172.0.0/14\",\r\n            \"192.176.0.0/12\",\r\n
-        \           \"192.192.0.0/10\",\r\n            \"193.0.0.0/8\",\r\n            \"194.0.0.0/7\",\r\n
-        \           \"196.0.0.0/7\",\r\n            \"198.0.0.0/12\",\r\n            \"198.16.0.0/15\",\r\n
-        \           \"198.20.0.0/14\",\r\n            \"198.24.0.0/13\",\r\n            \"198.32.0.0/11\",\r\n
-        \           \"198.64.0.0/10\",\r\n            \"198.128.0.0/9\",\r\n            \"199.0.0.0/8\",\r\n
-        \           \"200.0.0.0/5\",\r\n            \"208.0.0.0/4\"\r\n          ],\r\n
-        \         \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\":
-        \"Outbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/DenyAllOutBound\",\r\n
+        [\r\n            \"1.0.0.0/8\",\r\n            \"2.0.0.0/7\",\r\n            \"4.0.0.0/9\",\r\n
+        \           \"4.144.0.0/12\",\r\n            \"4.160.0.0/11\",\r\n            \"4.192.0.0/10\",\r\n
+        \           \"5.0.0.0/8\",\r\n            \"6.0.0.0/7\",\r\n            \"8.0.0.0/7\",\r\n
+        \           \"11.0.0.0/8\",\r\n            \"12.0.0.0/8\",\r\n            \"13.0.0.0/10\",\r\n
+        \           \"13.64.0.0/11\",\r\n            \"13.104.0.0/13\",\r\n            \"13.112.0.0/12\",\r\n
+        \           \"13.128.0.0/9\",\r\n            \"14.0.0.0/7\",\r\n            \"16.0.0.0/6\",\r\n
+        \           \"20.0.0.0/11\",\r\n            \"20.32.0.0/15\",\r\n            \"20.34.0.0/16\",\r\n
+        \           \"20.35.0.0/17\",\r\n            \"20.35.128.0/18\",\r\n            \"20.35.192.0/19\",\r\n
+        \           \"20.35.224.0/20\",\r\n            \"20.35.240.0/21\",\r\n            \"20.35.248.0/22\",\r\n
+        \           \"20.36.0.0/14\",\r\n            \"20.40.0.0/13\",\r\n            \"20.48.0.0/12\",\r\n
+        \           \"20.64.0.0/10\",\r\n            \"20.129.0.0/16\",\r\n            \"20.131.0.0/16\",\r\n
+        \           \"20.132.0.0/14\",\r\n            \"20.136.0.0/13\",\r\n            \"20.148.0.0/14\",\r\n
+        \           \"20.152.0.0/13\",\r\n            \"20.160.0.0/12\",\r\n            \"20.184.0.0/13\",\r\n
+        \           \"20.192.0.0/10\",\r\n            \"23.0.0.0/10\",\r\n            \"23.64.0.0/11\",\r\n
+        \           \"23.96.0.0/14\",\r\n            \"23.100.0.0/15\",\r\n            \"23.102.0.0/16\",\r\n
+        \           \"23.103.64.0/18\",\r\n            \"23.103.128.0/17\",\r\n            \"23.104.0.0/13\",\r\n
+        \           \"23.112.0.0/12\",\r\n            \"23.128.0.0/9\",\r\n            \"24.0.0.0/8\",\r\n
+        \           \"25.1.0.0/16\",\r\n            \"25.2.0.0/15\",\r\n            \"25.8.0.0/13\",\r\n
+        \           \"25.16.0.0/13\",\r\n            \"25.24.0.0/14\",\r\n            \"25.32.0.0/16\",\r\n
+        \           \"25.34.0.0/15\",\r\n            \"25.36.0.0/14\",\r\n            \"25.40.0.0/16\",\r\n
+        \           \"25.41.16.0/20\",\r\n            \"25.41.32.0/19\",\r\n            \"25.41.64.0/18\",\r\n
+        \           \"25.41.128.0/17\",\r\n            \"25.42.0.0/15\",\r\n            \"25.44.0.0/14\",\r\n
+        \           \"25.132.0.0/14\",\r\n            \"25.136.0.0/14\",\r\n            \"25.140.0.0/15\",\r\n
+        \           \"25.240.0.0/14\",\r\n            \"25.250.86.0/23\",\r\n            \"25.250.88.0/21\",\r\n
+        \           \"25.250.96.0/19\",\r\n            \"25.250.128.0/17\",\r\n            \"25.254.9.0/24\",\r\n
+        \           \"25.254.10.0/23\",\r\n            \"25.254.12.0/22\",\r\n            \"25.254.32.0/19\",\r\n
+        \           \"26.0.0.0/7\",\r\n            \"28.0.0.0/6\",\r\n            \"32.0.0.0/5\",\r\n
+        \           \"40.0.0.0/10\",\r\n            \"40.64.0.0/15\",\r\n            \"40.66.0.0/17\",\r\n
+        \           \"40.67.0.0/16\",\r\n            \"40.68.0.0/14\",\r\n            \"40.72.0.0/13\",\r\n
+        \           \"40.80.0.0/12\",\r\n            \"40.96.0.0/13\",\r\n            \"40.104.0.0/14\",\r\n
+        \           \"40.108.128.0/17\",\r\n            \"40.110.0.0/15\",\r\n            \"40.112.0.0/12\",\r\n
+        \           \"40.128.0.0/9\",\r\n            \"41.0.0.0/8\",\r\n            \"42.0.0.0/7\",\r\n
+        \           \"44.0.0.0/6\",\r\n            \"48.0.0.0/6\",\r\n            \"52.0.0.0/9\",\r\n
+        \           \"52.128.0.0/14\",\r\n            \"52.136.0.0/13\",\r\n            \"52.144.0.0/16\",\r\n
+        \           \"52.146.0.0/15\",\r\n            \"52.148.0.0/14\",\r\n            \"52.152.0.0/13\",\r\n
+        \           \"52.160.0.0/11\",\r\n            \"52.192.0.0/10\",\r\n            \"53.0.0.0/8\",\r\n
+        \           \"54.0.0.0/7\",\r\n            \"56.0.0.0/5\",\r\n            \"64.0.0.0/6\",\r\n
+        \           \"68.0.0.0/12\",\r\n            \"68.16.0.0/15\",\r\n            \"68.20.0.0/14\",\r\n
+        \           \"68.24.0.0/13\",\r\n            \"68.32.0.0/11\",\r\n            \"68.64.0.0/10\",\r\n
+        \           \"68.128.0.0/9\",\r\n            \"69.0.0.0/8\",\r\n            \"70.0.0.0/7\",\r\n
+        \           \"72.0.0.0/5\",\r\n            \"80.0.0.0/4\",\r\n            \"96.0.0.0/6\",\r\n
+        \           \"100.0.0.0/10\",\r\n            \"100.128.0.0/9\",\r\n            \"101.0.0.0/8\",\r\n
+        \           \"102.0.0.0/7\",\r\n            \"104.0.0.0/9\",\r\n            \"104.128.0.0/12\",\r\n
+        \           \"104.144.0.0/15\",\r\n            \"104.146.128.0/17\",\r\n            \"104.148.0.0/14\",\r\n
+        \           \"104.152.0.0/13\",\r\n            \"104.160.0.0/11\",\r\n            \"104.192.0.0/12\",\r\n
+        \           \"104.208.0.0/14\",\r\n            \"104.212.0.0/19\",\r\n            \"104.212.32.0/22\",\r\n
+        \           \"104.212.40.0/21\",\r\n            \"104.212.48.0/22\",\r\n            \"104.212.56.0/21\",\r\n
+        \           \"104.212.64.0/18\",\r\n            \"104.212.128.0/17\",\r\n
+        \           \"104.213.0.0/16\",\r\n            \"104.214.0.0/15\",\r\n            \"104.216.0.0/13\",\r\n
+        \           \"104.224.0.0/11\",\r\n            \"105.0.0.0/8\",\r\n            \"106.0.0.0/7\",\r\n
+        \           \"108.0.0.0/6\",\r\n            \"112.0.0.0/5\",\r\n            \"120.0.0.0/6\",\r\n
+        \           \"124.0.0.0/7\",\r\n            \"126.0.0.0/8\",\r\n            \"128.0.0.0/8\",\r\n
+        \           \"129.0.0.0/10\",\r\n            \"129.64.0.0/13\",\r\n            \"129.72.0.0/15\",\r\n
+        \           \"129.74.0.0/16\",\r\n            \"129.76.0.0/14\",\r\n            \"129.80.0.0/12\",\r\n
+        \           \"129.96.0.0/11\",\r\n            \"129.128.0.0/9\",\r\n            \"130.0.0.0/7\",\r\n
+        \           \"132.0.0.0/7\",\r\n            \"134.0.0.0/9\",\r\n            \"134.128.0.0/11\",\r\n
+        \           \"134.160.0.0/12\",\r\n            \"134.176.0.0/16\",\r\n            \"134.178.0.0/15\",\r\n
+        \           \"134.180.0.0/14\",\r\n            \"134.184.0.0/13\",\r\n            \"134.192.0.0/10\",\r\n
+        \           \"135.0.0.0/8\",\r\n            \"136.0.0.0/7\",\r\n            \"138.0.0.0/9\",\r\n
+        \           \"138.128.0.0/10\",\r\n            \"138.192.0.0/14\",\r\n            \"138.197.0.0/16\",\r\n
+        \           \"138.198.0.0/15\",\r\n            \"138.200.0.0/13\",\r\n            \"138.208.0.0/12\",\r\n
+        \           \"138.224.0.0/11\",\r\n            \"139.0.0.0/8\",\r\n            \"140.0.0.0/8\",\r\n
+        \           \"141.0.0.0/9\",\r\n            \"141.128.0.0/10\",\r\n            \"141.192.0.0/11\",\r\n
+        \           \"141.224.0.0/12\",\r\n            \"141.240.0.0/13\",\r\n            \"141.248.0.0/15\",\r\n
+        \           \"141.250.0.0/16\",\r\n            \"141.252.0.0/14\",\r\n            \"142.0.0.0/7\",\r\n
+        \           \"144.0.0.0/7\",\r\n            \"146.0.0.0/9\",\r\n            \"146.128.0.0/12\",\r\n
+        \           \"146.144.0.0/15\",\r\n            \"146.146.0.0/16\",\r\n            \"146.148.0.0/14\",\r\n
+        \           \"146.152.0.0/13\",\r\n            \"146.160.0.0/11\",\r\n            \"146.192.0.0/10\",\r\n
+        \           \"147.0.0.0/8\",\r\n            \"148.0.0.0/6\",\r\n            \"152.0.0.0/6\",\r\n
+        \           \"156.0.0.0/8\",\r\n            \"157.0.0.0/11\",\r\n            \"157.32.0.0/12\",\r\n
+        \           \"157.48.0.0/13\",\r\n            \"157.56.0.0/15\",\r\n            \"157.58.0.0/16\",\r\n
+        \           \"157.60.0.0/14\",\r\n            \"157.64.0.0/10\",\r\n            \"157.128.0.0/9\",\r\n
+        \           \"158.0.0.0/7\",\r\n            \"160.0.0.0/5\",\r\n            \"168.0.0.0/8\",\r\n
+        \           \"169.0.0.0/9\",\r\n            \"169.128.0.0/10\",\r\n            \"169.192.0.0/11\",\r\n
+        \           \"169.224.0.0/12\",\r\n            \"169.240.0.0/13\",\r\n            \"169.248.0.0/14\",\r\n
+        \           \"169.252.0.0/15\",\r\n            \"169.255.0.0/16\",\r\n            \"170.0.0.0/7\",\r\n
+        \           \"172.0.0.0/12\",\r\n            \"172.32.0.0/11\",\r\n            \"172.64.0.0/10\",\r\n
+        \           \"172.128.0.0/9\",\r\n            \"173.0.0.0/8\",\r\n            \"174.0.0.0/7\",\r\n
+        \           \"176.0.0.0/4\",\r\n            \"192.0.0.0/23\",\r\n            \"192.0.3.0/24\",\r\n
+        \           \"192.0.4.0/22\",\r\n            \"192.0.8.0/21\",\r\n            \"192.0.16.0/20\",\r\n
+        \           \"192.0.32.0/19\",\r\n            \"192.0.64.0/18\",\r\n            \"192.0.128.0/17\",\r\n
+        \           \"192.1.0.0/16\",\r\n            \"192.2.0.0/15\",\r\n            \"192.4.0.0/14\",\r\n
+        \           \"192.8.0.0/13\",\r\n            \"192.16.0.0/12\",\r\n            \"192.33.0.0/16\",\r\n
+        \           \"192.34.0.0/15\",\r\n            \"192.36.0.0/14\",\r\n            \"192.40.0.0/13\",\r\n
+        \           \"192.48.0.0/12\",\r\n            \"192.64.0.0/10\",\r\n            \"192.128.0.0/11\",\r\n
+        \           \"192.160.0.0/13\",\r\n            \"192.169.0.0/16\",\r\n            \"192.170.0.0/15\",\r\n
+        \           \"192.172.0.0/14\",\r\n            \"192.176.0.0/12\",\r\n            \"192.192.0.0/10\",\r\n
+        \           \"193.0.0.0/8\",\r\n            \"194.0.0.0/7\",\r\n            \"196.0.0.0/7\",\r\n
+        \           \"198.0.0.0/12\",\r\n            \"198.16.0.0/15\",\r\n            \"198.20.0.0/14\",\r\n
+        \           \"198.24.0.0/13\",\r\n            \"198.32.0.0/11\",\r\n            \"198.64.0.0/10\",\r\n
+        \           \"198.128.0.0/9\",\r\n            \"199.0.0.0/8\",\r\n            \"200.0.0.0/5\",\r\n
+        \           \"208.0.0.0/4\"\r\n          ],\r\n          \"access\": \"Allow\",\r\n
+        \         \"priority\": 65001,\r\n          \"direction\": \"Outbound\"\r\n
+        \       },\r\n        {\r\n          \"name\": \"defaultSecurityRules/DenyAllOutBound\",\r\n
         \         \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n
         \         \"destinationPortRange\": \"0-65535\",\r\n          \"sourcePortRanges\":
         [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\":
@@ -904,105 +1011,110 @@ interactions:
         [\r\n          \"10.0.0.0/16\",\r\n          \"168.63.129.16/32\"\r\n        ],\r\n
         \       \"AzureLoadBalancer\": [\r\n          \"168.63.129.16/32\",\r\n          \"fe80::1234:5678:9abc/128\"\r\n
         \       ],\r\n        \"Internet\": [\r\n          \"1.0.0.0/8\",\r\n          \"2.0.0.0/7\",\r\n
-        \         \"4.0.0.0/6\",\r\n          \"8.0.0.0/7\",\r\n          \"11.0.0.0/8\",\r\n
-        \         \"12.0.0.0/8\",\r\n          \"13.0.0.0/10\",\r\n          \"13.64.0.0/11\",\r\n
-        \         \"13.104.0.0/13\",\r\n          \"13.112.0.0/12\",\r\n          \"13.128.0.0/9\",\r\n
-        \         \"14.0.0.0/7\",\r\n          \"16.0.0.0/6\",\r\n          \"20.0.0.0/11\",\r\n
-        \         \"20.32.0.0/15\",\r\n          \"20.34.0.0/16\",\r\n          \"20.35.0.0/17\",\r\n
-        \         \"20.35.128.0/18\",\r\n          \"20.35.192.0/19\",\r\n          \"20.35.224.0/20\",\r\n
-        \         \"20.35.240.0/21\",\r\n          \"20.35.248.0/22\",\r\n          \"20.36.0.0/14\",\r\n
-        \         \"20.40.0.0/13\",\r\n          \"20.48.0.0/12\",\r\n          \"20.64.0.0/10\",\r\n
-        \         \"20.129.0.0/16\",\r\n          \"20.131.0.0/16\",\r\n          \"20.132.0.0/14\",\r\n
-        \         \"20.136.0.0/13\",\r\n          \"20.148.0.0/14\",\r\n          \"20.152.0.0/13\",\r\n
-        \         \"20.160.0.0/12\",\r\n          \"20.184.0.0/13\",\r\n          \"20.192.0.0/10\",\r\n
-        \         \"23.0.0.0/10\",\r\n          \"23.64.0.0/11\",\r\n          \"23.96.0.0/14\",\r\n
-        \         \"23.100.0.0/15\",\r\n          \"23.102.0.0/16\",\r\n          \"23.103.64.0/18\",\r\n
-        \         \"23.103.128.0/17\",\r\n          \"23.104.0.0/13\",\r\n          \"23.112.0.0/12\",\r\n
-        \         \"23.128.0.0/9\",\r\n          \"24.0.0.0/8\",\r\n          \"25.1.0.0/16\",\r\n
-        \         \"25.2.0.0/15\",\r\n          \"25.8.0.0/13\",\r\n          \"25.16.0.0/13\",\r\n
-        \         \"25.24.0.0/14\",\r\n          \"25.32.0.0/16\",\r\n          \"25.34.0.0/15\",\r\n
-        \         \"25.36.0.0/14\",\r\n          \"25.40.0.0/16\",\r\n          \"25.41.16.0/20\",\r\n
-        \         \"25.41.32.0/19\",\r\n          \"25.41.64.0/18\",\r\n          \"25.41.128.0/17\",\r\n
-        \         \"25.42.0.0/15\",\r\n          \"25.44.0.0/14\",\r\n          \"25.132.0.0/14\",\r\n
-        \         \"25.136.0.0/14\",\r\n          \"25.140.0.0/15\",\r\n          \"25.240.0.0/14\",\r\n
-        \         \"25.250.86.0/23\",\r\n          \"25.250.88.0/21\",\r\n          \"25.250.96.0/19\",\r\n
-        \         \"25.250.128.0/17\",\r\n          \"25.254.9.0/24\",\r\n          \"25.254.10.0/23\",\r\n
-        \         \"25.254.12.0/22\",\r\n          \"25.254.32.0/19\",\r\n          \"26.0.0.0/7\",\r\n
-        \         \"28.0.0.0/6\",\r\n          \"32.0.0.0/5\",\r\n          \"40.0.0.0/10\",\r\n
-        \         \"40.64.0.0/15\",\r\n          \"40.66.0.0/17\",\r\n          \"40.67.0.0/16\",\r\n
-        \         \"40.68.0.0/14\",\r\n          \"40.72.0.0/13\",\r\n          \"40.80.0.0/12\",\r\n
-        \         \"40.96.0.0/13\",\r\n          \"40.104.0.0/14\",\r\n          \"40.108.128.0/17\",\r\n
-        \         \"40.110.0.0/15\",\r\n          \"40.112.0.0/12\",\r\n          \"40.128.0.0/9\",\r\n
-        \         \"41.0.0.0/8\",\r\n          \"42.0.0.0/7\",\r\n          \"44.0.0.0/6\",\r\n
-        \         \"48.0.0.0/6\",\r\n          \"52.0.0.0/9\",\r\n          \"52.128.0.0/14\",\r\n
-        \         \"52.136.0.0/13\",\r\n          \"52.144.0.0/16\",\r\n          \"52.146.0.0/15\",\r\n
-        \         \"52.148.0.0/14\",\r\n          \"52.152.0.0/13\",\r\n          \"52.160.0.0/11\",\r\n
-        \         \"52.192.0.0/10\",\r\n          \"53.0.0.0/8\",\r\n          \"54.0.0.0/7\",\r\n
-        \         \"56.0.0.0/5\",\r\n          \"64.0.0.0/3\",\r\n          \"96.0.0.0/6\",\r\n
-        \         \"100.0.0.0/10\",\r\n          \"100.128.0.0/9\",\r\n          \"101.0.0.0/8\",\r\n
-        \         \"102.0.0.0/7\",\r\n          \"104.0.0.0/9\",\r\n          \"104.128.0.0/12\",\r\n
-        \         \"104.144.0.0/15\",\r\n          \"104.146.128.0/17\",\r\n          \"104.148.0.0/14\",\r\n
-        \         \"104.152.0.0/13\",\r\n          \"104.160.0.0/11\",\r\n          \"104.192.0.0/12\",\r\n
-        \         \"104.208.0.0/14\",\r\n          \"104.212.0.0/19\",\r\n          \"104.212.32.0/22\",\r\n
-        \         \"104.212.40.0/21\",\r\n          \"104.212.48.0/22\",\r\n          \"104.212.56.0/21\",\r\n
-        \         \"104.212.64.0/18\",\r\n          \"104.212.128.0/17\",\r\n          \"104.213.0.0/16\",\r\n
-        \         \"104.214.0.0/15\",\r\n          \"104.216.0.0/13\",\r\n          \"104.224.0.0/11\",\r\n
-        \         \"105.0.0.0/8\",\r\n          \"106.0.0.0/7\",\r\n          \"108.0.0.0/6\",\r\n
-        \         \"112.0.0.0/5\",\r\n          \"120.0.0.0/6\",\r\n          \"124.0.0.0/7\",\r\n
-        \         \"126.0.0.0/8\",\r\n          \"128.0.0.0/8\",\r\n          \"129.0.0.0/10\",\r\n
-        \         \"129.64.0.0/13\",\r\n          \"129.72.0.0/15\",\r\n          \"129.74.0.0/16\",\r\n
-        \         \"129.76.0.0/14\",\r\n          \"129.80.0.0/12\",\r\n          \"129.96.0.0/11\",\r\n
-        \         \"129.128.0.0/9\",\r\n          \"130.0.0.0/7\",\r\n          \"132.0.0.0/7\",\r\n
-        \         \"134.0.0.0/9\",\r\n          \"134.128.0.0/11\",\r\n          \"134.160.0.0/12\",\r\n
-        \         \"134.176.0.0/16\",\r\n          \"134.178.0.0/15\",\r\n          \"134.180.0.0/14\",\r\n
-        \         \"134.184.0.0/13\",\r\n          \"134.192.0.0/10\",\r\n          \"135.0.0.0/8\",\r\n
-        \         \"136.0.0.0/7\",\r\n          \"138.0.0.0/9\",\r\n          \"138.128.0.0/10\",\r\n
-        \         \"138.192.0.0/14\",\r\n          \"138.197.0.0/16\",\r\n          \"138.198.0.0/15\",\r\n
-        \         \"138.200.0.0/13\",\r\n          \"138.208.0.0/12\",\r\n          \"138.224.0.0/11\",\r\n
-        \         \"139.0.0.0/8\",\r\n          \"140.0.0.0/8\",\r\n          \"141.0.0.0/9\",\r\n
-        \         \"141.128.0.0/10\",\r\n          \"141.192.0.0/11\",\r\n          \"141.224.0.0/12\",\r\n
-        \         \"141.240.0.0/13\",\r\n          \"141.248.0.0/15\",\r\n          \"141.250.0.0/16\",\r\n
-        \         \"141.252.0.0/14\",\r\n          \"142.0.0.0/7\",\r\n          \"144.0.0.0/7\",\r\n
-        \         \"146.0.0.0/9\",\r\n          \"146.128.0.0/12\",\r\n          \"146.144.0.0/15\",\r\n
-        \         \"146.146.0.0/16\",\r\n          \"146.148.0.0/14\",\r\n          \"146.152.0.0/13\",\r\n
-        \         \"146.160.0.0/11\",\r\n          \"146.192.0.0/10\",\r\n          \"147.0.0.0/8\",\r\n
-        \         \"148.0.0.0/6\",\r\n          \"152.0.0.0/6\",\r\n          \"156.0.0.0/8\",\r\n
-        \         \"157.0.0.0/11\",\r\n          \"157.32.0.0/12\",\r\n          \"157.48.0.0/13\",\r\n
-        \         \"157.56.0.0/15\",\r\n          \"157.58.0.0/16\",\r\n          \"157.60.0.0/14\",\r\n
-        \         \"157.64.0.0/10\",\r\n          \"157.128.0.0/9\",\r\n          \"158.0.0.0/7\",\r\n
-        \         \"160.0.0.0/5\",\r\n          \"168.0.0.0/8\",\r\n          \"169.0.0.0/9\",\r\n
-        \         \"169.128.0.0/10\",\r\n          \"169.192.0.0/11\",\r\n          \"169.224.0.0/12\",\r\n
-        \         \"169.240.0.0/13\",\r\n          \"169.248.0.0/14\",\r\n          \"169.252.0.0/15\",\r\n
-        \         \"169.255.0.0/16\",\r\n          \"170.0.0.0/7\",\r\n          \"172.0.0.0/12\",\r\n
-        \         \"172.32.0.0/11\",\r\n          \"172.64.0.0/10\",\r\n          \"172.128.0.0/9\",\r\n
-        \         \"173.0.0.0/8\",\r\n          \"174.0.0.0/7\",\r\n          \"176.0.0.0/4\",\r\n
-        \         \"192.0.0.0/23\",\r\n          \"192.0.3.0/24\",\r\n          \"192.0.4.0/22\",\r\n
-        \         \"192.0.8.0/21\",\r\n          \"192.0.16.0/20\",\r\n          \"192.0.32.0/19\",\r\n
-        \         \"192.0.64.0/18\",\r\n          \"192.0.128.0/17\",\r\n          \"192.1.0.0/16\",\r\n
-        \         \"192.2.0.0/15\",\r\n          \"192.4.0.0/14\",\r\n          \"192.8.0.0/13\",\r\n
-        \         \"192.16.0.0/12\",\r\n          \"192.33.0.0/16\",\r\n          \"192.34.0.0/15\",\r\n
-        \         \"192.36.0.0/14\",\r\n          \"192.40.0.0/13\",\r\n          \"192.48.0.0/12\",\r\n
-        \         \"192.64.0.0/10\",\r\n          \"192.128.0.0/11\",\r\n          \"192.160.0.0/13\",\r\n
-        \         \"192.169.0.0/16\",\r\n          \"192.170.0.0/15\",\r\n          \"192.172.0.0/14\",\r\n
-        \         \"192.176.0.0/12\",\r\n          \"192.192.0.0/10\",\r\n          \"193.0.0.0/8\",\r\n
-        \         \"194.0.0.0/7\",\r\n          \"196.0.0.0/7\",\r\n          \"198.0.0.0/12\",\r\n
-        \         \"198.16.0.0/15\",\r\n          \"198.20.0.0/14\",\r\n          \"198.24.0.0/13\",\r\n
-        \         \"198.32.0.0/11\",\r\n          \"198.64.0.0/10\",\r\n          \"198.128.0.0/9\",\r\n
-        \         \"199.0.0.0/8\",\r\n          \"200.0.0.0/5\",\r\n          \"208.0.0.0/4\"\r\n
-        \       ]\r\n      }\r\n    }\r\n  ]\r\n}"
+        \         \"4.0.0.0/9\",\r\n          \"4.144.0.0/12\",\r\n          \"4.160.0.0/11\",\r\n
+        \         \"4.192.0.0/10\",\r\n          \"5.0.0.0/8\",\r\n          \"6.0.0.0/7\",\r\n
+        \         \"8.0.0.0/7\",\r\n          \"11.0.0.0/8\",\r\n          \"12.0.0.0/8\",\r\n
+        \         \"13.0.0.0/10\",\r\n          \"13.64.0.0/11\",\r\n          \"13.104.0.0/13\",\r\n
+        \         \"13.112.0.0/12\",\r\n          \"13.128.0.0/9\",\r\n          \"14.0.0.0/7\",\r\n
+        \         \"16.0.0.0/6\",\r\n          \"20.0.0.0/11\",\r\n          \"20.32.0.0/15\",\r\n
+        \         \"20.34.0.0/16\",\r\n          \"20.35.0.0/17\",\r\n          \"20.35.128.0/18\",\r\n
+        \         \"20.35.192.0/19\",\r\n          \"20.35.224.0/20\",\r\n          \"20.35.240.0/21\",\r\n
+        \         \"20.35.248.0/22\",\r\n          \"20.36.0.0/14\",\r\n          \"20.40.0.0/13\",\r\n
+        \         \"20.48.0.0/12\",\r\n          \"20.64.0.0/10\",\r\n          \"20.129.0.0/16\",\r\n
+        \         \"20.131.0.0/16\",\r\n          \"20.132.0.0/14\",\r\n          \"20.136.0.0/13\",\r\n
+        \         \"20.148.0.0/14\",\r\n          \"20.152.0.0/13\",\r\n          \"20.160.0.0/12\",\r\n
+        \         \"20.184.0.0/13\",\r\n          \"20.192.0.0/10\",\r\n          \"23.0.0.0/10\",\r\n
+        \         \"23.64.0.0/11\",\r\n          \"23.96.0.0/14\",\r\n          \"23.100.0.0/15\",\r\n
+        \         \"23.102.0.0/16\",\r\n          \"23.103.64.0/18\",\r\n          \"23.103.128.0/17\",\r\n
+        \         \"23.104.0.0/13\",\r\n          \"23.112.0.0/12\",\r\n          \"23.128.0.0/9\",\r\n
+        \         \"24.0.0.0/8\",\r\n          \"25.1.0.0/16\",\r\n          \"25.2.0.0/15\",\r\n
+        \         \"25.8.0.0/13\",\r\n          \"25.16.0.0/13\",\r\n          \"25.24.0.0/14\",\r\n
+        \         \"25.32.0.0/16\",\r\n          \"25.34.0.0/15\",\r\n          \"25.36.0.0/14\",\r\n
+        \         \"25.40.0.0/16\",\r\n          \"25.41.16.0/20\",\r\n          \"25.41.32.0/19\",\r\n
+        \         \"25.41.64.0/18\",\r\n          \"25.41.128.0/17\",\r\n          \"25.42.0.0/15\",\r\n
+        \         \"25.44.0.0/14\",\r\n          \"25.132.0.0/14\",\r\n          \"25.136.0.0/14\",\r\n
+        \         \"25.140.0.0/15\",\r\n          \"25.240.0.0/14\",\r\n          \"25.250.86.0/23\",\r\n
+        \         \"25.250.88.0/21\",\r\n          \"25.250.96.0/19\",\r\n          \"25.250.128.0/17\",\r\n
+        \         \"25.254.9.0/24\",\r\n          \"25.254.10.0/23\",\r\n          \"25.254.12.0/22\",\r\n
+        \         \"25.254.32.0/19\",\r\n          \"26.0.0.0/7\",\r\n          \"28.0.0.0/6\",\r\n
+        \         \"32.0.0.0/5\",\r\n          \"40.0.0.0/10\",\r\n          \"40.64.0.0/15\",\r\n
+        \         \"40.66.0.0/17\",\r\n          \"40.67.0.0/16\",\r\n          \"40.68.0.0/14\",\r\n
+        \         \"40.72.0.0/13\",\r\n          \"40.80.0.0/12\",\r\n          \"40.96.0.0/13\",\r\n
+        \         \"40.104.0.0/14\",\r\n          \"40.108.128.0/17\",\r\n          \"40.110.0.0/15\",\r\n
+        \         \"40.112.0.0/12\",\r\n          \"40.128.0.0/9\",\r\n          \"41.0.0.0/8\",\r\n
+        \         \"42.0.0.0/7\",\r\n          \"44.0.0.0/6\",\r\n          \"48.0.0.0/6\",\r\n
+        \         \"52.0.0.0/9\",\r\n          \"52.128.0.0/14\",\r\n          \"52.136.0.0/13\",\r\n
+        \         \"52.144.0.0/16\",\r\n          \"52.146.0.0/15\",\r\n          \"52.148.0.0/14\",\r\n
+        \         \"52.152.0.0/13\",\r\n          \"52.160.0.0/11\",\r\n          \"52.192.0.0/10\",\r\n
+        \         \"53.0.0.0/8\",\r\n          \"54.0.0.0/7\",\r\n          \"56.0.0.0/5\",\r\n
+        \         \"64.0.0.0/6\",\r\n          \"68.0.0.0/12\",\r\n          \"68.16.0.0/15\",\r\n
+        \         \"68.20.0.0/14\",\r\n          \"68.24.0.0/13\",\r\n          \"68.32.0.0/11\",\r\n
+        \         \"68.64.0.0/10\",\r\n          \"68.128.0.0/9\",\r\n          \"69.0.0.0/8\",\r\n
+        \         \"70.0.0.0/7\",\r\n          \"72.0.0.0/5\",\r\n          \"80.0.0.0/4\",\r\n
+        \         \"96.0.0.0/6\",\r\n          \"100.0.0.0/10\",\r\n          \"100.128.0.0/9\",\r\n
+        \         \"101.0.0.0/8\",\r\n          \"102.0.0.0/7\",\r\n          \"104.0.0.0/9\",\r\n
+        \         \"104.128.0.0/12\",\r\n          \"104.144.0.0/15\",\r\n          \"104.146.128.0/17\",\r\n
+        \         \"104.148.0.0/14\",\r\n          \"104.152.0.0/13\",\r\n          \"104.160.0.0/11\",\r\n
+        \         \"104.192.0.0/12\",\r\n          \"104.208.0.0/14\",\r\n          \"104.212.0.0/19\",\r\n
+        \         \"104.212.32.0/22\",\r\n          \"104.212.40.0/21\",\r\n          \"104.212.48.0/22\",\r\n
+        \         \"104.212.56.0/21\",\r\n          \"104.212.64.0/18\",\r\n          \"104.212.128.0/17\",\r\n
+        \         \"104.213.0.0/16\",\r\n          \"104.214.0.0/15\",\r\n          \"104.216.0.0/13\",\r\n
+        \         \"104.224.0.0/11\",\r\n          \"105.0.0.0/8\",\r\n          \"106.0.0.0/7\",\r\n
+        \         \"108.0.0.0/6\",\r\n          \"112.0.0.0/5\",\r\n          \"120.0.0.0/6\",\r\n
+        \         \"124.0.0.0/7\",\r\n          \"126.0.0.0/8\",\r\n          \"128.0.0.0/8\",\r\n
+        \         \"129.0.0.0/10\",\r\n          \"129.64.0.0/13\",\r\n          \"129.72.0.0/15\",\r\n
+        \         \"129.74.0.0/16\",\r\n          \"129.76.0.0/14\",\r\n          \"129.80.0.0/12\",\r\n
+        \         \"129.96.0.0/11\",\r\n          \"129.128.0.0/9\",\r\n          \"130.0.0.0/7\",\r\n
+        \         \"132.0.0.0/7\",\r\n          \"134.0.0.0/9\",\r\n          \"134.128.0.0/11\",\r\n
+        \         \"134.160.0.0/12\",\r\n          \"134.176.0.0/16\",\r\n          \"134.178.0.0/15\",\r\n
+        \         \"134.180.0.0/14\",\r\n          \"134.184.0.0/13\",\r\n          \"134.192.0.0/10\",\r\n
+        \         \"135.0.0.0/8\",\r\n          \"136.0.0.0/7\",\r\n          \"138.0.0.0/9\",\r\n
+        \         \"138.128.0.0/10\",\r\n          \"138.192.0.0/14\",\r\n          \"138.197.0.0/16\",\r\n
+        \         \"138.198.0.0/15\",\r\n          \"138.200.0.0/13\",\r\n          \"138.208.0.0/12\",\r\n
+        \         \"138.224.0.0/11\",\r\n          \"139.0.0.0/8\",\r\n          \"140.0.0.0/8\",\r\n
+        \         \"141.0.0.0/9\",\r\n          \"141.128.0.0/10\",\r\n          \"141.192.0.0/11\",\r\n
+        \         \"141.224.0.0/12\",\r\n          \"141.240.0.0/13\",\r\n          \"141.248.0.0/15\",\r\n
+        \         \"141.250.0.0/16\",\r\n          \"141.252.0.0/14\",\r\n          \"142.0.0.0/7\",\r\n
+        \         \"144.0.0.0/7\",\r\n          \"146.0.0.0/9\",\r\n          \"146.128.0.0/12\",\r\n
+        \         \"146.144.0.0/15\",\r\n          \"146.146.0.0/16\",\r\n          \"146.148.0.0/14\",\r\n
+        \         \"146.152.0.0/13\",\r\n          \"146.160.0.0/11\",\r\n          \"146.192.0.0/10\",\r\n
+        \         \"147.0.0.0/8\",\r\n          \"148.0.0.0/6\",\r\n          \"152.0.0.0/6\",\r\n
+        \         \"156.0.0.0/8\",\r\n          \"157.0.0.0/11\",\r\n          \"157.32.0.0/12\",\r\n
+        \         \"157.48.0.0/13\",\r\n          \"157.56.0.0/15\",\r\n          \"157.58.0.0/16\",\r\n
+        \         \"157.60.0.0/14\",\r\n          \"157.64.0.0/10\",\r\n          \"157.128.0.0/9\",\r\n
+        \         \"158.0.0.0/7\",\r\n          \"160.0.0.0/5\",\r\n          \"168.0.0.0/8\",\r\n
+        \         \"169.0.0.0/9\",\r\n          \"169.128.0.0/10\",\r\n          \"169.192.0.0/11\",\r\n
+        \         \"169.224.0.0/12\",\r\n          \"169.240.0.0/13\",\r\n          \"169.248.0.0/14\",\r\n
+        \         \"169.252.0.0/15\",\r\n          \"169.255.0.0/16\",\r\n          \"170.0.0.0/7\",\r\n
+        \         \"172.0.0.0/12\",\r\n          \"172.32.0.0/11\",\r\n          \"172.64.0.0/10\",\r\n
+        \         \"172.128.0.0/9\",\r\n          \"173.0.0.0/8\",\r\n          \"174.0.0.0/7\",\r\n
+        \         \"176.0.0.0/4\",\r\n          \"192.0.0.0/23\",\r\n          \"192.0.3.0/24\",\r\n
+        \         \"192.0.4.0/22\",\r\n          \"192.0.8.0/21\",\r\n          \"192.0.16.0/20\",\r\n
+        \         \"192.0.32.0/19\",\r\n          \"192.0.64.0/18\",\r\n          \"192.0.128.0/17\",\r\n
+        \         \"192.1.0.0/16\",\r\n          \"192.2.0.0/15\",\r\n          \"192.4.0.0/14\",\r\n
+        \         \"192.8.0.0/13\",\r\n          \"192.16.0.0/12\",\r\n          \"192.33.0.0/16\",\r\n
+        \         \"192.34.0.0/15\",\r\n          \"192.36.0.0/14\",\r\n          \"192.40.0.0/13\",\r\n
+        \         \"192.48.0.0/12\",\r\n          \"192.64.0.0/10\",\r\n          \"192.128.0.0/11\",\r\n
+        \         \"192.160.0.0/13\",\r\n          \"192.169.0.0/16\",\r\n          \"192.170.0.0/15\",\r\n
+        \         \"192.172.0.0/14\",\r\n          \"192.176.0.0/12\",\r\n          \"192.192.0.0/10\",\r\n
+        \         \"193.0.0.0/8\",\r\n          \"194.0.0.0/7\",\r\n          \"196.0.0.0/7\",\r\n
+        \         \"198.0.0.0/12\",\r\n          \"198.16.0.0/15\",\r\n          \"198.20.0.0/14\",\r\n
+        \         \"198.24.0.0/13\",\r\n          \"198.32.0.0/11\",\r\n          \"198.64.0.0/10\",\r\n
+        \         \"198.128.0.0/9\",\r\n          \"199.0.0.0/8\",\r\n          \"200.0.0.0/5\",\r\n
+        \         \"208.0.0.0/4\"\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20683'
+      - '21459'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:16 GMT
+      - Fri, 23 Sep 2022 12:14:06 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f74c5036-708f-44f2-9ee7-a189ce405875?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/84441ac8-b3f5-4f18-96d6-fee6c32d03b1?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -1017,7 +1129,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4a921d18-2ce2-4217-a345-dab312baaa20
+      - 5e6cc321-4fa6-4404-9d10-0e7e61c66ffc
     status:
       code: 200
       message: OK
@@ -1037,9 +1149,10 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveRouteTable?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveRouteTable?api-version=2022-01-01
   response:
     body:
       string: 'null'
@@ -1051,11 +1164,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:17 GMT
+      - Fri, 23 Sep 2022 12:14:08 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/a51791f5-86f0-4797-9fb4-a7312f92e319?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/6cd96348-c57d-49af-9482-4ad221be66f6?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -1066,7 +1179,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0f822b42-65bc-4f10-90e7-6941d91fa456
+      - ec1c351e-8a21-4589-a6e9-28358b739846
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1086,9 +1199,10 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - AZURECLI/2.27.2 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.7 (Linux-5.15.0-1019-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/a51791f5-86f0-4797-9fb4-a7312f92e319?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/6cd96348-c57d-49af-9482-4ad221be66f6?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"disableBgpRoutePropagation\":
@@ -1112,43 +1226,43 @@ interactions:
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"25.48.0.0/12\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"172.16.0.0/12\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
         [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
         false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
-        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"25.4.0.0/14\"\r\n
+        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"25.48.0.0/12\"\r\n
         \     ],\r\n      \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\":
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"198.18.0.0/15\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"25.4.0.0/14\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
         [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
         false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
-        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"157.59.0.0/16\"\r\n
+        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"198.18.0.0/15\"\r\n
         \     ],\r\n      \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\":
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"192.168.0.0/16\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"157.59.0.0/16\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
         [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
         false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
-        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"25.33.0.0/16\"\r\n
+        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"192.168.0.0/16\"\r\n
         \     ],\r\n      \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\":
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"40.109.0.0/16\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"25.33.0.0/16\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
         [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
         false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
-        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"104.147.0.0/16\"\r\n
+        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"40.109.0.0/16\"\r\n
         \     ],\r\n      \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\":
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"40.108.0.0/17\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"104.147.0.0/16\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
         [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
         false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
@@ -1157,31 +1271,36 @@ interactions:
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"23.103.0.0/18\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"40.108.0.0/17\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
         [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
         false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
-        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"25.41.0.0/20\"\r\n
+        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"23.103.0.0/18\"\r\n
         \     ],\r\n      \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\":
         [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    },\r\n
         \   {\r\n      \"disableBgpRoutePropagation\": false,\r\n      \"source\":
         \"Default\",\r\n      \"state\": \"Active\",\r\n      \"hasBgpOverride\":
-        false,\r\n      \"addressPrefix\": [\r\n        \"20.35.252.0/22\"\r\n      ],\r\n
+        false,\r\n      \"addressPrefix\": [\r\n        \"25.41.0.0/20\"\r\n      ],\r\n
         \     \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\": [],\r\n      \"destinationServiceTags\":
-        [],\r\n      \"tagMap\": {}\r\n    }\r\n  ]\r\n}"
+        [],\r\n      \"tagMap\": {}\r\n    },\r\n    {\r\n      \"disableBgpRoutePropagation\":
+        false,\r\n      \"source\": \"Default\",\r\n      \"state\": \"Active\",\r\n
+        \     \"hasBgpOverride\": false,\r\n      \"addressPrefix\": [\r\n        \"20.35.252.0/22\"\r\n
+        \     ],\r\n      \"nextHopType\": \"None\",\r\n      \"nextHopIpAddress\":
+        [],\r\n      \"destinationServiceTags\": [],\r\n      \"tagMap\": {}\r\n    }\r\n
+        \ ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5529'
+      - '5853'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Sep 2021 10:45:27 GMT
+      - Fri, 23 Sep 2022 12:14:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/a51791f5-86f0-4797-9fb4-a7312f92e319?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/6cd96348-c57d-49af-9482-4ad221be66f6?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -1196,7 +1315,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0f822b42-65bc-4f10-90e7-6941d91fa456
+      - ec1c351e-8a21-4589-a6e9-28358b739846
     status:
       code: 200
       message: OK

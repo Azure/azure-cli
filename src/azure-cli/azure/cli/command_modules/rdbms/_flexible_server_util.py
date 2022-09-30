@@ -18,11 +18,13 @@ from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import AuthenticationError
+from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
+from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 
@@ -49,27 +51,24 @@ def create_random_resource_name(prefix='azure', length=15):
 
 
 def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
-    # if location is not passed as a parameter or is missing from local context
-    if location is None and resource_group_name is None:
-        if db_engine == 'postgres':
-            location = DEFAULT_LOCATION_PG
-        else:
-            location = DEFAULT_LOCATION_MySQL
-    elif location is None and resource_group_name is not None:
-        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
-        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
-        location = resource_group.location
-
     # If resource group is there in local context, check for its existence.
-    resource_group_exists = True
     if resource_group_name is not None:
         logger.warning('Checking the existence of the resource group \'%s\'...', resource_group_name)
         resource_group_exists = _check_resource_group_existence(cmd, resource_group_name)
         logger.warning('Resource group \'%s\' exists ? : %s ', resource_group_name, resource_group_exists)
+    else:
+        resource_group_exists = False
 
-    # If resource group is not passed as a param or is not in local context or the rg in the local context has been deleted
-    if not resource_group_exists or resource_group_name is None:
+    # set location to be same as RG's if not specified
+    if not resource_group_exists:
+        if not location:
+            location = DEFAULT_LOCATION_PG if db_engine == 'postgres' else DEFAULT_LOCATION_MySQL
         resource_group_name = _create_resource_group(cmd, location, resource_group_name)
+    else:
+        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
+        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
+        if not location:
+            location = resource_group.location
 
     # If servername is not passed, always create a new server - even if it is stored in the local context
     if server_name is None:
@@ -173,22 +172,21 @@ def get_postgres_tiers(sku_info):
 def get_postgres_list_skus_info(cmd, location):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.execute(location)
-    return _postgres_parse_list_skus(list_skus_result, 'postgres')
+    return _postgres_parse_list_skus(list_skus_result)
 
 
 def get_mysql_list_skus_info(cmd, location):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_skus_result = list_skus_client.list(location)
-    return _mysql_parse_list_skus(list_skus_result, 'mysql')
+    return _mysql_parse_list_skus(list_skus_result)
 
 
-def _postgres_parse_list_skus(result, database_engine):
+def _postgres_parse_list_skus(result):
     result = _get_list_from_paged_response(result)
-    single_az = False
+
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    if len(result) == 1:
-        single_az = True
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -213,16 +211,16 @@ def _postgres_parse_list_skus(result, database_engine):
 
         tiers_dict[tier_name] = tier_dict
 
-    return tiers_dict, single_az
+    return {'sku_info': tiers_dict,
+            'single_az': single_az}
 
 
-def _mysql_parse_list_skus(result, database_engine):
+def _mysql_parse_list_skus(result):
     result = _get_list_from_paged_response(result)
-    single_az = False
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
-    if len(result) == 1:
-        single_az = True
+    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
+    geo_paried_region = result[0].supported_geo_backup_regions
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -249,7 +247,10 @@ def _mysql_parse_list_skus(result, database_engine):
         iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
-    return tiers_dict, single_az, iops_dict
+    return {'sku_info': tiers_dict,
+            'single_az': single_az,
+            'iops_info': iops_dict,
+            'geo_paired_regions': geo_paried_region}
 
 
 def _get_available_values(sku_info, argument, tier=None):
@@ -271,9 +272,20 @@ def _create_resource_group(cmd, location, resource_group_name):
     return resource_group_name
 
 
-def _check_resource_group_existence(cmd, resource_group_name):
-    resource_client = resource_client_factory(cmd.cli_ctx)
-    return resource_client.resource_groups.check_existence(resource_group_name)
+# pylint: disable=protected-access
+def _check_resource_group_existence(cmd, resource_group_name, resource_client=None):
+    if resource_client is None:
+        resource_client = resource_client_factory(cmd.cli_ctx)
+
+    exists = False
+
+    try:
+        exists = resource_client.resource_groups.check_existence(resource_group_name)
+    except HttpResponseError as e:
+        if e.status_code == 403:
+            raise CLIError("You don't have authorization to perform action 'Microsoft.Resources/subscriptions/resourceGroups/read' over scope '/subscriptions/{}/resourceGroups/{}'.".format(resource_client._config.subscription_id, resource_group_name))
+
+    return exists
 
 
 # Map day_of_week string to integer to day of week
@@ -306,18 +318,21 @@ def get_id_components(rid):
 
 def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
-    from azure.core.exceptions import HttpResponseError
     parent_path = ''
     if parent_name and parent_type:
         parent_path = '{}/{}'.format(parent_type, parent_name)
 
     api_version = _resolve_api_version(resource_client, provider_namespace, resource_type, parent_path)
 
+    resource = None
+
     try:
-        resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
-    except HttpResponseError:
-        return False
-    return True
+        resource = resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
+    except HttpResponseError as e:
+        if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+            raise CLIError(e)
+
+    return resource is not None
 
 
 def _resolve_api_version(client, provider_namespace, resource_type, parent_path):
@@ -363,7 +378,7 @@ def register_credential_secrets(cmd, database_engine, server, repository):
         provider = "DBforPostgreSQL"
     scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
 
-    app = create_service_principal_for_rbac(cmd, name=server.name, role='contributor', scopes=[scope])
+    app = create_service_principal_for_rbac(cmd, display_name=server.name, role='contributor', scopes=[scope])
     app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
     app['subscriptionId'] = get_subscription_id(cmd.cli_ctx)
     app.pop('displayName')
@@ -456,7 +471,54 @@ def get_user_confirmation(message, yes=False):
             'Unable to prompt for confirmation as no tty available. Use --yes.')
 
 
+def replace_memory_optimized_tier(result):
+    result = _get_list_from_paged_response(result)
+    for capability_idx, capability in enumerate(result):
+        for edition_idx, edition in enumerate(capability.supported_flexible_server_editions):
+            if edition.name == 'MemoryOptimized':
+                result[capability_idx].supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
+
+    return result
+
+
 def _is_resource_name(resource):
     if len(resource.split('/')) == 1:
         return True
     return False
+
+
+def build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok_key, backup_byok_key):
+    identity, data_encryption = None, None
+
+    if byok_identity and byok_key:
+        identities = {byok_identity: {}}
+
+        if backup_byok_identity:
+            identities[backup_byok_identity] = {}
+
+        identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
+                                                         type="UserAssigned")
+
+        data_encryption = mysql_flexibleservers.models.DataEncryption(
+            primary_user_assigned_identity_id=byok_identity,
+            primary_key_uri=byok_key,
+            geo_backup_user_assigned_identity_id=backup_byok_identity,
+            geo_backup_key_uri=backup_byok_key,
+            type="AzureKeyVault")
+
+    return identity, data_encryption
+
+
+def get_identity_and_data_encryption(server):
+    identity, data_encryption = server.identity, server.data_encryption
+
+    if identity and identity.type == 'UserAssigned':
+        for current_id in identity.user_assigned_identities:
+            identity.user_assigned_identities[current_id] = {}
+    else:
+        identity = None
+
+    if not (data_encryption and data_encryption.type == 'AzureKeyVault'):
+        data_encryption = None
+
+    return identity, data_encryption

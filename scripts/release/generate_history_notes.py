@@ -147,8 +147,11 @@ def get_commits():
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
+    output = stdout.decode()
+    if out.returncode != 0:
+        raise Exception(output)
     dev_commits = []
-    for line in stdout.decode('utf-8').splitlines():
+    for line in output.splitlines():
         words = line.strip('"').split(None, 1)
         sha = words[0]
         subject = words[1]

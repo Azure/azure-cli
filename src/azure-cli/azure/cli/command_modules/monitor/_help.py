@@ -55,6 +55,9 @@ parameters:
         Azure Function:
             Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
         'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
@@ -128,6 +131,9 @@ parameters:
         Azure Function:
             Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
         'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
@@ -144,6 +150,75 @@ helps['monitor action-group enable-receiver'] = """
 type: command
 short-summary: Enable a receiver in an action group.
 long-summary: This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
+"""
+
+helps['monitor action-group wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state.
+"""
+
+helps['monitor action-group test-notifications'] = """
+type: group
+short-summary: Manage action groups test-notifications
+"""
+
+helps['monitor action-group test-notifications create'] = """
+type: command
+short-summary: Create an action group test-notifications
+parameters:
+  - name: --add-action -a
+    short-summary: Add receivers to the action group test-notifications
+    long-summary: |
+        Usage:   --add-action TYPE NAME [ARG ...]
+        Email:
+            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
+            Example:    --add-action email bob bob@contoso.com
+        SMS:
+            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action sms charli 1 5551234567
+        Webhook:
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
+        Arm Role:
+            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
+        Azure App Push:
+            Format:     --add-action azureapppush NAME EMAIL_ADDRESS
+            Example:    --add-action azureapppush test_apppush bob@contoso.com
+        ITSM:
+            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
+            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast
+        Automation runbook:
+            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
+            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
+        Voice:
+            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action voice charli 1 4441234567
+        Logic App:
+            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
+        Azure Function:
+            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
+            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Event Hub:
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
+        Multiple actions can be specified by using more than one `--add-action` argument.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
+examples:
+  - name: Create an action group test-notifications with action group
+    text: |
+        az monitor action-group test-notifications create --action-group MyActionGroup \\
+        --resource-group MyResourceGroup -a email alice alice@example.com usecommonalertsChema --alert-type budget
+  - name: Create an action group test-notifications with resource-group
+    text: |
+        az monitor action-group test-notifications create --resource-group MyResourceGroup \\
+        -a email alice alice@example.com usecommonalertsChema --alert-type budget
+  - name: Create an action group test-notifications
+    text: |
+        az monitor action-group test-notifications create -a email alice alice@example.com usecommonalertsChema \\
+        --alert-type budget
 """
 
 helps['monitor activity-log'] = """
@@ -369,149 +444,6 @@ examples:
 helps['monitor activity-log list-categories'] = """
 type: command
 short-summary: List the event categories of activity logs.
-"""
-
-helps['monitor alert'] = """
-type: group
-short-summary: Manage classic metric-based alert rules.
-"""
-
-helps['monitor alert create'] = """
-type: command
-short-summary: Create a classic metric-based alert rule.
-parameters:
-  - name: --action -a
-    short-summary: Add an action to fire when the alert is triggered.
-    long-summary: |
-        Usage:   --action TYPE KEY [ARG ...]
-        Email:   --action email bob@contoso.com ann@contoso.com
-        Webhook: --action webhook https://www.contoso.com/alert apiKey=value
-        Webhook: --action webhook https://www.contoso.com/alert?apiKey=value
-        Multiple actions can be specified by using more than one `--action` argument.
-  - name: --description
-    short-summary: Free-text description of the rule. Defaults to the condition expression.
-  - name: --disabled
-    short-summary: Create the rule in a disabled state.
-  - name: --condition
-    short-summary: The condition which triggers the rule.
-    long-summary: >
-        The form of a condition is "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD".
-        Values for METRIC and appropriate THRESHOLD values can be obtained from `az monitor metric` commands,
-        and PERIOD is of the form "##h##m##s".
-  - name: --email-service-owners
-    short-summary: Email the service owners if an alert is triggered.
-examples:
-  - name: Create a high CPU usage alert on a VM with no actions.
-    text: >
-        az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} --condition "Percentage CPU > 90 avg 5m"
-  - name: Create a high CPU usage alert on a VM with email and webhook actions.
-    text: |
-        az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} \\
-            --condition "Percentage CPU > 90 avg 5m" \\
-            --action email bob@contoso.com ann@contoso.com --email-service-owners \\
-            --action webhook https://www.contoso.com/alerts?type=HighCPU \\
-            --action webhook https://alerts.contoso.com apiKey={APIKey} type=HighCPU
-"""
-
-helps['monitor alert delete'] = """
-type: command
-short-summary: Delete an alert rule.
-examples:
-  - name: Delete an alert rule. (autogenerated)
-    text: |
-        az monitor alert delete --name MyAlertRule --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['monitor alert list'] = """
-type: command
-short-summary: List alert rules in a resource group.
-examples:
-  - name: List alert rules in a resource group. (autogenerated)
-    text: |
-        az monitor alert list --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['monitor alert list-incidents'] = """
-type: command
-short-summary: List all incidents for an alert rule.
-examples:
-  - name: List all incidents for an alert rule. (autogenerated)
-    text: |
-        az monitor alert list-incidents --resource-group MyResourceGroup --rule-name MyRule
-    crafted: true
-"""
-
-helps['monitor alert show'] = """
-type: command
-short-summary: Show an alert rule.
-examples:
-  - name: Show an alert rule. (autogenerated)
-    text: |
-        az monitor alert show --name MyAlertRule --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['monitor alert show-incident'] = """
-type: command
-short-summary: Get the details of an alert rule incident.
-"""
-
-helps['monitor alert update'] = """
-type: command
-short-summary: Update a classic metric-based alert rule.
-parameters:
-  - name: --description
-    short-summary: Description of the rule.
-  - name: --condition
-    short-summary: The condition which triggers the rule.
-    long-summary: >
-        The form of a condition is "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD".
-        Values for METRIC and appropriate THRESHOLD values can be obtained from `az monitor metric` commands,
-        and PERIOD is of the form "##h##m##s".
-  - name: --add-action -a
-    short-summary: Add an action to fire when the alert is triggered.
-    long-summary: |
-        Usage:   --add-action TYPE KEY [ARG ...]
-        Email:   --add-action email bob@contoso.com ann@contoso.com
-        Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
-        Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
-        Multiple actions can be specified by using more than one `--add-action` argument.
-  - name: --remove-action -r
-    short-summary: Remove one or more actions.
-    long-summary: |
-        Usage:   --remove-action TYPE KEY [KEY ...]
-        Email:   --remove-action email bob@contoso.com ann@contoso.com
-        Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com
-  - name: --email-service-owners
-    short-summary: Email the service owners if an alert is triggered.
-  - name: --metric
-    short-summary: Name of the metric to base the rule on.
-    populator-commands:
-      - az monitor metrics list-definitions
-  - name: --operator
-    short-summary: How to compare the metric against the threshold.
-  - name: --threshold
-    short-summary: Numeric threshold at which to trigger the alert.
-  - name: --aggregation
-    short-summary: Type of aggregation to apply based on --period.
-  - name: --period
-    short-summary: >
-        Time span over which to apply --aggregation, in nDnHnMnS shorthand or full ISO8601 format.
-examples:
-  - name: Update a classic metric-based alert rule. (autogenerated)
-    text: |
-        az monitor alert update --email-service-owners true --name MyAlertRule --resource-group MyResourceGroup
-    crafted: true
-  - name: Update a classic metric-based alert rule. (autogenerated)
-    text: |
-        az monitor alert update --name MyAlertRule --remove-action email bob@contoso.com --resource-group MyResourceGroup
-    crafted: true
-  - name: Update a classic metric-based alert rule. (autogenerated)
-    text: |
-        az monitor alert update --name MyAlertRule --resource-group MyResourceGroup --set retentionPolicy.days=365
-    crafted: true
 """
 
 helps['monitor autoscale'] = """
@@ -777,21 +709,6 @@ examples:
     crafted: true
 """
 
-helps['monitor autoscale-settings'] = """
-type: group
-short-summary: Manage autoscale settings.
-"""
-
-helps['monitor autoscale-settings update'] = """
-type: command
-short-summary: Updates an autoscale setting.
-examples:
-  - name: Updates an autoscale setting. (autogenerated)
-    text: |
-        az monitor autoscale-settings update --name MyAutoscaleSetting --resource-group MyResourceGroup --set retentionPolicy.days=365
-    crafted: true
-"""
-
 helps['monitor diagnostic-settings'] = """
 type: group
 short-summary: Manage service diagnostic settings.
@@ -824,12 +741,6 @@ parameters:
   - name: --resource-group -g
     type: string
     short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of the service instead of a full resource ID is given.
-  - name: --logs
-    type: string
-    short-summary: JSON encoded list of logs settings. Use '@{file}' to load from a file.
-  - name: --metrics
-    type: string
-    short-summary: JSON encoded list of metric settings. Use '@{file}' to load from a file.
   - name: --storage-account
     type: string
     short-summary: Name or ID of the storage account to send diagnostic logs to.
@@ -843,10 +754,10 @@ parameters:
   - name: --event-hub-rule
     short-summary: Name or ID of the event hub authorization rule.
 examples:
-  - name: Create diagnostic settings with EventHub.
+  - name: Create diagnostic settings, retention here only applies when the target is a storage account.
     text: |
         az monitor diagnostic-settings create --resource {ID} -n {name}
-           --event-hub-rule {eventHubRuleID} --storage-account {storageAccount}
+           --storage-account {storageAccount}
            --logs '[
              {
                "category": "WorkflowRuntime",
@@ -932,129 +843,6 @@ type: command
 short-summary: Update diagnostic settings for a subscription.
 """
 
-helps['monitor log-analytics'] = """
-type: group
-short-summary: Manage Azure log analytics.
-"""
-
-helps['monitor log-analytics cluster'] = """
-type: group
-short-summary: Manage Azure log analytics cluster.
-"""
-
-helps['monitor log-analytics cluster create'] = """
-type: command
-short-summary: Create a cluster instance.
-examples:
-  - name: Create a cluster instance.
-    text: az monitor log-analytics cluster create -g MyResourceGroup -n MyCluster --sku-capacity 1000
-"""
-
-helps['monitor log-analytics cluster update'] = """
-type: command
-short-summary: Update a cluster instance.
-examples:
-  - name: Update a cluster instance.
-    text: |
-        az monitor log-analytics cluster update -g MyResourceGroup -n MyCluster \\
-          --key-vault-uri https://myvault.vault.azure.net/ --key-name my-key \\
-          --key-version fe0adcedd8014aed9c22e9aefb81a1ds --sku-capacity 1000
-"""
-
-helps['monitor log-analytics cluster delete'] = """
-type: command
-short-summary: Delete a cluster instance.
-examples:
-  - name: Delete a cluster instance.
-    text: az monitor log-analytics cluster delete -g MyResourceGroup -n MyCluster
-"""
-
-helps['monitor log-analytics cluster show'] = """
-type: command
-short-summary: Show the properties of a cluster instance.
-examples:
-  - name: Show the properties of a cluster instance.
-    text: az monitor log-analytics cluster show -g MyResourceGroup -n MyCluster
-"""
-
-helps['monitor log-analytics cluster list'] = """
-type: command
-short-summary: Gets all cluster instances in a resource group or in current subscription.
-examples:
-  - name: Gets all cluster instances in a resource group.
-    text: az monitor log-analytics cluster list -g MyResourceGroup
-  - name: Gets all cluster instances in current subscription.
-    text: az monitor log-analytics cluster list
-"""
-
-helps['monitor log-analytics cluster wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the cluster is met.
-examples:
-  - name: Pause executing next line of CLI script until the cluster is successfully provisioned.
-    text: az monitor log-analytics cluster wait -n MyCluster -g MyResourceGroup --created
-"""
-
-helps['monitor log-analytics workspace'] = """
-type: group
-short-summary: Manage Azure log analytics workspace
-"""
-
-helps['monitor log-analytics workspace create'] = """
-type: command
-short-summary: Create a workspace instance
-examples:
-  - name: Create a workspace instance
-    text: az monitor log-analytics workspace create -g MyResourceGroup -n MyWorkspace
-"""
-
-helps['monitor log-analytics workspace delete'] = """
-type: command
-short-summary: Delete a workspace instance.
-examples:
-  - name: Delete a workspace instance. (autogenerated)
-    text: |
-        az monitor log-analytics workspace delete --force true --resource-group MyResourceGroup --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace get-schema'] = """
-type: command
-short-summary: Get the schema for a given workspace.
-long-summary: >
-    Schema represents the internal structure of the workspace, which can be used during the query.
-    For more information, visit: https://docs.microsoft.com/en-us/rest/api/loganalytics/workspaces%202015-03-20/getschema
-examples:
-  - name: Get the schema for a given workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace get-schema --resource-group MyResourceGroup --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace get-shared-keys'] = """
-type: command
-short-summary: Get the shared keys for a workspace.
-examples:
-  - name: Get the shared keys for a workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace get-shared-keys --resource-group MyResourceGroup --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace list'] = """
-type: command
-short-summary: Get a list of workspaces under a resource group or a subscription.
-"""
-
-helps['monitor log-analytics workspace list-deleted-workspaces'] = """
-type: command
-short-summary: Get a list of deleted workspaces that can be recovered in a subscription or a resource group.
-examples:
-  - name: Get a list of deleted workspaces that can be recovered in a resource group
-    text: |
-        az monitor log-analytics workspace list-deleted-workspaces --resource-group MyResourceGroup
-"""
-
 helps['monitor log-analytics workspace recover'] = """
 type: command
 short-summary: Recover a workspace in a soft-delete state within 14 days.
@@ -1064,195 +852,71 @@ examples:
         az monitor log-analytics workspace recover --resource-group MyResourceGroup -n MyWorkspace
 """
 
-helps['monitor log-analytics workspace list-management-groups'] = """
-type: command
-short-summary: Get a list of management groups connected to a workspace.
-examples:
-  - name: Get a list of management groups connected to a workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace list-management-groups --resource-group MyResourceGroup --subscription mysubscription --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace list-usages'] = """
-type: command
-short-summary: Get a list of usage metrics for a workspace.
-examples:
-  - name: Get a list of usage metrics for a workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace list-usages --resource-group MyResourceGroup --subscription MySubscription --workspace-name MyWorkspace
-    crafted: true
-"""
-
 helps['monitor log-analytics workspace table'] = """
 type: group
 short-summary: Manage tables for log analytics workspace.
 """
 
-helps['monitor log-analytics workspace table list'] = """
+helps['monitor log-analytics workspace table create'] = """
 type: command
-short-summary: List all the tables for the given Log Analytics workspace.
+short-summary: Create a Log Analytics workspace microsoft/custom log table. The table name needs to end with '_CL'.
 examples:
-  - name: List all the tables for the given Log Analytics workspace
+  - name: Create a Log Analytics workspace custom log table.
     text: |
-        az monitor log-analytics workspace table list --resource-group MyResourceGroup --workspace-name MyWorkspace
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL --retention-time 45 --columns MyColumn1=string TimeGenerated=datetime
 """
 
-helps['monitor log-analytics workspace table show'] = """
+helps['monitor log-analytics workspace table search-job'] = """
+type: group
+short-summary: Manage tables for log analytics workspace search results table.
+"""
+
+helps['monitor log-analytics workspace table search-job create'] = """
 type: command
-short-summary: Get a Log Analytics workspace table.
+short-summary: Create a Log Analytics workspace search results table. The table name needs to end with '_SRCH'.
 examples:
-  - name: Get a Log Analytics workspace table
+  - name: Create a Log Analytics workspace search result table.
     text: |
-        az monitor log-analytics workspace table show --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
+        az monitor log-analytics workspace table search-job create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-query "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
+"""
+
+helps['monitor log-analytics workspace table restore'] = """
+type: group
+short-summary: Manage tables for log analytics workspace restore logs table.
+"""
+
+helps['monitor log-analytics workspace table restore create'] = """
+type: command
+short-summary: Create a Log Analytics workspace restore logs table. The table name needs to end with '_RST'.
+examples:
+  - name: Create a Log Analytics workspace restore logs table.
+    text: |
+        az monitor log-analytics workspace table restore create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT" --restore-source-table MyTable
 """
 
 helps['monitor log-analytics workspace table update'] = """
 type: command
-short-summary: Update the properties of a Log Analytics workspace table, currently only support updating retention time.
+short-summary: Update the properties of a Log Analytics workspace table.
 examples:
-  - name: Update the retention time of a Log Analytics workspace table
+  - name: Update the properties of a Log Analytics workspace table.
     text: |
         az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
 """
 
-helps['monitor log-analytics workspace pack'] = """
-type: group
-short-summary: Manage intelligent packs for log analytics workspace.
-"""
-
-helps['monitor log-analytics workspace pack disable'] = """
+helps['monitor log-analytics workspace saved-search create'] = """
 type: command
-short-summary: Disable an intelligence pack for a given workspace.
-"""
-
-helps['monitor log-analytics workspace pack enable'] = """
-type: command
-short-summary: Enable an intelligence pack for a given workspace.
+short-summary: Create a saved search for a given workspace.
 examples:
-  - name: Enable an intelligence pack for a given workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace pack enable --name MyIntelligencePack --resource-group MyResourceGroup --subscription mysubscription --workspace-name MyWorkspace
-    crafted: true
+  - name: Create a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
 """
 
-helps['monitor log-analytics workspace pack list'] = """
+helps['monitor log-analytics workspace saved-search update'] = """
 type: command
-short-summary: List all the intelligence packs possible and whether they are enabled or disabled for a given workspace.
+short-summary: Update a saved search for a given workspace.
 examples:
-  - name: List all the intelligence packs possible and whether they are enabled or disabled for a given workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace pack list --resource-group MyResourceGroup --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace show'] = """
-type: command
-short-summary: Show a workspace instance.
-examples:
-  - name: Show a workspace instance. (autogenerated)
-    text: |
-        az monitor log-analytics workspace show --resource-group MyResourceGroup --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace update'] = """
-type: command
-short-summary: Update a workspace instance
-examples:
-  - name: Update a workspace instance. (autogenerated)
-    text: |
-        az monitor log-analytics workspace update --resource-group myresourcegroup --retention-time 30 --workspace-name myworkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace linked-service'] = """
-type: group
-short-summary: Manage linked service for log analytics workspace.
-long-summary: |
-    Linked services is used to defined a relation from the workspace to another Azure resource. Log Analytics and Azure resources then leverage this connection in their operations. Example uses of Linked Services in Log Analytics workspace are Automation account and workspace association to CMK.
-"""
-
-helps['monitor log-analytics workspace linked-service create'] = """
-type: command
-short-summary: Create a linked service.
-examples:
-  - name: Create a linked service.
-    text: |
-        az monitor log-analytics workspace linked-service create -g MyResourceGroup -n cluster \\
-          --workspace-name MyWorkspace --write-access-resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/clusters/MyCluster
-"""
-
-helps['monitor log-analytics workspace linked-service update'] = """
-type: command
-short-summary: Update a linked service.
-examples:
-  - name: Update a linked service.
-    text: |
-        az monitor log-analytics workspace linked-service update -g MyResourceGroup -n cluster \\
-          --workspace-name MyWorkspace --write-access-resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/clusters/MyCluster
-"""
-
-helps['monitor log-analytics workspace linked-service show'] = """
-type: command
-short-summary: Show the properties of a linked service.
-examples:
-  - name: Show the properties of a linked service.
-    text: |
-        az monitor log-analytics workspace linked-service show -g MyResourceGroup -n cluster --workspace-name MyWorkspace
-"""
-
-helps['monitor log-analytics workspace linked-service delete'] = """
-type: command
-short-summary: Delete a linked service.
-examples:
-  - name: Delete a linked service.
-    text: |
-        az monitor log-analytics workspace linked-service delete -g MyResourceGroup -n cluster --workspace-name MyWorkspace
-"""
-
-helps['monitor log-analytics workspace linked-service list'] = """
-type: command
-short-summary: Gets all the linked services in a workspace.
-examples:
-  - name: Gets all the linked services in a workspace.
-    text: |
-        az monitor log-analytics workspace linked-service list -g MyResourceGroup --workspace-name MyWorkspace
-"""
-
-helps['monitor log-analytics workspace linked-service wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the linked service is met.
-examples:
-  - name: Pause executing next line of CLI script until the linked service is successfully provisioned.
-    text: az monitor log-analytics workspace linked-service wait -n cluster -g MyResourceGroup --workspace-name MyWorkspace --created
-"""
-
-helps['monitor log-analytics workspace linked-storage'] = """
-type: group
-short-summary: Manage linked storage account for log analytics workspace.
-"""
-
-helps['monitor log-analytics workspace linked-storage create'] = """
-type: command
-short-summary: Create some linked storage accounts for log analytics workspace.
-examples:
-  - name: Create two linked storage accounts for a log analytics workspace using the name of the storage account.
-    text: az monitor log-analytics workspace linked-storage create --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts StorageAccount1 StorageAccount2
-  - name: Create one linked storage accounts for a log analytics workspace using the resource id of the storage account.
-    text: az monitor log-analytics workspace linked-storage create --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000001
-  - name: Create some linked storage accounts for log analytics workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace linked-storage create --resource-group MyResourceGroup --storage-accounts /subscriptions/00000000-0000-0000-0000-00000000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000001 --subscription mysubscription --type CustomLogs --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace linked-storage delete'] = """
-type: command
-short-summary: Delete all linked storage accounts with specific data source type for log analytics workspace.
-examples:
-  - name: Delete all linked storage accounts with a specific type for a log analytics workspace
-    text: az monitor log-analytics workspace linked-storage delete --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
+  - name: Update a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
 """
 
 helps['monitor log-analytics workspace linked-storage add'] = """
@@ -1273,112 +937,6 @@ examples:
     text: az monitor log-analytics workspace linked-storage remove --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts StorageAccount1 StorageAccount2
   - name: Remove one linked storage accounts for a log analytics workspace using the resource id of the storage account.
     text: az monitor log-analytics workspace linked-storage remove --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000001
-"""
-
-helps['monitor log-analytics workspace linked-storage list'] = """
-type: command
-short-summary: List all linked storage accounts for a log analytics workspace.
-examples:
-  - name: List all linked storage accounts for a log analytics workspace. (autogenerated)
-    text: |
-        az monitor log-analytics workspace linked-storage list --resource-group MyResourceGroup --workspace-name MyWorkspace
-    crafted: true
-"""
-
-helps['monitor log-analytics workspace linked-storage show'] = """
-type: command
-short-summary: List all linked storage accounts with specific data source type for a log analytics workspace.
-examples:
-  - name: Show all linked storage accounts with a specific type for a log analytics workspace
-    text: az monitor log-analytics workspace linked-storage show --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
-"""
-
-helps['monitor log-analytics workspace saved-search'] = """
-type: group
-short-summary: Manage saved search for log analytics workspace.
-"""
-
-helps['monitor log-analytics workspace saved-search create'] = """
-type: command
-short-summary: Create a saved search for a given workspace.
-examples:
-  - name: Create a saved search for a given workspace.
-    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
-"""
-
-helps['monitor log-analytics workspace saved-search update'] = """
-type: command
-short-summary: Update a saved search for a given workspace.
-examples:
-  - name: Update a saved search for a given workspace.
-    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(TimeGenerated, 1h)" --fa myfun --fp "a:string = value"
-"""
-
-helps['monitor log-analytics workspace saved-search list'] = """
-type: command
-short-summary: List all saved searches for a given workspace.
-"""
-
-helps['monitor log-analytics workspace saved-search show'] = """
-type: command
-short-summary: Show a saved search for a given workspace.
-"""
-
-helps['monitor log-analytics workspace saved-search delete'] = """
-type: command
-short-summary: Delete a saved search for a given workspace.
-"""
-
-helps['monitor log-analytics workspace data-export'] = """
-type: group
-short-summary: Manage data export ruls for log analytics workspace.
-"""
-
-helps['monitor log-analytics workspace data-export create'] = """
-type: command
-short-summary: Create a data export rule for a given workspace.
-long-summary: |
-    For more information, see
-    https://docs.microsoft.com/en-us/azure/azure-monitor/platform/logs-data-export.
-parameters:
-  - name: --tables -t
-    short-summary: An array of tables to export.
-    populator-commands:
-      - "`az monitor log-analytics workspace table list`"
-examples:
-  - name: Create a data export rule for a given workspace.
-    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
-"""
-
-helps['monitor log-analytics workspace data-export update'] = """
-type: command
-short-summary: Update a data export rule for a given workspace.
-long-summary: |
-    For more information, see
-    https://docs.microsoft.com/en-us/azure/azure-monitor/platform/logs-data-export.
-parameters:
-  - name: --tables -t
-    short-summary: An array of tables to export.
-    populator-commands:
-      - "`az monitor log-analytics workspace table list`"
-examples:
-  - name: Update a data export rule for a given workspace.
-    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} -t {table_name} --enable false
-"""
-
-helps['monitor log-analytics workspace data-export list'] = """
-type: command
-short-summary: List all data export ruleses for a given workspace.
-"""
-
-helps['monitor log-analytics workspace data-export show'] = """
-type: command
-short-summary: Show a data export rule for a given workspace.
-"""
-
-helps['monitor log-analytics workspace data-export delete'] = """
-type: command
-short-summary: Delete a data export rule for a given workspace.
 """
 
 helps['monitor log-profiles'] = """
@@ -1452,6 +1010,7 @@ parameters:
                            [{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
+                           [with skipmetricvalidation]
 
         Sensitivity can be 'low', 'medium', 'high'.
 

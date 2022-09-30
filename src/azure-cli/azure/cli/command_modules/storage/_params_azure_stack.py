@@ -10,8 +10,8 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
-                          resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets, validate_custom_domain, validate_container_public_access,
+                          resource_type_type, services_type, validate_select, validate_blob_type,
+                          validate_included_datasets, validate_custom_domain,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -19,11 +19,11 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
                           validate_fs_public_access)
+from ._validators_azure_stack import validate_entity, validate_container_public_access
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
     from argcomplete.completers import FilesCompleter
-    from six import u as unicode_string
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -136,12 +136,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
              'where p is the permission and u is the umask. For more information, please refer to '
-             'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#umask.')
+             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
              'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
-             'docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -622,7 +622,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of blob at the destination.')
         c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
-                   'Please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers '
+                   'Please refer to https://docs.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
@@ -650,7 +650,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_lease_id', arg_group='Copy Source')
 
     with self.argument_context('storage blob copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+        from azure.cli.command_modules.storage._validators_azure_stack import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
         c.argument('requires_sync', arg_type=get_three_state_flag(),
@@ -983,11 +983,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('no_progress', progress_type)
 
     with self.argument_context('storage file delete-batch') as c:
-        from ._validators import process_file_batch_source_parameters
+        from ._validators_azure_stack import process_file_batch_source_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
 
     with self.argument_context('storage file copy start') as c:
-        from azure.cli.command_modules.storage._validators import validate_source_uri
+        from azure.cli.command_modules.storage._validators_azure_stack import validate_source_uri
 
         c.register_path_argument(options_list=('--destination-path', '-p'))
         c.register_source_uri_arguments(validator=validate_source_uri)
@@ -1062,7 +1062,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage message') as c:
         c.argument('queue_name', queue_name_type)
         c.argument('message_id', options_list='--id')
-        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.argument('content', type=str, help='Message content, up to 64KB in size.')
 
     with self.argument_context('storage remove') as c:
         from .completers import file_path_completer

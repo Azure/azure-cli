@@ -31,9 +31,8 @@ def maps_account_create(client,
             '\nQueries are not linked to any customer or end-user when shared with TomTom ' \
             'and cannot be used to identify individuals.' \
             '\nMicrosoft is currently in the process of adding TomTom to the Online Services Subcontractor List. ' \
-            '\nNote that the Mobility and Weather Services which include integration with ' \
-            'Moovit and AccuWeather are currently in PREVIEW ' \
-            '(see https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/). '
+            '\nNote that Weather Services integrates with AccuWeather and is currently in PREVIEW ' \
+            '(see https://azure.microsoft.com/support/legal/preview-supplemental-terms/). '
     hint = 'Please select.'
     client_denied_terms = 'You must agree to the License and Privacy Statement to create an account.'
 

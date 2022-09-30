@@ -67,15 +67,15 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Is a directory: ') as e:
             self._test_zone('404zone.com', '')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied: ') as e:
             self._test_zone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
@@ -87,12 +87,12 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
         # Difference with Linux platform while reading a directory
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied:') as e:
             self._test_zone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 
@@ -442,7 +442,11 @@ class DnsParseZoneFiles(unittest.TestCase):
             (7200, 7, 'foo bar')
         ])
         self._check_txt(zone, 'mytxtrs.' + zn, [(3600, 2, 'hi')])
-        self._check_srv(zone, 'mysrv.' + zn, [(3600, 1, 2, 1234, 'target.contoso.com.')])
+        self._check_srv(zone, 'mysrv.' + zn, [
+            (3600, 1, 2, 1234, 'target-1.contoso.com.'),
+            (3600, 1, 2, 1234, 'target-2.contoso.com.'),
+            (3600, 1, 2, 1234, 'target-3.contoso.com.')
+        ])
         self._check_caa(zone, 'caa1.' + zn, [
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 128, 'iodef', 'mailto:test@contoso.com')

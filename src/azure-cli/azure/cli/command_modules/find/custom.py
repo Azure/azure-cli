@@ -15,7 +15,6 @@ import colorama  # pylint: disable=import-error
 
 from azure.cli.core import telemetry as telemetry_core
 from azure.cli.core import __version__ as core_version
-from azure.cli.core.commands.constants import SURVEY_PROMPT
 from packaging.version import parse
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -59,8 +58,7 @@ def process_query(cli_term):
                     print(style_message("More commands and examples are available in the latest version of the CLI. "
                                         "Please update for the best experience.\n"))
     from azure.cli.core.util import show_updates_available
-    show_updates_available(new_line_after=True)
-    print(SURVEY_PROMPT)
+    show_updates_available()
 
 
 def get_generated_examples(cli_term):
@@ -97,6 +95,7 @@ def call_aladdin_service(query):
     version = str(parse(core_version))
     correlation_id = telemetry_core._session.correlation_id   # pylint: disable=protected-access
     subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
+    event_id = telemetry_core._session.event_id  # pylint: disable=protected-access
 
     # Used for DDOS protection and rate limiting
     user_id = telemetry_core._get_installation_id()  # pylint: disable=protected-access
@@ -112,6 +111,9 @@ def call_aladdin_service(query):
 
     if telemetry_core.is_telemetry_enabled() and subscription_id is not None:
         context['subscriptionId'] = subscription_id
+
+    if telemetry_core.is_telemetry_enabled():
+        context['eventId'] = event_id
 
     api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {

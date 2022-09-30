@@ -176,11 +176,11 @@ History notes are auto-generated based on PR titles and descriptions starting fr
 2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. If it's related to fixing an issue, put `Fix #number` in this part. For other cases, this part could be empty.
 3. [**Recommendation**] If the change can be mapped into a command, then the next part could be the command name starting with `az`, followed by a colon.
 4. [**Recommendation**] Use the right verb with **present-tense** in **base form** and **capitalized first letter** to describe what is done:
-    * **Add** for new features.
-    * **Change** for changes in existing functionality.
-    * **Deprecate** for once-stable features removed in upcoming releases.
-    * **Remove** for deprecated features removed in this release.
-    * **Fix** for any bug fixes.
+    * **Add** for new features.
+    * **Change** for changes in existing functionality.
+    * **Deprecate** for once-stable features removed in upcoming releases.
+    * **Remove** for deprecated features removed in this release.
+    * **Fix** for any bug fixes.
 
 Examples of customer-facing change PR title:
 

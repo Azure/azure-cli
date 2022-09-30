@@ -12,7 +12,7 @@ from unittest import mock
 from knack.log import get_logger
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.checkers import StringContainCheck
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 logger = get_logger(__name__)
 

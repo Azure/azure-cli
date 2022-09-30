@@ -42,7 +42,7 @@ class TestCoreTelemetry(unittest.TestCase):
 
     def test_cloud_forbid_telemetry(self):
         from unittest import mock
-        import azure.cli.core.telemetry as telemetry
+        from azure.cli.core import telemetry
         from azure.cli.core.mock import DummyCli
         from knack.completion import ARGCOMPLETE_ENV_NAME
 

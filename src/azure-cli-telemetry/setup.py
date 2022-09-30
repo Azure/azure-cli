@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = "1.0.6"
+VERSION = "1.0.8"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -16,10 +16,10 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -41,7 +41,7 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=[
         'applicationinsights>=0.11.1,<0.12',
-        'portalocker~=1.6',
+        'portalocker>=1.6,<3',
     ],
     packages=[
         'azure.cli.telemetry',

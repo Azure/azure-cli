@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 
 class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):
@@ -22,7 +22,7 @@ class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):
         return self.cmd("netappfiles volume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} -l {loc} "
                         "--vnet {vnet} --subnet {subnet} --file-path {vol_name} --usage-threshold 100")
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_vault_list_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_vault_list_', additional_tags={'owner': 'cli_test'})
     def test_list_vault(self):
         self.kwargs.update({
             'loc': LOCATION,

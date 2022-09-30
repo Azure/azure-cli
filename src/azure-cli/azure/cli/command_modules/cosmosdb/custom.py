@@ -9,7 +9,6 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
-from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.cosmosdb.models import (
@@ -58,7 +57,17 @@ from azure.mgmt.cosmosdb.models import (
     RestoreParameters,
     ContinuousModeBackupPolicy,
     ContinuousBackupRestoreLocation,
-    CreateMode
+    CreateMode,
+    ManagedServiceIdentityUserAssignedIdentity,
+    ClusterResource,
+    ClusterResourceProperties,
+    CommandPostBody,
+    DataCenterResource,
+    DataCenterResourceProperties,
+    ManagedCassandraManagedServiceIdentity,
+    ServiceResourceCreateUpdateParameters,
+    MongoRoleDefinitionCreateUpdateParameters,
+    MongoUserDefinitionCreateUpdateParameters
 )
 
 logger = get_logger(__name__)
@@ -87,7 +96,8 @@ DEFAULT_INDEXING_POLICY = """{
 
 
 # pylint: disable=too-many-locals
-def cli_cosmosdb_create(cmd, client,
+def cli_cosmosdb_create(cmd,
+                        client,
                         resource_group_name,
                         account_name,
                         locations=None,
@@ -112,6 +122,7 @@ def cli_cosmosdb_create(cmd, client,
                         network_acl_bypass_resource_ids=None,
                         backup_interval=None,
                         backup_retention=None,
+                        backup_redundancy=None,
                         assign_identity=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
@@ -163,6 +174,7 @@ def cli_cosmosdb_create(cmd, client,
                                     analytical_storage_schema_type=analytical_storage_schema_type,
                                     backup_policy_type=backup_policy_type,
                                     backup_interval=backup_interval,
+                                    backup_redundancy=backup_redundancy,
                                     assign_identity=assign_identity,
                                     default_identity=default_identity,
                                     backup_retention=backup_retention,
@@ -171,6 +183,7 @@ def cli_cosmosdb_create(cmd, client,
 
 
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-branches
 def _create_database_account(client,
                              resource_group_name,
                              account_name,
@@ -196,6 +209,7 @@ def _create_database_account(client,
                              network_acl_bypass_resource_ids=None,
                              backup_interval=None,
                              backup_retention=None,
+                             backup_redundancy=None,
                              assign_identity=None,
                              default_identity=None,
                              backup_policy_type=None,
@@ -220,12 +234,30 @@ def _create_database_account(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    system_assigned_identity = None
+    managed_service_identity = None
+    SYSTEM_ID = '[system]'
+    enable_system = False
     if assign_identity is not None:
         if assign_identity == [] or (len(assign_identity) == 1 and assign_identity[0] == '[system]'):
-            system_assigned_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
+            enable_system = True
+            managed_service_identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
         else:
-            raise InvalidArgumentValueError("Only '[system]' is supported right now for command '--assign-identity'.")
+            user_identities = {}
+            for x in assign_identity:
+                if x != SYSTEM_ID:
+                    user_identities[x] = ManagedServiceIdentityUserAssignedIdentity()  # pylint: disable=line-too-long
+                else:
+                    enable_system = True
+            if enable_system:
+                managed_service_identity = ManagedServiceIdentity(
+                    type=ResourceIdentityType.system_assigned_user_assigned.value,
+                    user_assigned_identities=user_identities
+                )
+            else:
+                managed_service_identity = ManagedServiceIdentity(
+                    type=ResourceIdentityType.user_assigned.value,
+                    user_assigned_identities=user_identities
+                )
 
     api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
@@ -236,18 +268,23 @@ def _create_database_account(client,
     backup_policy = None
     if backup_policy_type is not None:
         if backup_policy_type.lower() == 'periodic':
+            if backup_interval is None and backup_retention is None and backup_redundancy is None:
+                raise CLIError(
+                    '--backup-interval, --backup-retention or --backup-redundancy ' +
+                    'must be specified when Backup Policy Type is Periodic.')
             backup_policy = PeriodicModeBackupPolicy()
-            if backup_interval is not None or backup_retention is not None:
+            if backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
                 periodic_mode_properties = PeriodicModeProperties(
                     backup_interval_in_minutes=backup_interval,
-                    backup_retention_interval_in_hours=backup_retention
+                    backup_retention_interval_in_hours=backup_retention,
+                    backup_storage_redundancy=backup_redundancy
                 )
             backup_policy.periodic_mode_properties = periodic_mode_properties
         elif backup_policy_type.lower() == 'continuous':
             backup_policy = ContinuousModeBackupPolicy()
         else:
             raise CLIError('backup-policy-type argument is invalid.')
-    elif backup_interval is not None or backup_retention is not None:
+    elif backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
         backup_policy = PeriodicModeBackupPolicy()
         periodic_mode_properties = PeriodicModeProperties(
             backup_interval_in_minutes=backup_interval,
@@ -297,7 +334,7 @@ def _create_database_account(client,
         network_acl_bypass=network_acl_bypass,
         network_acl_bypass_resource_ids=network_acl_bypass_resource_ids,
         backup_policy=backup_policy,
-        identity=system_assigned_identity,
+        identity=managed_service_identity,
         default_identity=default_identity,
         analytical_storage_configuration=analytical_storage_configuration,
         create_mode=create_mode,
@@ -326,6 +363,7 @@ def cli_cosmosdb_update(client,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
+                        key_uri=None,
                         enable_public_network=None,
                         enable_analytical_storage=None,
                         network_acl_bypass=None,
@@ -333,6 +371,7 @@ def cli_cosmosdb_update(client,
                         server_version=None,
                         backup_interval=None,
                         backup_retention=None,
+                        backup_redundancy=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
                         backup_policy_type=None):
@@ -367,19 +406,20 @@ def cli_cosmosdb_update(client,
     api_properties = {'ServerVersion': server_version}
 
     backup_policy = None
-    if backup_interval is not None or backup_retention is not None:
+    if backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             if backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
                 raise CLIError('backup-interval and backup-retention can only be set with periodic backup policy.')
             periodic_mode_properties = PeriodicModeProperties(
                 backup_interval_in_minutes=backup_interval,
-                backup_retention_interval_in_hours=backup_retention
+                backup_retention_interval_in_hours=backup_retention,
+                backup_storage_redundancy=backup_redundancy
             )
             backup_policy = existing.backup_policy
             backup_policy.periodic_mode_properties = periodic_mode_properties
         else:
             raise CLIError(
-                'backup-interval and backup-retention can only be set for accounts with periodic backup policy.')
+                'backup-interval, backup-retention and backup_redundancy can only be set for accounts with periodic backup policy.')  # pylint: disable=line-too-long
     elif backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             backup_policy = ContinuousModeBackupPolicy()
@@ -400,6 +440,7 @@ def cli_cosmosdb_update(client,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
+        key_vault_key_uri=key_uri,
         public_network_access=public_network_access,
         enable_analytical_storage=enable_analytical_storage,
         network_acl_bypass=network_acl_bypass,
@@ -482,11 +523,12 @@ def _populate_sql_container_definition(sql_container_resource,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
     if all(arg is None for arg in
-           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
+           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, client_encryption_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
@@ -506,6 +548,9 @@ def _populate_sql_container_definition(sql_container_resource,
     if unique_key_policy is not None:
         sql_container_resource.unique_key_policy = unique_key_policy
 
+    if client_encryption_policy is not None:
+        sql_container_resource.client_encryption_policy = client_encryption_policy
+
     if conflict_resolution_policy is not None:
         sql_container_resource.conflict_resolution_policy = conflict_resolution_policy
 
@@ -524,6 +569,7 @@ def cli_cosmosdb_sql_container_create(client,
                                       partition_key_version=None,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
+                                      client_encryption_policy=None,
                                       throughput=None,
                                       max_throughput=None,
                                       unique_key_policy=None,
@@ -537,6 +583,7 @@ def cli_cosmosdb_sql_container_create(client,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl)
@@ -577,6 +624,7 @@ def cli_cosmosdb_sql_container_update(client,
                                           None,
                                           default_ttl,
                                           indexing_policy,
+                                          None,
                                           None,
                                           None,
                                           None,
@@ -779,7 +827,8 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
                                        partition_key_path,
                                        default_ttl,
                                        indexing_policy,
-                                       conflict_resolution_policy):
+                                       conflict_resolution_policy,
+                                       analytical_storage_ttl):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
         return False
 
@@ -798,6 +847,9 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
     if conflict_resolution_policy is not None:
         gremlin_graph_resource.conflict_resolution_policy = conflict_resolution_policy
 
+    if analytical_storage_ttl is not None:
+        gremlin_graph_resource.analytical_storage_ttl = analytical_storage_ttl
+
     return True
 
 
@@ -811,7 +863,8 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
                                       throughput=None,
                                       max_throughput=None,
-                                      conflict_resolution_policy=None):
+                                      conflict_resolution_policy=None,
+                                      analytical_storage_ttl=None):
     """Creates an Azure Cosmos DB Gremlin graph """
     gremlin_graph_resource = GremlinGraphResource(id=graph_name)
 
@@ -819,7 +872,8 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                        partition_key_path,
                                        default_ttl,
                                        indexing_policy,
-                                       conflict_resolution_policy)
+                                       conflict_resolution_policy,
+                                       analytical_storage_ttl)
 
     options = _get_options(throughput, max_throughput)
 
@@ -840,7 +894,8 @@ def cli_cosmosdb_gremlin_graph_update(client,
                                       database_name,
                                       graph_name,
                                       default_ttl=None,
-                                      indexing_policy=None):
+                                      indexing_policy=None,
+                                      analytical_storage_ttl=None):
     """Updates an Azure Cosmos DB Gremlin graph """
     logger.debug('reading Gremlin graph')
     gremlin_graph = client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
@@ -851,12 +906,14 @@ def cli_cosmosdb_gremlin_graph_update(client,
     gremlin_graph_resource.default_ttl = gremlin_graph.resource.default_ttl
     gremlin_graph_resource.unique_key_policy = gremlin_graph.resource.unique_key_policy
     gremlin_graph_resource.conflict_resolution_policy = gremlin_graph.resource.conflict_resolution_policy
+    gremlin_graph_resource.analytical_storage_ttl = gremlin_graph.resource.analytical_storage_ttl
 
     if _populate_gremlin_graph_definition(gremlin_graph_resource,
                                           None,
                                           default_ttl,
                                           indexing_policy,
-                                          None):
+                                          None,
+                                          analytical_storage_ttl):
         logger.debug('replacing Gremlin graph')
 
     gremlin_graph_create_update_resource = GremlinGraphCreateUpdateParameters(
@@ -917,7 +974,7 @@ def cli_cosmosdb_mongodb_database_exists(client,
 
 
 def _populate_mongodb_collection_definition(mongodb_collection_resource, shard_key_path, indexes, analytical_storage_ttl):
-    if all(arg is None for arg in [shard_key_path, indexes]):
+    if all(arg is None for arg in [shard_key_path, indexes, analytical_storage_ttl]):
         return False
 
     if shard_key_path is not None:
@@ -1400,7 +1457,7 @@ def cli_cosmosdb_table_throughput_migrate(client,
 
 
 def _get_throughput_settings_update_parameters(throughput=None, max_throughput=None):
-
+    throughput_resource = None
     if throughput and max_throughput:
         raise CLIError("Please provide max-throughput if your resource is autoscale enabled otherwise provide throughput.")
     if throughput:
@@ -1426,19 +1483,51 @@ def cli_cosmosdb_identity_show(client, resource_group_name, account_name):
 
 def cli_cosmosdb_identity_assign(client,
                                  resource_group_name,
-                                 account_name):
-    """ Show the identity associated with a Cosmos DB account """
+                                 account_name,
+                                 identities=None):
+    """ Update the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
-    if ResourceIdentityType.system_assigned.value in existing.identity.type:
+    SYSTEM_ID = '[system]'
+    enable_system = identities is None or SYSTEM_ID in identities
+    new_user_identities = []
+    if identities is not None:
+        new_user_identities = [x for x in identities if x != SYSTEM_ID]
+
+    only_enabling_system = enable_system and len(new_user_identities) == 0
+    system_already_added = existing.identity.type == ResourceIdentityType.system_assigned or existing.identity.type == ResourceIdentityType.system_assigned_user_assigned
+    all_new_users_already_added = new_user_identities and existing.identity and existing.identity.user_assigned_identities and all(x in existing.identity.user_assigned_identities for x in new_user_identities)
+    if only_enabling_system and system_already_added:
+        return existing.identity
+    if (not enable_system) and all_new_users_already_added:
+        return existing.identity
+    if enable_system and system_already_added and all_new_users_already_added:
         return existing.identity
 
-    if existing.identity.type == ResourceIdentityType.user_assigned.value:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned_user_assigned.value)
+    if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif existing.identity and existing.identity.type == ResourceIdentityType.system_assigned and new_user_identities:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif existing.identity and existing.identity.type == ResourceIdentityType.user_assigned and enable_system:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif new_user_identities and enable_system:
+        identity_type = ResourceIdentityType.system_assigned_user_assigned
+    elif new_user_identities:
+        identity_type = ResourceIdentityType.user_assigned
     else:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.system_assigned.value)
-    params = DatabaseAccountUpdateParameters(identity=identity)
+        identity_type = ResourceIdentityType.system_assigned
+
+    if identity_type in [ResourceIdentityType.system_assigned, ResourceIdentityType.none]:
+        new_identity = ManagedServiceIdentity(type=identity_type.value)
+    else:
+        new_assigned_identities = existing.identity.user_assigned_identities or {}
+        for identity in new_user_identities:
+            new_assigned_identities[identity] = ManagedServiceIdentityUserAssignedIdentity()
+
+        new_identity = ManagedServiceIdentity(type=identity_type.value, user_assigned_identities=new_assigned_identities)
+
+    params = DatabaseAccountUpdateParameters(identity=new_identity)
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
@@ -1446,19 +1535,61 @@ def cli_cosmosdb_identity_assign(client,
 
 def cli_cosmosdb_identity_remove(client,
                                  resource_group_name,
-                                 account_name):
-    """ Remove the SystemAssigned identity associated with a Cosmos DB account """
+                                 account_name,
+                                 identities=None):
+    """ Remove the identities associated with a Cosmos DB account """
 
     existing = client.get(resource_group_name, account_name)
 
-    if ResourceIdentityType.system_assigned.value not in existing.identity.type:
-        return existing.identity
+    SYSTEM_ID = '[system]'
+    remove_system_assigned_identity = False
+    if not identities:
+        remove_system_assigned_identity = True
+    elif SYSTEM_ID in identities:
+        remove_system_assigned_identity = True
+        identities.remove(SYSTEM_ID)
 
-    if ResourceIdentityType.user_assigned.value in existing.identity.type:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.user_assigned.value)
+    if existing.identity is None:
+        return ManagedServiceIdentity(type=ResourceIdentityType.none.value)
+    if existing.identity.user_assigned_identities:
+        existing_identities = existing.identity.user_assigned_identities.keys()
     else:
-        identity = ManagedServiceIdentity(type=ResourceIdentityType.none.value)
-    params = DatabaseAccountUpdateParameters(identity=identity)
+        existing_identities = []
+    if identities:
+        identities_to_remove = identities
+    else:
+        identities_to_remove = []
+    non_existing = [x for x in identities_to_remove if x not in set(existing_identities)]
+
+    if non_existing:
+        raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), account_name))
+    identities_remaining = [x for x in existing_identities if x not in set(identities_to_remove)]
+    if remove_system_assigned_identity and ((not existing.identity) or (existing.identity and existing.identity.type in [ResourceIdentityType.none, ResourceIdentityType.user_assigned])):
+        raise CLIError("System-assigned identity is not associated with '{}'".format(account_name))
+
+    if identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.system_assigned_user_assigned
+    elif identities_remaining and remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.user_assigned
+    elif identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.user_assigned:
+        set_type = ResourceIdentityType.user_assigned
+    elif not identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+        set_type = ResourceIdentityType.system_assigned
+    elif not identities_remaining and not remove_system_assigned_identity and existing.identity.type == ResourceIdentityType.system_assigned:
+        set_type = ResourceIdentityType.system_assigned
+    else:
+        set_type = ResourceIdentityType.none
+
+    new_user_identities = {}
+    for identity in identities_remaining:
+        new_user_identities[identity] = ManagedServiceIdentityUserAssignedIdentity()
+    if set_type in [ResourceIdentityType.system_assigned_user_assigned, ResourceIdentityType.user_assigned]:
+        for removed_identity in identities_to_remove:
+            new_user_identities[removed_identity] = None
+    if not new_user_identities:
+        new_user_identities = None
+
+    params = DatabaseAccountUpdateParameters(identity=ManagedServiceIdentity(type=set_type, user_assigned_identities=new_user_identities))
     async_cosmos_db_update = client.begin_update(resource_group_name, account_name, params)
     cosmos_db_account = async_cosmos_db_update.result()
     return cosmos_db_account.identity
@@ -1519,7 +1650,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
                                      account_name,
                                      subnet,
                                      virtual_network=None):
-    """ Adds a virtual network rule to an existing Cosmos DB database account """
+    """ Remove a virtual network rule from an existing Cosmos DB database account """
     subnet = _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network)
     existing = client.get(resource_group_name, account_name)
 
@@ -1711,21 +1842,25 @@ def cli_cosmosdb_restorable_database_account_list(client,
     return matching_restorable_accounts
 
 
-def cli_retrieve_latest_backup_time(client,
-                                    resource_group_name,
-                                    account_name,
-                                    database_name,
-                                    container_name,
-                                    location):
+def cli_sql_retrieve_latest_backup_time(client,
+                                        resource_group_name,
+                                        account_name,
+                                        database_name,
+                                        container_name,
+                                        location):
     try:
         client.get_sql_database(resource_group_name, account_name, database_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a database with name {}".format(database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
 
     try:
         client.get_sql_container(resource_group_name, account_name, database_name, container_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a container with name {} under database {}".format(container_name, database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Container with name '{}' under database '{}' could not be found.".format(container_name, database_name))
+        raise CLIError("{}".format(str(ex)))
 
     restoreLocation = ContinuousBackupRestoreLocation(
         location=location
@@ -1737,6 +1872,39 @@ def cli_retrieve_latest_backup_time(client,
                                                                           container_name,
                                                                           restoreLocation)
     return asyc_backupInfo.result()
+
+
+def cli_mongo_db_retrieve_latest_backup_time(client,
+                                             resource_group_name,
+                                             account_name,
+                                             database_name,
+                                             collection_name,
+                                             location):
+    try:
+        client.get_mongo_db_database(resource_group_name, account_name, database_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
+
+    try:
+        client.get_mongo_db_collection(resource_group_name, account_name, database_name, collection_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Collection with name '{}' under database '{}' could not be found.".format(collection_name, database_name))
+        raise CLIError("{}".format(str(ex)))
+
+    restoreLocation = ContinuousBackupRestoreLocation(
+        location=location
+    )
+
+    asyc_backupInfo = client.begin_retrieve_continuous_backup_information(resource_group_name,
+                                                                          account_name,
+                                                                          database_name,
+                                                                          collection_name,
+                                                                          restoreLocation)
+    return asyc_backupInfo.result()
+
 
 ######################
 # data plane APIs
@@ -1814,7 +1982,8 @@ def cli_cosmosdb_collection_delete(client, database_id, collection_id):
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
                                     default_ttl=None,
-                                    indexing_policy=None):
+                                    indexing_policy=None,
+                                    client_encryption_policy=None):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
         return False
 
@@ -1832,6 +2001,9 @@ def _populate_collection_definition(collection,
     if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy
 
+    if client_encryption_policy is not None:
+        collection['clientEncryptionPolicy'] = client_encryption_policy
+
     return True
 
 
@@ -1841,7 +2013,8 @@ def cli_cosmosdb_collection_create(client,
                                    throughput=None,
                                    partition_key_path=None,
                                    default_ttl=None,
-                                   indexing_policy=DEFAULT_INDEXING_POLICY):
+                                   indexing_policy=DEFAULT_INDEXING_POLICY,
+                                   client_encryption_policy=None):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
 
@@ -1852,7 +2025,8 @@ def cli_cosmosdb_collection_create(client,
     _populate_collection_definition(collection,
                                     partition_key_path,
                                     default_ttl,
-                                    indexing_policy)
+                                    indexing_policy,
+                                    client_encryption_policy)
 
     created_collection = client.CreateContainer(_get_database_link(database_id), collection,
                                                 options)
@@ -1901,6 +2075,104 @@ def cli_cosmosdb_collection_update(client,
 
         result['offer'] = client.ReplaceOffer(offer['_self'], offer)
     return result
+
+
+def cli_cosmosdb_mongo_role_definition_create(client,
+                                              resource_group_name,
+                                              account_name,
+                                              mongo_role_definition_body):
+    '''Creates an Azure Cosmos DB Mongo Role Definition '''
+    mongo_role_definition_create_resource = MongoRoleDefinitionCreateUpdateParameters(
+        role_name=mongo_role_definition_body['RoleName'],
+        type=mongo_role_definition_body['Type'],
+        database_name=mongo_role_definition_body['DatabaseName'],
+        privileges=mongo_role_definition_body['Privileges'],
+        roles=mongo_role_definition_body['Roles'])
+
+    return client.begin_create_update_mongo_role_definition(mongo_role_definition_body['Id'], resource_group_name, account_name, mongo_role_definition_create_resource)
+
+
+def cli_cosmosdb_mongo_role_definition_update(client,
+                                              resource_group_name,
+                                              account_name,
+                                              mongo_role_definition_body):
+    '''Update an existing Azure Cosmos DB Mongo Role Definition'''
+    logger.debug('reading Mongo role definition')
+    mongo_role_definition = client.get_mongo_role_definition(mongo_role_definition_body['Id'], resource_group_name, account_name)
+
+    if mongo_role_definition_body['RoleName'] != mongo_role_definition.role_name:
+        raise CLIError('No Mongo Role Definition found with name [{}].'.format(mongo_role_definition_body['RoleName']))
+
+    mongo_role_definition_update_resource = MongoRoleDefinitionCreateUpdateParameters(
+        role_name=mongo_role_definition.role_name,
+        type=mongo_role_definition_body['Type'],
+        database_name=mongo_role_definition_body['DatabaseName'],
+        privileges=mongo_role_definition_body['Privileges'],
+        roles=mongo_role_definition_body['Roles'])
+
+    return client.begin_create_update_mongo_role_definition(mongo_role_definition_body['Id'], resource_group_name, account_name, mongo_role_definition_update_resource)
+
+
+def cli_cosmosdb_mongo_role_definition_exists(client,
+                                              resource_group_name,
+                                              account_name,
+                                              mongo_role_definition_id):
+    """Checks if an Azure Cosmos DB Mongo Role Definition exists"""
+    try:
+        client.get_mongo_role_definition(mongo_role_definition_id, resource_group_name, account_name)
+    except ResourceNotFoundError:
+        return False
+
+    return True
+
+
+def cli_cosmosdb_mongo_user_definition_create(client,
+                                              resource_group_name,
+                                              account_name,
+                                              mongo_user_definition_body):
+    '''Creates an Azure Cosmos DB Mongo User Definition '''
+    mongo_user_definition_create_resource = MongoUserDefinitionCreateUpdateParameters(
+        user_name=mongo_user_definition_body['UserName'],
+        password=mongo_user_definition_body['Password'],
+        database_name=mongo_user_definition_body['DatabaseName'],
+        custom_data=mongo_user_definition_body['CustomData'],
+        mechanisms=mongo_user_definition_body['Mechanisms'],
+        roles=mongo_user_definition_body['Roles'])
+
+    return client.begin_create_update_mongo_user_definition(mongo_user_definition_body['Id'], resource_group_name, account_name, mongo_user_definition_create_resource)
+
+
+def cli_cosmosdb_mongo_user_definition_update(client,
+                                              resource_group_name,
+                                              account_name,
+                                              mongo_user_definition_body,
+                                              no_wait=False):
+    '''Update an existing Azure Cosmos DB Mongo User Definition'''
+    logger.debug('reading Mongo user definition')
+    mongo_user_definition = client.get_mongo_user_definition(mongo_user_definition_body['Id'], resource_group_name, account_name)
+
+    mongo_user_definition_update_resource = MongoUserDefinitionCreateUpdateParameters(
+        user_name=mongo_user_definition.user_name,
+        password=mongo_user_definition_body['Password'],
+        database_name=mongo_user_definition_body['DatabaseName'],
+        custom_data=mongo_user_definition_body['CustomData'],
+        mechanisms=mongo_user_definition_body['Mechanisms'],
+        roles=mongo_user_definition_body['Roles'])
+
+    return sdk_no_wait(no_wait, client.begin_create_update_mongo_user_definition, mongo_user_definition_body['Id'], resource_group_name, account_name, mongo_user_definition_update_resource)
+
+
+def cli_cosmosdb_mongo_user_definition_exists(client,
+                                              resource_group_name,
+                                              account_name,
+                                              mongo_user_definition_id):
+    """Checks if an Azure Cosmos DB Mongo User Definition exists"""
+    try:
+        client.get_mongo_user_definition(mongo_user_definition_id, resource_group_name, account_name)
+    except ResourceNotFoundError:
+        return False
+
+    return True
 
 
 def cli_cosmosdb_sql_role_definition_create(client,
@@ -2041,3 +2313,295 @@ def get_associated_role_definition_id(client,
         raise CLIError('No Role Definition found with name [{}].'.format(role_definition_name))
 
     return matching_role_definition.id
+
+
+def cli_cosmosdb_managed_cassandra_cluster_create(client,
+                                                  resource_group_name,
+                                                  cluster_name,
+                                                  location,
+                                                  delegated_management_subnet_id,
+                                                  tags=None,
+                                                  identity_type='None',
+                                                  cluster_name_override=None,
+                                                  initial_cassandra_admin_password=None,
+                                                  client_certificates=None,
+                                                  external_gossip_certificates=None,
+                                                  external_seed_nodes=None,
+                                                  restore_from_backup_id=None,
+                                                  cassandra_version=None,
+                                                  authentication_method=None,
+                                                  hours_between_backups=None,
+                                                  repair_enabled=None):
+
+    """Creates an Azure Managed Cassandra Cluster"""
+
+    if authentication_method != 'None' and initial_cassandra_admin_password is None and external_gossip_certificates is None:
+        raise CLIError('At least one out of the Initial Cassandra Admin Password or External Gossip Certificates is required.')
+
+    if initial_cassandra_admin_password is not None and external_gossip_certificates is not None:
+        raise CLIError('Only one out of the Initial Cassandra Admin Password or External Gossip Certificates has to be specified.')
+
+    cluster_properties = ClusterResourceProperties(
+        delegated_management_subnet_id=delegated_management_subnet_id,
+        cluster_name_override=cluster_name_override,
+        initial_cassandra_admin_password=initial_cassandra_admin_password,
+        client_certificates=client_certificates,
+        external_gossip_certificates=external_gossip_certificates,
+        external_seed_nodes=external_seed_nodes,
+        restore_from_backup_id=restore_from_backup_id,
+        cassandra_version=cassandra_version,
+        authentication_method=authentication_method,
+        hours_between_backups=hours_between_backups,
+        repair_enabled=repair_enabled)
+
+    managed_service_identity_parameter = ManagedCassandraManagedServiceIdentity(
+        type=identity_type
+    )
+
+    cluster_resource_create_update_parameters = ClusterResource(
+        location=location,
+        tags=tags,
+        identity=managed_service_identity_parameter,
+        properties=cluster_properties)
+
+    return client.begin_create_update(resource_group_name, cluster_name, cluster_resource_create_update_parameters)
+
+
+def cli_cosmosdb_managed_cassandra_cluster_update(client,
+                                                  resource_group_name,
+                                                  cluster_name,
+                                                  tags=None,
+                                                  identity_type=None,
+                                                  client_certificates=None,
+                                                  external_gossip_certificates=None,
+                                                  external_seed_nodes=None,
+                                                  cassandra_version=None,
+                                                  authentication_method=None,
+                                                  hours_between_backups=None,
+                                                  repair_enabled=None):
+
+    """Updates an Azure Managed Cassandra Cluster"""
+
+    cluster_resource = client.get(resource_group_name, cluster_name)
+
+    if client_certificates is None:
+        client_certificates = cluster_resource.properties.client_certificates
+
+    if external_gossip_certificates is None:
+        external_gossip_certificates = cluster_resource.properties.external_gossip_certificates
+
+    if external_seed_nodes is None:
+        external_seed_nodes = cluster_resource.properties.external_seed_nodes
+
+    if cassandra_version is None:
+        cassandra_version = cluster_resource.properties.cassandra_version
+
+    if authentication_method is None:
+        authentication_method = cluster_resource.properties.authentication_method
+
+    if hours_between_backups is None:
+        hours_between_backups = cluster_resource.properties.hours_between_backups
+
+    if repair_enabled is None:
+        repair_enabled = cluster_resource.properties.repair_enabled
+
+    if tags is None:
+        tags = cluster_resource.tags
+
+    identity = cluster_resource.identity
+
+    if identity_type is not None:
+        identity = ManagedCassandraManagedServiceIdentity(type=identity_type)
+
+    cluster_properties = ClusterResourceProperties(
+        provisioning_state=cluster_resource.properties.provisioning_state,
+        restore_from_backup_id=cluster_resource.properties.restore_from_backup_id,
+        delegated_management_subnet_id=cluster_resource.properties.delegated_management_subnet_id,
+        cassandra_version=cassandra_version,
+        cluster_name_override=cluster_resource.properties.cluster_name_override,
+        authentication_method=authentication_method,
+        initial_cassandra_admin_password=cluster_resource.properties.initial_cassandra_admin_password,
+        hours_between_backups=hours_between_backups,
+        repair_enabled=repair_enabled,
+        client_certificates=client_certificates,
+        external_gossip_certificates=external_gossip_certificates,
+        gossip_certificates=cluster_resource.properties.gossip_certificates,
+        external_seed_nodes=external_seed_nodes,
+        seed_nodes=cluster_resource.properties.seed_nodes
+    )
+
+    cluster_resource_create_update_parameters = ClusterResource(
+        location=cluster_resource.location,
+        tags=tags,
+        identity=identity,
+        properties=cluster_properties)
+
+    return client.begin_create_update(resource_group_name, cluster_name, cluster_resource_create_update_parameters)
+
+
+def cli_cosmosdb_managed_cassandra_cluster_list(client,
+                                                resource_group_name=None):
+
+    """List Azure Managed Cassandra Clusters by resource group and subscription."""
+
+    if resource_group_name is None:
+        return client.list_by_subscription()
+
+    return client.list_by_resource_group(resource_group_name)
+
+
+def cli_cosmosdb_managed_cassandra_cluster_invoke_command(client,
+                                                          resource_group_name,
+                                                          cluster_name,
+                                                          command_name,
+                                                          host,
+                                                          arguments=None,
+                                                          cassandra_stop_start=None,
+                                                          readwrite=None):
+
+    """Invokes a command in Azure Managed Cassandra Cluster host"""
+
+    cluster_invoke_command = CommandPostBody(
+        command=command_name,
+        host=host,
+        arguments=arguments,
+        cassandra_stop_start=cassandra_stop_start,
+        readwrite=readwrite
+    )
+
+    return client.begin_invoke_command(resource_group_name, cluster_name, cluster_invoke_command)
+
+
+def cli_cosmosdb_managed_cassandra_cluster_status(client,
+                                                  resource_group_name,
+                                                  cluster_name):
+
+    """Get Azure Managed Cassandra Cluster Node Status"""
+
+    return client.status(resource_group_name, cluster_name)
+
+
+def cli_cosmosdb_managed_cassandra_cluster_deallocate(client,
+                                                      resource_group_name,
+                                                      cluster_name):
+
+    """Deallocate Azure Managed Cassandra Cluster"""
+
+    return client.begin_deallocate(resource_group_name, cluster_name)
+
+
+def cli_cosmosdb_managed_cassandra_cluster_start(client,
+                                                 resource_group_name,
+                                                 cluster_name):
+
+    """Start Azure Managed Cassandra Cluster"""
+
+    return client.begin_start(resource_group_name, cluster_name)
+
+
+def cli_cosmosdb_managed_cassandra_datacenter_create(client,
+                                                     resource_group_name,
+                                                     cluster_name,
+                                                     data_center_name,
+                                                     data_center_location,
+                                                     delegated_subnet_id,
+                                                     node_count,
+                                                     base64_encoded_cassandra_yaml_fragment=None,
+                                                     managed_disk_customer_key_uri=None,
+                                                     backup_storage_customer_key_uri=None,
+                                                     sku=None,
+                                                     disk_sku=None,
+                                                     disk_capacity=None,
+                                                     availability_zone=None):
+
+    """Creates an Azure Managed Cassandra DataCenter"""
+
+    data_center_properties = DataCenterResourceProperties(
+        data_center_location=data_center_location,
+        delegated_subnet_id=delegated_subnet_id,
+        node_count=node_count,
+        base64_encoded_cassandra_yaml_fragment=base64_encoded_cassandra_yaml_fragment,
+        sku=sku,
+        disk_sku=disk_sku,
+        disk_capacity=disk_capacity,
+        availability_zone=availability_zone,
+        managed_disk_customer_key_uri=managed_disk_customer_key_uri,
+        backup_storage_customer_key_uri=backup_storage_customer_key_uri
+    )
+
+    data_center_resource = DataCenterResource(
+        properties=data_center_properties
+    )
+
+    return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
+
+
+def cli_cosmosdb_managed_cassandra_datacenter_update(client,
+                                                     resource_group_name,
+                                                     cluster_name,
+                                                     data_center_name,
+                                                     node_count=None,
+                                                     base64_encoded_cassandra_yaml_fragment=None,
+                                                     managed_disk_customer_key_uri=None,
+                                                     backup_storage_customer_key_uri=None):
+
+    """Updates an Azure Managed Cassandra DataCenter"""
+
+    data_center_resource = client.get(resource_group_name, cluster_name, data_center_name)
+
+    if node_count is None:
+        node_count = data_center_resource.properties.node_count
+
+    if base64_encoded_cassandra_yaml_fragment is None:
+        base64_encoded_cassandra_yaml_fragment = data_center_resource.properties.base64_encoded_cassandra_yaml_fragment
+
+    if managed_disk_customer_key_uri is None:
+        managed_disk_customer_key_uri = data_center_resource.properties.managed_disk_customer_key_uri
+
+    if backup_storage_customer_key_uri is None:
+        backup_storage_customer_key_uri = data_center_resource.properties.backup_storage_customer_key_uri
+
+    data_center_properties = DataCenterResourceProperties(
+        data_center_location=data_center_resource.properties.data_center_location,
+        delegated_subnet_id=data_center_resource.properties.delegated_subnet_id,
+        node_count=node_count,
+        seed_nodes=data_center_resource.properties.seed_nodes,
+        base64_encoded_cassandra_yaml_fragment=base64_encoded_cassandra_yaml_fragment,
+        managed_disk_customer_key_uri=managed_disk_customer_key_uri,
+        backup_storage_customer_key_uri=backup_storage_customer_key_uri
+    )
+
+    data_center_resource = DataCenterResource(
+        properties=data_center_properties
+    )
+
+    return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
+
+
+# Create function for CosmosDB ComputeV2 services
+def cli_cosmosdb_service_create(client,
+                                account_name,
+                                resource_group_name,
+                                service_name,
+                                instance_count=1,
+                                instance_size="Cosmos.D4s"):
+    service_kind = "SqlDedicatedGateway"
+    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
+                                                   instance_count=instance_count,
+                                                   instance_size=instance_size)
+
+    return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
+
+
+def cli_cosmosdb_service_update(client,
+                                account_name,
+                                resource_group_name,
+                                service_name,
+                                instance_count,
+                                instance_size=None):
+    service_kind = "SqlDedicatedGateway"
+    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
+                                                   instance_count=instance_count,
+                                                   instance_size=instance_size)
+
+    return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)

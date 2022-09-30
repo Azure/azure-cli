@@ -129,5 +129,5 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('monitor private-link-scope delete -n {scope} -g {rg} -y')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor private-link-scope show -n {scope} -g {rg}')

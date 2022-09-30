@@ -300,7 +300,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
         c.argument('disk_size', type=int, options_list=['--disk-size', '--data-disk-size'], help='Disk size for each vm in the node type in GBs.', default=100)
         c.argument('disk_type', arg_type=get_enum_type(DiskType), options_list=['--disk-type', '--data-disk-type'],
-                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
+                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
                    'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.'
                    'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.'
                    'Premium_LRS: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.')

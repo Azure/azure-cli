@@ -5,7 +5,7 @@
 
 import os
 import platform
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.request import urlopen
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -187,7 +187,7 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
         logger.warning('Please note that "az acr helm" commands do not work with Helm 3, '
                        'but you can still push Helm chart to ACR using a different command flow. '
                        'For more information, please check out '
-                       'https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos')
+                       'https://docs.microsoft.com/azure/container-registry/container-registry-helm-repos')
 
     install_location, install_dir, cli = _process_helm_install_location_info(install_location)
 

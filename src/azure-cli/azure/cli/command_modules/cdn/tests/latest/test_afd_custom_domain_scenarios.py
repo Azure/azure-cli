@@ -22,7 +22,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/certificates/localdev-wild"
+        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-wild"
         use_latest_version = True
         secret_version = None
 
@@ -42,7 +42,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         minimum_tls_version = AfdMinimumTlsVersion.tls12
         azure_dns_zone = None
 
-        checks = [JMESPathCheck('domainValidationState', 'Approved')]
+        checks = [JMESPathCheck('domainValidationState', 'Pending')]
         self.afd_custom_domain_create_cmd(resource_group,
                                           profile_name,
                                           custom_domain_name,
@@ -54,7 +54,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                           checks=checks)
 
         show_checks = [JMESPathCheck('name', custom_domain_name),
-                       JMESPathCheck('domainValidationState', 'Approved'),
+                       JMESPathCheck('domainValidationState', 'Pending'),
                        JMESPathCheck('hostName', host_name),
                        JMESPathCheck('tlsSettings.certificateType', certificate_type),
                        JMESPathCheck('tlsSettings.minimumTlsVersion', minimum_tls_version),
@@ -63,23 +63,11 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         list_checks = [JMESPathCheck('length(@)', 1),
                        JMESPathCheck('@[0].name', custom_domain_name),
-                       JMESPathCheck('@[0].domainValidationState', 'Approved')]
+                       JMESPathCheck('@[0].domainValidationState', 'Pending')]
         self.afd_custom_domain_list_cmd(resource_group, profile_name, checks=list_checks)
 
-        # Updated to managed certificate
-        certificate_type = AfdCertificateType.managed_certificate
-        minimum_tls_version = AfdMinimumTlsVersion.tls10
-        update_checks = [JMESPathCheck('name', custom_domain_name),
-                         JMESPathCheck('domainValidationState', 'Approved'),
-                         JMESPathCheck('hostName', host_name),
-                         JMESPathCheck('tlsSettings.certificateType', certificate_type),
-                         JMESPathCheck('tlsSettings.minimumTlsVersion', minimum_tls_version)]
-        self.afd_custom_domain_update_cmd(resource_group,
-                                          profile_name,
-                                          custom_domain_name,
-                                          certificate_type,
-                                          minimum_tls_version,
-                                          checks=update_checks)
+        self.cmd(f"afd custom-domain regenerate-validation-token -g {resource_group} "
+                 f"--profile-name {profile_name} --custom-domain-name {custom_domain_name}")
 
         # Delete the custom domain
         self.afd_custom_domain_delete_cmd(resource_group, profile_name, custom_domain_name)

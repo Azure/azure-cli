@@ -11,7 +11,6 @@ import math
 import os
 import re
 import struct
-import sys
 import time
 import uuid
 from ipaddress import ip_network
@@ -28,15 +27,12 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
-from azure.graphrbac.models import GraphErrorException
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
-
-from msrestazure.azure_exceptions import CloudError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -254,7 +250,11 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        return client.list_deleted()
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        resources.extend(client.list_deleted())
+        resources.extend(hsm_client.list_deleted())
+        return resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -303,18 +303,13 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
-    try:
-        current_user = graph_client.signed_in_user.get()
-        if current_user and current_user.object_id:  # pylint:disable=no-member
-            return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
-        pass
+    current_user = graph_client.signed_in_user_get()
+    return current_user['id']
 
 
 def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principals.list(
+    accounts = list(graph_client.service_principal_list(
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
@@ -323,11 +318,11 @@ def _get_object_id_by_spn(graph_client, spn):
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
+    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
         return None
@@ -335,7 +330,7 @@ def _get_object_id_by_upn(graph_client, upn):
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
@@ -522,7 +517,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         enabled_for_disk_encryption=None,
                         enabled_for_template_deployment=None,
                         enable_rbac_authorization=None,
-                        enable_soft_delete=None,
                         enable_purge_protection=None,
                         retention_days=None,
                         network_acls=None,
@@ -532,7 +526,9 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         default_action=None,
                         no_self_perms=None,
                         tags=None,
-                        no_wait=False):
+                        no_wait=False,
+                        public_network_access=None,
+                        ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
                             client=client,
@@ -544,7 +540,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             enabled_for_disk_encryption=enabled_for_disk_encryption,
                             enabled_for_template_deployment=enabled_for_template_deployment,
                             enable_rbac_authorization=enable_rbac_authorization,
-                            enable_soft_delete=enable_soft_delete,
                             enable_purge_protection=enable_purge_protection,
                             retention_days=retention_days,
                             network_acls=network_acls,
@@ -554,7 +549,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             default_action=default_action,
                             no_self_perms=no_self_perms,
                             tags=tags,
-                            no_wait=no_wait)
+                            no_wait=no_wait,
+                            public_network_access=public_network_access)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -630,13 +626,12 @@ def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault(cmd, client,  # pylint: disable=too-many-locals
+def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
                  resource_group_name, vault_name, location=None, sku=None,
                  enabled_for_deployment=None,
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  network_acls=None,
@@ -646,7 +641,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  default_action=None,
                  no_self_perms=None,
                  tags=None,
-                 no_wait=False):
+                 no_wait=False,
+                 public_network_access=None):
     from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
@@ -657,7 +653,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
         # just continue the normal creation process
         pass
     from azure.cli.core._profile import Profile
-    from azure.graphrbac import GraphRbacManagementClient
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -671,13 +667,10 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
+    _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    graph_client = GraphRbacManagementClient(
-        cred,
-        tenant_id,
-        base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
@@ -692,51 +685,58 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore,
-                                        KeyPermissions.recover],
-                                  secrets=[
-                                      SecretPermissions.get,
-                                      SecretPermissions.list,
-                                      SecretPermissions.set,
-                                      SecretPermissions.delete,
-                                      SecretPermissions.backup,
-                                      SecretPermissions.restore,
-                                      SecretPermissions.recover],
-                                  certificates=[
-                                      CertificatePermissions.get,
-                                      CertificatePermissions.list,
-                                      CertificatePermissions.delete,
-                                      CertificatePermissions.create,
-                                      CertificatePermissions.import_enum,
-                                      CertificatePermissions.update,
-                                      CertificatePermissions.managecontacts,
-                                      CertificatePermissions.getissuers,
-                                      CertificatePermissions.listissuers,
-                                      CertificatePermissions.setissuers,
-                                      CertificatePermissions.deleteissuers,
-                                      CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover],
-                                  storage=[
-                                      StoragePermissions.get,
-                                      StoragePermissions.list,
-                                      StoragePermissions.delete,
-                                      StoragePermissions.set,
-                                      StoragePermissions.update,
-                                      StoragePermissions.regeneratekey,
-                                      StoragePermissions.setsas,
-                                      StoragePermissions.listsas,
-                                      StoragePermissions.getsas,
-                                      StoragePermissions.deletesas])
+        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.get,
+                                            KeyPermissions.create,
+                                            KeyPermissions.delete,
+                                            KeyPermissions.list,
+                                            KeyPermissions.update,
+                                            KeyPermissions.import_enum,
+                                            KeyPermissions.backup,
+                                            KeyPermissions.restore,
+                                            KeyPermissions.recover],
+                                      secrets=[
+                                          SecretPermissions.get,
+                                          SecretPermissions.list,
+                                          SecretPermissions.set,
+                                          SecretPermissions.delete,
+                                          SecretPermissions.backup,
+                                          SecretPermissions.restore,
+                                          SecretPermissions.recover],
+                                      certificates=[
+                                          CertificatePermissions.get,
+                                          CertificatePermissions.list,
+                                          CertificatePermissions.delete,
+                                          CertificatePermissions.create,
+                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.update,
+                                          CertificatePermissions.managecontacts,
+                                          CertificatePermissions.getissuers,
+                                          CertificatePermissions.listissuers,
+                                          CertificatePermissions.setissuers,
+                                          CertificatePermissions.deleteissuers,
+                                          CertificatePermissions.manageissuers,
+                                          CertificatePermissions.recover],
+                                      storage=[
+                                          StoragePermissions.get,
+                                          StoragePermissions.list,
+                                          StoragePermissions.delete,
+                                          StoragePermissions.set,
+                                          StoragePermissions.update,
+                                          StoragePermissions.regeneratekey,
+                                          StoragePermissions.setsas,
+                                          StoragePermissions.listsas,
+                                          StoragePermissions.getsas,
+                                          StoragePermissions.deletesas])
+
         try:
             object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
+        except GraphError:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
@@ -749,11 +749,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if not sku:
         sku = 'standard'
 
-    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-        enable_soft_delete = True
-        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-              'The value will be changed to true.', file=sys.stderr)
-
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
@@ -762,9 +757,9 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_rbac_authorization=enable_rbac_authorization,
-                                 enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
-                                 soft_delete_retention_in_days=int(retention_days))
+                                 soft_delete_retention_in_days=int(retention_days),
+                                 public_network_access=public_network_access)
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -790,6 +785,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
+                                    tags=parameters.tags,
                                     properties=parameters.properties),
                                 no_wait=no_wait)
 
@@ -811,11 +807,11 @@ def update_vault(cmd, instance,
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
-                 default_action=None):
+                 default_action=None,
+                 public_network_access=None):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -827,13 +823,6 @@ def update_vault(cmd, instance,
 
     if enable_rbac_authorization is not None:
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
-
-    if enable_soft_delete is not None:
-        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-            enable_soft_delete = True
-            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-                  'The value will be changed to true.', file=sys.stderr)
-        instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
@@ -849,6 +838,10 @@ def update_vault(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
+
     return instance
 
 
@@ -877,15 +870,9 @@ def update_hsm(cmd, instance,
 
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.core._profile import Profile
-        from azure.graphrbac import GraphRbacManagementClient
+        from azure.cli.command_modules.role import graph_client_factory
 
-        profile = Profile(cli_ctx=cli_ctx)
-        cred, _, tenant_id = profile.get_login_credentials(
-            resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-        graph_client = GraphRbacManagementClient(cred,
-                                                 tenant_id,
-                                                 base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+        graph_client = graph_client_factory(cli_ctx)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -1046,7 +1033,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
-        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
         to_modify |= len(new_rules) != len(rules.ip_rules)
         if to_modify:
             rules.ip_rules = new_rules
@@ -1113,21 +1101,43 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 
 
 # region KeyVault Key
-def create_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
+def create_key(client, name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
 
-    return client.create_key(vault_base_url=vault_base_url,
-                             key_name=key_name,
-                             kty=kty,
-                             key_size=key_size,
-                             key_ops=key_ops,
-                             key_attributes=key_attrs,
+    return client.create_key(name=name,
+                             key_type=kty,
+                             size=key_size,
+                             key_operations=key_ops,
+                             enabled=not disabled,
+                             not_before=not_before,
+                             expires_on=expires,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             exportable=exportable,
+                             release_policy=release_policy)
+
+
+def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, version=None):
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
+
+
+def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
+                name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 authentication_tag=binascii.unhexlify(tag) if tag else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1233,17 +1243,13 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disable=too-many-locals
-               hsm_name=None, identifier=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', curve=None):
+               byok_string=None, kty='RSA', curve=None, exportable=None, release_policy=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1284,7 +1290,11 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    return client.import_key(name=name, key=key_obj,
+                             hardware_protected=(protection == 'hsm'),
+                             enabled=not disabled, tags=tags,
+                             not_before=not_before, expires_on=expires,
+                             exportable=exportable, release_policy=release_policy)
 
 
 def _bytes_to_int(b):
@@ -1417,17 +1427,52 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
 
 def get_policy_template():
     policy = {
-        'version': '0.2',
+        'version': '1.0.0',
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
                 'claim': '<claim name>',
-                'condition': 'equals',
-                'value': '<value to match>'
+                'equals': '<value to match>'
             }]
         }]
     }
     return policy
+
+
+def update_key_rotation_policy(cmd, client, value, key_name=None):
+    from azure.cli.core.util import read_file_content, get_json_object
+    if os.path.exists(value):
+        value = read_file_content(value)
+
+    policy = get_json_object(value)
+    if not policy:
+        raise InvalidArgumentValueError("Please specify a valid policy")
+
+    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
+                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyRotationPolicy = cmd.loader.get_sdk('KeyRotationPolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    lifetime_actions = []
+    if policy.get('lifetime_actions', None):
+        for action in policy['lifetime_actions']:
+            try:
+                action_type = action['action'].get('type', None) if action.get('action', None) else None
+            except AttributeError:
+                action_type = action.get('action', None)
+            time_after_create = action['trigger'].get('time_after_create', None) \
+                if action.get('trigger', None) else action.get('time_after_create', None)
+            time_before_expiry = action['trigger'].get('time_before_expiry', None) \
+                if action.get('trigger', None) else action.get('time_before_expiry', None)
+            lifetime_action = KeyRotationLifetimeAction(action_type,
+                                                        time_after_create=time_after_create,
+                                                        time_before_expiry=time_before_expiry)
+            lifetime_actions.append(lifetime_action)
+    expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
+    if policy.get('attributes', None):
+        expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
+    return client.update_key_rotation_policy(key_name=key_name,
+                                             policy=KeyRotationPolicy(lifetime_actions=lifetime_actions,
+                                                                      expires_in=expires_in))
 # endregion
 
 
@@ -1918,15 +1963,22 @@ def _get_role_dics(role_defs):
 def _get_principal_dics(cli_ctx, role_assignments):
     principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
     if principal_ids:
+        from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role._client_factory import _graph_client_factory
-            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+            from azure.cli.command_modules.role.custom import (_get_displayable_name, _get_object_stubs,
+                                                               _odata_type_to_arm_principal_type)
 
-            graph_client = _graph_client_factory(cli_ctx)
+            graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
 
-        except (CloudError, GraphErrorException) as ex:
+            results = {}
+            for i in principals:
+                object_id = i['id']
+                display_name = _get_displayable_name(i)
+                principal_type = _odata_type_to_arm_principal_type(i['@odata.type'])
+                results[object_id] = (display_name, principal_type)
+            return results
+        except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -1960,6 +2012,11 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# for injecting test seems to produce predictable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
+
+
 # pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
@@ -1982,7 +2039,7 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                        'to check whether the role is existing.'.format(role))
 
     if role_assignment_name is None:
-        role_assignment_name = str(uuid.uuid4())
+        role_assignment_name = str(_gen_guid())
 
     if scope is None:
         scope = ''
@@ -2346,6 +2403,8 @@ def _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, 
         with open(private_key_path, 'rb') as f:
             pem_data = f.read()
             password = passwords[private_key_index] if private_key_index < len(passwords) else None
+            if password and not isinstance(password, bytes):
+                password = password.encode(encoding="utf-8")
             private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
 
         with open(cert_path, 'rb') as f:

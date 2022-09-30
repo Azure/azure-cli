@@ -47,7 +47,7 @@ def make_zone_file(json_obj):
     }
     """
     import azure.cli.command_modules.network.zone_file.record_processors as record_processors
-    from six import StringIO
+    from io import StringIO
 
     zone_file = StringIO()
 

@@ -8,6 +8,11 @@ set -ev
 ##############################################
 # clean up and dir search
 mkdir -p ./artifacts
+
+# Current folder (/azure-cli) is mounted from host which has different owner than docker container's
+# current user 0(root).
+# https://github.blog/2022-04-12-git-security-vulnerability-announced/
+git config --global --add safe.directory $(pwd)
 echo `git rev-parse --verify HEAD` > ./artifacts/build.sha
 
 mkdir -p ./artifacts/build
@@ -93,9 +98,10 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -134,35 +140,40 @@ done
 
 cat >>$testsrc_dir/setup.py <<EOL
     ],
-    package_data={'': ['recordings/*.yaml',
-                       'data/*.zip',
-                       'data/*.whl',
-                       'data/*.yaml',
-                       '*.zip',
+    package_data={'': ['*.bat',
+                       '*.byok',
+                       '*.cer',
+                       '*.gql',  # graphql used by apim
+                       '*.js',
+                       '*.json',
+                       '*.kql',
+                       '*.md',
                        '*.pem',
                        '*.pfx',
+                       '*.sql',
                        '*.txt',
-                       '*.json',
-                       '*.byok',
-                       '*.js',
-                       '*.md',
-                       '*.bat',
                        '*.txt',
-                       '*.cer',
-                       '*.yml',
                        '*.xml',
+                       '*.yml',
+                       '*.zip',
+                       '**/*.bat',
+                       '**/*.byok',
                        '**/*.cer',
+                       '**/*.gql',
+                       '**/*.ipynb',
+                       '**/*.jar',
+                       '**/*.js',
+                       '**/*.json',
+                       '**/*.kql',
+                       '**/*.md',
                        '**/*.pem',
                        '**/*.pfx',
+                       '**/*.sql',
                        '**/*.txt',
-                       '**/*.json',
-                       '**/*.ipynb',
-                       '**/*.byok',
-                       '**/*.js',
-                       '**/*.md',
-                       '**/*.bat',
                        '**/*.txt',
-                       '**/*.xml']},
+                       '**/*.xml',
+                       'data/*',
+                       'recordings/*.yaml']},
     install_requires=DEPENDENCIES
 )
 EOL

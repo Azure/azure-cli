@@ -343,6 +343,8 @@ short-summary: Creates the EventHubs Namespace
 examples:
   - name: Creates a new namespace.
     text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate --maximum-throughput-units 20
+  - name: Create a new namespace with Identity and Encryption enabled.
+    text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus --sku Premium --mi-user-assigned /subscriptions/{subscriptionId}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
 """
 
 helps['eventhubs namespace delete'] = """
@@ -398,6 +400,14 @@ short-summary: Show properties of Network rule of the given Namespace.
 examples:
   - name: Show properties of Network rule of the given Namespace
     text: az eventhubs namespace network-rule list --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['eventhubs namespace network-rule update'] = """
+type: command
+short-summary: Updates network rule properties of the given Namespace.
+examples:
+  - name: Updates network rule properties of the given Namespace, can be used to update public network access, trusted service and default action.
+    text: az eventhubs namespace network-rule update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled
 """
 
 helps['eventhubs namespace network-rule remove'] = """
@@ -495,4 +505,254 @@ examples:
 helps['eventhubs cluster wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the Cluster operation is completed.
+"""
+
+helps['eventhubs namespace private-endpoint-connection'] = """
+type: group
+short-summary: Manage eventhubs namespace private endpoint connection.
+"""
+
+helps['eventhubs namespace private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for eventhubs namesapce.
+examples:
+  - name: Approve a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Eventhub/namesapces/mynamepsace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection approve -g myRg --namespace-name mynamespace --name myconnection
+  - name: Approve a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection approve -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection request for eventhubs namespace.
+examples:
+  - name: Delete a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.EventHub/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for eventhubs namespace using account name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection delete -g myRg --namespace-name mynamespace --name myconnection
+  - name: Delete a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection delete -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for eventhubs namespace.
+examples:
+  - name: Reject a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.EventHub/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection reject -g myRg --namespace-name mynamespace --name myconnection
+  - name: Reject a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection reject -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for eventhubs namespace.
+examples:
+  - name: Show details of a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.EventHub/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection show -g myRg --namespace-name mynamespace --name myconnection
+  - name: Show details of a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection show -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-link-resource'] = """
+type: group
+short-summary: Manage eventhubs namespace private link resources.
+"""
+
+helps['eventhubs namespace private-link-resource show'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a eventhubs namespace.
+examples:
+  - name: Get the private link resources that need to be created for a eventhubs namespace.
+    text: |
+        az eventhubs namespace private-link-resource show --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace encryption'] = """
+type: group
+short-summary: Manage eventhubs namespace encryption properties.
+"""
+
+helps['eventhubs namespace encryption add'] = """
+type: command
+short-summary: Add Encryption properties to a namespace.
+examples:
+  - name: Set 2 different encryption properties for a namespace that has User Assigned Identity already enabled
+    text: |
+        az eventhubs namespace encryption add --namespace-name mynamespace -g MyResourceGroup --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName2
+"""
+
+helps['eventhubs namespace encryption remove'] = """
+type: command
+short-summary: Remove one or more Encryption properties from a namespace.
+examples:
+  - name: Remove encryption properties for a namespace that has User Assigned Identity already enabled
+    text: |
+        az eventhubs namespace encryption remove --namespace-name mynamespace -g MyResourceGroup --encryption-config key-name=key1 key-vault-uri=https://mykeyvault.vault.azure.net/ user-assigned-identity=/subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
+"""
+
+helps['eventhubs namespace identity'] = """
+type: group
+short-summary: Manage eventhubs namespace identity.
+"""
+
+helps['eventhubs namespace identity assign'] = """
+type: command
+short-summary: Assign System or User or System,User assigned identities to a namespace
+examples:
+  - name: Assign system assigned and user assigned identity to a namespace. (give a list of identity id's for --user-assigned)
+    text: |
+        az eventhubs namespace identity assign --namespace-name mynamespace -g MyResourceGroup --system-assigned --user-assigned /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName2
+"""
+
+helps['eventhubs namespace identity remove'] = """
+type: command
+short-summary: Remove System or User or System,User assigned identities from a namespace
+examples:
+  - name: Remove system assigned and a user assigned identity from a namespace. (give a list of identity id's for --user-assigned)
+    text: |
+        az eventhubs namespace identity remove --namespace-name mynamespace -g MyResourceGroup --system-assigned --user-assigned /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
+"""
+
+helps['eventhubs namespace schema-registry'] = """
+type: group
+short-summary: Manages eventhubs namespace schema registry.
+"""
+
+helps['eventhubs namespace schema-registry create'] = """
+type: command
+short-summary: Creates a schema group for an EventHub namespace
+examples:
+  - name: Create a schema group mySchemaGroup for eventhub namespace mynamespace
+    text: |
+        az eventhubs namespace schema-registry create --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup --schema-compatibility Forward --schema-type Avro --group-properties k1=v1 k2=v2
+"""
+
+helps['eventhubs namespace schema-registry list'] = """
+type: command
+short-summary: Lists all schema groups of the EventHub Namespace
+examples:
+  - name: List all schema groups within eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace schema-registry list --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace schema-registry show'] = """
+type: command
+short-summary: Get a specific schema group from an EventHub namespace.
+examples:
+  - name: Get mySchemaGroup from namespace mynamespace
+    text: |
+        az eventhubs namespace schema-registry show --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
+"""
+
+helps['eventhubs namespace schema-registry delete'] = """
+type: command
+short-summary: Deletes a schema group from a namespace
+examples:
+  - name: Deletes a schema group mySchemaGroup from a namespace
+    text: |
+        az eventhubs namespace schema-registry delete --namespace-name mynamespace -g MyResourceGroup --name mySchemaGroup
+"""
+
+helps['eventhubs namespace application-group'] = """
+type: group
+short-summary: Manages Application Groups for premium eventhubs namespace.
+"""
+
+helps['eventhubs namespace application-group policy'] = """
+type: group
+short-summary: Append or Remove application group policies.
+"""
+
+helps['eventhubs namespace application-group create'] = """
+type: command
+short-summary: Creates an application group for an EventHub namespace
+examples:
+  - name: Create an application group myAppGroup for eventhub namespace mynamespace with 2 throttling policies. Maximum allowed throttling policies is 4.
+    text: |
+        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --client-app-group-identifier SASKeyName=keyname --throttling-policy-config name=policy1 metric-id=IncomingMessages rate-limit-threshold=10000 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+"""
+
+helps['eventhubs namespace application-group update'] = """
+type: command
+short-summary: Updates an application group in an EventHub namespace
+examples:
+  - name: Updates an application group myAppGroup for eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace application-group update --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --is-enabled false
+"""
+
+helps['eventhubs namespace application-group show'] = """
+type: command
+short-summary: Gets an application group in an EventHub namespace
+examples:
+  - name: Gets an application group myAppGroup for eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace application-group show --namespace-name mynamespace -g MyResourceGroup --name myAppGroup
+"""
+
+helps['eventhubs namespace application-group list'] = """
+type: command
+short-summary: Lists all application groups in an EventHub namespace
+examples:
+  - name: Lists all application groups in eventhub namespace mynamespace.
+    text: |
+        az eventhubs namespace application-group list --namespace-name mynamespace -g MyResourceGroup
+"""
+
+helps['eventhubs namespace application-group policy add'] = """
+type: command
+short-summary: Appends an application group policy to the existing policy. This cmdlet can be used to append one or more throttling policies.
+examples:
+  - name: Append 2 throttling policies to an application group. Maximum allowed throttling policies is 4.
+    text: |
+        az eventhubs namespace application-group policy add --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+"""
+
+helps['eventhubs namespace application-group policy remove'] = """
+type: command
+short-summary: Removes an application group policy from the existing policies. This cmdlet can be used to remove one or more throttling policies.
+examples:
+  - name: Removes a throttling policy from an applicatin group myAppGroup.
+    text: |
+        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
 """

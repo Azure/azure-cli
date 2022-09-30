@@ -554,7 +554,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
         self.assertEqual(len(attrs), 7)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
-        self.assertEqual(len(attrs), 8)
+        self.assertEqual(len(attrs), 9)
 
     def test_batch_load_arguments(self):
         # pylint: disable=too-many-statements
@@ -572,7 +572,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertTrue('account_endpoint' in [a for a, _ in args])
         handler = operations._job_operations.JobOperations.add
         args = list(self.command_job._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 18)
+        self.assertEqual(len(args), 19)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -605,7 +605,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations._job_schedule_operations.JobScheduleOperations.add
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
-        self.assertEqual(len(args), 22)
+        self.assertEqual(len(args), 23)
         self.assertTrue('id' in args)
         self.assertTrue('job_manager_task_id' in args)
         self.assertFalse('job_manager_task_max_wall_clock_time' in args)

@@ -20,7 +20,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import pg_arguments_validator, validate_server_name
+from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -50,6 +50,7 @@ def flexible_server_create(cmd, client,
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
+
     server_name = server_name.lower()
 
     pg_arguments_validator(db_context,
@@ -101,8 +102,6 @@ def flexible_server_create(cmd, client,
 
     sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    if high_availability.lower() == "enabled":
-        high_availability = "ZoneRedundant"
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
@@ -177,6 +176,8 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
+
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
@@ -191,8 +192,8 @@ def flexible_server_restore(cmd, client,
         )
 
         if source_server_object.network.public_network_access == 'Disabled':
+            network = postgresql_flexibleservers.models.Network()
             if subnet is not None or vnet is not None:
-                network = postgresql_flexibleservers.models.Network()
                 subnet_id = prepare_private_network(cmd,
                                                     resource_group_name,
                                                     server_name,
@@ -203,6 +204,10 @@ def flexible_server_restore(cmd, client,
                                                     vnet_address_pref=vnet_address_prefix,
                                                     subnet_address_pref=subnet_address_prefix,
                                                     yes=yes)
+            else:
+                subnet_id = source_server_object.network.delegated_subnet_resource_id
+
+            if private_dns_zone_arguments is not None:
                 private_dns_zone_id = prepare_private_dns_zone(db_context,
                                                                'PostgreSQL',
                                                                resource_group_name,
@@ -211,9 +216,13 @@ def flexible_server_restore(cmd, client,
                                                                subnet_id=subnet_id,
                                                                location=location,
                                                                yes=yes)
-                network.delegated_subnet_resource_id = subnet_id
-                network.private_dns_zone_arm_resource_id = private_dns_zone_id
-                parameters.network = network
+            else:
+                private_dns_zone_id = source_server_object.network.private_dns_zone_arm_resource_id
+
+            network.delegated_subnet_resource_id = subnet_id
+            network.private_dns_zone_arm_resource_id = private_dns_zone_id
+            parameters.network = network
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -288,8 +297,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
     if high_availability:
-        if high_availability.lower() == "enabled":
-            high_availability_param.mode = "ZoneRedundant"
+        if high_availability.lower() != "disabled":
+            high_availability_param.mode = high_availability
             if standby_availability_zone:
                 high_availability_param.standby_availability_zone = standby_availability_zone
         else:
@@ -321,7 +330,7 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
 
 
-def flexible_server_delete(cmd, client, resource_group_name=None, server_name=None, yes=False):
+def flexible_server_delete(cmd, client, resource_group_name, server_name, yes=False):
     result = None
     if not yes:
         user_confirmation(
@@ -420,7 +429,7 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         '{} Database Create/Update'.format(logging_name))
 
 
-def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+def database_create_func(client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
 
     if charset is None and collation is None:
         charset = 'utf8'
