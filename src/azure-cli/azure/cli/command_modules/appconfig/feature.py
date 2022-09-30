@@ -633,6 +633,139 @@ def add_filter(cmd,
         "Failed to add filter for the feature flag '{}' due to a conflicting operation.".format(feature))
 
 
+def update_filter(cmd,
+                  filter_name,
+                  feature=None,
+                  key=None,
+                  name=None,
+                  label=None,
+                  filter_parameters=None,
+                  yes=False,
+                  index=None,
+                  connection_string=None,
+                  auth_mode="key",
+                  endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError(
+            "Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning(
+            "Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(
+        cmd, name, connection_string, auth_mode, endpoint)
+
+    if index is None:
+        index = float("-inf")
+
+    # Construct feature filter to be added
+    if filter_parameters is None:
+        filter_parameters = {}
+    new_filter = FeatureFilter(filter_name, filter_parameters)
+
+    retry_times = 3
+    retry_interval = 1
+    for i in range(0, retry_times):
+        try:
+            retrieved_kv = azconfig_client.get_configuration_setting(
+                key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError(
+                "Feature flag '{}' with label '{}' not found.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError(
+                "Failed to retrieve feature flags from config store. " + str(exception))
+
+        try:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                raise CLIError(
+                    "The feature flag {} does not exist.".format(feature))
+
+            # we make sure that value retrieved is a valid json and only has the fields supported by backend.
+            # if it's invalid, we catch appropriate exception that contains
+            # detailed message
+            feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
+            feature_filters = feature_flag_value.conditions['client_filters']
+
+            entry = json.dumps(new_filter.__dict__,
+                               indent=2, ensure_ascii=False)
+
+            current_filter = {}
+            match_index = []
+
+            entry = json.dumps(new_filter.__dict__,
+                               indent=2, ensure_ascii=False)
+
+            # get all filters where name matches filter_name provided by user
+            for idx, feature_filter in enumerate(feature_filters):
+                if feature_filter.name == filter_name:
+                    if idx == index:
+                        current_filter = copy.deepcopy(feature_filters[index])
+
+                        confirmation_message = "Current filter:\n" + \
+                            json.dumps(current_filter.__dict__, indent=2, ensure_ascii=False) + \
+                            "\nAre you sure you want to update it with this filter?\n" + \
+                            entry
+
+                        user_confirmation(confirmation_message, yes)
+
+                        feature_filters[index] = new_filter
+                        break
+
+                    match_index.append(idx)
+
+            if not current_filter:
+                # If one match was found at a different index from the given one, we ignore it
+                if len(match_index) == 1:
+                    if index != float("-inf"):
+                        logger.warning(
+                            "Found filter '%s' at index '%s'. Invalidating provided index '%s'", filter_name, match_index[0], index)
+
+                    current_filter = copy.deepcopy(feature_filters[match_index[0]])
+
+                    confirmation_message = "Current filter:\n" + \
+                        json.dumps(current_filter.__dict__, indent=2, ensure_ascii=False) + \
+                        "\nAre you sure you want to update it with this filter?\n" + \
+                        entry
+
+                    user_confirmation(confirmation_message, yes)
+
+                    feature_filters[match_index[0]] = new_filter
+
+                elif len(match_index) > 1:
+                    error_msg = "Feature '{0}' contains multiple instances of filter '{1}'. ".format(feature, filter_name) +\
+                                "For resolving this conflict run the command again with the filter name and correct zero-based index of the filter you want to update.\n"
+                    raise CLIError(str(error_msg))
+
+                else:
+                    raise CLIError(
+                        "No filter named '{0}' was found for feature '{1}'".format(filter_name, feature))
+
+            __update_existing_key_value(azconfig_client=azconfig_client,
+                                        retrieved_kv=retrieved_kv,
+                                        updated_value=json.dumps(feature_flag_value,
+                                                                 default=lambda o: o.__dict__,
+                                                                 ensure_ascii=False))
+
+            return new_filter
+
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug(
+                    'Retrying filter add operation %s times with exception: concurrent setting operations', i + 1)
+                time.sleep(retry_interval)
+            else:
+                raise CLIError(str(exception))
+        except Exception as exception:
+            raise CLIError(str(exception))
+    raise CLIError(
+        "Failed to add filter for the feature flag '{}' due to a conflicting operation.".format(feature))
+
+
 def delete_filter(cmd,
                   feature=None,
                   key=None,
