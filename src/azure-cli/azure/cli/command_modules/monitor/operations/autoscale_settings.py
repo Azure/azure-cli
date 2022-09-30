@@ -76,7 +76,7 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
 
 
 # pylint: disable=too-many-locals
-def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None, # pylint:disable=too-many-statements,too-many-branches
+def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None,  # pylint:disable=too-many-statements,too-many-branches
                      add_actions=None, remove_actions=None, email_administrator=None,
                      email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
     import json
