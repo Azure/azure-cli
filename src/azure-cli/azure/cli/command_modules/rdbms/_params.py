@@ -723,8 +723,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
-                    c.argument('level', options_list=['--level'], choices=['Active', 'All'], default='Active', required=False,
-                               help='Specify the level of migration details requested. Valid values are Active and All.')
                 elif scope == "list":
                     c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
                     c.argument('migration_filter', options_list=['--filter'], required=False, choices=['Active', 'All'], default='Active',
