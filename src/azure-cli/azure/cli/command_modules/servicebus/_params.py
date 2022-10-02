@@ -84,6 +84,7 @@ def load_arguments_sb(self, _):
             c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
             c.argument('lock_duration', validator=_validate_lock_duration, help='String ISO 8601 timespan or duration format for duration of a peek-lock; that is, the amount of time that the message is locked for other receivers. The maximum value for LockDuration is 5 minutes; the default value is 1 minute.')
             c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920], help='Maximum size of queue in megabytes, which is the size of the memory allocated for the queue. Default is 1024. Max for Standard SKU is 5120 and for Premium SKU is 81920')
+            c.argument('max_message_size_in_kilobytes', type=int, help='Maximum size (in KB) of the message payload that can be accepted by the queue. This property is only used in Premium today and default is 1024.')
             c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this queue requires duplicate detection.')
             c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.')
             c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 timespan or duration time format for default message to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
@@ -139,6 +140,7 @@ def load_arguments_sb(self, _):
             c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timespan or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic to be partitioned across multiple message brokers is enabled.')
             c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.')
+            c.argument('max_message_size', type=int, help='Maximum size (in KB) of the message payload that can be accepted by the queue. This property is only used in Premium today and default is 1024.')
 
     for scope in ['servicebus topic show', 'servicebus topic delete']:
         with self.argument_context(scope) as c:
@@ -184,6 +186,12 @@ def load_arguments_sb(self, _):
             c.argument('forward_to', help='Queue/Topic name to forward the messages')
             c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
             c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-letter-on-filter-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
+    
+    with self.argument_context('servicebus topic subscription create') as c:
+        c.argument('is_client_affine', arg_type=get_three_state_flag(), help='Value that indicates whether the subscription has an affinity to the client id.')
+        c.argument('client_id', help='Indicates the Client ID of the application that created the client-affine subscription.')
+        c.argument('is_shared', arg_type=get_three_state_flag(), help='For client-affine subscriptions, this value indicates whether the subscription is shared or not.')
+        c.argument('is_durable', arg_type=get_three_state_flag(), help='For client-affine subscriptions, this value indicates whether the subscription is durable or not.')
 
     with self.argument_context('servicebus topic subscription list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
