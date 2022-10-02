@@ -22,32 +22,6 @@ from msrestazure.tools import resource_id
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-class NetworkApplicationSecurityGroupScenario(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_asg')
-    def test_network_asg(self, resource_group):
-
-        self.kwargs.update({
-            'asg': 'asg1'
-        })
-
-        count1 = len(self.cmd('network asg list').get_output_in_json())
-        self.cmd('network asg create -g {rg} -n {asg} --tags foo=doo',
-                 checks=self.check('tags.foo', 'doo'))
-        self.cmd('network asg update -g {rg} -n {asg} --tags foo=bar',
-                 checks=self.check('tags.foo', 'bar'))
-        count2 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count2 == count1 + 1)
-        self.cmd('network asg show -g {rg} -n {asg}', checks=[
-            self.check('name', '{asg}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('tags.foo', 'bar')
-        ])
-        self.cmd('network asg delete -g {rg} -n {asg}')
-        count3 = len(self.cmd('network asg list').get_output_in_json())
-        self.assertTrue(count3 == count1)
-
-
 class NetworkLoadBalancerWithSku(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
@@ -678,27 +652,6 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
         self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
 
 
-class NetworkRouteFilterScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
-    @AllowLargeResponse()
-    def test_network_route_filter(self, resource_group):
-        self.kwargs['filter'] = 'filter1'
-        self.cmd('network route-filter create -g {rg} -n {filter} --tags foo=doo')
-        self.cmd('network route-filter update -g {rg} -n {filter}')
-        self.cmd('network route-filter show -g {rg} -n {filter}')
-        self.cmd('network route-filter list -g {rg}')
-
-        self.cmd('network route-filter rule list-service-communities')
-        self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow', expect_failure=True)
-        self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny', expect_failure=True)
-        self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1')
-        self.cmd('network route-filter rule list -g {rg} --filter-name {filter}')
-        self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1')
-
-        self.cmd('network route-filter delete -g {rg} -n {filter}')
-
-
 class NetworkExpressRouteScenarioTest(ScenarioTest):
 
     def _test_express_route_peering(self):
@@ -1305,6 +1258,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
 
 class NetworkSecurityGroupScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nsg')
     def test_network_nsg(self, resource_group):
 
@@ -1924,29 +1878,6 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
 
-    def _network_watcher_connection_monitor(self):
-        import time
-        self.kwargs.update({
-            'vm2': 'vm2',
-            'vm3': 'vm3',
-            'cm': 'cm1'
-        })
-        self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
-        self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
-        self.cmd('vm extension set -g {rg} --vm-name {vm3} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        time.sleep(20)
-        self.cmd('network watcher connection-monitor create -n {cm} --source-resource {vm2} -g {rg} --dest-resource {vm3} --dest-port 80 --tags foo=doo')
-        self.cmd('network watcher connection-monitor list -l {loc}')
-        self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
-        try:
-            self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
-            self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
-        except CLIError:
-            pass
-        self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
-
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
@@ -1960,7 +1891,6 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
             'capture': 'capture1'
         })
         self._network_watcher_configure()
-        self._network_watcher_connection_monitor()
         self._network_watcher_vm()
         self._network_watcher_flow_log()
         self._network_watcher_packet_capture()

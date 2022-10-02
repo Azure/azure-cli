@@ -8,15 +8,14 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
-
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError
+    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError, \
+    MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -98,10 +97,6 @@ def list_nics(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_interfaces', resource_group_name)
 
 
-def list_nsgs(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'network_security_groups', resource_group_name)
-
-
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
     client = network_client_factory(cmd.cli_ctx).network_security_groups
     nsg = client.get(resource_group_name, network_security_group_name)
@@ -150,8 +145,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
-                               sku=None, priority=None,
-                               private_ip_address=None, public_ip_address=None,
+                               sku=None, priority=None, private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1426,10 +1420,9 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
     return parent
 
 
-def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
-                                   address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None,
-                                   priority=None):
+def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, address_pool=None,
+                                   http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
+                                   rule_type='Basic', no_wait=False, rewrite_rule_set=None, priority=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1484,8 +1477,7 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
 
 def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                            address_pool=None, settings=None, listener=None,
-                           rule_type='Basic', no_wait=False,
-                           priority=None):
+                           rule_type='Basic', no_wait=False, priority=None):
     ApplicationGatewayRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1931,8 +1923,13 @@ def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_n
 
 
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name,
-                                   match_variables, operator, match_values, negation_condition=None, transforms=None):
+def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables, operator,
+                                   match_values=None, negation_condition=None, transforms=None):
+    if operator.lower() == "any" and match_values is not None:
+        raise ArgumentUsageError("Any operator does not require --match-values.")
+    if operator.lower() != "any" and match_values is None:
+        raise ArgumentUsageError("Non-any operator requires --match-values.")
+
     MatchCondition = cmd.get_models('MatchCondition')
     waf_policy = client.get(resource_group_name, policy_name)
     custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
@@ -2198,37 +2195,25 @@ def list_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name):
 # endregion
 
 
-# region ApplicationSecurityGroups
-def create_asg(cmd, client, resource_group_name, application_security_group_name, location=None, tags=None):
-    ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup')
-    asg = ApplicationSecurityGroup(location=location, tags=tags)
-    return client.begin_create_or_update(resource_group_name, application_security_group_name, asg)
-
-
-def update_asg(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
-# endregion
-
-
 # region DdosProtectionPlans
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation
-
-    ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    ddos_protection_plan = cmd.get_models('DdosProtectionPlan')()
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Create
+    Create_Ddos_Protection = Create(cli_ctx=cmd.cli_ctx)
+    args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
     if location:
-        ddos_protection_plan.location = location
+        args['location'] = location
     if tags:
-        ddos_protection_plan.tags = tags
+        args['tags'] = tags
     if not vnets:
         # if no VNETs can do a simple PUT
-        return ddos_client.begin_create_or_update(resource_group_name, ddos_plan_name, parameters=ddos_protection_plan)
+        return Create_Ddos_Protection(args)
 
     # if VNETs specified, have to create the protection plan and then add the VNETs
-    plan_id = LongRunningOperation(cmd.cli_ctx)(
-        ddos_client.begin_create_or_update(resource_group_name, ddos_plan_name, parameters=ddos_protection_plan)).id
+    plan_id = LongRunningOperation(cmd.cli_ctx)(Create_Ddos_Protection(args))['id']
 
     SubResource = cmd.get_models('SubResource')
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
@@ -2238,28 +2223,50 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
         vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
         vnet.ddos_protection_plan = SubResource(id=plan_id)
         vnet_client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-    return ddos_client.get(resource_group_name, ddos_plan_name)
+
+    show_args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+    Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
+    return Show_Ddos_Protection(show_args)
 
 
-def update_ddos_plan(cmd, instance, tags=None, vnets=None):
+def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=None):
     SubResource = cmd.get_models('SubResource')
-
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Update
+    Update_Ddos_Protection = Update(cli_ctx=cmd.cli_ctx)
+    args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
     if tags is not None:
-        instance.tags = tags
+        args['tags'] = tags
     if vnets is not None:
+        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+        show_args = {
+            "name": ddos_plan_name,
+            "resource_group": resource_group_name,
+        }
+        Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
+        show_args = Show_Ddos_Protection(show_args)
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
         vnet_ids = set([])
         if len(vnets) == 1 and not vnets[0]:
             pass
         else:
             vnet_ids = {x.id for x in vnets}
-        existing_vnet_ids = {x.id for x in instance.virtual_networks} if instance.virtual_networks else set([])
+        if 'virtualNetworks' in show_args:
+            existing_vnet_ids = {x['id'] for x in show_args['virtualNetworks']}
+        else:
+            existing_vnet_ids = set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
-            vnet.ddos_protection_plan = SubResource(id=instance.id)
+            vnet.ddos_protection_plan = SubResource(id=show_args['id'])
             client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
         for vnet_id in existing_vnet_ids.difference(vnet_ids):
             logger.info("Removing VNet '%s' from plan.", vnet_id)
@@ -2267,7 +2274,7 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
             vnet.ddos_protection_plan = None
             client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-    return instance
+    return Update_Ddos_Protection(args)
 
 
 def list_ddos_plans(cmd, resource_group_name=None):
@@ -2404,6 +2411,7 @@ def _type_to_property_name(key):
         'spf': 'txt_records',
         'srv': 'srv_records',
         'txt': 'txt_records',
+        'alias': 'target_resource',
     }
     return type_dict[key.lower()]
 
@@ -2495,11 +2503,34 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
-# pylint: disable=too-many-return-statements, inconsistent-return-statements
+# pylint: disable=too-many-return-statements, inconsistent-return-statements, too-many-branches
 def _build_record(cmd, data):
-    AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord, NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord = \
-        cmd.get_models('AaaaRecord', 'ARecord', 'CaaRecord', 'CnameRecord', 'MxRecord', 'NsRecord',
-                       'PtrRecord', 'SoaRecord', 'SrvRecord', 'TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
+    (
+        AaaaRecord,
+        ARecord,
+        CaaRecord,
+        CnameRecord,
+        MxRecord,
+        NsRecord,
+        PtrRecord,
+        SoaRecord,
+        SrvRecord,
+        TxtRecord,
+        SubResource,
+    ) = cmd.get_models(
+        "AaaaRecord",
+        "ARecord",
+        "CaaRecord",
+        "CnameRecord",
+        "MxRecord",
+        "NsRecord",
+        "PtrRecord",
+        "SoaRecord",
+        "SrvRecord",
+        "TxtRecord",
+        "SubResource",
+        resource_type=ResourceType.MGMT_NETWORK_DNS,
+    )
     record_type = data['delim'].lower()
     try:
         if record_type == 'aaaa':
@@ -2528,6 +2559,8 @@ def _build_record(cmd, data):
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
+        if record_type == 'alias':
+            return SubResource(id=data["resourceId"])
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
@@ -2571,6 +2604,11 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
                 record_set_ttl = entry['ttl']
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
+                alias_record_type = entry.get("aliasDelim", None)
+
+                if alias_record_type:
+                    alias_record_type = alias_record_type.lower()
+                    record_set_key = '{}{}'.format(record_set_name.lower(), alias_record_type)
 
                 record = _build_record(cmd, entry)
                 if not record:
@@ -2591,7 +2629,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                     record_set = RecordSet(ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
-                            is_list=record_set_type.lower() not in ['soa', 'cname'])
+                            is_list=record_set_type.lower() not in ['soa', 'cname', 'alias'])
 
     total_records = 0
     for key, rs in record_sets.items():
@@ -3522,12 +3560,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         if ip_configurations:
             PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
             for prop in ip_configurations:
-                ip_config = PrivateEndpointIPConfiguration(
-                    name=prop['name'],
-                    group_id=prop['group_id'],
-                    member_name=prop['member_name'],
-                    private_ip_address=prop['private_ip_address']
-                )
+                ip_config = PrivateEndpointIPConfiguration(**prop)
                 try:
                     private_endpoint.ip_configurations.append(ip_config)
                 except AttributeError:
@@ -3535,7 +3568,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         if application_security_groups:
             ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
             for prop in application_security_groups:
-                asg = ApplicationSecurityGroup(id=prop["id"])
+                asg = ApplicationSecurityGroup(**prop)
                 try:
                     private_endpoint.application_security_groups.append(asg)
                 except AttributeError:
@@ -4858,35 +4891,6 @@ def _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight):
         else:
             raise CLIError(
                 'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
-
-
-def create_local_gateway(cmd, resource_group_name, local_network_gateway_name, gateway_ip_address,
-                         location=None, tags=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, no_wait=False):
-    AddressSpace, LocalNetworkGateway, BgpSettings = cmd.get_models(
-        'AddressSpace', 'LocalNetworkGateway', 'BgpSettings')
-    client = network_client_factory(cmd.cli_ctx).local_network_gateways
-    local_gateway = LocalNetworkGateway(
-        local_network_address_space=AddressSpace(address_prefixes=(local_address_prefix or [])),
-        location=location, tags=tags, gateway_ip_address=gateway_ip_address)
-    if bgp_peering_address or asn or peer_weight:
-        local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
-                                                 peer_weight=peer_weight)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, local_network_gateway_name, local_gateway)
-
-
-def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None, tags=None):
-    _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
-
-    if gateway_ip_address is not None:
-        instance.gateway_ip_address = gateway_ip_address
-    if local_address_prefix is not None:
-        instance.local_network_address_space.address_prefixes = local_address_prefix
-    if tags is not None:
-        instance.tags = tags
-    return instance
 # endregion
 
 
@@ -5322,15 +5326,6 @@ def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=No
 # endregion
 
 
-# region NetworkProfiles
-def list_network_profiles(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_profiles
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_all()
-# endregion
-
-
 # region NetworkWatchers
 def _create_network_watchers(cmd, client, resource_group_name, locations, tags):
     if resource_group_name is None:
@@ -5402,14 +5397,7 @@ def create_nw_connection_monitor(cmd,
                                  watcher_name,
                                  resource_group_name=None,
                                  location=None,
-                                 source_resource=None,
-                                 source_port=None,
-                                 dest_resource=None,
-                                 dest_port=None,
-                                 dest_address=None,
                                  tags=None,
-                                 do_not_start=None,
-                                 monitoring_interval=None,
                                  endpoint_source_name=None,
                                  endpoint_source_resource_id=None,
                                  endpoint_source_address=None,
@@ -5440,118 +5428,41 @@ def create_nw_connection_monitor(cmd,
                                  output_type=None,
                                  workspace_ids=None,
                                  notes=None):
-    v1_required_parameter_set = [
-        source_resource, source_port,
-        dest_resource, dest_address, dest_port
-    ]
-
-    v2_required_parameter_set = [
-        endpoint_source_name, endpoint_source_resource_id, endpoint_source_type, endpoint_source_coverage_level,
-        endpoint_dest_name, endpoint_dest_address, endpoint_dest_type, endpoint_dest_coverage_level,
-        test_config_name, test_config_protocol,
-        output_type, workspace_ids,
-    ]
-
-    if any(v1_required_parameter_set):  # V1 creation
-        connection_monitor = _create_nw_connection_monitor_v1(cmd,
-                                                              connection_monitor_name,
-                                                              watcher_rg,
-                                                              watcher_name,
-                                                              source_resource,
-                                                              resource_group_name,
-                                                              source_port,
-                                                              location,
-                                                              dest_resource,
-                                                              dest_port,
-                                                              dest_address,
-                                                              tags,
-                                                              do_not_start,
-                                                              monitoring_interval)
-        from azure.cli.core.profiles._shared import AD_HOC_API_VERSIONS
-        client = get_mgmt_service_client(
-            cmd.cli_ctx,
-            ResourceType.MGMT_NETWORK,
-            api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['nw_connection_monitor']
-        ).connection_monitors
-    elif any(v2_required_parameter_set):  # V2 creation
-        connection_monitor = _create_nw_connection_monitor_v2(cmd,
-                                                              location,
-                                                              tags,
-                                                              endpoint_source_name,
-                                                              endpoint_source_resource_id,
-                                                              endpoint_source_address,
-                                                              endpoint_source_type,
-                                                              endpoint_source_coverage_level,
-                                                              endpoint_dest_name,
-                                                              endpoint_dest_resource_id,
-                                                              endpoint_dest_address,
-                                                              endpoint_dest_type,
-                                                              endpoint_dest_coverage_level,
-                                                              test_config_name,
-                                                              test_config_frequency,
-                                                              test_config_protocol,
-                                                              test_config_preferred_ip_version,
-                                                              test_config_threshold_failed_percent,
-                                                              test_config_threshold_round_trip_time,
-                                                              test_config_tcp_port,
-                                                              test_config_tcp_port_behavior,
-                                                              test_config_tcp_disable_trace_route,
-                                                              test_config_icmp_disable_trace_route,
-                                                              test_config_http_port,
-                                                              test_config_http_method,
-                                                              test_config_http_path,
-                                                              test_config_http_valid_status_codes,
-                                                              test_config_http_prefer_https,
-                                                              test_group_name,
-                                                              test_group_disable,
-                                                              output_type,
-                                                              workspace_ids,
-                                                              notes)
-    else:
-        raise CLIError('Unknown operation')
+    connection_monitor = _create_nw_connection_monitor_v2(cmd,
+                                                          location,
+                                                          tags,
+                                                          endpoint_source_name,
+                                                          endpoint_source_resource_id,
+                                                          endpoint_source_address,
+                                                          endpoint_source_type,
+                                                          endpoint_source_coverage_level,
+                                                          endpoint_dest_name,
+                                                          endpoint_dest_resource_id,
+                                                          endpoint_dest_address,
+                                                          endpoint_dest_type,
+                                                          endpoint_dest_coverage_level,
+                                                          test_config_name,
+                                                          test_config_frequency,
+                                                          test_config_protocol,
+                                                          test_config_preferred_ip_version,
+                                                          test_config_threshold_failed_percent,
+                                                          test_config_threshold_round_trip_time,
+                                                          test_config_tcp_port,
+                                                          test_config_tcp_port_behavior,
+                                                          test_config_tcp_disable_trace_route,
+                                                          test_config_icmp_disable_trace_route,
+                                                          test_config_http_port,
+                                                          test_config_http_method,
+                                                          test_config_http_path,
+                                                          test_config_http_valid_status_codes,
+                                                          test_config_http_prefer_https,
+                                                          test_group_name,
+                                                          test_group_disable,
+                                                          output_type,
+                                                          workspace_ids,
+                                                          notes)
 
     return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def _create_nw_connection_monitor_v1(cmd,
-                                     connection_monitor_name,
-                                     watcher_rg,
-                                     watcher_name,
-                                     source_resource,
-                                     resource_group_name=None,
-                                     source_port=None,
-                                     location=None,
-                                     dest_resource=None,
-                                     dest_port=None,
-                                     dest_address=None,
-                                     tags=None,
-                                     do_not_start=None,
-                                     monitoring_interval=60):
-    ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
-        'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
-
-    cmv1 = ConnectionMonitor(
-        location=location,
-        tags=tags,
-        source=ConnectionMonitorSource(
-            resource_id=source_resource,
-            port=source_port
-        ),
-        destination=ConnectionMonitorDestination(
-            resource_id=dest_resource,
-            port=dest_port,
-            address=dest_address
-        ),
-        auto_start=not do_not_start,
-        monitoring_interval_in_seconds=monitoring_interval,
-        endpoints=None,
-        test_configurations=None,
-        test_groups=None,
-        outputs=None,
-        notes=None
-    )
-
-    return cmv1
 
 
 def _create_nw_connection_monitor_v2(cmd,
@@ -6263,18 +6174,26 @@ def show_nw_security_view(cmd, client, resource_group_name, vm, watcher_rg, watc
     return client.begin_get_vm_security_rules(watcher_rg, watcher_name, security_group_view_parameters)
 
 
-def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
-                             watcher_rg, watcher_name, location=None,
+def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
+                             watcher_rg, watcher_name, vm=None, location=None,
                              storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None, filters=None):
+                             capture_size=None, capture_limit=None, time_limit=None, filters=None,
+                             target_type=None, target=None, include=None, exclude=None):
     PacketCapture, PacketCaptureStorageLocation = cmd.get_models('PacketCapture', 'PacketCaptureStorageLocation')
+    PacketCaptureMachineScope = cmd.get_models('PacketCaptureMachineScope')
+    # Set the appropriate fields if target is VM
+    pcap_scope = None
+    if not target_type or target_type.lower() != "azurevmss":
+        target = vm
+    else:
+        pcap_scope = PacketCaptureMachineScope(include=include, exclude=exclude)
 
     storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
                                                     storage_path=storage_path, file_path=file_path)
-    capture_params = PacketCapture(target=vm, storage_location=storage_settings,
+    capture_params = PacketCapture(target=target, storage_location=storage_settings,
                                    bytes_to_capture_per_packet=capture_size,
                                    total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
-                                   filters=filters)
+                                   filters=filters, target_type=target_type, scope=pcap_scope)
     return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
 
 
@@ -6287,7 +6206,6 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     config = LongRunningOperation(cmd.cli_ctx)(client.begin_get_flow_log_status(watcher_rg,
                                                                                 watcher_name,
                                                                                 flowlog_status_parameters))
-
     try:
         if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
             config.flow_analytics_configuration = None
@@ -6350,8 +6268,8 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
 
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
-def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
-                          flow_log_name=None):
+def show_nw_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+                         flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
         flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
@@ -6369,7 +6287,10 @@ def create_nw_flow_log(cmd,
                        watcher_rg,
                        watcher_name,
                        flow_log_name,
-                       nsg,
+                       nsg=None,
+                       vnet=None,
+                       subnet=None,
+                       nic=None,
                        storage_account=None,
                        resource_group_name=None,
                        enabled=None,
@@ -6381,11 +6302,20 @@ def create_nw_flow_log(cmd,
                        traffic_analytics_enabled=None,
                        tags=None):
     FlowLog = cmd.get_models('FlowLog')
-    flow_log = FlowLog(location=location,
-                       target_resource_id=nsg,
-                       storage_id=storage_account,
-                       enabled=enabled,
-                       tags=tags)
+
+    if sum(map(bool, [vnet, subnet, nic, nsg])) == 0:
+        raise RequiredArgumentMissingError("Please enter atleast one target resource ID.")
+    if sum(map(bool, [vnet, nic, nsg])) > 1:
+        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
+
+    if subnet is not None:
+        flow_log = FlowLog(location=location, target_resource_id=subnet, storage_id=storage_account, enabled=enabled, tags=tags)
+    elif vnet is not None and subnet is None:
+        flow_log = FlowLog(location=location, target_resource_id=vnet, storage_id=storage_account, enabled=enabled, tags=tags)
+    elif nic is not None:
+        flow_log = FlowLog(location=location, target_resource_id=nic, storage_id=storage_account, enabled=enabled, tags=tags)
+    elif nsg is not None:
+        flow_log = FlowLog(location=location, target_resource_id=nsg, storage_id=storage_account, enabled=enabled, tags=tags)
 
     if retention > 0:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
@@ -6436,6 +6366,9 @@ def update_nw_flow_log(cmd,
                        resource_group_name=None,    # dummy parameter to let it appear in command
                        enabled=None,
                        nsg=None,
+                       vnet=None,
+                       subnet=None,
+                       nic=None,
                        storage_account=None,
                        retention=0,
                        log_format=None,
@@ -6448,6 +6381,17 @@ def update_nw_flow_log(cmd,
         c.set_param('enabled', enabled)
         c.set_param('tags', tags)
         c.set_param('storage_id', storage_account)
+
+    if sum(map(bool, [vnet, nic, nsg])) > 1:
+        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
+
+    if subnet is not None:
+        c.set_param('target_resource_id', subnet)
+    elif vnet is not None and subnet is None:
+        c.set_param('target_resource_id', vnet)
+    elif nic is not None:
+        c.set_param('target_resource_id', nic)
+    else:
         c.set_param('target_resource_id', nsg)
 
     with cmd.update_context(instance.retention_policy) as c:
@@ -6713,197 +6657,81 @@ def update_public_ip_prefix(instance, tags=None):
 # endregion
 
 
-# region RouteFilters
-def create_route_filter(cmd, client, resource_group_name, route_filter_name, location=None, tags=None):
-    RouteFilter = cmd.get_models('RouteFilter')
-    return client.begin_create_or_update(resource_group_name, route_filter_name,
-                                         RouteFilter(location=location, tags=tags))
-
-
-def list_route_filters(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-
-    return client.list()
-
-
-def create_route_filter_rule(cmd, client, resource_group_name, route_filter_name, rule_name, access, communities,
-                             location=None):
-    RouteFilterRule = cmd.get_models('RouteFilterRule')
-    return client.begin_create_or_update(resource_group_name, route_filter_name, rule_name,
-                                         RouteFilterRule(access=access, communities=communities,
-                                                         location=location))
-
-# endregion
-
-
-# region RouteTables
-def create_route_table(cmd, resource_group_name, route_table_name, location=None, tags=None,
-                       disable_bgp_route_propagation=None):
-    RouteTable = cmd.get_models('RouteTable')
-    ncf = network_client_factory(cmd.cli_ctx)
-    route_table = RouteTable(location=location, tags=tags)
-    if cmd.supported_api_version(min_api='2017-10-01'):
-        route_table.disable_bgp_route_propagation = disable_bgp_route_propagation
-    return ncf.route_tables.begin_create_or_update(resource_group_name, route_table_name, route_table)
-
-
-def update_route_table(instance, tags=None, disable_bgp_route_propagation=None):
-    if tags == '':
-        instance.tags = None
-    elif tags is not None:
-        instance.tags = tags
-    if disable_bgp_route_propagation is not None:
-        instance.disable_bgp_route_propagation = disable_bgp_route_propagation
-    return instance
-
-
-def create_route(cmd, resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
-                 next_hop_ip_address=None):
-    Route = cmd.get_models('Route')
-    route = Route(next_hop_type=next_hop_type, address_prefix=address_prefix,
-                  next_hop_ip_address=next_hop_ip_address, name=route_name)
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.routes.begin_create_or_update(resource_group_name, route_table_name, route_name, route)
-
-
-def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_address=None):
-    if address_prefix is not None:
-        instance.address_prefix = address_prefix
-
-    if next_hop_type is not None:
-        instance.next_hop_type = next_hop_type
-
-    if next_hop_ip_address is not None:
-        instance.next_hop_ip_address = next_hop_ip_address
-    return instance
-# endregion
-
-
-# region ServiceEndpoints
-def create_service_endpoint_policy(cmd, resource_group_name, service_endpoint_policy_name, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    ServiceEndpointPolicy = cmd.get_models('ServiceEndpointPolicy')
-    policy = ServiceEndpointPolicy(tags=tags, location=location)
-    return client.begin_create_or_update(resource_group_name, service_endpoint_policy_name, policy)
-
-
-def list_service_endpoint_policies(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policies
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
-def update_service_endpoint_policy(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-
-    return instance
-
-
-def create_service_endpoint_policy_definition(cmd, resource_group_name, service_endpoint_policy_name,
-                                              service_endpoint_policy_definition_name, service, service_resources,
-                                              description=None):
-    client = network_client_factory(cmd.cli_ctx).service_endpoint_policy_definitions
-    ServiceEndpointPolicyDefinition = cmd.get_models('ServiceEndpointPolicyDefinition')
-    policy_def = ServiceEndpointPolicyDefinition(description=description, service=service,
-                                                 service_resources=service_resources)
-    return client.begin_create_or_update(resource_group_name, service_endpoint_policy_name,
-                                         service_endpoint_policy_definition_name, policy_def)
-
-
-def update_service_endpoint_policy_definition(instance, service=None, service_resources=None, description=None):
-    if service is not None:
-        instance.service = service
-
-    if service_resources is not None:
-        instance.service_resources = service_resources
-
-    if description is not None:
-        instance.description = description
-
-    return instance
-# endregion
-
-
 # region TrafficManagers
-def list_traffic_manager_profiles(cmd, resource_group_name=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-
-    return client.list_by_subscription()
-
-
 def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path=None,
-                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value,
-                                   profile_status=ProfileStatus.enabled.value,
+                                   monitor_port=80, monitor_protocol="HTTP",
+                                   profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
+    from .aaz.latest.network.traffic_manager.profile import Create
+    Create_Profile = Create(cmd.loader)
+
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
-    profile = Profile(location='global', tags=tags, profile_status=profile_status,
-                      traffic_routing_method=routing_method,
-                      dns_config=DnsConfig(relative_name=unique_dns_name, ttl=ttl),
-                      monitor_config=MonitorConfig(protocol=monitor_protocol,
-                                                   port=monitor_port,
-                                                   path=monitor_path,
-                                                   interval_in_seconds=interval,
-                                                   timeout_in_seconds=timeout,
-                                                   tolerated_number_of_failures=max_failures,
-                                                   custom_headers=monitor_custom_headers,
-                                                   expected_status_code_ranges=status_code_ranges),
-                      max_return=max_return)
-    return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
+    args = {
+        "name": traffic_manager_profile_name,
+        "location": "global",
+        "resource_group": resource_group_name,
+        "unique_dns_name": unique_dns_name,
+        "ttl": ttl,
+        "max_return": max_return,
+        "status": profile_status,
+        "routing_method": routing_method,
+        "tags": tags,
+        "custom_headers": monitor_custom_headers,
+        "status_code_ranges": status_code_ranges,
+        "interval": interval,
+        "path": monitor_path,
+        "port": monitor_port,
+        "protocol": monitor_protocol,
+        "timeout": timeout,
+        "max_failures": max_failures
+    }
+
+    return Create_Profile(args)
 
 
-def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
+def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
+                                   profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    if tags is not None:
-        instance.tags = tags
-    if profile_status is not None:
-        instance.profile_status = profile_status
-    if routing_method is not None:
-        instance.traffic_routing_method = routing_method
+    from .aaz.latest.network.traffic_manager.profile import Update
+    Update_Profile = Update(cmd.loader)
+
+    args = {
+        "name": traffic_manager_profile_name,
+        "resource_group": resource_group_name
+    }
     if ttl is not None:
-        instance.dns_config.ttl = ttl
-
-    if monitor_protocol is not None:
-        instance.monitor_config.protocol = monitor_protocol
-    if monitor_port is not None:
-        instance.monitor_config.port = monitor_port
-    if monitor_path == '':
-        instance.monitor_config.path = None
-    elif monitor_path is not None:
-        instance.monitor_config.path = monitor_path
-    if interval is not None:
-        instance.monitor_config.interval_in_seconds = interval
-    if timeout is not None:
-        instance.monitor_config.timeout_in_seconds = timeout
-    if max_failures is not None:
-        instance.monitor_config.tolerated_number_of_failures = max_failures
-    if monitor_custom_headers is not None:
-        instance.monitor_config.custom_headers = monitor_custom_headers
-    if status_code_ranges is not None:
-        instance.monitor_config.expected_status_code_ranges = status_code_ranges
+        args["ttl"] = ttl
     if max_return is not None:
-        instance.max_return = max_return
+        args["max_return"] = max_return
+    if profile_status is not None:
+        args["status"] = profile_status
+    if routing_method is not None:
+        args["routing_method"] = routing_method
+    if tags is not None:
+        args["tags"] = tags
+    if monitor_custom_headers is not None:
+        args["custom_headers"] = monitor_custom_headers
+    if status_code_ranges is not None:
+        args["status_code_ranges"] = status_code_ranges
+    if interval is not None:
+        args["interval"] = interval
+    if monitor_path is not None:
+        args["path"] = monitor_path
+    if monitor_port is not None:
+        args["port"] = monitor_port
+    if monitor_protocol is not None:
+        args["protocol"] = monitor_protocol
+    if timeout is not None:
+        args["timeout"] = timeout
+    if max_failures is not None:
+        args["max_failures"] = max_failures
 
-    # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
-    for endpoint in instance.endpoints:
-        endpoint._validation = {  # pylint: disable=protected-access
-            'name': {'readonly': False},
-            'type': {'readonly': False},
-        }
-    return instance
+    return Update_Profile(args)
 
 
 def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_type, endpoint_name,
@@ -6912,73 +6740,89 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    from azure.mgmt.trafficmanager.models import Endpoint
-    ncf = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).endpoints
+    from .aaz.latest.network.traffic_manager.endpoint import Create
+    Create_Endpoint = Create(cmd.loader)
 
-    endpoint = Endpoint(target_resource_id=target_resource_id, target=target,
-                        endpoint_status=endpoint_status, weight=weight, priority=priority,
-                        endpoint_location=endpoint_location,
-                        endpoint_monitor_status=endpoint_monitor_status,
-                        min_child_endpoints=min_child_endpoints,
-                        min_child_endpoints_i_pv4=min_child_ipv4,
-                        min_child_endpoints_i_pv6=min_child_ipv6,
-                        geo_mapping=geo_mapping,
-                        subnets=subnets,
-                        custom_headers=monitor_custom_headers)
+    args = {
+        "name": endpoint_name,
+        "type": endpoint_type,
+        "profile_name": profile_name,
+        "resource_group": resource_group_name,
+        "custom_headers": monitor_custom_headers,
+        "endpoint_location": endpoint_location,
+        "endpoint_monitor_status": endpoint_monitor_status,
+        "endpoint_status": endpoint_status,
+        "geo_mapping": geo_mapping,
+        "min_child_endpoints": min_child_endpoints,
+        "min_child_ipv4": min_child_ipv4,
+        "min_child_ipv6": min_child_ipv6,
+        "priority": priority,
+        "subnets": subnets,
+        "target": target,
+        "target_resource_id": target_resource_id,
+        "weight": weight
+    }
 
-    return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
-                                endpoint)
+    return Create_Endpoint(args)
 
 
-def update_traffic_manager_endpoint(instance, endpoint_type, endpoint_location=None,
+def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_name,
+                                    endpoint_type, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None):
-    if endpoint_location is not None:
-        instance.endpoint_location = endpoint_location
-    if endpoint_status is not None:
-        instance.endpoint_status = endpoint_status
-    if endpoint_monitor_status is not None:
-        instance.endpoint_monitor_status = endpoint_monitor_status
-    if priority is not None:
-        instance.priority = priority
-    if target is not None:
-        instance.target = target
-    if target_resource_id is not None:
-        instance.target_resource_id = target_resource_id
-    if weight is not None:
-        instance.weight = weight
-    if min_child_endpoints is not None:
-        instance.min_child_endpoints = min_child_endpoints
-    if min_child_ipv4 is not None:
-        instance.min_child_endpoints_i_pv4 = min_child_ipv4
-    if min_child_ipv6 is not None:
-        instance.min_child_endpoints_i_pv6 = min_child_ipv6
-    if geo_mapping is not None:
-        instance.geo_mapping = geo_mapping
-    if subnets is not None:
-        instance.subnets = subnets
-    if monitor_custom_headers:
-        instance.custom_headers = monitor_custom_headers
+    from .aaz.latest.network.traffic_manager.endpoint import Update
+    Update_Endpoint = Update(cmd.loader)
 
-    return instance
+    args = {
+        "name": endpoint_name,
+        "type": endpoint_type,
+        "profile_name": profile_name,
+        "resource_group": resource_group_name
+    }
+    if monitor_custom_headers is not None:
+        args["custom_headers"] = monitor_custom_headers
+    if endpoint_location is not None:
+        args["endpoint_location"] = endpoint_location
+    if endpoint_monitor_status is not None:
+        args["endpoint_monitor_status"] = endpoint_monitor_status
+    if endpoint_status is not None:
+        args["endpoint_status"] = endpoint_status
+    if geo_mapping is not None:
+        args["geo_mapping"] = geo_mapping
+    if min_child_endpoints is not None:
+        args["min_child_endpoints"] = min_child_endpoints
+    if min_child_ipv4 is not None:
+        args["min_child_ipv4"] = min_child_ipv4
+    if min_child_ipv6 is not None:
+        args["min_child_ipv6"] = min_child_ipv6
+    if priority is not None:
+        args["priority"] = priority
+    if subnets is not None:
+        args["subnets"] = subnets
+    if target is not None:
+        args["target"] = target
+    if target_resource_id is not None:
+        args["target_resource_id"] = target_resource_id
+    if weight is not None:
+        args["weight"] = weight
+
+    return Update_Endpoint(args)
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = client.get(resource_group_name, profile_name)
-    return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
+    from .aaz.latest.network.traffic_manager.profile import Show
+    Show_Profile = Show(cmd.loader)
 
+    args = {
+        "resource_group": resource_group_name,
+        "profile_name": profile_name
+    }
+    profile = Show_Profile(args)
 
-def check_traffic_manager_name(cmd, client, name):
-    from azure.mgmt.trafficmanager.models import CheckTrafficManagerRelativeDnsNameAvailabilityParameters
-    checknameParameters = CheckTrafficManagerRelativeDnsNameAvailabilityParameters(name=name, type='Microsoft.Network/trafficManagerProfiles')
-    return client.check_traffic_manager_relative_dns_name_availability(checknameParameters)
-
+    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
 # endregion
 
 
@@ -7909,19 +7753,6 @@ def create_virtual_hub(cmd, client,
     return client.get(resource_group_name, virtual_hub_name)
 
 
-def virtual_hub_update_setter(client, resource_group_name, virtual_hub_name, parameters):
-    return client.begin_create_or_update(resource_group_name, virtual_hub_name, parameters)
-
-
-def update_virtual_hub(cmd, instance,
-                       tags=None,
-                       allow_branch_to_branch_traffic=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-        c.set_param('allow_branch_to_branch_traffic', allow_branch_to_branch_traffic)
-    return instance
-
-
 def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
@@ -7931,46 +7762,6 @@ def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wa
         poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
         LongRunningOperation(cmd.cli_ctx)(poller)
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
-
-
-def list_virtual_hub(client, resource_group_name=None):
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
-def create_virtual_hub_bgp_connection(cmd, client, resource_group_name, virtual_hub_name, connection_name,
-                                      peer_asn, peer_ip, no_wait=False):
-    BgpConnection = cmd.get_models('BgpConnection')
-    vhub_bgp_conn = BgpConnection(name=connection_name, peer_asn=peer_asn, peer_ip=peer_ip)
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
-                       virtual_hub_name, connection_name, vhub_bgp_conn)
-
-
-def virtual_hub_bgp_connection_update_setter(client, resource_group_name,
-                                             virtual_hub_name, connection_name,
-                                             parameters):
-    return client.begin_create_or_update(resource_group_name, virtual_hub_name, connection_name, parameters)
-
-
-def update_virtual_hub_bgp_connection(cmd, instance, peer_asn=None, peer_ip=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('peer_asn', peer_asn)
-        c.set_param('peer_ip', peer_ip)
-    return instance
-
-
-def delete_virtual_hub_bgp_connection(client, resource_group_name,
-                                      virtual_hub_name, connection_name, no_wait=False):
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name, connection_name)
-
-
-def list_virtual_hub_bgp_connection_learned_routes(client, resource_group_name, virtual_hub_name, connection_name):
-    return client.begin_list_learned_routes(resource_group_name, virtual_hub_name, connection_name)
-
-
-def list_virtual_hub_bgp_connection_advertised_routes(client, resource_group_name, virtual_hub_name, connection_name):
-    return client.begin_list_advertised_routes(resource_group_name, virtual_hub_name, connection_name)
 # endregion
 
 
@@ -8282,18 +8073,10 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
 # endregion
 
 
-# region service aliases
-def list_service_aliases(cmd, location, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).available_service_aliases
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
-    return client.list(location=location)
-# endregion
-
-
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None,
+                        disable_copy_paste=False, enable_tunneling=False, enable_ip_connect=False, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -8316,10 +8099,28 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                    location=location,
                                    scale_units=scale_units,
                                    sku=sku,
-                                   tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         bastion_host_name=bastion_host_name,
-                                         parameters=bastion_host)
+                                   tags=tags,
+                                   disable_copy_paste=disable_copy_paste,
+                                   enable_tunneling=enable_tunneling,
+                                   enable_ip_connect=enable_ip_connect)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       bastion_host_name=bastion_host_name,
+                       parameters=bastion_host)
+
+
+def update_bastion_host(cmd, instance, scale_units=None, sku=None, disable_copy_paste=None, enable_tunneling=None, enable_ip_connect=None):
+    # both VirtualHub and VirtualRouter own those properties
+    sku_type = cmd.get_models('Sku')
+    sku = sku_type(name=sku)
+
+    with cmd.update_context(instance) as c:
+        c.set_param('scale_units', scale_units)
+        c.set_param('sku', sku)
+        c.set_param('disable_copy_paste', disable_copy_paste)
+        c.set_param('enable_tunneling', enable_tunneling)
+        c.set_param('enable_ip_connect', enable_ip_connect)
+    return instance
 
 
 def list_bastion_host(cmd, resource_group_name=None):
@@ -8428,7 +8229,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     if not resource_port:
         resource_port = 22
     if not is_valid_resource_id(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+        raise InvalidArgumentValueError("Please enter a valid resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
 
     tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
@@ -8477,7 +8278,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     if not resource_port:
         resource_port = 3389
     if not is_valid_resource_id(target_resource_id):
-        raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
+        raise InvalidArgumentValueError("Please enter a valid resource Id. If this is not working, try opening the JSON View of your resource (in the Overview tab), and copying the full resource id.")
     if platform.system() == 'Windows':
         if disable_gateway:
             tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
@@ -8554,37 +8355,6 @@ def _start_tunnel(tunnel_server):
 # endregion
 
 
-# region security partner provider
-def create_security_partner_provider(cmd, resource_group_name, security_partner_provider_name,
-                                     security_provider_name, virtual_hub, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).security_partner_providers
-    SecurityPartnerProvider, SubResource = cmd.get_models('SecurityPartnerProvider', 'SubResource')
-
-    security_partner_provider = SecurityPartnerProvider(security_provider_name=security_provider_name,
-                                                        virtual_hub=SubResource(id=virtual_hub),
-                                                        location=location,
-                                                        tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         security_partner_provider_name=security_partner_provider_name,
-                                         parameters=security_partner_provider)
-
-
-def update_security_partner_provider(instance, cmd, security_provider_name=None, virtual_hub=None, tags=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('security_provider_name', security_provider_name)
-        c.set_param('virtual_hub', virtual_hub)
-        c.set_param('tags', tags)
-    return instance
-
-
-def list_security_partner_provider(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).security_partner_providers
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-    return client.list()
-# endregion
-
-
 # region network gateway connection
 def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_length, resource_group_name=None):
     ConnectionResetSharedKey = cmd.get_models('ConnectionResetSharedKey')
@@ -8597,78 +8367,5 @@ def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_l
 def update_shared_key(cmd, instance, value):
     with cmd.update_context(instance) as c:
         c.set_param('value', value)
-    return instance
-# endregion
-
-
-# region network virtual appliance
-def create_network_virtual_appliance(cmd, client, resource_group_name, network_virtual_appliance_name,
-                                     vendor, bundled_scale_unit, market_place_version,
-                                     virtual_hub, boot_strap_configuration_blobs=None,
-                                     cloud_init_configuration_blobs=None,
-                                     cloud_init_configuration=None, asn=None,
-                                     location=None, tags=None, no_wait=False):
-    (NetworkVirtualAppliance,
-     SubResource,
-     VirtualApplianceSkuProperties) = cmd.get_models('NetworkVirtualAppliance',
-                                                     'SubResource',
-                                                     'VirtualApplianceSkuProperties')
-
-    virtual_appliance = NetworkVirtualAppliance(boot_strap_configuration_blobs=boot_strap_configuration_blobs,
-                                                cloud_init_configuration_blobs=cloud_init_configuration_blobs,
-                                                cloud_init_configuration=cloud_init_configuration,
-                                                virtual_appliance_asn=asn,
-                                                virtual_hub=SubResource(id=virtual_hub),
-                                                nva_sku=VirtualApplianceSkuProperties(
-                                                    vendor=vendor,
-                                                    bundled_scale_unit=bundled_scale_unit,
-                                                    market_place_version=market_place_version
-                                                ),
-                                                location=location,
-                                                tags=tags)
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, network_virtual_appliance_name, virtual_appliance)
-
-
-def update_network_virtual_appliance(instance, cmd, cloud_init_configuration=None, asn=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('virtual_appliance_asn', asn)
-        c.set_param('cloud_init_configuration', cloud_init_configuration)
-    return instance
-
-
-def list_network_virtual_appliance(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-    return client.list()
-
-
-def create_network_virtual_appliance_site(cmd, client, resource_group_name, network_virtual_appliance_name,
-                                          site_name, address_prefix, allow=None, optimize=None, default=None,
-                                          no_wait=False):
-    (BreakOutCategoryPolicies,
-     Office365PolicyProperties,
-     VirtualApplianceSite) = cmd.get_models('BreakOutCategoryPolicies',
-                                            'Office365PolicyProperties',
-                                            'VirtualApplianceSite')
-
-    virtual_appliance_site = VirtualApplianceSite(address_prefix=address_prefix,
-                                                  o365_policy=Office365PolicyProperties(
-                                                      break_out_categories=BreakOutCategoryPolicies(
-                                                          allow=allow,
-                                                          optimize=optimize,
-                                                          default=default
-                                                      )))
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, network_virtual_appliance_name, site_name, virtual_appliance_site)
-
-
-def update_network_virtual_appliance_site(instance, cmd, address_prefix, allow=None, optimize=None, default=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('address_prefix', address_prefix)
-        c.set_param('o365_policy.break_out_categories.allow', allow)
-        c.set_param('o365_policy.break_out_categories.optimize', optimize)
-        c.set_param('o365_policy.break_out_categories.default', default)
     return instance
 # endregion

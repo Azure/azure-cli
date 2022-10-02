@@ -249,6 +249,11 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 if exit_code == 0:
                     logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
                     subprocess.call(zypper_install_cmd)
+        elif installer == 'DOCKER' or any(x in distname for x in ['alpine linux']):
+            apk_install_cmd = 'apk add --no-cache libpq-dev'.split()
+            logger.debug("Install dependencies with '%s'", " ".join(apk_install_cmd))
+            logger.warning('This extension depends on libpq-dev and will be installed first.')
+            subprocess.call(apk_install_cmd)
 
 
 def is_valid_sha256sum(a_file, expected_sum):

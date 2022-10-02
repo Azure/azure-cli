@@ -23,14 +23,19 @@ MSI_LOCAL_ID = '[system]'
 
 
 def get_target_network_api(cli_ctx):
-    """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
-        necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
-        (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
-    version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
+    The fixed version of network used by ARM template deployment.
+    This is consistent with the version settings of other RP to ensure the stability of core commands "az vm create"
+    and "az vmss create".
+    In addition, it can also reduce the workload of re-recording a large number of vm tests after bumping the
+    network api-version.
+    Since it does not use the Python SDK, so it will not increase the dependence on the Python SDK
+    """
     if cli_ctx.cloud.profile == 'latest':
-        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
+        version = '2022-01-01'
+    else:
+        from azure.cli.core.profiles import get_api_version, ResourceType
+        version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     return version
 
 
@@ -120,6 +125,37 @@ def list_sku_info(cli_ctx, location=None):
     if location:
         result = [r for r in result if _match_location(location, r.locations)]
     return result
+
+
+def is_sku_available(cmd, sku_info, zone):
+    """
+    The SKU is unavailable in the following cases:
+    1. regional restriction and the region is restricted
+    2. parameter --zone is input which indicates only showing skus with availability zones.
+       Meanwhile, zonal restriction and all zones are restricted
+    """
+    is_available = True
+    is_restrict_zone = False
+    is_restrict_location = False
+    if not sku_info.restrictions:
+        return is_available
+    for restriction in sku_info.restrictions:
+        if restriction.reason_code == 'NotAvailableForSubscription':
+            # The attribute location_info is not supported in versions 2017-03-30 and earlier
+            if cmd.supported_api_version(max_api='2017-03-30'):
+                is_available = False
+                break
+            if restriction.type == 'Zone' and not (
+                    set(sku_info.location_info[0].zones or []) - set(restriction.restriction_info.zones or [])):
+                is_restrict_zone = True
+            if restriction.type == 'Location' and (
+                    sku_info.location_info[0].location in (restriction.restriction_info.locations or [])):
+                is_restrict_location = True
+
+            if is_restrict_location or (is_restrict_zone and zone):
+                is_available = False
+                break
+    return is_available
 
 
 # pylint: disable=too-many-statements, too-many-branches
@@ -385,6 +421,18 @@ def is_valid_vm_resource_id(vm_resource_id):
     vm_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
                                r'virtualMachines/.*$', re.IGNORECASE)
     if vm_id_pattern.match(vm_resource_id):
+        return True
+
+    return False
+
+
+def is_valid_vmss_resource_id(vmss_resource_id):
+    if not vmss_resource_id:
+        return False
+
+    vmss_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                 r'virtualMachineScaleSets/.*$', re.IGNORECASE)
+    if vmss_id_pattern.match(vmss_resource_id):
         return True
 
     return False

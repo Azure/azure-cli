@@ -40,7 +40,7 @@ policy_help = """JSON encoded policy definition. Use the show command with JSON 
 target_server_type_help = """Specify the type of the server which should be discovered."""
 protectable_item_name_type_help = """Specify the resource name to be protected by Azure Backup service."""
 backup_type_help = """'Full, Differential, Log, CopyOnlyFull' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
-retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). For SQL workload, retain-until can only be specified for backup-type 'CopyOnlyFull'. For HANA workload, user can't specify the value for retain-until. If not specified, 30 days will be taken as default value or as decided by service."""
+retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). In case of VM and AzureFileShare a default value of 30 days is taken. For MSSQL workload, retain-until min value is 2 days and max value is 99 years for backup-type 'CopyOnlyFull'. For MSSQL and SAPHANA, retain-until min value is 45 days and max value is 99 years for backup-type 'Full'. For any other backup-type, retain-until value is overriden by Policy. If not specified, a default value of 30 days will be taken for backup-type 'CopyOnlyFull', and a value of 45 days for backup-type 'Full' and no default value for other backup types."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
@@ -97,6 +97,8 @@ def load_arguments(self, _):
 
     with self.argument_context('backup vault create') as c:
         c.argument('tags', arg_type=tags_type)
+        c.argument('classic_alerts', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether backup alerts from the classic solution should be received.')
+        c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')
@@ -104,6 +106,8 @@ def load_arguments(self, _):
         c.argument('cross_region_restore_flag', arg_type=get_enum_type(['True', 'False']), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
         c.argument('hybrid_backup_security_features', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this field to set the security features for hybrid backups in a Recovery Services Vault.')
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
+        c.argument('classic_alerts', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether backup alerts from the classic solution should be received.')
+        c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
 
     # Identity
     with self.argument_context('backup vault identity assign') as c:
@@ -216,6 +220,7 @@ def load_arguments(self, _):
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('policy_sub_type', arg_type=get_enum_type(['Standard', 'Enhanced']), help='Sub type of policies to be retrieved. To list standard backup policies, specify ‘Standard’ as the value of this parameter. To list enhanced backup policies for Azure VMs, specify ‘Enhanced’ as the value of this parameter.')
+        c.argument('move_to_archive_tier', arg_type=get_enum_type(['Enabled', 'Disabled', 'All']), help='Parameter that specifies whether to only list policies where archive tier move is enabled/disabled.')
 
     with self.argument_context('backup policy get-default-for-vm') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -362,6 +367,7 @@ def load_arguments(self, _):
         c.argument('target_vnet_resource_group', help='Name of the resource group which contains the target VNet, in the case of Alternate Location restore to a new VM.')
         c.argument('target_subnet_name', help='Name of the subnet in which the target VM should be created, in the case of Alternate Location restore a new VM')
         c.argument('target_subscription_id', help='ID of the subscription to which the resource should be restored')
+        c.argument('storage_account_resource_group', help='Name of the resource group which contains the storage account. Default value will be same as --resource-group if not specified.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

@@ -55,7 +55,8 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
-                           access_tier=None, https_only=None,
+                           access_tier=None, https_only=None, enable_sftp=None, enable_local_user=None,
+                           enable_files_aadkerb=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
@@ -118,11 +119,29 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.enable_https_traffic_only = https_only
     if enable_hierarchical_namespace is not None:
         params.is_hns_enabled = enable_hierarchical_namespace
+    if enable_sftp is not None:
+        params.is_sftp_enabled = enable_sftp
+    if enable_local_user is not None:
+        params.is_local_user_enabled = enable_local_user
 
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
+    if enable_files_aadkerb is not None:
+        if enable_files_aadkerb:
+            active_directory_properties = None
+            if domain_name or domain_guid:
+                ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+                active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                        domain_guid=domain_guid)
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADKERB',
+                active_directory_properties=active_directory_properties)
+        else:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
@@ -328,8 +347,9 @@ def get_storage_account_properties(cli_ctx, account_id):
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions, line-too-long
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_version=None,
-                           encryption_key_name=None, encryption_key_vault=None,
-                           access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
+                           encryption_key_name=None, encryption_key_vault=None, enable_files_aadkerb=None,
+                           access_tier=None, https_only=None, enable_sftp=None, enable_local_user=None,
+                           enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
@@ -411,6 +431,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-adds false\" "
                                "before enable AzureActiveDirectoryDomainServicesForFile.")
+            if origin_storage_account.azure_files_identity_based_authentication and \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryKerberosForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadkerb false\" "
+                               "before enable AzureActiveDirectoryDomainServicesForFile.")
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='AADDS' if enable_files_aadds else 'None')
         else:  # Only disable AADDS and keep others unchanged
@@ -424,6 +449,38 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 params.azure_files_identity_based_authentication = \
                     origin_storage_account.azure_files_identity_based_authentication
 
+    if enable_files_aadkerb is not None:
+        if enable_files_aadkerb:  # enable AADKERB
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options \
+                    == 'AADDS':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable AzureActiveDirectoryKerberosForFile.")
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AD':
+                raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-adds false\" "
+                               "before enable AzureActiveDirectoryKerberosForFile.")
+            active_directory_properties = None
+            if domain_name or domain_guid:
+                ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+                active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                        domain_guid=domain_guid)
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADKERB',
+                active_directory_properties=active_directory_properties)
+
+        else:  # disable AADKERB
+            # Only disable AADKERB and keep others unchanged
+            if not instance.azure_files_identity_based_authentication or \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                    directory_service_options='None')
+            else:
+                params.azure_files_identity_based_authentication = \
+                    instance.azure_files_identity_based_authentication
+
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
@@ -432,12 +489,16 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
-            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
-            if origin_storage_account.azure_files_identity_based_authentication and \
-                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options \
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options \
                     == 'AADDS':
                 raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable ActiveDirectoryDomainServicesForFile.")
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryKerberosForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadkerb false\" "
                                "before enable ActiveDirectoryDomainServicesForFile.")
             active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
                                                                     net_bios_domain_name=net_bios_domain_name,
@@ -458,18 +519,18 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
             # Only disable AD and keep others unchanged
-            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
-            if not origin_storage_account.azure_files_identity_based_authentication or \
-                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
+            if not instance.azure_files_identity_based_authentication or \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AD':
                 params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                     directory_service_options='None')
             else:
                 params.azure_files_identity_based_authentication = \
-                    origin_storage_account.azure_files_identity_based_authentication
+                    instance.azure_files_identity_based_authentication
     if default_share_permission is not None:
         if params.azure_files_identity_based_authentication is None:
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
-                directory_service_options='None')
+                directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
+                else instance.azure_files_identity_based_authentication
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
     if assign_identity:
@@ -538,6 +599,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if public_network_access is not None:
         params.public_network_access = public_network_access
+
+    if enable_sftp is not None:
+        params.is_sftp_enabled = enable_sftp
+    if enable_local_user is not None:
+        params.is_local_user_enabled = enable_local_user
 
     return params
 
@@ -962,3 +1028,41 @@ def update_blob_inventory_policy(cmd, client, resource_group_name, account_name,
     BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)
+
+
+def _generate_local_user(local_user, permission_scope=None, ssh_authorized_key=None,
+                         home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None):
+    if permission_scope is not None:
+        local_user.permission_scopes = permission_scope
+    if ssh_authorized_key is not None:
+        local_user.ssh_authorized_keys = ssh_authorized_key
+    if home_directory is not None:
+        local_user.home_directory = home_directory
+    if has_shared_key is not None:
+        local_user.has_shared_key = has_shared_key
+    if has_ssh_key is not None:
+        local_user.has_ssh_key = has_ssh_key
+    if has_ssh_password is not None:
+        local_user.has_ssh_password = has_ssh_password
+
+
+def create_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None, home_directory=None,
+                      has_shared_key=None, has_ssh_key=None, has_ssh_password=None, ssh_authorized_key=None, **kwargs):
+    LocalUser = cmd.get_models('LocalUser')
+    local_user = LocalUser()
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)
+
+
+def update_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None,
+                      home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None,
+                      ssh_authorized_key=None, **kwargs):
+    local_user = client.get(resource_group_name, account_name, username)
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)

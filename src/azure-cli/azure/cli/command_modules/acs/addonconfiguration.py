@@ -37,81 +37,98 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         "australiasoutheast": "ASE",
         "australiaeast": "EAU",
         "australiacentral": "CAU",
+        "australiacentral2": "CBR2",
+        "brazilsouth": "CQ",
+        "brazilsoutheast": "BRSE",
         "canadacentral": "CCA",
-        "centralindia": "CIN",
+        "canadaeast": "YQ",
+        "centralindia": "CID",
         "centralus": "CUS",
         "eastasia": "EA",
         "eastus": "EUS",
         "eastus2": "EUS2",
         "eastus2euap": "EAP",
         "francecentral": "PAR",
-        "japaneast": "EJP",
-        "koreacentral": "SE",
-        "northeurope": "NEU",
-        "southcentralus": "SCUS",
-        "southeastasia": "SEA",
-        "uksouth": "SUK",
-        "usgovvirginia": "USGV",
-        "westcentralus": "EUS",
-        "westeurope": "WEU",
-        "westus": "WUS",
-        "westus2": "WUS2",
-        "brazilsouth": "CQ",
-        "brazilsoutheast": "BRSE",
-        "norwayeast": "NOE",
-        "southafricanorth": "JNB",
-        "northcentralus": "NCUS",
-        "uaenorth": "DXB",
+        "francesouth": "MRS",
         "germanywestcentral": "DEWC",
-        "ukwest": "WUK",
+        "japaneast": "EJP",
+        "japanwest": "OS",
+        "jioindiacentral": "JINC",
+        "jioindiawest": "JINW",
+        "koreacentral": "SE",
+        "koreasouth": "PS",
+        "northcentralus": "NCUS",
+        "northeurope": "NEU",
+        "norwayeast": "NOE",
+        "norwaywest": "NOW",
+        "qatarcentral": "QAC",
+        "southafricanorth": "JNB",
+        "southcentralus": "SCUS",
+        "southindia": "MA",
+        "southeastasia": "SEA",
+        "swedencentral": "SEC",
         "switzerlandnorth": "CHN",
         "switzerlandwest": "CHW",
         "uaecentral": "AUH",
+        "uaenorth": "DXB",
+        "uksouth": "SUK",
+        "ukwest": "WUK",
+        "usgovvirginia": "USGV",
+        "westcentralus": "WCUS",
+        "westeurope": "WEU",
+        "westus": "WUS",
+        "westus2": "WUS2",
+        "westus3": "USW3",
     }
     AzureCloudRegionToOmsRegionMap = {
         "australiacentral": "australiacentral",
-        "australiacentral2": "australiacentral",
+        "australiacentral2": "australiacentral2",
         "australiaeast": "australiaeast",
         "australiasoutheast": "australiasoutheast",
         "brazilsouth": "brazilsouth",
+        "brazilsoutheast": "brazilsoutheast",
         "canadacentral": "canadacentral",
-        "canadaeast": "canadacentral",
+        "canadaeast": "canadaeast",
         "centralus": "centralus",
         "centralindia": "centralindia",
         "eastasia": "eastasia",
         "eastus": "eastus",
         "eastus2": "eastus2",
         "francecentral": "francecentral",
-        "francesouth": "francecentral",
+        "francesouth": "francesouth",
+        "germanywestcentral": "germanywestcentral",
+        "germanynorth": "germanywestcentral",
         "japaneast": "japaneast",
-        "japanwest": "japaneast",
+        "japanwest": "japanwest",
+        "jioindiacentral": "jioindiacentral",
+        "jioindiawest": "jioindiawest",
         "koreacentral": "koreacentral",
-        "koreasouth": "koreacentral",
+        "koreasouth": "koreasouth",
         "northcentralus": "northcentralus",
         "northeurope": "northeurope",
+        "norwayeast": "norwayeast",
+        "norwaywest": "norwaywest",
+        "qatarcentral": "qatarcentral",
         "southafricanorth": "southafricanorth",
         "southafricawest": "southafricanorth",
         "southcentralus": "southcentralus",
         "southeastasia": "southeastasia",
-        "southindia": "centralindia",
+        "southindia": "southindia",
+        "swedencentral": "swedencentral",
+        "switzerlandnorth": "switzerlandnorth",
+        "switzerlandwest": "switzerlandwest",
+        "uaecentral": "uaecentral",
+        "uaenorth": "uaenorth",
         "uksouth": "uksouth",
         "ukwest": "ukwest",
-        "westcentralus": "eastus",
+        "westcentralus": "westcentralus",
         "westeurope": "westeurope",
         "westindia": "centralindia",
         "westus": "westus",
         "westus2": "westus2",
-        "norwayeast": "norwayeast",
-        "norwaywest": "norwayeast",
-        "switzerlandnorth": "switzerlandnorth",
-        "switzerlandwest": "switzerlandwest",
-        "uaenorth": "uaenorth",
-        "germanywestcentral": "germanywestcentral",
-        "germanynorth": "germanywestcentral",
-        "uaecentral": "uaecentral",
+        "westus3": "westus3",
         "eastus2euap": "eastus2euap",
         "centraluseuap": "eastus2euap",
-        "brazilsoutheast": "brazilsoutheast",
     }
 
     # mapping for azure china cloud
@@ -298,7 +315,6 @@ def ensure_container_insights_for_monitoring(
     # extract subscription ID and resource group from workspace_resource_id URL
     try:
         subscription_id = workspace_resource_id.split("/")[2]
-        resource_group = workspace_resource_id.split("/")[4]
     except IndexError:
         raise AzCLIError(
             "Could not locate resource group in workspace-resource-id URL."
@@ -324,7 +340,7 @@ def ensure_container_insights_for_monitoring(
         )
         dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
         dcr_resource_id = (
-            f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
+            f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
         if create_dcr:
@@ -335,7 +351,7 @@ def ensure_container_insights_for_monitoring(
             for _ in range(3):
                 try:
                     location_list_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{subscription_id}/locations?api-version=2019-11-01"
+                        f"/subscriptions/{cluster_subscription}/locations?api-version=2019-11-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", location_list_url)
                     # this is required to fool the static analyzer. The else statement will only run if an exception
                     # is thrown, but flake8 will complain that e is undefined if we don't also define it here.
@@ -356,7 +372,7 @@ def ensure_container_insights_for_monitoring(
             for _ in range(3):
                 try:
                     feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
+                        f"/subscriptions/{cluster_subscription}/providers/Microsoft.Insights?api-version=2020-10-01"
                     r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
                     error = None
                     break

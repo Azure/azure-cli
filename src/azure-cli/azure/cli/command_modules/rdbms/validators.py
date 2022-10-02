@@ -14,6 +14,7 @@ from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
 from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
@@ -125,10 +126,12 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
+# pylint: disable=too-many-locals
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
                               subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
-                              geo_redundant_backup=None, instance=None):
+                              geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None,
+                              backup_byok_key=None, disable_data_encryption=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
@@ -138,6 +141,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
 
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
+    if geo_redundant_backup is None and instance is not None:
+        geo_redundant_backup = instance.backup.geo_redundant_backup
     _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
     if tier is None and instance is not None:
         tier = instance.sku.tier
@@ -148,6 +153,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                                        single_az, auto_grow, instance)
     _mysql_version_validator(version, sku_info, tier, instance)
     _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
+    _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
+                          disable_data_encryption, geo_redundant_backup, instance)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
@@ -215,7 +222,7 @@ def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, i
     if replication_role not in ('None', None) and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for replica server cannot be disabled.")
     # if ha, cannot be disabled
-    if high_availability in ['Enabled', 'ZoneRedundant'] and auto_grow.lower() == 'disabled':
+    if high_availability == 'ZoneRedundant' and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
 
 
@@ -241,6 +248,30 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
+
+
+def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
+                          disable_data_encryption, geo_redundant_backup, instance):
+    # identity and key should be provided as a pair
+    if bool(byok_identity is None) ^ bool(byok_key is None) or\
+       bool(backup_byok_identity is None) ^ bool(backup_byok_key is None):
+        raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
+                                 "Please provide --identity, --key (and --backup-identity, --backup-key "
+                                 "if applicable) together.")
+
+    if byok_identity is None and backup_byok_identity is not None:
+        raise ArgumentUsageError("Backup identity and key must be provided with principal identity and key.")
+
+    if disable_data_encryption and (byok_key or backup_byok_key):
+        raise ArgumentUsageError("Data encryption cannot be disabled if key or backup key is provided.")
+
+    if not disable_data_encryption and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
+       (byok_identity is not None and backup_byok_identity is None):
+        raise ArgumentUsageError("Backup identity and key need to be provided for geo-redundant server.")
+
+    if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
+        raise CLIError("Data encryption cannot be modified on a server with replication role. "
+                       "Use the primary server instead.")
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
@@ -304,18 +335,23 @@ def _pg_version_validator(version, sku_info, tier, instance):
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
     if instance:
         tier = instance.sku.tier if tier is None else tier
-    if high_availability is not None and high_availability.lower() == 'enabled':
+        zone = instance.availability_zone if zone is None else zone
+
+    if high_availability is not None and high_availability.lower() != 'disabled':
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az:
+        if single_az and high_availability.lower() == 'zoneredundant':
             raise ArgumentUsageError("This region is single availability zone. "
-                                     "High availability is not supported in a single availability zone region.")
+                                     "Zone redundant high availability is not supported "
+                                     "in a single availability zone region.")
 
     if standby_availability_zone:
-        if not high_availability:
-            raise ArgumentUsageError("You need to enable high availability to set standby availability zone.")
+        if not high_availability or high_availability.lower() != 'zoneredundant':
+            raise ArgumentUsageError("You need to enable zone redundant high availability "
+                                     "to set standby availability zone.")
         if zone == standby_availability_zone:
-            raise ArgumentUsageError("The zone of the server cannot be same as standby zone.")
+            raise ArgumentUsageError("Your server is in availability zone {}. "
+                                     "The zone of the server cannot be same as the standby zone.".format(zone))
 
 
 def _network_arg_validator(subnet, public_access):
@@ -428,11 +464,17 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
 
     if db_context.command_group == 'mysql':
-        result = client.execute(db_context.location,
-                                name_availability_request={
-                                    'name': server_name,
-                                    'location_name': db_context.location,
-                                    'type': type_})
+        try:
+            result = client.execute(db_context.location,
+                                    name_availability_request={
+                                        'name': server_name,
+                                        'type': type_})
+        except HttpResponseError as e:
+            if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+                client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
+                result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+            else:
+                raise e
     else:
         result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
@@ -520,3 +562,43 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
         raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
+
+
+def _validate_identity(cmd, namespace, identity):
+    if is_valid_resource_id(identity):
+        return identity
+
+    if _is_resource_name(identity):
+        return resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.ManagedIdentity',
+            type='userAssignedIdentities',
+            name=identity)
+
+    raise ValidationError('Invalid identity name or ID.')
+
+
+def validate_identity(cmd, namespace):
+    if namespace.identity:
+        namespace.identity = _validate_identity(cmd, namespace, namespace.identity)
+
+
+def validate_byok_identity(cmd, namespace):
+    if namespace.byok_identity:
+        namespace.byok_identity = _validate_identity(cmd, namespace, namespace.byok_identity)
+
+    if namespace.backup_byok_identity:
+        namespace.backup_byok_identity = _validate_identity(cmd, namespace, namespace.backup_byok_identity)
+
+
+def validate_identities(cmd, namespace):
+    if namespace.identities:
+        namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def high_availability_validator(namespace):
+    if namespace.high_availability and namespace.high_availability == 'Enabled':
+        logger.warning("'Enabled' value for high availability parameter will be deprecated by April 2023. "
+                       "Please use 'ZoneRedundant' or 'SameZone' instead.")
+        namespace.high_availability = 'ZoneRedundant'

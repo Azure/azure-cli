@@ -327,6 +327,8 @@ examples:
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db-names db1 db2
   - name: Allow the migration workflow to overwrite the DB on the target.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
+  - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
   - name: This command helps in starting the data migration immediately between the source and target. Any migration scheduled for a future date and time will be cancelled.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-data-migration
 """
@@ -398,16 +400,16 @@ examples:
 
 helps['postgres flexible-server deploy'] = """
 type: group
-short-summary: Enable and run github action workflow for PostgreSQL server
+short-summary: Enable and run GitHub Actions workflow for PostgreSQL server
 """
 
 helps['postgres flexible-server deploy setup'] = """
 type: command
-short-summary: Create github action workflow file for PostgreSQL server.
+short-summary: Create GitHub Actions workflow file for PostgreSQL server.
 examples:
-  - name: Create github action workflow file for PostgreSQL server.
+  - name: Create GitHub Actions workflow file for PostgreSQL server.
     text: az postgres flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction
-  - name: Create github action workflow file for PostgreSQL server and push it to the remote repository
+  - name: Create GitHub Actions workflow file for PostgreSQL server and push it to the remote repository
     text: az postgres flexible-server deploy setup -s testserver -g testGroup -u username -p password --sql-file test.sql --repo username/userRepo -d flexibleserverdb --action-name testAction --branch userBranch --allow-push
 """
 
@@ -417,4 +419,25 @@ short-summary: Run an existing workflow in your github repository
 examples:
   - name: Run an existing workflow in your github repository
     text: az postgres flexible-server deploy run --action-name testAction --branch userBranch
+"""
+
+helps['postgres flexible-server backup'] = """
+type: group
+short-summary: Manage flexible server backups.
+"""
+
+helps['postgres flexible-server backup list'] = """
+type: command
+short-summary: List all the backups for a given server.
+examples:
+  - name: List all backups for 'testsvr'.
+    text: az postgres flexible-server backup list -g testgroup -n testsvr
+"""
+
+helps['postgres flexible-server backup show'] = """
+type: command
+short-summary: Show the details of a specific backup for a given server.
+examples:
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
 """

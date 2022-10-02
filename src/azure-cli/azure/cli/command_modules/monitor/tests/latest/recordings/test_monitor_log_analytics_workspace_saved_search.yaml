@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001","name":"cli_test_monitor_workspace_saved_search000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-13T07:11:48Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001","name":"cli_test_monitor_workspace_saved_search000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-22T12:59:32Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:11:50 GMT
+      - Thu, 22 Sep 2022 12:59:42 GMT
       expires:
       - '-1'
       pragma:
@@ -42,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"tags": {"clitest": "myron"}, "location": "eastus", "properties": {"sku":
-      {"name": "PerGB2018"}, "retentionInDays": 30, "workspaceCapping": {}}}'
+    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"name":
+      "PerGB2018"}}, "tags": {"clitest": "myron"}}'
     headers:
       Accept:
       - application/json
@@ -54,33 +54,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '145'
+      - '121'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2021-12-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"6abc0c78-ff99-49b8-8ffa-19cadadd5672\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \"88a35794-cda6-4135-810a-a0a9576d4c6b\",\r\n    \"provisioningState\": \"Creating\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Mon, 13 Dec 2021 07:11:58 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Thu, 22 Sep 2022 12:59:47 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Mon, 13 Dec 2021 12:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Fri, 23 Sep 2022 11:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 07:11:58 GMT\",\r\n
-        \   \"modifiedDate\": \"Mon, 13 Dec 2021 07:11:58 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 22 Sep 2022 12:59:47 GMT\",\r\n
+        \   \"modifiedDate\": \"Thu, 22 Sep 2022 12:59:47 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
         \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
         \ }\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       content-length:
@@ -88,18 +90,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Dec 2021 07:12:53 GMT
+      - Thu, 22 Sep 2022 12:59:49 GMT
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -120,27 +123,29 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2021-12-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"6abc0c78-ff99-49b8-8ffa-19cadadd5672\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"88a35794-cda6-4135-810a-a0a9576d4c6b\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Mon, 13 Dec 2021 07:11:58 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Thu, 22 Sep 2022 12:59:47 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Mon, 13 Dec 2021 12:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Fri, 23 Sep 2022 11:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 07:11:58 GMT\",\r\n
-        \   \"modifiedDate\": \"Mon, 13 Dec 2021 07:12:52 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 22 Sep 2022 12:59:47 GMT\",\r\n
+        \   \"modifiedDate\": \"Thu, 22 Sep 2022 12:59:49 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
         \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
         \ }\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       content-length:
@@ -148,18 +153,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Dec 2021 07:13:23 GMT
+      - Thu, 22 Sep 2022 13:00:19 GMT
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
       x-powered-by:
@@ -169,9 +175,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"category": "cli", "displayName": "myclitest", "query":
-      "Heartbeat | getschema", "functionAlias": "myfun", "functionParameters": "a:string
-      = value", "tags": [{"name": "a", "value": "b"}, {"name": "c", "value": "d"}]}}'
+    body: '{"properties": {"category": "cli", "displayName": "myclitest", "functionAlias":
+      "myfun", "functionParameters": "a:string = value", "query": "Heartbeat | getschema",
+      "tags": [{"name": "a", "value": "b"}, {"name": "c", "value": "d"}]}}'
     headers:
       Accept:
       - application/json
@@ -188,12 +194,12 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --category --display-name -q --fa --fp --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2021-12-13T07%3A13%3A25.9419576Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2022-09-22T13%3A00%3A25.1069246Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
         | getschema","tags":[{"name":"a","value":"b"},{"name":"c","value":"d"}],"functionAlias":"myfun","functionParameters":"a:string
         = value","version":2}}'
     headers:
@@ -204,7 +210,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:13:26 GMT
+      - Thu, 22 Sep 2022 13:00:24 GMT
       expires:
       - '-1'
       pragma:
@@ -220,7 +226,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -240,12 +246,12 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2021-12-13T07%3A13%3A25.9419576Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2022-09-22T13%3A00%3A25.1069246Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
         | getschema","tags":[{"name":"a","value":"b"},{"name":"c","value":"d"}],"functionAlias":"myfun","functionParameters":"a:string
         = value","version":2}}'
     headers:
@@ -256,7 +262,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:13:26 GMT
+      - Thu, 22 Sep 2022 13:00:28 GMT
       expires:
       - '-1'
       pragma:
@@ -290,12 +296,12 @@ interactions:
       ParameterSetName:
       - -g --workspace-name
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches?api-version=2020-08-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2021-12-13T07%3A13%3A25.9419576Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2022-09-22T13%3A00%3A25.1069246Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
         | getschema","tags":[{"name":"a","value":"b"},{"name":"c","value":"d"}],"functionAlias":"myfun","functionParameters":"a:string
         = value","version":2},"name":"clitest","type":"Microsoft.OperationalInsights/savedSearches"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/LogManagement(clitest000002)_LogManagement|AllEvents","properties":{"displayName":"All
         Events","category":"Log Management","query":"Event | sort by TimeGenerated
@@ -503,7 +509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:13:29 GMT
+      - Thu, 22 Sep 2022 13:00:31 GMT
       expires:
       - '-1'
       pragma:
@@ -537,12 +543,12 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --category --display-name -q --fa --fp --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2021-12-13T07%3A13%3A25.9419576Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2022-09-22T13%3A00%3A25.1069246Z''\"","properties":{"category":"cli","displayName":"myclitest","query":"Heartbeat
         | getschema","tags":[{"name":"a","value":"b"},{"name":"c","value":"d"}],"functionAlias":"myfun","functionParameters":"a:string
         = value","version":2}}'
     headers:
@@ -553,7 +559,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:13:29 GMT
+      - Thu, 22 Sep 2022 13:00:33 GMT
       expires:
       - '-1'
       pragma:
@@ -574,11 +580,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "W/\"datetime''2021-12-13T07%3A13%3A25.9419576Z''\"", "properties":
-      {"category": "cli2", "displayName": "myclitest2", "query": "AzureActivity |
-      summarize count() by bin(TimeGenerated, 1h)", "functionAlias": "myfun2", "functionParameters":
-      "a2:string = value", "version": 2, "tags": [{"name": "a", "value": "c"}, {"name":
-      "f", "value": "e"}]}}'
+    body: '{"etag": "W/\"datetime''2022-09-22T13%3A00%3A25.1069246Z''\"", "properties":
+      {"category": "cli2", "displayName": "myclitest2", "functionAlias": "myfun2",
+      "functionParameters": "a2:string = value", "query": "AzureActivity | summarize
+      count() by bin(TimeGenerated, 1h)", "tags": [{"name": "a", "value": "c"}, {"name":
+      "f", "value": "e"}], "version": 2}}'
     headers:
       Accept:
       - application/json
@@ -595,12 +601,12 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --category --display-name -q --fa --fp --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2021-12-13T07%3A13%3A31.9153394Z''\"","properties":{"category":"cli2","displayName":"myclitest2","query":"AzureActivity
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest","etag":"W/\"datetime''2022-09-22T13%3A00%3A36.0399904Z''\"","properties":{"category":"cli2","displayName":"myclitest2","query":"AzureActivity
         | summarize count() by bin(TimeGenerated, 1h)","tags":[{"name":"a","value":"c"},{"name":"f","value":"e"}],"functionAlias":"myfun2","functionParameters":"a2:string
         = value","version":2}}'
     headers:
@@ -611,7 +617,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:13:31 GMT
+      - Thu, 22 Sep 2022 13:00:35 GMT
       expires:
       - '-1'
       pragma:
@@ -627,7 +633,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -649,7 +655,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n -y
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest?api-version=2020-08-01
   response:
@@ -661,7 +667,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 13 Dec 2021 07:13:34 GMT
+      - Thu, 22 Sep 2022 13:00:37 GMT
       expires:
       - '-1'
       pragma:
@@ -673,55 +679,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14999'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor log-analytics workspace saved-search show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --workspace-name -n
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_saved_search000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/savedSearches/clitest?api-version=2020-08-01
-  response:
-    body:
-      string: '{"error":{"code":"SavedSearchNotFound","message":"Saved search ''clitest''
-        could not be found."}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '95'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Dec 2021 07:13:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 404
-      message: Not Found
 version: 1

@@ -17,7 +17,6 @@ set PYTHON_VERSION=3.10.5
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
-set PROPAGATE_ENV_CHANGE_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/propagate_env_change.zip"
 
 REM https://pip.pypa.io/en/stable/installation/#get-pip-py
 set GET_PIP_DOWNLOAD_URL="https://bootstrap.pypa.io/get-pip.py"
@@ -34,7 +33,6 @@ set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
-set PROPAGATE_ENV_CHANGE_DIR=%~dp0..\propagate_env_change
 
 set REPO_ROOT=%~dp0..\..\..
 
@@ -130,6 +128,7 @@ popd
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
 copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
+copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
 copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
@@ -182,20 +181,6 @@ for /d %%d in ("azure*.dist-info") do (
 popd
 
 if %errorlevel% neq 0 goto ERROR
-
-REM ensure propagate_env_change.exe is available
-if exist "%PROPAGATE_ENV_CHANGE_DIR%\propagate_env_change.exe" (
-    echo Using existing propagate_env_change.exe at %PROPAGATE_ENV_CHANGE_DIR%
-) else (
-    pushd %PROPAGATE_ENV_CHANGE_DIR%
-    echo Downloading propagate_env_change.exe.
-    curl --output propagate_env_change.zip %PROPAGATE_ENV_CHANGE_DOWNLOAD_URL%
-    unzip propagate_env_change.zip
-    if %errorlevel% neq 0 goto ERROR
-    del propagate_env_change.zip
-    echo propagate_env_change.exe downloaded and extracted successfully.
-    popd
-)
 
 echo Building MSI...
 msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj

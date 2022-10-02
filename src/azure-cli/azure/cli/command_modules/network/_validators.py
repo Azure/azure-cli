@@ -1044,17 +1044,6 @@ def process_cross_region_lb_frontend_ip_namespace(cmd, namespace):
     get_public_ip_validator()(cmd, namespace)
 
 
-def process_local_gateway_create_namespace(cmd, namespace):
-    ns = namespace
-    get_default_location_from_resource_group(cmd, ns)
-    validate_tags(ns)
-
-    use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
-        raise ValueError(
-            'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
-
-
 def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
@@ -1084,74 +1073,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' when sku is Standard and zone is not provided:'
                        ' For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"];'
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
-
-
-def process_route_table_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-
-def process_tm_endpoint_create_namespace(cmd, namespace):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = client.get(namespace.resource_group_name, namespace.profile_name)
-
-    routing_type = profile.traffic_routing_method  # pylint: disable=no-member
-    endpoint_type = namespace.endpoint_type
-    all_options = ['target_resource_id', 'target', 'min_child_endpoints',
-                   'min_child_ipv4', 'min_child_ipv6', 'priority', 'weight', 'endpoint_location']
-    props_to_options = {
-        'target_resource_id': '--target-resource-id',
-        'target': '--target',
-        'min_child_endpoints': '--min-child-endpoints',
-        'min_child_ipv4': '--min-child-ipv4',
-        'min_child_ipv6': '--min-child-ipv6',
-        'priority': '--priority',
-        'weight': '--weight',
-        'endpoint_location': '--endpoint-location',
-        'geo_mapping': '--geo-mapping'
-    }
-    validate_subnet_ranges(namespace)
-    validate_custom_headers(namespace)
-
-    required_options = []
-
-    # determine which options are required based on profile and routing method
-    if endpoint_type.lower() == 'externalendpoints':
-        required_options.append('target')
-    else:
-        required_options.append('target_resource_id')
-
-    if routing_type.lower() == 'weighted':
-        required_options.append('weight')
-    elif routing_type.lower() == 'priority':
-        required_options.append('priority')
-
-    if endpoint_type.lower() == 'nestedendpoints':
-        required_options.append('min_child_endpoints')
-
-    if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and routing_type.lower() == 'performance':
-        required_options.append('endpoint_location')
-
-    if routing_type.lower() == 'geographic':
-        required_options.append('geo_mapping')
-
-    # ensure required options are provided
-    missing_options = [props_to_options[x] for x in required_options if getattr(namespace, x, None) is None]
-    extra_options = [props_to_options[x] for x in all_options if
-                     getattr(namespace, x, None) is not None and x not in required_options]
-
-    if missing_options or extra_options:
-        error_message = "Incorrect options for profile routing method '{}' and endpoint type '{}'.".format(routing_type,
-                                                                                                           endpoint_type)  # pylint: disable=line-too-long
-        if missing_options:
-            error_message = '{}\nSupply the following: {}'.format(error_message, ', '.join(
-                missing_options))
-        if extra_options:
-            error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(
-                extra_options))
-        raise CLIError(error_message)
 
 
 def process_vnet_create_namespace(cmd, namespace):
@@ -1278,6 +1199,13 @@ def load_cert_file(param_name):
     return load_cert_validator
 
 
+def get_network_watcher_for_pcap_creation(cmd, namespace):
+    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
+        get_network_watcher_from_vmss(cmd, namespace)
+    else:
+        get_network_watcher_from_vm(cmd, namespace)
+
+
 def get_network_watcher_from_vm(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 
@@ -1285,6 +1213,16 @@ def get_network_watcher_from_vm(cmd, namespace):
     vm_name = parse_resource_id(namespace.vm)['name']
     vm = compute_client.get(namespace.resource_group_name, vm_name)
     namespace.location = vm.location  # pylint: disable=no-member
+    get_network_watcher_from_location()(cmd, namespace)
+
+
+def get_network_watcher_from_vmss(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
+    vmss_name = parse_resource_id(namespace.target)['name']
+    vmss = compute_client.get(namespace.resource_group_name, vmss_name)
+    namespace.location = vmss.location  # pylint: disable=no-member
     get_network_watcher_from_location()(cmd, namespace)
 
 
@@ -1347,6 +1285,7 @@ def process_nw_cm_v1_create_namespace(cmd, namespace):
 
 
 def process_nw_cm_v2_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     if namespace.location is None:  # location is None only occurs in creating a V2 connection monitor
         endpoint_source_resource_id = namespace.endpoint_source_resource_id
 
@@ -1389,15 +1328,6 @@ def process_nw_cm_v2_create_namespace(cmd, namespace):
             raise CLIError('usage error: --output-type is specified but no other resource id provided')
 
     return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_create_namespace(cmd, namespace):
-    # V2 parameter set
-    if namespace.source_resource is None:
-        return process_nw_cm_v2_create_namespace(cmd, namespace)
-
-    # V1 parameter set
-    return process_nw_cm_v1_create_namespace(cmd, namespace)
 
 
 def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
@@ -1522,6 +1452,30 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
         namespace.headers = headers
 
 
+def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if vnet and not is_valid_resource_id(vnet):
+        vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet)
+    return vnet
+
+
+def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
+    from azure.cli.core.azclierror import UnrecognizedArgumentError
+    from msrestazure.tools import is_valid_resource_id
+    if subnet and not is_valid_resource_id(subnet):
+        vnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name)
+        if vnet is None:
+            raise UnrecognizedArgumentError('vnet should be provided when input subnet name instead of subnet id')
+
+        subnet = vnet + f'/subnets/{subnet}'
+    return subnet
+
+
 def process_nw_flow_log_create_namespace(cmd, namespace):
     """
     Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
@@ -1541,10 +1495,41 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
         if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
             err_body = '--workspace ID / --workspace NAME --resource-group WORKSPACE_RESOURCE_GROUP'
 
+        if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+            err_body = '--vnet ID / --vnet NAME --resource-group VNET_RESOURCE_GROUP'
+
+        if namespace.subnet and not is_valid_resource_id(namespace.subnet):
+            err_body = '--subnet ID / --subnet NAME --resource-group SUBNET_RESOURCE_GROUP'
+
+        if namespace.nic and not is_valid_resource_id(namespace.nic):
+            err_body = '--nic ID / --nic NAME --resource-group NIC_RESOURCE_GROUP'
+
         if err_body is not None:
             raise CLIError(err_tpl.format(err_body))
 
     # for both create and update
+    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Network',
+            'type': 'virtualNetworks',
+            'name': namespace.vnet
+        }
+        namespace.vnet = resource_id(**kwargs)
+    if namespace.subnet and not is_valid_resource_id(namespace.subnet):
+        namespace.subnet = _process_subnet_name_and_id(
+            namespace.subnet, namespace.vnet,
+            cmd, namespace.resource_group_name)
+    if namespace.nic and not is_valid_resource_id(namespace.nic):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Network',
+            'type': 'networkInterfaces',
+            'name': namespace.nic
+        }
+        namespace.nic = resource_id(**kwargs)
     if namespace.nsg and not is_valid_resource_id(namespace.nsg):
         kwargs = {
             'subscription': get_subscription_id(cmd.cli_ctx),
@@ -1699,7 +1684,6 @@ def process_nw_topology_namespace(cmd, namespace):
 
 def process_nw_packet_capture_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
-    get_network_watcher_from_vm(cmd, namespace)
 
     storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path '
                              'PATH] [--file-path PATH] | --file-path PATH')
@@ -1709,13 +1693,24 @@ def process_nw_packet_capture_create_namespace(cmd, namespace):
     if namespace.storage_path and not namespace.storage_account:
         raise storage_usage
 
-    if not is_valid_resource_id(namespace.vm):
-        namespace.vm = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Compute',
-            type='virtualMachines',
-            name=namespace.vm)
+    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
+        get_network_watcher_from_vmss(cmd, namespace)
+        if not is_valid_resource_id(namespace.target):
+            namespace.target = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='virtualMachineScaleSets',
+                name=namespace.target)
+    else:
+        get_network_watcher_from_vm(cmd, namespace)
+        if not is_valid_resource_id(namespace.vm):
+            namespace.vm = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='virtualMachines',
+                name=namespace.vm)
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
@@ -1833,14 +1828,6 @@ def process_lb_outbound_rule_namespace(cmd, namespace):
                 cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
 
 
-def process_list_delegations_namespace(cmd, namespace):
-    if not namespace.resource_group_name and not namespace.location:
-        raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
-
-    if not namespace.location:
-        get_default_location_from_resource_group(cmd, namespace)
-
-
 def validate_ag_address_pools(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     address_pools = namespace.app_gateway_backend_address_pools
@@ -1947,7 +1934,7 @@ def validate_subnet_ranges(namespace):
         try:
             item_split = item.split(':', 1)
             if len(item_split) == 2:
-                values.append({'first': item_split[0], 'scope': item_split[1]})
+                values.append({'first': item_split[0], 'scope': int(item_split[1])})
                 continue
         except ValueError:
             pass

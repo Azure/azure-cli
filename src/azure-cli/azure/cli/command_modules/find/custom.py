@@ -15,7 +15,6 @@ import colorama  # pylint: disable=import-error
 
 from azure.cli.core import telemetry as telemetry_core
 from azure.cli.core import __version__ as core_version
-from azure.cli.core.commands.constants import SURVEY_PROMPT
 from packaging.version import parse
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -59,8 +58,7 @@ def process_query(cli_term):
                     print(style_message("More commands and examples are available in the latest version of the CLI. "
                                         "Please update for the best experience.\n"))
     from azure.cli.core.util import show_updates_available
-    show_updates_available(new_line_after=True)
-    print(SURVEY_PROMPT)
+    show_updates_available()
 
 
 def get_generated_examples(cli_term):

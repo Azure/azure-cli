@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=unused-argument
 from binascii import hexlify
 from os import urandom
 
@@ -26,7 +26,12 @@ from azure.cli.command_modules.appservice.custom import (
     update_container_settings_functionapp,
     try_create_application_insights,
     _set_remote_or_local_git, show_app,
-    create_app_service_plan)
+    create_app_service_plan,
+    get_site_configs,
+    _generic_site_operation,
+    update_app_settings,
+    delete_app_settings,
+    get_app_settings)
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
@@ -43,7 +48,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
                     app_insights=None, app_insights_key=None, disable_app_insights=None,
                     deployment_source_url=None, deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
-                    deployment_container_image_name=None, tags=None):
+                    deployment_container_image_name=None, tags=None, https_only=False):
     # pylint: disable=too-many-statements, too-many-branches, too-many-locals
     functions_version = DEFAULT_LOGICAPP_FUNCTION_VERSION
     runtime = None
@@ -65,7 +70,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
-    logicapp_def = Site(location=None, site_config=site_config, tags=tags)
+    logicapp_def = Site(location=None, site_config=site_config, tags=tags, https_only=https_only)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
     if runtime is not None:
@@ -244,3 +249,42 @@ def _get_java_version_functionapp(functions_version, runtime_version):
 
 def show_logicapp(cmd, resource_group_name, name):
     return show_app(cmd, resource_group_name=resource_group_name, name=name)
+
+
+def scale_logicapp(cmd, resource_group_name, name, minimum_instance_count=None, maximum_instance_count=None, slot=None):
+    return update_logicapp_scale(cmd=cmd,
+                                 resource_group_name=resource_group_name,
+                                 name=name,
+                                 slot=slot,
+                                 function_app_scale_limit=maximum_instance_count,
+                                 minimum_elastic_instance_count=minimum_instance_count)
+
+
+def update_logicapp_scale(cmd, resource_group_name, name, slot=None,
+                          function_app_scale_limit=None,
+                          minimum_elastic_instance_count=None):
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
+    import inspect
+    frame = inspect.currentframe()
+
+    # note: getargvalues is used already in azure.cli.core.commands.
+    # and no simple functional replacement for this deprecating method for 3.5
+    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+
+    for arg in args[3:]:
+        if values.get(arg, None):
+            setattr(configs, arg, values[arg])
+
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+
+def get_logicapp_app_settings(cmd, resource_group_name, name, slot=None):
+    return get_app_settings(cmd, resource_group_name, name, slot)
+
+
+def update_logicapp_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+    return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
+
+
+def delete_logicapp_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
+    return delete_app_settings(cmd, resource_group_name, name, setting_names, slot)

@@ -32,6 +32,8 @@ CONST_DEFAULT_NODE_OS_TYPE = "Linux"
 # os sku
 CONST_OS_SKU_UBUNTU = "Ubuntu"
 CONST_OS_SKU_CBLMARINER = "CBLMariner"
+CONST_OS_SKU_WINDOWS2019 = "Windows2019"
+CONST_OS_SKU_WINDOWS2022 = "Windows2022"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
@@ -40,6 +42,13 @@ CONST_AVAILABILITY_SET = "AvailabilitySet"
 # vm size
 CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
 CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
+
+# gpu instance
+CONST_GPU_INSTANCE_PROFILE_MIG1_G = "MIG1g"
+CONST_GPU_INSTANCE_PROFILE_MIG2_G = "MIG2g"
+CONST_GPU_INSTANCE_PROFILE_MIG3_G = "MIG3g"
+CONST_GPU_INSTANCE_PROFILE_MIG4_G = "MIG4g"
+CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 
 # consts for ManagedCluster
 # load balancer sku
@@ -73,6 +82,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
+CONST_NETWORK_PLUGIN_NONE = "none"
 
 # consts for addons
 # http application routing
@@ -113,6 +123,10 @@ CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = "azureKeyvaultSecretsProvider
 CONST_SECRET_ROTATION_ENABLED = "enableSecretRotation"
 CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 
+# azure keyvault kms
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -128,7 +142,6 @@ ADDONS = {
 
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
-CONST_ACR_DOMAIN_NAME = ".azurecr.io"
 
 
 # consts for decorator pattern

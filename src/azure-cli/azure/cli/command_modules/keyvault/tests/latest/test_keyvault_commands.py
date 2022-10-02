@@ -53,11 +53,8 @@ SD_NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(SD_NEXT_ACTIVE
 
 def _create_keyvault(test, kwargs, additional_args=None):
     # need premium KeyVault to store keys in HSM
-    # if --enable-soft-delete is not specified, turn that off to prevent the tests from leaving waste behind
     if additional_args is None:
         additional_args = ''
-    if '--enable-soft-delete' not in additional_args:
-        additional_args += ' --enable-soft-delete false'
     kwargs['add'] = additional_args
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium --retention-days 7 {add}')
 
@@ -282,12 +279,11 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
-
-    def test_keyvault_hsm_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitest-mhsm-rg', location='uksouth')
+    def test_keyvault_hsm_mgmt(self, resource_group):
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
-            'rg': 'clitest-mhsm-rg',
-            'loc': 'eastus2',
+            'loc': 'uksouth',
             'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
         })
 
@@ -317,6 +313,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('[0].sku.name', 'Standard_B1'),
             self.check('length([0].properties.initialAdminObjectIds)', 1),
             self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
+            self.check('[0].properties.networkAcls.bypass', 'None'),
             self.exists('[0].properties.hsmUri')
         ]
 
@@ -325,15 +322,25 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[?name==\'{hsm_name}\'&&properties.location==\'{loc}\'&&properties.deletionDate]'),
         ]
 
-        self.cmd('group create -g {rg} -l {loc}'),
-        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin}')
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7')
+
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = self.create_temp_dir()
+
+        self.kwargs.update({
+            'cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'clitest-mhsm-SD.json').replace('\\', '\\\\')
+        })
+
+        self.cmd('keyvault security-domain download --hsm-name {hsm_name} --sd-wrapping-keys {cert0} {cert1} {cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
 
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None', checks=[
-            self.check('properties.networkAcls.bypass', 'None')
-        ])
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None')
 
         self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
@@ -349,7 +356,6 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
-        self.cmd('group delete -n {rg} --yes')
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
@@ -400,7 +406,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
+        self.cmd('keyvault update -g {rg} -n {kv} '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
@@ -469,9 +475,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault delete -n {kv2}')
         self.cmd('keyvault purge -n {kv2}')
 
-        # test explicitly set '--enable-soft-delete true --enable-purge-protection true'
+        # test explicitly set '--enable-purge-protection true'
         # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-purge-protection true --retention-days 7',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
@@ -482,7 +488,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
             'loc': 'eastus'
         })
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
+        _create_keyvault(self, self.kwargs)
         _create_hsm(self)
 
         # delete resources

@@ -10,7 +10,6 @@ from collections import OrderedDict
 import codecs
 import json
 import os
-import platform
 import re
 import ssl
 import sys
@@ -769,13 +768,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
-                                                  deployment_name=None, mode=DeploymentMode.incremental,
+                                                  deployment_name=None, mode=None,
                                                   aux_tenants=None, result_format=None,
                                                   no_pretty_print=None, no_prompt=False,
                                                   exclude_change_types=None, template_spec=None, query_string=None):
     return _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name,
                                                                template_file, template_uri, parameters,
-                                                               deployment_name, DeploymentMode.incremental,
+                                                               deployment_name, mode,
                                                                aux_tenants, result_format,
                                                                no_pretty_print, no_prompt,
                                                                exclude_change_types, template_spec, query_string)
@@ -909,24 +908,7 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
     if no_pretty_print:
         return what_if_result
 
-    try:
-        if cli_ctx.enable_color:
-            # Disabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-            # is using. Unfortunately, the colors that colorama supports are very limited, which doesn't meet our needs.
-            from colorama import deinit
-            deinit()
-
-            # Enable virtual terminal mode for Windows console so it processes color codes.
-            if platform.system() == "Windows":
-                from ._win_vt import enable_vt_mode
-                enable_vt_mode()
-
-        print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
-    finally:
-        if cli_ctx.enable_color:
-            from colorama import init
-            init()
-
+    print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
     return what_if_result
 
 
