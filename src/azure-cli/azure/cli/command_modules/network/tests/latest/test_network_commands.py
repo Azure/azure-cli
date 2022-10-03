@@ -2730,11 +2730,11 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
     def test_network_zoned_public_ip(self, resource_group):
         self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku Standard',
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2',
                  checks=self.check('publicIp.zones[0]', '2'))
-        ip_address = self.cmd('network public-ip show -g {rg} -n {ip}').get_output_in_json()['ipAddress']
+
         table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
-        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', ip_address, 'IPv4', 'Static', '4', 'Succeeded'])
+        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
 
 
 class NetworkRouteFilterScenarioTest(ScenarioTest):
@@ -5248,7 +5248,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku standard --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
@@ -5259,7 +5259,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Basic'),
+            self.check('sku.name', 'Standard'),
             self.check('vpnType', 'RouteBased'),
             self.check('vpnGatewayGeneration', 'Generation1'),
             self.check('enableBgp', False),
