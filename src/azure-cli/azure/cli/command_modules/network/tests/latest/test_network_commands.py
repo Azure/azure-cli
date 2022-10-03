@@ -5248,7 +5248,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku standard --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
@@ -5259,7 +5259,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Standard'),
+            self.check('sku.name', 'Basic'),
             self.check('vpnType', 'RouteBased'),
             self.check('vpnGatewayGeneration', 'Generation1'),
             self.check('enableBgp', False),
