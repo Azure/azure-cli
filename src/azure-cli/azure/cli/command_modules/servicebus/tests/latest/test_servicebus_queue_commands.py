@@ -328,10 +328,10 @@ class SBQueueScenarioTest(ScenarioTest):
         self.assertNotEqual(currentKeys['primaryKey'], regenerateprimarykeyresult['primaryKey'])
         self.assertEqual(currentKeys['secondaryKey'], regenerateprimarykeyresult['secondaryKey'])
 
-        currentKeys = regenrateprimarykeyresult
+        currentKeys = regenerateprimarykeyresult
 
         # Regeneratekeys - Secondary
-        regenratesecondarykeyresult = self.cmd(
+        regeneratesecondarykeyresult = self.cmd(
             'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key {secondary}').get_output_in_json()
         self.assertIsNotNone(regeneratesecondarykeyresult)
         self.assertEqual(currentKeys['primaryKey'], regeneratesecondarykeyresult['primaryKey'])
@@ -354,9 +354,23 @@ class SBQueueScenarioTest(ScenarioTest):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-namespace-cli', length=25),
             'queuename': self.create_random_name(prefix='sb-queue-cli', length=25),
+            'topicname': self.create_random_name(prefix='sb-topic-cli', length=25)
         })
 
-        self.cmd('servicebus --resource-group {rg} --sku Premium --location eastus ')
+        self.cmd('servicebus namespace create --resource-group {rg} --name {namespacename} --sku Premium --location eastus')
+
+        queue = self.cmd('servicebus queue create --resource-group {rg} --namespace-name {namespacename} --name {queuename} --max-message-size-in-kilobytes 102400').get_output_in_json()
+        self.assertEqual(queue['maxMessageSizeInKilobytes'], 102400)
+        queue = self.cmd('servicebus queue update --resource-group {rg} --namespace-name {namespacename} --name {queuename} --max-message-size-in-kilobytes 81900').get_output_in_json()
+        self.assertEqual(queue['maxMessageSizeInKilobytes'], 81900)
+
+        topic = self.cmd('servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname} --max-message-size 81900').get_output_in_json()
+        self.assertEqual(topic['maxMessageSizeInKilobytes'], 81900)
+        topic = self.cmd('servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --max-message-size 102400').get_output_in_json()
+        self.assertEqual(topic['maxMessageSizeInKilobytes'], 102400)
+
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
+
 
     def assertOnUpdate(self, actual, expected):
 

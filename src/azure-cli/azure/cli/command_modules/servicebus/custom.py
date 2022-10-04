@@ -142,7 +142,7 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None,
-                       max_message_size=None):
+                       max_message_size_in_kilobytes=None):
 
     SBQueue = cmd.get_models('SBQueue', resource_type=ResourceType.MGMT_SERVICEBUS)
 
@@ -161,7 +161,7 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
         forward_to=forward_to,
         forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
         enable_batched_operations=enable_batched_operations,
-        max_message_size_in_kilobytes=max_message_size
+        max_message_size_in_kilobytes=max_message_size_in_kilobytes
     )
 
     if lock_duration:
@@ -189,7 +189,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None,
-                       max_message_size=None):
+                       max_message_size_in_kilobytes=None):
 
     from datetime import timedelta
     from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
@@ -317,7 +317,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
-                       enable_partitioning=None, enable_express=None, max_message_size=None):
+                       enable_partitioning=None, enable_express=None, max_message_size_in_kilobytes=None):
 
     from datetime import timedelta
     from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
