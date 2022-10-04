@@ -231,15 +231,6 @@ type: command
 short-summary: Wait for a account operation.
 """
 
-# helps['netappfiles account renew-credentials'] = """
-# type: command
-# short-summary: Renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption. If encryption.identity.principalId does not match identity.principalId, running this operation will fix it.
-# examples:
-#   - name: Renew identity credentials for account
-#     text: >
-#         az netappfiles account renew-credentials -g mygroup --account-name myaccname
-# """
-
 helps['netappfiles account backup'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Account Backup Resources.
