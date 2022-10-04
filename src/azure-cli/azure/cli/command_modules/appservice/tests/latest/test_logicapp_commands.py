@@ -222,6 +222,7 @@ class LogicAppDeployTest(LiveScenarioTest):
             JMESPathCheck('site_name', logicapp_name),
         ])
 
+    @unittest.skip("Falky test fails with read time out, need invesigation")
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_LOGICAPP)
     def test_linux_logicapp_zip_deploy_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)

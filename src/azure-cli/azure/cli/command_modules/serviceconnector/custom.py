@@ -30,7 +30,8 @@ from ._utils import (
     set_user_token_header,
     auto_register
 )
-# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test
+from ._credential_free import enable_mi_for_db_linker
+# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
 
 
 logger = get_logger(__name__)
@@ -148,7 +149,7 @@ def connection_validate(cmd, client,
     return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
-def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=too-many-statements
+def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None,
                       target_resource_group=None, target_id=None,
@@ -263,6 +264,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals disable=to
                                      'manually and then create the connection.'.format(str(e)))
 
     validate_service_state(parameters)
+    new_auth_info = enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name)
+    parameters['auth_info'] = new_auth_info if new_auth_info is not None else parameters['auth_info']
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,

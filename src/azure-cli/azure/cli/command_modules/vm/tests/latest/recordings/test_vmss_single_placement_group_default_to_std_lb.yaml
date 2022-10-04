@@ -170,7 +170,7 @@ interactions:
       - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.10
         (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2022-08-01
   response:
     body:
       string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20220815.1108\",\r\n
@@ -222,7 +222,7 @@ interactions:
       - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.10
         (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20220815.1108?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20220815.1108?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
@@ -284,7 +284,7 @@ interactions:
       - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
         (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -318,10 +318,10 @@ interactions:
       "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
       "vmss123Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"apiVersion":
-      "2018-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "vmss123LBPublicIP",
+      "2022-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "vmss123LBPublicIP",
       "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
       "Static"}, "sku": {"name": "Standard"}}, {"type": "Microsoft.Network/loadBalancers",
-      "name": "vmss123LB", "location": "westus", "tags": {}, "apiVersion": "2018-01-01",
+      "name": "vmss123LB", "location": "westus", "tags": {}, "apiVersion": "2022-01-01",
       "dependsOn": ["Microsoft.Network/virtualNetworks/vmss123VNET", "Microsoft.Network/publicIpAddresses/vmss123LBPublicIP"],
       "properties": {"backendAddressPools": [{"name": "vmss123LBBEPool"}], "frontendIPConfigurations":
       [{"name": "loadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vmss123LBPublicIP"}}}],
@@ -341,7 +341,7 @@ interactions:
       "properties": {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange":
       "22", "sourceAddressPrefix": "*", "destinationAddressPrefix": "*", "access":
       "Allow", "priority": 1000, "direction": "Inbound"}}]}}, {"type": "Microsoft.Compute/virtualMachineScaleSets",
-      "name": "vmss123", "location": "westus", "tags": {}, "apiVersion": "2022-03-01",
+      "name": "vmss123", "location": "westus", "tags": {}, "apiVersion": "2022-08-01",
       "dependsOn": ["Microsoft.Network/virtualNetworks/vmss123VNET", "Microsoft.Network/loadBalancers/vmss123LB",
       "Microsoft.Network/networkSecurityGroups/vmss123NSG"], "properties": {"overprovision":
       true, "upgradePolicy": {"mode": "manual", "rollingUpgradePolicy": {}}, "singlePlacementGroup":
@@ -596,7 +596,7 @@ interactions:
       - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-compute/27.1.0 Python/3.8.10
         (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss123?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss123?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss123\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss123\",\r\n
