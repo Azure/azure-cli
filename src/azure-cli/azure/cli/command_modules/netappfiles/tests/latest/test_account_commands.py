@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import unittest
 from knack.util import CLIError
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
