@@ -73,7 +73,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.2.0',
-    'azure-mgmt-compute~=27.1.0',
+    'azure-mgmt-compute~=28.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==10.0.0',
@@ -102,7 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
-    'azure-mgmt-monitor~=4.0.1',
+    'azure-mgmt-monitor~=5.0.0',
     'azure-mgmt-msi~=6.1.0',
     'azure-mgmt-netapp~=9.0.0',
     'azure-mgmt-network~=21.0.1',
@@ -173,7 +173,7 @@ setup(
         'az',
         'az.completion.sh',
         'az.bat',
-        'az.ps1'
+        'azps.ps1'
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,

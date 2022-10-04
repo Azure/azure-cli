@@ -276,8 +276,8 @@ class VMImageShowScenarioTest(ScenarioTest):
             'loc': 'westus',
             'pub': 'Canonical',
             'offer': 'UbuntuServer',
-            'sku': '14.04.2-LTS',
-            'ver': '14.04.201503090'
+            'sku': '18.04-LTS',
+            'ver': '18.04.202002180'
         })
 
         self.cmd('vm image show --location {loc} --publisher {pub} --offer {offer} --sku {sku} --version {ver}', checks=[
@@ -860,6 +860,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --os-type linux --use-unmanaged-disk --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
+    @AllowLargeResponse(99999)
     @ResourceGroupPreparer()
     def test_vm_create_data_disk_delete_option(self, resource_group):
         self.cmd('vm create -n Delete_CLI1 -g {rg} --image RedHat:RHEL:7-RAW:7.4.2018010506 -l northeurope '
@@ -1156,7 +1157,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('features[0].value', 'true', False)
         ])
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
-        self.cmd('snapshot create -g {rg} -n s1 --source disk')
+        self.cmd('snapshot create -g {rg} -n s1 --source disk --accelerated-network')
         gallery_image = self.cmd('sig image-version create -g {rg} --gallery-name {g1} --gallery-image-definition image --gallery-image-version 1.0.0 --os-snapshot s1').get_output_in_json()['id']
         self.kwargs.update({
             'gallery_image': gallery_image
@@ -8032,6 +8033,23 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('platformFaultDomainCount', 1),
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', self.kwargs['vmss'][:8]),
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_create_flexible_vmss_with_priority_mix_policy', location='NorthEurope')
+    def test_create_flexible_vmss_with_priority_mix_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image Centos --orchestration-mode flexible --regular-priority-count 4 --regular-priority-percentage 50 --orchestration-mode flexible --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
+            self.check('vmss.priorityMixPolicy.baseRegularPriorityCount', 4),
+            self.check('vmss.priorityMixPolicy.regularPriorityPercentageAboveBase', 50),
+        ])
+
+        self.cmd('vmss update -n {vmss} -g {rg} --regular-priority-count 2 --regular-priority-percentage 25', checks=[
+            self.check('priorityMixPolicy.baseRegularPriorityCount', 2),
+            self.check('priorityMixPolicy.regularPriorityPercentageAboveBase', 25),
+        ])
+
 
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):

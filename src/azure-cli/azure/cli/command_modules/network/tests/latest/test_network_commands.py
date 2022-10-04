@@ -5769,6 +5769,7 @@ class ServiceEndpointScenarioTest(ScenarioTest):
 
 class NetworkProfileScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_network_profile')
     def test_network_profile(self, resource_group):
 
@@ -5788,11 +5789,11 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group
         })
-        self.cmd('network list-service-aliases -l centralus')
-        self.cmd('network list-service-aliases -l centralus -g {rg}')
+        self.cmd('network list-service-aliases -l centralus', checks=self.check('type(@)', 'array'))
+        self.cmd('network list-service-aliases -l centralus -g {rg}', checks=self.check('type(@)', 'array'))
 
         # test list-service-tags
-        self.cmd('network list-service-tags -l centralus')
+        self.cmd('network list-service-tags -l centralus', checks=self.check('type(@)', 'object'))
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
