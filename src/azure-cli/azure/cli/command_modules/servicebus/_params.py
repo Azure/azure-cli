@@ -191,7 +191,7 @@ def load_arguments_sb(self, _):
             c.argument('forward_to', help='Queue/Topic name to forward the messages')
             c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
             c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-letter-on-filter-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
-    
+
     with self.argument_context('servicebus topic subscription create') as c:
         c.argument('is_client_affine', arg_type=get_three_state_flag(), help='Value that indicates whether the subscription has an affinity to the client id.')
         c.argument('client_id', help='Indicates the Client ID of the application that created the client-affine subscription.')
