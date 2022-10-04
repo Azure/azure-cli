@@ -37,7 +37,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         ehparam.cluster_arm_id = cluster_arm_id
         ehparam.minimum_tls_version = minimum_tls_version
 
-        if identity or mi_system_assigned:
+        if mi_system_assigned:
             ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
 
         if mi_user_assigned:
@@ -61,18 +61,11 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
             namespace_name=namespace_name,
             parameters=ehparam).result()
 
-    if default_action or trusted_service_access_enabled:
-        netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-        netwrokruleset.default_action = default_action
-        netwrokruleset.trusted_service_access_enabled = trusted_service_access_enabled
-        client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
     return client.get(resource_group_name, namespace_name)
 
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
-                         maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
-                         identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None, trusted_service_access_enabled=None,
+                         maximum_throughput_units=None, is_kafka_enabled=None,
                          disable_local_auth=None, require_infrastructure_encryption=None, minimum_tls_version=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
     KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -102,25 +95,10 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if minimum_tls_version:
             instance.minimum_tls_version = minimum_tls_version
 
-        if identity is True and instance.identity is None:
-            instance.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
-        elif instance.identity and (key_name or key_vault_uri or key_version or key_source):
-            instance.encryption = Encryption()
-            if key_source:
-                instance.encryption.key_source = key_source
-            if key_name and key_vault_uri:
-                keyprop = []
-                keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri, key_version=key_version))
-                instance.encryption.key_vault_properties = keyprop
-            if require_infrastructure_encryption:
-                instance.encryption.require_infrastructure_encryption = require_infrastructure_encryption
-
-        if default_action:
-            resourcegroup = instance.id.split('/')[4]
-            netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
-            netwrokruleset.default_action = default_action
-            netwrokruleset.trusted_service_access_enabled = trusted_service_access_enabled
-            client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
+        if require_infrastructure_encryption:
+            if instance.encryption is not None:
+                instance.encryption = Encryption()
+            instance.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
         if disable_local_auth is not None:
             instance.disable_local_auth = disable_local_auth

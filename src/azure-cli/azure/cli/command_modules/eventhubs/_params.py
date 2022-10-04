@@ -43,14 +43,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
-        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'], arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
-        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Managed Identity is enabled.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
         c.argument('mi_system_assigned', arg_group='Managed Identity',
@@ -64,12 +58,6 @@ def load_arguments_eh(self, _):
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
 
     with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
-        c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
-                   help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
-        c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
-        c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
-        c.argument('key_version', is_preview=True,
-                   help='The version of the KeyVault key to use.')
         c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
                    arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')

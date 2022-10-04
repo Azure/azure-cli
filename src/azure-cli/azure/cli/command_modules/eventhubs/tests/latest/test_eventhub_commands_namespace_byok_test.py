@@ -20,7 +20,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     @KeyVaultPreparer(name_prefix='cli', name_len=15, additional_params='--enable-purge-protection')
-    def test_eh_namespace_byok(self, resource_group):
+    def test_eh_authorization_rule(self, resource_group):
         self.kwargs.update({
             'loc': 'southcentralus',
             'rg': resource_group,
@@ -45,55 +45,15 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
             'maximumthroughputunits_update': 5
 
         })
-
-        kv_name = self.kwargs['kv']
-        key_name = self.create_random_name(prefix='cli', length=15)
-        key_uri = "https://{}.vault.azure.net/".format(kv_name)
-        self.kwargs.update({
-            'kv_name': kv_name,
-            'key_name': key_name,
-            'key_uri': key_uri
-        })
-
         # Check for the NameSpace name Availability
         self.cmd('eventhubs namespace exists --name {namespacename}', checks=[self.check('nameAvailable', True)])
 
         # Create Namespace
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid} --assign-identity {enableidentity}')
 
-        # Create Namespace
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid}')
-
-        # Get Created Namespace
-        principal_id = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
-
-        self.kwargs.update({
-            'principal_id': principal_id,
-            'key_source': 'Microsoft.KeyVault',
-            'key_properties': key_name + " " + key_uri + " "''
-        })
-
-        # Create AzKeyvault
-        self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --object-id {principal_id} --key-permissions  get unwrapKey wrapKey')
-        self.cmd('az keyvault key create -n {key_name} --vault-name {kv_name}')
-
-        # Update Namespace
-        self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
-
-        # Update Namespace
-        self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename1} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --assign-identity {enableidentity} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
-
-        # Get Created Namespace list by subscription
-        listnamespaceresult = self.cmd('eventhubs namespace list').output
-        self.assertGreater(len(listnamespaceresult), 0)
-
-        # Get Created Namespace list by ResourceGroup
-        listnamespacebyresourcegroupresult = self.cmd('eventhubs namespace list --resource-group {rg}').output
-        self.assertGreater(len(listnamespacebyresourcegroupresult), 0)
-
         # Create Authoriazation Rule
         self.cmd(
-            'eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}', checks=[self.check('name', self.kwargs['authoname'])])
+            'eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights ', checks=[self.check('name', self.kwargs['authoname'])])
 
         # Get Authorization Rule
         self.cmd(
