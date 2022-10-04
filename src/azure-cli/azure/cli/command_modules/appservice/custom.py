@@ -5604,6 +5604,32 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
                                                                   repo=repo, branch=branch, token=token)
     completed_workflow_file = completed_workflow_file.encode()
 
+    def add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot):
+        logger.warning('Adding publish profile to GitHub')
+        _add_publish_profile_to_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo,
+                                       token=token, github_actions_secret_name=publish_profile_name,
+                                       slot=slot)
+
+    def update_file(cmd,
+                    resource_group,
+                    name,
+                    repo,
+                    token,
+                    publish_profile_name,
+                    slot,
+                    logger_message,
+                    github_repo,
+                    github_message,
+                    file_path,
+                    completed_workflow_file,
+                    existing_workflow_file,
+                    branch):
+        add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot)
+        logger.warning(logger_message)
+        github_repo.update_file(path=file_path, message=github_message,
+                                content=completed_workflow_file, sha=existing_workflow_file.sha,
+                                branch=branch)
+
     # Check if workflow exists in repo, otherwise push
     if slot:
         file_name = "{}_{}({}).yml".format(branch.replace('/', '-'), name.lower(), slot)
@@ -5623,30 +5649,47 @@ def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None
             publish_profile_name = existing_publish_profile_name
         logger.warning("Existing workflow file found")
         if force:
-            logger.warning("Replacing the existing workflow file")
-            github_repo.update_file(path=file_path, message="Update workflow using Azure CLI",
-                                    content=completed_workflow_file, sha=existing_workflow_file.sha, branch=branch)
+            update_file(cmd,
+                        resource_group,
+                        name,
+                        repo,
+                        token,
+                        publish_profile_name,
+                        slot,
+                        "Replacing the existing workflow file",
+                        github_repo,
+                        "Update workflow using Azure CLI",
+                        file_path,
+                        completed_workflow_file,
+                        existing_workflow_file,
+                        branch)
         else:
             option = prompt_y_n('Replace existing workflow file?')
             if option:
-                logger.warning("Replacing the existing workflow file")
-                github_repo.update_file(path=file_path, message="Update workflow using Azure CLI",
-                                        content=completed_workflow_file, sha=existing_workflow_file.sha,
-                                        branch=branch)
+                update_file(cmd,
+                            resource_group,
+                            name,
+                            repo,
+                            token,
+                            publish_profile_name,
+                            slot,
+                            "Replacing the existing workflow file",
+                            github_repo,
+                            "Update workflow using Azure CLI",
+                            file_path,
+                            completed_workflow_file,
+                            existing_workflow_file,
+                            branch)
             else:
                 logger.warning("Use the existing workflow file")
                 if existing_publish_profile_name:
                     publish_profile_name = existing_publish_profile_name
+                add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot)
     except UnknownObjectException:
+        add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot)
         logger.warning("Creating new workflow file: %s", file_path)
         github_repo.create_file(path=file_path, message="Create workflow using Azure CLI",
                                 content=completed_workflow_file, branch=branch)
-
-    # Add publish profile to GitHub
-    logger.warning('Adding publish profile to GitHub')
-    _add_publish_profile_to_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo,
-                                   token=token, github_actions_secret_name=publish_profile_name,
-                                   slot=slot)
 
     # Set site source control properties
     _update_site_source_control_properties_for_gh_action(
@@ -6016,10 +6059,7 @@ def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, funct
     if matched_runtime.github_actions_properties:
         gh_props = matched_runtime.github_actions_properties
         if gh_props.is_supported:
-            if not is_linux and runtime_string.lower() == "powershell":
-                return runtime_version
-            # when stacks api is fixed, return supported_version if not null else runtime_verson
-            return gh_props.supported_version
+            return gh_props.supported_version if gh_props.supported_version else runtime_version
     return None
 
 
