@@ -1016,7 +1016,7 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
 def _set_trigger_restore_properties(cmd, trigger_restore_properties, target_virtual_machine_name, virtual_network_name,
                                     target_vnet_resource_group, subnet_name, vault_name, resource_group_name,
                                     recovery_point, target_zone, target_rg_id, source_resource_id, restore_mode,
-                                    target_subscription):
+                                    target_subscription, use_secondary_region):
     if restore_mode == "AlternateLocation":
         virtual_network = _get_vnet_object(cmd.cli_ctx, target_subscription, virtual_network_name,
                                            target_vnet_resource_group)
@@ -1038,7 +1038,7 @@ def _set_trigger_restore_properties(cmd, trigger_restore_properties, target_virt
         trigger_restore_properties.subnet_id = subnet_id
     if target_zone:
         backup_config_response = backup_storage_configs_non_crr_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
-        validators.validate_czr(backup_config_response, recovery_point)
+        validators.validate_czr(backup_config_response, recovery_point, use_secondary_region)
         trigger_restore_properties.zones = [target_zone]
 
 
@@ -1160,7 +1160,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     _set_trigger_restore_properties(cmd, trigger_restore_properties, target_vm_name, target_vnet_name,
                                     target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
                                     recovery_point, target_zone, target_rg_id, _source_resource_id, restore_mode,
-                                    target_subscription)
+                                    target_subscription, use_secondary_region)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
