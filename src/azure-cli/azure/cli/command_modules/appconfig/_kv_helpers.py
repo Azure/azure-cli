@@ -138,7 +138,7 @@ def __read_with_appropriate_encoding(file_path, format_):
             if format_ == 'json':
                 config_data = json.load(config_file)
                 # Only accept json objects
-                if not (isinstance(config_data, dict) or isinstance(config_data, list)):
+                if not isinstance(config_data, (dict, list)):
                     raise ValueError("Json object required but type '{}' was given.".format(type(config_data).__name__))
 
             elif format_ == 'yaml':
