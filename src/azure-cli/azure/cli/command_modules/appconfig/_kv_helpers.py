@@ -138,7 +138,7 @@ def __read_with_appropriate_encoding(file_path, format_):
             if format_ == 'json':
                 config_data = json.load(config_file)
                 # Only accept json objects
-                if not isinstance(config_data, dict):
+                if not (isinstance(config_data, dict) or isinstance(config_data, list)):
                     raise ValueError("Json object required but type '{}' was given.".format(type(config_data).__name__))
 
             elif format_ == 'yaml':
@@ -859,7 +859,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         raise CLIError("Fail to export key-values." + str(exception))
 
 
-def __try_convert_to_arrays(constructed_data, is_root=True):
+def __try_convert_to_arrays(constructed_data):
     if not (isinstance(constructed_data, dict) and len(constructed_data) > 0):
         return constructed_data
 
@@ -872,14 +872,14 @@ def __try_convert_to_arrays(constructed_data, is_root=True):
         # with indices corresponding to the keys.
         # We do not try to convert key-values at the root of the object to an array even if they meet this criterion.
         for index, key in enumerate(sorted_data_keys):
-            if is_root or index != key:
+            if index != key:
                 is_array = False
                 break
 
         if is_array:
-            return [__try_convert_to_arrays(constructed_data[str(data_key)], False) for data_key in sorted_data_keys]
+            return [__try_convert_to_arrays(constructed_data[str(data_key)]) for data_key in sorted_data_keys]
 
-    return {data_key: __try_convert_to_arrays(data_value, False) for data_key, data_value in constructed_data.items()}
+    return {data_key: __try_convert_to_arrays(data_value) for data_key, data_value in constructed_data.items()}
 
 
 def __export_features(retrieved_features, naming_convention):
