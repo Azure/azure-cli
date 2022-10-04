@@ -171,8 +171,6 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
-  - name: --encryption
-    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -232,6 +230,15 @@ helps['netappfiles account wait'] = """
 type: command
 short-summary: Wait for a account operation.
 """
+
+# helps['netappfiles account renew-credentials'] = """
+# type: command
+# short-summary: Renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption. If encryption.identity.principalId does not match identity.principalId, running this operation will fix it.
+# examples:
+#   - name: Renew identity credentials for account
+#     text: >
+#         az netappfiles account renew-credentials -g mygroup --account-name myaccname
+# """
 
 helps['netappfiles account backup'] = """
 type: group
@@ -700,6 +707,8 @@ parameters:
     short-summary: Availability Zone
   - name: --kv-private-endpoint-id
     short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
+  - name: --kerberos-enabled
+    short-summary: Describe if a volume is KerberosEnabled
 
 examples:
   - name: Create an ANF volume
@@ -1587,4 +1596,21 @@ examples:
 helps['netappfiles volume-group wait'] = """
 type: command
 short-summary: Wait for a volume group to be created.
+"""
+
+helps['netappfiles resource'] = """
+type: group
+short-summary: Provides operations for Azure NetApp Files (ANF) Account Resources.
+"""
+
+helps['netappfiles resource region-info'] = """
+type: command
+short-summary: Provides storage to network proximity and logical zone mapping information.
+parameters:
+  - name: --location -l
+    short-summary: The location
+examples:
+  - name: Describes region specific information.
+    text: >
+        az netappfiles resource region-info -l location
 """

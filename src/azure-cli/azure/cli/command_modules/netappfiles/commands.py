@@ -17,7 +17,8 @@ from ._client_factory import (
     backup_policies_mgmt_client_factory,
     vaults_mgmt_client_factory,
     subvolumes_mgmt_client_factory,
-    volume_groups_mgmt_client_factory)
+    volume_groups_mgmt_client_factory,
+    netapp_resource_mgmt_client_factory)
 from ._exception_handler import netappfiles_exception_handler
 
 
@@ -99,6 +100,13 @@ def load_command_table(self, _):
     )
     load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk)
 
+    netappfiles_resource_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations._net_app_resource_operations#NetAppResourceOperations.{}',
+        client_factory=netapp_resource_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+    load_net_app_resource_command_groups(self, netappfiles_resource_sdk)
+
     with self.command_group('netappfiles', is_preview=False):
         pass
 
@@ -123,6 +131,7 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.command('renew-credentials', 'begin_renew_credentials', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('netappfiles account ad', netappfiles_accounts_sdk) as g:
@@ -371,3 +380,8 @@ def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
                          exception_handler=netappfiles_exception_handler)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
+
+
+def load_net_app_resource_command_groups(self, netappfiles_resource_sdk):
+    with self.command_group('netappfiles resource', netappfiles_resource_sdk) as g:
+        g.command('region-info', 'query_region_info', supports_no_wait=True)
