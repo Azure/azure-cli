@@ -36,7 +36,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-        # delete and recheck
+        # delete and re-check
         self.cmd("az netappfiles account delete --resource-group {rg} --account-name '{acc_name}'")
         self.cmd("netappfiles account list --resource-group {rg}", checks=[
             self.check('length(@)', 0)
