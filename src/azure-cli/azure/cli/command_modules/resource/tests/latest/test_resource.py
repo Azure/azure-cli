@@ -2141,7 +2141,7 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
 
-        # create new resource group - delete flag --delete-resources
+        # create new resource group - test delete flag --delete-resources
         self.cmd('az group create --location {location} --name {resource-group-two}')
 
         # create stack  with resource1
@@ -2562,7 +2562,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
 
-    
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_show_deployment_stack_resource_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2759,6 +2758,395 @@ class DeploymentStacksTest(ScenarioTest):
 
         # cleanup 
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
+    def test_create_deployment_stack_management_group(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-subscription', 60)
+        template_spec_name = self.create_random_name('cli-test-template-spec', 60)
+        resource_one = self.create_random_name('cli-test-resource-one', 60)
+        resource_two = self.create_random_name('cli-test-resource-two', 60)
+        resource_three = self.create_random_name('cli-test-resource-three', 60)
+        resource_group_two = self.create_random_name('cli-test-cli_test_deployment_stacks-two', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': location,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
+            'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
+            'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
+            'template-spec-name': template_spec_name,
+            'template-spec-version': "v1",
+            'resource-group': resource_group,
+            'resource-group-two': resource_group_two,
+            'resource-one': resource_one,
+            'resource-two': resource_two,
+            'resource-three': resource_three,
+            'resource-type-specs': "Microsoft.Resources/templateSpecs",
+            'actual-mg': self.create_random_name('azure-cli-management', 30),
+            'mg': "AzGovBlueprint"
+        })
+        # create mg
+        #self.cmd('account management-group create --name {mg}', checks=[])
+
+        # create template spec
+        basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location "westus2" --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
+        template_spec_id = basic_template_spec['id']
+
+        self.kwargs.update({'template-spec-id': template_spec_id})
+
+        # create deployment stack with template file and parameter file
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup
+        self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
+
+        #create deployment stack with template spec and parameter file
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup 
+        self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
+    
+        # create deployment stack with bicep file and rg scope
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{bicep-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup
+        self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
+
+        # test delete flag --delete-resource-groups - create stack  with resource1
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-one}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # update stack with resource2 set to detach
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # check resource1 still exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        # check resource2 exists in Azure
+        self.cmd('group show -n {resource-two}')
+
+        # update stack with resource3 set to delete
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-three}" --delete-resources --delete-resources --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # check resource1 still exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        # check resource3 exists in Azure
+        self.cmd('group show -n {resource-three}')
+
+        # check resource2 does not exist in Azure - should have been purged
+        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+
+        # cleanup
+        self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
+
+    def test_show_deployment_stack_management_group(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-get-deployment-stack-subscription', 60)
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': location,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'mg': "AzGovBlueprint",
+            'actual-mg':self.create_random_name('azure-cli-management', 30)
+        })
+
+        #self.cmd('account management-group create --name {mg}', checks=[])
+
+        created_deployment_stack = self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        deployment_stack_id = created_deployment_stack['id']
+
+        self.kwargs.update({'deployment-stack-id': deployment_stack_id})
+
+        # show stack with stack name
+        self.cmd('stack mg show --name {name} --management-group-id {mg}', checks=self.check('name', '{name}'))
+
+        # show stack with stack id
+        self.cmd('stack mg show --id {deployment-stack-id} --management-group-id {mg}', checks=self.check('name', '{name}'))
+
+        # cleanup 
+        self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
+
+    def test_delete_deployment_stack_management_group(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-subscription', 60)
+        resource_one = self.create_random_name('cli-test-resource-one', 60)
+        resource_two = self.create_random_name('cli-test-resource-two', 60)
+        resource_three = self.create_random_name('cli-test-resource-three', 60)
+        template_spec_name = self.create_random_name('cli-test-template-spec', 60)
+        resource_group_two = self.create_random_name('cli-test-cli_test_deployment_stacks-two', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': location,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
+            'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
+            'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
+            'template-spec-name': template_spec_name,
+            'template-spec-version': "v1",
+            'resource-one': resource_one,
+            'resource-two': resource_two,
+            'resource-three': resource_three,
+            'resource-group-two': resource_group_two,
+            'resource-type-specs': "Microsoft.Resources/templateSpecs"
+        })
+
+        # create stack
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        # check stack to make sure it exists
+        self.cmd('stack sub show --name {name}', checks=self.check('name', '{name}'))
+
+        # delete stack with stack name
+        self.cmd('stack sub delete --name {name} --yes')
+
+        #confirm stack is deleted
+        #self.cmd('stack sub list', checks=self.check("length([?name=='{name}'])", 0))
+
+        #add delete with stack id
+        created_stack = self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        stack_id = created_stack['id']
+
+        self.kwargs.update({'id': stack_id})
+
+        # delete stack with id 
+        self.cmd('stack sub delete --id  {id} --yes')
+
+        #confirm stack is deleted
+        #self.cmd('stack sub list', checks=self.check("length([?name=='{name}'])", 0))
+
+        # create new resource group - delete flag --delete-resources
+        self.cmd('group create --location {location} --name {resource-group-two}')
+
+        # create stack with resource1 to check if resources are being detached on delete
+        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # delete stack set to (default) detach
+        self.cmd('stack sub delete --name {name} --yes')
+
+        # check resource1 still exists in Azure
+        self.cmd('resource show -n {resource-one} -g {resource-group-two} --resource-type {resource-type-specs}')
+
+        # create stack with resource2 to check if resources are being purged on delete
+        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # delete stack with resource2 set to delete
+        self.cmd('stack sub delete --name {name} --delete-resources --yes')
+
+        #confirm resource2 has been removed from Azure
+        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+
+        # cleanup - delete resource group two
+        self.cmd('az group delete --name {resource-group-two} --yes')
+
+        # test delete flag --delete-resource-groups - create stack  with resource1
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+ 
+        # delete stack with resource1 set to detach
+        self.cmd('stack sub delete --name {name} --yes')
+
+        # check resource1 still exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        # update stack with resource3 set to delete
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}" --delete-resources --delete-resource-groups --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # delete stack with resource1 set to detach
+        self.cmd('stack sub delete --name {name} --delete-resources --delete-resource-groups --yes')
+
+        # check resource1 still exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        #confirm resource2 has been removed from Azure
+        self.cmd('group list', checks=self.check("length([?name=='{resource-two}'])", 0))
+
+        # cleanup 
+        self.cmd('group delete --name {resource-one} --yes')
+
+        #new code
+        # create new resource group - testing delete-all flag
+        self.cmd('group create --location {location} --name {resource-group-two}')
+
+        # create stack
+        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{track-rg-file}" --parameters "rgname={resource-one}" "tsname={template-spec-name}" --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # check template spec exists in Azure
+        self.cmd('resource show -n {template-spec-name} -g {resource-group-two} --resource-type {resource-type-specs}')
+
+        # check rg resource1 exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        # create stack with delete-all set 
+        self.cmd('stack sub delete --name {name} --delete-all --yes')
+
+        # confirm template spec has been removed from azure
+        self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
+
+        #confirm rg resource1 has been removed from azure
+        self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
+
+        # cleanup - delete resource group two
+        self.cmd('group delete --name {resource-group-two} --yes')
+
+    #test again
+    @AllowLargeResponse(4096)
+    def test_list_deployment_stack_management_group(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-list-deployment-stack-subscription', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': location,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+
+        })
+
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        # list stacks 
+        list_deployment_stacks = self.cmd('stack sub list').get_output_in_json()
+
+        self.assertTrue(len(list_deployment_stacks) > 0)
+        self.assertTrue(list_deployment_stacks[0]['name'], '{name}')
+
+         # cleanup 
+        self.cmd('stack sub delete --name {name} --yes')
+    
+
+    @AllowLargeResponse(4096)
+    def test_export_template_deployment_management_group(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_stack_name = self.create_random_name('cli-test-delete-deployment-stack-subscription', 60)
+        resource_one = self.create_random_name('cli-test-resource-one', 60)
+        resource_two = self.create_random_name('cli-test-resource-two', 60)
+        resource_three = self.create_random_name('cli-test-resource-three', 60)
+        template_spec_name = self.create_random_name('cli-test-template-spec', 60)
+        resource_group_two = self.create_random_name('cli-test-cli_test_deployment_stacks-two', 60)
+
+        self.kwargs.update({
+            'name': deployment_stack_name,
+            'location': location,
+            'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
+            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
+            'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
+            'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
+            'template-spec-name': template_spec_name,
+            'template-spec-version': "v1",
+            'resource-one': resource_one,
+            'resource-two': resource_two,
+            'resource-three': resource_three,
+            'resource-group-two': resource_group_two,
+            'resource-type-specs': "Microsoft.Resources/templateSpecs"
+        })
+
+        # create stack
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+
+        # check stack to make sure it exists
+        self.cmd('stack sub show --name {name}', checks=self.check('name', '{name}'))
+
+        # delete stack with stack name
+        self.cmd('stack sub delete --name {name} --yes')
+
+        #confirm stack is deleted
+        #self.cmd('stack sub list', checks=self.check("length([?name=='{name}'])", 0))
+
+        #add delete with stack id
+        created_stack = self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        stack_id = created_stack['id']
+
+        self.kwargs.update({'id': stack_id})
+
+        # delete stack with id 
+        self.cmd('stack sub delete --id  {id} --yes')
+
+        #confirm stack is deleted
+        #self.cmd('stack sub list', checks=self.check("length([?name=='{name}'])", 0))
+
+        # create new resource group - delete flag --delete-resources
+        self.cmd('group create --location {location} --name {resource-group-two}')
+
+        # create stack with resource1 to check if resources are being detached on delete
+        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # delete stack set to (default) detach
+        self.cmd('stack sub delete --name {name} --yes')
+
+        # check resource1 still exists in Azure
+        self.cmd('resource show -n {resource-one} -g {resource-group-two} --resource-type {resource-type-specs}')
+
+        # create stack with resource2 to check if resources are being purged on delete
+        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # delete stack with resource2 set to delete
+        self.cmd('stack sub delete --name {name} --delete-resources --yes')
+
+        #confirm resource2 has been removed from Azure
+        self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
+
+        # cleanup - delete resource group two
+        self.cmd('az group delete --name {resource-group-two} --yes')
+
+        # test delete flag --delete-resource-groups - create stack  with resource1
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+ 
+        # delete stack with resource1 set to detach
+        self.cmd('stack sub delete --name {name} --yes')
+
+        # check resource1 still exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        # update stack with resource3 set to delete
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}" --delete-resources --delete-resource-groups --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # delete stack with resource1 set to detach
+        self.cmd('stack sub delete --name {name} --delete-resources --delete-resource-groups --yes')
+
+        # check resource1 still exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        #confirm resource2 has been removed from Azure
+        self.cmd('group list', checks=self.check("length([?name=='{resource-two}'])", 0))
+
+        # cleanup 
+        self.cmd('group delete --name {resource-one} --yes')
+
+        #new code
+        # create new resource group - testing delete-all flag
+        self.cmd('group create --location {location} --name {resource-group-two}')
+
+        # create stack
+        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{track-rg-file}" --parameters "rgname={resource-one}" "tsname={template-spec-name}" --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        # check template spec exists in Azure
+        self.cmd('resource show -n {template-spec-name} -g {resource-group-two} --resource-type {resource-type-specs}')
+
+        # check rg resource1 exists in Azure
+        self.cmd('group show -n {resource-one}')
+
+        # create stack with delete-all set 
+        self.cmd('stack sub delete --name {name} --delete-all --yes')
+
+        # confirm template spec has been removed from azure
+        self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
+
+        #confirm rg resource1 has been removed from azure
+        self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
+
+        # cleanup - delete resource group two
+        self.cmd('group delete --name {resource-group-two} --yes')
 
 class DeploymentStacksSnapshotTest(ScenarioTest):
     global location
