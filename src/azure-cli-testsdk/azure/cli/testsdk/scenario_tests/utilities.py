@@ -70,9 +70,9 @@ def trim_kwargs_from_test_function(fn, kwargs):
     # the next function is the actual test function. the kwargs need to be trimmed so
     # that parameters which are not required will not be passed to it.
     if not is_preparer_func(fn):
-        args, _, kw, _ = inspect.getargspec(fn)  # pylint: disable=deprecated-method
-        if kw is None:
-            args = set(args)
+        spec = inspect.getfullargspec(fn)
+        if spec.varkw is None:
+            args = set(spec.args)
             for key in [k for k in kwargs if k not in args]:
                 del kwargs[key]
 
