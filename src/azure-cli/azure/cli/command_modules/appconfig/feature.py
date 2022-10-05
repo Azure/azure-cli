@@ -662,7 +662,7 @@ def update_filter(cmd,
     if index is None:
         index = float("-inf")
 
-    # Construct feature filter to be added
+    # Construct feature filter
     if filter_parameters is None:
         filter_parameters = {}
     new_filter = FeatureFilter(filter_name, filter_parameters)
@@ -696,9 +696,6 @@ def update_filter(cmd,
 
             current_filter = {}
             match_index = []
-
-            entry = json.dumps(new_filter.__dict__,
-                               indent=2, ensure_ascii=False)
 
             # get all filters where name matches filter_name provided by user
             for idx, feature_filter in enumerate(feature_filters):
@@ -756,14 +753,14 @@ def update_filter(cmd,
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug(
-                    'Retrying filter add operation %s times with exception: concurrent setting operations', i + 1)
+                    'Retrying filter update operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
         except Exception as exception:
             raise CLIError(str(exception))
     raise CLIError(
-        "Failed to add filter for the feature flag '{}' due to a conflicting operation.".format(feature))
+        "Failed to update filter for the feature flag '{}' due to a conflicting operation.".format(feature))
 
 
 def delete_filter(cmd,

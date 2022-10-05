@@ -300,7 +300,7 @@ def load_arguments(self, _):
         c.argument('label', help="If no label specified, update the feature flag with null label by default.")
         c.argument('filter_name', help='Name of the filter to be updated.')
         c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
-        c.argument('index', type=int, help='Zero-based index of the filter you want to update in the list of filters. The index must be specified if multiple filters exist with the same filter name.')
+        c.argument('index', type=int, help='Zero-based index of the filter to be updated in case there are multiple instances with same filter name.')
 
     with self.argument_context('appconfig feature filter delete') as c:
         c.argument('feature', help='Name of the feature from which you want to delete the filter. If the feature flag key is different from the default key, provide the `--key` argument instead.')
