@@ -618,7 +618,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('publicIp.dnsSettings', None)
         ])
         self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza --idle-timeout 10 --tags foo=doo', checks=[
-            self.check('publicIPAllocationMethod', 'Static'),
+            self.check('publicIpAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', 'wowza'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')

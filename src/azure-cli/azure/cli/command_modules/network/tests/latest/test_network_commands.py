@@ -80,7 +80,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
 
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -496,14 +496,14 @@ class NetworkPublicIpWithSku(ScenarioTest):
         self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
             self.check('sku.name', self.kwargs.get('basic_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
-            self.check('publicIpAllocationMethod', 'Dynamic')
+            self.check('publicIPAllocationMethod', 'Dynamic')
         ])
 
         self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -511,7 +511,7 @@ class NetworkPublicIpWithSku(ScenarioTest):
         self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('global_tier')),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
         from azure.core.exceptions import HttpResponseError
@@ -3112,7 +3112,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network cross-region-lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -3333,7 +3333,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
