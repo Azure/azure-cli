@@ -2730,11 +2730,16 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
     def test_network_zoned_public_ip(self, resource_group):
         self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2',
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku standard',
                  checks=self.check('publicIp.zones[0]', '2'))
 
-        table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
-        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
 
 
 class NetworkRouteFilterScenarioTest(ScenarioTest):
