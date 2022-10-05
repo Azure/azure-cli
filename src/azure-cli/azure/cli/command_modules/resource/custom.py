@@ -2529,6 +2529,14 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
         return rcf.deployment_stacks.begin_delete_at_management_group(management_group_id, delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
+def export_template_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):
+    if name or id:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        if name:
+            return rcf.deployment_stacks.export_template_at_management_group(management_group_id, name)
+        return rcf.deployment_stacks.export_template_at_management_group(management_group_id, id.split('/')[-1])
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
+
 def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, id=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if id:

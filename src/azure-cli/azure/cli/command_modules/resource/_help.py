@@ -2781,6 +2781,62 @@ type: group
 short-summary: (Version 0.1.4) Manage deployment stacks at subscription or resource group scope
 """
 
+helps['stack mg create'] = """
+type: command
+short-summary: Create a deployment stack at management group scope
+examples:
+  - name: Create a deployment stack using template file.
+    text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json --location "westus2" --description "description"
+  - name: Create a deployment stack with parameter file.
+    text: az stack mg create --name "StackName" --management-group-id myMg --update-behavior "detachResources" --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location "westus2" --description "description"
+  - name: Create a deployment stack with template spec
+    text: az stack mg create --name "StackName" --management-group-id myMg --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
+  - name: Create a deployment stack using bicep file.
+    text: az stack mg create --name "StackName" --management-group-id myMg --update-behavior "detachResources" --template-file simple.bicep --location "westus2" --description "description"
+  - name: Create a deployment stack using parameters from key/value pairs
+    text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json  --location "westus" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
+  - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location "westus"
+"""
+
+helps['stack mg list'] = """
+type: command
+short-summary: List all deployment stacks in management group
+examples:
+  - name: List all stacks 
+    text: az stack mg list ----management-group-id myMg
+"""
+
+helps['stack mg show'] = """
+type: command
+short-summary: Get specified deployment stack from management group scope
+examples:
+  - name: Get stack by name.
+    text: az stack mg show --name "StackName" --management-group-id myMg
+  - name: Get stack by stack resource id.
+    text: az stack mg show --id "StackResourceID" --management-group-id myMg
+"""
+
+helps['stack mg export'] = """
+type: command
+short-summary: Exports the template used to create the deployment stack
+examples:
+  - name: Export template by name.
+    text: az stack mg export --name "StackName" --management-group-id myMg
+  - name: Export template by stack resource id.
+    text: az stack mg export --id "StackResourceID" --management-group-id myMg
+"""
+
+helps['stack mg delete'] = """
+type: command
+short-summary: Delete specified deployment stack from management group scope
+examples:
+  - name: Delete stack by name.
+    text: az stack mg delete --name "StackName" --management-group-id myMg
+  - name: Delete stack by stack resource id.
+    text: az stack mg delete --id "StackResourceID" --management-group-id myMg
+"""
+
 helps['stack sub create'] = """
 type: command
 short-summary: Create a deployment stack at subscription scope
@@ -2819,6 +2875,16 @@ examples:
     text: az stack sub show --name "StackName"
   - name: Get stack by stack resource id.
     text: az stack sub show --id "StackResourceID"
+"""
+
+helps['stack sub export'] = """
+type: command
+short-summary: Exports the template used to create the deployment stack
+examples:
+  - name: Export template by name.
+    text: az stack sub export --name "StackName"
+  - name: Export template by stack resource id.
+    text: az stack sub export --id "StackResourceID"
 """
 
 helps['stack sub delete'] = """
@@ -2867,6 +2933,16 @@ examples:
     text: az stack group show --name "StackName" --resource-group "ResourceGroup"
   - name: Get stack by stack resource id.
     text: az stack group show --id "StackResourceID"
+"""
+
+helps['stack group export'] = """
+type: command
+short-summary: Exports the template used to create the deployment stack from resource group scope
+examples:
+  - name: Export template by name.
+    text: az stack group export --name "StackName" --resource-group "ResourceGroup"
+  - name: Export template by stack resource id.
+    text: az stack group export --id "StackResourceID"
 """
 
 helps['stack group delete'] = """
