@@ -829,7 +829,7 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
                                        indexing_policy,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
-    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
+    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
