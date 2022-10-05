@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import difflib
+import sys
 
 import argparse
 import argcomplete
@@ -91,8 +92,10 @@ class AzCliCommandParser(CLICommandParser):
 
             command_verb = command_name.split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
-            # parsers we add to the "choices" section of the subparser.
-            subparser.choices[command_verb] = command_verb
+            # parsers we add to the "choices" section of the subparser. This workaround
+            # is no longer required in Python 3.11.
+            if sys.version_info < (3, 11):
+                subparser.choices[command_verb] = command_verb
 
             # inject command_module designer's help formatter -- default is HelpFormatter
             fc = metadata.formatter_class or argparse.HelpFormatter
