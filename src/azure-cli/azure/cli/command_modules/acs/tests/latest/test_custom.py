@@ -605,8 +605,8 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_location = os.path.join(temp_dir, 'kubectl')
             k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
-            # 2 warnings, 1st for download result; 2nd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+            # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
         finally:
             shutil.rmtree(temp_dir)
 
@@ -622,7 +622,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
-    @unittest.skip('Update api version')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_emit_warnings(self, logger_mock, mock_url_retrieve):
@@ -632,12 +631,11 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_location = os.path.join(temp_dir, 'kubelogin')
             k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
-            # 2 warnings, 1st for download result; 2nd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+            # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
         finally:
             shutil.rmtree(temp_dir)
 
-    @unittest.skip('Update api version')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_create_installation_dir(self, logger_mock, mock_url_retrieve):

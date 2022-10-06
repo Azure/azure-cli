@@ -155,7 +155,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}')
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -168,7 +168,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
@@ -176,7 +176,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -189,7 +189,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
@@ -197,7 +197,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -210,7 +210,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
@@ -313,6 +313,80 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_predictive_policy')
+    def test_monitor_autoscale_predictive_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'scale-look-ahead-time': 'PT1M',
+            'scale-mode': 'Enabled',
+            'new-scale-mode': 'ForecastOnly'
+        })
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --scale-mode {scale-mode}', checks=[
+            self.check('predictiveAutoscalePolicy.scaleMode', 'Enabled'),
+            self.check('profiles[0].capacity.default', 3),
+            self.check('profiles[0].capacity.minimum', 3),
+            self.check('profiles[0].capacity.maximum', 3)
+        ])
+        self.cmd('monitor autoscale list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('monitor autoscale show -g {rg} -n {vmss}')
+
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --count 2 --scale-look-ahead-time {scale-look-ahead-time}',
+                 checks=[
+                     # self.check('predictiveAutoscalePolicy.scaleLookAheadTime', 'PT1M'),
+                     self.check('profiles[0].capacity.default', 2),
+                     self.check('profiles[0].capacity.minimum', 2),
+                     self.check('profiles[0].capacity.maximum', 2)
+                 ])
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --scale-mode {new-scale-mode}', checks=[
+            self.check('predictiveAutoscalePolicy.scaleMode', 'ForecastOnly'),
+        ])
+        self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_show_predictive_metric')
+    def test_monitor_autoscale_show_predictive_metric(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'scale-look-ahead-time': 'PT1M',
+            'scale-mode': 'Enabled',
+        })
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --max-count 5 --min-count 1 '
+                 '--scale-mode {scale-mode} --scale-look-ahead-time {scale-look-ahead-time}',
+                 checks=[
+                     self.check('predictiveAutoscalePolicy.scaleMode', 'Enabled'),
+                     self.check('profiles[0].capacity.default', 3),
+                     self.check('profiles[0].capacity.minimum', 1),
+                     self.check('profiles[0].capacity.maximum', 5)
+                 ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'Percentage CPU'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 75),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT5M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+        self.cmd('monitor autoscale show-predictive-metric -g {rg} --autoscale-setting-name {vmss} --aggregation Total --interva PT1H '
+                 '--metric-name "PercentageCPU" --metric-namespace "Microsoft.Compute/virtualMachineScaleSets" '
+                 '--timespan "2022-01-14T22:00:00.000Z/2022-01-16T22:00:00.000Z" ',
+                 checks=[
+                     self.check('interval', "PT1H")
+                 ])
 
 # inexplicably fails on CI so making into a live test
 class TestMonitorAutoscaleTimezones(LiveScenarioTest):
