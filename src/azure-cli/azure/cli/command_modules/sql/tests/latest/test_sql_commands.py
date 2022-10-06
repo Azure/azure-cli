@@ -1099,6 +1099,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'dest_database_name': 'cli-restore-ltr'
         })
 
+        self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
+
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg}',
@@ -5031,6 +5033,7 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
+    @AllowLargeResponse
     def test_sql_managed_db_long_term_retention(self, mi, rg):
         resource_prefix = 'MIDBLongTermRetention'
         self.kwargs.update({
