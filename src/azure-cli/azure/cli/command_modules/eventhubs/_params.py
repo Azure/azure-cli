@@ -53,14 +53,13 @@ def load_arguments_eh(self, _):
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
         c.argument('minimum_tls_version', arg_type=get_enum_type(TlsVersion), options_list=['--minimum-tls-version', '--min-tls'], help='The minimum TLS version for the cluster to support, e.g. 1.2')
+        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
 
-    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
-        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Cluster region
     for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:
@@ -249,6 +248,9 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace encryption add', 'eventhubs namespace encryption remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+            c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                       arg_type=get_three_state_flag(),
+                       help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Schema Registry
     with self.argument_context('eventhubs namespace schema-registry list') as c:

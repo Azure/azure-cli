@@ -16,7 +16,7 @@ from azure.cli.core.profiles import ResourceType
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
                          default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None,
-                         disable_local_auth=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None, minimum_tls_version=None):
+                         disable_local_auth=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None, minimum_tls_version=None, require_infrastructure_encryption=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -55,6 +55,11 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         if encryption_config:
             ehparam.encryption = Encryption()
             ehparam.encryption.key_vault_properties = encryption_config
+
+        if require_infrastructure_encryption is not None:
+            if ehparam.encryption is None:
+                ehparam.encryption = Encryption()
+            ehparam.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
         client.begin_create_or_update(
             resource_group_name=resource_group_name,
@@ -95,8 +100,8 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if minimum_tls_version:
             instance.minimum_tls_version = minimum_tls_version
 
-        if require_infrastructure_encryption:
-            if instance.encryption is not None:
+        if require_infrastructure_encryption is not None:
+            if instance.encryption is None:
                 instance.encryption = Encryption()
             instance.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
@@ -527,7 +532,7 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
     return get_namespace
 
 
-def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
+def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config, require_infrastructure_encryption=None):
     namespace = client.get(resource_group_name, namespace_name)
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
 
@@ -540,6 +545,9 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
     else:
         namespace.encryption = Encryption()
         namespace.encryption.key_vault_properties = encryption_config
+
+    if require_infrastructure_encryption is not None:
+        namespace.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
     client.begin_create_or_update(
         resource_group_name=resource_group_name,
