@@ -2964,6 +2964,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest-HSEP', location='eastus2')
     @SqlServerPreparer(name_prefix='clitest-HSEP', location='eastus2')
     @AllowLargeResponse()
+    @live_only() # Could not find tier Hyperscale. Supported tiers are: ['Standard', 'Premium', 'Basic', 'GeneralPurpose', 'BusinessCritical']
     def test_sql_elastic_pools_hyperscale_mgmt(self, resource_group, resource_group_location, server):
         pool_name = "cliautomationpool1"
 
@@ -3975,6 +3976,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
+    @live_only() # Location 'East US 2 EUAP' is not accepting creation of new Windows Azure SQL Database servers at this time.
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
         source_non_zr_db_name = "sourceNonZrDb"
@@ -4057,6 +4059,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
     @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
     @AllowLargeResponse()
+    @live_only() # Location 'East US 2 EUAP' is not accepting creation of new Windows Azure SQL Database servers at this time.
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
         non_zr_db_name_1 = "nonZrDb1"
@@ -4169,6 +4172,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
+    @live_only() # Location 'East US 2 EUAP' is not accepting creation of new Windows Azure SQL Database servers at this time.
     def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
         # Set db names
         source_non_zr_db_name = "sourceNonZrDb"
