@@ -205,6 +205,14 @@ examples:
   - name: Update a function app's settings.
     text: |
         az functionapp config appsettings set --name MyFunctionApp --resource-group MyResourceGroup --settings "AzureWebJobsStorage=$storageConnectionString"
+  - name: Set using both key-value pair and a json file with more settings.
+    text: >
+        az functionapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['functionapp config container'] = """
