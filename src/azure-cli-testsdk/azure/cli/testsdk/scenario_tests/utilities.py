@@ -70,9 +70,10 @@ def trim_kwargs_from_test_function(fn, kwargs):
     # the next function is the actual test function. the kwargs need to be trimmed so
     # that parameters which are not required will not be passed to it.
     if not is_preparer_func(fn):
-        spec = inspect.getfullargspec(fn)
-        if spec.varkw is None:
-            args = set(spec.args)
+        sig = inspect.signature(fn)
+        if not any(param.kind == inspect.Parameter.VAR_KEYWORD
+                   for param in sig.parameters.values()):
+            args = set(sig.parameters.keys())
             for key in [k for k in kwargs if k not in args]:
                 del kwargs[key]
 
