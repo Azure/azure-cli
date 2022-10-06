@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=C0302
+from difflib import restore
 from enum import Enum
 import calendar
 from datetime import datetime
@@ -5208,24 +5209,32 @@ def managed_db_log_replay_stop(
     '''
 
     restore_details_client = get_sql_managed_database_restore_details_operations(cmd.cli_ctx, None)
+    try:
+        # Determine if managed DB was created using log replay service
+        # Raises RestoreDetailsNotAvailableOrExpired exception if there are no restore details
+        restore_details = restore_details_client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            restore_details_name=RestoreDetailsName.DEFAULT)
 
-    # Determine if managed DB was created using log replay service, raise exception if not
-    restore_details = restore_details_client.get(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name,
-        restore_details_name=RestoreDetailsName.DEFAULT)
-
-    # If type is present, it must be lrsrestore in order to proceed with stop-log-replay
-    if (hasattr(restore_details, 'type_properties_type') and restore_details.type_properties_type.lower() != 'lrsrestore'):
-        raise CLIError(
-            f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
-            f'in the resource group {resource_group_name} was not created with log replay service.')
-
-    return client.begin_delete(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+        # Type must be LRSRestore in order to proceed with stop-log-replay
+        if (restore_details.type_properties_type.lower() == 'lrsrestore'):
+            return client.begin_delete(
+                database_name=database_name,
+                managed_instance_name=managed_instance_name,
+                resource_group_name=resource_group_name)
+        else:
+            raise CLIError(
+                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+                f'in the resource group {resource_group_name} was not created with log replay service.')
+    except Exception as ex:
+        # 
+        if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
+            raise CLIError(
+                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+                f'in the resource group {resource_group_name} was not created with log replay service.')
+        raise ex   
 
 
 def managed_db_log_replay_complete_restore(
