@@ -73,9 +73,6 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
                          maximum_throughput_units=None, is_kafka_enabled=None,
                          disable_local_auth=None, require_infrastructure_encryption=None, minimum_tls_version=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
-    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
-    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
-    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2021-06-01-preview'):
         if tags:
