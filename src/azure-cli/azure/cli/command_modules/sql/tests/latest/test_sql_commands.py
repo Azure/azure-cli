@@ -3516,6 +3516,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
     @KeyVaultPreparer(location='eastus', name_prefix='sqltdebyok')
+    @live_only() # User tried to log in to a device from a platform (Unknown) that's currently not supported through Conditional Access policy. Supported device platforms are: iOS, Android, Mac, and Windows flavors.
     def test_sql_tdebyok(self, resource_group, server, key_vault):
         resource_prefix = 'sqltdebyok'
 
