@@ -61,11 +61,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         parameters=parameter
     ).result()
 
-    if default_action:
-        netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-        netwrokruleset.default_action = default_action
-        client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
     return client.get(resource_group_name, namespace_name)
 
 
@@ -280,7 +275,7 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
-                       enable_partitioning=None, enable_express=None, max_message_size=None):
+                       enable_partitioning=None, enable_express=None, max_message_size_in_kilobytes=None):
     SBTopic = cmd.get_models('SBTopic', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if max_size_in_megabytes:
@@ -294,7 +289,7 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
         support_ordering=support_ordering,
         enable_partitioning=enable_partitioning,
         enable_express=enable_express,
-        max_message_size_in_kilobytes=max_message_size
+        max_message_size_in_kilobytes=max_message_size_in_kilobytes
     )
 
     if default_message_time_to_live:

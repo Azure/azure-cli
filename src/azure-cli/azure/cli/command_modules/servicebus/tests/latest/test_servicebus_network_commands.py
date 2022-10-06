@@ -63,11 +63,6 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', '{sku}')])
 
-        # Update Namespace
-        self.cmd(
-            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags} --default-action Allow',
-            checks=[self.check('sku.name', '{sku}')])
-
         # Get NetworkRule
         self.cmd(
             'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()

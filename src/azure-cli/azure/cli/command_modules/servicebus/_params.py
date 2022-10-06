@@ -33,7 +33,6 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus namespace') as c:
         c.argument('namespace_name', id_part='name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
-        c.argument('default_action', help='Default action for network rule set.')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
