@@ -1594,7 +1594,7 @@ type: group
 short-summary: Provides operations for Azure NetApp Files (ANF) Account Resources.
 """
 
-helps['netappfiles resource region-info'] = """
+helps['netappfiles resource query-region-info'] = """
 type: command
 short-summary: Provides storage to network proximity and logical zone mapping information.
 parameters:
@@ -1603,5 +1603,5 @@ parameters:
 examples:
   - name: Describes region specific information.
     text: >
-        az netappfiles resource region-info -l location
+        az netappfiles resource query-region-info -l location
 """

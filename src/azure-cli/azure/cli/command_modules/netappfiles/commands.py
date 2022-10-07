@@ -383,4 +383,4 @@ def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
 
 def load_net_app_resource_command_groups(self, netappfiles_resource_sdk):
     with self.command_group('netappfiles resource', netappfiles_resource_sdk) as g:
-        g.command('region-info', 'query_region_info', supports_no_wait=True)
+        g.command('query-region-info', 'query_region_info', supports_no_wait=True)

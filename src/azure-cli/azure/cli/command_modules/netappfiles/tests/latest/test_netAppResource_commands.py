@@ -16,6 +16,6 @@ class AzureNetAppFilesResourceServiceScenarioTest(ScenarioTest):
             'loc': LOCATION,
         })
         
-        self.cmd("az netappfiles resource region-info -l {loc}", checks=[
+        self.cmd("az netappfiles resource query-region-info -l {loc}", checks=[
             self.check("length(@)", 1)
         ])
