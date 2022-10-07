@@ -65,8 +65,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
 
 def cli_namespace_update(instance, tags=None, sku=None, capacity=None, minimum_tls_version=None):
-    from msrestazure.tools import parse_resource_id
-
     if tags is not None:
         instance.tags = tags
 
