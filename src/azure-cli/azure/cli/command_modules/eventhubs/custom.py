@@ -14,8 +14,7 @@ from azure.cli.core.profiles import ResourceType
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
-                         is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
-                         default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None,
+                         is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, zone_redundant=None, cluster_arm_id=None,
                          disable_local_auth=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None, minimum_tls_version=None, require_infrastructure_encryption=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -69,7 +68,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
+def cli_namespace_update(cmd, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None,
                          disable_local_auth=None, require_infrastructure_encryption=None, minimum_tls_version=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
