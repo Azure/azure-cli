@@ -54,17 +54,12 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku} --default-action Allow',
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', '{sku}')])
-
-        # Update Namespace
-        self.cmd(
-            'eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags} --default-action Allow',
-            checks=[self.check('sku.name', '{sku}')])
 
         # Get NetworkRule
         self.cmd(
