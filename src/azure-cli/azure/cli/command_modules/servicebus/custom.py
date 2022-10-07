@@ -15,7 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None,
+                         capacity=None, zone_redundant=None, mi_system_assigned=None,
                          mi_user_assigned=None, encryption_config=None, minimum_tls_version=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -64,7 +64,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None, minimum_tls_version=None):
+def cli_namespace_update(instance, tags=None, sku=None, capacity=None, minimum_tls_version=None):
     from msrestazure.tools import parse_resource_id
 
     if tags is not None:
@@ -79,12 +79,6 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
 
     if minimum_tls_version:
         instance.minimum_tls_version = minimum_tls_version
-
-    if default_action:
-        resourcegroup = parse_resource_id(instance.id)['resource_group']
-        netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
-        netwrokruleset.default_action = default_action
-        client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
 
     return instance
 
