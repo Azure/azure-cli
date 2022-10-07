@@ -56,7 +56,7 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku} --default-action Allow',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
