@@ -365,7 +365,7 @@ class ApimScenarioTest(ScenarioTest):
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(api_count, 1)
 
-        count = len(self.cmd('apim list').get_output_in_json())
+        service_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
         pythonfile = 'gql_schema.gql'
         schemapath = os.path.join(TEST_DIR, pythonfile)
         api_file = open(schemapath, 'r')
@@ -490,8 +490,8 @@ class ApimScenarioTest(ScenarioTest):
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
-        final_count = len(self.cmd('apim list').get_output_in_json())
-        self.assertEqual(final_count, count - 1)
+        final_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
+        self.assertEqual(final_count, service_count - 1)
 
     @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
