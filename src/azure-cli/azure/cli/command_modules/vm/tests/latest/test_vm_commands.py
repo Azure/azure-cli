@@ -3643,6 +3643,17 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             self.check('[0].sku.name', 'Standard')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nat_rule')
+    def test_vmss_create_with_nat_rule(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15),
+            'natrule': self.create_random_name('natrule', 15)
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntults --admin-username clittester --generate-ssh-keys --nat-rule-name {natrule}')
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('name', '{vmss}')
+        ])
+
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
