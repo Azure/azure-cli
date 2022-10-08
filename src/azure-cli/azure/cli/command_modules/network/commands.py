@@ -1129,8 +1129,8 @@ def load_command_table(self, _):
     with self.command_group('network vnet', network_vnet_sdk) as g:
         from .aaz.latest.network.vnet import List
         self.command_table['network vnet list'] = List(loader=self, table_transformer=transform_vnet_table_output)
-        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet', supports_local_cache=True)
+        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet')
         g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
@@ -1139,7 +1139,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
-        g.custom_command('create', 'create_subnet', supports_local_cache=True)
+        g.custom_command('create', 'create_subnet')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters', custom_func_name='update_subnet')
         g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
     # endregion
