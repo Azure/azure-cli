@@ -6563,6 +6563,82 @@ def update_custom_ip_prefix(instance,
 
 
 # region PublicIPAddresses
+def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
+                            allocation_method=None, dns_name=None,
+                            idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
+                            public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
+    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
+
+    public_ip_args = {
+        'name': public_ip_address_name,
+        "resource_group": resource_group_name,
+        'location': location,
+        'tags': tags,
+        'allocation_method': allocation_method,
+        'idle_timeout': idle_timeout,
+        'ip_address': ip_address,
+        'ip_tags': ip_tags
+    }
+
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        if is_valid_resource_id(public_ip_prefix):
+            public_ip_prefix_id = public_ip_prefix
+            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
+        else:
+            public_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIPPrefixes',
+                name=public_ip_prefix
+            )
+            public_ip_prefix_name = public_ip_prefix
+        public_ip_args['public_ip_prefix'] = public_ip_prefix_id
+
+        # reuse prefix information
+        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
+        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
+        version = pip_obj.public_ip_address_version
+        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
+        zone = pip_obj.zones
+
+    if sku is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
+    if not allocation_method:
+        if sku and sku.lower() == 'standard':
+            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
+        else:
+            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
+
+    public_ip_args['version'] = version
+    public_ip_args['zone'] = zone
+
+    if sku:
+        public_ip_args['sku'] = sku
+    if tier:
+        if not sku:
+            public_ip_args['sku'] = 'Basic'
+        public_ip_args['tier'] = tier
+
+    if dns_name or reverse_fqdn:
+        public_ip_args['dns_name'] = dns_name
+        public_ip_args['reverse_fqdn'] = reverse_fqdn
+
+    if edge_zone:
+        public_ip_args['edge_zone'] = edge_zone
+        public_ip_args['type'] = 'EdgeZone'
+    if protection_mode:
+        public_ip_args['protection_mode'] = protection_mode
+
+    from .aaz.latest.network.public_ip import Create
+
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
+
+
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
