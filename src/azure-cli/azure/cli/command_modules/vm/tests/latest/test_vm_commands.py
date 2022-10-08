@@ -7506,6 +7506,42 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='eastus2euap')
+    def test_disk_controller_type(self, resource_group):
+        self.kwargs.update({
+            'vm_disk': self.create_random_name('disk-', 15),
+            'vm': self.create_random_name('vm-', 15),
+            'vm1': self.create_random_name('vm-', 15),
+            'vm2': self.create_random_name('vm-', 15),
+            'vmss': self.create_random_name('vmss-', 15),
+            'image': self.create_random_name('image-', 15),
+            'vmss1': self.create_random_name('vmss-', 15)
+        })
+        self.cmd('disk create -n {vm_disk} -g {rg} --hyper-v-generation v2 --size-gb 10')
+        self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --attach-os-disk {vm_disk} --os-type linux')
+        self.cmd('vm show -n {vm} -g {rg}', checks=[
+            self.check('storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm1} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5')
+        self.cmd('vm update --disk-controller-type SCSI -n {vm1} -g {rg}')
+        self.cmd('vm show -n {vm1} -g {rg}', checks=[
+            self.check('storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5 --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vm deallocate -g {rg} -n {vm2}')
+        self.cmd('vm generalize -g {rg} -n {vm2}')
+        self.cmd('image create -g {rg} -n {image} --source {vm2} --hyper-v-generation v2')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --disk-controller-type scsi --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5')
+        self.cmd('vmss update -g {rg} -n {vmss1} --disk-controller-type scsi', checks=[
+            self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
+        ])
+
 
 class DiskAccessTest(ScenarioTest):
 
