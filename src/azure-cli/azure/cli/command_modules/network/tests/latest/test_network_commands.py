@@ -2596,7 +2596,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection')
+    @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection', location='eastus2')
     def test_network_ddos_protection_plan(self, resource_group):
 
         self.kwargs.update({
@@ -2609,7 +2609,10 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
         self.kwargs['vnet2_id'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
         # can be attached through DDoS create
         self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos} --vnets {vnet1} {vnet2_id} --tags foo=doo').get_output_in_json()['id']
-        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}',
+                 checks=[self.check('name', '{ddos}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('length(virtualNetworks)', 2)])
 
         # can be detached through VNet update
         self.cmd('network vnet update -g {rg} -n {vnet1} --ddos-protection-plan ""')
@@ -2623,13 +2626,19 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
         # can be detached through DDoS update
         self.cmd('network ddos-protection update -g {rg} -n {ddos} --tags doo=foo --vnets ""')
-        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}',
+                 checks=[self.check('name', '{ddos}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('virtualNetworks', None)])
 
         # can be attached through DDoS update
         self.cmd('network ddos-protection update -g {rg} -n {ddos} --vnets {vnet2_id} --tags foo=boo')
-        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}',
+                 checks=[self.check('name', '{ddos}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('length(virtualNetworks)', 1)])
 
-        self.cmd('network ddos-protection list -g {rg}')
+        self.cmd('network ddos-protection list -g {rg}', checks=[self.check('length(@)', 1)])
         with self.assertRaises(Exception):
             self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 
@@ -4420,37 +4429,6 @@ class NetworkVNetScenarioTest(ScenarioTest):
         ])
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
-    def test_network_vnet_caching(self, resource_group):
-        from time import sleep
-
-        self.kwargs.update({
-            'vnet': 'vnet1'
-        })
-
-        # test that custom commands work with caching
-        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --defer')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --defer')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --defer')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            # ensure vnet has not been created
-            self.cmd('network vnet show -g {rg} -n {vnet}')
-        self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
-        self.cmd('network vnet show -g {rg} -n {vnet}',
-                 checks=self.check('length(subnets)', 3))
-        with self.assertRaisesRegex(CLIError, 'Not found in cache'):
-            self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
-
-        # test that generic update works with caching
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --defer')
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2')
-        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-            self.check('length(tags)', 2),
-            self.check('length(subnets)', 3)  # should reflect the write-through behavior from the earlier PUT
-        ])
-
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
@@ -5791,6 +5769,7 @@ class ServiceEndpointScenarioTest(ScenarioTest):
 
 class NetworkProfileScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_network_profile')
     def test_network_profile(self, resource_group):
 
@@ -5810,11 +5789,11 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group
         })
-        self.cmd('network list-service-aliases -l centralus')
-        self.cmd('network list-service-aliases -l centralus -g {rg}')
+        self.cmd('network list-service-aliases -l centralus', checks=self.check('type(@)', 'array'))
+        self.cmd('network list-service-aliases -l centralus -g {rg}', checks=self.check('type(@)', 'array'))
 
         # test list-service-tags
-        self.cmd('network list-service-tags -l centralus')
+        self.cmd('network list-service-tags -l centralus', checks=self.check('type(@)', 'object'))
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
@@ -5862,32 +5841,6 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             self.check('name', '{bastion}')
         ])
         self.cmd('network bastion delete -g {rg} -n {bastion}')
-
-
-class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
-
-    @ResourceGroupPreparer()
-    def test_network_vnet_local_context(self):
-        self.kwargs.update({
-            'vnet': self.create_random_name(prefix='vnet-', length=12),
-            'subnet': self.create_random_name(prefix='subnet-', length=12)
-        })
-
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
-                 checks=[self.check('newVNet.name', self.kwargs['vnet'])])
-        self.cmd('network vnet show', checks=[
-            self.check('name', self.kwargs['vnet'])
-        ])
-        self.cmd('network vnet subnet show', checks=[
-            self.check('name', self.kwargs['subnet'])
-        ])
-        with self.assertRaises(CLIError):
-            self.cmd('network vnet delete')
-        with self.assertRaises(CLIError):
-            self.cmd('network vnet subnet delete')
-
-        self.cmd('network vnet subnet delete -n {subnet}')
-        self.cmd('network vnet delete -n {vnet}')
 
 
 class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):

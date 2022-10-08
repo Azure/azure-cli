@@ -101,9 +101,12 @@ class AAZObject(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            other = other._data
+            return self._data == other._data
+
+        # other is buld-in type value
         if other is None:
             return self._data is None
+
         if (not isinstance(other, dict)) or len(other) != len(self._data):
             return False
 
@@ -195,7 +198,9 @@ class AAZDict(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            other = other._data
+            return self._data == other._data
+
+        # other is buld-in type value
         if other is None:
             return self._data is None
 
@@ -323,6 +328,7 @@ class AAZList(AAZBaseValue):
         if isinstance(other, AAZBaseValue):
             return self._data == other._data
 
+        # other is buld-in type value
         if other is None:
             return self._data is None
 

@@ -91,6 +91,7 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('ldap_enabled', arg_type=get_three_state_flag())
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
+        c.argument('has_root_access', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume create') as c:
         c.argument('zones', nargs="+")

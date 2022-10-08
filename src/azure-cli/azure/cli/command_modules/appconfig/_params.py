@@ -25,7 +25,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
-                          validate_strict_import)
+                          validate_strict_import, validate_export_as_reference)
 
 
 def load_arguments(self, _):
@@ -201,6 +201,8 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], is_preview=True, arg_type=get_three_state_flag(), validator=validate_export_as_reference,
+                   help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")

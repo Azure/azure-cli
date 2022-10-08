@@ -32,14 +32,6 @@ def cf_flow_logs(cli_ctx, _):
     return network_client_factory(cli_ctx).flow_logs
 
 
-def cf_ddos_protection_plans(cli_ctx, _):
-    return network_client_factory(cli_ctx).ddos_protection_plans
-
-
-def cf_endpoint_services(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_endpoint_services
-
-
 def cf_express_route_circuit_authorizations(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_authorizations
 
@@ -116,10 +108,6 @@ def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
 
 
-def cf_network_profiles(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_profiles
-
-
 def cf_network_security_groups(cli_ctx, _):
     return network_client_factory(cli_ctx).network_security_groups
 
@@ -148,10 +136,6 @@ def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
 
 
-def cf_service_tags(cli_ctx, _):
-    return network_client_factory(cli_ctx).service_tags
-
-
 def cf_subnets(cli_ctx, _):
     return network_client_factory(cli_ctx).subnets
 
@@ -174,10 +158,6 @@ def cf_virtual_networks(cli_ctx, _):
 
 def cf_virtual_network_peerings(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_peerings
-
-
-def cf_service_aliases(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_service_aliases
 
 
 def cf_dns_references(cli_ctx, _):

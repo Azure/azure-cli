@@ -1347,19 +1347,6 @@ def load_arguments(self, _):
         c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
         c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
 
-    # connection monitor V1 parameter set
-    with self.argument_context('network watcher connection-monitor', arg_group='V1 Endpoint') as c:
-        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic. '
-                                           'Currently only Virtual Machines are supported.')
-        c.argument('source_port', help='Port number from which to originate traffic.')
-        c.argument('dest_resource', help='Name of ID of the resource to receive traffic. '
-                                         'Currently only Virtual Machines are supported.')
-        c.argument('dest_port', help='Port number on which to receive traffic.')
-        c.argument('dest_address', help='The IP address or URI at which to receive traffic.')
-        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int, default=60)
-        c.argument('do_not_start', action='store_true',
-                   help='Create the connection monitor but do not start it immediately.')
-
     nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
     for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
         with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
@@ -1772,13 +1759,6 @@ def load_arguments(self, _):
         c.argument('destination', help="Traffic destination. Accepted values are '*', IP address/CIDR, or service tag.")
         c.argument('source', help="Traffic source. Accepted values are '*', IP address/CIDR, or service tag.")
         c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
-    # endregion
-
-    # region NetworkProfile
-    network_profile_name = CLIArgumentType(options_list='--profile-name', metavar='NAME', help='The network profile name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkProfiles'))
-
-    with self.argument_context('network profile') as c:
-        c.argument('network_profile_name', network_profile_name, options_list=['--name', '-n'])
     # endregion
 
     # region CustomIpPrefix
