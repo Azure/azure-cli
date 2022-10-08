@@ -101,9 +101,12 @@ class AAZObject(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            other = other._data
+            return self._data == other._data
+
+        # other is buld-in type value
         if other is None:
             return self._data is None
+
         if (not isinstance(other, dict)) or len(other) != len(self._data):
             return False
 
@@ -130,12 +133,13 @@ class AAZObject(AAZBaseValue):
 
             for schema in schemas:
                 for name, field_schema in schema._fields.items():
-                    v = self[name].to_serialized_data(processor=processor, **kwargs)
-                    if v == AAZUndefined:
-                        continue
-                    if field_schema._serialized_name:   # pylint: disable=protected-access
-                        name = field_schema._serialized_name  # pylint: disable=protected-access
-                    result[name] = v
+                    if name in self._data:
+                        v = self[name].to_serialized_data(processor=processor, **kwargs)
+                        if v == AAZUndefined:
+                            continue
+                        if field_schema._serialized_name:   # pylint: disable=protected-access
+                            name = field_schema._serialized_name  # pylint: disable=protected-access
+                        result[name] = v
 
         if not result and self._is_patch:
             result = AAZUndefined
@@ -194,7 +198,9 @@ class AAZDict(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            other = other._data
+            return self._data == other._data
+
+        # other is buld-in type value
         if other is None:
             return self._data is None
 
@@ -322,6 +328,7 @@ class AAZList(AAZBaseValue):
         if isinstance(other, AAZBaseValue):
             return self._data == other._data
 
+        # other is buld-in type value
         if other is None:
             return self._data is None
 

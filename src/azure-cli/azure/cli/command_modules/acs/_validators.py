@@ -55,11 +55,6 @@ def validate_ssh_key(namespace):
     namespace.ssh_key_value = content
 
 
-def validate_list_of_integers(string):
-    # extract comma-separated list of integers
-    return list(map(int, string.split(',')))
-
-
 def validate_create_parameters(namespace):
     if not namespace.name:
         raise CLIError('--name has no value')
@@ -222,6 +217,12 @@ def validate_load_balancer_idle_timeout(namespace):
     if namespace.load_balancer_idle_timeout is not None:
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
+
+
+def validate_network_policy(namespace):
+    """validate network policy to be in lowercase"""
+    if namespace.network_policy is not None and namespace.network_policy.islower() is False:
+        raise InvalidArgumentValueError("--network-policy should be provided in lowercase")
 
 
 def validate_nat_gateway_managed_outbound_ip_count(namespace):

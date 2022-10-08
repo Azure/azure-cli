@@ -11,11 +11,11 @@ from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccou
     CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, \
     ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, \
     DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, \
-    BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, AuthorizeRequest, \
+    BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, KeyVaultProperties, EncryptionIdentity, AuthorizeRequest, \
     BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
     SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
     VolumeGroupVolumeProperties
-
+from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
@@ -45,10 +45,20 @@ def _update_mapper(existing, new, keys):
 
 # ---- ACCOUNT ----
 # account update - active_directory is amended with subgroup commands
-def create_account(cmd, client, account_name, resource_group_name, location=None, tags=None, encryption=None,
+def create_account(cmd, client, account_name, resource_group_name, location=None, tags=None, encryption=None, key_source='Microsoft.NetApp', key_vault_uri=None,
+                   key_name=None, key_vault_resource_id=None, user_assigned_identity=None,
                    no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    account_encryption = AccountEncryption(key_source=encryption) if encryption is not None else None
+
+    if encryption is not None and key_source is None:
+        key_source = encryption
+
+    if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
+        keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
+        identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
+    else:
+        account_encryption = None
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
@@ -140,8 +150,16 @@ def remove_active_directory(client, account_name, resource_group_name, active_di
 
 
 # account update, active_directory is amended with subgroup commands
-def patch_account(instance, tags=None, encryption=None):
-    account_encryption = AccountEncryption(key_source=encryption)
+def patch_account(instance, tags=None, encryption=None, key_source=None, key_vault_uri=None,
+                  key_name=None, key_vault_resource_id=None, user_assigned_identity=None):
+    if encryption is not None and key_source is None:
+        key_source = encryption
+    if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
+        keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
+        identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
+    else:
+        account_encryption = None
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
     _update_mapper(instance, body, ['tags', 'encryption'])
     return body
@@ -192,7 +210,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
                   default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None,
-                  zones=None, kv_private_endpoint_id=None, no_wait=False):
+                  zones=None, kv_private_endpoint_id=None, delete_base_snapshot=None, smb_access_based_enumeration=None,
+                  smb_non_browsable=None, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subs_id = get_subscription_id(cmd.cli_ctx)
 
@@ -299,7 +318,10 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         network_features=network_features,
         enable_subvolumes=enable_subvolumes,
         zones=zones,
-        key_vault_private_endpoint_resource_id=kv_private_endpoint_id)
+        key_vault_private_endpoint_resource_id=kv_private_endpoint_id,
+        delete_base_snapshot=delete_base_snapshot,
+        smb_access_based_enumeration=smb_access_based_enumeration,
+        smb_non_browsable=smb_non_browsable)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, pool_name, volume_name, body)
 
@@ -367,7 +389,8 @@ def break_replication(client, resource_group_name, account_name, pool_name, volu
 # add new rule to policy
 def add_export_policy_rule(instance, allowed_clients, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
                            rule_index=None, kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
-                           kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None, chown_mode=None):
+                           kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None,
+                           chown_mode=None):
     if rule_index is None:
         rule_index = 1 if len(instance.export_policy.rules) < 1 else max(rule.rule_index for rule in instance.export_policy.rules) + 1
 
@@ -410,7 +433,7 @@ def list_export_policy_rules(client, account_name, pool_name, volume_name, resou
 def remove_export_policy_rule(instance, rule_index):
     rules = []
     # Note this commented out way created a patch request that included some mount target properties causing validation issues server side
-    # need to investigate why, leave this for now remove after this has been ivestigated before next release please
+    # need to investigate why, leave this for now remove after this has been investigated before next release please
     # look for the rule and remove
     # for rule in instance.export_policy.rules:
     #    if rule.rule_index == int(rule_index):
@@ -557,7 +580,8 @@ def create_volume_group(cmd, client, resource_group_name, account_name, pool_nam
                         log_backup_size=None, log_backup_throughput=None, backup_nfsv3=False, no_wait=False,
                         data_repl_skd=None, data_src_id=None, shared_repl_skd=None, shared_src_id=None,
                         data_backup_repl_skd=None, data_backup_src_id=None, log_backup_repl_skd=None,
-                        log_backup_src_id=None, kv_private_endpoint_id=None):
+                        log_backup_src_id=None, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                        smb_non_browsable=None):
     if number_of_hots < 1 or number_of_hots > 3:
         raise ValidationError("Number of hosts must be between 1 and 3")
     if memory < 1 or memory > 12000:
@@ -632,14 +656,19 @@ def create_volume_group(cmd, client, resource_group_name, account_name, pool_nam
     volumes.extend(log_volumes)
 
     volumes.append(create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
-                                                   shared_throughput, number_of_hots, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id))
+                                                   shared_throughput, number_of_hots, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, smb_access_based_enumeration,
+                                                   smb_non_browsable))
     volumes.append(create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
                                                         data_backup_throughput, total_data_volume_size,
                                                         total_log_volume_size, prefix, backup_nfsv3,
-                                                        data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id))
+                                                        data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id,
+                                                        smb_access_based_enumeration,
+                                                        smb_non_browsable))
     volumes.append(create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
                                                        log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
-                                                       log_backup_src_id, kv_private_endpoint_id))
+                                                       log_backup_src_id, kv_private_endpoint_id,
+                                                       smb_access_based_enumeration,
+                                                       smb_non_browsable))
 
     body = VolumeGroupDetails(
         location=location,
@@ -718,7 +747,8 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
 
 def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
-                                    shared_src_id=None, kv_private_endpoint_id=None):
+                                    shared_src_id=None, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                                    smb_non_browsable=None):
     name = prefix + sap_sid + "-" + VolumeType.SHARED.value
 
     if shared_size is None:
@@ -747,7 +777,9 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
         throughput_mibps=shared_throughput,
         export_policy=create_default_export_policy_for_vg(),
         data_protection=data_protection,
-        key_vault_private_endpoint_resource_id=kv_private_endpoint_id
+        key_vault_private_endpoint_resource_id=kv_private_endpoint_id,
+        smb_access_based_enumeration=smb_access_based_enumeration,
+        smb_non_browsable=smb_non_browsable
     )
 
     return shared_volume
@@ -756,7 +788,8 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
 def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
-                                         kv_private_endpoint_id=None):
+                                         kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                                         smb_non_browsable=None):
     name = prefix + sap_sid + "-" + VolumeType.DATA_BACKUP.value
 
     if data_backup_size is None:
@@ -786,7 +819,9 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
         throughput_mibps=data_backup_throughput,
         export_policy=create_default_export_policy_for_vg(backup_nfsv3),
         data_protection=data_protection,
-        key_vault_private_endpoint_resource_id=kv_private_endpoint_id
+        key_vault_private_endpoint_resource_id=kv_private_endpoint_id,
+        smb_access_based_enumeration=smb_access_based_enumeration,
+        smb_non_browsable=smb_non_browsable
     )
 
     return data_backup_volume
@@ -794,7 +829,8 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
 
 def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
-                                        log_backup_src_id, kv_private_endpoint_id=None):
+                                        log_backup_src_id, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                                        smb_non_browsable=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG_BACKUP.value
 
     if log_backup_size is None:
@@ -823,7 +859,9 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
         throughput_mibps=log_backup_throughput,
         export_policy=create_default_export_policy_for_vg(backup_nfsv3),
         data_protection=data_protection,
-        key_vault_private_endpoint_resource_id=kv_private_endpoint_id
+        key_vault_private_endpoint_resource_id=kv_private_endpoint_id,
+        smb_access_based_enumeration=smb_access_based_enumeration,
+        smb_non_browsable=smb_non_browsable
     )
 
     return log_backup

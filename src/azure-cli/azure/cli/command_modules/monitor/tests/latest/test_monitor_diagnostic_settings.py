@@ -47,8 +47,8 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
                  checks=self.check('name', 'test01'))
 
         self.cmd('monitor diagnostic-settings list --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} -o json', checks=[
-            self.check('length(value)', 1),
-            self.check('value[0].name', 'test01')
+            self.check('length(@)', 1),
+            self.check('[0].name', 'test01')
         ])
 
         self.cmd('monitor diagnostic-settings show -n test01 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} -o json',
@@ -57,7 +57,7 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
         self.cmd('monitor diagnostic-settings delete -n test01 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} -o json')
 
         self.cmd('monitor diagnostic-settings list --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} -o json',
-                 checks=self.check('length(value)', 0))
+                 checks=self.check('length(@)', 0))
 
         self.cmd('monitor diagnostic-settings create -n test02 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} --workspace {ws} --export-to-resource-specific --logs \'{log_config}\' -o json',
                  checks=[

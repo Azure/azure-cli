@@ -8,6 +8,7 @@ import base64
 import binascii
 import getpass
 import json
+import yaml
 import logging
 import os
 import platform
@@ -96,6 +97,14 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
 
     elif isinstance(ex, ValidationError):
         az_error = azclierror.ValidationError(error_msg)
+
+    elif isinstance(ex, azclierror.HTTPError):
+        # For resources that don't support CAE - 401 can't be handled
+        if ex.response.status_code == 401 and 'WWW-Authenticate' in ex.response.headers:
+            az_error = azclierror.AuthenticationError(ex)
+            az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
+        else:
+            az_error = azclierror.UnclassifiedUserFault(ex)
 
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
@@ -525,6 +534,18 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     except CLIError as ex:
         # Reading file bypasses shell interpretation, so we discard the recommendation for shell quoting.
         raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
+
+
+def get_file_yaml(file_path, throw_on_empty=True):
+    content = read_file_content(file_path)
+    if not content:
+        if throw_on_empty:
+            raise CLIError("Failed to parse file '{}' with exception:\nNo content in the file.".format(file_path))
+        return None
+    try:
+        return yaml.safe_load(content)
+    except yaml.parser.ParserError as ex:
+        raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex)) from ex
 
 
 def read_file_content(file_path, allow_binary=False):

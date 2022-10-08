@@ -171,8 +171,6 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
-  - name: --encryption
-    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -657,7 +655,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --smb-encryption
     short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
   - name: --smb-continuously-avl
@@ -700,6 +698,8 @@ parameters:
     short-summary: Availability Zone
   - name: --kv-private-endpoint-id
     short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
+  - name: --kerberos-enabled
+    short-summary: Describe if a volume is KerberosEnabled
 
 examples:
   - name: Create an ANF volume
@@ -916,7 +916,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --chown-mode
     short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:
@@ -1587,4 +1587,21 @@ examples:
 helps['netappfiles volume-group wait'] = """
 type: command
 short-summary: Wait for a volume group to be created.
+"""
+
+helps['netappfiles resource'] = """
+type: group
+short-summary: Provides operations for Azure NetApp Files (ANF) Account Resources.
+"""
+
+helps['netappfiles resource query-region-info'] = """
+type: command
+short-summary: Provides storage to network proximity and logical zone mapping information.
+parameters:
+  - name: --location -l
+    short-summary: The location
+examples:
+  - name: Describes region specific information.
+    text: >
+        az netappfiles resource query-region-info -l location
 """

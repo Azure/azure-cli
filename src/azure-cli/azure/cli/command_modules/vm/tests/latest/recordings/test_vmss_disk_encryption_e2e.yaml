@@ -170,7 +170,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2022-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2022-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2022-08-01
   response:
     body:
       string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"20348.887.220806\",\r\n
@@ -222,7 +222,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2022-Datacenter/versions/20348.887.220806?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2022-Datacenter/versions/20348.887.220806?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
@@ -284,7 +284,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -318,10 +318,10 @@ interactions:
       "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
       "vmss1Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"apiVersion":
-      "2018-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "vmss1LBPublicIP",
+      "2022-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "vmss1LBPublicIP",
       "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
       "Dynamic"}}, {"type": "Microsoft.Network/loadBalancers", "name": "vmss1LB",
-      "location": "westus", "tags": {}, "apiVersion": "2018-01-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
+      "location": "westus", "tags": {}, "apiVersion": "2022-01-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
       "Microsoft.Network/publicIpAddresses/vmss1LBPublicIP"], "properties": {"backendAddressPools":
       [{"name": "vmss1LBBEPool"}], "frontendIPConfigurations": [{"name": "loadBalancerFrontEnd",
       "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Network/publicIPAddresses/vmss1LBPublicIP"}}}],
@@ -330,7 +330,7 @@ interactions:
       ''/frontendIPConfigurations/'', ''loadBalancerFrontEnd'')]"}, "protocol": "tcp",
       "frontendPortRangeStart": "50000", "frontendPortRangeEnd": "50119", "backendPort":
       3389}}]}}, {"type": "Microsoft.Compute/virtualMachineScaleSets", "name": "vmss1",
-      "location": "westus", "tags": {}, "apiVersion": "2022-03-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
+      "location": "westus", "tags": {}, "apiVersion": "2022-08-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
       "Microsoft.Network/loadBalancers/vmss1LB"], "properties": {"overprovision":
       true, "upgradePolicy": {"mode": "manual", "rollingUpgradePolicy": {}}, "singlePlacementGroup":
       null, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
@@ -583,7 +583,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -734,7 +734,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -773,7 +773,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1cb45268-732f-459a-8937-717c5e95480a?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1cb45268-732f-459a-8937-717c5e95480a?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
@@ -823,7 +823,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1cb45268-732f-459a-8937-717c5e95480a?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1cb45268-732f-459a-8937-717c5e95480a?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:51:46.6893644+00:00\",\r\n  \"status\":
@@ -874,7 +874,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1cb45268-732f-459a-8937-717c5e95480a?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1cb45268-732f-459a-8937-717c5e95480a?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:51:46.6893644+00:00\",\r\n  \"endTime\":
@@ -926,7 +926,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -1011,13 +1011,13 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/manualupgrade?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/manualupgrade?api-version=2022-08-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1027,7 +1027,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
       pragma:
       - no-cache
       server:
@@ -1063,7 +1063,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:52:49.3306773+00:00\",\r\n  \"status\":
@@ -1114,7 +1114,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:52:49.3306773+00:00\",\r\n  \"status\":
@@ -1165,7 +1165,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:52:49.3306773+00:00\",\r\n  \"status\":
@@ -1216,7 +1216,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:52:49.3306773+00:00\",\r\n  \"status\":
@@ -1267,7 +1267,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:52:49.3306773+00:00\",\r\n  \"endTime\":
@@ -1319,7 +1319,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/30f63d0c-da1a-486a-a67c-72f4c7dbd656?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
   response:
     body:
       string: ''
@@ -1363,7 +1363,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/virtualMachines?$select=instanceView&$expand=instanceView&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/virtualMachines?$select=instanceView&$expand=instanceView&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/virtualMachines/0\",\r\n
@@ -1460,7 +1460,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -1541,7 +1541,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -1646,7 +1646,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -1685,7 +1685,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1d5ced3f-6c9a-4cde-8b47-12c71451aa1b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1d5ced3f-6c9a-4cde-8b47-12c71451aa1b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1735,7 +1735,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1d5ced3f-6c9a-4cde-8b47-12c71451aa1b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/1d5ced3f-6c9a-4cde-8b47-12c71451aa1b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:55:23.551105+00:00\",\r\n  \"endTime\":
@@ -1787,7 +1787,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -1872,13 +1872,13 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/manualupgrade?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/manualupgrade?api-version=2022-08-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1888,7 +1888,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
       pragma:
       - no-cache
       server:
@@ -1924,7 +1924,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:55:35.0356+00:00\",\r\n  \"status\":
@@ -1975,7 +1975,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2022-08-22T06:55:35.0356+00:00\",\r\n  \"endTime\":
@@ -2027,7 +2027,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/919e3311-aa37-4f22-ac3c-c4cc80c60de9?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
   response:
     body:
       string: ''
@@ -2071,7 +2071,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/virtualMachines?$select=instanceView&$expand=instanceView&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/virtualMachines?$select=instanceView&$expand=instanceView&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/virtualMachines/0\",\r\n
@@ -2165,7 +2165,7 @@ interactions:
       - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
         VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_encryption000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n

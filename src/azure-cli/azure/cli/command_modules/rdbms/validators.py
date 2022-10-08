@@ -141,6 +141,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
 
     _network_arg_validator(subnet, public_access)
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
+    if geo_redundant_backup is None and instance is not None:
+        geo_redundant_backup = instance.backup.geo_redundant_backup
     _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
     if tier is None and instance is not None:
         tier = instance.sku.tier
@@ -220,7 +222,7 @@ def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, i
     if replication_role not in ('None', None) and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for replica server cannot be disabled.")
     # if ha, cannot be disabled
-    if high_availability in ['Enabled', 'ZoneRedundant'] and auto_grow.lower() == 'disabled':
+    if high_availability == 'ZoneRedundant' and auto_grow.lower() == 'disabled':
         raise ValidationError("Auto grow feature for high availability server cannot be disabled.")
 
 
@@ -471,6 +473,8 @@ def validate_server_name(db_context, server_name, type_):
             if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
                 client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
                 result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+            else:
+                raise e
     else:
         result = client.execute(name_availability_request={'name': server_name, 'type': type_})
 
@@ -591,3 +595,10 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def high_availability_validator(namespace):
+    if namespace.high_availability and namespace.high_availability == 'Enabled':
+        logger.warning("'Enabled' value for high availability parameter will be deprecated by April 2023. "
+                       "Please use 'ZoneRedundant' or 'SameZone' instead.")
+        namespace.high_availability = 'ZoneRedundant'
