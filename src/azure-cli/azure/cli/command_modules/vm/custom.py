@@ -2993,7 +2993,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
-                os_disk_delete_option=None, data_disk_delete_option=None):
+                os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
+                regular_priority_percentage=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3276,7 +3277,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
             v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
-            os_disk_delete_option=os_disk_delete_option)
+            os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
+            regular_priority_percentage=regular_priority_percentage)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3625,7 +3627,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
-                **kwargs):
+                regular_priority_count=None, regular_priority_percentage=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3740,6 +3742,21 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm
         }}
+
+    if regular_priority_count is not None or regular_priority_percentage is not None:
+        if vmss.orchestration_mode != 'Flexible':
+            raise ValidationError("--regular-priority-count/--regular-priority-percentage is only available for"
+                                  " VMSS with flexible orchestration mode")
+        if vmss.priority_mix_policy is None:
+            vmss.priority_mix_policy = {
+                'baseRegularPriorityCount': regular_priority_count,
+                'regularPriorityPercentageAboveBase': regular_priority_percentage
+            }
+        else:
+            if regular_priority_count is not None:
+                vmss.priority_mix_policy.base_regular_priority_count = regular_priority_count
+            if regular_priority_percentage is not None:
+                vmss.priority_mix_policy.regular_priority_percentage_above_base = regular_priority_percentage
 
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}

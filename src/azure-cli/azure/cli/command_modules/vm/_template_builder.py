@@ -911,7 +911,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
-                        os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None):
+                        os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
+                        regular_priority_count=None, regular_priority_percentage=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1256,6 +1257,14 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if spot_restore_timeout:
             vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
+
+    if regular_priority_count is not None or regular_priority_percentage is not None:
+        priority_mix_policy = {}
+        if regular_priority_count is not None:
+            priority_mix_policy['baseRegularPriorityCount'] = regular_priority_count
+        if regular_priority_percentage is not None:
+            priority_mix_policy['regularPriorityPercentageAboveBase'] = regular_priority_percentage
+        vmss_properties['priorityMixPolicy'] = priority_mix_policy
 
     if license_type:
         virtual_machine_profile['licenseType'] = license_type

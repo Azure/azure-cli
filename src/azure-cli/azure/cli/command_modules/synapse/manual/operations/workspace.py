@@ -123,7 +123,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
                                                                               tenant_id=tenant_id)
 
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=tenant_ids_list) if allowed_aad_tenant_ids is not None else None
-    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings, workspace_repository_configuration=workspace_repository_configuration)
+    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_administrator_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings, workspace_repository_configuration=workspace_repository_configuration)
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, workspace_name, workspace_patch_info)
 
 

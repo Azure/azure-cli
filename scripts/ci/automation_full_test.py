@@ -85,7 +85,6 @@ jobs = {
             'rdbms': 89,
             'redis': 31,
             'relay': 22,
-            'reservations': 20,
             'resource': 101,
             'role': 38,
             'search': 34,
