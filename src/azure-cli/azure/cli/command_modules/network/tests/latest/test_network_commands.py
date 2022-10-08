@@ -80,7 +80,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
 
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -496,14 +496,14 @@ class NetworkPublicIpWithSku(ScenarioTest):
         self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
             self.check('sku.name', self.kwargs.get('basic_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
-            self.check('publicIpAllocationMethod', 'Dynamic')
+            self.check('publicIPAllocationMethod', 'Dynamic')
         ])
 
         self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -511,7 +511,7 @@ class NetworkPublicIpWithSku(ScenarioTest):
         self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('global_tier')),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
         from azure.core.exceptions import HttpResponseError
@@ -584,13 +584,13 @@ class NetworkPublicIpPrefix(ScenarioTest):
         # Test public IP create with prefix
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
-                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix}')", True))
         self.cmd('network public-ip prefix create -n {prefix_v6} -g {rg} --version IPv6 --length 126 -z 1 3 2')
         self.cmd(
             'network public-ip create -n {pip_v6} -g {rg} --public-ip-prefix {prefix_v6}',
             checks=[
                 self.check('publicIp.name', '{pip_v6}'),
-                self.check('publicIp.publicIpAddressVersion', 'IPv6'),
+                self.check('publicIp.publicIPAddressVersion', 'IPv6'),
                 self.check('publicIp.zones', ['1', '3', '2'])
             ]
         )
@@ -644,7 +644,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
         # Create public ip with ip address
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
-                 checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
 
     @live_only()
     @ResourceGroupPreparer(name_prefix="cli_test_network_public_ip_prefix_", location="eastus2", subscription=AUX_SUBSCRIPTION)
@@ -2675,7 +2675,6 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
     def test_network_public_ip(self, resource_group):
-
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
@@ -2683,20 +2682,22 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Static'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
-        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
-            self.check('dnsSettings.domainNameLabel', 'wowza2'),
-            self.check('idleTimeoutInMinutes', 10),
-            self.check('tags.foo', 'doo')
-        ])
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
 
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -2719,17 +2720,50 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('length(publicIp.zones)', 3)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_ddos_settings', location='eastus2')
+    def test_network_public_ip_ddos_settings(self, resource_group):
+
+        self.kwargs.update({
+            'ip1': 'pubipddos',
+        })
+
+        # self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
+
+        self.cmd(
+            'network public-ip create -g {rg} -n {ip1} --protection-mode Enabled --sku Standard',
+            checks=[
+                self.check('publicIp.ddosSettings.protectionMode', 'Enabled'),
+                self.check('publicIp.name', '{ip1}'),
+                self.check('publicIp.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled',
+                 checks=[
+                     self.check('ddosSettings.protectionMode', 'Disabled'),
+                     self.check('name', '{ip1}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+        # self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
+
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))
 
 class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
     def test_network_zoned_public_ip(self, resource_group):
         self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2',
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku standard',
                  checks=self.check('publicIp.zones[0]', '2'))
 
-        table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
-        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
 
 
 class NetworkRouteFilterScenarioTest(ScenarioTest):
@@ -3107,7 +3141,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network cross-region-lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -3328,7 +3362,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
