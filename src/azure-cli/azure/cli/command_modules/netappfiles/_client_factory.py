@@ -54,3 +54,7 @@ def subvolumes_mgmt_client_factory(cli_ctx, _):
 
 def volume_groups_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).volume_groups
+
+
+def netapp_resource_mgmt_client_factory(cli_ctx, _):
+    return cf_netappfiles(cli_ctx).net_app_resource
