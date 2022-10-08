@@ -27,8 +27,7 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
     RequiredArgumentMissingError,
-    ArgumentUsageError,
-    MutuallyExclusiveArgumentError
+    ArgumentUsageError
 )
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
@@ -3132,6 +3131,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                         public_ip_address)
 
             if nat_rule_name and nat_pool_name:
+                from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
                 raise MutuallyExclusiveArgumentError(
                     'Please do not pass in both "--nat-pool-name" and "--nat-rule-name" parameters at the same time.'
                     '"--nat-rule-name" parameter is recommended')
