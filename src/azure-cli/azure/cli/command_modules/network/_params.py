@@ -42,7 +42,7 @@ from azure.cli.command_modules.network._completers import (
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
-    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest)
+    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest, WAFRulesCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -604,7 +604,8 @@ def load_arguments(self, _):
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
-        c.argument('rules', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too')
+        c.argument('rules', options_list=['--rule'], nargs='+', action=WAFRulesCreate,
+                   help='List of rules that will be disabled. If provided, --group-name must be provided too')
 
     with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
                                min_api='2019-09-01') as c:

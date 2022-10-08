@@ -1822,30 +1822,28 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, client, resource_group_name, policy_name,
-                         location=None, tags=None, rule_set_type='OWASP',
-                         rule_set_version='3.0'):
-    WebApplicationFirewallPolicy, ManagedRulesDefinition, \
-        ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
-                                        'ManagedRulesDefinition',
-                                        'ManagedRuleSet')
-    #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
+def create_ag_waf_policy(cmd, resource_group_name, policy_name,
+                         location=None, tags=None, rule_set_type='OWASP', rule_set_version='3.0'):
+    # https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
 
     # mandatory default rule with empty rule sets
-    managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type, rule_set_version=rule_set_version)
-    managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
-    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version
+    }
+    managed_rule_definition = {
+        "managed_rule_sets": [managed_rule_set]
+    }
 
+    from .aaz.latest.network.application_gateway.waf_policy import Create
 
-def update_ag_waf_policy(cmd, instance, tags=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-    return instance
-
-
-def list_ag_waf_policies(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'web_application_firewall_policies', resource_group_name)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name,
+        "location": location,
+        "tags": tags,
+        "managed_rules": managed_rule_definition
+    })
 # endregion
 
 
@@ -1960,118 +1958,175 @@ def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_n
 
 
 # region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
-def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
-                             rule_set_type, rule_set_version,
-                             rule_group_name=None, rules=None):
+def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
+                             rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
     """
-    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
-        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
-
-    waf_policy = client.get(resource_group_name, policy_name)
-
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules is not None else []
+    if rules is None:
+        managed_rule_overrides = []
+    else:
+        managed_rule_overrides = rules
 
     rule_group_override = None
     if rule_group_name is not None:
-        rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
-                                                       rules=managed_rule_overrides)
-    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
-                                          rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
+        rule_group_override = {
+            "rule_group_name": rule_group_name,
+            "rules": managed_rule_overrides
+        }
 
-    for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
-            for rule_override in rule_set.rule_group_overrides:
-                if rule_override.rule_group_name == rule_group_name:
-                    # Add one rule
-                    rule_override.rules.extend(managed_rule_overrides)
+    if rule_group_override is None:
+        rule_group_overrides = []
+    else:
+        rule_group_overrides = [rule_group_override]
+
+    new_managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version,
+        "rule_group_overrides": rule_group_overrides
+    }
+
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFManagedRuleSetAdd(Update):
+        def pre_instance_update(self, instance):
+            for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                    for rule_override in rule_set.rule_group_overrides:
+                        if rule_override.rule_group_name == rule_group_name:
+                            # add one rule
+                            rule_override.rules.extend(managed_rule_overrides)
+                            break
+                    else:
+                        # add one rule group
+                        if rule_group_override is not None:
+                            rule_set.rule_group_overrides.append(rule_group_override)
                     break
             else:
-                # Add one rule group
-                if rule_group_override is not None:
-                    rule_set.rule_group_overrides.append(rule_group_override)
-            break
-    else:
-        # Add new rule set
-        waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+                # add new rule set
+                instance.properties.managed_rules.managed_rule_sets.append(new_managed_rule_set)
 
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return WAFManagedRuleSetAdd(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })
 
 
-def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, rule_group_name=None, rules=None):
+def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
+                                rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Update(Override) existing rule set of a WAF policy managed rules.
     """
-    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
-        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
+    managed_rule_overrides = rules if rules else None
 
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules else None
+    rule_group_override = {
+        "rule_group_name": rule_group_name,
+        "rules": managed_rule_overrides
+    } if managed_rule_overrides else None
 
-    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
-                                                   rules=managed_rule_overrides) if managed_rule_overrides else None
+    if rule_group_override is None:
+        rule_group_overrides = []
+    else:
+        rule_group_overrides = [rule_group_override]
 
-    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
-                                          rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
+    new_managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version,
+        "rule_group_overrides": rule_group_overrides
+    }
 
-    updated_rule_set = None
+    from .aaz.latest.network.application_gateway.waf_policy import Update
 
-    for rule_set in instance.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version != rule_set_version:
-            updated_rule_set = rule_set
-            break
+    class WAFManagedRuleSetUpdate(Update):
+        def pre_instance_update(self, instance):
+            updated_rule_set = None
+            for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version != rule_set_version:
+                    updated_rule_set = rule_set
+                    break
 
-        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
-            if rule_group_name is None:
-                updated_rule_set = rule_set
-                break
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                    if rule_group_name is None:
+                        updated_rule_set = rule_set
+                        break
 
-            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
-            if rg:
-                rg.rules = managed_rule_overrides   # differentiate with add_waf_managed_rule_set()
-            else:
-                rule_set.rule_group_overrides.append(rule_group_override)
+                    rg = next((g for g in rule_set.rule_group_overrides if g.rule_group_name == rule_group_name), None)
+                    if rg:
+                        rg.rules = managed_rule_overrides
+                    else:
+                        rule_set.rule_group_overrides.append(rule_group_override)
 
-    if updated_rule_set:
-        instance.managed_rules.managed_rule_sets.remove(updated_rule_set)
-        instance.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+            if updated_rule_set:
+                new_managed_rule_sets = []
+                for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                    if rule_set == updated_rule_set:
+                        continue
 
-    return instance
+                    new_managed_rule_sets.append(rule_set)
+                new_managed_rule_sets.append(new_managed_rule_set)
+
+                instance.properties.managed_rules.managed_rule_sets = new_managed_rule_sets
+
+    return WAFManagedRuleSetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })
 
 
-def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
+def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                                 rule_set_type, rule_set_version, rule_group_name=None):
     """
     Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     """
-    waf_policy = client.get(resource_group_name, policy_name)
+    from .aaz.latest.network.application_gateway.waf_policy import Update
 
-    delete_rule_set = None
+    class WAFManagedRuleSetRemove(Update):
+        def pre_instance_update(self, instance):
+            delete_rule_set = None
+            for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
+                    if rule_group_name is None:
+                        delete_rule_set = rule_set
+                        break
+                    # remove one rule from rule group
+                    is_removed = False
+                    new_rule_group_overrides = []
+                    for rg in rule_set.rule_group_overrides:
+                        if rg.rule_group_name == rule_group_name and not is_removed:
+                            is_removed = True
+                            continue
 
-    for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
-            if rule_group_name is None:
-                delete_rule_set = rule_set
-                break
+                        new_rule_group_overrides.append(rg)
+                    if not is_removed:
+                        err_msg = f"Rule set group [{rule_group_name}] is not found."
+                        raise ResourceNotFoundError(err_msg)
 
-            # Remove one rule from rule group
-            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
-            if rg is None:
-                raise CLIError('Rule set group [ {} ] not found.'.format(rule_group_name))
-            rule_set.rule_group_overrides.remove(rg)
+                    rule_set.rule_group_overrides = new_rule_group_overrides
 
-    if delete_rule_set:
-        waf_policy.managed_rules.managed_rule_sets.remove(delete_rule_set)
+            if delete_rule_set:
+                new_managed_rule_sets = []
+                for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                    if rule_set == delete_rule_set:
+                        continue
 
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+                    new_managed_rule_sets.append(rule_set)
+
+                instance.properties.managed_rules.managed_rule_sets = new_managed_rule_sets
+
+    return WAFManagedRuleSetRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })
 
 
-def list_waf_managed_rule_set(cmd, client, resource_group_name, policy_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return waf_policy.managed_rules
+def list_waf_managed_rule_set(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Show
+
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })["managedRules"]
 # endregion
 
 
