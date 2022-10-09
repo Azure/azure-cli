@@ -348,18 +348,97 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 if disk_version.lower() == 'latest':
                     disk_version = _get_latest_image_version(cmd.cli_ctx, location, disk_publisher, disk_offer,
                                                              disk_sku)
-                client = _compute_client_factory(cmd.cli_ctx)
-                response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
-                                                             disk_version)
-                image_reference = response.id
             else:  # error
                 raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
+        else:
+            from msrestazure.tools import parse_resource_id
+            terms = parse_resource_id(image_reference)
+            disk_publisher, disk_offer, disk_sku, disk_version = \
+                terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
+
+        client = _compute_client_factory(cmd.cli_ctx)
+        response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
+                                                     disk_version)
+
+        if hasattr(response, 'hyper_v_generation'):
+            if response.hyper_v_generation == 'V1':
+                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
+                               'Trusted Launch security type. To know more about Trusted Launch, please visit '
+                               'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+            elif response.hyper_v_generation == 'V2':
+                if hyper_v_generation == 'V1':
+                    logger.warning(
+                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                # will set default value of hyper_v_generation
+                if hasattr(response, 'features') and response.features \
+                        and 'SecurityType' in response.features \
+                        and response.features['SecurityType'] in \
+                        ['TrustedLaunchSupported', 'TrustedLaunchAndConfidentialVmSupported'] \
+                        and security_type != 'TrustedLaunch':
+                    # will set default value of security_type
+                    logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
+                                   'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
+                                   'to avoid the breaking change. To know more about Trusted Launch, please visit '
+                                   'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+
         # image_reference is an ID now
-        image_reference = {'id': image_reference}
+        image_reference = {'id': response.id}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
 
     if gallery_image_reference is not None:
+        from azure.cli.command_modules.vm._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id
+        if is_shared_gallery_image_id(gallery_image_reference):
+            # the gallery image reference is shared gallery image id
+            from azure.cli.command_modules.vm._vm_utils import parse_shared_gallery_image_id
+            image_info = parse_shared_gallery_image_id(gallery_image_reference)
+            from ._client_factory import cf_shared_gallery_image
+            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+        elif is_community_gallery_image_id(gallery_image_reference):
+            # the gallery image reference is community gallery image id
+            from azure.cli.command_modules.vm._vm_utils import parse_community_gallery_image_id
+            image_info = parse_community_gallery_image_id(gallery_image_reference)
+            from ._client_factory import cf_community_gallery_image
+            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+                location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+        else:
+            # the gallery image reference is compute gallery image id
+            from msrestazure.tools import parse_resource_id
+            terms = parse_resource_id(gallery_image_reference)
+            gallery_image_reference_rg, gallery_name, gallery_image_definition = \
+                terms['resource_group'], terms['name'], terms['child_name_1']
+            client = _compute_client_factory(cmd.cli_ctx)
+            gallery_image_info = client.gallery_images.get(resource_group_name=gallery_image_reference_rg,
+                                                           gallery_name=gallery_name,
+                                                           gallery_image_name=gallery_image_definition)
+        if hasattr(gallery_image_info, 'hyper_v_generation'):
+            if gallery_image_info.hyper_v_generation == 'V1':
+                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
+                               'Trusted Launch security type. To know more about Trusted Launch, please visit '
+                               'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+            elif gallery_image_info.hyper_v_generation == 'V2':
+                if hyper_v_generation == 'V1':
+                    logger.warning(
+                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
+                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
+                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
+                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                # will set default value of hyper_v_generation
+                if hasattr(gallery_image_info, 'features') and gallery_image_info.features \
+                        and 'SecurityType' in gallery_image_info.features \
+                        and gallery_image_info.features['SecurityType'] in \
+                        ['TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported'] \
+                        and security_type != 'TrustedLaunch':
+                    # will set default value of security_type
+                    logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
+                                   'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
+                                   'to avoid the breaking change. To know more about Trusted Launch, please visit '
+                                   'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+
         key = gallery_image_reference_type if gallery_image_reference_type else 'id'
         gallery_image_reference = {key: gallery_image_reference}
         if gallery_image_reference_lun is not None:
@@ -403,6 +482,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
+    if option == DiskCreateOption.empty and os_type:
+        # will set default value of hyper_v_generation and security_type
+        logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
+                       'by default. Please use "--security-type TrustedLaunch" and "--hyper-v-generation V2" '
+                       'in your scripts in advance to avoid the breaking change. To know more about Trusted Launch, '
+                       'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
 
