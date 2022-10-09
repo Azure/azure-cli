@@ -3655,7 +3655,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'natrule1': self.create_random_name('natrule', 15),
             'natrule2': self.create_random_name('natrule', 15)
         })
-        self.cmd('vmss create -n {vmss1} -g {rg} --image CentOS --lb-sku Standard --admin-password PasswordPassword1!')
+        self.cmd('vmss create -n {vmss1} -g {rg} --image CentOS --lb-sku Standard')
         self.cmd('vmss show -n {vmss1} -g {rg}', checks=[
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
@@ -3664,7 +3664,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image CentOS --admin-password PasswordPassword1!')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image CentOS')
         self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
             self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
         ])
@@ -3673,7 +3673,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss2} -g {rg}')
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image CentOS --nat-rule-name {natrule} --lb-sku Standard --admin-password PasswordPassword1!')
+        self.cmd('vmss create -n {vmss3} -g {rg} --image CentOS --nat-rule-name {natrule} --lb-sku Standard')
         self.cmd('vmss show -n {vmss3} -g {rg}', checks=[
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
@@ -3682,7 +3682,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss3} -g {rg}')
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image CentOS --nat-rule-name {natrule1} --admin-password PasswordPassword1!')
+        self.cmd('vmss create -n {vmss4} -g {rg} --image CentOS --nat-rule-name {natrule1}')
         self.cmd('vmss show -n {vmss4} -g {rg}', checks=[
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
@@ -3693,7 +3693,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         with self.assertRaisesRegex(CLIError, message):
             self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
 
-        self.cmd('vmss create -n {vmss5} -g {rg} --image CentOS --nat-rule-name {natrule2} --lb-sku Basic --admin-password PasswordPassword1!')
+        self.cmd('vmss create -n {vmss5} -g {rg} --image CentOS --nat-rule-name {natrule2} --lb-sku Basic')
         self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
         ])
