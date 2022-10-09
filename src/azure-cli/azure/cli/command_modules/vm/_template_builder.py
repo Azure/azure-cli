@@ -885,7 +885,7 @@ def build_nat_rule_v2(cmd, name, location, lb_name, frontend_ip_name, backend_po
             },
             "backendPort": backend_port,
             "frontendPortRangeStart": "50000",
-            # This logic comes from the template of `inboundNatPools` to keep consistent with the frontend port of NAT pool
+            # This logic comes from the template of `inboundNatPools` to keep consistent with NAT pool
             # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
             "frontendPortRangeEnd": str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
             "protocol": "tcp",
