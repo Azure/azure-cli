@@ -644,7 +644,7 @@ def update_filter(cmd,
                   index=None,
                   connection_string=None,
                   auth_mode=None,
-                  endpoint=None): 
+                  endpoint=None):
     if auth_mode is None:
         auth_mode = "key"
     if key is None and feature is None:
