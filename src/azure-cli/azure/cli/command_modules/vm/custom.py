@@ -826,7 +826,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
               v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
-              os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
+              os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
+              disk_controller_type=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1052,7 +1053,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
         os_disk_security_encryption_type=os_disk_security_encryption_type,
-        os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set)
+        os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
+        disk_controller_type=disk_controller_type)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1492,7 +1494,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, **kwargs):
+              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
+              **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1613,6 +1616,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         else:
             raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
                                   "creating VM with the option '--ephemeral-os-disk true'")
+    if disk_controller_type is not None:
+        vm.storage_profile.disk_controller_type = disk_controller_type
 
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
@@ -2994,7 +2999,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
-                regular_priority_percentage=None):
+                regular_priority_percentage=None, disk_controller_type=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3278,7 +3283,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
-            regular_priority_percentage=regular_priority_percentage)
+            regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3627,7 +3632,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
-                regular_priority_count=None, regular_priority_percentage=None, **kwargs):
+                regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3797,6 +3802,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
                                   "creating VMSS with the option '--ephemeral-os-disk true'")
+
+    if disk_controller_type is not None:
+        vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
