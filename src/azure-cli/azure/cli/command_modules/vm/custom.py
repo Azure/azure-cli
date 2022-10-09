@@ -375,7 +375,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 # will set default value of hyper_v_generation
                 if hasattr(response, 'features') and response.features \
                         and 'SecurityType' in response.features \
-                        and response.features['SecurityType'] == 'TrustedLaunchSupported':
+                        and (response.features['SecurityType'] == 'TrustedLaunchSupported'
+                             or response.features['SecurityType'] == 'TrustedLaunchAndConfidentialVmSupported')\
+                        and security_type != 'TrustedLaunch':
                     # will set default value of security_type
                     logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
                                    'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
