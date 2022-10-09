@@ -724,7 +724,8 @@ def load_arguments(self, _):
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName),
                    help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
-        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
+        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], deprecate_info=c.deprecate(target='--nat-pool-name', redirect='--nat-rule-name', hide=True))
+        c.argument('nat_rule_name', help='Name to use for the NAT rule v2 when creating a new load balancer. (NAT rule V2 is used to replace NAT pool)', options_list=['--lb-nat-rule-name', '--nat-rule-name'])
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
