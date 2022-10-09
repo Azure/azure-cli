@@ -385,8 +385,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                    'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
 
         # image_reference is an ID now
-        image_reference = response.id
-        image_reference = {'id': image_reference}
+        image_reference = {'id': response.id}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
 
