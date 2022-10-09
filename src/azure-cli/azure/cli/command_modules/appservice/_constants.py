@@ -84,6 +84,7 @@ LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'python': 'FunctionApp/linux-python-functionapp-on-azure.yml',
     'dotnet': 'FunctionApp/linux-dotnet-functionapp-on-azure.yml',
     'java': 'FunctionApp/linux-java-functionapp-on-azure.yml',
+    'powershell': 'FunctionApp/linux-powershell-functionapp-on-azure.yml',
 }
 
 WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {

@@ -8,7 +8,6 @@ import os
 import urllib
 import urllib3
 import certifi
-import sys
 
 from knack.log import get_logger
 
@@ -267,24 +266,3 @@ def is_webapp(app):
     if app is None or app.kind is None:
         return False
     return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
-
-
-class PollingAnimation():
-    def __init__(self, prefix="", suffix=" Running..."):
-        self.tickers = ["/", "|", "\\", "-", "/", "|", "\\", "-"]
-        self.currTicker = 0
-        self.prefix = prefix
-        self.suffix = suffix
-
-    def tick(self):
-        sys.stdout.write('\r')
-        sys.stdout.write(self.prefix + self.tickers[self.currTicker] + self.suffix)
-        sys.stdout.flush()
-        self.currTicker += 1
-        self.currTicker = self.currTicker % len(self.tickers)
-
-    @classmethod
-    def flush(cls):
-        sys.stdout.flush()
-        sys.stdout.write('\r')
-        sys.stdout.write("\033[K")  # \33[K: clears from cursor to end of line.
