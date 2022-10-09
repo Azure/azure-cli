@@ -3643,6 +3643,66 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             self.check('[0].sku.name', 'Standard')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nat_rule_v2')
+    def test_vmss_create_with_nat_rule_v2(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 15),
+            'vmss2': self.create_random_name('vmss', 15),
+            'vmss3': self.create_random_name('vmss', 15),
+            'vmss4': self.create_random_name('vmss', 15),
+            'vmss5': self.create_random_name('vmss', 15),
+            'natrule': self.create_random_name('natrule', 15),
+            'natrule1': self.create_random_name('natrule', 15),
+            'natrule2': self.create_random_name('natrule', 15)
+        })
+        self.cmd('vmss create -n {vmss1} -g {rg} --image CentOS --lb-sku Standard')
+        self.cmd('vmss show -n {vmss1} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss1}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
+
+        self.cmd('vmss create -n {vmss2} -g {rg} --image CentOS')
+        self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
+            self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
+        ])
+        self.cmd('network lb show -n {vmss2}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss2} -g {rg}')
+
+        self.cmd('vmss create -n {vmss3} -g {rg} --image CentOS --nat-rule-name {natrule} --lb-sku Standard')
+        self.cmd('vmss show -n {vmss3} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss3}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss3} -g {rg}')
+
+        self.cmd('vmss create -n {vmss4} -g {rg} --image CentOS --nat-rule-name {natrule1}')
+        self.cmd('vmss show -n {vmss4} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss4}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
+        with self.assertRaisesRegex(CLIError, message):
+            self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
+
+        self.cmd('vmss create -n {vmss5} -g {rg} --image CentOS --nat-rule-name {natrule2} --lb-sku Basic')
+        self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss5}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        with self.assertRaisesRegex(CLIError, message):
+            self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
+
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
