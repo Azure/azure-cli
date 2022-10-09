@@ -643,8 +643,10 @@ def update_filter(cmd,
                   yes=False,
                   index=None,
                   connection_string=None,
-                  auth_mode="key",
-                  endpoint=None):
+                  auth_mode=None,
+                  endpoint=None): 
+    if auth_mode is None:
+        auth_mode = "key"
     if key is None and feature is None:
         raise RequiredArgumentMissingError(
             "Please provide either `--key` or `--feature` value.")
