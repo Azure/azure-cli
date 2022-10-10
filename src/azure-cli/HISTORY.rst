@@ -51,9 +51,9 @@ Release History
 
 * [BREAKING CHANGE] `az vmss create`: Update NAT pool to NAT rule V2 for Standard LB SKU when creating VMSS (#23638)
 * `az vm/vmss create`: `--enable-secure-boot` is set to True by default when the `--security-type` used by the VM/VMSS creation is `TrustedLaunch ` (#24004)
-* `az restore-point create`: Add new parameters `--consistency-mode` to support setting consistency mode (#23789)
+* `az restore-point create`: Add new parameter `--consistency-mode` to support setting consistency mode (#23789)
 * `az vmss create/update`: Add new parameters `--priority-count` and `--priority-percentage` to support setting priority mix policy (#23786)
-* `az vm/vmss create/update`: Add new parameters `--disk-controller-type` to support setting disk controller type (#23710)
+* `az vm/vmss create/update`: Add new parameter `--disk-controller-type` to support setting disk controller type (#23710)
 * `az disk create`: Add warning log in three scenarios to later support creating disk with Gen2 and TLVM as default (#23942)
 * `az vmss create`: Add new parameter `--nat-rule-name` to specify the name of NAT rule V2 when creating a new load balancer (NAT rule V2 is used to replace NAT pool) (#23638)
 
