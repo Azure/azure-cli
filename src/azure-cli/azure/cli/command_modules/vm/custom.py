@@ -3226,11 +3226,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                     'Please do not pass in both "--nat-pool-name" and "--nat-rule-name" parameters at the same time.'
                     '"--nat-rule-name" parameter is recommended')
 
+            is_basic_lb_sku = not load_balancer_sku or load_balancer_sku.lower() != 'standard'
             # calculate default names if not provided
             if orchestration_mode.lower() == flexible_str.lower():
                 # inbound nat pools are not supported on VMSS Flex
                 nat_pool_name = None
-            elif not nat_rule_name and (not load_balancer_sku or load_balancer_sku.lower() != 'standard'):
+            elif nat_pool_name or (not nat_rule_name and is_basic_lb_sku):
                 nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
 
             if not backend_port:
@@ -3257,7 +3258,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             # So when users use Standard LB SKU, CLI uses NAT rule V2 by default
             if not nat_pool_name:
 
-                if nat_rule_name and (not load_balancer_sku or load_balancer_sku.lower() != 'standard'):
+                if nat_rule_name and is_basic_lb_sku:
                     logger.warning(
                         'Since the basic SKU of load balancer cannot fully support NAT rule V2, '
                         'it is recommended to specify "--lb-sku Standard" to use standard SKU instead.')
