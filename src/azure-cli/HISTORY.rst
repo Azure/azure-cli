@@ -16,7 +16,7 @@ Release History
 
 **AKS**
 
-* Fix #23779: `az aks install-cli` support to determine the arch of binaries based on system information (#24006)
+* Fix #23779: `az aks install-cli`: Support determining the arch of binaries based on system information (#24006)
 
 **APIM**
 
@@ -132,12 +132,8 @@ Release History
 **Storage**
 
 * `az storage blob/container`: Support `--account-name` for non-standard account URL (#23832)
-* `az storage account update`: Fix updating `--default-share-permission` will wipe out other ADProperties issue (#23986)
+* `az storage account update`: Fix ADProperties wipe out issue when updating `--default-share-permission` (#23986)
 * Fix #19311: `az storage remove`: Add support for connection-string (#24049)
-
-**Synapse**
-
-* Update Synapse contacts (#23765)
 
 2.40.0
 ++++++
