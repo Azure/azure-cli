@@ -3973,10 +3973,9 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
-    @live_only() # Location 'East US 2 EUAP' is not accepting creation of new Windows Azure SQL Database servers at this time.
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
         source_non_zr_db_name = "sourceNonZrDb"
@@ -4054,12 +4053,11 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
-    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
-    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
-    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus')
     @AllowLargeResponse()
-    @live_only() # Location 'East US 2 EUAP' is not accepting creation of new Windows Azure SQL Database servers at this time.
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
         non_zr_db_name_1 = "nonZrDb1"
@@ -4169,10 +4167,9 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
-    @live_only() # Location 'East US 2 EUAP' is not accepting creation of new Windows Azure SQL Database servers at this time.
     def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
         # Set db names
         source_non_zr_db_name = "sourceNonZrDb"
@@ -5961,13 +5958,13 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         managed_database_name1 = 'logReplayTestDb1'
         # Uploading bak file to blob is restricted by testing framework, so only mitigation for now is to use hard-coded values
         self.kwargs.update({
-            'storage_account': 'toolingsa',
-            'container_name': 'tools',
+            'storage_account': 'backupscxteam',
+            'container_name': 'clients',
             'resource_group': rg,
             'managed_instance_name': mi,
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
-            'storage_uri': 'https://toolingsa.blob.core.windows.net/tools',
+            'storage_uri': 'https://backupscxteam.blob.core.windows.net/clients',
             'last_backup_name': 'full.bak'
         })
 
