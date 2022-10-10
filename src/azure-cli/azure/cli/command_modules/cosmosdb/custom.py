@@ -829,7 +829,7 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
                                        indexing_policy,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
-    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
+    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
@@ -1657,7 +1657,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
     virtual_network_rules = []
     rule_removed = False
     for rule in existing.virtual_network_rules:
-        if rule.id != subnet:
+        if rule.id.lower() != subnet.lower():
             virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
                                    ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))

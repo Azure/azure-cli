@@ -5773,7 +5773,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create key vault
-        create_kv_cmd = 'keyvault create -n {kv_name} -g {resource_group} --enable-purge-protection true --enable-soft-delete true'
+        create_kv_cmd = 'keyvault create -n {kv_name} -g {resource_group} --enable-purge-protection true'
         self.cmd(create_kv_cmd, checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('name', kv_name)
