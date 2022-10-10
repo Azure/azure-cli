@@ -6521,47 +6521,6 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # endregion
 
 
-# region CustomIpPrefix
-def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
-                            cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
-                            custom_ip_prefix_parent=None, no_wait=False):
-
-    CustomIpPrefix = cmd.get_models('CustomIpPrefix')
-    prefix = CustomIpPrefix(
-        location=location,
-        cidr=cidr,
-        zones=zone,
-        tags=tags,
-        signed_message=signed_message,
-        authorization_message=authorization_message
-    )
-
-    if custom_ip_prefix_parent:
-        try:
-            prefix.custom_ip_prefix_parent = client.get(resource_group_name, custom_ip_prefix_name)
-        except ResourceNotFoundError:
-            raise ResourceNotFoundError("Custom ip prefix parent {} doesn't exist".format(custom_ip_prefix_name))
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
-
-
-def update_custom_ip_prefix(instance,
-                            signed_message=None,
-                            authorization_message=None,
-                            tags=None,
-                            commissioned_state=None):
-    if tags is not None:
-        instance.tags = tags
-    if signed_message is not None:
-        instance.signed_message = signed_message
-    if authorization_message is not None:
-        instance.authorization_message = authorization_message
-    if commissioned_state is not None:
-        instance.commissioned_state = commissioned_state[0].upper() + commissioned_state[1:] + 'ing'
-    return instance
-# endregion
-
-
 # region PublicIPAddresses
 def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                             allocation_method=None, dns_name=None,

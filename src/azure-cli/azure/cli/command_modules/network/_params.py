@@ -1762,20 +1762,6 @@ def load_arguments(self, _):
         c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
-    # region CustomIpPrefix
-    with self.argument_context('network custom-ip prefix') as c:
-        c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
-        c.argument('signed_message', help='Signed message for WAN validation.')
-        c.argument('authorization_message', help='Authorization message for WAN validation.')
-        c.argument('custom_ip_prefix_parent', help='The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.', options_list=['--cip-prefix-parent', '-c'])
-        c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
-        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
-        c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
-
-    with self.argument_context('network custom-ip prefix update') as c:
-        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['commission', 'decommission', 'deprovision', 'provision']))
-    # endregion
-
     # region PublicIPAddresses
     with self.argument_context('network public-ip') as c:
         c.argument('public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
