@@ -5229,12 +5229,11 @@ def managed_db_log_replay_stop(
                 f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
                 f'in the resource group {resource_group_name} was not created with log replay service.')
     except Exception as ex:
-        # 
         if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
             raise CLIError(
                 f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
                 f'in the resource group {resource_group_name} was not created with log replay service.')
-        raise ex   
+        raise ex
 
 
 def managed_db_log_replay_complete_restore(
