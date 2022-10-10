@@ -1514,9 +1514,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    if not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
-                        logger.warning("No inbound nat pool was configured on '%s'", namespace.load_balancer)
-                    else:
+                    if lb.inbound_nat_pools:
                         namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
@@ -1569,6 +1567,11 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.orchestration_mode.lower() != flexible_str.lower():
             raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
                                             ' available for VMSS with flexible orchestration mode')
+
+    if namespace.regular_priority_count is not None or namespace.regular_priority_percentage is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --regular-priority-count/--regular-priority-percentage is'
+                                            ' only available for VMSS with flexible orchestration mode')
 
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 

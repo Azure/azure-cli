@@ -496,7 +496,7 @@ type: command
 short-summary: Create the Service Bus Topic
 examples:
   - name: Create a new Service Bus Topic
-    text: az servicebus topic create --resource-group myresourcegroup --namespace-name mynamespace --name mytopic
+    text: az servicebus topic create --resource-group myresourcegroup --namespace-name mynamespace --name mytopic --max-message-size-in-kilobytes 102400
 """
 
 helps['servicebus topic delete'] = """

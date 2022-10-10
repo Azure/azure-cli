@@ -107,7 +107,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
     MGMT_RELAY = ('azure.mgmt.relay', None)
-    MGMT_RESERVATIONS = ('azure.mgmt.reservations', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
@@ -215,7 +214,7 @@ AZURE_API_PROFILES = {
             'activity_logs': '2015-04-01',
             'alert_rule_incidents': '2016-03-01',
             'alert_rules': '2016-03-01',
-            'autoscale_settings': '2015-04-01',
+            'autoscale_settings': '2022-10-01',
             'baseline': '2018-09-01',
             'baselines': '2019-03-01',
             'diagnostic_settings': '2021-05-01-preview',

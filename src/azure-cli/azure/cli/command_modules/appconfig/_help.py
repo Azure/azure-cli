@@ -531,6 +531,24 @@ helps['appconfig feature filter add'] = """
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
     """
 
+helps['appconfig feature filter update'] = """
+  type: command
+  short-summary: Update a filter in a feature flag.
+  examples:
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\"
+      - name: Update the filter at index 2 (zero-based index) for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\" --index 2
+      - name: Update a filter for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
+  """
+
 helps['appconfig feature filter delete'] = """
     type: command
     short-summary: Delete a filter from a feature flag.

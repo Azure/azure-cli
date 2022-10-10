@@ -756,14 +756,6 @@ def load_arguments(self, _):
     with self.argument_context('logicapp') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)
 
-    with self.argument_context('logicapp create') as c:
-        # Dynamic SKU is no longer supported for logicapp standard
-        c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
-                   help="Geographic location where {} app will be hosted. Use `az {} list-consumption-locations` to view available locations.".format(app_type, scope),
-                   deprecate_info=c.deprecate(expiration='2.41.0'))
-        c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.",
-                   deprecate_info=c.deprecate(expiration='2.41.0'))
-
     with self.argument_context('logicapp show') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)
 
