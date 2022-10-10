@@ -1077,13 +1077,13 @@ def load_command_table(self, _):
     # endregion
 
     # region CustomIpPrefix
-    with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, is_preview=True, min_api='2020-06-01') as g:
-        g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_custom_ip_prefixes')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
-        g.wait_command('wait')
+    # with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, min_api='2020-06-01') as g:
+        # g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
+        # g.command('delete', 'begin_delete')
+        # g.custom_command('list', 'list_custom_ip_prefixes')
+        # g.show_command('show')
+        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
+        # g.wait_command('wait')
     # endRegion
 
     # region PublicIPAddresses
