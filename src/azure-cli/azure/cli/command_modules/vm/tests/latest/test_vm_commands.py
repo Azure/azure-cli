@@ -2740,7 +2740,7 @@ class VMCreateCustomIP(ScenarioTest):
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys --nsg-rule NONE')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', '{dns}'),
             self.check('sku.name', '{public_ip_sku}')
         ])
@@ -2750,7 +2750,7 @@ class VMCreateCustomIP(ScenarioTest):
         # verify the default should be "Basic" sku with "Dynamic" allocation method
         self.cmd('vm create -n {vm2} -g {rg} --image UbuntuLTS --admin-username user11 --generate-ssh-keys --nsg-rule NONE')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIPAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
         ])
 
@@ -3642,6 +3642,78 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Standard')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nat_rule_v2')
+    def test_vmss_create_with_nat_rule_v2(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 15),
+            'vmss2': self.create_random_name('vmss', 15),
+            'vmss3': self.create_random_name('vmss', 15),
+            'vmss4': self.create_random_name('vmss', 15),
+            'vmss5': self.create_random_name('vmss', 15),
+            'vmss6': self.create_random_name('vmss', 15),
+            'natrule': self.create_random_name('natrule', 15),
+            'natrule1': self.create_random_name('natrule', 15),
+            'natrule2': self.create_random_name('natrule', 15),
+            'natpool': self.create_random_name('natpool', 15),
+        })
+
+        self.cmd('vmss create -n {vmss1} -g {rg} --image CentOS --lb-sku Standard')
+        self.cmd('vmss show -n {vmss1} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss1}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
+
+        self.cmd('vmss create -n {vmss2} -g {rg} --image CentOS')
+        self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
+            self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
+        ])
+        self.cmd('network lb show -n {vmss2}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss2} -g {rg}')
+
+        self.cmd('vmss create -n {vmss3} -g {rg} --image CentOS --nat-rule-name {natrule} --lb-sku Standard')
+        self.cmd('vmss show -n {vmss3} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss3}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss3} -g {rg}')
+
+        self.cmd('vmss create -n {vmss4} -g {rg} --image CentOS --nat-rule-name {natrule1}')
+        self.cmd('vmss show -n {vmss4} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss4}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
+        with self.assertRaisesRegex(CLIError, message):
+            self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
+
+        self.cmd('vmss create -n {vmss5} -g {rg} --image CentOS --nat-rule-name {natrule2} --lb-sku Basic')
+        self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss5}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        with self.assertRaisesRegex(CLIError, message):
+            self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
+
+        self.cmd('vmss create -n {vmss6} -g {rg} --image CentOS --nat-pool-name {natpool} --lb-sku Standard')
+        self.cmd('vmss show -n {vmss6} -g {rg}', checks=[
+            self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
+        ])
+        self.cmd('network lb show -n {vmss6}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss6} -g {rg}')
 
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -7504,6 +7576,42 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('vmss show -n {vmss1} -g {rg}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'DiskWithVMGuestState'),
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='eastus2euap')
+    def test_disk_controller_type(self, resource_group):
+        self.kwargs.update({
+            'vm_disk': self.create_random_name('disk-', 15),
+            'vm': self.create_random_name('vm-', 15),
+            'vm1': self.create_random_name('vm-', 15),
+            'vm2': self.create_random_name('vm-', 15),
+            'vmss': self.create_random_name('vmss-', 15),
+            'image': self.create_random_name('image-', 15),
+            'vmss1': self.create_random_name('vmss-', 15)
+        })
+        self.cmd('disk create -n {vm_disk} -g {rg} --hyper-v-generation v2 --size-gb 10')
+        self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --attach-os-disk {vm_disk} --os-type linux')
+        self.cmd('vm show -n {vm} -g {rg}', checks=[
+            self.check('storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm1} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5')
+        self.cmd('vm update --disk-controller-type SCSI -n {vm1} -g {rg}')
+        self.cmd('vm show -n {vm1} -g {rg}', checks=[
+            self.check('storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5 --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vm deallocate -g {rg} -n {vm2}')
+        self.cmd('vm generalize -g {rg} -n {vm2}')
+        self.cmd('image create -g {rg} -n {image} --source {vm2} --hyper-v-generation v2')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --disk-controller-type scsi --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5')
+        self.cmd('vmss update -g {rg} -n {vmss1} --disk-controller-type scsi', checks=[
+            self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
         ])
 
 
