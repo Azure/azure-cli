@@ -113,7 +113,7 @@ Release History
 
 **Reservations**
 
-* Move commands from azure-cli to azure-cli-extensions (#24097)
+* Move commands from azure-cli to `reservation` extension (#24097)
 
 **Service Bus**
 
