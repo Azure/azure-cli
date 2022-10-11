@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=C0302
-from difflib import restore
 from enum import Enum
 import calendar
 from datetime import datetime
@@ -5218,17 +5217,18 @@ def managed_db_log_replay_stop(
             resource_group_name=resource_group_name,
             restore_details_name=RestoreDetailsName.DEFAULT)
 
-        # Type must be LRSRestore in order to proceed with stop-log-replay
-        if (restore_details.type_properties_type.lower() == 'lrsrestore'):
+        # Type must be LRSRestore in order to proceed with stop-log-replay, else raise exception
+        if restore_details.type_properties_type.lower() == 'lrsrestore':
             return client.begin_delete(
                 database_name=database_name,
                 managed_instance_name=managed_instance_name,
                 resource_group_name=resource_group_name)
-        else:
-            raise CLIError(
-                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
-                f'in the resource group {resource_group_name} was not created with log replay service.')
+
+        raise CLIError(
+            f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+            f'in the resource group {resource_group_name} was not created with log replay service.')
     except Exception as ex:
+        # Map RestoreDetailsNotAvailableOrExpired to a more descriptive error
         if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
             raise CLIError(
                 f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
