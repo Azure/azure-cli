@@ -268,6 +268,16 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     return tags
 
 
+def sanitize_name(name):
+    name = name[0:43]
+    lastIndexAlphaNumeric = len(name)- 1
+    while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
+        lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
+    if (lastIndexAlphaNumeric < 0):
+        return ""
+    return name[0:lastIndexAlphaNumeric + 1]
+
+
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
@@ -338,7 +348,7 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
+        dataCollectionRuleName = sanitize_name(f"MSCI-{cluster_name}-{cluster_region}")
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
