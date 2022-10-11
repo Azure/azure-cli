@@ -4,6 +4,7 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 
 RUN tdnf update -y
+# kernel-headers, glibc-devel, binutils are needed to install psutil python package on ARM64
 RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch dos2unix perl sed kernel-headers glibc-devel binutils
 
 WORKDIR /azure-cli

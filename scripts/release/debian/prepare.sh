@@ -110,7 +110,8 @@ ${TAB}echo "\043!/usr/bin/env bash\nbin_dir=\140cd \"\044(dirname \"\044BASH_SOU
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
-${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 debian/azure-cli/opt/az/lib/python3.10/lib-dynload/_ssl.cpython-310-x86_64-linux-gnu.so
+${TAB}ssl_file=$(find debian/azure-cli/opt/az/lib/python3.10/ -type f -name '_ssl.cpython-310-*-linux-gnu.so')
+${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 $ssl_file
 
 
 override_dh_strip:
