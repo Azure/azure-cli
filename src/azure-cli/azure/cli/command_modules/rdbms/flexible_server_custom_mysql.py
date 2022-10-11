@@ -60,9 +60,6 @@ def flexible_server_create(cmd, client,
 
     # Process parameters
     server_name = server_name.lower()
-    if high_availability and high_availability.lower() == 'enabled':
-        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
-        high_availability = 'ZoneRedundant'
 
     # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
     if tier == 'BusinessCritical':
@@ -328,6 +325,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        iops=None,
                                        backup_retention=None,
+                                       geo_redundant_backup=None,
                                        administrator_login_password=None,
                                        high_availability=None,
                                        standby_availability_zone=None,
@@ -344,10 +342,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
         cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
         logging_name='MySQL', command_group='mysql', server_client=client, location=instance.location)
 
-    if high_availability and high_availability.lower() == 'enabled':
-        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
-        high_availability = 'ZoneRedundant'
-
     # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
     if tier == 'BusinessCritical':
         tier = 'MemoryOptimized'
@@ -363,7 +357,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               auto_grow=auto_grow,
                               replication_role=replication_role,
                               instance=instance,
-                              geo_redundant_backup=instance.backup.geo_redundant_backup,
+                              geo_redundant_backup=geo_redundant_backup,
                               byok_identity=byok_identity,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
@@ -386,6 +380,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
+
+    if geo_redundant_backup:
+        instance.backup.geo_redundant_backup = geo_redundant_backup
 
     if maintenance_window:
         # if disabled is pass in reset to default values
@@ -484,7 +481,7 @@ def server_delete_func(cmd, client, resource_group_name, server_name, yes=None):
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
     instance = client.get(resource_group_name, server_name)
-    if fail_over is not None and instance.high_availability.mode not in ["ZoneRedundant", "Enabled"]:
+    if fail_over is not None and instance.high_availability.mode != "ZoneRedundant":
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
 
     if fail_over is not None:

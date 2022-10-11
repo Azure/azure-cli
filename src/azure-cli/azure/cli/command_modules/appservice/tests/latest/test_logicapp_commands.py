@@ -215,13 +215,14 @@ class LogicAppDeployTest(LiveScenarioTest):
         storage = self.create_random_name(prefix='logic', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
-        self.cmd('logicapp create -g {} -n {} -p {} -s {} --os-type windows'.format(resource_group, logicapp_name, plan, storage))
+        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage))
 
         self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('site_name', logicapp_name),
         ])
 
+    @unittest.skip("Falky test fails with read time out, need invesigation")
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_LOGICAPP)
     def test_linux_logicapp_zip_deploy_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
@@ -237,18 +238,6 @@ class LogicAppDeployTest(LiveScenarioTest):
             JMESPathCheck('complete', True),
         ])
 
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    def test_consumption_logicapp_zip_deploy_e2e(self, resource_group):
-        logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
-        zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
-        storage = self.create_random_name(prefix='logic', length=24)
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
-        self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type windows'.format(resource_group, logicapp_name, DEFAULT_LOCATION, storage))
-
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('site_name', logicapp_name),
-        ])
 
 
 class LogicAppPlanTest(ScenarioTest):
@@ -336,22 +325,6 @@ class LogicAppPlanTest(ScenarioTest):
         plan_name = self._create_app_service_plan("WS1", resource_group)
         self._create_app_service_plan("WS2", resource_group, plan_name)
         self._create_app_service_plan("WS3", resource_group, plan_name)
-
-
-class LogicAppOnWindows(ScenarioTest):
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_LOGICAPP)
-    @StorageAccountPreparer()
-    def test_logicapp_windows(self, resource_group, storage_account):
-        logicapp_name = self.create_random_name(
-            'logicappwindowsruntime', 40)
-
-        self.cmd('logicapp create -g {} -n {} -c {} -s {} --os-type Windows'
-                 .format(resource_group, logicapp_name, WINDOWS_ASP_LOCATION_LOGICAPP, storage_account)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', logicapp_name),
-                     JMESPathCheck('kind', 'functionapp,workflowapp'),
-                     JMESPathCheck('hostNames[0]', logicapp_name + '.azurewebsites.net')])
-        self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
 
 
 class LogicAppOnLinux(ScenarioTest):

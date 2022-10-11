@@ -1410,7 +1410,7 @@ examples:
         az eventgrid event-subscription create --name es1 \\
             --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1 \\
             --endpoint https://contoso.azurewebsites.net/api/f1?code=code
-  - name: Create a new event subscription for an Azure subscription subscription, using default filters.
+  - name: Create a new event subscription for an Azure subscription, using default filters.
     text: |
         az eventgrid event-subscription create --name es2 \\
             --source-resource-id /subscriptions/{SubID} \\

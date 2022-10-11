@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "eastus2euap"
+VNET_LOCATION = "eastus2euap"
 
 class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
     def create_volume(self, volume_only=False):

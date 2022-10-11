@@ -28,6 +28,7 @@ class ImportFormat(Enum):
     OpenApi = "OpenApi"
     OpenApiJson = "OpenApiJson"
     Wsdl = "Wsdl"
+    GraphQL = "GraphQL"
 
 
 def load_arguments(self, _):

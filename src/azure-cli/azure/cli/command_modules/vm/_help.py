@@ -3888,7 +3888,7 @@ helps['restore-point create'] = """
         short-summary: "List of disk resource ids that the customer wishes to exclude from the restore point. If no \
 disks are specified, all disks will be included."
         long-summary: |
-            Usage: --exclude-disks id=XX
+            Usage: --exclude-disks XX XX
             id: The ARM resource id in the form of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/.\
 ..
             Multiple actions can be specified by using more than one --exclude-disks argument.
@@ -3898,6 +3898,15 @@ disks are specified, all disks will be included."
                az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour\
                ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" \
                --collection-name "rpcName" --name "rpName"
+      - name: Create a restore point with --consistency-mode CrashConsistent
+        text: |-
+               az vm create -n vm -g rg --image UbuntuLTS --tag EnableCrashConsistentRestorePoint=True
+
+               az restore-point collection create --source-id "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM"\
+                -g rg --collection-name "myRpc"
+
+               az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" \
+               --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
 """
 
 helps['restore-point delete'] = """

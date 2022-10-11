@@ -1333,6 +1333,8 @@ def process_file_batch_source_parameters(cmd, namespace):
         if not namespace.account_name:
             namespace.account_name = identifier.account_name
 
+    namespace.share_name = namespace.source
+
 
 def process_file_download_namespace(namespace):
     get_file_path_validator()(namespace)
@@ -1660,7 +1662,7 @@ def validate_azcopy_remove_arguments(cmd, namespace):
                                              'specified'))
     if valid_blob:
         client = blob_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name})
+            'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
         if not blob:
             blob = ''
         url = client.make_blob_url(container, blob)

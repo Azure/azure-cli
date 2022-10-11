@@ -301,29 +301,22 @@ class GraphClient:
 
     def user_get(self, id_or_upn):
         # https://docs.microsoft.com/graph/api/user-get
-
-        # MSGraph known issues regarding '$' and '#' https://docs.microsoft.com/en-us/graph/known-issues#users
-        if '@' in id_or_upn and '#' in id_or_upn:
-            id_or_upn = id_or_upn.replace('#', '%23')
-        if id_or_upn.startswith('$'):
-            result = self._send("GET", "/users('{}')".format(id_or_upn))
-        else:
-            result = self._send("GET", "/users/{}".format(id_or_upn))
+        result = self._send("GET", "{}".format(_get_user_url(id_or_upn)))
         return result
 
     def user_update(self, id_or_upn, body):
         # https://docs.microsoft.com/graph/api/user-update
-        result = self._send("PATCH", "/users/{}".format(id_or_upn), body=body)
+        result = self._send("PATCH", "{}".format(_get_user_url(id_or_upn)), body=body)
         return result
 
     def user_delete(self, id_or_upn):
         # https://docs.microsoft.com/graph/api/user-delete
-        result = self._send("DELETE", "/users/{}".format(id_or_upn))
+        result = self._send("DELETE", "{}".format(_get_user_url(id_or_upn)))
         return result
 
     def user_get_member_groups(self, id_or_upn, body):
         # https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
-        result = self._send("POST", "/users/{}/getMemberGroups".format(id_or_upn), body=body)
+        result = self._send("POST", "{}/getMemberGroups".format(_get_user_url(id_or_upn)), body=body)
         return result
 
     def oauth2_permission_grant_list(self, filter=None):
@@ -362,6 +355,21 @@ def _filter_to_query(filter):
         from urllib.parse import quote
         return "?$filter={}".format(quote(filter, safe=''))
     return ''
+
+
+def _get_user_url(id_or_upn):
+    # Correctly handle $ and # in upn according to
+    # https://docs.microsoft.com/en-us/graph/api/user-get
+    # https://docs.microsoft.com/en-us/graph/known-issues#users
+
+    # UPN
+    if '@' in id_or_upn:
+        # According to the doc, only encode #, but not @ and $
+        id_or_upn = id_or_upn.replace('#', '%23')
+
+    if id_or_upn.startswith('$'):
+        return f"/users('{id_or_upn}')"
+    return f"/users/{id_or_upn}"
 
 
 class GraphError(Exception):
