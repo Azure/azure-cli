@@ -249,3 +249,31 @@ class AddMappingRequest(argparse.Action):
             else:
                 raise UnrecognizedArgumentError('key error: key must be one of {ip, nic}.')
         return d
+
+
+class WAFRulesCreate(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(WAFRulesCreate, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise UnrecognizedArgumentError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'rule-id':
+                d['rule_id'] = v[0]
+            elif kl == 'action':
+                d['action'] = v[0]
+            elif kl == 'state':
+                d['state'] = v[0]
+            else:
+                raise UnrecognizedArgumentError('key error: key must be one of rule-id, action and state.')
+        return d
