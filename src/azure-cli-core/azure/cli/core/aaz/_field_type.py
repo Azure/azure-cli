@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
-from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError
 
@@ -246,11 +246,47 @@ class AAZObjectType(AAZBaseType):
         return None
 
 
-class AAZDictType(AAZBaseType):
+class AAZFreeFormDictType(AAZBaseType):
+    """Free form dict value type"""
+
+    _ValueCls = AAZFreeFormDict
+    _PatchDataCls = dict
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __getitem__(self, key):
+        return None
+
+    def process_data(self, data, **kwargs):
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
+            if self._nullable:
+                return None
+            return AAZValuePatch.build(self)
+
+        if isinstance(data, AAZFreeFormDict) and data._is_patch:
+            # use value patch
+            result = AAZValuePatch.build(self)
+        else:
+            result = {}
+
+        value = AAZFreeFormDict(schema=self, data=result)
+
+        if isinstance(data, AAZFreeFormDict):
+            for key in data._data.keys():
+                value[key] = data[key]
+        else:
+            assert isinstance(data, (dict,))
+            for key, sub_data in data.items():
+                value[key] = sub_data
+        return result
+
+
+class AAZDictType(AAZFreeFormDictType):
     """Dict value type"""
 
     _ValueCls = AAZDict
-    _PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -275,29 +311,6 @@ class AAZDictType(AAZBaseType):
 
     def __getitem__(self, key):
         return self.Element
-
-    def process_data(self, data, **kwargs):
-        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
-            # data can be None or AAZSimpleValue == None
-            if self._nullable:
-                return None
-            return AAZValuePatch.build(self)
-
-        if isinstance(data, AAZDict) and data._is_patch:
-            # use value patch
-            result = AAZValuePatch.build(self)
-        else:
-            result = {}
-        value = AAZDict(schema=self, data=result)
-
-        if isinstance(data, AAZDict):
-            for key in data._data.keys():
-                value[key] = data[key]
-        else:
-            assert isinstance(data, (dict,))
-            for key, sub_data in data.items():
-                value[key] = sub_data
-        return result
 
 
 class AAZListType(AAZBaseType):

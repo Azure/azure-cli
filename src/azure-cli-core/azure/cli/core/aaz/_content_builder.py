@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from ._base import AAZBaseValue, AAZUndefined
-from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
+from ._field_value import AAZSimpleValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
 from ._field_type import AAZObjectType
 from ._arg_browser import AAZArgBrowser
 
