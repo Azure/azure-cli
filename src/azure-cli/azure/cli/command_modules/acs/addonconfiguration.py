@@ -270,7 +270,7 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
 
 def sanitize_name(name):
     name = name[0:43]
-    lastIndexAlphaNumeric = len(name)- 1
+    lastIndexAlphaNumeric = len(name) - 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
         lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
     if lastIndexAlphaNumeric < 0:
