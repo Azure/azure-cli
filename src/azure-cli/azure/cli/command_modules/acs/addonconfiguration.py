@@ -273,7 +273,7 @@ def sanitize_name(name):
     lastIndexAlphaNumeric = len(name)- 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
         lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
-    if (lastIndexAlphaNumeric < 0):
+    if lastIndexAlphaNumeric < 0:
         return ""
     return name[0:lastIndexAlphaNumeric + 1]
 
