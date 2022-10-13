@@ -104,7 +104,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 
             if isinstance(values, str) and len(values) > 0:
                 try:
-                    data = cls._str_parser(values, is_simple=True)
+                    data = cls.decode_str(values)
                 except AAZShowHelp as aaz_help:
                     aaz_help.schema = cls._schema
                     raise aaz_help
@@ -112,6 +112,10 @@ class AAZSimpleTypeArgAction(AAZArgAction):
                 data = values
         data = cls.format_data(data)
         dest_ops.add(data, *prefix_keys)
+
+    @classmethod
+    def decode_str(cls, value):
+        return cls._str_parser(value, is_simple=True)
 
     @classmethod
     def format_data(cls, data):
@@ -260,6 +264,33 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
             return result
 
         raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
+
+
+class AAZFreeFormDictArgAction(AAZSimpleTypeArgAction):
+
+    @classmethod
+    def decode_str(cls, value):
+        from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
+
+        if len(value) == 0:
+            # the express "a=" will return the blank value of schema 'a'
+            return AAZBlankArgValue
+
+        path = os.path.expanduser(value)
+        if os.path.exists(path):
+            if path.endswith('.yml') or path.endswith('.yaml'):
+                # read from yaml file
+                v = get_file_yaml(path)
+            else:
+                # read from json file
+                v = get_file_json(path, preserve_order=True)
+        else:
+            try:
+                v = shell_safe_json_parse(value, True)
+            except Exception as ex:
+                logger.debug(ex)  # log parse json failed expression
+                raise
+        return v
 
 
 class AAZListArgAction(AAZCompoundTypeArgAction):

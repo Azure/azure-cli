@@ -2,9 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import copy
 
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
-
+from .exceptions import AAZInvalidValueError
+import abc
 
 class AAZSimpleValue(AAZBaseValue):
     """ Simple build-in values such as int, float, boolean and string"""
@@ -161,27 +163,19 @@ class AAZObject(AAZBaseValue):
         return attr_schema, name
 
 
-class AAZDict(AAZBaseValue):
+class AAZBaseDictValue(AAZBaseValue):
 
     def __init__(self, schema, data):
-        from ._field_type import AAZDictType
-        assert isinstance(schema, AAZDictType)
         super().__init__(schema, data)
         assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
+    @abc.abstractmethod
     def __getitem__(self, key) -> AAZBaseValue:
-        item_schema = self._schema[key]
-        if key not in self._data:
-            self._data[key] = AAZValuePatch.build(item_schema)
-        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
+        raise NotImplementedError()
 
+    @abc.abstractmethod
     def __setitem__(self, key, data):
-        try:
-            item_schema = self._schema[key]
-        except AttributeError:
-            # ignore undefined element
-            return
-        self._data[key] = item_schema.process_data(data, key=key)
+        raise NotImplementedError()
 
     def __delitem__(self, key):
         del self._data[key]
@@ -228,6 +222,28 @@ class AAZDict(AAZBaseValue):
     def items(self):
         for key in self._data:
             yield key, self[key]
+
+
+class AAZDict(AAZBaseDictValue):
+
+    def __init__(self, schema, data):
+        from ._field_type import AAZDictType
+        assert isinstance(schema, AAZDictType)
+        super().__init__(schema, data)
+
+    def __getitem__(self, key) -> AAZBaseValue:
+        item_schema = self._schema[key]
+        if key not in self._data:
+            self._data[key] = AAZValuePatch.build(item_schema)
+        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
+
+    def __setitem__(self, key, data):
+        try:
+            item_schema = self._schema[key]
+        except AttributeError:
+            # ignore undefined element
+            return
+        self._data[key] = item_schema.process_data(data, key=key)
 
     def to_serialized_data(self, processor=None, **kwargs):
         if self._data == AAZUndefined:
@@ -250,75 +266,38 @@ class AAZDict(AAZBaseValue):
         return result
 
 
-class AAZFreeFormDict(AAZBaseValue):
+class AAZFreeFormDict(AAZBaseDictValue):
 
     def __init__(self, schema, data):
         from ._field_type import AAZFreeFormDictType
         assert isinstance(schema, AAZFreeFormDictType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> AAZBaseValue:
         item_schema = self._schema[key]
         if item_schema is None:
+            # free form
             return self._data[key]
         if key not in self._data:
             self._data[key] = AAZValuePatch.build(item_schema)
         return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
 
     def __setitem__(self, key, data):
-        try:
-            item_schema = self._schema[key]
-        except AttributeError:
-            self._data[key] = data
+        item_schema = self._schema[key]
+        if item_schema is None:
+            # free form
+            if isinstance(data, AAZValuePatch):
+                raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
+            if isinstance(data, AAZBaseValue):
+                if data._is_patch:
+                    raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
+                data = data._data
+            assert not isinstance(data, AAZBaseValue)
+            self._data[key] = copy.deepcopy(data)
             return
+
+        # For fixed key properties usage
         self._data[key] = item_schema.process_data(data, key=key)
-
-    def __delitem__(self, key):
-        del self._data[key]
-
-    def __contains__(self, key):
-        return key in self._data
-
-    def __len__(self):
-        return len(self._data)
-
-    def __iter__(self):
-        for key in self._data:
-            yield key
-
-    def __eq__(self, other):
-        if isinstance(other, AAZBaseValue):
-            return self._data == other._data
-
-        # other is buld-in type value
-        if other is None:
-            return self._data is None
-
-        if (not isinstance(other, dict)) or len(other) != len(self._data):
-            return False
-
-        for key, _ in other.items():
-            if other[key] != self[key]:
-                return False
-        return True
-
-    def __ne__(self, other):
-        return not self == other
-
-    def clear(self):
-        self._data.clear()
-
-    def keys(self):
-        return self._data.keys()
-
-    def values(self):
-        for key in self._data:
-            yield self[key]
-
-    def items(self):
-        for key in self._data:
-            yield key, self[key]
 
     def to_serialized_data(self, processor=None, **kwargs):
         if self._data == AAZUndefined:

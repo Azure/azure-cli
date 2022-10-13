@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import abc
+
 from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
 from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
@@ -246,17 +248,16 @@ class AAZObjectType(AAZBaseType):
         return None
 
 
-class AAZFreeFormDictType(AAZBaseType):
-    """Free form dict value type"""
+class AAZBaseDictType(AAZBaseType):
 
-    _ValueCls = AAZFreeFormDict
     _PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @abc.abstractmethod
     def __getitem__(self, key):
-        return None
+        raise NotImplementedError()
 
     def process_data(self, data, **kwargs):
         if data == None:  # noqa: E711, pylint: disable=singleton-comparison
@@ -265,15 +266,15 @@ class AAZFreeFormDictType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
-        if isinstance(data, AAZFreeFormDict) and data._is_patch:
+        if isinstance(data, self._ValueCls) and data._is_patch:
             # use value patch
             result = AAZValuePatch.build(self)
         else:
             result = {}
 
-        value = AAZFreeFormDict(schema=self, data=result)
+        value = self._ValueCls(schema=self, data=result)
 
-        if isinstance(data, AAZFreeFormDict):
+        if isinstance(data, self._ValueCls):
             for key in data._data.keys():
                 value[key] = data[key]
         else:
@@ -283,7 +284,7 @@ class AAZFreeFormDictType(AAZBaseType):
         return result
 
 
-class AAZDictType(AAZFreeFormDictType):
+class AAZDictType(AAZBaseDictType):
     """Dict value type"""
 
     _ValueCls = AAZDict
@@ -311,6 +312,15 @@ class AAZDictType(AAZFreeFormDictType):
 
     def __getitem__(self, key):
         return self.Element
+
+
+class AAZFreeFormDictType(AAZBaseDictType):
+    """Free form dict value type"""
+
+    _ValueCls = AAZFreeFormDict
+
+    def __getitem__(self, key):
+        return None
 
 
 class AAZListType(AAZBaseType):
