@@ -154,6 +154,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             scopes, prompt='select_account', port=8400 if self._is_adfs else None,
             success_template=success_template, error_template=error_template,
             parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
+            enable_msa_passthrough=True,
             **kwargs)
         return check_result(result)
 
