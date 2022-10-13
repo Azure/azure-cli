@@ -2191,8 +2191,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
             data_disk_images = None
             if hasattr(namespace, 'target_edge_zone_encryption') and namespace.target_edge_zone_encryption:
                 terms = namespace.target_edge_zone_encryption[i].split(',')
-                # edge zone
-                # TODO edge_zone
+                if len(terms) < 2:
+                    break
                 # OS disk
                 os_disk_image = terms[1]
                 if os_disk_image == 'null':

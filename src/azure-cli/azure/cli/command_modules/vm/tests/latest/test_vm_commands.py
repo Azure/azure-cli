@@ -5769,8 +5769,8 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1', checks=[
             self.check('name', self.kwargs['image'])
         ])
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --target-region-cvm-encryption EncryptedVMGuestStateOnlyWithPmk, --os-snapshot {snapshot1} --replica-count 1'
-                 '--target-edge-zone-encryption microsoftlosangeles1,{des1},0,{des1} --target-edge-zones centraluseuap=microsoftlosangeles1', checks=[
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} '
+                 '--target-edge-zone-encryption microsoftlosangeles1,{des1},0,{des1} --target-edge-zones centraluseuap=microsoftlosangeles1 --replica-count 1', checks=[
             self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
