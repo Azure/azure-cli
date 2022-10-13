@@ -1704,6 +1704,20 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_list')
+    def test_vm_extension_list(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-',15)
+        })
+
+        vm = self.cmd('vm create -n {vm} -g {rg} --image ubuntults --admin-username user11 --admin-password testPassword0 --nsg-rule NONE').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+        self.cmd('vm extension list --ids {vm_id} ', checks=[
+            self.check('length([])', 0)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_2')
     def test_vm_extension_instance_name(self, resource_group):
 

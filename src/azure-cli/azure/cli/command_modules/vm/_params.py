@@ -522,7 +522,7 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
-        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 
     with self.argument_context('vm extension show') as c:
         c.argument('instance_view', action='store_true', help='The instance view of a virtual machine extension.')
