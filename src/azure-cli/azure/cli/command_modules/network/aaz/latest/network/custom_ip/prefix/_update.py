@@ -65,7 +65,12 @@ class Update(AAZCommand):
             options=["--state"],
             help="Commissioned State of the custom ip prefix.",
             nullable=True,
-            enum={"Commissioned": "Commissioned", "CommissionedNoInternetAdvertise": "CommissionedNoInternetAdvertise", "Commissioning": "Commissioning", "Decommissioning": "Decommissioning", "Deprovisioned": "Deprovisioned", "Deprovisioning": "Deprovisioning", "Provisioned": "Provisioned", "Provisioning": "Provisioning"},
+            enum={"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"},
+        )
+        _args_schema.no_internet_advertise = AAZBoolArg(
+            options=["--no-internet-advertise"],
+            help="Whether to Advertise the range to Internet.",
+            nullable=True,
         )
         _args_schema.signed_message = AAZStrArg(
             options=["--signed-message"],
@@ -330,6 +335,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("authorizationMessage", AAZStrType, ".authorization_message")
                 properties.set_prop("commissionedState", AAZStrType, ".state")
+                properties.set_prop("noInternetAdvertise", AAZBoolType, ".no_internet_advertise")
                 properties.set_prop("signedMessage", AAZStrType, ".signed_message")
 
             tags = _builder.get(".tags")

@@ -60,6 +60,10 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.asn = AAZStrArg(
+            options=["--asn"],
+            help="The ASN for CIDR advertising. Should be an integer as string.",
+        )
         _args_schema.authorization_message = AAZStrArg(
             options=["--authorization-message"],
             help="Authorization message for WAN validation.",
@@ -71,6 +75,15 @@ class Create(AAZCommand):
         _args_schema.cip_prefix_parent = AAZStrArg(
             options=["-c", "--cip-prefix-parent"],
             help="The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.",
+        )
+        _args_schema.express_route_advertise = AAZBoolArg(
+            options=["--is-advertised", "--express-route-advertise"],
+            help="Whether to do express route advertise.",
+        )
+        _args_schema.geo = AAZStrArg(
+            options=["--geo"],
+            help="The Geo for CIDR advertising. Should be an Geo code.",
+            enum={"AFRI": "AFRI", "APAC": "APAC", "AQ": "AQ", "EURO": "EURO", "GLOBAL": "GLOBAL", "LATAM": "LATAM", "ME": "ME", "NAM": "NAM", "OCEANIA": "OCEANIA"},
         )
         _args_schema.signed_message = AAZStrArg(
             options=["--signed-message"],
@@ -209,9 +222,12 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("asn", AAZStrType, ".asn")
                 properties.set_prop("authorizationMessage", AAZStrType, ".authorization_message")
                 properties.set_prop("cidr", AAZStrType, ".cidr")
                 properties.set_prop("customIpPrefixParent", AAZObjectType)
+                properties.set_prop("expressRouteAdvertise", AAZBoolType, ".express_route_advertise")
+                properties.set_prop("geo", AAZStrType, ".geo")
                 properties.set_prop("signedMessage", AAZStrType, ".signed_message")
 
             custom_ip_prefix_parent = _builder.get(".properties.customIpPrefixParent")
