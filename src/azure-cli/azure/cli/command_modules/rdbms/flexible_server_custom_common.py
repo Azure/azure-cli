@@ -55,7 +55,7 @@ def server_list_custom_func(client, resource_group_name=None):
     return client.list()
 
 
-def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline", migration_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
@@ -63,23 +63,26 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         raise FileOperationError("Properties file does not exist in the given location")
     with open(properties_filepath, "r") as f:
         try:
-            json_data = json.dumps(json.load(f))
+            request_payload = json.load(f)
+            if migration_mode == "online":
+                request_payload.get("properties")['MigrationMode'] = "Online"
+            json_data = json.dumps(request_payload)
         except ValueError as err:
             logger.error(err)
             raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
 
     return r.json()
 
 
-def migration_show_func(cmd, client, resource_group_name, server_name, migration_name, level="Default"):
+def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name, level))
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
 
     return r.json()
 
@@ -88,12 +91,12 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
 
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, start_data_migration=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, cancel=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -117,37 +120,25 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         operationSpecified = True
         properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
 
-    if cutover is True:
+    if cutover is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
+        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name, "Default")
+        if r.get("properties").get("migrationMode") == "Offline":
+            raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
+        properties = json.dumps({"properties": {"triggerCutover": "true", "DBsToTriggerCutoverMigrationOn": cutover}})
 
-    if start_data_migration is True:
+    if cancel is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        properties = "{\"properties\": {\"startDataMigration\": \"true\"} }"
+        properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": cancel}})
 
     if operationSpecified is False:
-        raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
+        raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")
 
-    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
-
-    return r.json()
-
-
-def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name, yes=None):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    if not yes:
-        user_confirmation(
-            "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
-                migration_name, server_name, resource_group_name))
-
-    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
-
+    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
     return r.json()
 
 
@@ -155,7 +146,7 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     properties = json.dumps({"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"})
-    r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
+    r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
     return r.json()
 
 
