@@ -277,11 +277,16 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         # now add an export policy
         # there is already one default rule present
-        vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
+        vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s "
+                                          "--allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true "
+                                          "--unix-read-write false --cifs false --nfsv3 true --nfsv41 false "
+                                          "--has-root-access false" %
+                                          (account_name, pool_name, volume_name)).get_output_in_json()
         assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert vol_with_export_policy['exportPolicy']['rules'][0]['allowedClients'] == '1.2.3.0/24'
         assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
         assert vol_with_export_policy['exportPolicy']['rules'][0]['cifs'] is False
+        assert vol_with_export_policy['exportPolicy']['rules'][0]['hasRootAccess'] is False
 
         # and add another export policy
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.4.0/24' --rule-index 2 --unix-read-only true --unix-read-write false --cifs true --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()

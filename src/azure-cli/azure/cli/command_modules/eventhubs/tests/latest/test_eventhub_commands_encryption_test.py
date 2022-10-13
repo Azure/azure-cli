@@ -61,7 +61,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         identity4 = self.cmd('identity create --name {identity4} --resource-group {rg}').get_output_in_json()
         self.kwargs.update({'id4': identity4['id']})
 
-        keyvaultcreate = self.cmd('keyvault create --resource-group {rg} --name {kv_name} --location {loc} --enable-soft-delete --enable-purge-protection').get_output_in_json()
+        keyvaultcreate = self.cmd('keyvault create --resource-group {rg} --name {kv_name} --location {loc} --enable-purge-protection --retention-days 7').get_output_in_json()
 
         self.kwargs.update({
             'id1object': identity1['principalId'],
