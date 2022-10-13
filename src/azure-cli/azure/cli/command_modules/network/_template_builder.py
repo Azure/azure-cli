@@ -41,6 +41,28 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
     return frontend_ip_config
 
 
+def _build_frontend_ip_config_v2(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
+                                 private_ip_allocation=None, zone=None, private_ip_address_version=None):
+    frontend_ip_config = {
+        'name': name
+    }
+
+    if public_ip_id:
+        frontend_ip_config['public_ip_address'] = {'id': public_ip_id}
+    else:
+        frontend_ip_config['private_ip_allocation_method'] = private_ip_allocation
+        frontend_ip_config['private_ip_address'] = private_ip_address
+        frontend_ip_config['subnet'] = {'id': subnet_id}
+
+    if zone and cmd.supported_api_version(min_api='2017-06-01'):
+        frontend_ip_config['zones'] = zone
+
+    if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
+        frontend_ip_config['private_ip_address_version'] = private_ip_address_version
+
+    return frontend_ip_config
+
+
 def _build_appgw_private_link_ip_configuration(name,
                                                private_link_ip_address,
                                                private_link_ip_allocation_method,
@@ -390,6 +412,39 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
     return lb
 
 
+def build_load_balancer_resource_v2(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
+                                    subnet_id, private_ip_address, private_ip_allocation,
+                                    sku, frontend_ip_zone, private_ip_address_version, tier=None,
+                                    edge_zone=None, edge_zone_type=None):
+    frontend_ip_config = _build_frontend_ip_config_v2(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
+                                                      private_ip_allocation, frontend_ip_zone, private_ip_address_version)
+    lb = {
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'backend_address_pools': [
+            {
+                'name': backend_pool_name
+            }
+        ],
+        'frontend_ip_configurations': [frontend_ip_config]
+    }
+
+    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
+    if cmd.supported_api_version(min_api='2021-02-01') and sku and str(sku).lower() == 'gateway':
+        lb['backend_address_pools'][0]['tunnel_interfaces'] = [{'protocol': 'VXLAN',
+                                                                'type': 'Internal',
+                                                                'identifier': 900}]
+
+    if sku and cmd.supported_api_version(min_api='2017-08-01'):
+        lb['sku'] = {'name': sku}
+    if tier and cmd.supported_api_version(min_api='2020-07-01'):
+        lb['sku'].update({'tier': tier})
+    if edge_zone and edge_zone_type:
+        lb['extended_location'] = {'name': edge_zone, 'type': edge_zone_type}
+    return lb
+
+
 def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, tier=None,
                              edge_zone=None, edge_zone_type=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
@@ -416,6 +471,31 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip['zones'] = zone
     if edge_zone and edge_zone_type:
         public_ip['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
+    return public_ip
+
+
+def build_public_ip_resource_v2(cmd, location, tags, address_allocation, dns_name, sku, zone, tier=None,
+                                edge_zone=None, edge_zone_type=None):
+
+    public_ip = {
+        'location': location,
+        'tags': tags
+    }
+
+    public_ip['public_ip_allocation_method'] = address_allocation
+    if dns_name:
+        public_ip['dns_settings'] = {'domain_name_label': dns_name}
+    if sku and cmd.supported_api_version(min_api='2017-08-01'):
+        public_ip['sku'] = {'name': sku}
+    if tier and cmd.supported_api_version(min_api='2020-07-01'):
+        if not sku:
+            # Basic --> Standard
+            public_ip['sku'] = {'name': 'Standard'}
+        public_ip['sku'].update({'tier': tier})
+    if zone and cmd.supported_api_version(min_api='2017-06-01'):
+        public_ip['zones'] = zone
+    if edge_zone and edge_zone_type:
+        public_ip['extended_location'] = {'name': edge_zone, 'type': edge_zone_type}
     return public_ip
 
 

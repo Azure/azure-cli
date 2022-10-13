@@ -3518,13 +3518,6 @@ examples:
     text: az network cross-region-lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule \\ --protocol All --frontend-port 0 --backend-port 0
 """
 
-helps['network lb'] = """
-type: group
-short-summary: Manage and configure load balancers.
-long-summary: |
-  To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
-"""
-
 helps['network lb wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the load balancer is met.
@@ -3718,14 +3711,6 @@ examples:
         az network lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 --vnet-name MyVnet --subnet MySubnet
 """
 
-helps['network lb delete'] = """
-type: command
-short-summary: Delete a load balancer.
-examples:
-  - name: Delete a load balancer.
-    text: az network lb delete -g MyResourceGroup -n MyLb
-"""
-
 helps['network lb frontend-ip'] = """
 type: group
 short-summary: Manage frontend IP addresses of a load balancer.
@@ -3906,22 +3891,6 @@ examples:
     text: |
         az network lb inbound-nat-rule update --lb-name MyLb --name MyNatRule --resource-group MyResourceGroup --set tags.CostCenter=MyBusinessGroup
     crafted: true
-"""
-
-helps['network lb list'] = """
-type: command
-short-summary: List load balancers.
-examples:
-  - name: List load balancers.
-    text: az network lb list -g MyResourceGroup
-"""
-
-helps['network lb list-nic'] = """
-type: command
-short-summary: List associated load balancer network interfaces.
-examples:
-  - name: List associated load balancer network interfaces.
-    text: az network lb list-nic -g MyResourceGroup --name MyLb
 """
 
 helps['network lb list-mapping'] = """
@@ -4114,24 +4083,6 @@ examples:
     text: |
         az network lb rule update --idle-timeout 5 --lb-name MyLb --name MyLbRule --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['network lb show'] = """
-type: command
-short-summary: Get the details of a load balancer.
-examples:
-  - name: Get the details of a load balancer.
-    text: az network lb show -g MyResourceGroup -n MyLb
-"""
-
-helps['network lb update'] = """
-type: command
-short-summary: Update a load balancer.
-long-summary: >
-    This command can only be used to update the tags for a load balancer. Name and resource group are immutable and cannot be updated.
-examples:
-  - name: Update the tags of a load balancer.
-    text: az network lb update -g MyResourceGroup -n MyLb --set tags.CostCenter=MyBusinessGroup
 """
 
 helps['network list-usages'] = """
