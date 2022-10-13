@@ -527,9 +527,13 @@ class NetworkCustomIPPrefix(ScenarioTest):
         })
 
         self.cmd(
-            "network custom-ip prefix create -n {cip_name} -z 1 -g {rg} --cidr 0.0.0.0/24",
+            "network custom-ip prefix create -n {cip_name} -z 1 -g {rg} --cidr 0.0.0.0/24 "
+            "--asn 65515 --geo GLOBAL --is-advertised false",
             checks=[
-                self.check("name", "{cip_name}")
+                self.check("name", "{cip_name}"),
+                self.check("asn", "65515"),
+                self.check("geo", "GLOBAL"),
+                self.check("expressRouteAdvertise", False)
             ]
         )
         self.cmd(
@@ -545,6 +549,22 @@ class NetworkCustomIPPrefix(ScenarioTest):
             checks=[
                 self.check("name", "{cip_name}"),
                 self.check("tags.foo", "bar")
+            ]
+        )
+
+
+    @record_only()
+    def test_network_custom_ip_prefix_update_state(self):
+        self.kwargs.update({
+            "rg": "cli_test_custom_ip_prefix",
+            "cip_name": "prefix1"
+        })
+
+        self.cmd(
+            "network custom-ip prefix update -n {cip_name} -g {rg} --state commission --no-internet-advertise false",
+            checks=[
+                self.check("commissionedState", "Commissioning"),
+                self.check("noInternetAdvertise", False)
             ]
         )
 

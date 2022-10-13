@@ -11,14 +11,15 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -z -g --cidr
+      - -n -z -g --cidr --asn --geo --is-advertised
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_custom_ip_prefix_000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001","name":"cli_test_network_custom_ip_prefix_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-10-10T07:16:42Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001","name":"cli_test_network_custom_ip_prefix_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-10-13T09:06:09Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:16:48 GMT
+      - Thu, 13 Oct 2022 09:06:16 GMT
       expires:
       - '-1'
       pragma:
@@ -42,8 +43,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "properties": {"cidr": "0.0.0.0/24"}, "zones":
-      ["1"]}'
+    body: '{"location": "eastus2", "properties": {"asn": "65515", "cidr": "0.0.0.0/24",
+      "expressRouteAdvertise": false, "geo": "GLOBAL"}, "zones": ["1"]}'
     headers:
       Accept:
       - application/json
@@ -54,38 +55,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '77'
+      - '142'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -z -g --cidr
+      - -n -z -g --cidr --asn --geo --is-advertised
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes/cip-000002?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cip-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \ \"etag\": \"W/\\\"75ca582d-6bdc-40fc-9a4c-4d11c09ed65e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8e184753-04ed-48de-9a38-900258394454\\\"\",\r\n  \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"zones\": [\r\n    \"1\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n
         \   \"commissionedState\": \"Provisioning\",\r\n    \"failedReason\": \"\",\r\n
         \   \"noInternetAdvertise\": false,\r\n    \"expressRouteAdvertise\": false,\r\n
-        \   \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\": []\r\n  }\r\n}"
+        \   \"geo\": \"GLOBAL\",\r\n    \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\":
+        [],\r\n    \"asn\": \"65515\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/cc50b2b1-31fe-4a6b-bffe-b6fcab29a2c0?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f2a8a832-8ef8-49f7-903c-a4f360251e6b?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '688'
+      - '731'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:16:53 GMT
+      - Thu, 13 Oct 2022 09:06:27 GMT
       expires:
       - '-1'
       pragma:
@@ -98,7 +100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 80bb4cda-5ccc-4677-8cdd-86983a2de7d3
+      - d3fa5a20-105f-4e26-bfb9-348f22450619
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -116,11 +118,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -z -g --cidr
+      - -n -z -g --cidr --asn --geo --is-advertised
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/cc50b2b1-31fe-4a6b-bffe-b6fcab29a2c0?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f2a8a832-8ef8-49f7-903c-a4f360251e6b?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -132,7 +134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:16:57 GMT
+      - Thu, 13 Oct 2022 09:06:30 GMT
       expires:
       - '-1'
       pragma:
@@ -149,7 +151,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8c5d9844-35b9-4f71-89e9-445d17815e54
+      - 9d41c851-d976-48bd-b58c-fc0a81fe11d5
     status:
       code: 200
       message: OK
@@ -165,32 +167,33 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -z -g --cidr
+      - -n -z -g --cidr --asn --geo --is-advertised
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes/cip-000002?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cip-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \ \"etag\": \"W/\\\"81eefbcf-9b0d-40e7-8f99-30e267718859\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3c972afe-3030-4225-856a-99b7139835a2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"zones\": [\r\n    \"1\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n
         \   \"commissionedState\": \"Provisioning\",\r\n    \"failedReason\": \"\",\r\n
         \   \"noInternetAdvertise\": false,\r\n    \"expressRouteAdvertise\": false,\r\n
-        \   \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\": []\r\n  }\r\n}"
+        \   \"geo\": \"GLOBAL\",\r\n    \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\":
+        [],\r\n    \"asn\": \"65515\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '689'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:16:57 GMT
+      - Thu, 13 Oct 2022 09:06:31 GMT
       etag:
-      - W/"81eefbcf-9b0d-40e7-8f99-30e267718859"
+      - W/"3c972afe-3030-4225-856a-99b7139835a2"
       expires:
       - '-1'
       pragma:
@@ -207,7 +210,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 08978f61-9f64-47fa-b4f7-802fae41062e
+      - 00500384-842e-4b55-8f64-da33c50bb169
     status:
       code: 200
       message: OK
@@ -225,30 +228,31 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"cip-000002\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \     \"etag\": \"W/\\\"81eefbcf-9b0d-40e7-8f99-30e267718859\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"3c972afe-3030-4225-856a-99b7139835a2\\\"\",\r\n      \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n      \"location\": \"eastus2\",\r\n
         \     \"zones\": [\r\n        \"1\"\r\n      ],\r\n      \"properties\": {\r\n
         \       \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n        \"commissionedState\":
+        \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n        \"commissionedState\":
         \"Provisioning\",\r\n        \"failedReason\": \"\",\r\n        \"noInternetAdvertise\":
-        false,\r\n        \"expressRouteAdvertise\": false,\r\n        \"cidr\": \"0.0.0.0/24\",\r\n
-        \       \"childCustomIpPrefixes\": []\r\n      }\r\n    }\r\n  ]\r\n}"
+        false,\r\n        \"expressRouteAdvertise\": false,\r\n        \"geo\": \"GLOBAL\",\r\n
+        \       \"cidr\": \"0.0.0.0/24\",\r\n        \"childCustomIpPrefixes\": [],\r\n
+        \       \"asn\": \"65515\"\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '794'
+      - '845'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:16:59 GMT
+      - Thu, 13 Oct 2022 09:06:32 GMT
       expires:
       - '-1'
       pragma:
@@ -265,7 +269,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2995be60-06a7-4d7c-aad6-5a82dd870704
+      - 1767434a-c22b-41be-be9b-b9f759f7e673
     status:
       code: 200
       message: OK
@@ -283,30 +287,31 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes/cip-000002?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cip-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \ \"etag\": \"W/\\\"81eefbcf-9b0d-40e7-8f99-30e267718859\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3c972afe-3030-4225-856a-99b7139835a2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"zones\": [\r\n    \"1\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n
         \   \"commissionedState\": \"Provisioning\",\r\n    \"failedReason\": \"\",\r\n
         \   \"noInternetAdvertise\": false,\r\n    \"expressRouteAdvertise\": false,\r\n
-        \   \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\": []\r\n  }\r\n}"
+        \   \"geo\": \"GLOBAL\",\r\n    \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\":
+        [],\r\n    \"asn\": \"65515\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '689'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:16:59 GMT
+      - Thu, 13 Oct 2022 09:06:32 GMT
       etag:
-      - W/"81eefbcf-9b0d-40e7-8f99-30e267718859"
+      - W/"3c972afe-3030-4225-856a-99b7139835a2"
       expires:
       - '-1'
       pragma:
@@ -316,22 +321,18 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d1d26b28-e48d-4f8d-a946-e472ede9629e
+      - 1d9f7334-2752-4301-b34d-b0bda9f02f8f
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002",
-      "location": "eastus2", "properties": {"cidr": "0.0.0.0/24", "commissionedState":
-      "Provisioning", "expressRouteAdvertise": false, "noInternetAdvertise": false},
-      "tags": {"foo": "bar"}, "zones": ["1"]}'
+      "location": "eastus2", "properties": {"asn": "65515", "cidr": "0.0.0.0/24",
+      "commissionedState": "Provisioning", "expressRouteAdvertise": false, "geo":
+      "GLOBAL", "noInternetAdvertise": false}, "tags": {"foo": "bar"}, "zones": ["1"]}'
     headers:
       Accept:
       - application/json
@@ -342,39 +343,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '373'
+      - '406'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes/cip-000002?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cip-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \ \"etag\": \"W/\\\"3f6f3d3e-0b17-4b1e-b30c-4e3ebcc8a714\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a57a3c8f-eac7-4d60-b6d3-f32b4d558d98\\\"\",\r\n  \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"zones\": [\r\n    \"1\"\r\n
         \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n    \"commissionedState\":
+        \   \"resourceGuid\": \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n    \"commissionedState\":
         \"Provisioning\",\r\n    \"failedReason\": \"\",\r\n    \"noInternetAdvertise\":
-        false,\r\n    \"expressRouteAdvertise\": false,\r\n    \"cidr\": \"0.0.0.0/24\",\r\n
-        \   \"childCustomIpPrefixes\": []\r\n  }\r\n}"
+        false,\r\n    \"expressRouteAdvertise\": false,\r\n    \"geo\": \"GLOBAL\",\r\n
+        \   \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\": [],\r\n    \"asn\":
+        \"65515\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/10e05686-cb7c-4253-9535-20a8e9f4a000?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a64cfee2-0144-4ea5-91c4-c57a9a1d79ed?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '725'
+      - '768'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:17:06 GMT
+      - Thu, 13 Oct 2022 09:06:40 GMT
       expires:
       - '-1'
       pragma:
@@ -384,16 +386,12 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 64d7edc1-c0de-4a38-a108-a00492fe5a82
+      - 3bf28318-4985-404a-ba2c-06694f739020
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -411,9 +409,9 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/10e05686-cb7c-4253-9535-20a8e9f4a000?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a64cfee2-0144-4ea5-91c4-c57a9a1d79ed?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -425,7 +423,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:17:09 GMT
+      - Thu, 13 Oct 2022 09:06:44 GMT
       expires:
       - '-1'
       pragma:
@@ -435,14 +433,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f7e2ac3f-449e-47e0-9853-80931685487f
+      - 1c3f601e-7bc1-4477-8981-df2bf5759d3e
     status:
       code: 200
       message: OK
@@ -460,31 +454,32 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes/cip-000002?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cip-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \ \"etag\": \"W/\\\"e69fbc57-b435-4651-947d-12847379a672\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5a454826-faa7-4aaa-9871-dcf14262acea\\\"\",\r\n  \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"zones\": [\r\n    \"1\"\r\n
         \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n    \"commissionedState\":
+        \   \"resourceGuid\": \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n    \"commissionedState\":
         \"Provisioning\",\r\n    \"failedReason\": \"\",\r\n    \"noInternetAdvertise\":
-        false,\r\n    \"expressRouteAdvertise\": false,\r\n    \"cidr\": \"0.0.0.0/24\",\r\n
-        \   \"childCustomIpPrefixes\": []\r\n  }\r\n}"
+        false,\r\n    \"expressRouteAdvertise\": false,\r\n    \"geo\": \"GLOBAL\",\r\n
+        \   \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\": [],\r\n    \"asn\":
+        \"65515\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '726'
+      - '769'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:17:09 GMT
+      - Thu, 13 Oct 2022 09:06:44 GMT
       etag:
-      - W/"e69fbc57-b435-4651-947d-12847379a672"
+      - W/"5a454826-faa7-4aaa-9871-dcf14262acea"
       expires:
       - '-1'
       pragma:
@@ -494,14 +489,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ffa41169-ff0a-4d8d-8848-ee0d03a8a22d
+      - 0240b061-f8c2-4f75-a1ac-76a0a13b6c58
     status:
       code: 200
       message: OK
@@ -519,31 +510,32 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.40.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIpPrefixes/cip-000002?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cip-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_custom_ip_prefix_000001/providers/Microsoft.Network/customIPPrefixes/cip-000002\",\r\n
-        \ \"etag\": \"W/\\\"e69fbc57-b435-4651-947d-12847379a672\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5a454826-faa7-4aaa-9871-dcf14262acea\\\"\",\r\n  \"type\":
         \"Microsoft.Network/customIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"zones\": [\r\n    \"1\"\r\n
         \ ],\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5f6edf14-7b5e-423b-a948-a19ddfcfd3bb\",\r\n    \"commissionedState\":
+        \   \"resourceGuid\": \"ead016c6-5a44-4300-ace7-5e080a8260de\",\r\n    \"commissionedState\":
         \"Provisioning\",\r\n    \"failedReason\": \"\",\r\n    \"noInternetAdvertise\":
-        false,\r\n    \"expressRouteAdvertise\": false,\r\n    \"cidr\": \"0.0.0.0/24\",\r\n
-        \   \"childCustomIpPrefixes\": []\r\n  }\r\n}"
+        false,\r\n    \"expressRouteAdvertise\": false,\r\n    \"geo\": \"GLOBAL\",\r\n
+        \   \"cidr\": \"0.0.0.0/24\",\r\n    \"childCustomIpPrefixes\": [],\r\n    \"asn\":
+        \"65515\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '726'
+      - '769'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Oct 2022 07:17:10 GMT
+      - Thu, 13 Oct 2022 09:06:45 GMT
       etag:
-      - W/"e69fbc57-b435-4651-947d-12847379a672"
+      - W/"5a454826-faa7-4aaa-9871-dcf14262acea"
       expires:
       - '-1'
       pragma:
@@ -560,7 +552,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9ea3e704-73bd-4ff2-907a-f0fb4a55db24
+      - c4a527c7-cc5d-4845-98f6-df0d1bbd2e27
     status:
       code: 200
       message: OK
