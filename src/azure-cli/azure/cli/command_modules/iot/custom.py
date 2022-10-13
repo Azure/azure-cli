@@ -468,6 +468,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate_verify_body)
 
 
+# pylint: disable=too-many-statements
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    sku=IotHubSku.s1.value,
                    unit=1,
@@ -517,6 +518,14 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         if fileupload_storage_identity and fileupload_storage_identity != SYSTEM_ASSIGNED_IDENTITY and not user_identities:
             raise ArgumentUsageError('User identity [--mi-user-assigned] must be added in order to use it for file upload')
     location = _ensure_location(cli_ctx, resource_group_name, location)
+
+    if location == 'qatarcentral':
+        if enable_data_residency is False:
+            raise InvalidArgumentValueError('Data Residency enforcement cannot be disabled in this region.')
+        if not enable_data_residency:
+            logger.warning('Setting "--enforce-data-residency" argument to "True" - Data Residency enforcement must be enabled in this region.')
+        enable_data_residency = True
+
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
     event_hub_dic = {}
