@@ -3948,7 +3948,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
         vnet_client.begin_create_or_update(resource_group_name, virtual_network_name, vnet_args)
         subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, virtual_network_name, subnet)
-
+    print("----------------------------------------------------------------------------------")
     if public_ip_address_type == 'new':
         public_args = build_public_ip_resource_v2(cmd, location,
                                                   tags,

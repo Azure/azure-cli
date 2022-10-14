@@ -758,7 +758,7 @@ def load_command_table(self, _):
     # endregion
 
     # region LoadBalancers
-    with self.command_group('network lb', network_lb_sdk) as g:
+    with self.command_group('network lb') as g:
         g.custom_command('create', 'create_load_balancer', supports_no_wait=True, validator=process_lb_create_namespace)
         # g.show_command('show', 'get')
         # g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace, exception_handler=handle_template_based_exception)
