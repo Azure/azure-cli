@@ -292,6 +292,23 @@ class AAZFreeFormDictArgAction(AAZSimpleTypeArgAction):
                 raise
         return v
 
+    @classmethod
+    def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
+        if isinstance(data, dict):
+            return data
+
+        if data is None:
+            if cls._schema._nullable:
+                return data
+            raise AAZInvalidValueError("field is not nullable")
+
+        raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
+
 
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
