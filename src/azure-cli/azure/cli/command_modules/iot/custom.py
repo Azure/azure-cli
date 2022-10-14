@@ -519,12 +519,11 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
             raise ArgumentUsageError('User identity [--mi-user-assigned] must be added in order to use it for file upload')
     location = _ensure_location(cli_ctx, resource_group_name, location)
 
-    if location == 'qatarcentral':
-        if enable_data_residency is False:
-            raise InvalidArgumentValueError('Data Residency enforcement cannot be disabled in this region.')
-        if not enable_data_residency:
-            logger.warning('Setting "--enforce-data-residency" argument to "True" - Data Residency enforcement must be enabled in this region.')
-        enable_data_residency = True
+    if location == 'qatarcentral' and not enable_data_residency:
+        raise InvalidArgumentValueError(
+            "Data Residency enforcement must be enabled for IoT Hubs created in this region. Please use the '--enforce-data-residency' (--edr) argument "
+            "to enable it. Check command help (-h) for more information on this property's usage and implications."
+        )
 
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
