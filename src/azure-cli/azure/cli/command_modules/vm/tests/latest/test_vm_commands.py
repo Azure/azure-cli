@@ -1710,7 +1710,7 @@ class VMExtensionScenarioTest(ScenarioTest):
             'vm': self.create_random_name('vm-',15)
         })
 
-        vm = self.cmd('vm create -n {vm} -g {rg} --image ubuntults --admin-username user11 --admin-password testPassword0 --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd('vm create -n {vm} -g {rg} --image ubuntults').get_output_in_json()
         self.kwargs.update({
             'vm_id': vm['id']
         })
