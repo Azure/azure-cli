@@ -164,7 +164,8 @@ class TestAAZField(unittest.TestCase):
 
     def test_aaz_free_form_dict_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZFreeFormDictType, AAZDictType, AAZListType
-        from azure.cli.core.aaz._field_value import AAZObject, AAZBaseValue, AAZUndefined
+        from azure.cli.core.aaz._field_value import AAZObject, AAZBaseValue, AAZUndefined, AAZValuePatch
+        from azure.cli.core.aaz.exceptions import AAZInvalidValueError
 
         model_schema = AAZObjectType()
         model_schema.additional = AAZFreeFormDictType()
@@ -255,6 +256,32 @@ class TestAAZField(unittest.TestCase):
         v.configs[0] = None
         self.assertEqual(v.configs.to_serialized_data(), [{"obj": {"c": 2}}])
 
+        with self.assertRaises(AAZInvalidValueError):
+            v.nullable_additional['a'] = AAZValuePatch(AAZUndefined)
+
+        self.assertTrue(v.additional._is_patch)
+        with self.assertRaises(AAZInvalidValueError):
+            v.nullable_additional['p'] = v.additional
+
+        self.assertTrue(v.configs[1]._is_patch is False)
+
+        v.nullable_additional['z'] = v.configs[1]
+
+        v.configs[1]['more'] = True
+        self.assertEqual(v.nullable_additional.to_serialized_data(), {
+            "z": {"obj": {"c": 2}},
+        })
+
+        self.assertEqual(v.to_serialized_data(), {
+            "additional": {
+                'none': None,
+                'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
+                'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
+            },
+            "configs": [{"obj": {"c": 2}, "more": True}],
+            "nullable_additional": {"z": {"obj": {"c": 2}}}
+        })
+
         v.nullable_additional = None
         self.assertEqual(v.to_serialized_data(), {
             "additional": {
@@ -262,9 +289,10 @@ class TestAAZField(unittest.TestCase):
                 'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
                 'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
             },
-            "configs": [{"obj": {"c": 2}}],
+            "configs": [{"obj": {"c": 2}, "more": True}],
             "nullable_additional": None
         })
+
 
     def test_aaz_list_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZStrType
