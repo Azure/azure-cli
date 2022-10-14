@@ -495,15 +495,8 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationGatewayWAFPolicy
-    with self.command_group('network application-gateway waf-policy', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2018-12-01') as g:
+    with self.command_group('network application-gateway waf-policy', min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_waf_policy')
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_ag_waf_policies')
-        g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
-        g.wait_command('wait')
 
     with self.command_group('network application-gateway waf-policy policy-setting', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
@@ -535,17 +528,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_waf_custom_rule_match_cond')
         g.custom_command('remove', 'remove_waf_custom_rule_match_cond')
 
-    with self.command_group('network application-gateway waf-policy managed-rule rule-set', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
+    with self.command_group('network application-gateway waf-policy managed-rule rule-set', min_api='2019-09-01') as g:
         g.custom_command('add', 'add_waf_managed_rule_set')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_managed_rule_set',
-                                 validator=process_appgw_waf_policy_update)
         g.custom_command('remove', 'remove_waf_managed_rule_set')
         g.custom_command('list', 'list_waf_managed_rule_set')
+        g.custom_command('update', 'update_waf_managed_rule_set', validator=process_appgw_waf_policy_update)
 
     with self.command_group('network application-gateway waf-policy managed-rule exclusion', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
@@ -1104,11 +1091,17 @@ def load_command_table(self, _):
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
     with self.command_group('network public-ip', network_public_ip_sdk) as g:
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
-        g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
-        g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip')
+        if self.cli_ctx.cloud.profile == 'latest':
+            from .aaz.latest.network.public_ip import List, Show
+            self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
+            self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
+            g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+        else:
+            g.command('delete', 'begin_delete')
+            g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
+            g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
+            g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+            g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip')
 
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
         g.custom_command('create', 'create_public_ip_prefix')
@@ -1142,8 +1135,8 @@ def load_command_table(self, _):
     with self.command_group('network vnet', network_vnet_sdk) as g:
         from .aaz.latest.network.vnet import List
         self.command_table['network vnet list'] = List(loader=self, table_transformer=transform_vnet_table_output)
-        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet', supports_local_cache=True)
+        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet')
         g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
@@ -1152,7 +1145,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
-        g.custom_command('create', 'create_subnet', supports_local_cache=True)
+        g.custom_command('create', 'create_subnet')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters', custom_func_name='update_subnet')
         g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
     # endregion
