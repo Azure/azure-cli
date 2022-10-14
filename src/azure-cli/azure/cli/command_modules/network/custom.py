@@ -139,13 +139,13 @@ def _is_v2_sku(sku):
 
 
 # pylint: disable=too-many-statements
-def create_application_gateway(cmd, application_gateway_name, resource_group_name, priority, location=None,
+def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
-                               sku=None, private_ip_address=None, public_ip_address=None,
+                               sku=None, priority=None, private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1420,9 +1420,9 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
     return parent
 
 
-def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
-                                   address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
+def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, address_pool=None,
+                                   http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
+                                   rule_type='Basic', no_wait=False, rewrite_rule_set=None, priority=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1475,9 +1475,9 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, priority,
+def create_ag_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                            address_pool=None, settings=None, listener=None,
-                           rule_type='Basic', no_wait=False):
+                           rule_type='Basic', no_wait=False, priority=None):
     ApplicationGatewayRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1822,30 +1822,28 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, client, resource_group_name, policy_name,
-                         location=None, tags=None, rule_set_type='OWASP',
-                         rule_set_version='3.0'):
-    WebApplicationFirewallPolicy, ManagedRulesDefinition, \
-        ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
-                                        'ManagedRulesDefinition',
-                                        'ManagedRuleSet')
-    #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
+def create_ag_waf_policy(cmd, resource_group_name, policy_name,
+                         location=None, tags=None, rule_set_type='OWASP', rule_set_version='3.0'):
+    # https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
 
     # mandatory default rule with empty rule sets
-    managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type, rule_set_version=rule_set_version)
-    managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
-    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version
+    }
+    managed_rule_definition = {
+        "managed_rule_sets": [managed_rule_set]
+    }
 
+    from .aaz.latest.network.application_gateway.waf_policy import Create
 
-def update_ag_waf_policy(cmd, instance, tags=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-    return instance
-
-
-def list_ag_waf_policies(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'web_application_firewall_policies', resource_group_name)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name,
+        "location": location,
+        "tags": tags,
+        "managed_rules": managed_rule_definition
+    })
 # endregion
 
 
@@ -1960,118 +1958,175 @@ def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_n
 
 
 # region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
-def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
-                             rule_set_type, rule_set_version,
-                             rule_group_name=None, rules=None):
+def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
+                             rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
     """
-    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
-        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
-
-    waf_policy = client.get(resource_group_name, policy_name)
-
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules is not None else []
+    if rules is None:
+        managed_rule_overrides = []
+    else:
+        managed_rule_overrides = rules
 
     rule_group_override = None
     if rule_group_name is not None:
-        rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
-                                                       rules=managed_rule_overrides)
-    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
-                                          rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
+        rule_group_override = {
+            "rule_group_name": rule_group_name,
+            "rules": managed_rule_overrides
+        }
 
-    for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
-            for rule_override in rule_set.rule_group_overrides:
-                if rule_override.rule_group_name == rule_group_name:
-                    # Add one rule
-                    rule_override.rules.extend(managed_rule_overrides)
+    if rule_group_override is None:
+        rule_group_overrides = []
+    else:
+        rule_group_overrides = [rule_group_override]
+
+    new_managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version,
+        "rule_group_overrides": rule_group_overrides
+    }
+
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFManagedRuleSetAdd(Update):
+        def pre_instance_update(self, instance):
+            for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                    for rule_override in rule_set.rule_group_overrides:
+                        if rule_override.rule_group_name == rule_group_name:
+                            # add one rule
+                            rule_override.rules.extend(managed_rule_overrides)
+                            break
+                    else:
+                        # add one rule group
+                        if rule_group_override is not None:
+                            rule_set.rule_group_overrides.append(rule_group_override)
                     break
             else:
-                # Add one rule group
-                if rule_group_override is not None:
-                    rule_set.rule_group_overrides.append(rule_group_override)
-            break
-    else:
-        # Add new rule set
-        waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+                # add new rule set
+                instance.properties.managed_rules.managed_rule_sets.append(new_managed_rule_set)
 
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return WAFManagedRuleSetAdd(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })
 
 
-def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, rule_group_name=None, rules=None):
+def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
+                                rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Update(Override) existing rule set of a WAF policy managed rules.
     """
-    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
-        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
+    managed_rule_overrides = rules if rules else None
 
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules else None
+    rule_group_override = {
+        "rule_group_name": rule_group_name,
+        "rules": managed_rule_overrides
+    } if managed_rule_overrides else None
 
-    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
-                                                   rules=managed_rule_overrides) if managed_rule_overrides else None
+    if rule_group_override is None:
+        rule_group_overrides = []
+    else:
+        rule_group_overrides = [rule_group_override]
 
-    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
-                                          rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
+    new_managed_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version,
+        "rule_group_overrides": rule_group_overrides
+    }
 
-    updated_rule_set = None
+    from .aaz.latest.network.application_gateway.waf_policy import Update
 
-    for rule_set in instance.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version != rule_set_version:
-            updated_rule_set = rule_set
-            break
+    class WAFManagedRuleSetUpdate(Update):
+        def pre_instance_update(self, instance):
+            updated_rule_set = None
+            for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version != rule_set_version:
+                    updated_rule_set = rule_set
+                    break
 
-        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
-            if rule_group_name is None:
-                updated_rule_set = rule_set
-                break
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                    if rule_group_name is None:
+                        updated_rule_set = rule_set
+                        break
 
-            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
-            if rg:
-                rg.rules = managed_rule_overrides   # differentiate with add_waf_managed_rule_set()
-            else:
-                rule_set.rule_group_overrides.append(rule_group_override)
+                    rg = next((g for g in rule_set.rule_group_overrides if g.rule_group_name == rule_group_name), None)
+                    if rg:
+                        rg.rules = managed_rule_overrides
+                    else:
+                        rule_set.rule_group_overrides.append(rule_group_override)
 
-    if updated_rule_set:
-        instance.managed_rules.managed_rule_sets.remove(updated_rule_set)
-        instance.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+            if updated_rule_set:
+                new_managed_rule_sets = []
+                for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                    if rule_set == updated_rule_set:
+                        continue
 
-    return instance
+                    new_managed_rule_sets.append(rule_set)
+                new_managed_rule_sets.append(new_managed_rule_set)
+
+                instance.properties.managed_rules.managed_rule_sets = new_managed_rule_sets
+
+    return WAFManagedRuleSetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })
 
 
-def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
+def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                                 rule_set_type, rule_set_version, rule_group_name=None):
     """
     Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     """
-    waf_policy = client.get(resource_group_name, policy_name)
+    from .aaz.latest.network.application_gateway.waf_policy import Update
 
-    delete_rule_set = None
+    class WAFManagedRuleSetRemove(Update):
+        def pre_instance_update(self, instance):
+            delete_rule_set = None
+            for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
+                    if rule_group_name is None:
+                        delete_rule_set = rule_set
+                        break
+                    # remove one rule from rule group
+                    is_removed = False
+                    new_rule_group_overrides = []
+                    for rg in rule_set.rule_group_overrides:
+                        if rg.rule_group_name == rule_group_name and not is_removed:
+                            is_removed = True
+                            continue
 
-    for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
-            if rule_group_name is None:
-                delete_rule_set = rule_set
-                break
+                        new_rule_group_overrides.append(rg)
+                    if not is_removed:
+                        err_msg = f"Rule set group [{rule_group_name}] is not found."
+                        raise ResourceNotFoundError(err_msg)
 
-            # Remove one rule from rule group
-            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
-            if rg is None:
-                raise CLIError('Rule set group [ {} ] not found.'.format(rule_group_name))
-            rule_set.rule_group_overrides.remove(rg)
+                    rule_set.rule_group_overrides = new_rule_group_overrides
 
-    if delete_rule_set:
-        waf_policy.managed_rules.managed_rule_sets.remove(delete_rule_set)
+            if delete_rule_set:
+                new_managed_rule_sets = []
+                for rule_set in instance.properties.managed_rules.managed_rule_sets:
+                    if rule_set == delete_rule_set:
+                        continue
 
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+                    new_managed_rule_sets.append(rule_set)
+
+                instance.properties.managed_rules.managed_rule_sets = new_managed_rule_sets
+
+    return WAFManagedRuleSetRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })
 
 
-def list_waf_managed_rule_set(cmd, client, resource_group_name, policy_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return waf_policy.managed_rules
+def list_waf_managed_rule_set(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Show
+
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": policy_name
+    })["managedRules"]
 # endregion
 
 
@@ -2198,20 +2253,22 @@ def list_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name):
 # region DdosProtectionPlans
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation
-
-    ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    ddos_protection_plan = cmd.get_models('DdosProtectionPlan')()
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Create
+    Create_Ddos_Protection = Create(cli_ctx=cmd.cli_ctx)
+    args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
     if location:
-        ddos_protection_plan.location = location
+        args['location'] = location
     if tags:
-        ddos_protection_plan.tags = tags
+        args['tags'] = tags
     if not vnets:
         # if no VNETs can do a simple PUT
-        return ddos_client.begin_create_or_update(resource_group_name, ddos_plan_name, parameters=ddos_protection_plan)
+        return Create_Ddos_Protection(args)
 
     # if VNETs specified, have to create the protection plan and then add the VNETs
-    plan_id = LongRunningOperation(cmd.cli_ctx)(
-        ddos_client.begin_create_or_update(resource_group_name, ddos_plan_name, parameters=ddos_protection_plan)).id
+    plan_id = LongRunningOperation(cmd.cli_ctx)(Create_Ddos_Protection(args))['id']
 
     SubResource = cmd.get_models('SubResource')
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
@@ -2221,28 +2278,50 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
         vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
         vnet.ddos_protection_plan = SubResource(id=plan_id)
         vnet_client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-    return ddos_client.get(resource_group_name, ddos_plan_name)
+
+    show_args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+    Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
+    return Show_Ddos_Protection(show_args)
 
 
-def update_ddos_plan(cmd, instance, tags=None, vnets=None):
+def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=None):
     SubResource = cmd.get_models('SubResource')
-
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Update
+    Update_Ddos_Protection = Update(cli_ctx=cmd.cli_ctx)
+    args = {
+        "name": ddos_plan_name,
+        "resource_group": resource_group_name,
+    }
     if tags is not None:
-        instance.tags = tags
+        args['tags'] = tags
     if vnets is not None:
+        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+        show_args = {
+            "name": ddos_plan_name,
+            "resource_group": resource_group_name,
+        }
+        Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
+        show_args = Show_Ddos_Protection(show_args)
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
         vnet_ids = set([])
         if len(vnets) == 1 and not vnets[0]:
             pass
         else:
             vnet_ids = {x.id for x in vnets}
-        existing_vnet_ids = {x.id for x in instance.virtual_networks} if instance.virtual_networks else set([])
+        if 'virtualNetworks' in show_args:
+            existing_vnet_ids = {x['id'] for x in show_args['virtualNetworks']}
+        else:
+            existing_vnet_ids = set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
-            vnet.ddos_protection_plan = SubResource(id=instance.id)
+            vnet.ddos_protection_plan = SubResource(id=show_args['id'])
             client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
         for vnet_id in existing_vnet_ids.difference(vnet_ids):
             logger.info("Removing VNet '%s' from plan.", vnet_id)
@@ -2250,7 +2329,7 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
             vnet.ddos_protection_plan = None
             client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-    return instance
+    return Update_Ddos_Protection(args)
 
 
 def list_ddos_plans(cmd, resource_group_name=None):
@@ -5302,15 +5381,6 @@ def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=No
 # endregion
 
 
-# region NetworkProfiles
-def list_network_profiles(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_profiles
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_all()
-# endregion
-
-
 # region NetworkWatchers
 def _create_network_watchers(cmd, client, resource_group_name, locations, tags):
     if resource_group_name is None:
@@ -5382,14 +5452,7 @@ def create_nw_connection_monitor(cmd,
                                  watcher_name,
                                  resource_group_name=None,
                                  location=None,
-                                 source_resource=None,
-                                 source_port=None,
-                                 dest_resource=None,
-                                 dest_port=None,
-                                 dest_address=None,
                                  tags=None,
-                                 do_not_start=None,
-                                 monitoring_interval=None,
                                  endpoint_source_name=None,
                                  endpoint_source_resource_id=None,
                                  endpoint_source_address=None,
@@ -5420,118 +5483,41 @@ def create_nw_connection_monitor(cmd,
                                  output_type=None,
                                  workspace_ids=None,
                                  notes=None):
-    v1_required_parameter_set = [
-        source_resource, source_port,
-        dest_resource, dest_address, dest_port
-    ]
-
-    v2_required_parameter_set = [
-        endpoint_source_name, endpoint_source_resource_id, endpoint_source_type, endpoint_source_coverage_level,
-        endpoint_dest_name, endpoint_dest_address, endpoint_dest_type, endpoint_dest_coverage_level,
-        test_config_name, test_config_protocol,
-        output_type, workspace_ids,
-    ]
-
-    if any(v1_required_parameter_set):  # V1 creation
-        connection_monitor = _create_nw_connection_monitor_v1(cmd,
-                                                              connection_monitor_name,
-                                                              watcher_rg,
-                                                              watcher_name,
-                                                              source_resource,
-                                                              resource_group_name,
-                                                              source_port,
-                                                              location,
-                                                              dest_resource,
-                                                              dest_port,
-                                                              dest_address,
-                                                              tags,
-                                                              do_not_start,
-                                                              monitoring_interval)
-        from azure.cli.core.profiles._shared import AD_HOC_API_VERSIONS
-        client = get_mgmt_service_client(
-            cmd.cli_ctx,
-            ResourceType.MGMT_NETWORK,
-            api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['nw_connection_monitor']
-        ).connection_monitors
-    elif any(v2_required_parameter_set):  # V2 creation
-        connection_monitor = _create_nw_connection_monitor_v2(cmd,
-                                                              location,
-                                                              tags,
-                                                              endpoint_source_name,
-                                                              endpoint_source_resource_id,
-                                                              endpoint_source_address,
-                                                              endpoint_source_type,
-                                                              endpoint_source_coverage_level,
-                                                              endpoint_dest_name,
-                                                              endpoint_dest_resource_id,
-                                                              endpoint_dest_address,
-                                                              endpoint_dest_type,
-                                                              endpoint_dest_coverage_level,
-                                                              test_config_name,
-                                                              test_config_frequency,
-                                                              test_config_protocol,
-                                                              test_config_preferred_ip_version,
-                                                              test_config_threshold_failed_percent,
-                                                              test_config_threshold_round_trip_time,
-                                                              test_config_tcp_port,
-                                                              test_config_tcp_port_behavior,
-                                                              test_config_tcp_disable_trace_route,
-                                                              test_config_icmp_disable_trace_route,
-                                                              test_config_http_port,
-                                                              test_config_http_method,
-                                                              test_config_http_path,
-                                                              test_config_http_valid_status_codes,
-                                                              test_config_http_prefer_https,
-                                                              test_group_name,
-                                                              test_group_disable,
-                                                              output_type,
-                                                              workspace_ids,
-                                                              notes)
-    else:
-        raise CLIError('Unknown operation')
+    connection_monitor = _create_nw_connection_monitor_v2(cmd,
+                                                          location,
+                                                          tags,
+                                                          endpoint_source_name,
+                                                          endpoint_source_resource_id,
+                                                          endpoint_source_address,
+                                                          endpoint_source_type,
+                                                          endpoint_source_coverage_level,
+                                                          endpoint_dest_name,
+                                                          endpoint_dest_resource_id,
+                                                          endpoint_dest_address,
+                                                          endpoint_dest_type,
+                                                          endpoint_dest_coverage_level,
+                                                          test_config_name,
+                                                          test_config_frequency,
+                                                          test_config_protocol,
+                                                          test_config_preferred_ip_version,
+                                                          test_config_threshold_failed_percent,
+                                                          test_config_threshold_round_trip_time,
+                                                          test_config_tcp_port,
+                                                          test_config_tcp_port_behavior,
+                                                          test_config_tcp_disable_trace_route,
+                                                          test_config_icmp_disable_trace_route,
+                                                          test_config_http_port,
+                                                          test_config_http_method,
+                                                          test_config_http_path,
+                                                          test_config_http_valid_status_codes,
+                                                          test_config_http_prefer_https,
+                                                          test_group_name,
+                                                          test_group_disable,
+                                                          output_type,
+                                                          workspace_ids,
+                                                          notes)
 
     return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def _create_nw_connection_monitor_v1(cmd,
-                                     connection_monitor_name,
-                                     watcher_rg,
-                                     watcher_name,
-                                     source_resource,
-                                     resource_group_name=None,
-                                     source_port=None,
-                                     location=None,
-                                     dest_resource=None,
-                                     dest_port=None,
-                                     dest_address=None,
-                                     tags=None,
-                                     do_not_start=None,
-                                     monitoring_interval=60):
-    ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
-        'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
-
-    cmv1 = ConnectionMonitor(
-        location=location,
-        tags=tags,
-        source=ConnectionMonitorSource(
-            resource_id=source_resource,
-            port=source_port
-        ),
-        destination=ConnectionMonitorDestination(
-            resource_id=dest_resource,
-            port=dest_port,
-            address=dest_address
-        ),
-        auto_start=not do_not_start,
-        monitoring_interval_in_seconds=monitoring_interval,
-        endpoints=None,
-        test_configurations=None,
-        test_groups=None,
-        outputs=None,
-        notes=None
-    )
-
-    return cmv1
 
 
 def _create_nw_connection_monitor_v2(cmd,
@@ -6577,6 +6563,82 @@ def update_custom_ip_prefix(instance,
 
 
 # region PublicIPAddresses
+def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
+                            allocation_method=None, dns_name=None,
+                            idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
+                            public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
+    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
+
+    public_ip_args = {
+        'name': public_ip_address_name,
+        "resource_group": resource_group_name,
+        'location': location,
+        'tags': tags,
+        'allocation_method': allocation_method,
+        'idle_timeout': idle_timeout,
+        'ip_address': ip_address,
+        'ip_tags': ip_tags
+    }
+
+    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
+        if is_valid_resource_id(public_ip_prefix):
+            public_ip_prefix_id = public_ip_prefix
+            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
+        else:
+            public_ip_prefix_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIPPrefixes',
+                name=public_ip_prefix
+            )
+            public_ip_prefix_name = public_ip_prefix
+        public_ip_args['public_ip_prefix'] = public_ip_prefix_id
+
+        # reuse prefix information
+        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
+        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
+        version = pip_obj.public_ip_address_version
+        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
+        zone = pip_obj.zones
+
+    if sku is None:
+        logger.warning(
+            "Please note that the default public IP used for creation will be changed from Basic to Standard "
+            "in the future."
+        )
+
+    if not allocation_method:
+        if sku and sku.lower() == 'standard':
+            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
+        else:
+            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
+
+    public_ip_args['version'] = version
+    public_ip_args['zone'] = zone
+
+    if sku:
+        public_ip_args['sku'] = sku
+    if tier:
+        if not sku:
+            public_ip_args['sku'] = 'Basic'
+        public_ip_args['tier'] = tier
+
+    if dns_name or reverse_fqdn:
+        public_ip_args['dns_name'] = dns_name
+        public_ip_args['reverse_fqdn'] = reverse_fqdn
+
+    if edge_zone:
+        public_ip_args['edge_zone'] = edge_zone
+        public_ip_args['type'] = 'EdgeZone'
+    if protection_mode:
+        public_ip_args['protection_mode'] = protection_mode
+
+    from .aaz.latest.network.public_ip import Create
+
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
+
+
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
@@ -8139,15 +8201,6 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
 
     vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
     return vhub_bgp_conn_client.begin_delete(resource_group_name, virtual_hub_name, bgp_conn_name)
-# endregion
-
-
-# region service aliases
-def list_service_aliases(cmd, location, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).available_service_aliases
-    if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
-    return client.list(location=location)
 # endregion
 
 

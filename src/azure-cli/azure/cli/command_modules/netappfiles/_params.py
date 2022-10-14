@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long, disable=too-many-statements
 from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type, get_three_state_flag
+from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource, SmbAccessBasedEnumeration, SmbNonBrowsable
 from knack.arguments import CLIArgumentType
 
 
@@ -27,6 +28,14 @@ def load_arguments(self, _):
 
     with self.argument_context('netappfiles account') as c:
         c.argument('account_name', account_name_type, options_list=['--name', '--account-name', '-n', '-a'])
+
+    with self.argument_context('netappfiles account', arg_group='Encryption') as c:
+        c.argument('key_source', arg_type=get_enum_type(EncryptionKeySource), options_list=['--key-source'], help='The encryption keySource (provider).', is_preview=True)
+        c.argument('key_vault_uri', options_list=['--key-vault-uri', '-v'], help='The Uri of KeyVault.', is_preview=True)
+        c.argument('key_name', options_list=['--key-name'], help='The name of KeyVault key.', is_preview=True)
+        c.argument('key_vault_resource_id', options_list=['--keyvault-resource-id'], help='The resource ID of KeyVault.', is_preview=True)
+        c.argument('user_assigned_identity', options_list=['--user-assigned-identity', '-u'], help='The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has ''UserAssigned''. It should match key of identity.userAssignedIdentities.', is_preview=True)
+        c.argument('encryption', help='This argument will be deprecated, please use --key-source instead', deprecate_info=c.deprecate(hide=False, redirect='--key-source'))
 
     with self.argument_context('netappfiles account list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
@@ -91,9 +100,13 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('ldap_enabled', arg_type=get_three_state_flag())
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
+        c.argument('has_root_access', arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume create') as c:
         c.argument('zones', nargs="+")
+        c.argument('smb_access_based_enumeration', arg_type=get_enum_type(SmbAccessBasedEnumeration), options_list=['--smb-access'], help='Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume')
+        c.argument('smb_non_browsable', arg_type=get_enum_type(SmbNonBrowsable), options_list=['--smb-browsable'], help='Enables non browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume')
+        c.argument('delete_base_snapshot', arg_type=get_three_state_flag(), help='If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false')
 
     with self.argument_context('netappfiles volume delete') as c:
         c.argument('force_delete', arg_type=get_three_state_flag())
@@ -175,6 +188,7 @@ def load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name
 def load_vault_arguments(self, account_name_type):
     with self.argument_context('netappfiles vault list') as c:
         c.argument('account_name', account_name_type, id_part=None)
+        c.argument('loc', deprecate_info=c.deprecate(hide=False))
 
 
 def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type):
@@ -221,6 +235,8 @@ def load_volume_groups_arguments(self, account_name_type, pool_name_type):
         c.argument('data_backup_throughput', type=int, help="Throughput in MiB/s for data backup volumes. If not provided size will automatically be calculated")
         c.argument('log_backup_size', type=int, help="Capacity (in GiB) for log backup volumes. If not provided size will automatically be calculated")
         c.argument('log_backup_throughput', type=int, help="Throughput in MiB/s for log backup volumes. If not provided size will automatically be calculated")
+        c.argument('smb_access_based_enumeration', arg_type=get_enum_type(SmbAccessBasedEnumeration), options_list=['--smb-access'], help='Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume')
+        c.argument('smb_non_browsable', arg_type=get_enum_type(SmbNonBrowsable), options_list=['--smb-browsable'], help='Enables non browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume')
 
     with self.argument_context('netappfiles volume-group list') as c:
         c.argument('account_name', id_part=None)

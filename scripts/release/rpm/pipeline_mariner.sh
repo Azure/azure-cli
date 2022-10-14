@@ -5,26 +5,25 @@
 set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
+
+# IMAGE should be Mariner docker image url, such as mcr.microsoft.com/cbl-mariner/base/core:2.0
 : "${IMAGE:?IMAGE environment variable not set.}"
-: "${TAG:?TAG environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
 # Create a container image that includes the source code and a built RPM using this file.
 docker build \
     --target build-env \
-    --build-arg image=${IMAGE} \
-    --build-arg tag=${TAG} \
     --build-arg cli_version=${CLI_VERSION} \
+    --build-arg image=${IMAGE} \
     -f ./scripts/release/rpm/mariner.dockerfile \
     -t azure/azure-cli:mariner-builder \
     .
 
 # Continue the previous build, and create a container that has the current azure-cli build but not the source code.
 docker build \
-    --build-arg image=${IMAGE} \
-    --build-arg tag=${TAG} \
     --build-arg cli_version=${CLI_VERSION} \
+    --build-arg image=${IMAGE} \
     -f ./scripts/release/rpm/mariner.dockerfile \
     -t azure/azure-cli:mariner \
     .

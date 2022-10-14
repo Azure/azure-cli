@@ -147,8 +147,8 @@ def load_command_table(self, _):
                                  transform=database_lro_transform,
                                  table_transformer=db_table_format)
 
-        g.custom_command('export', 'db_export')
-        g.custom_command('import', 'db_import')
+        g.custom_command('export', 'db_export', supports_no_wait=True)
+        g.custom_command('import', 'db_import', supports_no_wait=True)
 
     capabilities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#CapabilitiesOperations.{}',

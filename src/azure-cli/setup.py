@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.40.0"
+VERSION = "2.41.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -73,12 +73,12 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.2.0',
-    'azure-mgmt-compute~=27.1.0',
+    'azure-mgmt-compute~=28.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==10.0.0',
     'azure-mgmt-containerservice~=20.3.0',
-    'azure-mgmt-cosmosdb==7.0.0',
+    'azure-mgmt-cosmosdb==8.0.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -102,9 +102,9 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
-    'azure-mgmt-monitor~=4.0.1',
+    'azure-mgmt-monitor~=5.0.0',
     'azure-mgmt-msi~=6.1.0',
-    'azure-mgmt-netapp~=8.1.0',
+    'azure-mgmt-netapp~=9.0.0',
     'azure-mgmt-network~=21.0.1',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
@@ -124,7 +124,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr==1.1.0',
     'azure-mgmt-sqlvirtualmachine==1.0.0b3',
-    'azure-mgmt-sql==4.0.0b2',
+    'azure-mgmt-sql==4.0.0b3',
     'azure-mgmt-storage~=20.1.0',
     'azure-mgmt-synapse==2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
@@ -142,6 +142,7 @@ DEPENDENCIES = [
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
+    'mycli~=1.22.2',
     'packaging>=20.9,<22.0',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
@@ -172,7 +173,7 @@ setup(
         'az',
         'az.completion.sh',
         'az.bat',
-        'az.ps1'
+        'azps.ps1'
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,

@@ -25,7 +25,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
-                          validate_strict_import)
+                          validate_strict_import, validate_export_as_reference)
 
 
 def load_arguments(self, _):
@@ -201,6 +201,8 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], is_preview=True, arg_type=get_three_state_flag(), validator=validate_export_as_reference,
+                   help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
@@ -292,6 +294,13 @@ def load_arguments(self, _):
         c.argument('filter_name', help='Name of the filter to be added.')
         c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
         c.argument('index', type=int, help='Zero-based index in the list of filters where you want to insert the new filter. If no index is specified or index is invalid, filter will be added to the end of the list.')
+
+    with self.argument_context('appconfig feature filter update') as c:
+        c.argument('feature', help='Name of the feature whose filter you want to update. If the feature flag key is different from the default key, provide the `--key` argument instead.')
+        c.argument('label', help="If no label specified, update the feature flag with null label by default.")
+        c.argument('filter_name', help='Name of the filter to be updated.')
+        c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
+        c.argument('index', type=int, help='Zero-based index of the filter to be updated in case there are multiple instances with same filter name.')
 
     with self.argument_context('appconfig feature filter delete') as c:
         c.argument('feature', help='Name of the feature from which you want to delete the filter. If the feature flag key is different from the default key, provide the `--key` argument instead.')

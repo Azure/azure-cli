@@ -600,21 +600,15 @@ jobs:
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      1.0:
-        image: cblmariner.azurecr.io/base/core
-        tag: 1.0
       2.0:
-        image: mcr.microsoft.com/cbl-mariner/base/core
-        tag: 2.0
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
-    env:
-      IMAGE: $(image)
-      TAG: $(tag)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -625,7 +619,7 @@ jobs:
     displayName: 'Publish Artifact: rpm-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-mariner$(tag)
+      ArtifactName: $(artifact)
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 - job: BuildRpmPackages
@@ -662,9 +656,6 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
-    env:
-      IMAGE: $(image)
-      TAG: $(tag)
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
     inputs:
