@@ -1290,18 +1290,10 @@ def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_r
         vault_location = vault.location
         azure_region = secondary_region_map[vault_location]
         client = backup_crr_job_details_cf(cmd.cli_ctx)
-        return client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
+        response = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
+        return cust_help.replace_min_value_in_subtask(response)
     response = client.get(vault_name, resource_group_name, name)
-
-    # Task in progress: replace min_value in start and end times with null.
-    tasks_list = response.properties.extended_info.tasks_list
-    for task in tasks_list:
-        if task.start_time == datetime.min:
-            task.start_time = None
-        if task.end_time == datetime.min:
-            task.end_time = None
-
-    return response
+    return cust_help.replace_min_value_in_subtask(response)
 
 
 def stop_job(client, resource_group_name, vault_name, name, use_secondary_region=None):
