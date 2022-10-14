@@ -315,7 +315,7 @@ jobs:
       ext-webapp:
         Target: ext-webapp
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: 'pool-ubuntu-2004'
   steps:
     - bash: |
         if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then
