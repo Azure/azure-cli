@@ -1706,16 +1706,26 @@ class VMExtensionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_list')
     def test_vm_extension_list(self, resource_group):
+
+        user_name = 'testuser'
+        config_file = _write_config_file(user_name)
         self.kwargs.update({
-            'vm': self.create_random_name('vm-',15)
+            'vm': self.create_random_name('vm-',15),
+            'pub': 'Microsoft.OSTCExtensions',
+            'ext': 'VMAccessForLinux',
+            'config': config_file,
+            'user': user_name
         })
 
         vm = self.cmd('vm create -n {vm} -g {rg} --image ubuntults').get_output_in_json()
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update --enable-auto-upgrade false --no-wait')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })
         self.cmd('vm extension list --ids {vm_id} ', checks=[
-            self.check('length([])', 0)
+            self.check('length([])', 1),
+            self.check('[0].name', '{ext}'),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_2')
