@@ -54,6 +54,9 @@ from ._bicep import (
     validate_bicep_target_scope,
     bicep_version_greater_than_or_equal_to
 )
+from ._azd import (
+    ensure_azd_installation
+)
 
 from ._utils import _build_preflight_error_message, _build_http_response_error_message
 
@@ -3781,3 +3784,7 @@ def delete_private_link_association(cmd, management_group_id, name):
 def list_private_link_association(cmd, management_group_id):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.private_link_association.list(group_id=management_group_id)
+
+
+def install_azd_cli(cmd):
+    ensure_azd_installation()
