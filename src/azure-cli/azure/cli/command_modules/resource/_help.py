@@ -2867,3 +2867,18 @@ examples:
   - name: Delete a PrivateLinkAssociation.
     text: az private-link association delete --management-group-id TestMG --name testPLA
 """
+
+helps['dev'] = """
+type: group
+short-summary: Azure Developer CLI command group.
+"""
+
+helps['dev install'] = """
+type: command
+short-summary: Install Azure Developer CLI.
+"""
+
+helps['dev version'] = """
+type: command
+short-summary: Print the version number of Azure Developer CLI.
+"""

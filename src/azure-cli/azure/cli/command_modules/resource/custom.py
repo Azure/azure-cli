@@ -55,7 +55,8 @@ from ._bicep import (
     bicep_version_greater_than_or_equal_to
 )
 from ._azd import (
-    ensure_azd_installation
+    ensure_azd_installation,
+    run_azd_command
 )
 
 from ._utils import _build_preflight_error_message, _build_http_response_error_message
@@ -3786,5 +3787,13 @@ def list_private_link_association(cmd, management_group_id):
     return rcf.private_link_association.list(group_id=management_group_id)
 
 
-def install_azd_cli(cmd):
+def install_azd_cli():
     ensure_azd_installation()
+
+
+def check_azd_version():
+    print(run_azd_command(['version']))
+
+
+# def init_azd():
+#     print(run_azd_command(['init']))

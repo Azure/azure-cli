@@ -7,10 +7,16 @@ import os
 import platform
 import subprocess
 import sys
+import re
 
+from knack.log import get_logger
 from azure.cli.core.azclierror import (
-    ValidationError
+    ValidationError,
+    UnclassifiedUserFault
 )
+_logger = get_logger(__name__)
+_azd_diagnostic_warning_pattern = r"^([^\s].*)\((\d+)(?:,\d+|,\d+,\d+)?\)\s+:\s+(Warning)\s+([a-zA-Z-\d]+):\s*(.*?)\s+\[(.*?)\]$"
+
 
 def ensure_azd_installation(stdout=True):
     system = platform.system()
@@ -58,3 +64,37 @@ def _install_azd(system):
         return
 
     raise ValidationError(f'The platform "{system}" is not supported.')
+
+def run_azd_command(args, auto_install=True):
+    installation_path = _get_azd_installation_path(platform.system())
+    installed = os.path.isfile(installation_path)
+
+    if not installed:
+        if auto_install:
+            ensure_bicep_installation(stdout=False)
+        else:
+            raise FileOperationError('Azure Developer CLI not found. Install it now by running "az dev install".')
+
+    return _run_command(installation_path, args)
+
+def _run_command(azd_installation_path, args):
+    process = subprocess.run([rf"{azd_installation_path}"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    try:
+        process.check_returncode()
+        command_warnings = process.stderr.decode("utf-8")
+        if command_warnings:
+            _logger.warning(command_warnings)
+        return process.stdout.decode("utf-8")
+    except subprocess.CalledProcessError:
+        stderr_output = process.stderr.decode("utf-8")
+        errors = []
+
+        for line in stderr_output.splitlines():
+            if re.match(_azd_diagnostic_warning_pattern, line):
+                _logger.warning(line)
+            else:
+                errors.append(line)
+
+        error_msg = os.linesep.join(errors)
+        raise UnclassifiedUserFault(error_msg)
