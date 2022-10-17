@@ -2,9 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import abc
+
 from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
-from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError
 
@@ -246,11 +248,46 @@ class AAZObjectType(AAZBaseType):
         return None
 
 
-class AAZDictType(AAZBaseType):
+class AAZBaseDictType(AAZBaseType):
+
+    _PatchDataCls = dict
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @abc.abstractmethod
+    def __getitem__(self, key):
+        raise NotImplementedError()
+
+    def process_data(self, data, **kwargs):
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
+            if self._nullable:
+                return None
+            return AAZValuePatch.build(self)
+
+        if isinstance(data, self._ValueCls) and data._is_patch:
+            # use value patch
+            result = AAZValuePatch.build(self)
+        else:
+            result = {}
+
+        value = self._ValueCls(schema=self, data=result)  # pylint: disable=not-callable
+
+        if isinstance(data, self._ValueCls):
+            for key in data._data.keys():
+                value[key] = data[key]
+        else:
+            assert isinstance(data, (dict,))
+            for key, sub_data in data.items():
+                value[key] = sub_data
+        return result
+
+
+class AAZDictType(AAZBaseDictType):
     """Dict value type"""
 
     _ValueCls = AAZDict
-    _PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -276,28 +313,14 @@ class AAZDictType(AAZBaseType):
     def __getitem__(self, key):
         return self.Element
 
-    def process_data(self, data, **kwargs):
-        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
-            # data can be None or AAZSimpleValue == None
-            if self._nullable:
-                return None
-            return AAZValuePatch.build(self)
 
-        if isinstance(data, AAZDict) and data._is_patch:
-            # use value patch
-            result = AAZValuePatch.build(self)
-        else:
-            result = {}
-        value = AAZDict(schema=self, data=result)
+class AAZFreeFormDictType(AAZBaseDictType):
+    """Free form dict value type"""
 
-        if isinstance(data, AAZDict):
-            for key in data._data.keys():
-                value[key] = data[key]
-        else:
-            assert isinstance(data, (dict,))
-            for key, sub_data in data.items():
-                value[key] = sub_data
-        return result
+    _ValueCls = AAZFreeFormDict
+
+    def __getitem__(self, key):
+        return None
 
 
 class AAZListType(AAZBaseType):
