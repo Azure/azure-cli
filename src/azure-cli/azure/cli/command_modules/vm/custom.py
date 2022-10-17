@@ -4539,7 +4539,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
-                         image_version=None, target_edge_zone_encryption=None, target_edge_zones=None):
+                         image_version=None, target_zone_encryption=None, target_edge_zones=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4680,7 +4680,8 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
 
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
-                         target_regions=None, replica_count=None, no_wait=False, **kwargs):
+                         target_regions=None, replica_count=None, no_wait=False, target_zone_encryption=None,
+                         target_edge_zones=None, **kwargs):
     image_version = kwargs['gallery_image_version']
 
     if target_regions:
@@ -4689,6 +4690,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         image_version.publishing_profile.replica_count = replica_count
     if image_version.storage_profile.source is not None:
         image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
+    if target_edge_zones:
+        image_version.publishing_profile.target_extended_locations = target_edge_zones
 
     client = _compute_client_factory(cmd.cli_ctx)
 

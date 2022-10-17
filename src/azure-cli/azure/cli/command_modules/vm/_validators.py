@@ -2025,7 +2025,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                        'ConfidentialVMEncryptionType')
     GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models('GalleryTargetExtendedLocation',
                                                                             'GalleryExtendedLocation',
-                                                                            operation_group='gallery_image_versions')
+                                                                            operation_group='galleries')
     storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
     storage_account_types_str = ", ".join(storage_account_types_list)
 
@@ -2141,8 +2141,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
         namespace.target_regions = regions_info
 
     if hasattr(namespace, 'target_edge_zones') and namespace.target_edge_zones:
-        if hasattr(namespace, 'target_edge_zone_encryption') and namespace.target_edge_zone_encryption:
-            if len(namespace.target_edge_zones) != len(namespace.target_edge_zone_encryption):
+        if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+            if len(namespace.target_edge_zones) != len(namespace.target_zone_encryption):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target-edge-zone-encryption '
                     'should be as same as length of --target-edge-zones')
@@ -2191,8 +2191,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
             encryption = None
             os_disk_image = None
             data_disk_images = None
-            if hasattr(namespace, 'target_edge_zone_encryption') and namespace.target_edge_zone_encryption:
-                terms = namespace.target_edge_zone_encryption[i].split(',')
+            if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+                terms = namespace.target_zone_encryption[i].split(',')
                 if len(terms) < 2:
                     break
                 # OS disk
