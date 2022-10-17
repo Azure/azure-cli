@@ -2166,7 +2166,7 @@ def load_arguments(self, _):
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
-    from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
+    from azure.cli.command_modules.network.azure_stack.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
     register_providers()
     for scope in ['private-link-resource', 'private-endpoint-connection']:
         with self.argument_context('network {} list'.format(scope)) as c:
