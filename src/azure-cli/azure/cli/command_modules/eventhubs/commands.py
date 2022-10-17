@@ -31,11 +31,6 @@ def load_command_table(self, _):
         client_factory=cluster_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
-    eh_event_hub_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
-        client_factory=event_hub_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
     eh_consumer_groups_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#ConsumerGroupsOperations.{}',
         client_factory=consumer_groups_mgmt_client_factory,
@@ -123,13 +118,6 @@ def load_command_table(self, _):
                                  custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
 # EventHub Region
-    with self.command_group('eventhubs eventhub', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_eheventhub_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_namespace')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_eheventhub_update')
-
     with self.command_group('eventhubs eventhub authorization-rule', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_eventhubautho_create')
         g.show_command('show', 'get_authorization_rule')
