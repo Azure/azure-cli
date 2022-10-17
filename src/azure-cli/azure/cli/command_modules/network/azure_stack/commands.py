@@ -28,7 +28,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
     cf_custom_ip_prefixes)
-from azure.cli.command_modules.network.azure_stack._util import (
+from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
 from azure.cli.command_modules.network.azure_stack._format import (
