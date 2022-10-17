@@ -388,7 +388,7 @@ def cli_cosmosdb_update(client,
         from msrestazure.tools import is_valid_resource_id
         for resource_id in network_acl_bypass_resource_ids:
             if not is_valid_resource_id(resource_id):
-                raise CLIError('--network_acl_bypass_resource_ids is not a valid resource ID.')
+                raise CLIError(f'{resource_id} is not a valid resource ID for --network-acl-bypass-resource-ids')
 
     if max_staleness_prefix is None:
         max_staleness_prefix = existing.consistency_policy.max_staleness_prefix
