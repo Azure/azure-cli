@@ -8,6 +8,7 @@ from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
 from .exceptions import AAZInvalidValueError
 import abc
 
+
 class AAZSimpleValue(AAZBaseValue):
     """ Simple build-in values such as int, float, boolean and string"""
 

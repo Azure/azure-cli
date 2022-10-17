@@ -349,7 +349,7 @@ class AAZFreeFormDictArg(AAZBaseArg, AAZFreeFormDictType):
 
     @property
     def _type_in_help(self):
-        return f"Dict<String, Any>"
+        return "Dict<String, Any>"
 
 
 class AAZListArg(AAZCompoundTypeArg, AAZListType):

@@ -144,8 +144,6 @@ class AAZContentBuilder:
                     if not sub_arg.is_patch and arg_key:
                         value[key] = sub_arg.data
 
-        return None
-
     def discriminate_by(self, prop_name, prop_value):
         """discriminate object by a specify property"""
         if self._discriminator_prop_name is None:

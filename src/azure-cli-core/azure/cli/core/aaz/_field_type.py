@@ -272,7 +272,7 @@ class AAZBaseDictType(AAZBaseType):
         else:
             result = {}
 
-        value = self._ValueCls(schema=self, data=result)
+        value = self._ValueCls(schema=self, data=result)  # pylint: disable=not-callable
 
         if isinstance(data, self._ValueCls):
             for key in data._data.keys():
