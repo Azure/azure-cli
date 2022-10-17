@@ -8,15 +8,15 @@ import copy
 from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
 
-from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction, \
-    AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
+from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
+    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
-    AAZSimpleType
+    AAZSimpleType, AAZFreeFormDictType
 from ._field_value import AAZObject
-from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZSubscriptionIdArgFormat, \
-    AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
-    AAZDateTimeFormat, AAZDurationFormat
+from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
+    AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
+    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
@@ -323,6 +323,33 @@ class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
     @property
     def _type_in_help(self):
         return f"Dict<String,{self.Element._type_in_help}>"
+
+
+class AAZFreeFormDictArg(AAZBaseArg, AAZFreeFormDictType):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZFreeFormDictArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
+    def to_cmd_arg(self, name):
+        arg = super().to_cmd_arg(name)
+
+        short_summary = arg.type.settings.get('help', None) or ''
+        if short_summary:
+            short_summary += '  '
+        short_summary += "Support json-file and yaml-file."
+        arg.help = short_summary
+        return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZFreeFormDictArgAction):
+            _schema = self  # bind action class with current schema
+
+        return Action
+
+    @property
+    def _type_in_help(self):
+        return "Dict<String, Any>"
 
 
 class AAZListArg(AAZCompoundTypeArg, AAZListType):
