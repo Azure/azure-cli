@@ -454,13 +454,13 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
         self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6')
         self.cmd('network lb frontend-ip create --lb-name {lb2} -n ipv6 -g {rg} --private-ip-address-version IPv6 --public-ip-address {ip2}', checks=[
             self.check('name', 'ipv6'),
-            self.check('privateIpAddressVersion', 'IPv6'),
             self.check('provisioningState', 'Succeeded')
         ])
 
-        self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
-            self.check('frontendIPConfigurations[0].privateIPAddressVersion', 'IPv6')
-        ])
+        # The privateIPAddressVersion field is no longer returned in lb response message
+        # self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
+        #     self.check('frontendIPConfigurations[0].privateIPAddressVersion', 'IPv6')
+        # ])
 
     @ResourceGroupPreparer(name_prefix='test_network_lb_frontend_ip_zone', location='eastus2')
     def test_network_lb_frontend_ip_zone(self, resource_group):
@@ -6311,10 +6311,8 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
             'identifier': '901',
             'identifier1': '902',
             'port': '10700',
-            'fport': '40',
-            'fport1': '60',
-            'bport': '60',
-            'bport1': '80',
+            'fport': '0',
+            'bport': '0'
         })
 
         self.cmd('network lb create -g {rg} -n {lb} --sku Gateway --vnet-name vnet --subnet subnet')
@@ -6330,9 +6328,10 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
                  '--frontend-port {fport}  --protocol All --backend-port {bport} --backend-pool-name {bap1} ',
                  checks=[self.exists('backendAddressPool'),
                          self.check('length(backendAddressPools)', 1)])
+        self.cmd('network lb rule delete --lb-name {lb} -g {rg} -n rule1')
         # test --backend-pools-name
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
-                 '--frontend-port {fport1} --backend-pools-name {bap3} {bap2} --protocol All  --backend-port {bport1}',
+                 '--frontend-port {fport} --backend-pools-name {bap3} {bap2} --protocol All  --backend-port {bport}',
                  checks=[self.not_exists('backendAddressPool'),
                          self.check('length(backendAddressPools)', 2)])
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
