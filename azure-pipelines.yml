@@ -12,10 +12,8 @@ pr:
     include:
     - '*'
 
-parameters:
-- name: ubuntu_pool
-  type: string
-  default: pool-ubuntu-2004
+variables:
+- template: .azure-pipelines/variables.yml
 
 jobs:
 - job: CheckPullRequest
@@ -23,7 +21,7 @@ jobs:
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
   pool:
-    name: ${{ parameters.ubuntu_pool }}
+    name: ${{ variables.ubuntu_pool }}
   steps:
   - bash: |
       echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
