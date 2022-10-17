@@ -3,11 +3,14 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
 jobs:
 - job: Monitor
   displayName: Monitor
   pool:
-    name: 'pool-ubuntu-2004'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:

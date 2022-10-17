@@ -11,6 +11,9 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
 #schedules:
 #- cron: "0 18 * * 5"
 #  displayName: Weekly Friday test
@@ -315,7 +318,7 @@ jobs:
       ext-webapp:
         Target: ext-webapp
   pool:
-    name: 'pool-ubuntu-2004'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - bash: |
         if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then

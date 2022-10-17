@@ -5,6 +5,9 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
 schedules:
 - cron: "0 18 * * 5"
   displayName: Weekly Friday test
@@ -25,7 +28,7 @@ jobs:
         Target: {{module}}
     {% endfor %}
   pool:
-    name: 'pool-ubuntu-2004'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -81,7 +84,7 @@ jobs:
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
   pool:
-    name: 'pool-ubuntu-2004'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
