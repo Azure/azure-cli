@@ -4067,6 +4067,11 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
+def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
+    return client.list(resource_group_name, load_balancer_name)
+
+
 def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, backend_pool_name, request):
     args = {
         "resource_group": resource_group_name,
