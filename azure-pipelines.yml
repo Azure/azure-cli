@@ -12,13 +12,18 @@ pr:
     include:
     - '*'
 
+parameters:
+- name: ubuntu_pool
+  type: string
+  default: pool-ubuntu-2004
+
 jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
   pool:
-    name: 'pool-ubuntu-2004'
+    name: ${{ parameters.ubuntu_pool }}
   steps:
   - bash: |
       echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
