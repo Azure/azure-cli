@@ -3134,7 +3134,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         # test lb create with min params (new ip)
         self.cmd('network cross-region-lb create -n {lb}1 -g {rg}', checks=[
-            self.check('loadBalancer.frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}')
         ])
 
@@ -3148,9 +3148,9 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with existing public IP (by name)
         self.cmd('network public-ip create -n {pub_ip} -g {rg} --sku Standard --tier Global')
         self.cmd('network cross-region-lb create -n {lb}3 -g {rg} --public-ip-address {pub_ip}', checks=[
-            self.check('loadBalancer.frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
-            self.check("loadBalancer.frontendIPConfigurations[0].publicIPAddress.contains(id, '{pub_ip}')", True)
+            self.check("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{pub_ip}')", True)
         ])
 
         self.cmd('network cross-region-lb list', checks=[
