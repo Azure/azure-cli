@@ -416,8 +416,9 @@ def build_load_balancer_resource_v2(cmd, name, location, tags, backend_pool_name
                                     subnet_id, private_ip_address, private_ip_allocation,
                                     sku, frontend_ip_zone, private_ip_address_version, tier=None,
                                     edge_zone=None, edge_zone_type=None):
-    frontend_ip_config = _build_frontend_ip_config_v2(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
-                                                      private_ip_allocation, frontend_ip_zone, private_ip_address_version)
+    frontend_ip_config = _build_frontend_ip_config_v2(cmd, frontend_ip_name, public_ip_id, subnet_id,
+                                                      private_ip_address, private_ip_allocation, frontend_ip_zone,
+                                                      private_ip_address_version)
     lb = {
         'name': name,
         'location': location,
