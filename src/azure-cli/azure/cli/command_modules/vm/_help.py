@@ -1160,8 +1160,7 @@ short-summary: Share gallery with subscriptions and tenants
 examples:
   - name: Share entire gallery with all members of a subscription and/or tenant.
     text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery
-        --gallery-image-definition MyImage \\
+        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery \\
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
 
