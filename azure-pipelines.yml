@@ -838,8 +838,7 @@ jobs:
   displayName: Build Rpm Package Mariner ARM64
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'ubuntu-arm64-2004-pool'
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_arm64_pool }}
   variables:
     # Disable Component Detection on ARM64
     skipComponentGovernanceDetection: true
@@ -882,8 +881,7 @@ jobs:
   # Do not run this job for Pull Requests due to the slowness
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'ubuntu-arm64-2004-pool'
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_arm64_pool }}
   variables:
     skipComponentGovernanceDetection: true
   strategy:
@@ -942,8 +940,7 @@ jobs:
   - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'ubuntu-arm64-2004-pool'
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_arm64_pool }}
   variables:
     skipComponentGovernanceDetection: true
   strategy:
@@ -1014,8 +1011,7 @@ jobs:
   displayName: Build Deb Packages ARM64
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: 'ubuntu-arm64-2004-pool'
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_arm64_pool }}
   variables:
     skipComponentGovernanceDetection: true
   strategy:
@@ -1095,8 +1091,7 @@ jobs:
         deb_system: debian
         distro: bullseye
   pool:
-    name: 'ubuntu-arm64-2004-pool'
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_arm64_pool }}
   variables:
     skipComponentGovernanceDetection: true
   steps:
