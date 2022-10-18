@@ -846,7 +846,7 @@ jobs:
     matrix:
       2.0:
         image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0
+        artifact: rpm-mariner2.0-arm64
   steps:
   - bash: |
       # https://docs.docker.com/engine/security/rootless/
@@ -889,22 +889,22 @@ jobs:
       Red Hat Universal Base Image 8:
         dockerfile: ubi
         image: registry.access.redhat.com/ubi8/ubi:8.4
-        artifact: rpm-ubi8
+        artifact: rpm-ubi8-arm64
         python_package: python39
       Red Hat Universal Base Image 9:
         dockerfile: ubi
         image: registry.access.redhat.com/ubi9/ubi:9.0.0
-        artifact: rpm-ubi9
+        artifact: rpm-ubi9-arm64
         python_package: python3.9
       Fedora 35:
         dockerfile: fedora
         image: fedora:35
-        artifact: rpm-fedora35
+        artifact: rpm-fedora35-arm64
         python_package: python3
       Fedora 36:
         dockerfile: fedora
         image: fedora:36
-        artifact: rpm-fedora36
+        artifact: rpm-fedora36-arm64
         python_package: python3
   steps:
   - bash: |
@@ -946,28 +946,28 @@ jobs:
   strategy:
     matrix:
       Red Hat Universal Base Image 8:
-        artifact: rpm-ubi8
+        artifact: rpm-ubi8-arm64
         distro: el8
         image: registry.access.redhat.com/ubi8/ubi:8.4
         python_package: python39
         python_cmd: python3.9
         pip_cmd: pip3.9
       Red Hat Universal Base Image 9:
-        artifact: rpm-ubi9
+        artifact: rpm-ubi9-arm64
         distro: el9
         image: registry.access.redhat.com/ubi9/ubi:9.0.0
         python_package: python3.9
         python_cmd: python3.9
         pip_cmd: pip3.9
       Fedora 35:
-        artifact: rpm-fedora35
+        artifact: rpm-fedora35-arm64
         distro: fc35
         image: fedora:35
         python_package: python3
         python_cmd: python3
         pip_cmd: pip3
       Fedora 36:
-        artifact: rpm-fedora36
+        artifact: rpm-fedora36-arm64
         distro: fc36
         image: fedora:36
         python_package: python3
@@ -1068,7 +1068,7 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(deb_system)-$(distro)
+      ArtifactName: $(deb_system)-$(distro)-arm64
 
 - job: TestDebPackagesArm64
   displayName: Test Deb Packages ARM64
@@ -1105,7 +1105,7 @@ jobs:
     displayName: 'Download $(deb_system):$(distro) Build'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: $(deb_system)-$(distro)
+      artifactName: $(deb_system)-$(distro)-arm64
   - bash: |
       # https://docs.docker.com/engine/security/rootless/
       /bin/bash -c "$(curl -fsSL https://get.docker.com)"
