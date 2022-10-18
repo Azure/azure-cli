@@ -501,7 +501,7 @@ def reload_extension(extension_name, extension_module=None):
 
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
-    sys.path.append(ext_dir)
+    sys.path.insert(0, ext_dir)
     # If this path update should have made a new "azure" module available,
     # extend the existing module with its path. This allows extensions to
     # include (or depend on) Azure SDK modules that are not yet part of
