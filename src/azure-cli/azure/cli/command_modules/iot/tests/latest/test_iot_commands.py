@@ -346,7 +346,8 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub route test'
         self.kwargs["route_properties"] = json.dumps({"body": 4})
-        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2} --sp {route_properties} --ap {route_properties}'.format(hub, rg, route_name),
+        props = "--sp '{route_properties}' --ap '{route_properties}'"
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2} {3}'.format(hub, rg, route_name, props),
                  checks=[self.check('result', 'true')])
 
         # Test 'az iot hub route test'
