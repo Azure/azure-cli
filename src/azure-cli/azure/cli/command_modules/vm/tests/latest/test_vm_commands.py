@@ -5360,7 +5360,7 @@ class VMGenericUpdate(ScenarioTest):
 class VMGalleryImage(ScenarioTest):
     
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
