@@ -68,6 +68,9 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 def load_command_table(self, _):
 
     # region Command Types
+    custom_command_type = self.module_kwargs["custom_command_type"]
+    custom_operations_tmpl = custom_command_type.settings["operations_tmpl"]
+
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
         client_factory=cf_application_gateways
@@ -268,7 +271,7 @@ def load_command_table(self, _):
     )
 
     network_watcher_flow_log_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
+        operations_tmpl=custom_operations_tmpl,
         client_factory=cf_flow_logs,
     )
 
@@ -284,7 +287,7 @@ def load_command_table(self, _):
     )
 
     network_virtual_hub_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
+        operations_tmpl=custom_operations_tmpl,
         client_factory=cf_virtual_hub,
         min_api='2020-07-01'
     )
@@ -296,7 +299,7 @@ def load_command_table(self, _):
     )
 
     network_vrouter_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
+        operations_tmpl=custom_operations_tmpl,
         client_factory=cf_virtual_router,
         min_api='2019-08-01'
     )
@@ -308,7 +311,7 @@ def load_command_table(self, _):
     )
 
     network_vrouter_peering_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
+        operations_tmpl=custom_operations_tmpl,
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
     )
@@ -325,16 +328,16 @@ def load_command_table(self, _):
         min_api='2020-06-01'
     )
 
-    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}')
+    network_custom = CliCommandType(operations_tmpl=custom_operations_tmpl)
 
     network_load_balancers_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
+        operations_tmpl=custom_operations_tmpl,
         client_factory=cf_load_balancers,
         min_api='2020-08-01'
     )
 
     network_nic_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
+        operations_tmpl=custom_operations_tmpl,
         client_factory=cf_network_interfaces
     )
 
