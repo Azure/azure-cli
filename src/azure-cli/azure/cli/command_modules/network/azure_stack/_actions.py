@@ -8,8 +8,8 @@ from collections import defaultdict
 import argparse
 from knack.util import CLIError
 from azure.cli.core.azclierror import UnrecognizedArgumentError
-from azure.cli.command_modules.network._util import enum_check
 from ._validators import read_base_64_file
+from ._util import enum_check
 
 
 # pylint: disable=protected-access

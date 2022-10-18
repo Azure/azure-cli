@@ -28,7 +28,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
     cf_custom_ip_prefixes)
-from azure.cli.command_modules.network._util import (
+from azure.cli.command_modules.network.azure_stack._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
 from azure.cli.command_modules.network.azure_stack._format import (
@@ -79,7 +79,7 @@ def load_command_table(self, _):
     )
 
     network_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network._util#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack._util#{}',
         client_factory=None
     )
 
@@ -268,7 +268,7 @@ def load_command_table(self, _):
     )
 
     network_watcher_flow_log_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
         client_factory=cf_flow_logs,
     )
 
@@ -284,7 +284,7 @@ def load_command_table(self, _):
     )
 
     network_virtual_hub_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
         client_factory=cf_virtual_hub,
         min_api='2020-07-01'
     )
@@ -296,7 +296,7 @@ def load_command_table(self, _):
     )
 
     network_vrouter_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
         client_factory=cf_virtual_router,
         min_api='2019-08-01'
     )
@@ -308,7 +308,7 @@ def load_command_table(self, _):
     )
 
     network_vrouter_peering_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
     )
@@ -325,16 +325,16 @@ def load_command_table(self, _):
         min_api='2020-06-01'
     )
 
-    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
+    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}')
 
     network_load_balancers_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
         client_factory=cf_load_balancers,
         min_api='2020-08-01'
     )
 
     network_nic_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}',
         client_factory=cf_network_interfaces
     )
 
@@ -1285,7 +1285,7 @@ def load_command_table(self, _):
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
-    plr_and_pec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom#{}')
+    plr_and_pec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.azure_stack.private_link_resource_and_endpoint_connections.custom#{}')
     with self.command_group('network private-link-resource', custom_command_type=plr_and_pec_custom) as g:
         g.custom_show_command('list', 'list_private_link_resource')
     with self.command_group('network private-endpoint-connection', custom_command_type=plr_and_pec_custom) as g:
