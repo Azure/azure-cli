@@ -726,8 +726,7 @@ jobs:
       set -ex
       
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=azure-cli-$CLI_VERSION-1.${DISTRO}.x86_64.rpm
-      RPM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/rpm/$RPM_NAME
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name 'azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm' -printf '%f\n')
       
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
@@ -830,9 +829,11 @@ jobs:
       script: |
         set -exv
         CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+        DEB_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/debian/ -type f -name 'azure-cli_$CLI_VERSION-1~${DISTRO}_*.deb' -printf '%f\n')
+        
         echo "== Test debian package on ${DISTRO} =="
         docker pull ${DISTRO_BASE_IMAGE}
-        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
+        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -e DEB_NAME=$DEB_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
 
 - job: BuildRpmPackageMarinerArm64
   displayName: Build Rpm Package Mariner ARM64
@@ -1000,7 +1001,7 @@ jobs:
       set -ex
 
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(cd $SYSTEM_ARTIFACTSDIRECTORY/rpm/ && ls azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm)
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name 'azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm' -printf '%f\n')
 
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
@@ -1127,9 +1128,11 @@ jobs:
       script: |
         set -exv
         CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+        DEB_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/debian/ -type f -name 'azure-cli_$CLI_VERSION-1~${DISTRO}_*.deb' -printf '%f\n')
+        
         echo "== Test debian package on ${DISTRO} =="
         docker pull ${DISTRO_BASE_IMAGE}
-        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
+        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -e DEB_NAME=$DEB_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
 
 - job: CheckStyle
   displayName: "Check CLI Style"

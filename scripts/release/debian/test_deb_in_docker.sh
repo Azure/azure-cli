@@ -14,7 +14,7 @@ case ${DISTRO} in
     *)                        :;;
 esac
 
-dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
+dpkg -i /mnt/artifacts/$DEB_NAME
 
 time az self-test
 time az --version
