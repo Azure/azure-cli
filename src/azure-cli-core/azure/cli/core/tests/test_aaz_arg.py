@@ -1015,6 +1015,61 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(aazerror.AAZInvalidShorthandSyntaxError):
             action.setup_operations(dest_ops, ["{c:}"])
 
+    def test_aaz_freeform_dict_arg(self):
+        from azure.cli.core.aaz._arg import AAZFreeFormDictArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.tags = AAZFreeFormDictArg(
+            options=["--tags", "-t"],
+            nullable=True,
+            blank={"blank": True}
+        )
+
+        arg = schema.tags.to_cmd_arg("tags")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, None)
+
+        # empty dict
+        action.setup_operations(dest_ops, "{}")
+        self.assertEqual(len(dest_ops._ops), 2)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {})
+
+        # freeform dict
+        action.setup_operations(dest_ops, '{"a": 1, "b": null, "c": false, "d": "string", "e": [1, "str", null]}')
+        self.assertEqual(len(dest_ops._ops), 3)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"a": 1, "b": None, "c": False, "d": "string", "e": [1, "str", None]})
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 4)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"blank": True})
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "'null'")
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "'123'")
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "123")
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "[1, 2, 3]")
+
+
     def test_aaz_object_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg, \
             AAZStrArg, AAZArgumentsSchema
