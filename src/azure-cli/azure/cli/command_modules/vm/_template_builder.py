@@ -867,6 +867,38 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
     return lb
 
 
+def build_nat_rule_v2(cmd, name, location, lb_name, frontend_ip_name, backend_pool_name, backend_port, instance_count,
+                      disable_overprovision):
+    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(lb_name)
+
+    nat_rule = {
+        "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+        "apiVersion": get_target_network_api(cmd.cli_ctx),
+        "name": name,
+        "location": location,
+        "properties": {
+            "frontendIPConfiguration": {
+                'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+            },
+            "backendAddressPool": {
+                "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+            },
+            "backendPort": backend_port,
+            "frontendPortRangeStart": "50000",
+            # This logic comes from the template of `inboundNatPools` to keep consistent with NAT pool
+            # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+            "frontendPortRangeEnd": str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
+            "protocol": "tcp",
+            "idleTimeoutInMinutes": 5
+        },
+        "dependsOn": [
+            "[concat('Microsoft.Network/loadBalancers/', '{}')]".format(lb_name)
+        ]
+    }
+
+    return nat_rule
+
+
 def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku, edge_zone=None):
 
     storage_resource = {

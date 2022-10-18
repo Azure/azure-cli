@@ -3084,7 +3084,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
-                regular_priority_percentage=None, disk_controller_type=None):
+                regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3094,7 +3094,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_load_balancer_resource,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
-                                                                build_msi_role_assignment, build_nsg_resource)
+                                                                build_msi_role_assignment, build_nsg_resource,
+                                                                build_nat_rule_v2)
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
@@ -3219,19 +3220,27 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                         public_ip_address)
 
+            if nat_rule_name and nat_pool_name:
+                from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+                raise MutuallyExclusiveArgumentError(
+                    'Please do not pass in both "--nat-pool-name" and "--nat-rule-name" parameters at the same time.'
+                    '"--nat-rule-name" parameter is recommended')
+
+            is_basic_lb_sku = not load_balancer_sku or load_balancer_sku.lower() != 'standard'
             # calculate default names if not provided
             if orchestration_mode.lower() == flexible_str.lower():
                 # inbound nat pools are not supported on VMSS Flex
                 nat_pool_name = None
-            else:
+            elif nat_pool_name or (not nat_rule_name and is_basic_lb_sku):
                 nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
 
             if not backend_port:
                 backend_port = 3389 if os_type == 'windows' else 22
 
+            frontend_ip_name = 'loadBalancerFrontEnd'
             lb_resource = build_load_balancer_resource(
                 cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-                'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
+                frontend_ip_name, public_ip_address_id, subnet_id, private_ip_address='',
                 private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
                 disable_overprovision=disable_overprovision, edge_zone=edge_zone)
             lb_resource['dependsOn'] = lb_dependencies
@@ -3244,6 +3253,22 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                     None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
                 nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
                 vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
+
+            # Since NAT rule V2 can work for both Uniform and Flex VMSS, but basic LB SKU cannot fully support it
+            # So when users use Standard LB SKU, CLI uses NAT rule V2 by default
+            if not nat_pool_name:
+
+                if nat_rule_name and is_basic_lb_sku:
+                    logger.warning(
+                        'Since the basic SKU of load balancer cannot fully support NAT rule V2, '
+                        'it is recommended to specify "--lb-sku Standard" to use standard SKU instead.')
+
+                nat_rule_name = nat_rule_name or 'NatRule'
+                # The nested resource must follow the pattern parent_resource_name/nested_res_name
+                nat_rule_name = '{}/{}'.format(load_balancer, nat_rule_name)
+                nat_rule = build_nat_rule_v2(cmd, nat_rule_name, location, load_balancer, frontend_ip_name,
+                                             backend_pool_name, backend_port, instance_count, disable_overprovision)
+                master_template.add_resource(nat_rule)
 
         # Or handle application gateway creation
         if app_gateway_type == 'new':
@@ -3596,11 +3621,19 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     primary_nic_config = next((n for n in nic_configs if n.primary), None)
     if primary_nic_config is None:
         raise CLIError('could not find a primary NIC which is needed to search to load balancer')
-    ip_configs = primary_nic_config.ip_configurations
-    ip_config = next((ip for ip in ip_configs if ip.load_balancer_inbound_nat_pools), None)
-    if not ip_config:
-        raise CLIError('No load balancer exists to retrieve public IP address')
-    res_id = ip_config.load_balancer_inbound_nat_pools[0].id
+
+    res_id = None
+    for ip in primary_nic_config.ip_configurations:
+        if ip.load_balancer_inbound_nat_pools:
+            res_id = ip.load_balancer_inbound_nat_pools[0].id
+            break
+        if ip.load_balancer_backend_address_pools:
+            res_id = ip.load_balancer_backend_address_pools[0].id
+            break
+
+    if not res_id:
+        raise ResourceNotFoundError('No load balancer exists to retrieve public IP address')
+
     lb_info = parse_resource_id(res_id)
     lb_name = lb_info['name']
     lb_rg = lb_info['resource_group']
@@ -3616,12 +3649,37 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
         public_ip = network_client.public_ip_addresses.get(public_ip_rg, public_ip_name)
         public_ip_address = public_ip.ip_address
 
-        # loop around inboundnatrule
+        # For NAT pool, get the frontend port and VMSS instance from inboundNatRules
+        is_nat_pool = True
         instance_addresses = {}
         for rule in lb.inbound_nat_rules:
+            # If backend_ip_configuration does not exist, it means that NAT rule V2 is used
+            if not rule.backend_ip_configuration:
+                is_nat_pool = False
+                break
             instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name_1']
             instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
                                                                            rule.frontend_port)
+        if is_nat_pool:
+            return instance_addresses
+
+        # For NAT rule V2, get the frontend port and VMSS instance from loadBalancerBackendAddresses
+        for backend_address_pool in lb.backend_address_pools:
+            if not backend_address_pool.load_balancer_backend_addresses:
+                raise CLIError('There is no connection information. '
+                               'If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard')
+
+            for load_balancer_backend_addresse in backend_address_pool.load_balancer_backend_addresses:
+
+                network_interface_ip_configuration = load_balancer_backend_addresse.network_interface_ip_configuration
+                if not network_interface_ip_configuration or not network_interface_ip_configuration.id:
+                    continue
+                instance_id = parse_resource_id(network_interface_ip_configuration.id)['child_name_1']
+
+                if not load_balancer_backend_addresse.inbound_nat_rules_port_mapping:
+                    continue
+                frontend_port = load_balancer_backend_addresse.inbound_nat_rules_port_mapping[0].frontend_port
+                instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address, frontend_port)
 
         return instance_addresses
     raise CLIError('The VM scale-set uses an internal load balancer, hence no connection information')

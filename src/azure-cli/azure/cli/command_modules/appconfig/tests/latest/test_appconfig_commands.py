@@ -2454,6 +2454,42 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                          self.check('label', entry_label),
                          self.check('state', conditional_state)])
 
+        # Update Filter Tests
+        updated_params = 'ArrayParams=[10,20,30]'
+        updated_params_output = {
+            "ArrayParams": [
+                10,
+                20,
+                30
+            ]
+        }
+
+        # Update Filter should fail when filter_name does not exist
+        non_existent_filter_name = "non_existent_filter"
+
+        self.kwargs.update({
+            'filter_parameters': updated_params,
+            'filter_name': non_existent_filter_name
+        })
+        with self.assertRaisesRegex(CLIError, "No filter named '{}' was found for feature".format(non_existent_filter_name)):
+            self.cmd(
+                'appconfig feature filter update -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y --filter-parameters {filter_parameters}')
+
+        # Update Filter without index should throw error when duplicates exist
+        self.kwargs.update({
+            'filter_name': first_filter_name
+        })
+
+        with self.assertRaisesRegex(CLIError, "contains multiple instances of filter"):
+            self.cmd(
+                'appconfig feature filter update -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y --filter-parameters {filter_parameters}')
+
+        # Update Filter with index succeeds when correct index provided
+        self.cmd('appconfig feature filter update -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --index 0 -y --filter-parameters {filter_parameters}',
+                 checks=[self.check('name', first_filter_name),
+                         self.check('parameters', updated_params_output)])
+
+
         # Delete Filter without index should throw error when duplicates exist
         with self.assertRaisesRegex(CLIError, "contains multiple instances of filter"):
             self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y')
