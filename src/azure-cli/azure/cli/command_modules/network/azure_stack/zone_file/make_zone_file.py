@@ -46,7 +46,7 @@ def make_zone_file(json_obj):
         "uri":     [ uri records ]
     }
     """
-    import azure.cli.command_modules.network.zone_file.record_processors as record_processors
+    import azure.cli.command_modules.network.azure_stack.zone_file.record_processors as record_processors
     from io import StringIO
 
     zone_file = StringIO()

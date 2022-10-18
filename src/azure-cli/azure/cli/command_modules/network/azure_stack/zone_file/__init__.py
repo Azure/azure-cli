@@ -25,5 +25,5 @@
 # SOFTWARE.
 # pylint: skip-file
 
-from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
-from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+from azure.cli.command_modules.network.azure_stack.zone_file.parse_zone_file import parse_zone_file
+from azure.cli.command_modules.network.azure_stack.zone_file.make_zone_file import make_zone_file
