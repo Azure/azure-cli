@@ -1099,6 +1099,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'dest_database_name': 'cli-restore-ltr'
         })
 
+        self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
+
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg}',
@@ -2962,6 +2964,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest-HSEP', location='eastus2')
     @SqlServerPreparer(name_prefix='clitest-HSEP', location='eastus2')
     @AllowLargeResponse()
+    @live_only() # Could not find tier Hyperscale. Supported tiers are: ['Standard', 'Premium', 'Basic', 'GeneralPurpose', 'BusinessCritical']
     def test_sql_elastic_pools_hyperscale_mgmt(self, resource_group, resource_group_location, server):
         pool_name = "cliautomationpool1"
 
@@ -3514,6 +3517,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
     @KeyVaultPreparer(location='eastus', name_prefix='sqltdebyok')
+    @live_only() # User tried to log in to a device from a platform (Unknown) that's currently not supported through Conditional Access policy. Supported device platforms are: iOS, Android, Mac, and Windows flavors.
     def test_sql_tdebyok(self, resource_group, server, key_vault):
         resource_prefix = 'sqltdebyok'
 
@@ -3969,8 +3973,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -4049,10 +4053,10 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
-    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
-    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
-    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
@@ -4163,8 +4167,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -5031,6 +5035,7 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
+    @AllowLargeResponse
     def test_sql_managed_db_long_term_retention(self, mi, rg):
         resource_prefix = 'MIDBLongTermRetention'
         self.kwargs.update({
@@ -5953,13 +5958,13 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         managed_database_name1 = 'logReplayTestDb1'
         # Uploading bak file to blob is restricted by testing framework, so only mitigation for now is to use hard-coded values
         self.kwargs.update({
-            'storage_account': 'toolingsa',
-            'container_name': 'tools',
+            'storage_account': 'backupscxteam',
+            'container_name': 'clients',
             'resource_group': rg,
             'managed_instance_name': mi,
             'managed_database_name': managed_database_name,
             'managed_database_name1': managed_database_name1,
-            'storage_uri': 'https://toolingsa.blob.core.windows.net/tools',
+            'storage_uri': 'https://backupscxteam.blob.core.windows.net/clients',
             'last_backup_name': 'full.bak'
         })
 
