@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
+import json
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -341,6 +342,11 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub route test'
         self.cmd('iot hub route test --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
+                 checks=[self.check('result', 'true')])
+
+        # Test 'az iot hub route test'
+        self.kwargs["route_properties"] = json.dumps({"body": 4})
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2} --sp {route_properties} --ap {route_properties}'.format(hub, rg, route_name),
                  checks=[self.check('result', 'true')])
 
         # Test 'az iot hub route test'
