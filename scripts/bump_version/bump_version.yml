@@ -8,11 +8,14 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
 jobs:
 - job: UpdateVersionFiles
   displayName: CLI Bump Version Update Version Files
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -79,7 +82,7 @@ jobs:
       instance8:
         Instance_idx: 8
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -115,14 +118,14 @@ jobs:
       displayName: "Rerun tests"
     - task: PublishTestResults@2
       inputs:
-        testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/s/env/test_results_*.xml'
+        testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
         testRunTitle: 'CLI Bump Version test results of instance $(Instance_idx)'
 
 - job: CreatePR
   displayName: CLI Bump Version Create PR
   dependsOn: RerunTests
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: AzureCLI@1
       displayName: 'Create PR'

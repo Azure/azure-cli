@@ -110,8 +110,7 @@ def load_arguments(self, _):
 
     edge_zone_type = CLIArgumentType(
         help='The name of edge zone.',
-        min_api='2020-12-01',
-        is_preview=True
+        min_api='2020-12-01'
     )
 
     t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')

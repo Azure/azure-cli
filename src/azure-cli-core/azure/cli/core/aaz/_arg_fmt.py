@@ -12,7 +12,7 @@ from knack.log import get_logger
 
 from ._command_ctx import AAZCommandCtx
 from ._field_type import AAZSimpleType
-from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZList, AAZObject
+from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
 from .exceptions import AAZInvalidArgValueError
 
 logger = get_logger(__name__)
@@ -448,6 +448,34 @@ class AAZDictArgFormat(AAZBaseArgFormat):
                 except AAZInvalidArgValueError as err:
                     err.indexes = [f'[{key}]', *err.indexes]
                     raise err from err
+
+        if value._is_patch:
+            return value
+
+        if self._min_properties and len(value) < self._min_properties:
+            raise AAZInvalidArgValueError(
+                f"Invalid format: dict length is less than {self._min_properties}")
+
+        if self._max_properties and len(value) > self._max_properties:
+            raise AAZInvalidArgValueError(
+                f"Invalid format: dict length is greater than {self._max_properties}")
+
+        return value
+
+
+class AAZFreeFormDictArgFormat(AAZBaseArgFormat):
+
+    def __init__(self, max_properties=None, min_properties=None):
+        self._max_properties = max_properties
+        self._min_properties = min_properties
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZFreeFormDict)
+        data = value._data
+        if data == AAZUndefined or data is None:
+            return value
+
+        assert isinstance(data, dict)
 
         if value._is_patch:
             return value
