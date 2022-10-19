@@ -293,6 +293,12 @@ def validate_strict_import(namespace):
             raise InvalidArgumentValueError("The option '--strict' can only be used when importing from a file.")
 
 
+def validate_export_as_reference(namespace):
+    if namespace.export_as_reference:
+        if namespace.destination != 'appservice':
+            raise InvalidArgumentValueError("The option '--export-as-reference' can only be used when exporting to app service.")
+
+
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
     return InvalidArgumentValueError("The option '{0}' is not supported when {1} using '{2}' profile".format(argument, action, ImportExportProfiles.KVSET))

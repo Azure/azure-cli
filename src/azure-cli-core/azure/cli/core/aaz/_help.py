@@ -35,7 +35,7 @@ class AAZShowHelp(BaseException):
         self.schema = None
 
     def show(self):
-        from ._arg import AAZObjectArg, AAZDictArg, AAZListArg, AAZBaseArg
+        from ._arg import AAZObjectArg, AAZDictArg, AAZFreeFormDictArg, AAZListArg, AAZBaseArg
         assert self.schema is not None and isinstance(self.schema, AAZBaseArg)
         schema = self.schema
         schema_key = self.keys[0]
@@ -49,7 +49,7 @@ class AAZShowHelp(BaseException):
                     # show the help of current schema
                     break
                 key = f'.{key}'
-            elif isinstance(schema, AAZDictArg):
+            elif isinstance(schema, (AAZDictArg, AAZFreeFormDictArg)):
                 try:
                     schema = schema.Element
                 except AAZUnknownFieldError:

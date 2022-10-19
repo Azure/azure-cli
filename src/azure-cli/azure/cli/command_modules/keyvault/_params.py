@@ -535,7 +535,7 @@ def load_arguments(self, _):
 
     # region KeyVault Secret
     with self.argument_context('keyvault secret set') as c:
-        c.argument('content_type', options_list=['--description'],
+        c.argument('content_type', options_list=['--description', '--content-type'],
                    help='Description of the secret contents (e.g. password, connection string, etc)')
         c.attributes_argument('secret', SecretAttributes, create=True)
 

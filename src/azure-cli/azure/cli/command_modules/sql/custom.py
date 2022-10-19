@@ -1440,6 +1440,7 @@ def db_export(
         resource_group_name,
         storage_key_type,
         storage_key,
+        no_wait=False,
         **kwargs):
     '''
     Exports a database to a bacpac file.
@@ -1450,7 +1451,9 @@ def db_export(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.begin_export(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_export,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1464,6 +1467,7 @@ def db_import(
         resource_group_name,
         storage_key_type,
         storage_key,
+        no_wait=False,
         **kwargs):
     '''
     Imports a bacpac file into an existing database.
@@ -1474,7 +1478,9 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.begin_import_method(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_import_method,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -5159,6 +5165,7 @@ def managed_db_log_replay_start(
         last_backup_name,
         storage_container_uri,
         storage_container_sas_token,
+        storage_container_identity,
         **kwargs):
     '''
     Start a log replay restore.
@@ -5180,6 +5187,7 @@ def managed_db_log_replay_start(
 
     kwargs['storageContainerUri'] = storage_container_uri
     kwargs['storageContainerSasToken'] = storage_container_sas_token
+    kwargs['storage_container_identity'] = storage_container_identity
 
     # Create
     return client.begin_create_or_update(

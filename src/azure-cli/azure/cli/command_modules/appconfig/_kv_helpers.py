@@ -25,7 +25,7 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import FileOperationError, AzureInternalError
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -137,6 +137,9 @@ def __read_with_appropriate_encoding(file_path, format_):
         with io.open(file_path, 'r', encoding=default_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
+                # Only accept json objects
+                if not isinstance(config_data, (dict, list)):
+                    raise ValueError("Json object required but type '{}' was given.".format(type(config_data).__name__))
 
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
@@ -281,6 +284,22 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
         raise CLIError("Failed to export key-values to file. " + str(exception))
 
 
+# Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Label=<kvLabel>).
+# Label is optional
+
+def __map_to_appservice_config_reference(key_value, endpoint, prefix):
+    label = key_value.label
+    key_value.value = AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX + '(Endpoint={0}; Key={1}'.format(
+        endpoint, key_value.key) + ('; Label={0}'.format(label) if label is not None else '') + ')'
+
+    if key_value.key.startswith(prefix):
+        key_value.key = key_value.key[len(prefix):]
+
+    # We set content type to an empty string to ensure that this key-value is not treated as a key-vault reference or feature flag down the line.
+    key_value.content_type = ""
+    return key_value
+
+
 # Config Store <-> List of KeyValue object
 
 def __read_kv_from_config_store(azconfig_client,
@@ -416,19 +435,24 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
             cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=slot)
         for item in settings:
             key = prefix_to_add + item['name']
+            value = item['value']
+
+            if value.strip().lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()):   # Exclude app configuration references.
+                logger.warning('Ignoring app configuration reference with Key "%s" and Value "%s"', key, value)
+                continue
+
             if validate_import_key(key):
-                tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
-                value = item['value']
+                tags = {AppServiceConstants.APPSVC_SLOT_SETTING_KEY: str(item['slotSetting']).lower()} if item['slotSetting'] else {}
 
                 # Value will look like one of the following if it is a KeyVault reference:
                 # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
                 # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
-                if value and value.strip().lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
+                if value and value.strip().lower().startswith(AppServiceConstants.APPSVC_KEYVAULT_PREFIX.lower()):
                     try:
                         # Strip all whitespaces from value string.
                         # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
                         value = value.replace(" ", "")
-                        appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
+                        appsvc_value_dict = dict(x.split('=') for x in value[len(AppServiceConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
                         appsvc_value_dict = {k.lower(): v for k, v in appsvc_value_dict.items()}
                         secret_identifier = appsvc_value_dict.get('secreturi')
                         if not secret_identifier:
@@ -484,7 +508,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
                 try:
                     secret_uri = json.loads(value).get("uri")
                     if secret_uri:
-                        value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
+                        value = AppServiceConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
                     else:
                         logger.debug(
                             'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n', name, value)
@@ -492,7 +516,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
                     logger.debug(
                         'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', name, value, str(e))
 
-            if 'AppService:SlotSetting' in kv.tags and kv.tags['AppService:SlotSetting'] == 'true':
+            if AppServiceConstants.APPSVC_SLOT_SETTING_KEY in kv.tags and kv.tags[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] == 'true':
                 slot_settings.append(name + '=' + value)
             else:
                 non_slot_settings.append(name + '=' + value)
@@ -518,10 +542,12 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     elif level == 'appservice':
         for kv in keyvalues:
             kv_json = {'value': kv.value}
+            # Explicitly assign slot settings for comparison.
+            slot_setting = 'false'
             if kv.tags:
-                for tag_k, tag_v in kv.tags.items():
-                    if tag_k == 'AppService:SlotSetting':
-                        kv_json[tag_k] = tag_v
+                slot_setting = kv.tags.get(AppServiceConstants.APPSVC_SLOT_SETTING_KEY, 'false')
+            kv_json[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] = slot_setting
+
             res[kv.key] = kv_json
     # import/export key, value, content-type, and tags (as a sub group)
     elif level == 'appconfig':
@@ -804,50 +830,20 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
         flattened_data[key] = str(value)
 
 
-def __export_keyvalue(key_segments, value, constructed_data, key):
+def __export_keyvalue(key_segments, value, constructed_data):
     first_key_segment = key_segments[0]
-    if isinstance(constructed_data, list):
-        if not first_key_segment.isdigit():
-            logger.debug(
-                "A key %s has been dropped as it can not be exported to a valid file!", key)
-            return
 
-        first_key_segment = int(first_key_segment)
-        if len(key_segments) == 1:
-            constructed_data.extend(
-                [Undef()] * (first_key_segment - len(constructed_data) + 1))
-            constructed_data[first_key_segment] = value
-        else:
-            if first_key_segment >= len(constructed_data):
-                constructed_data.extend(
-                    [Undef()] * (first_key_segment - len(constructed_data) + 1))
-            if isinstance(constructed_data[first_key_segment], Undef):
-                constructed_data[first_key_segment] = [
-                ] if key_segments[1].isdigit() else {}
-            __export_keyvalue(
-                key_segments[1:], value, constructed_data[first_key_segment], key)
-    elif isinstance(constructed_data, dict):
-        if first_key_segment.isdigit():
-            logger.debug(
-                "A key '%s' has been dropped as it can not be exported to a valid file!", key)
-            return
-
-        if len(key_segments) == 1:
-            constructed_data[first_key_segment] = value
-        else:
-            if first_key_segment not in constructed_data:
-                constructed_data[first_key_segment] = [
-                ] if key_segments[1].isdigit() else {}
-            __export_keyvalue(
-                key_segments[1:], value, constructed_data[first_key_segment], key)
+    if len(key_segments) == 1:
+        constructed_data[first_key_segment] = value
     else:
-        logger.debug(
-            "A key '%s' has been dropped as it can not be exported to a valid file!", key)
+        if first_key_segment not in constructed_data:
+            constructed_data[first_key_segment] = {}
+        __export_keyvalue(
+            key_segments[1:], value, constructed_data[first_key_segment])
 
 
 def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     exported_dict = {}
-    exported_list = []
 
     previous_kv = None
     try:
@@ -878,21 +874,34 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
                 continue
 
             key_segments = key.split(separator)
-            if key_segments[0].isdigit():
-                __export_keyvalue(key_segments,
-                                  kv.value, exported_list, key)
+            __export_keyvalue(key_segments, kv.value, exported_dict)
 
-            else:
-                __export_keyvalue(key_segments,
-                                  kv.value, exported_dict, key)
-
-        if exported_dict and exported_list:
-            logger.error("Can not export to a valid file! Some keys have been dropped. %s", json.dumps(
-                exported_dict, indent=2, ensure_ascii=False))
-
-        return __compact_key_values(exported_dict if not exported_list else exported_list)
+        return __try_convert_to_arrays(exported_dict)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
+
+
+def __try_convert_to_arrays(constructed_data):
+    if not (isinstance(constructed_data, dict) and len(constructed_data) > 0):
+        return constructed_data
+
+    # Object cannot be an array if not all keys are numeric
+    if False not in (key.isdigit() for key in constructed_data):
+        is_array = True
+        sorted_data_keys = sorted(int(key) for key in constructed_data)
+
+        # If all keys are digits and in order starting from 0, we convert the dictionary to an array
+        # with indices corresponding to the keys.
+        # We do not try to convert key-values at the root of the object to an array even if they meet this criterion.
+        for index, key in enumerate(sorted_data_keys):
+            if index != key:
+                is_array = False
+                break
+
+        if is_array:
+            return [__try_convert_to_arrays(constructed_data[str(data_key)]) for data_key in sorted_data_keys]
+
+    return {data_key: __try_convert_to_arrays(data_value) for data_key, data_value in constructed_data.items()}
 
 
 def __export_features(retrieved_features, naming_convention):

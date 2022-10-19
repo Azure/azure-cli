@@ -276,8 +276,8 @@ class VMImageShowScenarioTest(ScenarioTest):
             'loc': 'westus',
             'pub': 'Canonical',
             'offer': 'UbuntuServer',
-            'sku': '14.04.2-LTS',
-            'ver': '14.04.201503090'
+            'sku': '18.04-LTS',
+            'ver': '18.04.202002180'
         })
 
         self.cmd('vm image show --location {loc} --publisher {pub} --offer {offer} --sku {sku} --version {ver}', checks=[
@@ -860,6 +860,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --os-type linux --use-unmanaged-disk --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
+    @AllowLargeResponse(99999)
     @ResourceGroupPreparer()
     def test_vm_create_data_disk_delete_option(self, resource_group):
         self.cmd('vm create -n Delete_CLI1 -g {rg} --image RedHat:RHEL:7-RAW:7.4.2018010506 -l northeurope '
@@ -1156,7 +1157,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('features[0].value', 'true', False)
         ])
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
-        self.cmd('snapshot create -g {rg} -n s1 --source disk')
+        self.cmd('snapshot create -g {rg} -n s1 --source disk --accelerated-network')
         gallery_image = self.cmd('sig image-version create -g {rg} --gallery-name {g1} --gallery-image-definition image --gallery-image-version 1.0.0 --os-snapshot s1').get_output_in_json()['id']
         self.kwargs.update({
             'gallery_image': gallery_image
@@ -2739,7 +2740,7 @@ class VMCreateCustomIP(ScenarioTest):
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys --nsg-rule NONE')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', '{dns}'),
             self.check('sku.name', '{public_ip_sku}')
         ])
@@ -2749,7 +2750,7 @@ class VMCreateCustomIP(ScenarioTest):
         # verify the default should be "Basic" sku with "Dynamic" allocation method
         self.cmd('vm create -n {vm2} -g {rg} --image UbuntuLTS --admin-username user11 --generate-ssh-keys --nsg-rule NONE')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIPAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
         ])
 
@@ -3641,6 +3642,78 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Standard')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_nat_rule_v2')
+    def test_vmss_create_with_nat_rule_v2(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 15),
+            'vmss2': self.create_random_name('vmss', 15),
+            'vmss3': self.create_random_name('vmss', 15),
+            'vmss4': self.create_random_name('vmss', 15),
+            'vmss5': self.create_random_name('vmss', 15),
+            'vmss6': self.create_random_name('vmss', 15),
+            'natrule': self.create_random_name('natrule', 15),
+            'natrule1': self.create_random_name('natrule', 15),
+            'natrule2': self.create_random_name('natrule', 15),
+            'natpool': self.create_random_name('natpool', 15),
+        })
+
+        self.cmd('vmss create -n {vmss1} -g {rg} --image CentOS --lb-sku Standard')
+        self.cmd('vmss show -n {vmss1} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss1}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss1} -g {rg}')
+
+        self.cmd('vmss create -n {vmss2} -g {rg} --image CentOS')
+        self.cmd('vmss show -n {vmss2} -g {rg}', checks=[
+            self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
+        ])
+        self.cmd('network lb show -n {vmss2}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss2} -g {rg}')
+
+        self.cmd('vmss create -n {vmss3} -g {rg} --image CentOS --nat-rule-name {natrule} --lb-sku Standard')
+        self.cmd('vmss show -n {vmss3} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss3}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss3} -g {rg}')
+
+        self.cmd('vmss create -n {vmss4} -g {rg} --image CentOS --nat-rule-name {natrule1}')
+        self.cmd('vmss show -n {vmss4} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss4}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        message = 'There is no connection information. If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard'
+        with self.assertRaisesRegex(CLIError, message):
+            self.cmd('vmss list-instance-connection-info -n {vmss4} -g {rg}')
+
+        self.cmd('vmss create -n {vmss5} -g {rg} --image CentOS --nat-rule-name {natrule2} --lb-sku Basic')
+        self.cmd('vmss show -n {vmss5} -g {rg}', checks=[
+            self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools', None)
+        ])
+        self.cmd('network lb show -n {vmss5}LB -g {rg}', checks=[
+            self.check('sku.name', 'Basic')
+        ])
+        with self.assertRaisesRegex(CLIError, message):
+            self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
+
+        self.cmd('vmss create -n {vmss6} -g {rg} --image CentOS --nat-pool-name {natpool} --lb-sku Standard')
+        self.cmd('vmss show -n {vmss6} -g {rg}', checks=[
+            self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
+        ])
+        self.cmd('network lb show -n {vmss6}LB -g {rg}', checks=[
+            self.check('sku.name', 'Standard')
+        ])
+        self.cmd('vmss list-instance-connection-info -n {vmss6} -g {rg}')
 
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -7505,6 +7578,42 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='eastus2euap')
+    def test_disk_controller_type(self, resource_group):
+        self.kwargs.update({
+            'vm_disk': self.create_random_name('disk-', 15),
+            'vm': self.create_random_name('vm-', 15),
+            'vm1': self.create_random_name('vm-', 15),
+            'vm2': self.create_random_name('vm-', 15),
+            'vmss': self.create_random_name('vmss-', 15),
+            'image': self.create_random_name('image-', 15),
+            'vmss1': self.create_random_name('vmss-', 15)
+        })
+        self.cmd('disk create -n {vm_disk} -g {rg} --hyper-v-generation v2 --size-gb 10')
+        self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --attach-os-disk {vm_disk} --os-type linux')
+        self.cmd('vm show -n {vm} -g {rg}', checks=[
+            self.check('storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm1} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5')
+        self.cmd('vm update --disk-controller-type SCSI -n {vm1} -g {rg}')
+        self.cmd('vm show -n {vm1} -g {rg}', checks=[
+            self.check('storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5 --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vm deallocate -g {rg} -n {vm2}')
+        self.cmd('vm generalize -g {rg} -n {vm2}')
+        self.cmd('image create -g {rg} -n {image} --source {vm2} --hyper-v-generation v2')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --disk-controller-type scsi --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5', checks=[
+            self.check('vmss.virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5')
+        self.cmd('vmss update -g {rg} -n {vmss1} --disk-controller-type scsi', checks=[
+            self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
+        ])
+
 
 class DiskAccessTest(ScenarioTest):
 
@@ -8033,6 +8142,23 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', self.kwargs['vmss'][:8]),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_create_flexible_vmss_with_priority_mix_policy', location='NorthEurope')
+    def test_create_flexible_vmss_with_priority_mix_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image Centos --orchestration-mode flexible --regular-priority-count 4 --regular-priority-percentage 50 --orchestration-mode flexible --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
+            self.check('vmss.priorityMixPolicy.baseRegularPriorityCount', 4),
+            self.check('vmss.priorityMixPolicy.regularPriorityPercentageAboveBase', 50),
+        ])
+
+        self.cmd('vmss update -n {vmss} -g {rg} --regular-priority-count 2 --regular-priority-percentage 25', checks=[
+            self.check('priorityMixPolicy.baseRegularPriorityCount', 2),
+            self.check('priorityMixPolicy.regularPriorityPercentageAboveBase', 25),
+        ])
+
+
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
@@ -8460,9 +8586,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
 
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4} --enable-secure-boot')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4}')
         self.cmd('vm show -g {rg} -n {vm4}', checks=[
-            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True)
         ])
         self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
@@ -8485,9 +8612,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot')
+        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch')
         self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
-            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True)
         ])
 
 
@@ -9121,10 +9249,27 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('creationData.createOption', 'CopyStart')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_snapshot_ultra_ssd', location='eastus2euap')
+    def test_snapshot_ultra_ssd(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+        })
+
+        disk_info = self.cmd('disk create -g {rg} -n {disk} --size-gb 4 --sku UltraSSD_LRS', checks=[
+            self.check('sku.name', 'UltraSSD_LRS')
+        ]).get_output_in_json()
+        self.kwargs.update({
+            'disk_id': disk_info['id']
+        })
+        self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
+            self.check('creationData.sourceResourceId', '{disk_id}')
+        ])
+
 
 class RestorePointScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collections', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point', location='EASTUS2EUAP')
     def test_restore_point(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -9133,35 +9278,36 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_name': self.create_random_name('vm_', 15)
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS --admin-username vmtest --admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True').get_output_in_json()
         self.kwargs.update({
             'vm_id': vm['id']
         })
 
-        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id} -l eastus', checks=[
-            self.check('location', 'eastus'),
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
+            self.check('location', 'eastus2euap'),
             self.check('name', '{collection_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}')
         ])
 
-        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name} --consistency-mode CrashConsistent', checks=[
             self.check('name', '{point_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('consistencyMode', 'CrashConsistent')
         ]).get_output_in_json()
 
         self.kwargs.update({
             'point_id': point['id']
         })
 
-        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name} --instance-view', checks=[
+        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
             self.check('id', '{point_id}'),
             self.check('name', '{point_name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('instanceView.diskRestorePoints[0].replicationStatus.status.code', 'ReplicationState/replicating')
         ])
 
         self.cmd('restore-point collection show -g {rg} --collection-name {collection_name} --restore-points', checks=[
-            self.check('location', 'eastus'),
+            self.check('location', 'eastus2euap'),
             self.check('name', '{collection_name}'),
             self.check('restorePoints[0].id', '{point_id}'),
             self.check('restorePoints[0].name', '{point_name}'),

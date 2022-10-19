@@ -11,6 +11,9 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
 #schedules:
 #- cron: "0 18 * * 5"
 #  displayName: Weekly Friday test
@@ -122,8 +125,6 @@ jobs:
         Target: redis
       relay:
         Target: relay
-      reservations:
-        Target: reservations
       resource:
         Target: resource
       role:
@@ -317,7 +318,7 @@ jobs:
       ext-webapp:
         Target: ext-webapp
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - bash: |
         if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then
@@ -380,7 +381,7 @@ jobs:
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
 
         # Clean resources
-        python /home/vsts/work/1/s/scripts/live_test/clean_policy.py
+        python /mnt/vss/_work/1/s/scripts/live_test/clean_policy.py
 
         # Whether commit changes
         if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
@@ -410,32 +411,32 @@ jobs:
     - task: PublishTestResults@2
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
-        testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
+        testResultsFiles: '/mnt/vss/_work/1/test_results.*.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).report.sequential.json'
         ArtifactName: '$(Target).report.sequential.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).report.sequential.html'
         ArtifactName: '$(Target).report.sequential.html'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).report.parallel.json'
         ArtifactName: '$(Target).report.parallel.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.parallel.html'
         publishLocation: 'Container'
 
@@ -472,11 +473,11 @@ jobs:
         echo "set account"
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
         echo "send email to grid"
-        python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
-        # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
+        python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
+        # python /mnt/vss/_work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources
         if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
-          python /home/vsts/work/1/s/scripts/live_test/clean.py
+          python /mnt/vss/_work/1/s/scripts/live_test/clean.py
         fi
 #    - task: AzureCLI@2
 #      inputs:

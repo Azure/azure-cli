@@ -42,7 +42,7 @@ from azure.cli.command_modules.network._completers import (
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
-    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest)
+    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest, WAFRulesCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -110,7 +110,7 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
         choices=['1', '2', '3']
     )
-    edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2021-02-01')
+    edge_zone = CLIArgumentType(help='The name of edge zone.', min_api='2021-02-01')
     gateway_lb = CLIArgumentType(help='The reference to gateway load balancer frontend IP. If you want to delete it, '
                                       'input \'\"\"\'(Powershell) or \"\"(Linux)', is_preview=True, min_api='2020-08-01')
 
@@ -604,7 +604,8 @@ def load_arguments(self, _):
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
-        c.argument('rules', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too')
+        c.argument('rules', options_list=['--rule'], nargs='+', action=WAFRulesCreate,
+                   help='List of rules that will be disabled. If provided, --group-name must be provided too')
 
     with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
                                min_api='2019-09-01') as c:
@@ -1761,13 +1762,6 @@ def load_arguments(self, _):
         c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
-    # region NetworkProfile
-    network_profile_name = CLIArgumentType(options_list='--profile-name', metavar='NAME', help='The network profile name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkProfiles'))
-
-    with self.argument_context('network profile') as c:
-        c.argument('network_profile_name', network_profile_name, options_list=['--name', '-n'])
-    # endregion
-
     # region CustomIpPrefix
     with self.argument_context('network custom-ip prefix') as c:
         c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
@@ -1788,7 +1782,7 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
-        c.argument('idle_timeout', help='Idle timeout in minutes.')
+        c.argument('idle_timeout', type=int, help='Idle timeout in minutes.')
         c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
         c.argument('zone', zone_compatible_type, min_api='2020-08-01')
         c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
@@ -1801,13 +1795,11 @@ def load_arguments(self, _):
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)
 
-    for item in ['create', 'update']:
-        with self.argument_context('network public-ip {}'.format(item)) as c:
-            c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-            c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
-
-    with self.argument_context('network public-ip update') as c:
-        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
+    with self.argument_context('network public-ip create') as c:
+        c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(['Static', 'Dynamic']))
+        c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+        c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
+                   min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:

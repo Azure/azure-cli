@@ -605,7 +605,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
-            'dns': 'woot'
+            'dns': 'woot1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),

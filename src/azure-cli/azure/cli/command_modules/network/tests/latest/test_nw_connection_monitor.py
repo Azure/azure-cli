@@ -70,7 +70,10 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--endpoint-dest-name bing '
                  '--endpoint-dest-address bing.com '
                  '--test-config-name DefaultIcmp '
-                 '--protocol Icmp ')
+                 '--protocol Icmp --tags tag=test',
+                 checks=[
+                     self.check('tags', {'tag': 'test'})
+                 ])
 
         self.cmd('network watcher connection-monitor list -l {location}')
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')

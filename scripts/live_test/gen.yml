@@ -3,11 +3,14 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
 jobs:
 - job: Gen
   displayName: Gen
   pool:
-    vmImage: 'Ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -20,7 +23,7 @@ jobs:
         git clone -b dev https://github.com/Azure/azure-cli.git
         git clone -b master https://github.com/Azure/azure-cli-extensions.git
         pip install jinja2
-        python /home/vsts/work/1/s/scripts/live_test/gen.py
+        python /mnt/vss/_work/1/s/scripts/live_test/gen.py
         rm -rf azure-cli
         rm -rf azure-cli-extensions
         git clone -b CLITest https://qwordy:$(PASSWORD)@github.com/qwordy/azure-cli.git
