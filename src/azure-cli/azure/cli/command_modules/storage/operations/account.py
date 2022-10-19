@@ -281,7 +281,7 @@ def list_storage_accounts(cmd, resource_group_name=None):
 
 def show_storage_account_connection_string(cmd, resource_group_name, account_name, protocol='https', blob_endpoint=None,
                                            file_endpoint=None, queue_endpoint=None, table_endpoint=None, sas_token=None,
-                                           key_name='primary'):
+                                           key_name='key1'):
 
     endpoint_suffix = cmd.cli_ctx.cloud.suffixes.storage_endpoint
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={}'.format(protocol, endpoint_suffix)
@@ -308,7 +308,7 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
         connection_string = '{}{}{}'.format(
             connection_string,
             ';AccountName={}'.format(account_name),
-            ';AccountKey={}'.format(keys[0] if key_name == 'primary' else keys[1]))  # pylint: disable=no-member
+            ';AccountKey={}'.format(keys[0] if key_name == 'key1' else keys[1]))  # pylint: disable=no-member
 
     connection_string = '{}{}'.format(connection_string,
                                       ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
