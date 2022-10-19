@@ -3796,5 +3796,9 @@ def check_azd_version():
     run_azd_command(['version'])
 
 
-def init_azd():
-    run_azd_command(['init'])
+def init_azd(**kwargs):
+    run_azd_command(['init'], **kwargs)
+
+
+def provision_azd(**kwargs):
+    run_azd_command(['provision'], **kwargs)

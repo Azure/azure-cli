@@ -2882,3 +2882,16 @@ helps['dev version'] = """
 type: command
 short-summary: Print the version number of Azure Developer CLI.
 """
+
+helps['dev init'] = """
+type: command
+short-summary: Initialize a new application.
+parameters:
+  - name: --location
+    short-summary: Azure location for the new environment
+"""
+
+helps['dev provision'] = """
+type: command
+short-summary: Provision the Azure resources for an application.
+"""

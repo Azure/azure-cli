@@ -65,7 +65,7 @@ def _install_azd(system):
 
     raise ValidationError(f'The platform "{system}" is not supported.')
 
-def run_azd_command(args, auto_install=True):
+def run_azd_command(args, auto_install=True, **kwargs):
     installation_path = _get_azd_installation_path(platform.system())
     installed = os.path.isfile(installation_path)
 
@@ -75,10 +75,14 @@ def run_azd_command(args, auto_install=True):
         else:
             raise FileOperationError('Azure Developer CLI not found. Install it now by running "az dev install".')
 
-    return _run_command(installation_path, args)
+    command = [rf"{installation_path}"] + args
+    for k,v in kwargs.items():
+        if v is not None:
+            command += ['--'+k, v]
+    return _run_command(command)
 
-def _run_command(azd_installation_path, args):
+def _run_command(command):
     try:
-        subprocess.run([rf"{azd_installation_path}"] + args)
+        subprocess.run(command)
     except Exception as ex:
         raise(ex)
