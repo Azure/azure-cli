@@ -2799,6 +2799,8 @@ examples:
     text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location "westus"
   - name: Create a deployment stack from a local template, using deny settings.
     text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2" --location "westus"
+  - name: Create a deployment stack from a local template, apply deny settings to child scope.
+    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-apply-to-child-scopes --location "westus"
 """
 
 helps['stack mg list'] = """
@@ -2860,7 +2862,9 @@ examples:
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack sub create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location "westus"
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack mg create --name rollout01 --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2" --location "westus"
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2" --location "westus"
+  - name: Create a deployment stack from a local template, apply deny settings to child scopes.
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-apply-to-child-scopes --location "westus"
 """
 
 helps['stack sub list'] = """
@@ -2920,7 +2924,9 @@ examples:
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: az stack group create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group "ResourceGroup"
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack mg create --name rollout01 --resource-group "ResourceGroup" --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2"
+    text: az stack group create --name rollout01 --resource-group "ResourceGroup" --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2"
+  - name: Create a deployment stack from a local template, apply deny setting to child scopes.
+    text: az stack group create --name rollout01 --resource-group "ResourceGroup" --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-apply-to-child-scopes
 """
 
 helps['stack group list'] = """
