@@ -3903,38 +3903,23 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                          public_ip_address_allocation=None,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
-                         public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None,
+                         public_ip_address_type=None, subnet_type=None,
+                         sku=None, frontend_ip_zone=None, public_ip_zone=None,
                          private_ip_address_version=None, edge_zone=None):
-    from azure.cli.core.util import random_string
-    from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
-        build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
-
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
-
-    if public_ip_address is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
+        build_load_balancer_resource_v2, build_public_ip_resource_v2)
 
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
     if not public_ip_address_allocation:
-        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
-
-    # Build up the ARM template
-    master_template = ArmTemplateBuilder()
-    lb_dependencies = []
+        public_ip_address_allocation = 'Static' if (sku and sku.lower() == 'standard') \
+            else 'Dynamic'
 
     public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
     subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
+    private_ip_allocation = 'Static' if private_ip_address \
+        else 'Dynamic'
 
     network_id_template = resource_id(
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -3946,66 +3931,56 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         edge_zone_type = None
 
     if subnet_type == 'new':
-        lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
-        vnet = build_vnet_resource(
-            cmd, virtual_network_name, location, tags, vnet_address_prefix, subnet,
-            subnet_address_prefix)
-        master_template.add_resource(vnet)
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(
-            network_id_template, virtual_network_name, subnet)
+        vnet_args = {
+            'name': virtual_network_name,
+            'location': location,
+            'tags': tags,
+            'address_space': {'address_prefixes': [vnet_address_prefix]},
+            'subnets': []
+        }
+        if subnet:
+            vnet_args['subnets'].append({
+                'name': subnet,
+                'address_prefix': subnet_address_prefix
+            })
+        vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
+        vnet_client.begin_create_or_update(resource_group_name, virtual_network_name, vnet_args)
+        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, virtual_network_name, subnet)
 
     if public_ip_address_type == 'new':
-        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-        master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location,
-                                                              tags,
-                                                              public_ip_address_allocation,
-                                                              public_ip_dns_name,
-                                                              sku, public_ip_zone, None, edge_zone, edge_zone_type))
+        public_args = build_public_ip_resource_v2(cmd, location,
+                                                  tags,
+                                                  public_ip_address_allocation,
+                                                  public_ip_dns_name,
+                                                  sku, public_ip_zone, None, edge_zone, edge_zone_type)
+        public_ip_client = network_client_factory(cmd.cli_ctx).public_ip_addresses
+        public_ip_client.begin_create_or_update(resource_group_name, public_ip_address, public_args)
+
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
-    load_balancer_resource = build_load_balancer_resource(
+    load_balancer_args = build_load_balancer_resource_v2(
         cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
         frontend_ip_zone, private_ip_address_version, None, edge_zone, edge_zone_type)
-    load_balancer_resource['dependsOn'] = lb_dependencies
-    master_template.add_resource(load_balancer_resource)
-    master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
+    load_balancer_args['resource_group'] = resource_group_name
 
-    template = master_template.build()
-
-    # deploy ARM template
-    deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    deployment = Deployment(properties=properties)
-
-    if validate:
-        _log_pprint_template(template)
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            from azure.cli.core.commands import LongRunningOperation
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return client.validate(resource_group_name, deployment_name, deployment)
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
-    return client.list(resource_group_name, load_balancer_name)
+    from .aaz.latest.network.lb import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=load_balancer_args)
 
 
 def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, backend_pool_name, request):
-    client = network_client_factory(cmd.cli_ctx).load_balancers
-    return client.begin_list_inbound_nat_rule_port_mappings(
-        resource_group_name,
-        load_balancer_name,
-        backend_pool_name,
-        request
-    )
+    args = {
+        "resource_group": resource_group_name,
+        "name": load_balancer_name,
+        "backend_pool_name": backend_pool_name
+    }
+    if 'ip_configuration' in request:
+        args["ip_configuration"] = {'id': request['ip_configuration']}
+    if 'ip_address' in request:
+        args["ip_address"] = request['ip_address']
+    from .aaz.latest.network.lb import ListMapping
+    return ListMapping(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def create_lb_inbound_nat_rule(

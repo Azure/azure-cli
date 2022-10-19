@@ -758,16 +758,9 @@ def load_command_table(self, _):
     # endregion
 
     # region LoadBalancers
-    with self.command_group('network lb', network_lb_sdk) as g:
-        g.show_command('show', 'get')
-        g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_lbs')
-        g.wait_command('wait')
-        g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update')
-        g.custom_command('list-nic', 'list_load_balancer_nic', min_api='2017-06-01')
-        g.custom_command('list-mapping', 'list_load_balancer_mapping', min_api='2021-05-01')
+    with self.command_group('network lb') as g:
+        g.custom_command('create', 'create_load_balancer', validator=process_lb_create_namespace)
+        g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
