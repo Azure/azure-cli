@@ -21,7 +21,7 @@ class Show(AAZCommand):
         az network public-ip show -g MyResourceGroup -n MyIp
 
     :example: Get the FQDN and IP address of a public IP resource.
-        az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
+        az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn,address: ipAddress}"
     """
 
     _aaz_info = {
@@ -58,7 +58,7 @@ class Show(AAZCommand):
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="Expand referenced resources. Default value is None.",
+            help="Expands referenced resources.",
         )
         return cls._args_schema
 
@@ -67,11 +67,11 @@ class Show(AAZCommand):
         self.PublicIPAddressesGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -1904,9 +1904,7 @@ def _build_schema_public_ip_address_read(_schema):
     )
     properties.public_ip_prefix = AAZObjectType(
         serialized_name="publicIPPrefix",
-        flags={"read_only": True},
     )
-    _build_schema_sub_resource_read(properties.public_ip_prefix)
     properties.resource_guid = AAZStrType(
         serialized_name="resourceGuid",
         flags={"read_only": True},
@@ -1919,12 +1917,13 @@ def _build_schema_public_ip_address_read(_schema):
     ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
     ddos_settings.ddos_protection_plan = AAZObjectType(
         serialized_name="ddosProtectionPlan",
-        flags={"read_only": True},
     )
-    _build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
     ddos_settings.protection_mode = AAZStrType(
         serialized_name="protectionMode",
     )
+
+    ddos_protection_plan = _schema_public_ip_address_read.properties.ddos_settings.ddos_protection_plan
+    ddos_protection_plan.id = AAZStrType()
 
     dns_settings = _schema_public_ip_address_read.properties.dns_settings
     dns_settings.domain_name_label = AAZStrType(
@@ -2011,6 +2010,9 @@ def _build_schema_public_ip_address_read(_schema):
 
     zones = _schema_public_ip_address_read.properties.nat_gateway.zones
     zones.Element = AAZStrType()
+
+    public_ip_prefix = _schema_public_ip_address_read.properties.public_ip_prefix
+    public_ip_prefix.id = AAZStrType()
 
     sku = _schema_public_ip_address_read.sku
     sku.name = AAZStrType()
