@@ -3909,19 +3909,17 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     from azure.cli.command_modules.network._template_builder import (
         build_load_balancer_resource_v2, build_public_ip_resource_v2)
 
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
-
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
     if not public_ip_address_allocation:
-        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
+        public_ip_address_allocation = 'Static' if (sku and sku.lower() == 'standard') \
+            else 'Dynamic'
 
     public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
     subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
+    private_ip_allocation = 'Static' if private_ip_address \
+        else 'Dynamic'
 
     network_id_template = resource_id(
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,

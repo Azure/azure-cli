@@ -42,7 +42,9 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
 
 
 def _build_frontend_ip_config_v2(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
-                                 private_ip_allocation=None, zone=None, private_ip_address_version=None):
+                                 private_ip_allocation=None, zone=None, private_ip_address_version=None,
+                                 enable_private_link=False,
+                                 private_link_configuration_id=None):
     frontend_ip_config = {
         'name': name
     }
@@ -60,6 +62,8 @@ def _build_frontend_ip_config_v2(cmd, name, public_ip_id=None, subnet_id=None, p
     if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
         frontend_ip_config['private_ip_address_version'] = private_ip_address_version
 
+    if enable_private_link is True and cmd.supported_api_version(min_api='2020-05-01'):
+        frontend_ip_config['private_link_configuration'] = {'id': private_link_configuration_id}
     return frontend_ip_config
 
 
