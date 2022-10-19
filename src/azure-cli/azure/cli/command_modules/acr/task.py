@@ -448,7 +448,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                     context_access_token=git_access_token,
                     target=target
                 )
-        else:
+        elif step:
             if hasattr(step, 'docker_file_path'):
                 step = DockerBuildStepUpdateParameters(
                     image_names=image_names,
