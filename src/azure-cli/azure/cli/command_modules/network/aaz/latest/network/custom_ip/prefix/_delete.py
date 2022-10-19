@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network custom-ip prefix delete",
+    confirmation="",
 )
 class Delete(AAZCommand):
     """Delete a custom IP prefix resource.
@@ -61,11 +62,11 @@ class Delete(AAZCommand):
         yield self.CustomIPPrefixesDelete(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
