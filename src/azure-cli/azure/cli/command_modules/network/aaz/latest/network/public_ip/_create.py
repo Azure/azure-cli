@@ -78,7 +78,7 @@ class Create(AAZCommand):
             help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled.",
         )
         _args_schema.ddos_protection_mode = AAZStrArg(
-            options=["--ddos-protection-mode"],
+            options=["--protection-mode", "--ddos-protection-mode"],
             help="The DDoS protection mode of the public IP",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )

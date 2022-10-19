@@ -1094,7 +1094,7 @@ def load_command_table(self, _):
         from .aaz.latest.network.public_ip import List, Show
         self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
         self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
-        g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+        g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
 
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
         g.custom_command('create', 'create_public_ip_prefix')

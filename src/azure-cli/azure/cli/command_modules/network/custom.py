@@ -6566,8 +6566,7 @@ def update_custom_ip_prefix(instance,
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None, ddos_protection_mode=None):
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
+                     public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
 
     public_ip_args = {
         'name': public_ip_address_name,
@@ -6610,9 +6609,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
-            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
+            public_ip_args['allocation_method'] = 'Static'
         else:
-            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
+            public_ip_args['allocation_method'] = 'Dynamic'
 
     public_ip_args['version'] = version
     public_ip_args['zone'] = zone
@@ -6631,8 +6630,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     if edge_zone:
         public_ip_args['edge_zone'] = edge_zone
         public_ip_args['type'] = 'EdgeZone'
-    if ddos_protection_mode:
-        public_ip_args['ddos_protection_mode'] = ddos_protection_mode
+    if protection_mode:
+        public_ip_args['ddos_protection_mode'] = protection_mode
 
     from .aaz.latest.network.public_ip import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)

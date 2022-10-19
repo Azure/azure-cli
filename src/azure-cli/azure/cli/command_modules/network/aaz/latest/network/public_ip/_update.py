@@ -62,7 +62,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.ddos_protection_mode = AAZStrArg(
-            options=["--ddos-protection-mode"],
+            options=["--protection-mode", "--ddos-protection-mode"],
             help="The DDoS protection mode of the public IP",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
