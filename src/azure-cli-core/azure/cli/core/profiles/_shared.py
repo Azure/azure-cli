@@ -415,6 +415,18 @@ AD_HOC_API_VERSIONS = {
         'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'
+    },
+    ResourceType.MGMT_CONTAINERREGISTRY: {
+        # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
+        'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",
+        'VERSION_2019_06_01_PREVIEW': "2019-06-01-preview",
+        'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
+        'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
+        'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
+    },
+    ResourceType.MGMT_CONTAINERSERVICE: {
+        # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
+        'ManagedClusterAddonProfile': '2020-03-01',
     }
 }
 
