@@ -16,7 +16,7 @@ if "%CLI_VERSION%"=="" (
 set PYTHON_VERSION=3.10.8
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
+set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-amd64.zip"
 
 REM https://pip.pypa.io/en/stable/installation/#get-pip-py
 set GET_PIP_DOWNLOAD_URL="https://bootstrap.pypa.io/get-pip.py"
