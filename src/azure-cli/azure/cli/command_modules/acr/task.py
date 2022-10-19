@@ -404,9 +404,11 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
     step = task.step
     branch = None
-    # If context is not given, use the existing context
+
     if context_path is None:
         context_path = step.context_path
+    elif context_path.lower() == ACR_NULL_CONTEXT:
+        context_path = None 
     else:
         branch = _get_branch_name(context_path)
 
@@ -415,8 +417,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     arguments = _get_all_override_arguments(arg, secret_arg)
     set_values = _get_all_override_arguments(set_value, set_secret)
 
-    # If context is None or user inputs "/dev/null" as new context
-    if context_path is None or context_path.lower() == ACR_NULL_CONTEXT:
+    if context_path is None:
         yaml_template = get_yaml_template(
             cmd_value, timeout, file)
         import base64
