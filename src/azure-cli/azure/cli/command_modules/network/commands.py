@@ -759,7 +759,7 @@ def load_command_table(self, _):
 
     # region LoadBalancers
     with self.command_group('network lb') as g:
-        g.custom_command('create', 'create_load_balancer', supports_no_wait=True, validator=process_lb_create_namespace)
+        g.custom_command('create', 'create_load_balancer', validator=process_lb_create_namespace)
         g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
     property_map = {
