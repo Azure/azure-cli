@@ -6566,7 +6566,7 @@ def update_custom_ip_prefix(instance,
 def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                             allocation_method=None, dns_name=None,
                             idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                            public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
+                            public_ip_prefix=None, edge_zone=None, ip_address=None, ddos_protection_mode=None):
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     public_ip_args = {
@@ -6631,8 +6631,8 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
     if edge_zone:
         public_ip_args['edge_zone'] = edge_zone
         public_ip_args['type'] = 'EdgeZone'
-    if protection_mode:
-        public_ip_args['protection_mode'] = protection_mode
+    if ddos_protection_mode:
+        public_ip_args['ddos_protection_mode'] = ddos_protection_mode
 
     from .aaz.latest.network.public_ip import Create
 
