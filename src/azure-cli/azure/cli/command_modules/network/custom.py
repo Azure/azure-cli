@@ -6563,11 +6563,10 @@ def update_custom_ip_prefix(instance,
 
 
 # region PublicIPAddresses
-def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                            allocation_method=None, dns_name=None,
-                            idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                            public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
+def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
+                     allocation_method=None, dns_name=None,
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
+                     public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
 
     public_ip_args = {
         'name': public_ip_address_name,
@@ -6610,9 +6609,9 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
-            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
+            public_ip_args['allocation_method'] = 'Static'
         else:
-            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
+            public_ip_args['allocation_method'] = 'Dynamic'
 
     public_ip_args['version'] = version
     public_ip_args['zone'] = zone
@@ -6632,88 +6631,10 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
         public_ip_args['edge_zone'] = edge_zone
         public_ip_args['type'] = 'EdgeZone'
     if protection_mode:
-        public_ip_args['protection_mode'] = protection_mode
+        public_ip_args['ddos_protection_mode'] = protection_mode
 
     from .aaz.latest.network.public_ip import Create
-
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
-
-
-def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None):
-    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
-        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
-
-    public_ip_args = {
-        'location': location,
-        'tags': tags,
-        'public_ip_allocation_method': allocation_method,
-        'idle_timeout_in_minutes': idle_timeout,
-        'ip_address': ip_address,
-        'dns_settings': None
-    }
-
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        if is_valid_resource_id(public_ip_prefix):
-            public_ip_prefix_id = public_ip_prefix
-            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
-        else:
-            public_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIPPrefixes',
-                name=public_ip_prefix
-            )
-            public_ip_prefix_name = public_ip_prefix
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
-
-        # reuse prefix information
-        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
-        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
-        version = pip_obj.public_ip_address_version
-        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
-        zone = pip_obj.zones
-
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    if not allocation_method:
-        if sku and sku.lower() == 'standard':
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
-        else:
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
-
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        public_ip_args['public_ip_address_version'] = version
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        public_ip_args['zones'] = zone
-    if cmd.supported_api_version(min_api='2017-11-01'):
-        public_ip_args['ip_tags'] = ip_tags
-
-    if sku:
-        public_ip_args['sku'] = {'name': sku}
-    if tier:
-        if not sku:
-            public_ip_args['sku'] = {'name': 'Basic'}
-        public_ip_args['sku'].update({'tier': tier})
-
-    public_ip = PublicIPAddress(**public_ip_args)
-
-    if dns_name or reverse_fqdn:
-        public_ip.dns_settings = PublicIPAddressDnsSettings(
-            domain_name_label=dns_name,
-            reverse_fqdn=reverse_fqdn)
-
-    if edge_zone:
-        public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
 
 def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
