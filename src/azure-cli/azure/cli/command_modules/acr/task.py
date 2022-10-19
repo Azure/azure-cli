@@ -367,18 +367,21 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                     update_trigger_payload_type=None,
                     target=None,
                     auth_mode=None,
-                    log_template=None):
+                    log_template=None,
+                    cmd_value=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     AgentProperties, AuthInfoUpdateParameters, BaseImageTriggerUpdateParameters, \
-        DockerBuildStepUpdateParameters, FileTaskStepUpdateParameters, PlatformUpdateParameters, \
-        SourceControlType, SourceUpdateParameters, SourceTriggerUpdateParameters, \
-        TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters = cmd.get_models(
+        DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, \
+        FileTaskStepUpdateParameters, PlatformUpdateParameters, SourceControlType, \
+        SourceUpdateParameters, SourceTriggerUpdateParameters, TaskUpdateParameters, \
+        TriggerStatus, TriggerUpdateParameters = cmd.get_models(
             'AgentProperties',
             'AuthInfoUpdateParameters',
             'BaseImageTriggerUpdateParameters',
             'DockerBuildStepUpdateParameters',
+            'EncodedTaskStepUpdateParameters',
             'FileTaskStepUpdateParameters',
             'PlatformUpdateParameters',
             'SourceControlType',
@@ -401,6 +404,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
     step = task.step
     branch = None
+    # If context is not given, use the existing context
     if context_path is None:
         context_path = step.context_path
     else:
@@ -411,46 +415,60 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     arguments = _get_all_override_arguments(arg, secret_arg)
     set_values = _get_all_override_arguments(set_value, set_secret)
 
-    if file and file.endswith(ALLOWED_TASK_FILE_TYPES):
-        step = FileTaskStepUpdateParameters(
-            task_file_path=file,
-            values_file_path=values,
+    # If context is None or user inputs "/dev/null" as new context
+    if context_path is None or context_path.lower() == ACR_NULL_CONTEXT:
+        yaml_template = get_yaml_template(
+            cmd_value, timeout, file)
+        import base64
+        step = EncodedTaskStepUpdateParameters(
+            encoded_task_content=base64.b64encode(
+                yaml_template.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
-            values=set_values
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
-    elif file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
-        step = DockerBuildStepUpdateParameters(
-            image_names=image_names,
-            is_push_enabled=not no_push,
-            no_cache=no_cache,
-            docker_file_path=file,
-            arguments=arguments,
-            context_path=context_path,
-            context_access_token=git_access_token,
-            target=target
-        )
-    elif step:
-        if hasattr(step, 'docker_file_path'):
-            step = DockerBuildStepUpdateParameters(
-                image_names=image_names,
-                is_push_enabled=not no_push,
-                no_cache=no_cache,
-                docker_file_path=file,
-                arguments=arguments,
-                context_path=context_path,
-                context_access_token=git_access_token,
-                target=target
-            )
+    else:
+        if file:
+            if file.endswith(ALLOWED_TASK_FILE_TYPES):
+                step = FileTaskStepUpdateParameters(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                )
+            else:
+                step = DockerBuildStepUpdateParameters(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
+        else:
+            if hasattr(step, 'docker_file_path'):
+                step = DockerBuildStepUpdateParameters(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=arguments,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
 
-        elif hasattr(step, 'task_file_path'):
-            step = FileTaskStepUpdateParameters(
-                task_file_path=file,
-                values_file_path=values,
-                context_path=context_path,
-                context_access_token=git_access_token,
-                values=set_values
-            )
+            elif hasattr(step, 'task_file_path'):
+                step = FileTaskStepUpdateParameters(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=set_values
+                )
 
     source_control_type = None
     if context_path:
@@ -528,7 +546,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         agent_pool_name=agent_pool_name,
         log_template=log_template
     )
-
     return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
