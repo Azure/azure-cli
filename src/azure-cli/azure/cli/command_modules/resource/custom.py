@@ -3789,11 +3789,12 @@ def list_private_link_association(cmd, management_group_id):
 
 def install_azd_cli():
     ensure_azd_installation()
+    run_azd_command(['version'])
 
 
 def check_azd_version():
-    print(run_azd_command(['version']))
+    run_azd_command(['version'])
 
 
-# def init_azd():
-#     print(run_azd_command(['init']))
+def init_azd():
+    run_azd_command(['init'])

@@ -562,4 +562,4 @@ def load_command_table(self, _):
     with self.command_group('dev') as g:
         g.custom_command('install', 'install_azd_cli')
         g.custom_command('version', 'check_azd_version')
-        # g.custom_command('init', 'init_azd')
+        g.custom_command('init', 'init_azd')

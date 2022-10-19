@@ -71,30 +71,14 @@ def run_azd_command(args, auto_install=True):
 
     if not installed:
         if auto_install:
-            ensure_bicep_installation(stdout=False)
+            ensure_azd_installation(stdout=False)
         else:
             raise FileOperationError('Azure Developer CLI not found. Install it now by running "az dev install".')
 
     return _run_command(installation_path, args)
 
 def _run_command(azd_installation_path, args):
-    process = subprocess.run([rf"{azd_installation_path}"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
     try:
-        process.check_returncode()
-        command_warnings = process.stderr.decode("utf-8")
-        if command_warnings:
-            _logger.warning(command_warnings)
-        return process.stdout.decode("utf-8")
-    except subprocess.CalledProcessError:
-        stderr_output = process.stderr.decode("utf-8")
-        errors = []
-
-        for line in stderr_output.splitlines():
-            if re.match(_azd_diagnostic_warning_pattern, line):
-                _logger.warning(line)
-            else:
-                errors.append(line)
-
-        error_msg = os.linesep.join(errors)
-        raise UnclassifiedUserFault(error_msg)
+        subprocess.run([rf"{azd_installation_path}"] + args)
+    except Exception as ex:
+        raise(ex)
