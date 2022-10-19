@@ -16,7 +16,8 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
+    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
+    high_availability_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -371,8 +372,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         high_availability_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled', 'Enabled']),
             options_list=['--high-availability'],
-            help='Enable (ZoneRedundant or SameZone) or disable high availability feature. '
-                 'Default value is Disabled. High availability can only be set during flexible server create time. '
+            help='Enable (ZoneRedundant or SameZone) or disable high availability feature.',
+            validator=high_availability_validator
         )
 
         mysql_version_upgrade_arg_type = CLIArgumentType(
@@ -717,29 +718,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Request properties. Use double or no quotes to pass in filepath as argument.')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
+                    c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
+                               help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
-                    c.argument('level', options_list=['--level'], required=False,
-                               help='Specify the level of migration details requested. Valid values are Active and All. Active is the default.')
                 elif scope == "list":
-                    c.argument('migration_filter', options_list=['--filter'], required=False,
-                               help='Indicate whether all the migrations or just the Active migrations are returned. Active is the default. Valid values are: Active, All.')
+                    c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+                    c.argument('migration_filter', options_list=['--filter'], required=False, choices=['Active', 'All'], default='Active',
+                               help='Indicate whether all the migrations or just the Active migrations are returned. Valid values are: Active and All.')
                 elif scope == "update":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                     c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
-                               help='Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.')
+                               help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
-                    c.argument('start_data_migration', options_list=['--start-data-migration'], action='store_true', required=False,
-                               help='Reschedule the data migration to start right now.')
-                elif scope == "delete":
-                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                               help='Name of the migration.')
-                    c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+                    c.argument('cutover', nargs='+', options_list=['--cutover'], required=False,
+                               help='Cut-over the data migration for either all databases or few selected ones. After this is complete, subsequent updates to the selected databases will not be migrated to the target.')
+                    c.argument('cancel', nargs='+', options_list=['--cancel'], required=False,
+                               help='Cancel the data migration for either all databases or few selected ones.')
                 elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')

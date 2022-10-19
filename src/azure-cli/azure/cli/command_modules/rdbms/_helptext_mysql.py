@@ -98,7 +98,7 @@ examples:
     text: >
       # create keyvault
 
-      az keyvault create -g testGroup -n testVault --location testLocation --enable-soft-delete true --enable-purge-protection true
+      az keyvault create -g testGroup -n testVault --location testLocation --enable-purge-protection true
 
 
       # create key in keyvault
@@ -125,7 +125,7 @@ examples:
     text: >
       # create keyvault
 
-      az keyvault create -g testGroup -n testVault --location testLocation --enable-soft-delete true --enable-purge-protection true
+      az keyvault create -g testGroup -n testVault --location testLocation --enable-purge-protection true
 
 
       # create key in keyvault
@@ -145,7 +145,7 @@ examples:
 
       # create backup keyvault
 
-      az keyvault create -g testGroup -n testBackupVault --location testBackupLocation --enable-soft-delete true --enable-purge-protection true
+      az keyvault create -g testGroup -n testBackupVault --location testBackupLocation --enable-purge-protection true
 
 
       # create backup key in backup keyvault

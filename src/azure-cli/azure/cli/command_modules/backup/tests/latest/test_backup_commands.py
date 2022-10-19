@@ -769,6 +769,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
+            self.check("properties.extendedInfo.tasksList[0].endTime", None),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -1119,7 +1120,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
-        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        self.cmd('keyvault update --name {key_vault} --enable-purge-protection')
 
         key1_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),

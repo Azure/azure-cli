@@ -22,7 +22,7 @@ Considering bumping version is time consuming and most of the work is repetitive
 
 ## Regression Test Pipeline
 
-The [Regression Test Pipeline](https://dev.azure.com/azure-sdk/internal/_build?definitionId=4949) is designed to handle all the repetitive work. It will take care of step #1 ~ #3 with a PR created to CLI repo with all code changes and test recordings.
+The [Regression Test Pipeline](https://dev.azure.com/azclitools/internal/_build?definitionId=220) is designed to handle all the repetitive work. It will take care of step #1 ~ #3 with a PR created to CLI repo with all code changes and test recordings.
 
 Follow below steps to trigger a new execution of Regression Test Pipeline:
 

@@ -365,7 +365,7 @@ class ApimScenarioTest(ScenarioTest):
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(api_count, 1)
 
-        count = len(self.cmd('apim list').get_output_in_json())
+        service_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
         pythonfile = 'gql_schema.gql'
         schemapath = os.path.join(TEST_DIR, pythonfile)
         api_file = open(schemapath, 'r')
@@ -383,9 +383,22 @@ class ApimScenarioTest(ScenarioTest):
             'graphql_protocol': 'https',
             'graphql_api_type': 'graphql',
             'graphql_path': 'graphqltestpath',
-            'graphql_service_url': 'https://api.spacex.land/graphql/'
+            'graphql_service_url': 'https://api.spacex.land/graphql/',
+            'graphql_im_api_id': self.create_random_name('gr-imp', 10),
+            'path3' : 'testingImportApiPath',
+            'graphql' : 'GraphQL'
         })
-        
+
+        # import api
+        self.cmd(
+            'apim api import -g "{rg}" --service-name "{service_name}" --path "{path3}" --api-id "{graphql_im_api_id}" --specification-url "{graphql_service_url}" --specification-format "{graphql}" --display-name "{graphql_im_api_id}"',
+            checks=[self.check('displayName', '{graphql_im_api_id}'),
+                    self.check('path', '{path3}'),
+                    self.check('apiType','{graphql_api_type}')])
+
+        # api delete command
+        self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {graphql_im_api_id} --delete-revisions true -y')
+
         self.cmd(
             'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{graphql_display_name}" --path "{graphql_path}" --api-id "{graphql_api_id}" --protocols "{graphql_protocol}" --service-url "{graphql_service_url}" --api-type "{graphql_api_type}"',
             checks=[self.check('displayName', '{graphql_display_name}'),
@@ -477,8 +490,8 @@ class ApimScenarioTest(ScenarioTest):
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
-        final_count = len(self.cmd('apim list').get_output_in_json())
-        self.assertEqual(final_count, count - 1)
+        final_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
+        self.assertEqual(final_count, service_count - 1)
 
     @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
