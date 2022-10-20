@@ -67,6 +67,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.suppress_new_event = False
         self.poll_start_time = None
         self.poll_end_time = None
+        self.allow_broker = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -206,6 +207,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
         set_custom_properties(result, 'CloudName', _get_cloud_name())
         set_custom_properties(result, 'ShowSurveyMessage', str(self.show_survey_message))
+        set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
 
         return result
 
@@ -423,6 +425,12 @@ def set_raw_command_name(command):
 def set_survey_info(show_survey_message):
     # whether showed the intercept survey message or not
     _session.show_survey_message = show_survey_message
+
+
+@decorators.suppress_all_exceptions()
+def set_wam_info(allow_broker):
+    # whether customer has configured `allow_broker` to enable WAM(Web Account Manager) login for authentication
+    _session.allow_broker = allow_broker
 
 
 @decorators.suppress_all_exceptions()
