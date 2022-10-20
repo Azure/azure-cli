@@ -2141,7 +2141,9 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array, apply_to_child_scopes = deny_settings_apply_to_child_scopes)
+    #removed the following code because it is not in service yet, need to add this back eventually
+    #apply_to_child_scopes = deny_settings_apply_to_child_scopes
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, action_on_unmanage = action_on_unmanage_model, deployment_scope = deployment_scope, deny_settings = deny_settings_model)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
@@ -2317,7 +2319,9 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups = delete_resource_groups_enum)
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array, apply_to_child_scopes = deny_settings_apply_to_child_scopes)
+    #removed the following code because it is not in service yet, need to add this back eventually
+    #apply_to_child_scopes = deny_settings_apply_to_child_scopes
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, action_on_unmanage = action_on_unmanage_model, deny_settings = deny_settings_model)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
@@ -2510,7 +2514,9 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array, apply_to_child_scopes = deny_settings_apply_to_child_scopes)
+    #removed the following code because it is not in service yet, need to add this back eventually
+    #apply_to_child_scopes = deny_settings_apply_to_child_scopes
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, action_on_unmanage = action_on_unmanage_model, deployment_scope = deployment_scope, deny_settings = deny_settings_model)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 

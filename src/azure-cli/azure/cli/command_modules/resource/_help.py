@@ -2778,7 +2778,7 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: (Version 1.2) Manage deployment stacks at subscription or resource group scope, this version contains MG commands, delete flags, deny settings
+short-summary: (Version 1.3) Manage deployment stacks at subscription or resource group scope, this version contains MG commands, delete flags, deny settings. Apply to child scopes does not work, sub LIST is fixed
 """
 
 helps['stack mg create'] = """
