@@ -2616,6 +2616,8 @@ parameters:
     short-summary: "Specify the script download location."
   - name: --command-id
     short-summary: "Specify a commandId of predefined built-in script."
+  - name: --output-blob-uri
+    short-summary: "Specify the Azure storage blob (SAS URI) where script output stream will be uploaded."
   - name: --parameters
     short-summary: "The parameters used by the script."
     long-summary: |
@@ -2631,6 +2633,11 @@ examples:
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
+  - name: Create a run command with uploading script output stream to Azure storage blob (SAS URI).
+    text: |-
+           az vm run-command create --resource-group "myResourceGroup" --location "West US" \
+--script "Write-Host Hello World!" --run-command-name "myRunCommand" --vm-name "myVM" --output-blob-uri \
+https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D
 """
 
 helps['vm run-command update'] = """
