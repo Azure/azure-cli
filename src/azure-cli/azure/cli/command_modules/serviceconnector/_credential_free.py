@@ -215,7 +215,7 @@ class MysqlFlexibleHandler(TargetHandler):
                             for d in installed_packages)
         if not pym_installed:
             import pip
-            pip.main(['install', 'mycli'])
+            pip.main(['install', 'pymysql'])
         # pylint: disable=import-error
         import pymysql
         from pymysql.constants import CLIENT
