@@ -4084,17 +4084,17 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd("network vnet create -n {vnet_name} -g {rg} --subnet-name {subnet_name}")
         self.cmd("network nic create -n {nic_name} -g {rg} --vnet-name {vnet_name} --subnet {subnet_name}")
         self.cmd("network nic ip-config create -n ipconfig2 -g {rg} --nic-name {nic_name}")
-
-        self.kwargs["id1"] = self.cmd("network nic ip-config show -n ipconfig1 -g {rg} --nic-name {nic_name}").get_output_in_json()["id"]
-        self.kwargs["id2"] = self.cmd("network nic ip-config show -n ipconfig2 -g {rg} --nic-name {nic_name}").get_output_in_json()["id"]
         self.kwargs["asg_id"] = self.cmd("network asg create -n {asg_name} -g {rg}").get_output_in_json()["id"]
 
+        self.cmd("network nic ip-config update -n ipconfig1 -g {rg} --nic-name {nic_name} --asgs {asg_name}")
         self.cmd(
-            "network nic ip-config update -g {rg} --asgs {asg_name} --ids {id1} {id2}",
+            "network nic show -n {nic_name} -g {rg}",
             checks=[
-                self.check("length(@)", 2),
-                self.check("@[0].applicationSecurityGroups[0].id", "{asg_id}"),
-                self.check("@[1].applicationSecurityGroups[0].id", "{asg_id}"),
+                self.check("ipConfigurations | length(@)", 2),
+                self.check("ipConfigurations[0].name", "ipconfig1"),
+                self.check("ipConfigurations[1].name", "ipconfig2"),
+                self.check("ipConfigurations[0].applicationSecurityGroups[0].id", "{asg_id}"),
+                self.check("ipConfigurations[1].applicationSecurityGroups[0].id", "{asg_id}"),
             ]
         )
 
