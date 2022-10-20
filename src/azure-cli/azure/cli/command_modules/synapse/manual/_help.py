@@ -2348,6 +2348,35 @@ type: command
 short-summary: Create a link connection.
 examples:
   - name: Create a link connection.
+          Definition.json sample is
+          {
+            "name":"sampleLinkConnection", // please change to your link connection name
+            "properties":{
+            "sourceDatabase":{
+              "typeProperties":{ // please change to your source database resourceId and principalId
+              "resourceId":"/subscriptions/sampleSubscriptionId/resourceGroups/sampleResourceGroup/providers/Microsoft.Sql/servers/sampleServer",
+              "principalId":"xxxxxxxxxx"
+            },
+            "linkedService":{
+              "referenceName":"sampleLinkServiceReference", // please change to your source database link service name
+              "type":"LinkedServiceReference"
+              }
+            },
+            "targetDatabase":{
+              "linkedService":{
+                "referenceName":"sampleLinkServiceReference", // please change to your target database link service name
+                "type":"LinkedServiceReference",
+                "parameters":{
+                  "DBName":"v2"
+                }
+              }
+            },
+            "compute":{
+              "coreCount":16,
+              "computeType":"General"
+              }
+            }
+          }
     text: |-
         az synapse link-connection create --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname \\
@@ -2359,6 +2388,35 @@ type: command
 short-summary: Update a link connection.
 examples:
   - name: Update a link connnection.
+          Definition.json sample is
+          {
+            "name":"sampleLinkConnection", // please change to your link connection name
+            "properties":{
+            "sourceDatabase":{
+              "typeProperties":{ // please change to your source database resourceId and principalId
+              "resourceId":"/subscriptions/sampleSubscriptionId/resourceGroups/sampleResourceGroup/providers/Microsoft.Sql/servers/sampleServer",
+              "principalId":"xxxxxxxxxx"
+            },
+            "linkedService":{
+              "referenceName":"sampleLinkServiceReference", // please change to your source database link service name
+              "type":"LinkedServiceReference"
+              }
+            },
+            "targetDatabase":{
+              "linkedService":{
+                "referenceName":"sampleLinkServiceReference", // please change to your target database link service name
+                "type":"LinkedServiceReference",
+                "parameters":{
+                  "DBName":"v2"
+                }
+              }
+            },
+            "compute":{
+              "coreCount":16,
+              "computeType":"General"
+              }
+            }
+          }
     text: |-
         az synapse link-connection update --workspace-name testsynapseworkspace \\
           --name testlinkconnectionname \\
@@ -2410,52 +2468,31 @@ type: command
 short-summary: Edit tables for a link connection.
 examples:
   - name: Edit tables for a link connection.
+          the file pattern should be
+          {
+            "linkTables":[
+              {
+                "id":"00000000000000000000000000000000", // please change to your link table Id a uuid
+                "source":{
+                  "tableName":"sampleSourceTable", // please change to your source table name
+                  "schemaName":"sampleSourceSchema" // please change to your source database schema name
+                },
+                "target":{
+                  "tableName":"sampleTargetTable", // please change to your target table name
+                  "schemaName":"sampleTargetSchema", // please change to your target database schema name
+                  "distributionOptions":{
+                    "type":"Round_RoBin", // please choose a type from Hash, Round_RoBin, Replicate
+                    "distributionColumn":"sampleColumn" // please change to the column name
+                  }
+                },
+                "operationType":"add" // please choose a value from add, update, remove
+              }
+            ]
+          }
     text: |-
         az synapse link-connection edit-link-tables --workspace-name testsynapseworkspace \\
           --name linkconnectionname \\
           --file @path/edittablerequestfile.json
-        the file pattern should be:
-        {
-          "linkTables": [
-            {
-              "id": "<linkTableId1>",
-              "source": {
-                "tableName": "<sourceTableName1>",
-                "schemaName": "<sourceSchemaName1>"
-              },
-              "target": {
-                "tableName": "<sinkTableName1>",
-                "schemaName": "<sinkSchemaName1>",
-                "distributionOptions": {
-                  "type": "<Hash|Round_RoBin|Replicate>",
-                  "distributionColumn": "<distributionColumnName>"
-                }
-              },
-              "operationType": "add"
-            },
-            {
-              "id": "<linkTableId2>",
-              "operationType": "remove"
-            },
-            {
-              "id": "<linkTableId3>",
-              "source": {
-                "tableName": "<sourceTableName3>",
-                "schemaName": "<sourceSchemaName3>"
-              },
-              "target": {
-                "tableName": "<sinkTableName3>",
-                "schemaName": "<sinkSchemaName3>",
-                "distributionOptions": {
-                  "type": "<Hash|Round_RoBin|Replicate>",
-                  "distributionColumn": "<distributionColumnName>"
-                }
-              },
-              "operationType": "update"
-            }
-          ]
-        }
-
 """
 
 helps['synapse link-connection get-link-tables-status'] = """
