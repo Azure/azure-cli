@@ -21,7 +21,9 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
         self.models = BaseAKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
     def test_sanitize_dcr_name(self):
-        self.assertEqual(sanitize_dcr_name("abc--xyz__"), "abc--xyz")
+        self.assertEqual(sanitize_dcr_name("MSCI-abc-xyz__"), "MSCI-abc-xyz")
+        self.assertEqual(sanitize_dcr_name("426155Grtyhr8888xxxxxxx7777BDTR5665488555G771"), "426155Grtyhr8888xxxxxxx7777BDTR5665488555G77")
+        self.assertEqual(sanitize_dcr_name("MSCI-abc-xyz$$"), "MSCI-abc-xyz")
 
 
 if __name__ == "__main__":
