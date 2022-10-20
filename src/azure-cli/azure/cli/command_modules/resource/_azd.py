@@ -78,7 +78,7 @@ def run_azd_command(args, auto_install=True, **kwargs):
     command = [rf"{installation_path}"] + args
     for k,v in kwargs.items():
         if v is not None:
-            command += ['--'+k, v]
+            command += ['--'+k.replace('_', '-'), v]
     return _run_command(command)
 
 def _run_command(command):

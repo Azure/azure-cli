@@ -3792,12 +3792,13 @@ def install_azd_cli():
     run_azd_command(['version'])
 
 
-def check_azd_version():
-    run_azd_command(['version'])
+def check_azd_version(**kwargs):
+    run_azd_command(['version'], **kwargs)
 
 
-def init_azd(**kwargs):
-    run_azd_command(['init'], **kwargs)
+def init_azd(cmd, **kwargs):
+    subscription = cmd.cli_ctx.data['subscription_id'] if cmd.cli_ctx.data['subscription_id'] else None
+    run_azd_command(['init'], subscription=subscription, **kwargs)
 
 
 def provision_azd(**kwargs):
