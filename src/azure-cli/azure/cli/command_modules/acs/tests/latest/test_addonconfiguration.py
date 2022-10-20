@@ -22,7 +22,7 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
 
     def test_sanitize_dcr_name(self):
         self.assertEqual(sanitize_dcr_name("MSCI-abc-xyz__"), "MSCI-abc-xyz")
-        self.assertEqual(sanitize_dcr_name("426155Grtyhr8888xxxxxxx7777BDTR5665488555G771"), "426155Grtyhr8888xxxxxxx7777BDTR5665488555G77")
+        self.assertEqual(sanitize_dcr_name("426155Grtyhr8888xxxxxxx7777BDTR5665488555G771"), "426155Grtyhr8888xxxxxxx7777BDTR5665488555G7")
         self.assertEqual(sanitize_dcr_name("MSCI-abc-xyz$$"), "MSCI-abc-xyz")
 
 
