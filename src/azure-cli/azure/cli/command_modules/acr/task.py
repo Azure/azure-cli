@@ -415,10 +415,17 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     else:
         branch = _get_branch_name(context_path)
 
+    # When update encoded task, existing encoded_task_content in the step cannot be updated.
+    if context_path is None:
+        if cmd_value is not None or timeout is not None or file is not None:
+            raise CLIError(
+                "cannot update the task with change of cmd or timeout or file, please use create instead")
+
     if git_access_token is None:
         git_access_token = step.context_access_token
 
-    step = create_task_step(
+    step = update_task_step(
+        step=step, # Need exisiting step for update
         context_path=context_path,
         cmd=cmd,
         file=file,
@@ -431,9 +438,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         no_cache=no_cache,
         arg=arg,
         secret_arg=secret_arg,
-        target=target,
-        cmd_value=cmd_value,
-        timeout=timeout)
+        target=target)
 
     source_control_type = None
     if context_path:
@@ -513,7 +518,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     )
     return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
-def update_task_step(context_path,
+def update_task_step(step,
+                     context_path,
                      cmd,
                      file,
                      image_names,
@@ -525,10 +531,9 @@ def update_task_step(context_path,
                      no_cache,
                      arg,
                      secret_arg,
-                     target,
-                     cmd_value,
-                     timeout):
-    DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, FileTaskStepUpdateParameters = cmd.get_models(
+                     target):
+    DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, \
+        FileTaskStepUpdateParameters = cmd.get_models(
         'DockerBuildStepUpdateParameters',
         'EncodedTaskStepUpdateParameters',
         'FileTaskStepUpdateParameters',
@@ -578,12 +583,8 @@ def update_task_step(context_path,
                     values=set_values
                 )
     else:
-        yaml_template = get_yaml_template(
-            cmd_value, timeout, file)
-        import base64
         step = EncodedTaskStepUpdateParameters(
-            encoded_task_content=base64.b64encode(
-                yaml_template.encode()).decode(),
+            encoded_task_content=step.encoded_task_content,
             context_path=context_path,
             context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
