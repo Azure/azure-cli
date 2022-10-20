@@ -384,7 +384,7 @@ def _get_ado_token(cmd, source):
     body = {
         "displayName": f"SWA Deployment Token (created via the Azure CLI) - {uuid.uuid4().hex}",
         "scope": "vso.build_execute vso.code_full vso.variablegroups_manage",
-        "validTo": (datetime.utcnow() + timedelta(days=6*30)).isoformat(),
+        "validTo": (datetime.utcnow() + timedelta(days=6 * 30)).isoformat(),
         "allOrgs": False,
         "targetAccounts": [
             org_id
