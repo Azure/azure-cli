@@ -5110,10 +5110,11 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
     elif load_balancer_inbound_nat_rule_ids is not None:
         instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
 
-    if application_security_groups == ['']:
-        instance.application_security_groups = None
-    elif application_security_groups:
-        instance.application_security_groups = application_security_groups
+    for config in parent.ip_configurations:
+        if application_security_groups == ['']:
+            config.application_security_groups = None
+        elif application_security_groups:
+            config.application_security_groups = application_security_groups
 
     if app_gateway_backend_address_pools == ['']:
         instance.application_gateway_backend_address_pools = None
