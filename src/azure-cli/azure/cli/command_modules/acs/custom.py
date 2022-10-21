@@ -846,7 +846,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
         if enable_monitoring:
             syslog_enabled = False
             if CONST_MONITORING_ENABLE_SYSLOG in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
-                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_ENABLE_SYSLOG]).lower() == 'true':
+               str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_ENABLE_SYSLOG]).lower() == 'true':
                 syslog_enabled = True
             if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':

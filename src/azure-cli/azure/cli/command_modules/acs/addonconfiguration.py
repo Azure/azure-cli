@@ -485,45 +485,45 @@ def ensure_container_insights_for_monitoring(
                     "properties": {
                         "dataSources": {
                             "syslog": [
-                                    {
-                                        "streams": [
-                                            "Microsoft-Syslog"
-                                        ],
-                                        "facilityNames": [
-                                            "auth",
-                                            "authpriv",
-                                            "cron",
-                                            "daemon",
-                                            "mark",
-                                            "kern",
-                                            "local0",
-                                            "local1",
-                                            "local2",
-                                            "local3",
-                                            "local4",
-                                            "local5",
-                                            "local6",
-                                            "local7",
-                                            "lpr",
-                                            "mail",
-                                            "news",
-                                            "syslog",
-                                            "user",
-                                            "uucp"
-                                        ],
-                                        "logLevels": [
-                                            "Debug",
-                                            "Info",
-                                            "Notice",
-                                            "Warning",
-                                            "Error",
-                                            "Critical",
-                                            "Alert",
-                                            "Emergency"
-                                        ],
-                                        "name": "sysLogsDataSource"
-                                    }
-                                ],
+                                {
+                                    "streams": [
+                                        "Microsoft-Syslog"
+                                    ],
+                                    "facilityNames": [
+                                        "auth",
+                                        "authpriv",
+                                        "cron",
+                                        "daemon",
+                                        "mark",
+                                        "kern",
+                                        "local0",
+                                        "local1",
+                                        "local2",
+                                        "local3",
+                                        "local4",
+                                        "local5",
+                                        "local6",
+                                        "local7",
+                                        "lpr",
+                                        "mail",
+                                        "news",
+                                        "syslog",
+                                        "user",
+                                        "uucp"
+                                    ],
+                                    "logLevels": [
+                                        "Debug",
+                                        "Info",
+                                        "Notice",
+                                        "Warning",
+                                        "Error",
+                                        "Critical",
+                                        "Alert",
+                                        "Emergency"
+                                    ],
+                                    "name": "sysLogsDataSource"
+                                }
+                            ],
                             "extensions": [
                                 {
                                     "name": "ContainerInsightsExtension",
