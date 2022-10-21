@@ -2055,7 +2055,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False, yes=False):
+def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2063,28 +2063,13 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
 
     from knack.prompting import prompt_y_n
     if delete_all:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources and resource groups?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     if delete_resource_groups:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resource groups?")
-        if yes or confirmation:
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     if delete_resources:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
-
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
     deny_settings_enum = None
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
@@ -2191,32 +2176,36 @@ def list_deployment_stack_at_subscription(cmd):
 
 def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    confirmation = "Are you sure you want to delete this stack"
+    delete_list = []
+
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
 
-    from knack.prompting import prompt_y_n
     if delete_all:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources and resource groups?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_list.append("resources")
+        delete_list.append("resource groups")
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+
     if delete_resource_groups:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resource groups?")
-        if yes or confirmation:
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_list.append("resource groups")
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
     if delete_resources:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_list.append("resources")
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
+    #build confirmation string
+    from knack.prompting import prompt_y_n
+    if not yes:
+        if not delete_list:
+            response = prompt_y_n(confirmation + "?")
+            if not response: return None
         else:
-            return None
+            confirmation += " and the specified resources: "
+            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            if not response: return None
 
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
@@ -2242,35 +2231,19 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):
         return rcf.deployment_stacks.export_template_at_subscription(id.split('/')[-1])
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False, yes=False):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
 
-    from knack.prompting import prompt_y_n
     if delete_all:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources and resource groups?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     if delete_resource_groups:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resource groups?")
-        if yes or confirmation:
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     if delete_resources:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     
     deny_settings_enum = None
     if deny_settings_mode:
@@ -2374,33 +2347,37 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
 
 def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    confirmation = "Are you sure you want to delete this stack"
+    delete_list = []
+
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
 
-    from knack.prompting import prompt_y_n
     if delete_all:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources and resource groups?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_list.append("resources")
+        delete_list.append("resource groups")
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+
     if delete_resource_groups:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resource groups?")
-        if yes or confirmation:
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_list.append("resource groups")
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
     if delete_resources:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_list.append("resources")
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
+    #build confirmation string
+    from knack.prompting import prompt_y_n
+    if not yes:
+        if not delete_list:
+            response = prompt_y_n(confirmation + "?")
+            if not response: return None
         else:
-            return None
-        
+            confirmation += " and the specified resources: "
+            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            if not response: return None
+
     if name and resource_group:
         try:
             rcf.deployment_stacks.get_at_resource_group(resource_group,name)
@@ -2431,35 +2408,19 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
         return rcf.deployment_stacks.export_template_at_resource_group(stack_arr[4], stack_arr[-1])
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False, yes=False):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     
     delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
 
-    from knack.prompting import prompt_y_n
     if delete_all:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources and resource groups?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     if delete_resource_groups:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resource groups?")
-        if yes or confirmation:
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     if delete_resources:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
     
     deny_settings_enum = None
     if deny_settings_mode:
@@ -2564,32 +2525,36 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
 
 def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    confirmation = "Are you sure you want to delete this stack"
+    delete_list = []
+
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
     delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
 
-    from knack.prompting import prompt_y_n
     if delete_all:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources and resource groups?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_list.append("resources")
+        delete_list.append("resource groups")
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+
     if delete_resource_groups:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resource groups?")
-        if yes or confirmation:
-            delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        else:
-            return None
+        delete_list.append("resource groups")
+        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
     if delete_resources:
-        if not yes:
-            confirmation = prompt_y_n("Are you sure you want to set actionOnUnmanage to delete resources?")
-        if yes or confirmation:
-            delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+        delete_list.append("resources")
+        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
+    
+    #build confirmation string
+    from knack.prompting import prompt_y_n
+    if not yes:
+        if not delete_list:
+            response = prompt_y_n(confirmation + "?")
+            if not response: return None
         else:
-            return None
+            confirmation += " and the specified resources: "
+            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            if not response: return None
 
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
