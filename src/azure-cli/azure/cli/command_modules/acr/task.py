@@ -407,7 +407,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     if context_path is None:
         context_path = step.context_path
     elif context_path.lower() == ACR_NULL_CONTEXT:
-        context_path = None 
+        context_path = None
     else:
         branch = _get_branch_name(context_path)
 
@@ -421,7 +421,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         git_access_token = step.context_access_token
 
     step = update_task_step(
-        step=step, # Need exisiting step for update
+        step=step,  # Need exisiting step for update
         context_path=context_path,
         cmd=cmd,
         file=file,
@@ -514,6 +514,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     )
     return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
+
 def update_task_step(step,
                      context_path,
                      cmd,
@@ -530,10 +531,10 @@ def update_task_step(step,
                      target):
     DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, \
         FileTaskStepUpdateParameters = cmd.get_models(
-        'DockerBuildStepUpdateParameters',
-        'EncodedTaskStepUpdateParameters',
-        'FileTaskStepUpdateParameters',
-        operation_group='tasks')
+            'DockerBuildStepUpdateParameters',
+            'EncodedTaskStepUpdateParameters',
+            'FileTaskStepUpdateParameters',
+            operation_group='tasks')
     arguments = _get_all_override_arguments(arg, secret_arg)
     set_values = _get_all_override_arguments(set_value, set_secret)
     if context_path:
@@ -586,6 +587,7 @@ def update_task_step(step,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
     return step
+
 
 def acr_task_identity_assign(cmd,
                              client,
