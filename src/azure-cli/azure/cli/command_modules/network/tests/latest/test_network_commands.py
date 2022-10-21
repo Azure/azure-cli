@@ -4072,6 +4072,32 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
                  checks=self.check("subnet.contains(id, '{subnet}')", True))
 
+    @ResourceGroupPreparer(name_prefix="cli_test_multiple_ipconfigs_update_with_asg_", location="westus")
+    def test_multiple_ipconfigs_update_with_asg(self):
+        self.kwargs.update({
+            "nic_name": self.create_random_name("nic-", 8),
+            "vnet_name": self.create_random_name("vnet-", 12),
+            "subnet_name": self.create_random_name("subnet-", 12),
+            "asg_name": self.create_random_name("asg-", 8),
+        })
+
+        self.cmd("network vnet create -n {vnet_name} -g {rg} --subnet-name {subnet_name}")
+        self.cmd("network nic create -n {nic_name} -g {rg} --vnet-name {vnet_name} --subnet {subnet_name}")
+        self.cmd("network nic ip-config create -n ipconfig2 -g {rg} --nic-name {nic_name}")
+        self.kwargs["asg_id"] = self.cmd("network asg create -n {asg_name} -g {rg}").get_output_in_json()["id"]
+
+        self.cmd("network nic ip-config update -n ipconfig1 -g {rg} --nic-name {nic_name} --asgs {asg_name}")
+        self.cmd(
+            "network nic show -n {nic_name} -g {rg}",
+            checks=[
+                self.check("ipConfigurations | length(@)", 2),
+                self.check("ipConfigurations[0].name", "ipconfig1"),
+                self.check("ipConfigurations[1].name", "ipconfig2"),
+                self.check("ipConfigurations[0].applicationSecurityGroups[0].id", "{asg_id}"),
+                self.check("ipConfigurations[1].applicationSecurityGroups[0].id", "{asg_id}"),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools', location='eastus2')
     def test_network_nic_lb_address_pools(self, resource_group):
 
