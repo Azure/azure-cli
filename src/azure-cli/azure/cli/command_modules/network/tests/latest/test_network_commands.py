@@ -2588,14 +2588,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.kwargs.update({
             "waf": "agp",
             "rule_group1": "REQUEST-921-PROTOCOL-ATTACK",
-            "rule_group2": "REQUEST-931-APPLICATION-ATTACK-RFI",
+            "rule_group2": "REQUEST-920-PROTOCOL-ENFORCEMENT",
         })
         # create a waf-policy
-        self.cmd("network application-gateway waf-policy create -g {rg} -n {waf}")
+        self.cmd("network application-gateway waf-policy create -n {waf} -g {rg} --version 3.2")
         # add one rule group to exclusion
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
-            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --match-variable RequestHeaderValues --match-operator Contains --selector Google \
             --type OWASP --version 3.2 \
             --group-name {rule_group1} --rule-ids 921140 921150",
             checks=[
@@ -2605,30 +2605,43 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                 self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[1].ruleId", "921150"),
             ]
         )
-        # add another rule group to exclusion
+        # add another rule group to exclusion (with different matchers)
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
             --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
             --type OWASP --version 3.2 \
-            --group-name {rule_group2} --rule-ids 931100",
+            --group-name {rule_group2} --rule-ids 920340",
             checks=[
-                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 2),
-                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].ruleGroupName", self.kwargs["rule_group2"]),
-                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].rules[0].ruleId", "931100"),
+                self.check("managedRules.exclusions | length(@)", 2),
+                self.check("managedRules.exclusions[1].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("managedRules.exclusions[1].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "920340"),
+            ]
+        )
+        # add a rule group to the second exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group1} --rule-ids 921140 921150",
+            checks=[
+                self.check("managedRules.exclusions[1].exclusionManagedRuleSets[0].ruleGroups[1].ruleGroupName", self.kwargs["rule_group1"]),
+                self.check("managedRules.exclusions[1].exclusionManagedRuleSets[0].ruleGroups[1].rules | length(@)", 2),
+                self.check("managedRules.exclusions[1].exclusionManagedRuleSets[0].ruleGroups[1].rules[0].ruleId", "921140"),
+                self.check("managedRules.exclusions[1].exclusionManagedRuleSets[0].ruleGroups[1].rules[1].ruleId", "921150"),
             ]
         )
         # remove the first rule group
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set remove -g {rg} --policy-name {waf} \
-            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --match-variable RequestHeaderValues --match-operator Contains --selector Google \
             --type OWASP --version 3.2 --group-name {rule_group1}"
         )
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set list -g {rg} --policy-name {waf}",
             checks=[
-                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 1),
+                self.check("exclusions | length(@)", 1),
                 self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group2"]),
-                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "931100"),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "920340"),
             ]
         )
 
