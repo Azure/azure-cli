@@ -22,6 +22,9 @@ from ..util import retry
 from .test_graph import GraphScenarioTestBase
 
 
+TEST_TENANT_DOMAIN = '@azuresdkteam.onmicrosoft.com'
+
+
 class RoleScenarioTestBase(GraphScenarioTestBase):
 
     def run_under_service_principal(self):
@@ -258,7 +261,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + TEST_TENANT_DOMAIN,
                 'nsg': 'nsg1'
             })
 
@@ -331,11 +334,29 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role reader')
 
-                # test role assignment on empty scope
+                # Test bring-your-own assignment name
+                self.kwargs['assignment_name'] = self.create_guid()
+                # Directly use GUID to avoid querying definition ID and reduce recording YAML size
+                # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+                self.kwargs['reader_guid'] = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+                result = self.cmd('role assignment create --assignee {upn} '
+                                  '--role {reader_guid} --name {assignment_name}').get_output_in_json()
+                self.kwargs['assignment_id'] = result['id']
+                # Should be idempotent
+                self.cmd('role assignment create --assignee {upn} --role {reader_guid} --name {assignment_name}')
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid}',
+                         checks=[self.check("length([])", 1), self.check("[0].name", '{assignment_name}')])
+                # Delete by assignment id
+                self.cmd('role assignment delete --ids {assignment_id}')
+
+                # test create role assignment for invalid assignee
                 with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
-                self.cmd('ad user delete --id {upn}')
+                try:
+                    self.cmd('ad user delete --id {upn}')
+                except:
+                    pass
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
@@ -390,7 +411,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             # User
             user = self.create_random_name('testuser', 15)
-            self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
+            self.kwargs['upn'] = user + TEST_TENANT_DOMAIN
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 '
                               '--user-principal-name {upn}').get_output_in_json()
@@ -439,7 +460,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + TEST_TENANT_DOMAIN,
                 'rg': resource_group,
                 'description': "Role assignment foo to check on bar",
                 'condition': "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'",
@@ -512,7 +533,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + TEST_TENANT_DOMAIN,
                 'nsg': 'nsg1'
             })
 
@@ -565,7 +586,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             user = self.create_random_name('testuser', 15)
             mgmt_grp = self.create_random_name('mgmt_grp', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + TEST_TENANT_DOMAIN,
                 'mgmt_grp': mgmt_grp
             })
 
@@ -606,7 +627,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'upn': user + TEST_TENANT_DOMAIN,
             })
 
             self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
