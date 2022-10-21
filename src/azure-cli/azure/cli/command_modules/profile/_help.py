@@ -45,6 +45,19 @@ long-summary: To clear the current subscription, use 'az logout'.
 helps['account list'] = """
 type: command
 short-summary: Get a list of subscriptions for the logged in account.
+examples:
+    - name: List all subscriptions.
+      text: >
+        az account list --all
+    - name: List all enabled subscriptions.
+      text: >
+        az account list    
+    - name: Get the current default subscription. 
+      text: >
+        az account list --query "[?isDefault]"
+    - name: Refresh the list of subscriptions. 
+      text: >
+        az account list --refresh
 """
 
 helps['account list-locations'] = """
@@ -55,33 +68,53 @@ short-summary: List supported regions for the current subscription.
 helps['account show'] = """
 type: command
 short-summary: Get the details of a subscription.
-long-summary: If no subscription is specified, shows the current subscription.
+long-summary: >
+    If no subscription is specified, information for the current subscription is returned.
+    You can also get details of the current subscription by using `az account list --query "[?isDefault]"`.
+examples:
+    - name: Get the current default subscription returning results as JSON.  Use `--output yaml` for plain text. 
+      text: >
+        az account show --output json
+    - name: Get information about a different subscription returning results as a table.
+      text: >
+        az account show --name "My subscription name" --output table
+    - name: Get information about a different subscription using the subscription ID.
+      text: >
+        az account show --name 00000000-0000-0000-0000-000000000000
+    - name: 
+        Get information about a subscription using `query`.  
+        To see available query options, first run `az account show --output json`.
+      text: >
+        az account show --query name
+        az account show --query user.name
+        az account show --query tenantId
+    - name: Return results in plain text.
+      text: >
+        az account show --query tenantId -o tsv
 """
 
 helps['account set'] = """
 type: command
-short-summary: Set a subscription to be the current active subscription.
-"""
-
-helps['account show'] = """
-type: command
-short-summary: Get the details of a subscription.
-long-summary: >-
-    If the subscription isn't specified, shows the details of the default subscription.
-
-
-    When --sdk-auth is used,
-    the output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an alternative, consider using
-    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+short-summary: Change the active subscription.
+examples:
+    - name: Change the active subscription using a subscription name
+      text: >
+        az account set --subscription "My subscription name"
+    - name: Change the active subscription using a subscription ID
+      text: >
+        az account set --subscription 00000000-0000-0000-0000-000000000000
+    - name: Change the active subscription using a variable
+      text: >
+        subscriptionId="$(az account list --query "[?isDefault].id" -o tsv)"
+        az account set --subscription $subscriptionId
 """
 
 helps['account get-access-token'] = """
 type: command
 short-summary: Get a token for utilities to access Azure.
 long-summary: >
-    The token will be valid for at least 5 minutes with the maximum at 60 minutes.
-    If the subscription argument isn't specified, the current account is used.
+    The token will be valid for at least 5 minutes with a maximum of 60 minutes.
+    If the subscription parameter isn't specified, the current account is used.
 examples:
     - name: Get an access token for the current account
       text: >
@@ -95,9 +128,23 @@ examples:
     - name: Get an access token to use with MS Graph API
       text: >
         az account get-access-token --resource-type ms-graph
+    - name: >
+        Get an access token for a particular resource.  For a list of Virtual Network available service endpoints,
+        see `https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview`.  
+        If you receive a `Failed to connect to MSI...` error, <what is really the problem?  Is your resourceID wrong?  Does your resource not allow access tokens?>
+      text: >
+        az account get-access-token --resource myResourceID
+        az account get-access-token --resource https://database.windows.net --output tsv
+        az account get-access-token --resource https://management.core.windows.net/ --query accessToken --output tsv
+        
+    - name: Get an access token for a particular scope
+      text: >
+        az account get-access-token --scope <need example>
+        az account get-access-token --scope 
 """
 
 helps['self-test'] = """
 type: command
 short-summary: Runs a self-test of the CLI.
+long-summary: <Need more information here>
 """
