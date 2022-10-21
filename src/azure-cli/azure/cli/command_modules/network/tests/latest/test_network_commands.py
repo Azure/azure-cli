@@ -425,10 +425,10 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
         })
 
         # LB with public ip
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip} --sku Standard')
         # No zone on LB and its front-ip-config
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
-            self.check("frontendIpConfigurations[0].zones", None),
+            self.check("frontendIPConfigurations[0].zones", None),
             self.check("zones", None)
         ])
         # Zone on public-ip which LB uses to infer the zone
@@ -438,10 +438,10 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         # LB w/o public ip, so called ILB
         self.kwargs['lb'] = 'lb2'
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1 --sku Standard')
         # Zone on front-ip-config, and still no zone on LB resource
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
-            self.check("frontendIpConfigurations[0].zones[0]", self.kwargs['zone']),
+            self.check("frontendIPConfigurations[0].zones[0]", self.kwargs['zone']),
             self.check("zones", None)
         ])
         # add a second frontend ip configuration
@@ -454,13 +454,13 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
         self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6')
         self.cmd('network lb frontend-ip create --lb-name {lb2} -n ipv6 -g {rg} --private-ip-address-version IPv6 --public-ip-address {ip2}', checks=[
             self.check('name', 'ipv6'),
-            self.check('privateIpAddressVersion', 'IPv6'),
             self.check('provisioningState', 'Succeeded')
         ])
 
-        self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
-            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddressVersion', 'IPv6')
-        ])
+        # The privateIPAddressVersion field is no longer returned in lb response message
+        # self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
+        #     self.check('frontendIPConfigurations[0].privateIPAddressVersion', 'IPv6')
+        # ])
 
     @ResourceGroupPreparer(name_prefix='test_network_lb_frontend_ip_zone', location='eastus2')
     def test_network_lb_frontend_ip_zone(self, resource_group):
@@ -519,39 +519,54 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
-class NetworkCustomIpPrefix(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_custom_ip_prefix', location='eastus2')
-    def test_network_custom_ip_prefix(self, resource_group):
-
+class NetworkCustomIPPrefix(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")
+    def test_network_custom_ip_prefix_crud(self):
         self.kwargs.update({
-            'rg': resource_group,
-            'prefix': 'prefix1'
+            "cip_name": self.create_random_name("cip-", 8),
         })
 
-        # Test custom prefix CRUD
-        self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
-        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
-        # self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning')
-        self.cmd('network custom-ip prefix list -g {rg}',
-                 checks=self.check('length(@)', 1))
-        # Delete operation isn't ready.
-        # self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
-        # self.cmd('network custom-ip prefix list -g {rg}',
-        #          checks=self.is_empty())
+        self.cmd(
+            "network custom-ip prefix create -n {cip_name} -z 1 -g {rg} --cidr 0.0.0.0/24 "
+            "--asn 65515 --geo GLOBAL --is-advertised false",
+            checks=[
+                self.check("name", "{cip_name}"),
+                self.check("asn", "65515"),
+                self.check("geo", "GLOBAL"),
+                self.check("expressRouteAdvertise", False)
+            ]
+        )
+        self.cmd(
+            "network custom-ip prefix list -g {rg}",
+            checks=[
+                self.check("length(@)", 1),
+                self.check("@[0].name", "{cip_name}")
+            ]
+        )
+        self.cmd("network custom-ip prefix update -n {cip_name} -g {rg} --tags foo=bar")
+        self.cmd(
+            "network custom-ip prefix show -n {cip_name} -g {rg}",
+            checks=[
+                self.check("name", "{cip_name}"),
+                self.check("tags.foo", "bar")
+            ]
+        )
+
 
     @record_only()
     def test_network_custom_ip_prefix_update_state(self):
         self.kwargs.update({
-            'rg': 'cli_test_custom_ip_prefix',
-            'prefix': 'prefix1'
+            "rg": "cli_test_custom_ip_prefix",
+            "cip_name": "prefix1"
         })
 
-        self.cmd('network custom-ip prefix show -g {rg} -n {prefix}',
-                 checks=self.check('commissionedState', 'Provisioned'))
-
-        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state commission',
-                 checks=self.check('commissionedState', 'Commissioning'))
+        self.cmd(
+            "network custom-ip prefix update -n {cip_name} -g {rg} --state commission --no-internet-advertise false",
+            checks=[
+                self.check("commissionedState", "Commissioning"),
+                self.check("noInternetAdvertise", False)
+            ]
+        )
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
@@ -3239,8 +3254,8 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
             'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-cross-region-lb-address-pool-config.json')
         })
 
-        regional_lb_frontend_ip_address1 = self.cmd('network lb create -n {regional_lb1} -g {rg} --sku Standard').get_output_in_json()['loadBalancer']['frontendIPConfigurations'][0]['id']
-        regional_lb_frontend_ip_address2 = self.cmd('network lb create -n {regional_lb2} -g {rg} --sku Standard').get_output_in_json()['loadBalancer']['frontendIPConfigurations'][0]['id']
+        regional_lb_frontend_ip_address1 = self.cmd('network lb create -n {regional_lb1} -g {rg} --sku Standard').get_output_in_json()['frontendIPConfigurations'][0]['id']
+        regional_lb_frontend_ip_address2 = self.cmd('network lb create -n {regional_lb2} -g {rg} --sku Standard').get_output_in_json()['frontendIPConfigurations'][0]['id']
 
         self.kwargs.update({
             'regional_lb_frontend_ip_address1': regional_lb_frontend_ip_address1,
@@ -3355,8 +3370,8 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
         # test lb create with min params (new ip)
         self.cmd('network lb create -n {lb}1 -g {rg}', checks=[
-            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}')
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('frontendIPConfigurations[0].resourceGroup', '{rg}')
         ])
 
         # test internet facing load balancer with new static public IP
@@ -3369,18 +3384,18 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internal load balancer create (existing subnet ID)
         self.kwargs['subnet_id'] = self.cmd('network vnet create -n {vnet} -g {rg} --subnet-name default').get_output_in_json()['newVNet']['subnets'][0]['id']
         self.cmd('network lb create -n {lb}3 -g {rg} --subnet {subnet_id} --private-ip-address {pri_ip}', checks=[
-            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
-            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddress', '{pri_ip}'),
-            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
-            self.check("loadBalancer.frontendIPConfigurations[0].properties.subnet.id", '{subnet_id}')
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Static'),
+            self.check('frontendIPConfigurations[0].privateIPAddress', '{pri_ip}'),
+            self.check('frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check("frontendIPConfigurations[0].subnet.id", '{subnet_id}')
         ])
 
         # test internet facing load balancer with existing public IP (by name)
         self.cmd('network public-ip create -n {pub_ip} -g {rg}')
         self.cmd('network lb create -n {lb}4 -g {rg} --public-ip-address {pub_ip}', checks=[
-            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
-            self.check("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{pub_ip}')", True)
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check("frontendIPConfigurations[0].publicIPAddress.contains(id, '{pub_ip}')", True)
         ])
 
         self.cmd('network lb list', checks=[
@@ -4056,6 +4071,32 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
                  checks=self.check("subnet.contains(id, '{subnet}')", True))
+
+    @ResourceGroupPreparer(name_prefix="cli_test_multiple_ipconfigs_update_with_asg_", location="westus")
+    def test_multiple_ipconfigs_update_with_asg(self):
+        self.kwargs.update({
+            "nic_name": self.create_random_name("nic-", 8),
+            "vnet_name": self.create_random_name("vnet-", 12),
+            "subnet_name": self.create_random_name("subnet-", 12),
+            "asg_name": self.create_random_name("asg-", 8),
+        })
+
+        self.cmd("network vnet create -n {vnet_name} -g {rg} --subnet-name {subnet_name}")
+        self.cmd("network nic create -n {nic_name} -g {rg} --vnet-name {vnet_name} --subnet {subnet_name}")
+        self.cmd("network nic ip-config create -n ipconfig2 -g {rg} --nic-name {nic_name}")
+        self.kwargs["asg_id"] = self.cmd("network asg create -n {asg_name} -g {rg}").get_output_in_json()["id"]
+
+        self.cmd("network nic ip-config update -n ipconfig1 -g {rg} --nic-name {nic_name} --asgs {asg_name}")
+        self.cmd(
+            "network nic show -n {nic_name} -g {rg}",
+            checks=[
+                self.check("ipConfigurations | length(@)", 2),
+                self.check("ipConfigurations[0].name", "ipconfig1"),
+                self.check("ipConfigurations[1].name", "ipconfig2"),
+                self.check("ipConfigurations[0].applicationSecurityGroups[0].id", "{asg_id}"),
+                self.check("ipConfigurations[1].applicationSecurityGroups[0].id", "{asg_id}"),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools', location='eastus2')
     def test_network_nic_lb_address_pools(self, resource_group):
@@ -6311,10 +6352,8 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
             'identifier': '901',
             'identifier1': '902',
             'port': '10700',
-            'fport': '40',
-            'fport1': '60',
-            'bport': '60',
-            'bport1': '80',
+            'fport': '0',
+            'bport': '0'
         })
 
         self.cmd('network lb create -g {rg} -n {lb} --sku Gateway --vnet-name vnet --subnet subnet')
@@ -6327,12 +6366,13 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
 
         # test --backend-pool-name
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule1 --frontend-ip-name {fip} '
-                 '--frontend-port {fport}  --protocol tcp --backend-port {bport} --backend-pool-name {bap1} ',
+                 '--frontend-port {fport}  --protocol All --backend-port {bport} --backend-pool-name {bap1} ',
                  checks=[self.exists('backendAddressPool'),
                          self.check('length(backendAddressPools)', 1)])
+        self.cmd('network lb rule delete --lb-name {lb} -g {rg} -n rule1')
         # test --backend-pools-name
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
-                 '--frontend-port {fport1} --backend-pools-name {bap3} {bap2} --protocol tcp  --backend-port {bport1}',
+                 '--frontend-port {fport} --backend-pools-name {bap3} {bap2} --protocol All  --backend-port {bport}',
                  checks=[self.not_exists('backendAddressPool'),
                          self.check('length(backendAddressPools)', 2)])
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --frontend-ip-name {fip} '
