@@ -411,7 +411,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     else:
         branch = _get_branch_name(context_path)
 
-    # When update encoded task, existing encoded_task_content in the step cannot be updated.
+    # When update encoded task, existing encoded_task_content in the step cannot be decoded for update.
     if context_path is None:
         if cmd_value is not None or timeout is not None or file is not None:
             raise CLIError(
@@ -537,6 +537,7 @@ def update_task_step(step,
             operation_group='tasks')
     arguments = _get_all_override_arguments(arg, secret_arg)
     set_values = _get_all_override_arguments(set_value, set_secret)
+    # If context_path is not None, check if file is provided
     if context_path:
         if file:
             if file.endswith(ALLOWED_TASK_FILE_TYPES):
@@ -558,6 +559,7 @@ def update_task_step(step,
                     context_access_token=git_access_token,
                     target=target
                 )
+        # If file is not provided, use the existing step
         elif step:
             if hasattr(step, 'docker_file_path'):
                 step = DockerBuildStepUpdateParameters(
@@ -579,6 +581,7 @@ def update_task_step(step,
                     context_access_token=git_access_token,
                     values=set_values
                 )
+    # If context_path is None, update the encoded task
     else:
         step = EncodedTaskStepUpdateParameters(
             encoded_task_content=step.encoded_task_content,
