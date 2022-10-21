@@ -319,7 +319,7 @@ def ensure_container_insights_for_monitoring(
     aad_route=False,
     create_dcr=False,
     create_dcra=False,
-    add_syslog=False,
+    enable_syslog=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -327,7 +327,7 @@ def ensure_container_insights_for_monitoring(
 
     Set aad_route == True to set up the DCR data route. Otherwise the solution route will be used. Create_dcr and
     create_dcra have no effect if aad_route == False. If syslog data is to be collected set aad_route == True and
-    add_syslog == True
+    enable_syslog == True
 
     Set remove_monitoring to True and create_dcra to True to remove the DCRA from a cluster. The association makes
     it very hard to delete either the DCR or cluster. (It is not obvious how to even navigate to the association from
@@ -557,7 +557,7 @@ def ensure_container_insights_for_monitoring(
 
             for _ in range(3):
                 try:
-                    if add_syslog:
+                    if enable_syslog:
                         send_raw_request(
                             cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_with_syslog
                         )

@@ -48,7 +48,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
-    CONST_MONITORING_ENABLE_SYSLOG,
     CONST_NODEPOOL_MODE_USER,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_ROTATION_POLL_INTERVAL,
@@ -481,6 +480,7 @@ def aks_create(
     aks_custom_headers=None,
     host_group_id=None,
     gpu_instance_profile=None,
+    enable_syslog=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -809,7 +809,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
                       no_wait=False,
-                      enable_msi_auth_for_monitoring=False):
+                      enable_msi_auth_for_monitoring=False,
+                      enable_syslog=False):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
@@ -828,7 +829,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_sgxquotehelper=enable_sgxquotehelper,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
-                              no_wait=no_wait)
+                              no_wait=no_wait,
+                              enable_syslog=enable_syslog)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -844,10 +846,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            syslog_enabled = False
-            if CONST_MONITORING_ENABLE_SYSLOG in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
-               str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_ENABLE_SYSLOG]).lower() == 'true':
-                syslog_enabled = True
             if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
@@ -861,13 +859,13 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         aad_route=True,
                         create_dcr=True,
                         create_dcra=True,
-                        add_syslog=syslog_enabled)
+                        enable_syslog=enable_syslog)
                 else:
                     raise ArgumentUsageError(
                         "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
             else:
                 # monitoring addon will use legacy path
-                if syslog_enabled:
+                if enable_syslog:
                     raise ArgumentUsageError(
                         "--enable-syslog can not be used without MSI auth.")
                 ensure_container_insights_for_monitoring(
@@ -923,7 +921,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    enable_secret_rotation=False,
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
-                   no_wait=False):
+                   no_wait=False,
+                   enable_syslog=False):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
