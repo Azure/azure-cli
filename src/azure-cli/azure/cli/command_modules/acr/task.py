@@ -373,16 +373,12 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     AgentProperties, AuthInfoUpdateParameters, BaseImageTriggerUpdateParameters, \
-        DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, \
-        FileTaskStepUpdateParameters, PlatformUpdateParameters, SourceControlType, \
-        SourceUpdateParameters, SourceTriggerUpdateParameters, TaskUpdateParameters, \
+        PlatformUpdateParameters, SourceControlType, SourceUpdateParameters, \
+        SourceTriggerUpdateParameters, TaskUpdateParameters, \
         TriggerStatus, TriggerUpdateParameters = cmd.get_models(
             'AgentProperties',
             'AuthInfoUpdateParameters',
             'BaseImageTriggerUpdateParameters',
-            'DockerBuildStepUpdateParameters',
-            'EncodedTaskStepUpdateParameters',
-            'FileTaskStepUpdateParameters',
             'PlatformUpdateParameters',
             'SourceControlType',
             'SourceUpdateParameters',
