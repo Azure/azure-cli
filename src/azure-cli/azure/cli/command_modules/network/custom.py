@@ -4748,27 +4748,62 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
 
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                    path=None, interval=None, threshold=None):
-    Probe = cmd.get_models('Probe')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    new_probe = Probe(
-        protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
-        request_path=path, name=item_name)
-    upsert_to_collection(lb, 'probes', new_probe, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().probes, item_name)
+                    path=None, interval=None, threshold=None, probe_threshold=None):
+    from .aaz.latest.network.lb import Show
+    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': load_balancer_name})
+    probe_args = {
+        "name": item_name,
+        "interval_in_seconds": interval,
+        "number_of_probes": threshold,
+        "port": port,
+        "protocol": protocol,
+        "request_path": path,
+        "probe_threshold": probe_threshold
+    }
+
+    for probe in lb['probes']:
+        probe['interval_in_seconds'] = probe.pop('intervalInSeconds')
+        probe['number_of_probes'] = probe.pop('numberOfProbes')
+        probe['probe_threshold'] = probe.pop('probeThreshold')
+        if 'requestPath' in probe:
+            probe['request_path'] = probe.pop('requestPath')
+    lb['probes'].append(probe_args)
+    lb['resource_group'] = resource_group_name
+
+    from .aaz.latest.network.lb import Create
+    poller = Create(cli_ctx=cmd.cli_ctx)(command_args=lb).result()['probes']
+    return [probe for probe in poller if probe['name'] == item_name]
 
 
-def set_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
-                 path=None, interval=None, threshold=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('port', port)
-        c.set_param('request_path', path)
-        c.set_param('interval_in_seconds', interval)
-        c.set_param('number_of_probes', threshold)
-    return parent
+def set_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol=None, port=None,
+                 path=None, interval=None, threshold=None, probe_threshold=None):
+    from .aaz.latest.network.lb import Show
+    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': load_balancer_name})
+    for probe in lb['probes']:
+        probe['interval_in_seconds'] = probe.pop('intervalInSeconds')
+        probe['number_of_probes'] = probe.pop('numberOfProbes')
+        probe['probe_threshold'] = probe.pop('probeThreshold')
+        if 'requestPath' in probe:
+            probe['request_path'] = probe.pop('requestPath')
+        if probe['name'] == item_name:
+            if protocol is not None:
+                probe['protocol'] = protocol
+            if port is not None:
+                probe['port'] = port
+            if path == '':
+                probe['request_path'] = None
+            elif path is not None:
+                probe['request_path'] = path
+            if interval is not None:
+                probe['interval_in_seconds'] = interval
+            if threshold is not None:
+                probe['number_of_probes'] = threshold
+            if probe_threshold is not None:
+                probe['probe_threshold'] = probe_threshold
+    lb['resource_group'] = resource_group_name
+    from .aaz.latest.network.lb import Update
+    poller = Update(cli_ctx=cmd.cli_ctx)(command_args=lb).result()['probes']
+    return [probe for probe in poller if probe['name'] == item_name]
 
 
 def create_lb_rule(
