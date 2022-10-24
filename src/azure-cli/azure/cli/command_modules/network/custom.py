@@ -2223,24 +2223,38 @@ def remove_waf_exclusion_rule_set(client, resource_group_name, policy_name,
                                   rule_set_type, rule_set_version,
                                   match_variable, selector_match_operator, selector,
                                   rule_group_name=None):
+    remove_rule_set = None
+    remove_exclusion = None
     waf_policy = client.get(resource_group_name, policy_name)
-    to_be_deleted = None
+
     for exclusion in waf_policy.managed_rules.exclusions:
-        if exclusion.match_variable == match_variable \
-                and exclusion.selector_match_operator == selector_match_operator \
-                and exclusion.selector == selector:
+        if (exclusion.match_variable, exclusion.selector_match_operator, exclusion.selector) \
+           == (match_variable, selector_match_operator, selector):
             for rule_set in exclusion.exclusion_managed_rule_sets:
                 if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
                     if rule_group_name is None:
-                        to_be_deleted = rule_set
+                        remove_rule_set = rule_set
                         break
+
                     rule_group = next((rule_group for rule_group in rule_set.rule_groups if rule_group.rule_group_name == rule_group_name), None)
                     if rule_group is None:
                         err_msg = f"Rule set group [{rule_group_name}] is not found."
                         raise ResourceNotFoundError(err_msg)
+
                     rule_set.rule_groups.remove(rule_group)
-            if to_be_deleted:
-                exclusion.exclusion_managed_rule_sets.remove(to_be_deleted)
+                    if not rule_set.rule_groups:
+                        exclusion.exclusion_managed_rule_sets.remove(rule_set)
+                        if not exclusion.exclusion_managed_rule_sets:
+                            remove_exclusion = exclusion
+
+            if remove_rule_set:
+                exclusion.exclusion_managed_rule_sets.remove(remove_rule_set)
+                if not exclusion.exclusion_managed_rule_sets:
+                    remove_exclusion = exclusion
+
+    if remove_exclusion:
+        waf_policy.managed_rules.exclusions.remove(remove_exclusion)
+
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 

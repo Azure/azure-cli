@@ -3087,6 +3087,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('status', 'Starting')
             ])
 
+        time.sleep(120)
         # stop a link connnection
         self.cmd(
             'az synapse link-connection stop --workspace-name {workspace_name} --name {link_connection_name}')
