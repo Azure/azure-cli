@@ -13,7 +13,7 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.10.5
+set PYTHON_VERSION=3.10.8
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
@@ -187,7 +187,7 @@ msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\az
 
 if %errorlevel% neq 0 goto ERROR
 
-start %OUTPUT_DIR%
+echo %OUTPUT_DIR%
 
 goto END
 
