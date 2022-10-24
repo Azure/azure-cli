@@ -858,6 +858,8 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
 
     # PREVIEW: On Windows, use core.allow_broker=true to use broker (WAM) for authentication.
     allow_broker = cli_ctx.config.getboolean('core', 'allow_broker', fallback=False)
+    from .telemetry import set_broker_info
+    set_broker_info(allow_broker=allow_broker)
 
     return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, allow_broker=allow_broker,
                     **kwargs)
