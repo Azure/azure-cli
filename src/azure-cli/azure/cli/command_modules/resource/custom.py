@@ -54,10 +54,6 @@ from ._bicep import (
     validate_bicep_target_scope,
     bicep_version_greater_than_or_equal_to
 )
-from ._azd import (
-    ensure_azd_installation,
-    run_azd_command
-)
 
 from ._utils import _build_preflight_error_message, _build_http_response_error_message
 

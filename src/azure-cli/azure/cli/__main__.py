@@ -16,10 +16,16 @@ from azure.cli.core import get_default_cli
 from azure.cli.core.intercept_survey import prompt_survey_message
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
+from azure.cli.command_modules.util.custom import azd_cli
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.41.0"
 
+# run azd
+if sys.argv and len(sys.argv)>1 and sys.argv[1] == 'dev':
+    print("Running Azure Developer CLI")
+    azd_cli(sys.argv[2:])
+    sys.exit()
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
 # If uuid1 raises ValueError, use uuid4 instead.
