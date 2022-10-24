@@ -171,7 +171,7 @@ def load_arguments(self, _):
 
         # Dynamic executor allocation
         c.argument('enable_dynamic_executor_allocation', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
-                   help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+                   options_list=['--enable-dynamic-exec'], help='Indicates whether Dynamic Executor Allocation is enabled or not.')
         c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
         c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
 
@@ -211,7 +211,7 @@ def load_arguments(self, _):
 
         # Dynamic executor allocation
         c.argument('enable_dynamic_executor_allocation', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
-                   help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+                   options_list=['--enable-dynamic-exec'], help='Indicates whether Dynamic Executor Allocation is enabled or not.')
         c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
         c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
 

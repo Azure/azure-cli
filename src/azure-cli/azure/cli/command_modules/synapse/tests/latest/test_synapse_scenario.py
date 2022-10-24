@@ -1203,7 +1203,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update spark pool
         self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
                  ' --spark-config-file-path "{file}"'
-                 ' --enable-dynamic-executor-allocation --min-executors 1 --max-executors 2',
+                 ' --enable-dynamic-exec --min-executors 1 --max-executors 2',
                  checks=[
                     self.check('tags.key1', 'value1'),
                     self.check('name', self.kwargs['spark-pool']),
