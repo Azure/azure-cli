@@ -836,9 +836,9 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
-    with self.command_group('network lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_probe')
-        g.custom_command('update', 'set_lb_probe')
+    with self.command_group('network lb probe') as g:
+        g.custom_command('create', 'create_lb_probe_latest')
+        g.custom_command('update', 'set_lb_probe_latest')
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
