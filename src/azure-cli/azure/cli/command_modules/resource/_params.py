@@ -718,22 +718,3 @@ def load_arguments(self, _):
     with self.argument_context('private-link association delete') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
         c.argument('name', options_list=['--name', '-n'], help='The name of the private link association')
-
-    def _register_argument_azd(c):
-        c.extra('cwd', options_list=['-C, --cwd'], help='Sets the current working directory.',
-                arg_group='Global az dev')
-        c.extra('environment', options_list=['-e, --environment'], help='The name of the environment to use.',
-                arg_group='Global az dev')
-        c.extra('no_prompt', help='Accepts the default value instead of prompting, or it fails if there is no default.',
-                arg_group='Global az dev')
-
-    with self.argument_context('dev init') as c:
-        _register_argument_azd(c)
-        c.extra('branch', options_list=['--branch', '-b'], help='The template branch to initialize from.')
-        c.extra('location', options_list=['--location', '-l'], help='The template branch to initialize from.')
-        c.extra('template', options_list=['--template', '-t'],
-                help="The template to use when you initialize the project. You can use Full URI, <owner>/<repository>,"
-                     " or <repository> if it's part of the azure-samples organization.")
-
-    with self.argument_context('dev provision') as c:
-        c.extra('no_progress', help='Suppresses progress information.')

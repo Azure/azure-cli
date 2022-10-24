@@ -3785,21 +3785,3 @@ def delete_private_link_association(cmd, management_group_id, name):
 def list_private_link_association(cmd, management_group_id):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
     return rcf.private_link_association.list(group_id=management_group_id)
-
-
-def install_azd_cli():
-    ensure_azd_installation()
-    run_azd_command(['version'])
-
-
-def check_azd_version(**kwargs):
-    run_azd_command(['version'], **kwargs)
-
-
-def init_azd(cmd, **kwargs):
-    subscription = cmd.cli_ctx.data['subscription_id'] if cmd.cli_ctx.data['subscription_id'] else None
-    run_azd_command(['init'], subscription=subscription, **kwargs)
-
-
-def provision_azd(**kwargs):
-    run_azd_command(['provision'], **kwargs)

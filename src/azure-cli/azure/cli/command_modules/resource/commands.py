@@ -558,9 +558,3 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_private_link_association')
         g.custom_command('list', 'list_private_link_association')
         g.custom_command('delete', 'delete_private_link_association', confirmation=True)
-
-    with self.command_group('dev') as g:
-        g.custom_command('install', 'install_azd_cli')
-        g.custom_command('version', 'check_azd_version')
-        g.custom_command('init', 'init_azd')
-        g.custom_command('provision', 'provision_azd')

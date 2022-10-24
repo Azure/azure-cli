@@ -15,8 +15,9 @@ from azure.cli.core.azclierror import (
     UnclassifiedUserFault
 )
 _logger = get_logger(__name__)
-_azd_diagnostic_warning_pattern = r"^([^\s].*)\((\d+)(?:,\d+|,\d+,\d+)?\)\s+:\s+(Warning)\s+([a-zA-Z-\d]+):\s*(.*?)\s+\[(.*?)\]$"
 
+def azd_cli(extra_options):
+    run_azd_command(extra_options)
 
 def ensure_azd_installation(stdout=True):
     system = platform.system()
@@ -65,7 +66,7 @@ def _install_azd(system):
 
     raise ValidationError(f'The platform "{system}" is not supported.')
 
-def run_azd_command(args, auto_install=True, **kwargs):
+def run_azd_command(args, auto_install=True):
     installation_path = _get_azd_installation_path(platform.system())
     installed = os.path.isfile(installation_path)
 
@@ -76,9 +77,6 @@ def run_azd_command(args, auto_install=True, **kwargs):
             raise FileOperationError('Azure Developer CLI not found. Install it now by running "az dev install".')
 
     command = [rf"{installation_path}"] + args
-    for k,v in kwargs.items():
-        if v is not None:
-            command += ['--'+k.replace('_', '-'), v]
     return _run_command(command)
 
 def _run_command(command):
