@@ -22,7 +22,7 @@ __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.41.0"
 
 # run azd
-if sys.argv and len(sys.argv)>1 and sys.argv[1] == 'dev':
+if sys.argv and len(sys.argv) > 1 and sys.argv[1] == 'dev':
     print("Running Azure Developer CLI")
     azd_cli(sys.argv[2:])
     sys.exit()

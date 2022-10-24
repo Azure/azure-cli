@@ -346,8 +346,10 @@ def secret_store_load(cmd):
     store = get_secret_store(cmd.cli_ctx, SECRET_STORE_DEMO)
     return store.load()
 
+
 def azd_cli(args):
     run_azd_command(args)
+
 
 def ensure_azd_installation(stdout=True):
     system = platform.system()
@@ -371,12 +373,14 @@ def ensure_azd_installation(stdout=True):
     except IOError as err:
         raise ValidationError(f"Error while attempting to download Azure Developer CLI: {err}")
 
+
 def _get_azd_installation_path(system):
     if system == "Windows":
         appdata_local_path = os.getenv('LOCALAPPDATA') if os.getenv('LOCALAPPDATA') is not None else ''
         return os.path.join(appdata_local_path, "Programs\\Azure Dev CLI\\azd.exe")
     else:
         return '/usr/local/bin/azd'
+
 
 def _install_azd(system):
 
@@ -388,6 +392,7 @@ def _install_azd(system):
             subprocess.run('curl -fsSL https://aka.ms/install-azd.sh | bash ')
     except Exception as err:
         raise ValidationError(f"Error while attempting to install Azure Developer CLI: {err}")
+
 
 def run_azd_command(args, auto_install=True):
     installation_path = _get_azd_installation_path(platform.system())
@@ -401,6 +406,7 @@ def run_azd_command(args, auto_install=True):
 
     command = [rf"{installation_path}"] + args
     return _run_command(command)
+
 
 def _run_command(command):
     try:
