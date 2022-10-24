@@ -428,7 +428,7 @@ def set_survey_info(show_survey_message):
 
 
 @decorators.suppress_all_exceptions()
-def set_wam_info(allow_broker):
+def set_broker_info(allow_broker):
     # whether customer has configured `allow_broker` to enable WAM(Web Account Manager) login for authentication
     _session.allow_broker = allow_broker
 
