@@ -278,7 +278,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
+    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location,
+                                                 server_name=instance.name if instance else None)
     sku_info = list_skus_info['sku_info']
     single_az = list_skus_info['single_az']
     _network_arg_validator(subnet, public_access)
