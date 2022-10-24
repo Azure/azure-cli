@@ -495,8 +495,11 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
     definitions_client = factory.role_definitions
     ids = ids or []
     if ids:
-        if assignee or role or resource_group_name or scope or include_inherited:
-            raise CLIError('When assignment ids are used, other parameter values are not required')
+        ids_override_args = ['assignee', 'role', 'resource_group_name', 'scope', 'include_inherited']
+        for arg in ids_override_args:
+            if locals()[arg]:
+                logger.warning("option '%s' will be ignored due to use of '--ids'.",
+                               cmd.arguments[arg].type.settings['options_list'][0])
         for i in ids:
             assignments_client.delete_by_id(i)
         return

@@ -330,6 +330,19 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role reader')
+                self.cmd('role assignment list --assignee {upn}',
+                         checks=self.check("length([])", 0))
+
+                # Test delete by ID
+                self.kwargs['id'] = self.cmd('role assignment create --assignee {upn} --role reader').get_output_in_json()['id']
+                self.cmd('role assignment delete --ids {id}')
+                self.cmd('role assignment list --assignee {upn}', checks=self.check("length([])", 0))
+
+                # Test delete by ID, but with other parameters ignored
+                self.kwargs['id'] = self.cmd('role assignment create --assignee {upn} --role reader').get_output_in_json()['id']
+                self.cmd('role assignment delete --ids {id} '
+                         '--assignee test --role test --resource-group test --scope test --include-inherit')
+                self.cmd('role assignment list --assignee {upn}', checks=self.check("length([])", 0))
 
                 # test role assignment on empty scope
                 with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
