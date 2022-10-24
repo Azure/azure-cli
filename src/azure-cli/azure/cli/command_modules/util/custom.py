@@ -6,7 +6,6 @@
 import os
 import platform
 import subprocess
-import sys
 
 from azure.cli.core.azclierror import (
     ValidationError,
@@ -48,9 +47,7 @@ def show_version(cmd):  # pylint: disable=unused-argument
 
 
 def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
-    import platform
     import sys
-    import subprocess
     from azure.cli.core import telemetry
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
@@ -197,7 +194,6 @@ def _upgrade_on_windows():
     tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
 
     logger.warning("Installing MSI")
-    import subprocess
     exit_code = subprocess.call(['msiexec.exe', '/i', msi_path])
 
     if exit_code:
@@ -378,8 +374,7 @@ def _get_azd_installation_path(system):
     if system == "Windows":
         appdata_local_path = os.getenv('LOCALAPPDATA') if os.getenv('LOCALAPPDATA') is not None else ''
         return os.path.join(appdata_local_path, "Programs\\Azure Dev CLI\\azd.exe")
-    else:
-        return '/usr/local/bin/azd'
+    return '/usr/local/bin/azd'
 
 
 def _install_azd(system):
@@ -412,4 +407,4 @@ def _run_command(command):
     try:
         subprocess.run(command)
     except Exception as ex:
-        raise(ex)
+        raise ex

@@ -14,9 +14,9 @@ import uuid
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
 from azure.cli.core.intercept_survey import prompt_survey_message
+from azure.cli.command_modules.util.custom import azd_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
-from azure.cli.command_modules.util.custom import azd_cli
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.41.0"
