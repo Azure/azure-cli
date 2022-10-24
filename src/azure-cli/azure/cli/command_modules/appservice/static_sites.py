@@ -386,9 +386,7 @@ def _get_ado_token(cmd, source):
         "scope": "vso.build_execute vso.code_full vso.variablegroups_manage",
         "validTo": (datetime.utcnow() + timedelta(days=6 * 30)).isoformat(),
         "allOrgs": False,
-        "targetAccounts": [
-            org_id
-        ]
+        "targetAccounts": [org_id],
     }
     return send_raw_request(cmd.cli_ctx,
                             "POST",
