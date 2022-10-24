@@ -4642,8 +4642,9 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                                             data_disk_images=data_disk_images)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
                                      storage_profile=storage_profile)
-        if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-            GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile')
+        if allow_replicated_location_deletion is not None:
+            GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
+                                                              operation_group='gallery_image_versions')
             image_version.safety_profile = GalleryImageVersionSafetyProfile(
                 allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
     else:
@@ -4693,9 +4694,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         image_version.publishing_profile.replica_count = replica_count
     if image_version.storage_profile.source is not None:
         image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
-    if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-        if image_version.safety_profile.allow_deletion_of_replicated_locations:
-            image_version.safety_profile.allow_deletion_of_replicated_locations = allow_replicated_location_deletion
+    if allow_replicated_location_deletion is not None:
+        image_version.safety_profile.allow_deletion_of_replicated_locations = allow_replicated_location_deletion
 
     client = _compute_client_factory(cmd.cli_ctx)
 
