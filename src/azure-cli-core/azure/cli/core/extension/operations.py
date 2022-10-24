@@ -353,6 +353,15 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
         pass
 
 
+def is_cloud_shell_system_extension(ext_path):
+    import re
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        if re.search(r'^/usr/lib/python3\.\d+/site-packages/azure-cli-extensions/', ext_path):
+            return True
+    return False
+
+
 def remove_extension(extension_name):
     try:
         # Get the extension and it will raise an error if it doesn't exist
@@ -361,6 +370,8 @@ def remove_extension(extension_name):
             raise CLIError(
                 "Extension '{name}' was installed in development mode. Remove using "
                 "`azdev extension remove {name}`".format(name=extension_name))
+        if is_cloud_shell_system_extension(ext.path):
+            raise CLIError(f"Cannot remove system extension {extension_name} in Cloud Shell.")
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
         rmtree_with_retry(ext.path)
@@ -391,6 +402,9 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
+        if is_cloud_shell_system_extension(ext.path):
+            raise CLIError(
+                f"Cannot update system extension {extension_name}, please wait until Cloud Shell update it in the future release.")
         cur_version = ext.get_version()
         try:
             download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
