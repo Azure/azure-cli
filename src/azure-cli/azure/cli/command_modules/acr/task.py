@@ -411,8 +411,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     else:
         branch = _get_branch_name(context_path)
 
+    encoded_task_content = None
     if context_path is None:
-        encoded_task_content = None
         # When cmd_value is given or file is given,
         # regenerate encoded_task_content
         if cmd_value is not None or file is not None:
