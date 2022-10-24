@@ -9,37 +9,46 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['login'] = """
 type: command
-short-summary: Log in to Azure.
+short-summary: Log into Azure.
 examples:
     - name: Log in interactively.
       text: >
         az login
-    - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
+    - name: > 
+        Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. 
+        Use `-p=secret` if the first character of the password is `-`.
       text: >
-        az login -u johndoe@contoso.com -p VerySecret
-    - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
+        az login --user johndoe@contoso.com --password VerySecret
+    - name: > 
+        Log in with a password containing a `-` as the first character.    
       text: >
-        az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
-    - name: Log in with a service principal using client certificate.
+        az login --user johndoe@contoso.com --password secret -myPasswordThatStartsWithAdash
+    - name: Log in with a service principal using a client secret.
       text: >
-        az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
-    - name: Log in using a VM's system assigned identity
+        az login --service-principal --user http://azure-cli-2016-08-05-14-31-15 --password VerySecret --tenant contoso.onmicrosoft.com
+    - name: Log in with a service principal using a client certificate.
+      text: >
+        az login --service-principal --user http://azure-cli-2016-08-05-14-31-15 --password ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+    - name: Log in using a VM's system assigned identity.
       text: >
         az login --identity
-    - name: Log in using a VM's user assigned identity. Client or object ids of the service identity also work
+    - name: Log in using a VM's user assigned identity. Client or object ids of the service identity also work.
       text: >
-        az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        az login --identity --user /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
 """
 
 helps['account'] = """
 type: group
 short-summary: Manage Azure subscription information.
+long-summary: >
+  For an in-depth overview of working with subscriptions using the Azure CLI, see
+  `https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli`
 """
 
 helps['account clear'] = """
 type: command
 short-summary: Clear all subscriptions from the CLI's local cache.
-long-summary: To clear the current subscription, use 'az logout'.
+long-summary: To clear the current subscription, use `az logout`.
 """
 
 helps['account list'] = """
@@ -70,9 +79,10 @@ type: command
 short-summary: Get the details of a subscription.
 long-summary: >
     If no subscription is specified, information for the current subscription is returned.
-    You can also get details of the current subscription by using `az account list --query "[?isDefault]"`.
 examples:
-    - name: Get the current default subscription returning results as JSON.  Use `--output yaml` for plain text. 
+    - name: >
+        Get the current default subscription returning results as JSON.  Use `--output yaml` for plain text. 
+        You can also get details of the current subscription by using `az account list --query "[?isDefault]"`.
       text: >
         az account show --output json
     - name: Get information about a different subscription returning results as a table.
@@ -81,7 +91,7 @@ examples:
     - name: Get information about a different subscription using the subscription ID.
       text: >
         az account show --name 00000000-0000-0000-0000-000000000000
-    - name: 
+    - name: >
         Get information about a subscription using `query`.  
         To see available query options, first run `az account show --output json`.
       text: >
@@ -105,7 +115,7 @@ examples:
         az account set --subscription 00000000-0000-0000-0000-000000000000
     - name: Change the active subscription using a variable
       text: >
-        subscriptionId="$(az account list --query "[?isDefault].id" -o tsv)"
+        subscriptionId = "$(az account list --query "[?isDefault].id" -o tsv)"
         az account set --subscription $subscriptionId
 """
 
@@ -131,7 +141,7 @@ examples:
     - name: >
         Get an access token for a particular resource.  For a list of Virtual Network available service endpoints,
         see `https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview`.  
-        If you receive a `Failed to connect to MSI...` error, <what is really the problem?  Is your resourceID wrong?  Does your resource not allow access tokens?>
+        If you receive a `Failed to connect to MSI...` error, WHAT IS REALLY THE PROBLEM?  Is your resourceID wrong?  Does your resource not allow access tokens?
       text: >
         az account get-access-token --resource myResourceID
         az account get-access-token --resource https://database.windows.net --output tsv
@@ -139,12 +149,12 @@ examples:
         
     - name: Get an access token for a particular scope
       text: >
-        az account get-access-token --scope <need example>
+        az account get-access-token --scope NEED EXAMPLE
         az account get-access-token --scope 
 """
 
 helps['self-test'] = """
 type: command
 short-summary: Runs a self-test of the CLI.
-long-summary: <Need more information here>
+long-summary: NEED MORE INFORMATION HERE
 """
