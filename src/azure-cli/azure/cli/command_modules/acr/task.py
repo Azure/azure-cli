@@ -411,11 +411,21 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     else:
         branch = _get_branch_name(context_path)
 
-    # When update encoded task, existing encoded_task_content in the step cannot be decoded for update.
     if context_path is None:
-        if cmd_value is not None or timeout is not None or file is not None:
+        encoded_task_content = None
+        # When cmd_value is given or file is given,
+        # regenerate encoded_task_content
+        if cmd_value is not None or file is not None:
+            yaml_template = get_yaml_template(
+                cmd_value, timeout, file)
+            import base64
+            encoded_task_content = base64.b64encode(
+                yaml_template.encode()).decode()
+        # When only timeout is given,
+        # encoded_task_content cannot be patched
+        elif timeout is not None:
             raise CLIError(
-                "cannot update the task with change of cmd or timeout or file, please use create instead")
+                "cannot update the task with change of 'timeout' only, please use create instead")
 
     if git_access_token is None:
         git_access_token = step.context_access_token
@@ -424,6 +434,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         step=step,  # Need exisiting step for update
         context_path=context_path,
         cmd=cmd,
+        encoded_task_content=encoded_task_content,
         file=file,
         image_names=image_names,
         values=values,
@@ -518,6 +529,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 def update_task_step(step,
                      context_path,
                      cmd,
+                     encoded_task_content,
                      file,
                      image_names,
                      values,
@@ -583,8 +595,11 @@ def update_task_step(step,
                 )
     # If context_path is None, update the encoded task
     else:
+        # If encoded_task_content is None, use the existing one
+        if encoded_task_content is None:
+            encoded_task_content = step.encoded_task_content
         step = EncodedTaskStepUpdateParameters(
-            encoded_task_content=step.encoded_task_content,
+            encoded_task_content=encoded_task_content,
             context_path=context_path,
             context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
