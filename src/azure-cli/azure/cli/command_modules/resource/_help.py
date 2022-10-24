@@ -1155,16 +1155,38 @@ examples:
 
 helps['group'] = """
 type: group
-short-summary: Manage resource groups and template deployments.
+short-summary: Manage Azure resource groups and template deployments.
 """
 
 helps['group create'] = """
 type: command
-short-summary: Create a new resource group.
+short-summary: Create a resource group.
 examples:
   - name: Create a new resource group in the West US region.
     text: >
-        az group create -l westus -n MyResourceGroup
+        az group create --location westus --name MyResourceGroup
+  - name: >
+      Create a new resource group from a variable using a random ID.
+      Adding radom IDs to the resource group name will allow you to run a script repeatedly without having to wait for all resources in the prior group to be deleted.
+    text: >
+        let "randomIdentifier=$RANDOM*$RANDOM"
+        location="East US"
+        resourceGroup="rg-$randomIdentifier"
+        az group create --name $resourceGroup --location $location
+   - name: >
+      Create a resource group but only if it does not exist.
+    text: >
+        # run this script in a Docker Container
+        resourceGroup="myResourceGroup"
+        location="eastus"
+        if [ $(az group exists --name $resourceGroup) = false ]; then 
+          az group create --name $resourceGroup --location $location
+        else
+          echo The $resourceGroup resource group already exists.
+        fi 
+
+        # run this script in Azure Cloud Shell
+        -- Chase Crum to supply.  Also check with az CLI engineering team
 """
 
 helps['group delete'] = """
@@ -1173,7 +1195,21 @@ short-summary: Delete a resource group.
 examples:
   - name: Delete a resource group.
     text: >
-        az group delete -n MyResourceGroup
+        az group delete --name MyResourceGroup
+   - name: >
+      Delete a resource group but only if it exists.  Bypass the confirmation prompt.  Do not wait for the operation to finish.
+      This script runs best in a Docker Container.
+    text: >
+        # run this script in a Docker Container
+        resourceGroup=myResourceGroup
+        location=eastus
+        if [ $(az group exists --name $resourceGroup) = true ]; then 
+          az group delete --name $resourceGroup --yes  --no-wait
+        else
+          echo The $resourceGroup resource group does not exist.
+        fi 
+        # run this script in Azure Cloud Shell
+        --check with az CLI engineering team
 """
 
 helps['group deployment'] = """
@@ -1189,7 +1225,7 @@ parameters:
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        It is recommended that you supply your parameter file first, and then override selectively using KEY=VALUE syntax.
 examples:
   - name: Create a deployment from a remote template file, using parameters from a local JSON file.
     text: >
