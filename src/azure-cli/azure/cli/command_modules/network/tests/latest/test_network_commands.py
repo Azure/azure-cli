@@ -3732,8 +3732,8 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
 
         # test add --probe-threshold parameter.
-        self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 5', checks=self.check('[0].probeThreshold', 5))
-        self.cmd('network lb probe update -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 6', checks=self.check('[0].probeThreshold', 6))
+        self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 5', checks=self.check('probeThreshold', 5))
+        self.cmd('network lb probe update -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 6', checks=self.check('probeThreshold', 6))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_rules', location='eastus2')
     def test_network_lb_rules(self, resource_group):

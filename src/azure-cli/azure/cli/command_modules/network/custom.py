@@ -4748,7 +4748,7 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
 
 
 def create_lb_probe_latest(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                    path=None, interval=None, threshold=None, probe_threshold=None):
+                           path=None, interval=None, threshold=None, probe_threshold=None):
     from .aaz.latest.network.lb import Show
     lb = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': load_balancer_name})
     probe_args = {
@@ -4772,11 +4772,11 @@ def create_lb_probe_latest(cmd, resource_group_name, load_balancer_name, item_na
 
     from .aaz.latest.network.lb import Create
     poller = Create(cli_ctx=cmd.cli_ctx)(command_args=lb).result()['probes']
-    return [probe for probe in poller if probe['name'] == item_name]
+    return [probe for probe in poller if probe['name'] == item_name][0]
 
 
 def set_lb_probe_latest(cmd, resource_group_name, load_balancer_name, item_name, protocol=None, port=None,
-                 path=None, interval=None, threshold=None, probe_threshold=None):
+                        path=None, interval=None, threshold=None, probe_threshold=None):
     from .aaz.latest.network.lb import Show
     lb = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': load_balancer_name})
     for probe in lb['probes']:
@@ -4803,7 +4803,7 @@ def set_lb_probe_latest(cmd, resource_group_name, load_balancer_name, item_name,
     lb['resource_group'] = resource_group_name
     from .aaz.latest.network.lb import Update
     poller = Update(cli_ctx=cmd.cli_ctx)(command_args=lb).result()['probes']
-    return [probe for probe in poller if probe['name'] == item_name]
+    return [probe for probe in poller if probe['name'] == item_name][0]
 
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
