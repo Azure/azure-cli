@@ -519,6 +519,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        min_api='2021-01-01',
                        help='Resource identifier of the UserAssigned identity to be associated with server-side '
                             'encryption on the storage account.')
+            c.argument('federated_identity_client_id', options_list=['--key-vault-federated-client-id', '-f'],
+                       min_api='2021-08-01',
+                       help='ClientId of the multi-tenant application to be used '
+                            'in conjunction with the user-assigned identity for '
+                            'cross-tenant customer-managed-keys server-side encryption on the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
