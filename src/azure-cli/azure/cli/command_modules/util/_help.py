@@ -73,3 +73,8 @@ helps['demo secret-store load'] = """
 type: command
 short-summary: Load custom data from secret store.
 """
+
+helps['dev'] = """
+type: group
+short-summary: Run Azure Developer CLI
+"""
