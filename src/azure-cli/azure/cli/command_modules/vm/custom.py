@@ -699,7 +699,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
-        option = DiskCreateOption.import_enum
+        option = DiskCreateOption.IMPORT
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
         if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
