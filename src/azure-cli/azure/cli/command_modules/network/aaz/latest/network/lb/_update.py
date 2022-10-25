@@ -61,12 +61,12 @@ class Update(AAZCommand):
 
         # define Arg Group "Parameters"
 
-        # define Arg Group "Properties"
+        # define Arg Group "Probe"
 
         _args_schema = cls._args_schema
         _args_schema.probes = AAZListArg(
             options=["--probes"],
-            arg_group="Properties",
+            arg_group="Probe",
             help="Collection of probe objects used in the load balancer.",
             nullable=True,
         )
