@@ -599,7 +599,7 @@ class TestStaticAppCommands(unittest.TestCase):
         )
         link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id, self.environment1)
 
-        self.staticapp_client.begin_register_user_provided_function_app_with_static_site.assert_called_once()
+        self.staticapp_client.begin_register_user_provided_function_app_with_static_site_build.assert_called_once()
 
     @mock.patch("azure.cli.command_modules.appservice.static_sites.get_user_function", return_value=[mock.MagicMock()])
     def test_functions_unlink(self, *args, **kwargs):
