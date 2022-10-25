@@ -48,7 +48,7 @@ examples:
   - name: Create a Synapse workspace with managed resource group
     text: |-
         az synapse workspace create --name testworkspace --resource-group rg \\
-          --managed-resource-group-name managedrg \\
+          --managed-rg-name managedrg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
 """

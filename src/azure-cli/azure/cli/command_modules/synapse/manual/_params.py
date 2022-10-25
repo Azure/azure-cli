@@ -117,7 +117,8 @@ def load_arguments(self, _):
         c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
         c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
-        c.argument('managed_resource_group_name', help=' Workspace managed resource group. The resource group name uniquely identifies the resource group within the user subscriptionId.')
+        c.argument('managed_resource_group_name', options_list=['--managed-rg-name'],
+                   help=' Workspace managed resource group. The resource group name uniquely identifies the resource group within the user subscriptionId.')
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
