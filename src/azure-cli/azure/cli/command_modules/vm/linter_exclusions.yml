@@ -144,4 +144,12 @@ sig image-version create:
         target_region_cvm_encryption:
             rule_exclusions:
             - option_length_too_long
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+sig image-version update:
+    parameters:
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
 ...
