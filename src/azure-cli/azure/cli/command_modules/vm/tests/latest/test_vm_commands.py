@@ -798,23 +798,25 @@ class TestSnapShotAccess(ScenarioTest):
         self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
     @ResourceGroupPreparer(name_prefix='test_snapshot_create_with_source_blob_uri')
-    @StorageAccountPreparer()
-    def test_snapshot_create_with_source_blob_uri(self, resource_group, resource_group_location, storage_account_info):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
+    def test_snapshot_create_with_source_blob_uri(self, resource_group):
         self.kwargs.update({
-            'account': storage_account_info[0],
-            'storage_key': storage_account_info[1],
-            'container': self.create_random_name('container', 15),
-            'blob': self.create_random_name('blob', 15),
-            'f1': os.path.join(curr_dir, 'my_app_installer.txt').replace('\\', '\\\\'),
+            'vm': self.create_random_name('vm', 10),
             'snapshot': self.create_random_name('snap', 10)
     })
-        self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
-        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
-        message = 'The size of the blob being imported is invalid. The blob size is 0 bytes. Supported sizes are between 20971520 Bytes and 8192 GiB.'
-        from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, message):
-            self.cmd('snapshot create --resource-group {rg} --name {snapshot} --source https://{account}.blob.core.windows.net/{container}/{blob}')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        vm_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_vhd_uri': vm_info['storageProfile']['osDisk']['vhd']['uri'],
+        })
+        storage_account = self.cmd('storage account list -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'account_id': storage_account[0]['id'],
+        })
+        self.cmd('snapshot create -g {rg} -n {snapshot} --source {os_disk_vhd_uri} --source-storage-account-id {account_id}', checks=[
+            self.check('creationData.createOption', 'Import'),
+            self.check('creationData.sourceUri', '{os_disk_vhd_uri}')
+        ])
+
 
 class VMAttachDisksOnCreate(ScenarioTest):
 
