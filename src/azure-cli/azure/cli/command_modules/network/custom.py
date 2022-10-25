@@ -6531,7 +6531,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
         if is_valid_resource_id(public_ip_prefix):
             public_ip_prefix_id = public_ip_prefix
-            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
+            metadata = parse_resource_id(public_ip_prefix)
+            resource_group_name = metadata['resource_group']
+            public_ip_prefix_name = metadata['resource_name']
         else:
             public_ip_prefix_id = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
