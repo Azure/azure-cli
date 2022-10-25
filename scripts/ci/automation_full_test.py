@@ -21,7 +21,7 @@ logger.addHandler(ch)
 
 # sys.argv is passed by
 # .azure-pipelines/templates/automation_test.yml in section `Running full test`
-# scripts/bump_version/bump_version.yml in `azdev test` step
+# scripts/regression_test/regression_test.yml in section "Rerun tests"
 instance_cnt = int(sys.argv[1])
 instance_idx = int(sys.argv[2])
 profile = sys.argv[3]

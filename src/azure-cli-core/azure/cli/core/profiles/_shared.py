@@ -162,7 +162,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2022-03-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2022-01-03',
+            'gallery_image_versions': '2022-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
@@ -412,7 +412,6 @@ AZURE_API_PROFILES = {
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
-        'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'
     },

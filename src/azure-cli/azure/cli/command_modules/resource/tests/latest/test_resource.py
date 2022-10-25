@@ -200,7 +200,7 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check('tags', {}))
 
         # delete and verify
-        self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
+        self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt} --no-wait')
         time.sleep(10)
         self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
 
@@ -452,7 +452,7 @@ class TagScenarioTest(ScenarioTest):
             self.cmd('resource tag --ids {vault_id} --tags "" -i ')
         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vault_id} --no-wait', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_default_location_scenario', location='westus')
     def test_tag_default_location_scenario(self, resource_group, resource_group_location):
