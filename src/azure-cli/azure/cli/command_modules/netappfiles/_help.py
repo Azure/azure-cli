@@ -386,7 +386,7 @@ short-summary: Renew identity credentials that are used to authenticate to key v
 examples:
   - name: Renew identity credentials for account
     text: >
-        az netappfiles account renew-credentials -g mygroup --account-name myaccname
+        az netappfiles account renew-credentials -g mygroup --account-name myaccountname
 """
 
 helps['netappfiles pool'] = """
