@@ -6,11 +6,13 @@
 # pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 import importlib
 import os
+import copy
 from functools import partial
 
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
+from knack.arguments import CLIArgumentType
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
@@ -166,9 +168,10 @@ class AAZCommand(CLICommand):
         """ This function is called by core to add global arguments
         """
         schema = self.get_arguments_schema()
-        # not support to overwrite arguments defined in schema
-        if not hasattr(schema, param_name):
-            super().update_argument(param_name, argtype)
+        if hasattr(schema, param_name):
+            # not support to overwrite arguments defined in schema, use arg.type as overrides
+            argtype = copy.deepcopy(self.arguments[param_name].type)
+        super().update_argument(param_name, argtype)
 
     @staticmethod
     def deserialize_output(value, client_flatten=True):
