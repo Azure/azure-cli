@@ -787,13 +787,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features IsAcceleratedNetworkSupported=true
-  - name: Create an image definition for images that can be used to create Trusted VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchSupported
   - name: Create an image definition for images that can only be used to create Trusted VMs. Only Trusted VMs can be created from this image.
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -815,13 +808,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
-  - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -1160,8 +1146,7 @@ short-summary: Share gallery with subscriptions and tenants
 examples:
   - name: Share entire gallery with all members of a subscription and/or tenant.
     text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery
-        --gallery-image-definition MyImage \\
+        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery \\
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
 

@@ -5769,6 +5769,28 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+    @ResourceGroupPreparer(location='CentralUSEUAP')
+    def test_create_image_version_with_allow_replicated_location_deletion(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 10),
+            'gallery': self.create_random_name('gallery_', 20),
+            'image': self.create_random_name('image', 15),
+            'version': '1.1.1',
+            'captured': self.create_random_name('captured', 15),
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --allow-replicated-location-deletion True --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}', checks=[
+            self.check('safetyProfile.allowDeletionOfReplicatedLocations', True)
+        ])
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --allow-replicated-location-deletion False', checks=[
+            self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
+        ])
+
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
         self.kwargs.update({
