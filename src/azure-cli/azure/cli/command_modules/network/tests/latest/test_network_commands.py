@@ -3300,8 +3300,6 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         for i in range(1, 4):
             self.cmd('network cross-region-lb probe create -g {{rg}} --lb-name {{lb}} -n probe{0} --port {0} --protocol http --path "/test{0}"'.format(i))
-        self.cmd('network lb probe list -g {rg} --lb-name {lb}',
-                 checks=self.check('length(@)', 3))
         self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --interval 20 --threshold 5')
         self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe2 --protocol tcp --path ""')
         self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
