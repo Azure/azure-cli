@@ -776,7 +776,8 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 remove_monitoring=True,
                 aad_route=True,
                 create_dcr=False,
-                create_dcra=True
+                create_dcra=True,
+                enable_syslog=False,
             )
     except TypeError:
         pass
