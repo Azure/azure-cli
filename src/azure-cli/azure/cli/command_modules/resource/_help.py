@@ -1179,7 +1179,7 @@ examples:
         # run this script in a Docker Container
         resourceGroup="myResourceGroup"
         location="eastus"
-        if [ $(az group exists --name $resourceGroup) = false ]; then 
+        if [ $(az group exists --name $resourceGroup --output json) = false ]; then 
           az group create --name $resourceGroup --location $location
         else
           echo The $resourceGroup resource group already exists.
@@ -1198,18 +1198,14 @@ examples:
         az group delete --name MyResourceGroup
    - name: >
       Delete a resource group but only if it exists.  Bypass the confirmation prompt.  Do not wait for the operation to finish.
-      This script runs best in a Docker Container.
     text: >
-        # run this script in a Docker Container
         resourceGroup=myResourceGroup
         location=eastus
-        if [ $(az group exists --name $resourceGroup) = true ]; then 
+        if [ $(az group exists --name $resourceGroup --output json) = true ]; then 
           az group delete --name $resourceGroup --yes  --no-wait
         else
           echo The $resourceGroup resource group does not exist.
         fi 
-        # run this script in Azure Cloud Shell
-        --check with az CLI engineering team
 """
 
 helps['group deployment'] = """
