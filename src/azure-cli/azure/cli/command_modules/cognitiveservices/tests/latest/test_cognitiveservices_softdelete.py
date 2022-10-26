@@ -13,6 +13,7 @@ from knack.util import CLIError
 
 class CognitiveServicesTests(ScenarioTest):
     @ResourceGroupPreparer()
+    @AllowLargeResponse()
     def test_cognitiveservices_softdelete(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
         customdomain = self.create_random_name(prefix='csclitest', length=16)
@@ -21,7 +22,7 @@ class CognitiveServicesTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'centraluseuap',
+            'location': 'SOUTHCENTRALUS',
             'customdomain': customdomain
         })
 
