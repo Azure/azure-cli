@@ -79,13 +79,13 @@ short-summary: Get the details of a subscription.
 long-summary: >
     If no subscription is specified, information for the current subscription is returned.
 examples:
-    - name: Get the current default subscription returning results as a table.  Use `--output yaml` for plain text. 
+    - name: Get the current default subscription returning results in your default format.  
       text: >
-        az account show --output table
-    - name: Get information about a different subscription returning results as a table.
+        az account show
+    - name: Get information about a named subscription returning results as a table.  Use `--output yaml` for plain text.
       text: >
         az account show --name "My subscription name" --output table
-    - name: Get information about a different subscription using the subscription ID.
+    - name: Get information about a subscription using the subscription ID.
       text: >
         az account show --name 00000000-0000-0000-0000-000000000000
     - name: >
@@ -97,7 +97,11 @@ examples:
         az account show --query user.name
     - name: Return results in plain text.
       text: >
-        az account show --query tenantId -o tsv
+        az account show --query tenantId --output tsv
+    - name: Store the default subscription ID in a variable
+      text: >
+        subscriptionId="$(az account show --query id --output tsv)"
+        echo "The current subscription ID is $subscriptionId"
 """
 
 helps['account set'] = """
@@ -112,8 +116,9 @@ examples:
         az account set --subscription 00000000-0000-0000-0000-000000000000
     - name: Change the active subscription using a variable
       text: >
-        subscriptionId = "$(az account list --query "[?isDefault].id" -o tsv)"
+        subscriptionId="$(az account list --query "[?isDefault].id" --output tsv)"
         az account set --subscription $subscriptionId
+        echo "The current subscription has been set to $subscriptionId"
 """
 
 helps['account get-access-token'] = """
