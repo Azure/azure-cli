@@ -104,6 +104,7 @@ ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDe
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
 ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfileDiskCSIDriver')
 ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
+ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfileBlobCSIDriver')
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
 
 # TODO
@@ -594,6 +595,45 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return profile
 
+    def get_blob_driver(self) -> Optional[ManagedClusterStorageProfileBlobCSIDriver]:
+        """Obtain the value of storage_profile.blob_csi_driver
+        :return: Optional[ManagedClusterStorageProfileBlobCSIDriver]
+        """
+        enable_blob_driver = self.raw_param.get("enable_blob_driver")
+        disable_blob_driver = self.raw_param.get("disable_blob_driver")
+
+        if enable_blob_driver is None and disable_blob_driver is None:
+            return None
+
+        profile = self.models.ManagedClusterStorageProfileBlobCSIDriver()
+
+        if enable_blob_driver and disable_blob_driver:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-blob-driver and "
+                "--disable-blob-driver at the same time."
+            )
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if enable_blob_driver:
+                profile.enabled = True
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if enable_blob_driver:
+                msg = "Please make sure there is no open-source Blob CSI driver installed before enabling."
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = True
+            elif disable_blob_driver:
+                msg = (
+                    "Please make sure there are no existing PVs and PVCs "
+                    "that are used by Blob CSI driver before disabling."
+                )
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = False
+
+        return profile
+
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
 
@@ -642,6 +682,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             profile = self.mc.storage_profile
         profile.disk_csi_driver = self.get_disk_driver()
         profile.file_csi_driver = self.get_file_driver()
+        profile.blob_csi_driver = self.get_blob_driver()
         profile.snapshot_controller = self.get_snapshot_controller()
 
         return profile

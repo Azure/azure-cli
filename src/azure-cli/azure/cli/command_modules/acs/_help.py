@@ -413,6 +413,9 @@ parameters:
   - name: --disable-snapshot-controller
     type: bool
     short-summary: Disable CSI Snapshot Controller.
+  - name: --enable-blob-driver
+    type: bool
+    short-summary: Enable AzureBlob CSI Driver.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
@@ -683,6 +686,12 @@ parameters:
   - name: --disable-snapshot-controller
     type: bool
     short-summary: Disable CSI Snapshot Controller.
+  - name: --enable-blob-driver
+    type: bool
+    short-summary: Enable AzureBlob CSI Driver.
+  - name: --disable-blob-driver
+    type: bool
+    short-summary: Disable AzureBlob CSI Driver.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
