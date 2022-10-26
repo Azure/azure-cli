@@ -354,10 +354,9 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
 
 
 def is_cloud_shell_system_extension(ext_path):
-    import re
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
-        if re.search(r'^/usr/lib/python3\.\d+/site-packages/azure-cli-extensions/', ext_path):
+        if ext_path.startswith('/usr/lib/python3'):
             return True
     return False
 
