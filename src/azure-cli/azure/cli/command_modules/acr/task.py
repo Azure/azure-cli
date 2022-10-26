@@ -9,6 +9,7 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import user_confirmation
 from ._utils import (
     get_registry_by_name,
@@ -424,7 +425,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         # When only timeout is given,
         # encoded_task_content cannot be patched
         elif timeout is not None:
-            raise CLIError(
+            raise IncorrectUsageError(
                 "cannot update the task with change of 'timeout' only, please use create instead")
 
     if git_access_token is None:
@@ -558,7 +559,7 @@ def update_task_step(step,
                     values_file_path=values,
                     context_path=context_path,
                     context_access_token=git_access_token,
-                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                    values=set_values
                 )
             else:
                 step = DockerBuildStepUpdateParameters(
@@ -566,7 +567,7 @@ def update_task_step(step,
                     is_push_enabled=not no_push,
                     no_cache=no_cache,
                     docker_file_path=file,
-                    arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                    arguments=arguments,
                     context_path=context_path,
                     context_access_token=git_access_token,
                     target=target
@@ -602,7 +603,7 @@ def update_task_step(step,
             encoded_task_content=encoded_task_content,
             context_path=context_path,
             context_access_token=git_access_token,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+            values=set_values
         )
     return step
 
