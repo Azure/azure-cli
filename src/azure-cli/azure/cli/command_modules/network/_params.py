@@ -2146,6 +2146,7 @@ def load_arguments(self, _):
         c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
     with self.argument_context('network bastion rdp') as c:
         c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
+        c.argument('configure', help='Flag to configure RDP session.', action='store_true')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
