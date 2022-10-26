@@ -1053,13 +1053,13 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --target-regions westcentralus=2 eastus2
-  - name: Replicate to an additional region. Optional, you can set the replica count for the region.
+  - name: Replicate to an additional region. Optional, you can set the replica count for the region and the flag setting to hide an image when specifing version='latest'.
     text: |
         az sig image-version update --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --add publishingProfile.targetRegions name=westcentralus \\
-        regionalReplicaCount=3
+        regionalReplicaCount=3 excludeFromLatest=true
   - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
@@ -1070,6 +1070,11 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set publishingProfile.endOfLifeDate=2024-08-02T00:00:00+00:00
+  - name: Change whether or not removing this gallery image version from replicated regions is allowed.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --set safetyProfile.allowDeletionOfReplicatedLocations=true
 """
 
 helps['sig image-version list-community'] = """
