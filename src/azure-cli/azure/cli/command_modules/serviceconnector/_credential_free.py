@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import random_string
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import ArmTemplateBuilder
-from ._utils import run_cli_cmd, generate_random_string
+from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed, install_package
 from ._resource_config import (
     RESOURCE,
 )
@@ -208,17 +208,14 @@ class MysqlFlexibleHandler(TargetHandler):
         #     run_cli_cmd('az mysql server update --public Disabled --ids {}'.format(target_id))
 
     def create_aad_user_in_mysql(self, connection_kwargs, query_list):
-        import pkg_resources
-        installed_packages = pkg_resources.working_set
-        # pylint: disable=not-an-iterable
-        pym_installed = any(('pymysql') in d.key.lower()
-                            for d in installed_packages)
-        if not pym_installed:
-            import pip
-            pip.main(['install', 'pymysql'])
+        if not is_packaged_installed('pymysql'):
+            install_package("pymysql")
         # pylint: disable=import-error
-        import pymysql
-        from pymysql.constants import CLIENT
+        try:
+            import pymysql
+            from pymysql.constants import CLIENT
+        except ModuleNotFoundError:
+            raise CLIError("Dependency pymysql can't be installed, please install it manually with `pip install pymysql`.")
 
         connection_kwargs['client_flag'] = CLIENT.MULTI_STATEMENTS
         try:
@@ -338,20 +335,19 @@ class SqlHandler(TargetHandler):
             return False
 
     def create_aad_user_in_sql(self, connection_args, query_list):
-        import pkg_resources
-        installed_packages = pkg_resources.working_set
-        # pylint: disable=not-an-iterable
-        psy_installed = any(('pyodbc') in d.key.lower()
-                            for d in installed_packages)
 
-        if not psy_installed:
-            import pip
-            pip.main(['install', 'pyodbc'])
+        if not is_packaged_installed('pyodbc'):
             logger.warning(
+                "Dependency pyodbc is not installed and will be installed dynamically.")
+            install_package("pyodbc")
+
+        # pylint: disable=import-error, c-extension-no-member
+        try:
+            import pyodbc
+        except ModuleNotFoundError:
+            raise CLIError(
                 "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16 "
                 "and run 'pip install pyodbc'")
-        # pylint: disable=import-error, c-extension-no-member
-        import pyodbc
         try:
             with pyodbc.connect(connection_args.get("connection_string"), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:
@@ -400,7 +396,10 @@ class PostgresFlexHandler(TargetHandler):
         self.dbname = target_segments.get('child_name_1')
 
     def enable_pg_extension(self):
-        run_cli_cmd('az postgres flexible-server parameter set -g {} -s {} --subscription {} --name azure.extensions --value uuid-ossp'.format(self.resource_group, self.db_server, self.subscription))
+        try:
+            run_cli_cmd('az postgres flexible-server parameter set -g {} -s {} --subscription {} --name azure.extensions --value uuid-ossp'.format(self.resource_group, self.db_server, self.subscription))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning(e)
 
     def enable_target_aad_auth(self):
         self.enable_pg_extension()
@@ -534,17 +533,15 @@ class PostgresFlexHandler(TargetHandler):
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def create_aad_user_in_pg(self, conn_string, query_list):
-        import pkg_resources
-        installed_packages = pkg_resources.working_set
-        # pylint: disable=not-an-iterable
-        psy_installed = any(('psycopg2') in d.key.lower()
-                            for d in installed_packages)
-        if not psy_installed:
+        if not is_packaged_installed('psycopg2'):
             _install_deps_for_psycopg2()
-            import pip
-            pip.main(['install', 'psycopg2-binary'])
+            install_package("psycopg2-binary")
         # pylint: disable=import-error
-        import psycopg2
+        try:
+            import psycopg2
+        except ModuleNotFoundError:
+            raise CLIError(
+                "Dependency psycopg2 can't be installed, please install it manually with `pip install psycopg2-binary`.")
 
         # pylint: disable=protected-access
         try:
