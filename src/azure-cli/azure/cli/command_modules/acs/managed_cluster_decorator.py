@@ -624,7 +624,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                     raise DecoratorEarlyExitException()
                 profile.enabled = True
             elif disable_blob_driver:
-                msg = "Please make sure there are no existing PVs and PVCs that are used by Blob CSI driver before disabling."
+                msg = (
+                    "Please make sure there are no existing PVs and PVCs "
+                    "that are used by Blob CSI driver before disabling."
+                )
                 if not self.get_yes() and not prompt_y_n(msg, default="n"):
                     raise DecoratorEarlyExitException()
                 profile.enabled = False
