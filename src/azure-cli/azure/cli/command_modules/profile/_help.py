@@ -9,20 +9,19 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['login'] = """
 type: command
-short-summary: Log into Azure.
+short-summary: Log in to Azure.
 examples:
     - name: Log in interactively.
       text: >
         az login
-    - name: > 
-        Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. 
-        Use `-p=secret` if the first character of the password is `-`.
+    - name:  
+        Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled.
       text: >
         az login --user johndoe@contoso.com --password VerySecret
-    - name: > 
+    - name:
         Log in with a password containing a `-` as the first character.    
       text: >
-        az login --user johndoe@contoso.com --password secret -myPasswordThatStartsWithAdash
+        az login --user johndoe@contoso.com --password=-myPasswordThatStartsWithAdash
     - name: Log in with a service principal using a client secret.
       text: >
         az login --service-principal --user http://azure-cli-2016-08-05-14-31-15 --password VerySecret --tenant contoso.onmicrosoft.com
@@ -41,8 +40,8 @@ helps['account'] = """
 type: group
 short-summary: Manage Azure subscription information.
 long-summary: >
-  For an in-depth overview of working with subscriptions using the Azure CLI, see
-  `https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli`
+    For an in-depth overview of working with subscriptions using the Azure CLI, see
+    [How to manage Azure subscriptions with the Azure CLI](https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli)
 """
 
 helps['account clear'] = """
@@ -80,11 +79,9 @@ short-summary: Get the details of a subscription.
 long-summary: >
     If no subscription is specified, information for the current subscription is returned.
 examples:
-    - name: >
-        Get the current default subscription returning results as JSON.  Use `--output yaml` for plain text. 
-        You can also get details of the current subscription by using `az account list --query "[?isDefault]"`.
+    - name: Get the current default subscription returning results as a table.  Use `--output yaml` for plain text. 
       text: >
-        az account show --output json
+        az account show --output table
     - name: Get information about a different subscription returning results as a table.
       text: >
         az account show --name "My subscription name" --output table
@@ -94,10 +91,10 @@ examples:
     - name: >
         Get information about a subscription using `query`.  
         To see available query options, first run `az account show --output json`.
+        For in-depth `--query` examples see [How to query Azure CLI command output using a JMESPath query](https://learn.microsoft.com/en-us/cli/azure/query-azure-cli).
       text: >
         az account show --query name
         az account show --query user.name
-        az account show --query tenantId
     - name: Return results in plain text.
       text: >
         az account show --query tenantId -o tsv
@@ -124,7 +121,7 @@ type: command
 short-summary: Get a token for utilities to access Azure.
 long-summary: >
     The token will be valid for at least 5 minutes with a maximum of 60 minutes.
-    If the subscription parameter isn't specified, the current account is used.
+    If the subscription argument isn't specified, the current account is used.
 examples:
     - name: Get an access token for the current account
       text: >
@@ -139,22 +136,17 @@ examples:
       text: >
         az account get-access-token --resource-type ms-graph
     - name: >
-        Get an access token for a particular resource.  For a list of Virtual Network available service endpoints,
-        see `https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview`.  
-        If you receive a `Failed to connect to MSI...` error, WHAT IS REALLY THE PROBLEM?  Is your resourceID wrong?  Does your resource not allow access tokens?
+        Get an access token for a particular resource.  If you receive a `Failed to connect to MSI...` error, your resource may not exist.
       text: >
         az account get-access-token --resource myResourceID
         az account get-access-token --resource https://database.windows.net --output tsv
         az account get-access-token --resource https://management.core.windows.net/ --query accessToken --output tsv
-        
     - name: Get an access token for a particular scope
       text: >
-        az account get-access-token --scope NEED EXAMPLE
-        az account get-access-token --scope 
+        az account get-access-token --scope https://management.azure.com//.default
 """
 
 helps['self-test'] = """
 type: command
 short-summary: Runs a self-test of the CLI.
-long-summary: NEED MORE INFORMATION HERE
 """
