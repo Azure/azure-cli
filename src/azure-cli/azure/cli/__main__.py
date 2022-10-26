@@ -14,6 +14,7 @@ import uuid
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
 from azure.cli.core.intercept_survey import prompt_survey_message
+from azure.cli.core.style import Style, print_styled_text
 from azure.cli.command_modules.util.custom import azd_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
@@ -23,8 +24,12 @@ __version__ = "2.41.0"
 
 # run azd
 if sys.argv and len(sys.argv) > 1 and sys.argv[1] == 'dev':
-    print("Running Azure Developer CLI")
+    print_styled_text((Style.SUCCESS,"Running Azure Developer CLI (azd) through Azure CLI. "))
     azd_cli(sys.argv[2:])
+    for args in sys.argv:
+        if args == '-h' or args == '--help':
+            print_styled_text((Style.SUCCESS,"You can replace `azd` with `az dev` in the above commands."))
+            break
     sys.exit()
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
