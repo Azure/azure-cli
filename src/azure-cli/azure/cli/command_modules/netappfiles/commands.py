@@ -131,6 +131,7 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.command('renew-credentials', 'begin_renew_credentials', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('netappfiles account ad', netappfiles_accounts_sdk) as g:
