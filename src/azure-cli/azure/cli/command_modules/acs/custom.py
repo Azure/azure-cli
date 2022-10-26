@@ -415,6 +415,7 @@ def aks_create(
     aad_server_app_id=None,
     aad_server_app_secret=None,
     aad_tenant_id=None,
+    enable_oidc_issuer=False,
     windows_admin_username=None,
     windows_admin_password=None,
     enable_ahub=False,
@@ -531,6 +532,7 @@ def aks_update(
     disable_azure_rbac=False,
     aad_tenant_id=None,
     aad_admin_group_object_ids=None,
+    enable_oidc_issuer=False,
     windows_admin_password=None,
     enable_ahub=False,
     disable_ahub=False,
@@ -2223,3 +2225,7 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
+
+
+def aks_rotate_service_account_signing_keys(cmd, client, resource_group_name, name, no_wait=True):
+    return sdk_no_wait(no_wait, client.begin_rotate_service_account_signing_keys, resource_group_name, name)
