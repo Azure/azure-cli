@@ -4574,12 +4574,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
-
-        if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-            GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionFullSource')
-        else:
-            GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
+        GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
         GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
         source = os_disk_image = data_disk_images = None
