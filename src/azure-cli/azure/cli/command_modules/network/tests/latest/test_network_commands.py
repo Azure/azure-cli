@@ -3300,8 +3300,6 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         for i in range(1, 4):
             self.cmd('network cross-region-lb probe create -g {{rg}} --lb-name {{lb}} -n probe{0} --port {0} --protocol http --path "/test{0}"'.format(i))
-        self.cmd('network lb probe list -g {rg} --lb-name {lb}',
-                 checks=self.check('length(@)', 3))
         self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --interval 20 --threshold 5')
         self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe2 --protocol tcp --path ""')
         self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
@@ -3750,7 +3748,13 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         # test --probe-threshold parameter
         self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 5', checks=self.check('probeThreshold', 5))
+        self.cmd('network lb probe show -g {rg} --lb-name {lb2} -n {probe5}', checks=self.check('probeThreshold', 5))
         self.cmd('network lb probe update -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 6', checks=self.check('probeThreshold', 6))
+        self.cmd('network lb probe show -g {rg} --lb-name {lb2} -n {probe5}', checks=self.check('probeThreshold', 6))
+        self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=[
+            self.check('length(@)', 2),
+            self.check('[1].probeThreshold', 6)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_rules', location='eastus2')
     def test_network_lb_rules(self, resource_group):

@@ -764,8 +764,7 @@ def load_command_table(self, _):
         'frontend_ip_configurations': 'frontend-ip',
         'inbound_nat_rules': 'inbound-nat-rule',
         'inbound_nat_pools': 'inbound-nat-pool',
-        'load_balancing_rules': 'rule',
-        'probes': 'probe',
+        'load_balancing_rules': 'rule'
     }
     for subresource, alias in property_map.items():
         with self.command_group('network lb {}'.format(alias), network_util) as g:
@@ -837,6 +836,9 @@ def load_command_table(self, _):
     with self.command_group('network lb probe') as g:
         g.custom_command('create', 'create_lb_probe')
         g.custom_command('update', 'set_lb_probe')
+
+    with self.command_group('network lb probe', network_util) as g:
+        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
