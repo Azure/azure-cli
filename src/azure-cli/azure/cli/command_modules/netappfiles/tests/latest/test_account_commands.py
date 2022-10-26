@@ -227,7 +227,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
                 self.check('encryption.keySource', '{keySource}')
             ])
 
-    #@unittest.skip('(servicedeployment) api has not been deployed cannot test untill finilized')
+    #@unittest.skip('(servicedeployment) api has not been deployed cannot test until finalized')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_account_renew_credentials_fails(self):
         self.kwargs.update({
