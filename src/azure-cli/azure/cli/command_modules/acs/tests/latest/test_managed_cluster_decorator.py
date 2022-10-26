@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-from pickle import FALSE
 import unittest
 from unittest.mock import Mock, call, patch, ANY
 
