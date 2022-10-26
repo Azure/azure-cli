@@ -15,12 +15,12 @@ long-summary: >
     attaches header `Authorization: Bearer <token>`, where `<token>` is retrieved from AAD. The target resource of the
     token is derived from --url if --url starts with an endpoint from `az cloud show --query endpoints`. You may also
     use --resource for a custom resource.
-    
+
 
     If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
     application/json.
-    
-    
+
+
     For passing JSON in PowerShell, see https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md
 examples:
   - name: Get Audit log through Microsoft Graph
@@ -30,10 +30,10 @@ examples:
     text: |
         (Bash or CMD)
         az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"johndoe2\\"}"
-        
+
         (Bash)
         az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{"displayName": "johndoe2"}'
-        
+
         (PowerShell)
         az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{\\"displayName\\": \\"johndoe2\\"}'
   - name: Get a virtual machine
