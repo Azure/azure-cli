@@ -104,7 +104,7 @@ def remove_unused_api_versions(resource_type):
 
 def _print_folder_size(folder):
     size, count = calculate_folder_size(folder)
-    size_in_mb = size / 1048576
+    size_in_mb = size / 1048576  # 1 MB = 1024 * 1024 B = 1048576 B
     _LOGGER.info(f"{size_in_mb:.2f} MB, {count} files")
 
 
