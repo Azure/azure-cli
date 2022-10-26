@@ -55,19 +55,19 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
-            self.PublicIPAddressesListAll(ctx=self.ctx)()
-        if condition_1:
             self.PublicIPAddressesList(ctx=self.ctx)()
+        if condition_1:
+            self.PublicIPAddressesListAll(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -76,7 +76,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class PublicIPAddressesListAll(AAZHttpOperation):
+    class PublicIPAddressesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -90,7 +90,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/publicIPAddresses",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses",
                 **self.url_parameters
             )
 
@@ -105,6 +105,10 @@ class List(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
@@ -160,7 +164,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class PublicIPAddressesList(AAZHttpOperation):
+    class PublicIPAddressesListAll(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -174,7 +178,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/publicIPAddresses",
                 **self.url_parameters
             )
 
@@ -189,10 +193,6 @@ class List(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
@@ -1987,9 +1987,7 @@ def _build_schema_public_ip_address_read(_schema):
     )
     properties.public_ip_prefix = AAZObjectType(
         serialized_name="publicIPPrefix",
-        flags={"read_only": True},
     )
-    _build_schema_sub_resource_read(properties.public_ip_prefix)
     properties.resource_guid = AAZStrType(
         serialized_name="resourceGuid",
         flags={"read_only": True},
@@ -2002,12 +2000,13 @@ def _build_schema_public_ip_address_read(_schema):
     ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
     ddos_settings.ddos_protection_plan = AAZObjectType(
         serialized_name="ddosProtectionPlan",
-        flags={"read_only": True},
     )
-    _build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
     ddos_settings.protection_mode = AAZStrType(
         serialized_name="protectionMode",
     )
+
+    ddos_protection_plan = _schema_public_ip_address_read.properties.ddos_settings.ddos_protection_plan
+    ddos_protection_plan.id = AAZStrType()
 
     dns_settings = _schema_public_ip_address_read.properties.dns_settings
     dns_settings.domain_name_label = AAZStrType(
@@ -2094,6 +2093,9 @@ def _build_schema_public_ip_address_read(_schema):
 
     zones = _schema_public_ip_address_read.properties.nat_gateway.zones
     zones.Element = AAZStrType()
+
+    public_ip_prefix = _schema_public_ip_address_read.properties.public_ip_prefix
+    public_ip_prefix.id = AAZStrType()
 
     sku = _schema_public_ip_address_read.sku
     sku.name = AAZStrType()

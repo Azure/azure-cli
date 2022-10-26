@@ -215,7 +215,7 @@ class MysqlFlexibleHandler(TargetHandler):
                             for d in installed_packages)
         if not pym_installed:
             import pip
-            pip.main(['install', 'mycli'])
+            pip.main(['install', 'pymysql'])
         # pylint: disable=import-error
         import pymysql
         from pymysql.constants import CLIENT
@@ -258,7 +258,7 @@ class MysqlFlexibleHandler(TargetHandler):
             "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
             "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
                 self.aad_username, client_id),
-            "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'%';".format(
+            "GRANT ALL PRIVILEGES ON `{}`.* TO '{}'@'%';".format(
                 self.dbname, self.aad_username),
             "FLUSH privileges;"
         ]
@@ -590,7 +590,11 @@ class PostgresFlexHandler(TargetHandler):
             "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
                 self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
-                self.dbname, self.aad_username)]
+                self.dbname, self.aad_username),
+            'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "{}";'.format(
+                self.aad_username),
+            'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "{}";'.format(
+                self.aad_username)]
 
     def get_auth_config(self):
         if self.auth_type in {'systemAssignedIdentity'}:
@@ -665,7 +669,11 @@ class PostgresSingleHandler(PostgresFlexHandler):
             "CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
                 self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
-                self.dbname, self.aad_username)
+                self.dbname, self.aad_username),
+            'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "{}";'.format(
+                self.aad_username),
+            'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "{}";'.format(
+                self.aad_username)
         ]
 
 
