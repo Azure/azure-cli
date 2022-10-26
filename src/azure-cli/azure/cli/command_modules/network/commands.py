@@ -14,7 +14,7 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
-    cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
+    cf_express_route_service_providers, cf_load_balancers,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -26,7 +26,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub)
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -195,11 +195,6 @@ def load_command_table(self, _):
         min_api='2020-04-01'
     )
 
-    network_lgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LocalNetworkGatewaysOperations.{}',
-        client_factory=cf_local_network_gateways
-    )
-
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
@@ -274,18 +269,6 @@ def load_command_table(self, _):
     network_watcher_pc_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
         client_factory=cf_packet_capture
-    )
-
-    network_virtual_hub_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubsOperations.{}',
-        client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
     )
 
     network_vrouter_sdk = CliCommandType(
@@ -904,8 +887,8 @@ def load_command_table(self, _):
     # endregion
 
     # region LocalGateways
-    with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
+    from .aaz.latest.network.local_gateway import List
+    self.command_table['network local-gateway list'] = List(loader=self, table_transformer=transform_local_gateway_table_output)
     # endregion
 
     # region NetworkInterfaces: (NIC)
@@ -1236,8 +1219,7 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualHub
-    with self.command_group('network routeserver', network_virtual_hub_sdk,
-                            custom_command_type=network_virtual_hub_update_sdk) as g:
+    with self.command_group('network routeserver') as g:
         g.custom_command('create', 'create_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
     # endregion

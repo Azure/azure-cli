@@ -6577,37 +6577,6 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
-def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
-                     public_ip_prefix=None):
-    if dns_name is not None or reverse_fqdn is not None:
-        if instance.dns_settings:
-            if dns_name is not None:
-                instance.dns_settings.domain_name_label = dns_name
-            if reverse_fqdn is not None:
-                instance.dns_settings.reverse_fqdn = reverse_fqdn
-        else:
-            PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
-                                                               reverse_fqdn=reverse_fqdn)
-    if allocation_method is not None:
-        instance.public_ip_allocation_method = allocation_method
-    if version is not None:
-        instance.public_ip_address_version = version
-    if idle_timeout is not None:
-        instance.idle_timeout_in_minutes = idle_timeout
-    if tags is not None:
-        instance.tags = tags
-    if sku is not None:
-        instance.sku.name = sku
-    if ip_tags:
-        instance.ip_tags = ip_tags
-    if public_ip_prefix:
-        SubResource = cmd.get_models('SubResource')
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    return instance
-
-
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
                             version=None, location=None, tags=None, zone=None, edge_zone=None,
                             custom_ip_prefix_name=None):
@@ -7696,7 +7665,7 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 
 
 # region VirtualHub
-def create_virtual_hub(cmd, client,
+def create_virtual_hub(cmd,
                        resource_group_name,
                        virtual_hub_name,
                        hosted_subnet,
@@ -7705,23 +7674,28 @@ def create_virtual_hub(cmd, client,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
     from azure.cli.core.commands import LongRunningOperation
+    from .aaz.latest.network.routeserver import Show
+    from .aaz.latest.network.routeserver import List
 
-    try:
-        client.get(resource_group_name, virtual_hub_name)
-        raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
-            virtual_hub_name, resource_group_name))
-    except HttpResponseError:
-        pass
+    list_result = List(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name})
+    for x in list_result:
+        if x['name'] == virtual_hub_name:
+            raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
+                virtual_hub_name, resource_group_name))
 
     SubResource = cmd.get_models('SubResource')
 
     VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
                                                                      'PublicIPAddress')
-
-    hub = VirtualHub(tags=tags, location=location,
-                     virtual_wan=None,
-                     sku='Standard')
-    vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
+    args = {
+        'resource_group': resource_group_name,
+        'name': virtual_hub_name,
+        'location': location,
+        'tags': tags,
+        'sku': 'Standard',
+    }
+    from azure.cli.command_modules.network.aaz.latest.network.routeserver import Create
+    vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
     ip_config = HubIpConfiguration(
@@ -7739,13 +7713,14 @@ def create_virtual_hub(cmd, client,
             vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
         except HttpResponseError:
             pass
-        client.begin_delete(resource_group_name, virtual_hub_name)
+        from .aaz.latest.network.routeserver import Delete
+        Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
         raise ex
 
-    return client.get(resource_group_name, virtual_hub_name)
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 
 
-def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
+def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
@@ -7753,7 +7728,8 @@ def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wa
         ip_config = ip_configs[0]   # There will always be only 1
         poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
         LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
+    from .aaz.latest.network.routeserver import Delete
+    return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
 
 
