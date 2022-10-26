@@ -12,7 +12,6 @@ from functools import partial
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
-from knack.arguments import CLIArgumentType
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
