@@ -6,7 +6,8 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import CliCommandType
-from ._client_factory import (
+
+from azure.cli.command_modules.netappfiles._client_factory import (
     accounts_mgmt_client_factory,
     pools_mgmt_client_factory,
     volumes_mgmt_client_factory,
@@ -19,7 +20,8 @@ from ._client_factory import (
     subvolumes_mgmt_client_factory,
     volume_groups_mgmt_client_factory,
     netapp_resource_mgmt_client_factory)
-from ._exception_handler import netappfiles_exception_handler
+
+from azure.cli.command_modules.netappfiles._exception_handler import netappfiles_exception_handler
 
 
 def load_command_table(self, _):
