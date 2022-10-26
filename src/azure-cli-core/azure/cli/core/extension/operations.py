@@ -404,7 +404,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         if is_cloud_shell_system_extension(ext.path):
             raise CLIError(
-                f"Cannot update system extension {extension_name}, please wait until Cloud Shell update it in the future release.")
+                f"Cannot update system extension {extension_name}, please wait until Cloud Shell updates it in the next release.")
         cur_version = ext.get_version()
         try:
             download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
