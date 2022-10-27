@@ -16,15 +16,26 @@ long-summary: >
     token is derived from --url if --url starts with an endpoint from `az cloud show --query endpoints`. You may also
     use --resource for a custom resource.
 
+
     If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
     application/json.
+
+
+    For passing JSON in PowerShell, see https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md
 examples:
   - name: Get Audit log through Microsoft Graph
     text: >
         az rest --method get --url https://graph.microsoft.com/beta/auditLogs/directoryAudits
   - name: Update a Azure Active Directory Graph User's display name
-    text: >
-        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"jondoe2\\"}"
+    text: |
+        (Bash or CMD)
+        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"johndoe2\\"}"
+
+        (Bash)
+        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{"displayName": "johndoe2"}'
+
+        (PowerShell)
+        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{\\"displayName\\": \\"johndoe2\\"}'
   - name: Get a virtual machine
     text: >
         az rest --method get --uri /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}?api-version=2019-03-01
