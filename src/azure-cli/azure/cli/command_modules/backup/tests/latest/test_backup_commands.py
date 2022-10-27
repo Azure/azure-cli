@@ -769,6 +769,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
+            self.check("properties.extendedInfo.tasksList[0].endTime", None),
             self.check("resourceGroup", '{rg}')
         ])
 

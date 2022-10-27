@@ -227,7 +227,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
                 self.check('encryption.keySource', '{keySource}')
             ])
 
-    @unittest.skip('(servicedeployment) api has not been deployed cannot test untill finilized')
+    #@unittest.skip('(servicedeployment) api has not been deployed cannot test until finalized')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_account_renew_credentials_fails(self):
         self.kwargs.update({
@@ -253,11 +253,13 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('name', '{acc2_name}')
         ])
 
-        # with self.assertRaises(CLIError):
-        #     # create account with encryption value
-        #     self.cmd("az netappfiles account renew-credentials -g {rg} -a {acc_name} ", checks=[
-        #         self.check('name', '{acc_name}'),                
-        #     ])
+        with self.assertRaises(CLIError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account renew-credentials -g {rg} -a {acc2_name} ", checks=[
+                self.check('name', '{acc2_name}'),                
+            ])
+        self.assertIn('MsiInvalidForRenewal', str(
+            cm.exception))                            
         # with self.assertRaises(CLIError):
         #     # create account with encryption value
         #     self.cmd("az rest --method POST --uri /subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourcegroups/{rg}/providers/Microsoft.NetApp/netappAccounts/{acc_name}/renewCredentials?api-version=2022-05-01  ", checks=[

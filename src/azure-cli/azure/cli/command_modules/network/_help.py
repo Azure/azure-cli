@@ -4793,66 +4793,6 @@ examples:
     text: az network private-link-resource list --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002
 """
 
-helps['network custom-ip'] = """
-type: group
-short-summary: Manage custom IP
-"""
-
-helps['network custom-ip prefix'] = """
-type: group
-short-summary: Manage custom IP prefix resources.
-"""
-
-helps['network custom-ip prefix create'] = """
-type: command
-short-summary: Create a custom IP prefix resource.
-examples:
-  - name: Create a custom IP prefix resource.
-    text: |
-        az network custom-ip prefix create --location westus2 --name MyCustomIpPrefix --resource-group MyResourceGroup
-"""
-
-helps['network custom-ip prefix wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the custom ip prefix is met.
-examples:
-  - name: Wait for custom ip prefix to return as created.
-    text: |
-        az network custom-ip prefix wait --name MyCustomIpPrefix --resource-group MyResourceGroup --created
-"""
-
-helps['network custom-ip prefix delete'] = """
-type: command
-short-summary: Delete a custom IP prefix resource.
-examples:
-  - name: Delete a custom IP prefix resource.
-    text: |
-        az network custom-ip prefix delete --name MyCustomIpPrefix --resource-group MyResourceGroup
-"""
-
-helps['network custom-ip prefix list'] = """
-type: command
-short-summary: List custom IP prefix resources.
-"""
-
-helps['network custom-ip prefix show'] = """
-type: command
-short-summary: Get the details of a custom IP prefix resource.
-examples:
-  - name: Get the details of a custom IP prefix resource.
-    text: |
-        az network custom-ip prefix show --name MyCustomIpPrefix --resource-group MyResourceGroup --subscription MySubscription
-"""
-
-helps['network custom-ip prefix update'] = """
-type: command
-short-summary: Update a custom IP prefix resource.
-examples:
-  - name: Update a custom IP prefix resource.
-    text: |
-        az network custom-ip prefix update --name MyCustomIpPrefix --resource-group MyResourceGroup --tags foo=doo
-"""
-
 helps['network public-ip'] = """
 type: group
 short-summary: Manage public IP addresses.

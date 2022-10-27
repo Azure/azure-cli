@@ -162,7 +162,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2022-03-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2022-01-03',
+            'gallery_image_versions': '2022-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
@@ -249,7 +249,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-07-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-09-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),
@@ -412,9 +412,20 @@ AZURE_API_PROFILES = {
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
-        'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'
+    },
+    ResourceType.MGMT_CONTAINERREGISTRY: {
+        # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
+        'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",
+        'VERSION_2019_06_01_PREVIEW': "2019-06-01-preview",
+        'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
+        'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
+        'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
+    },
+    ResourceType.MGMT_CONTAINERSERVICE: {
+        # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
+        'ManagedClusterAddonProfile': '2020-03-01',
     }
 }
 

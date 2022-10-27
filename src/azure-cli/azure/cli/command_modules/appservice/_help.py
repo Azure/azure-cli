@@ -201,10 +201,18 @@ examples:
 helps['functionapp config appsettings set'] = """
 type: command
 short-summary: Update a function app's settings.
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
   - name: Update a function app's settings.
     text: |
         az functionapp config appsettings set --name MyFunctionApp --resource-group MyResourceGroup --settings "AzureWebJobsStorage=$storageConnectionString"
+  - name: Set using both key-value pair and a json file with more settings.
+    text: >
+        az functionapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
 """
 
 helps['functionapp config container'] = """
@@ -1093,6 +1101,11 @@ examples:
 helps['webapp config appsettings set'] = """
 type: command
 short-summary: Set a web app's settings.
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
   - name: Set the default NodeJS version to 6.9.1 for a web app.
     text: >
@@ -1100,11 +1113,6 @@ examples:
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
-parameters:
-  - name: --settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
-  - name: --slot-settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """

@@ -316,6 +316,8 @@ def load_arguments(self, _):
         c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
         c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
         c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
+        c.argument('assignment_name', name_arg_type,
+                   help='Name of the role assignment. If omitted, a new GUID is generetd.')
 
     time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
     with self.argument_context('role assignment list-changelogs') as c:
