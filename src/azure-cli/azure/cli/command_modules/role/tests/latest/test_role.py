@@ -336,31 +336,28 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 0))
 
-                # Test delete by ID
-                self.kwargs['id'] = self.cmd('role assignment create --assignee {upn} --role reader').get_output_in_json()['id']
-                self.cmd('role assignment delete --ids {id}')
-                self.cmd('role assignment list --assignee {upn}', checks=self.check("length([])", 0))
-
-                # Test delete by ID, but with other parameters ignored
-                self.kwargs['id'] = self.cmd('role assignment create --assignee {upn} --role reader').get_output_in_json()['id']
-                self.cmd('role assignment delete --ids {id} '
-                         '--assignee test --role test --resource-group test --scope test --include-inherit')
-                self.cmd('role assignment list --assignee {upn}', checks=self.check("length([])", 0))
-
                 # Test bring-your-own assignment name
                 self.kwargs['assignment_name'] = self.create_guid()
                 # Directly use GUID to avoid querying definition ID and reduce recording YAML size
                 # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
                 self.kwargs['reader_guid'] = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
-                result = self.cmd('role assignment create --assignee {upn} '
-                                  '--role {reader_guid} --name {assignment_name}').get_output_in_json()
-                self.kwargs['assignment_id'] = result['id']
+                self.kwargs['assignment_id'] = self.cmd('role assignment create --assignee {upn} --role {reader_guid} '
+                                                        '--name {assignment_name}').get_output_in_json()['id']
                 # Should be idempotent
                 self.cmd('role assignment create --assignee {upn} --role {reader_guid} --name {assignment_name}')
-                self.cmd('role assignment list --assignee {upn} --role {reader_guid}',
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid} --all',
                          checks=[self.check("length([])", 1), self.check("[0].name", '{assignment_name}')])
                 # Delete by assignment id
                 self.cmd('role assignment delete --ids {assignment_id}')
+
+                # Test delete by ID, but with other arguments ignored
+                self.kwargs['assignment_name'] = self.create_guid()
+                self.kwargs['assignment_id'] = self.cmd('role assignment create --assignee {upn} --role {reader_guid} '
+                                                        '--name {assignment_name}').get_output_in_json()['id']
+                # Besides --ids, all other arguments are ignored
+                self.cmd('role assignment delete --ids {assignment_id} '
+                         '--assignee test --role test --resource-group test --scope test --include-inherit')
+                self.cmd('role assignment list --assignee {upn} --all', checks=self.check("length([])", 0))
 
                 # test create role assignment for invalid assignee
                 with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
