@@ -337,8 +337,6 @@ class SqlHandler(TargetHandler):
     def create_aad_user_in_sql(self, connection_args, query_list):
 
         if not is_packaged_installed('pyodbc'):
-            logger.warning(
-                "Dependency pyodbc is not installed and will be installed dynamically.")
             install_package("pyodbc")
 
         # pylint: disable=import-error, c-extension-no-member
@@ -346,8 +344,11 @@ class SqlHandler(TargetHandler):
             import pyodbc
         except ModuleNotFoundError:
             raise CLIError(
-                "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16 "
-                "and run 'pip install pyodbc'")
+                "Dependency pyodbc can't be installed, please install it manually with `pip install pyodbc`.")
+        drivers = [x for x in pyodbc.drivers() if x == 'ODBC Driver 18 for SQL Server']
+        if not drivers:
+            raise CLIError(
+                "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16")
         try:
             with pyodbc.connect(connection_args.get("connection_string"), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:
