@@ -24,11 +24,11 @@ __version__ = "2.41.0"
 
 # run azd
 if sys.argv and len(sys.argv) > 1 and sys.argv[1] == 'dev':
-    print_styled_text((Style.SUCCESS,"Running Azure Developer CLI (azd) through Azure CLI. "))
+    print_styled_text((Style.SUCCESS, "Running Azure Developer CLI (azd) through Azure CLI. "))
     azd_cli(sys.argv[2:])
     for arg in sys.argv:
         if arg == '-h' or arg == '--help' or len(sys.argv) == 2:
-            print_styled_text((Style.SUCCESS,"You can replace `azd` with `az dev` in the above commands."))
+            print_styled_text((Style.SUCCESS, "You can replace `azd` with `az dev` in the above commands."))
             break
     sys.exit()
 
