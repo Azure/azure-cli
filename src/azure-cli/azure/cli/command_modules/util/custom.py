@@ -348,13 +348,13 @@ def byo_access_token(cmd, access_token, subscription_id):
     return client.resource_groups.list()
 
 
-class AccessTokenCredential:
+class AccessTokenCredential:  # pylint: disable=too-few-public-methods
     """Simple access token authentication. Return the access token as-is.
     """
     def __init__(self, access_token):
         self.access_token = access_token
 
-    def get_token(self, *scopes, **kwargs):  # pylint: disable=unused-argument, too-few-public-methods
+    def get_token(self, *scopes, **kwargs):  # pylint: disable=unused-argument
         import time
         from azure.cli.core.auth.util import AccessToken
         # Assume the access token expires in 1 year / 31536000 seconds
