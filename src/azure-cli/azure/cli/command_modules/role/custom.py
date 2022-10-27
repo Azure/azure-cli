@@ -497,8 +497,24 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
     definitions_client = factory.role_definitions
     ids = ids or []
     if ids:
-        if assignee or role or resource_group_name or scope or include_inherited:
-            raise CLIError('When assignment ids are used, other parameter values are not required')
+        # Warn that other arguments are overriden.
+        # We can't reuse the logic of `azure.cli.core.commands.arm.register_ids_argument`, because in that function,
+        # `ids_metadata` is built by checking `id_part` of each argument.
+        # Commands like `az vm delete` require a resource ID with fixed parts, such as
+        # /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}
+        # But for `az role assignment delete`, `--id` can have variable parts:
+        # - subscription level:   /subscriptions/{}
+        # - resource group level: /subscriptions/{}/resourceGroups/{}
+        # - resource level:       /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}
+        # so it can't be parsed into pre-defined parts and is passed to SDK as is.
+        ids_override_args = ['assignee', 'role', 'resource_group_name', 'scope', 'include_inherited']
+        for arg in ids_override_args:
+            if locals()[arg]:
+                # This is different with `register_ids_argument`'s `--ids` handling.
+                # `register_ids_argument` doesn't show warning if `is_default` of an argument value is true,
+                # but we do here. I feel being explicit is better than being implicit.
+                logger.warning("option '%s' will be ignored due to use of '--ids'.",
+                               cmd.arguments[arg].type.settings['options_list'][0])
         for i in ids:
             assignments_client.delete_by_id(i)
         return
