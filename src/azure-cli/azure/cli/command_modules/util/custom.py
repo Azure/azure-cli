@@ -11,6 +11,8 @@ from azure.cli.core.azclierror import (
     ValidationError,
     FileOperationError
 )
+from azure.cli.core.util import user_confirmation
+from azure.cli.core.style import Style, print_styled_text
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -230,7 +232,7 @@ def _download_from_url(url):
 
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
-    from azure.cli.core.style import Style, print_styled_text, format_styled_text
+    from azure.cli.core.style import format_styled_text
     if theme:
         format_styled_text.theme = theme
     print_styled_text("[How to call print_styled_text]")
@@ -347,13 +349,12 @@ def azd_cli(args):
     run_azd_command(args)
 
 
-def ensure_azd_installation(stdout=True):
+def ensure_azd_installation():
     system = platform.system()
     installation_path = _get_azd_installation_path(system)
 
     if os.path.isfile(installation_path):
-        if stdout:
-            print("Azure Developer CLI already installed")
+        print_styled_text((Style.SUCCESS, "Azure Developer CLI already installed"))
         return
 
     installation_dir = os.path.dirname(installation_path)
@@ -361,13 +362,14 @@ def ensure_azd_installation(stdout=True):
         os.makedirs(installation_dir)
 
     try:
-        print("Installing Azure Developer CLI...")
+        print_styled_text((Style.SUCCESS, "Installing Azure Developer CLI..."))
 
         _install_azd(system)
 
-        print(f'Successfully installed Azure Developer CLI to "{installation_path}".')
-    except IOError as err:
-        raise ValidationError(f"Error while attempting to download Azure Developer CLI: {err}")
+        print_styled_text((Style.SUCCESS, "Successfully installed Azure Developer CLI to "
+                                          "{}.".format(installation_path)))
+    except Exception as err:
+        raise ValidationError(f"Error while attempting to install Azure Developer CLI: {err}")
 
 
 def _get_azd_installation_path(system):
@@ -389,15 +391,13 @@ def _install_azd(system):
         raise ValidationError(f"Error while attempting to install Azure Developer CLI: {err}")
 
 
-def run_azd_command(args, auto_install=True):
+def run_azd_command(args):
     installation_path = _get_azd_installation_path(platform.system())
     installed = os.path.isfile(installation_path)
 
     if not installed:
-        if auto_install:
-            ensure_azd_installation()
-        else:
-            raise FileOperationError('Azure Developer CLI not found. Install it now by running "az dev install".')
+        user_confirmation('To run az dev, Azure Developer CLI is required to be installed. Do you want to install?')
+        ensure_azd_installation()
 
     command = [rf"{installation_path}"] + args
     return _run_command(command)
