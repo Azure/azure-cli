@@ -1,7 +1,7 @@
 
 ## Versioning
 
-The official Azure CLI follow [Semantic Versioning](https://semver.org/) for version numbering. The CLI version consists of three parts `MAJOR.MINOR.PATCH`:
+The official Azure CLI follows [Semantic Versioning](https://semver.org/) for version numbering. The CLI version consists of three parts `MAJOR.MINOR.PATCH`:
 - MAJOR version will be upgraded only when there is a huge revolution. Generally, this version will not be upgraded.
 - MINOR version upgraded for new features with the normal release process. All the feature updates must be forward compatible, the breaking changes can only be published in the breaking change window *(Ignite sprint or Build sprint)*.
 - PATCH version upgraded for hotfix with the hotfix release process.
