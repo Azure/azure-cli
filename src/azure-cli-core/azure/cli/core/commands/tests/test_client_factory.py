@@ -98,7 +98,7 @@ class TestClientFactory(unittest.TestCase):
                 self.access_token = access_token
                 self.get_token_called = False
 
-            def get_token(self, *arg, **kwargs):
+            def get_token(self, *scopes, **kwargs):
                 self.get_token_called = True
                 import time
                 # Assume the access token expires in 1 year

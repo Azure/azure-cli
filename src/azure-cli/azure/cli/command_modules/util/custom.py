@@ -357,5 +357,5 @@ class AccessTokenCredential:
     def get_token(self, *scopes, **kwargs):  # pylint: disable=unused-argument, too-few-public-methods
         import time
         from azure.cli.core.auth.util import AccessToken
-        # Assume the access token expires in 1 year
+        # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
