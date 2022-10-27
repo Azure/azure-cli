@@ -298,6 +298,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_log_analytics_workspace_saved_search')
         g.custom_command('update', 'update_log_analytics_workspace_saved_search')
 
+    from .operations.demo import ClusterCreate
+    self.command_table['monitor log-analytics cluster create'] = ClusterCreate(loader=self)
+
     from .operations.log_analytics_linked_storage_account import WorkspaceLinkedStorageAccountCreate
     self.command_table['monitor log-analytics workspace linked-storage create'] = WorkspaceLinkedStorageAccountCreate(
         loader=self)
