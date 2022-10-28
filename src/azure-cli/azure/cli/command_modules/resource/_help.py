@@ -1176,17 +1176,13 @@ examples:
    - name: >
       Create a resource group but only if it does not exist.
     text: >
-        # run this script in a Docker Container
-        resourceGroup="myResourceGroup"
+        resourceGroup="MyResourceGroup"
         location="eastus"
         if [ $(az group exists --name $resourceGroup --output json) = false ]; then 
           az group create --name $resourceGroup --location $location
         else
-          echo The $resourceGroup resource group already exists.
+          echo A resource group named $resourceGroup already exists in this subscription.
         fi 
-
-        # run this script in Azure Cloud Shell
-        -- Chase Crum to supply.  Also check with az CLI engineering team
 """
 
 helps['group delete'] = """
@@ -1199,18 +1195,17 @@ examples:
    - name: >
       Delete a resource group but only if it exists.  Bypass the confirmation prompt.  Do not wait for the operation to finish.
     text: >
-        resourceGroup=myResourceGroup
-        location=eastus
+        resourceGroup=MyResourceGroup
         if [ $(az group exists --name $resourceGroup --output json) = true ]; then 
           az group delete --name $resourceGroup --yes  --no-wait
         else
-          echo The $resourceGroup resource group does not exist.
+          echo Resource group $resourceGroup does not exist.
         fi 
 """
 
 helps['group deployment'] = """
 type: group
-short-summary: Manage Azure Resource Manager deployments.
+short-summary: Manage Azure Resource Manager (ARM) deployments.
 """
 
 helps['group deployment create'] = """
@@ -1295,9 +1290,13 @@ helps['group list'] = """
 type: command
 short-summary: List resource groups.
 examples:
+  - name: List all resource groups for the current subscription returning results in a table
+    text: >
+        az group list --output table
   - name: List all resource groups located in the West US region.
     text: >
         az group list --query "[?location=='westus']"
+
 """
 
 helps['group lock'] = """
@@ -1307,71 +1306,99 @@ short-summary: Manage Azure resource group locks.
 
 helps['group lock create'] = """
 type: command
-short-summary: Create a resource group lock.
+short-summary: Create a resource group lock. 
+long-summary: Use locks to restrict updates or deletions of a resource group.  You must have WHAT PERMISSIONS? in the resource group to create a lock.
 examples:
-  - name: Create a read-only resource group level lock.
+  - name: Create a read-only resource group level lock with notes.
     text: >
-        az group lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
+        az group lock create --lock-type ReadOnly --name MyLockName --resource-group MyResourceGroup --notes "My note that I want to remember."
+  - name: Create a lock that prohibits deletion of the resource group.
+    text: >
+        az group lock create --lock-type CanNotDelete --name MyLockName --resource-group MyResourceGroup
 """
 
 helps['group lock delete'] = """
 type: command
 short-summary: Delete a resource group lock.
+long-summary: You must have WHAT PERMISSIONS? in the resource group to delete a lock.
 examples:
   - name: Delete a resource group lock
     text: >
-        az group lock delete --name lockName -g MyResourceGroup
+        az group lock delete --name MyLockName --resource-group MyResourceGroup
 """
 
 helps['group lock list'] = """
 type: command
-short-summary: List lock information in the resource-group.
+short-summary: List lock information in a resource-group.
 examples:
-  - name: List out all locks on the resource group level
+  - name: List all locks for a resource group.
     text: >
-        az group lock list -g MyResourceGroup
+        az group lock list --resource-group MyResourceGroup
+  - name: List all locks meeting a filter criteria.
+        az group lock list --filter-string NEED EXAMPLE STRING HERE
+  - name: List all locks meeting a `--query` criteria.
+        az group lock list --query "[?level=='ReadOnly']"  THIS SCRIPT DOES NOT WORK
 """
 
 helps['group lock show'] = """
 type: command
-short-summary: Show the details of a resource group lock
+short-summary: Show the details of a resource group lock.
 examples:
-  - name: Show a resource group level lock
+  - name: Show the details of a resource group lock. The resource group name and lock name are both required if the `--ids` parameter is not used.
     text: >
-        az group lock show -n lockname -g MyResourceGroup
+        az group lock show --name MyLockName --resource-group MyResourceGroup
+  - name: >
+      Show the details of a resource group lock using the Id.  
+      The `--resource-group` and `--name` parameters are not needed in this example as these values exist in the Id.
+      For a list of available lock Ids, run `az group lock list -g MyResourceGroupName -o json`.
+    text: >
+        az group lock show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName1
+
 """
 
 helps['group lock update'] = """
 type: command
-short-summary: Update a resource group lock.
+short-summary: Update a resource group lock with new notes, or change the lock type.
+long-summary: You must have WHAT PERMISSIONS? in the resource group to update a lock.
 examples:
   - name: Update a resource group lock with new notes and type
     text: >
         az group lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
+  - name: Update a resource group lock using the Id.  For a list of available lock Ids, run `az group lock list -g MyResourceGroupName -o json`.
+    text: >
+        az group lock update --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName --notes MyNewNote
+  - name: Update several resource group locks at the same time using a space delimited list of Ids.
+    text: >
+        az group lock update --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName1 \\
+            /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName2 \\
+            --notes MyNewNoteForAllIDs
 """
 
 helps['group update'] = """
 type: command
 short-summary: Update a resource group.
 examples:
-  - name: Update a resource group. (autogenerated)
+  - name: Add tags to a resource group.
     text: |
         az group update --resource-group MyResourceGroup --set tags.CostCenter='{"Dept":"IT","Environment":"Test"}'
-    crafted: true
+  - name: Remove tags from a resource group
+    text: |
+        az group update --resource-group MyResourceGroup --remove tags
+  - name: Add a property to a resource group preserving string literals
+    text: |
+        az group update --resource-group MyResourceGroup --add properties.provisioningState NEED EXAMPLE HERE --force-string
 """
 
 helps['group wait'] = """
 type: command
-short-summary: Place the CLI in a waiting state until a condition of the resource group is met.
+short-summary: Place the Azure CLI in a waiting state until a condition of the resource group is met.
 examples:
-  - name: Place the CLI in a waiting state until a condition of the resource group is met. (autogenerated)
+  - name: Place the Azure CLI in a waiting state until `provisioningState` becomes `succeeded`.
     text: |
         az group wait --created  --resource-group MyResourceGroup
-    crafted: true
-  - name: Place the CLI in a waiting state until a condition of the resource group is met. (autogenerated)
+  - name: Place the Azure CLI in a waiting state as a resource group is deleted.
     text: |
         az group wait --deleted --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['lock'] = """
@@ -1899,7 +1926,7 @@ examples:
         az policy exemption create -n exemptTestVM \\
             --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
             --exemption-category "Waiver" \\
-            --resource-group "myResourceGroup"
+            --resource-group "MyResourceGroup"
   - name: Create a policy exemption in a management group.
     text: |
         az policy exemption create -n exemptTestVM \\
@@ -1914,7 +1941,7 @@ short-summary: Delete a policy exemption.
 examples:
   - name: Delete a policy exemption.
     text: |
-        az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"
+        az policy exemption delete --name MyPolicyExemption --resource-group "MyResourceGroup"
     crafted: true
 """
 
@@ -1929,7 +1956,7 @@ short-summary: Show a policy exemption.
 examples:
   - name: Show a policy exemption.
     text: |
-        az policy exemption show --name MyPolicyExemption --resource-group "myResourceGroup"
+        az policy exemption show --name MyPolicyExemption --resource-group "MyResourceGroup"
     crafted: true
 """
 
@@ -1945,7 +1972,7 @@ examples:
     text: |
         az policy exemption update -n exemptTestVM \\
             --exemption-category "Mitigated" \\
-            --resource-group "myResourceGroup"
+            --resource-group "MyResourceGroup"
   - name: Update a policy exemption in a management group.
     text: |
         az policy exemption update -n exemptTestVM \\
@@ -2300,7 +2327,7 @@ examples:
     crafted: true
   - name: Update a resource. (autogenerated)
     text: |
-        az resource update --name myresource --resource-group myresourcegroup --resource-type subnets --set tags.key=value
+        az resource update --name myresource --resource-group MyResourceGroup --resource-type subnets --set tags.key=value
     crafted: true
 """
 
