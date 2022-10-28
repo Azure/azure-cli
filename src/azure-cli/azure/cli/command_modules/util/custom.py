@@ -8,8 +8,7 @@ import platform
 import subprocess
 
 from azure.cli.core.azclierror import (
-    ValidationError,
-    FileOperationError
+    ValidationError
 )
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.style import Style, print_styled_text
