@@ -648,8 +648,8 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
     app_settings_should_contain = {}
 
     for keyval in settings:
-        value = keyval['value'].lower()
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            value = keyval['value'].lower()
             scm_do_build_during_deployment = value in ('true', '1')
 
     if scm_do_build_during_deployment is not False:
