@@ -934,7 +934,7 @@ jobs:
       . env/bin/activate
       # clone azure-cli-extensions
       cd ..
-      git clone --single-branch -b dev https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
+      git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
       azdev extension add "*"
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
