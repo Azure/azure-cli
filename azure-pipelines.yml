@@ -923,13 +923,13 @@ jobs:
   display: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
-    steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 3.10'
-      inputs:
-        versionSpec: 3.10
-    - template: .azure-pipelines/templates/azdev_setup.yml
-    - bash: |
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - template: .azure-pipelines/templates/azdev_setup.yml
+  - bash: |
       set -ev
       . env/bin/activate
       azdev extension add "*"
