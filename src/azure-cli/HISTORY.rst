@@ -81,7 +81,7 @@ Release History
 
 **Resource**
 
-* `az resource delete`: Add new parameters `--no-wait` to support not waiting the long-running operation to finish (#24302)
+* `az resource delete`: Add new parameter `--no-wait` to support not waiting the long-running operation to finish (#24302)
 
 **Role**
 
