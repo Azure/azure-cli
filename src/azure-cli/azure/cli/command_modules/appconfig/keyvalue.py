@@ -369,7 +369,7 @@ def set_key(cmd,
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-value will be created.", key, label)
         except HttpResponseError as exception:
-            raise CLIErrors.HTTPError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
             if __is_json_content_type(content_type):
@@ -461,7 +461,7 @@ def set_keyvault(cmd,
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-vault reference will be created.", key, label)
         except HttpResponseError as exception:
-            raise CLIErrors.HTTPError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
             set_kv = ConfigurationSetting(key=key,
@@ -503,7 +503,7 @@ def set_keyvault(cmd,
                 logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIErrors.HTTPError("Failed to set the keyvault reference due to an exception: " + str(exception))
+                raise CLIErrors.AzureResponseError("Failed to set the keyvault reference due to an exception: " + str(exception))
         except Exception as exception:
             raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
     raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
@@ -548,7 +548,7 @@ def delete_key(cmd,
             exception_messages.append(exception)
         except HttpResponseError as ex:
             exception_messages.append(str(ex))
-            raise CLIErrors.HTTPError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
+            raise CLIErrors.AzureResponseError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
     # Log errors if partially succeeded
     if exception_messages:
@@ -579,7 +579,7 @@ def lock_key(cmd,
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
-            raise CLIErrors.HTTPError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         confirmation_message = "Are you sure you want to lock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
@@ -592,7 +592,7 @@ def lock_key(cmd,
                 logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIErrors.HTTPError("Failed to lock the key-value due to an exception: " + str(exception))
+                raise CLIErrors.AzureResponseError("Failed to lock the key-value due to an exception: " + str(exception))
         except Exception as exception:
             raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to lock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
@@ -616,7 +616,7 @@ def unlock_key(cmd,
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
-            raise CLIErrors.HTTPError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         confirmation_message = "Are you sure you want to unlock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
@@ -629,7 +629,7 @@ def unlock_key(cmd,
                 logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIErrors.HTTPError("Failed to unlock the key-value due to an exception: " + str(exception))
+                raise CLIErrors.AzureResponseError("Failed to unlock the key-value due to an exception: " + str(exception))
         except Exception as exception:
             raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to unlock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
@@ -652,7 +652,7 @@ def show_key(cmd,
     except ResourceNotFoundError:
         raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
     except HttpResponseError as exception:
-        raise CLIErrors.HTTPError('Failed to retrieve key-values from config store. ' + str(exception))
+        raise CLIErrors.AzureResponseError('Failed to retrieve key-values from config store. ' + str(exception))
 
     raise CLIError("Failed to get the key '{}' with label '{}'.".format(key, label))
 
@@ -805,4 +805,4 @@ def list_revision(cmd,
                 return retrieved_revisions
         return retrieved_revisions
     except HttpResponseError as ex:
-        raise CLIErrors.HTTPError('List revision operation failed.\n' + str(ex))
+        raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))

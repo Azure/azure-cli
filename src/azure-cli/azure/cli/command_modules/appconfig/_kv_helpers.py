@@ -26,7 +26,7 @@ from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import (FileOperationError,
                                        AzureInternalError,
                                        ValidationError,
-                                       HTTPError,
+                                       AzureResponseError,
                                        RequiredArgumentMissingError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
@@ -339,7 +339,7 @@ def __read_kv_from_config_store(azconfig_client,
                                                                              accept_datetime=datetime,
                                                                              fields=query_fields)
     except HttpResponseError as exception:
-        raise HTTPError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
