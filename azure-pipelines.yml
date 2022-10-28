@@ -932,9 +932,13 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
+      # clone azure-cli-extensions
+      cd ..
+      git clone --single-branch -b dev https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
+      azdev extension repo add ./azure-cli-extensions
       azdev extension add "*"
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
-      azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
+      azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
