@@ -5,8 +5,8 @@ Release History
 
 2.42.0
 ++++++
-* `aaz`: Support Featur FreeFormDictType and FreeFormDictArg (#24183)
-* `aaz`: Support configured_default in arguments (#24411)
+* `aaz`: Support `FreeFormDictType` and `FreeFormDictArg` (#24183)
+* `aaz`: Support `configured_default` property in arguments (#24411)
 
 2.41.0
 ++++++

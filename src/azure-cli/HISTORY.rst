@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `acr task update`: Fix logic issue for updating encoded task (#24279)
+* `az acr task update`: Fix logic issue for updating encoded task (#24279)
 
 **AKS**
 
@@ -31,18 +31,14 @@ Release History
 
 * Fix #23050: `az functionapp deployment source config-zip`: Fix the bug that zip deployment will fail if app settings contain any values of null (#24077)
 
-**az hdinsight**
+**HDInsight**
 
-* [BREAKING CHANGE] `az hdinsight create`: Remove the enum value 1.0 and 1.1 from the --minimal-tls-version, HDInsight doesn't support TLS version which is less than 1.2 now. (#24141)
+* [BREAKING CHANGE] `az hdinsight create`: Remove the enum value 1.0 and 1.1 from the `--minimal-tls-version`, HDInsight doesn't support TLS version which is less than 1.2 now. (#24141)
 
 **Backup**
 
 * `az backup restore restore-disks`: Update Cross Zonal Restore behaviour for ZRS vaults and primary region CRR scenarios (#24126)
-* `az backup job show`: Change subtask start/end time from minimum value to null for ongoing or yet-to-start operation. (#24207)
-
-**Cognitive Services**
-
-* Update SDK to use latest API version (#24406)
+* `az backup job show`: Change subtask start/end time from minimum value to null for ongoing or yet-to-start operation (#24207)
 
 **Compute**
 
@@ -60,7 +56,7 @@ Release History
 
 **NetAppFiles**
 
-* `az netappfiles account renew-credentials`: Add `renew-credentials` comand to renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption (#24423)
+* `az netappfiles account renew-credentials`: Add `renew-credentials` command to renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption (#24423)
 
 **Network**
 
