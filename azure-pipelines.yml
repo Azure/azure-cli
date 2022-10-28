@@ -919,6 +919,27 @@ jobs:
         azdev linter --ci-exclusions --min-severity medium
       fi
 
+- job: CodegenCoverage
+  display: "Codegen Coverage"
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.10'
+      inputs:
+        versionSpec: 3.10
+    - template: .azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+      set -ev
+      . env/bin/activate
+      azdev extension add "*"
+      # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
+      azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
+      # CLI repo only
+      azdev statistics list-command-table CLI --statistics-only
+      # CLI + EXT repos
+      azdev statistics list-command-table --statistics-only
+
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
   pool:
