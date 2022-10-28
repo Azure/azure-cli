@@ -539,6 +539,9 @@ def load_arguments(self, _):
     with self.argument_context('group lock') as c:
         c.argument('resource_group', resource_group_name_type, validator=validate_group_lock, id_part=None)
 
+    with self.argument_context('group lock list') as c:
+        c.argument('resource_group', resource_group_name_type, id_part=None, required=True)
+
     with self.argument_context('group lock create') as c:
         c.argument('resource_group', required=True)
 
