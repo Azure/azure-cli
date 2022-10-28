@@ -20,8 +20,8 @@ Release History
 
 **APIM**
 
-* `apim create/update`: Add `--public-network-access` to support specifying whether or not public endpoint access is allowed for this API management service (#23983)
-* `apim create/update`: Add `--disable-gateway` to support disabling gateway in the master region (#23983)
+* `az apim create/update`: Add `--public-network-access` to support specifying whether or not public endpoint access is allowed for this API management service (#23983)
+* `az apim create/update`: Add `--disable-gateway` to support disabling gateway in the master region (#23983)
 
 **App Config**
 
