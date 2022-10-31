@@ -316,6 +316,7 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
         auth_info['subscriptionId'] = subscription_id
     return auth_info
 
+
 def is_packaged_installed(package_name):
     import pkg_resources
     installed_packages = pkg_resources.working_set
@@ -323,6 +324,7 @@ def is_packaged_installed(package_name):
     pkg_installed = any((package_name) in d.key.lower()
                         for d in installed_packages)
     return pkg_installed
+
 
 def install_package(package):
     import subprocess
