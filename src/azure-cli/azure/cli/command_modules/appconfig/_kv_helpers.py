@@ -23,7 +23,11 @@ from azure.keyvault.key_vault_id import KeyVaultIdentifier
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import FileOperationError, AzureInternalError
+from azure.cli.core.azclierror import (FileOperationError,
+                                       AzureInternalError,
+                                       ValidationError,
+                                       AzureResponseError,
+                                       RequiredArgumentMissingError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
 from ._utils import prep_label_filter_for_url_encoding
@@ -185,11 +189,11 @@ def __read_kv_from_file(file_path,
                 if feature_management_keyword in config_data:
                     del config_data[feature_management_keyword]
     except ValueError as ex:
-        raise CLIError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
+        raise FileOperationError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
     except yaml.YAMLError as ex:
-        raise CLIError('The input is not a well formatted YAML file.\nException: %s' % (ex))
+        raise FileOperationError('The input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
-        raise CLIError('File is not available.')
+        raise FileOperationError('File is not available.')
 
     flattened_data = {}
     if format_ == 'json' and content_type and __is_json_content_type(content_type):
@@ -248,15 +252,15 @@ def __read_features_from_file(file_path, format_):
                     enabled_for_keyword = ENABLED_FOR_KEYWORDS[index]
                     found_feature_section = True
                 else:
-                    raise CLIError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
+                    raise FileOperationError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
 
     except ValueError as ex:
-        raise CLIError(
+        raise FileOperationError(
             'The feature management section of input is not a well formatted %s file.\nException: %s' % (format_, ex))
     except yaml.YAMLError as ex:
-        raise CLIError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
+        raise FileOperationError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
-        raise CLIError('File is not available.')
+        raise FileOperationError('File is not available.')
 
     # features_dict contains all features that need to be converted to KeyValue format now
     return __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword)
@@ -281,7 +285,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             elif format_ == 'properties':
                 javaproperties.dump(exported_keyvalues, fp)
     except Exception as exception:
-        raise CLIError("Failed to export key-values to file. " + str(exception))
+        raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
 
 # Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Label=<kvLabel>).
@@ -335,7 +339,7 @@ def __read_kv_from_config_store(azconfig_client,
                                                                              accept_datetime=datetime,
                                                                              fields=query_fields)
     except HttpResponseError as exception:
-        raise CLIError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
@@ -483,7 +487,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                     try:
                         json.loads(value)
                     except ValueError:
-                        raise CLIError('Value "{}" for key "{}" is not a valid JSON object, which conflicts with the provided content type "{}".'.format(value, key, content_type))
+                        raise ValidationError('Value "{}" for key "{}" is not a valid JSON object, which conflicts with the provided content type "{}".'.format(value, key, content_type))
 
                 kv = KeyValue(key=key, value=value, tags=tags)
                 key_values.append(kv)
@@ -790,7 +794,7 @@ def __flatten_json_key_value(key, value, flattened_data, depth, separator):
         depth = depth - 1
         if value and isinstance(value, dict):
             if separator is None or not separator:
-                raise CLIError(
+                raise RequiredArgumentMissingError(
                     "A non-empty separator is required for importing hierarchical configurations.")
             for nested_key in value:
                 __flatten_json_key_value(
@@ -809,14 +813,14 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
         depth = depth - 1
         if isinstance(value, list):
             if separator is None or not separator:
-                raise CLIError(
+                raise RequiredArgumentMissingError(
                     "A non-empty separator is required for importing hierarchical configurations.")
             for index, item in enumerate(value):
                 __flatten_key_value(
                     key + separator + str(index), item, flattened_data, depth, separator)
         elif isinstance(value, dict):
             if separator is None or not separator:
-                raise CLIError(
+                raise RequiredArgumentMissingError(
                     "A non-empty separator is required for importing hierarchical configurations.")
             for nested_key in value:
                 __flatten_key_value(
@@ -959,7 +963,7 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                     try:
                         feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
                     except KeyError:
-                        raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
+                        raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
                     if feature_flag_value.conditions["client_filters"]:
                         feature_flag_value.enabled = True
@@ -1052,7 +1056,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         keyvault_reference.value = secret.value
         return keyvault_reference
     except (TypeError, ValueError):
-        raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
+        raise ValidationError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
     except Exception as exception:
         raise CLIError(str(exception))
 

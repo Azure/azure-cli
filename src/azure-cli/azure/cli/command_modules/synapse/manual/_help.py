@@ -45,6 +45,12 @@ examples:
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --repository-type AzureDevOpsGit --account-name testuser --project-name testprj \\
           --repository-name testrepo --collaboration-branch main --last-commit-id 000000
+  - name: Create a Synapse workspace with managed resource group
+    text: |-
+        az synapse workspace create --name testworkspace --resource-group rg \\
+          --managed-rg-name managedrg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
 """
 
 helps['synapse workspace list'] = """
@@ -159,6 +165,10 @@ examples:
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
         --spark-config-file-path 'path/configfile.txt'
+  - name: Update the Spark pool's dynamic executor allocation configuration.
+    text: |-
+        az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --enable-dynamic-exec --min-executors 3 --max-executors 10
 """
 
 helps['synapse spark pool delete'] = """

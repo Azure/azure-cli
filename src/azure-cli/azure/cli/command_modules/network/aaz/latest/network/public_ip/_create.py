@@ -114,9 +114,12 @@ class Create(AAZCommand):
             help="IP address allocation method.",
             enum={"Dynamic": "Dynamic", "Static": "Static"},
         )
-        _args_schema.public_ip_prefix = AAZStrArg(
+        _args_schema.public_ip_prefix = AAZResourceIdArg(
             options=["--public-ip-prefix"],
             help="Name or ID of a public IP prefix.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPPrefixes/{}",
+            ),
         )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
