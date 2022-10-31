@@ -135,3 +135,264 @@ jobs:
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
       fullTest: true
+
+- job: AutomationExtensionFullTestPython310ProfileLatest
+  displayName: Automation Extension Full Test Python310 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 124
+    matrix:
+      account:
+        Target: account
+      acrtransfer:
+        Target: acrtransfer
+      ad:
+        Target: ad
+      aem:
+        Target: aem
+      ai-examples:
+        Target: ai-examples
+      aks-preview:
+        Target: aks-preview
+      alertsmanagement:
+        Target: alertsmanagement
+      alias:
+        Target: alias
+      amg:
+        Target: amg
+      application-insights:
+        Target: application-insights
+      appservice-kube:
+        Target: appservice-kube
+      attestation:
+        Target: attestation
+      authV2:
+        Target: authV2
+      automation:
+        Target: automation
+      azure-firewall:
+        Target: azure-firewall
+      blockchain:
+        Target: blockchain
+      blueprint:
+        Target: blueprint
+      change-analysis:
+        Target: change-analysis
+      cli-translator:
+        Target: cli-translator
+      cloudservice:
+        Target: cloudservice
+      communication:
+        Target: communication
+      confidentialledger:
+        Target: confidentialledger
+      confluent:
+        Target: confluent
+      connectedk8s:
+        Target: connectedk8s
+      connectedmachine:
+        Target: connectedmachine
+      connectedvmware:
+        Target: connectedvmware
+      connection-monitor-preview:
+        Target: connection-monitor-preview
+      containerapp:
+        Target: containerapp
+      cosmosdb-preview:
+        Target: cosmosdb-preview
+      costmanagement:
+        Target: costmanagement
+      custom-providers:
+        Target: custom-providers
+      databox:
+        Target: databox
+      databricks:
+        Target: databricks
+      datadog:
+        Target: datadog
+      datafactory:
+        Target: datafactory
+      datamigration:
+        Target: datamigration
+      dataprotection:
+        Target: dataprotection
+      datashare:
+        Target: datashare
+      db-up:
+        Target: db-up
+      desktopvirtualization:
+        Target: desktopvirtualization
+      dev-spaces:
+        Target: dev-spaces
+      diskpool:
+        Target: diskpool
+      dms-preview:
+        Target: dms-preview
+      dnc:
+        Target: dnc
+      dns-resolver:
+        Target: dns-resolver
+      edgeorder:
+        Target: edgeorder
+      elastic-san:
+        Target: elastic-san
+      elastic:
+        Target: elastic
+      eventgrid:
+        Target: eventgrid
+      express-route-cross-connection:
+        Target: express-route-cross-connection
+      fleet:
+        Target: fleet
+      fluid-relay:
+        Target: fluid-relay
+      footprint:
+        Target: footprint
+      front-door:
+        Target: front-door
+      functionapp:
+        Target: functionapp
+      guestconfig:
+        Target: guestconfig
+      hack:
+        Target: hack
+      hardware-security-modules:
+        Target: hardware-security-modules
+      healthbot:
+        Target: healthbot
+      healthcareapis:
+        Target: healthcareapis
+      hpc-cache:
+        Target: hpc-cache
+      image-copy:
+        Target: image-copy
+      image-gallery:
+        Target: image-gallery
+      import-export:
+        Target: import-export
+      init:
+        Target: init
+      interactive:
+        Target: interactive
+      internet-analyzer:
+        Target: internet-analyzer
+      ip-group:
+        Target: ip-group
+      k8s-configuration:
+        Target: k8s-configuration
+      k8s-extension:
+        Target: k8s-extension
+      kusto:
+        Target: kusto
+      log-analytics-solution:
+        Target: log-analytics-solution
+      log-analytics:
+        Target: log-analytics
+      logic:
+        Target: logic
+      logz:
+        Target: logz
+      maintenance:
+        Target: maintenance
+      managementpartner:
+        Target: managementpartner
+      mesh:
+        Target: mesh
+      mixed-reality:
+        Target: mixed-reality
+      monitor-control-service:
+        Target: monitor-control-service
+      netappfiles-preview:
+        Target: netappfiles-preview
+      network-manager:
+        Target: network-manager
+      next:
+        Target: next
+      nginx:
+        Target: nginx
+      notification-hub:
+        Target: notification-hub
+      offazure:
+        Target: offazure
+      orbital:
+        Target: orbital
+      peering:
+        Target: peering
+      portal:
+        Target: portal
+      powerbidedicated:
+        Target: powerbidedicated
+      providerhub:
+        Target: providerhub
+      purview:
+        Target: purview
+      quantum:
+        Target: quantum
+      quota:
+        Target: quota
+      rdbms-connect:
+        Target: rdbms-connect
+      redisenterprise:
+        Target: redisenterprise
+      reservation:
+        Target: reservation
+      resource-graph:
+        Target: resource-graph
+      resource-mover:
+        Target: resource-mover
+      scenario-guide:
+        Target: scenario-guide
+      scheduled-query:
+        Target: scheduled-query
+      scvmm:
+        Target: scvmm
+      securityinsight:
+        Target: securityinsight
+      serial-console:
+        Target: serial-console
+      spring-cloud:
+        Target: spring-cloud
+      spring:
+        Target: spring
+      ssh:
+        Target: ssh
+      stack-hci:
+        Target: stack-hci
+      storage-blob-preview:
+        Target: storage-blob-preview
+      storage-preview:
+        Target: storage-preview
+      storagesync:
+        Target: storagesync
+      stream-analytics:
+        Target: stream-analytics
+      subscription:
+        Target: subscription
+      support:
+        Target: support
+      swiftlet:
+        Target: swiftlet
+      timeseriesinsights:
+        Target: timeseriesinsights
+      traffic-collector:
+        Target: traffic-collector
+      virtual-network-tap:
+        Target: virtual-network-tap
+      virtual-wan:
+        Target: virtual-wan
+      vm-repair:
+        Target: vm-repair
+      vmware:
+        Target: vmware
+      webapp:
+        Target: webapp
+      webpubsub:
+        Target: webpubsub
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '3.10'
+        profile: 'latest'
+        ext_module: '$(Target)'

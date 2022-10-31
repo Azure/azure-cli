@@ -4,10 +4,11 @@ parameters:
     default: '.'
   - name: CLIExtensionRepoPath
     type: string
-    default: ''
+    default: '.'
 steps:
   - bash: |
       set -ev
+      git clone https://github.com/Azure/azure-cli-extensions.git
 
       python -m venv env
       chmod +x env/bin/activate
