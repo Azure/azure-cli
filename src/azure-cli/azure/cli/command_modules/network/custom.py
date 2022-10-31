@@ -8308,7 +8308,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
                 f.write(response.text)
             rdpfilepath = os.getcwd() + "/conn.rdp"
             command = [_get_rdp_path()]
-            if (configure):
+            if configure:
                 command.append("/edit")
             command.append(rdpfilepath)
             launch_and_wait(command)
