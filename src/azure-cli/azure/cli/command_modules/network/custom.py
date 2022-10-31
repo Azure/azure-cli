@@ -8346,7 +8346,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 
-def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False):
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
@@ -8382,7 +8382,10 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             with open("conn.rdp", "w") as f:
                 f.write(response.text)
             rdpfilepath = os.getcwd() + "/conn.rdp"
-            command = [_get_rdp_path(), rdpfilepath]
+            command = [_get_rdp_path()]
+            if configure:
+                command.append("/edit")
+            command.append(rdpfilepath)
             launch_and_wait(command)
     else:
         raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
