@@ -389,7 +389,7 @@ jobs:
       webpubsub:
         Target: webpubsub
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
