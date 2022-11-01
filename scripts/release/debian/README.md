@@ -24,7 +24,7 @@ Verification
 ------------
 
 ``` bash
-sudo dpkg -i azure-cli_${CLI_VERSION}-1_all.deb
+sudo dpkg -i azure-cli_${CLI_VERSION}-1_$(dpkg --print-architecture).deb
 az
 az --version
 ```
