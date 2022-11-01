@@ -717,8 +717,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check("frontendIpConfigurations[0].subnet.contains(id, 'default')", True)
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True)
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
 
@@ -730,7 +730,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
         self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard')
-        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --priority 1001')
+        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --priority 1001 --waf-policy waf1')
 
         self.cmd('network application-gateway list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -741,7 +742,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1 '
                  '--host-name-from-http-settings --path /test --timeout 100 '
