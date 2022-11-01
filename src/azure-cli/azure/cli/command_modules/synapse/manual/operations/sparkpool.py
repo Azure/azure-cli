@@ -2,9 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=unused-argument, line-too-long, too-many-locals
+# pylint: disable=unused-argument, line-too-long, too-many-locals, too-many-branches, too-many-statements
 from azure.cli.core.util import sdk_no_wait, read_file_content
-from azure.mgmt.synapse.models import BigDataPoolResourceInfo, AutoScaleProperties, AutoPauseProperties, LibraryRequirements, NodeSizeFamily, LibraryInfo, SparkConfigProperties
+from azure.mgmt.synapse.models import BigDataPoolResourceInfo, AutoScaleProperties, AutoPauseProperties, LibraryRequirements, NodeSizeFamily, LibraryInfo, SparkConfigProperties, DynamicExecutorAllocation
 from .._client_factory import cf_synapse_client_workspace_factory
 from .artifacts import get_workspace_package
 from pathlib import Path
@@ -20,7 +20,8 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       node_size_family=NodeSizeFamily.memory_optimized.value, enable_auto_scale=None,
                       min_node_count=None, max_node_count=None, spark_config_file_path=None,
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
-                      spark_log_folder="/logs", tags=None, no_wait=False):
+                      spark_log_folder="/logs", enable_dynamic_executor_allocation=None, min_executors=None,
+                      max_executors=None, tags=None, no_wait=False):
 
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
     workspace_object = workspace_client.get(resource_group_name, workspace_name)
@@ -37,6 +38,9 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
     big_data_pool_info.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                         delay_in_minutes=delay)
 
+    big_data_pool_info.dynamic_executor_allocation = DynamicExecutorAllocation(enabled=enable_dynamic_executor_allocation,
+                                                                               min_executors=min_executors,
+                                                                               max_executors=max_executors)
     if spark_config_file_path:
         filename = Path(spark_config_file_path).stem
         try:
@@ -55,11 +59,10 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
 
 def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_pool_name,
                       node_size=None, node_count=None, enable_auto_scale=None,
-                      min_node_count=None, max_node_count=None,
-                      enable_auto_pause=None, delay=None,
+                      min_node_count=None, max_node_count=None, enable_auto_pause=None, delay=None,
                       library_requirements=None, spark_config_file_path=None,
-                      package_action=None, package=None,
-                      tags=None, force=False, no_wait=False):
+                      package_action=None, package=None, enable_dynamic_executor_allocation=None, min_executors=None,
+                      max_executors=None, tags=None, force=False, no_wait=False):
     existing_spark_pool = client.get(resource_group_name, workspace_name, spark_pool_name)
 
     if node_size:
@@ -118,6 +121,18 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
             raise InvalidArgumentValueError(err_msg)
         existing_spark_pool.spark_config_properties = SparkConfigProperties(content=content,
                                                                             filename=filename)
+
+    if existing_spark_pool.dynamic_executor_allocation is not None:
+        if enable_dynamic_executor_allocation is not None:
+            existing_spark_pool.dynamic_executor_allocation.enabled = enable_dynamic_executor_allocation
+        if min_executors:
+            existing_spark_pool.dynamic_executor_allocation.min_executors = min_executors
+        if max_executors:
+            existing_spark_pool.dynamic_executor_allocation.max_executors = max_executors
+    else:
+        existing_spark_pool.dynamic_executor_allocation = DynamicExecutorAllocation(enabled=enable_dynamic_executor_allocation,
+                                                                                    min_executors=min_executors,
+                                                                                    max_executors=max_executors)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,
                        existing_spark_pool, force=force)
 
