@@ -463,21 +463,17 @@ def validate_server_name(db_context, server_name, type_):
 
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
-
-    if db_context.command_group == 'mysql':
-        try:
-            result = client.execute(db_context.location,
-                                    name_availability_request={
-                                        'name': server_name,
-                                        'type': type_})
-        except HttpResponseError as e:
-            if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
-                client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
-                result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
-            else:
-                raise e
-    else:
-        result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+    try:
+        result = client.execute(db_context.location,
+                                name_availability_request={
+                                    'name': server_name,
+                                    'type': type_})
+    except HttpResponseError as e:
+        if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+            client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
+            result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+        else:
+            raise e
 
     if not result.name_available:
         raise ValidationError(result.message)
