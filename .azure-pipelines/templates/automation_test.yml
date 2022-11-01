@@ -67,7 +67,7 @@ steps:
         echo "Installing extension '$ext_module'"
         azdev extension add $ext_module
         echo "Running test for extension '$ext_module'"
-        azdev test $ext_module --discover --no-exitfirst --verbose --pytest-args "--durations=0"
+        azdev test $ext_module --no-exitfirst --pytest-args "--durations=0"
         echo "Uninstalling extension '$ext_module'"
         azdev extension remove $ext_module
         exit 0
