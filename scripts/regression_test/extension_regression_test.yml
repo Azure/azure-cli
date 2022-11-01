@@ -1,0 +1,49 @@
+name: CLI EXTENSION REGRESSION TEST $(Date:yyyyMMdd)$(Rev:.r)
+
+resources:
+- repo: self
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+variables:
+- template: .azure-pipelines/templates/variables.yml
+
+jobs:
+- job: CLIExtensionRegressionTest
+  displayName: CLI Extension Regression Test
+  timeoutInMinutes: 0
+    strategy:
+      maxParallel: 8
+      matrix:
+        instance1:
+          Instance_idx: 1
+        instance2:
+          Instance_idx: 2
+        instance3:
+          Instance_idx: 3
+        instance4:
+          Instance_idx: 4
+        instance5:
+          Instance_idx: 5
+        instance6:
+          Instance_idx: 6
+        instance7:
+          Instance_idx: 7
+        instance8:
+          Instance_idx: 8
+    pool:
+      name: ${{ variables.ubuntu_pool }}
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+        displayName: "Use Python 3.10"
+    - template: ../../.azure-pipelines/templates/azdev_setup.yml
+      parameters:
+        CLIExtensionRepoPath: azure-cli-extensions
+    - bash: |
+        set -ev
+
