@@ -1530,13 +1530,18 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
     def test_management_group_deployment_create_mode(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'policy_definition_deploy_mg.bicep').replace('\\', '\\\\'),
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'mg': self.create_random_name('mg', 10),
             'dn': self.create_random_name('depname', 20),
+            'sub-rg': self.create_random_name('sub-group', 20),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
         self.cmd('account management-group create --name {mg}')
-        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" --mode Incremental', checks=[
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}" --mode Incremental', checks=[
             self.check('name', '{dn}'),
             self.check('properties.mode', 'Incremental')
         ])
