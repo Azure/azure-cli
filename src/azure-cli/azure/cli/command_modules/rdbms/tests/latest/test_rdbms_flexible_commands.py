@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import unittest
 import time
 
 from datetime import datetime, timedelta, tzinfo
