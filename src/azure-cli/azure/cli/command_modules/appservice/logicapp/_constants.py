@@ -39,7 +39,7 @@ FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS = {
     },
     '3': {
         'node': ['10', '12'],
-        'python': ['3.6', '3.7', '3.8', '3.9', '3.10'],
+        'python': ['3.6', '3.7', '3.8'],
         'dotnet': ['3'],
         'java': ['8']
     }
