@@ -256,8 +256,16 @@ jobs:
 
   dependsOn: ExtractMetadata
   condition: succeeded()
+  strategy:
+    matrix:
+      AMD64:
+        pool: ${{ variables.ubuntu_pool }}
+        artifactName: docker
+      ARM64:
+        pool: ${{ variables.ubuntu_arm64_pool }}
+        artifactName: docker-arm64
   pool:
-    name: ${{ variables.ubuntu_pool }}
+    name: $(pool)
   steps:
   - task: Bash@3
     displayName: 'Bash Script'
@@ -275,15 +283,23 @@ jobs:
     displayName: 'Publish Artifact: docker image'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: docker
+      ArtifactName: $(artifactName)
 
 - job: TestDockerImage
   displayName: Test Docker Image
 
   dependsOn: BuildDockerImage
   condition: succeeded()
+  strategy:
+    matrix:
+      AMD64:
+        pool: ${{ variables.ubuntu_pool }}
+        artifactName: docker
+      ARM64:
+        pool: ${{ variables.ubuntu_arm64_pool }}
+        artifactName: docker-arm64
   pool:
-    name: ${{ variables.ubuntu_pool }}
+    name: $(pool)
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -296,7 +312,7 @@ jobs:
     displayName: 'Download Docker Image'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-      artifactName: docker
+      artifactName: $(artifactName)
 
 
   - bash: |
