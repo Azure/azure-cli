@@ -308,6 +308,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
                   version=None, cli_ctx=None, upgrade=None):
     ext_sha256 = None
+    update_to_latest = version == 'latest' and not source
 
     version = None if version == 'latest' else version
     cmd_cli_ctx = cli_ctx or cmd.cli_ctx
@@ -332,7 +333,8 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
             if not upgrade:
                 return
             if ext_version == ext.get_version():
-                logger.warning("Latest version of '%s' is already installed.", extension_name)
+                if update_to_latest:
+                    logger.warning("Latest version of '%s' is already installed.", extension_name)
                 return
 
             logger.warning("It will be overridden with version %s.", ext_version)
