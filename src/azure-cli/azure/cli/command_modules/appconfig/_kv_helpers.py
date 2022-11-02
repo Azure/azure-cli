@@ -23,7 +23,11 @@ from azure.keyvault.key_vault_id import KeyVaultIdentifier
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import FileOperationError, AzureInternalError
+from azure.cli.core.azclierror import (FileOperationError,
+                                       AzureInternalError,
+                                       ValidationError,
+                                       AzureResponseError,
+                                       RequiredArgumentMissingError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
 from ._utils import prep_label_filter_for_url_encoding
@@ -137,6 +141,9 @@ def __read_with_appropriate_encoding(file_path, format_):
         with io.open(file_path, 'r', encoding=default_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
+                # Only accept json objects
+                if not isinstance(config_data, (dict, list)):
+                    raise ValueError("Json object required but type '{}' was given.".format(type(config_data).__name__))
 
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
@@ -182,11 +189,11 @@ def __read_kv_from_file(file_path,
                 if feature_management_keyword in config_data:
                     del config_data[feature_management_keyword]
     except ValueError as ex:
-        raise CLIError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
+        raise FileOperationError('The input is not a well formatted %s file.\nException: %s' % (format_, ex))
     except yaml.YAMLError as ex:
-        raise CLIError('The input is not a well formatted YAML file.\nException: %s' % (ex))
+        raise FileOperationError('The input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
-        raise CLIError('File is not available.')
+        raise FileOperationError('File is not available.')
 
     flattened_data = {}
     if format_ == 'json' and content_type and __is_json_content_type(content_type):
@@ -245,15 +252,15 @@ def __read_features_from_file(file_path, format_):
                     enabled_for_keyword = ENABLED_FOR_KEYWORDS[index]
                     found_feature_section = True
                 else:
-                    raise CLIError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
+                    raise FileOperationError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
 
     except ValueError as ex:
-        raise CLIError(
+        raise FileOperationError(
             'The feature management section of input is not a well formatted %s file.\nException: %s' % (format_, ex))
     except yaml.YAMLError as ex:
-        raise CLIError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
+        raise FileOperationError('The feature management section of input is not a well formatted YAML file.\nException: %s' % (ex))
     except OSError:
-        raise CLIError('File is not available.')
+        raise FileOperationError('File is not available.')
 
     # features_dict contains all features that need to be converted to KeyValue format now
     return __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword)
@@ -278,7 +285,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             elif format_ == 'properties':
                 javaproperties.dump(exported_keyvalues, fp)
     except Exception as exception:
-        raise CLIError("Failed to export key-values to file. " + str(exception))
+        raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
 
 # Exported in the format @Microsoft.AppConfiguration(Endpoint=<storeEndpoint>; Key=<kvKey>; Label=<kvLabel>).
@@ -332,7 +339,7 @@ def __read_kv_from_config_store(azconfig_client,
                                                                              accept_datetime=datetime,
                                                                              fields=query_fields)
     except HttpResponseError as exception:
-        raise CLIError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
@@ -480,7 +487,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                     try:
                         json.loads(value)
                     except ValueError:
-                        raise CLIError('Value "{}" for key "{}" is not a valid JSON object, which conflicts with the provided content type "{}".'.format(value, key, content_type))
+                        raise ValidationError('Value "{}" for key "{}" is not a valid JSON object, which conflicts with the provided content type "{}".'.format(value, key, content_type))
 
                 kv = KeyValue(key=key, value=value, tags=tags)
                 key_values.append(kv)
@@ -787,7 +794,7 @@ def __flatten_json_key_value(key, value, flattened_data, depth, separator):
         depth = depth - 1
         if value and isinstance(value, dict):
             if separator is None or not separator:
-                raise CLIError(
+                raise RequiredArgumentMissingError(
                     "A non-empty separator is required for importing hierarchical configurations.")
             for nested_key in value:
                 __flatten_json_key_value(
@@ -806,14 +813,14 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
         depth = depth - 1
         if isinstance(value, list):
             if separator is None or not separator:
-                raise CLIError(
+                raise RequiredArgumentMissingError(
                     "A non-empty separator is required for importing hierarchical configurations.")
             for index, item in enumerate(value):
                 __flatten_key_value(
                     key + separator + str(index), item, flattened_data, depth, separator)
         elif isinstance(value, dict):
             if separator is None or not separator:
-                raise CLIError(
+                raise RequiredArgumentMissingError(
                     "A non-empty separator is required for importing hierarchical configurations.")
             for nested_key in value:
                 __flatten_key_value(
@@ -827,50 +834,20 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
         flattened_data[key] = str(value)
 
 
-def __export_keyvalue(key_segments, value, constructed_data, key):
+def __export_keyvalue(key_segments, value, constructed_data):
     first_key_segment = key_segments[0]
-    if isinstance(constructed_data, list):
-        if not first_key_segment.isdigit():
-            logger.debug(
-                "A key %s has been dropped as it can not be exported to a valid file!", key)
-            return
 
-        first_key_segment = int(first_key_segment)
-        if len(key_segments) == 1:
-            constructed_data.extend(
-                [Undef()] * (first_key_segment - len(constructed_data) + 1))
-            constructed_data[first_key_segment] = value
-        else:
-            if first_key_segment >= len(constructed_data):
-                constructed_data.extend(
-                    [Undef()] * (first_key_segment - len(constructed_data) + 1))
-            if isinstance(constructed_data[first_key_segment], Undef):
-                constructed_data[first_key_segment] = [
-                ] if key_segments[1].isdigit() else {}
-            __export_keyvalue(
-                key_segments[1:], value, constructed_data[first_key_segment], key)
-    elif isinstance(constructed_data, dict):
-        if first_key_segment.isdigit():
-            logger.debug(
-                "A key '%s' has been dropped as it can not be exported to a valid file!", key)
-            return
-
-        if len(key_segments) == 1:
-            constructed_data[first_key_segment] = value
-        else:
-            if first_key_segment not in constructed_data:
-                constructed_data[first_key_segment] = [
-                ] if key_segments[1].isdigit() else {}
-            __export_keyvalue(
-                key_segments[1:], value, constructed_data[first_key_segment], key)
+    if len(key_segments) == 1:
+        constructed_data[first_key_segment] = value
     else:
-        logger.debug(
-            "A key '%s' has been dropped as it can not be exported to a valid file!", key)
+        if first_key_segment not in constructed_data:
+            constructed_data[first_key_segment] = {}
+        __export_keyvalue(
+            key_segments[1:], value, constructed_data[first_key_segment])
 
 
 def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     exported_dict = {}
-    exported_list = []
 
     previous_kv = None
     try:
@@ -901,21 +878,34 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
                 continue
 
             key_segments = key.split(separator)
-            if key_segments[0].isdigit():
-                __export_keyvalue(key_segments,
-                                  kv.value, exported_list, key)
+            __export_keyvalue(key_segments, kv.value, exported_dict)
 
-            else:
-                __export_keyvalue(key_segments,
-                                  kv.value, exported_dict, key)
-
-        if exported_dict and exported_list:
-            logger.error("Can not export to a valid file! Some keys have been dropped. %s", json.dumps(
-                exported_dict, indent=2, ensure_ascii=False))
-
-        return __compact_key_values(exported_dict if not exported_list else exported_list)
+        return __try_convert_to_arrays(exported_dict)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
+
+
+def __try_convert_to_arrays(constructed_data):
+    if not (isinstance(constructed_data, dict) and len(constructed_data) > 0):
+        return constructed_data
+
+    # Object cannot be an array if not all keys are numeric
+    if False not in (key.isdigit() for key in constructed_data):
+        is_array = True
+        sorted_data_keys = sorted(int(key) for key in constructed_data)
+
+        # If all keys are digits and in order starting from 0, we convert the dictionary to an array
+        # with indices corresponding to the keys.
+        # We do not try to convert key-values at the root of the object to an array even if they meet this criterion.
+        for index, key in enumerate(sorted_data_keys):
+            if index != key:
+                is_array = False
+                break
+
+        if is_array:
+            return [__try_convert_to_arrays(constructed_data[str(data_key)]) for data_key in sorted_data_keys]
+
+    return {data_key: __try_convert_to_arrays(data_value) for data_key, data_value in constructed_data.items()}
 
 
 def __export_features(retrieved_features, naming_convention):
@@ -973,7 +963,7 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                     try:
                         feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
                     except KeyError:
-                        raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
+                        raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
                     if feature_flag_value.conditions["client_filters"]:
                         feature_flag_value.enabled = True
@@ -1066,7 +1056,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         keyvault_reference.value = secret.value
         return keyvault_reference
     except (TypeError, ValueError):
-        raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
+        raise ValidationError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
     except Exception as exception:
         raise CLIError(str(exception))
 

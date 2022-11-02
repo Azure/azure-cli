@@ -42,6 +42,7 @@ def load_arguments(self, _):
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
+    DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -109,8 +110,7 @@ def load_arguments(self, _):
 
     edge_zone_type = CLIArgumentType(
         help='The name of edge zone.',
-        min_api='2020-12-01',
-        is_preview=True
+        min_api='2020-12-01'
     )
 
     t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')
@@ -133,6 +133,7 @@ def load_arguments(self, _):
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
+    disk_controller_type = CLIArgumentType(help='Specify the disk controller type configured for the VM or VMSS.', arg_type=get_enum_type(DiskControllerTypes), arg_group='Storage', is_preview=True)
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -520,7 +521,7 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
-        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 
     with self.argument_context('vm extension show') as c:
         c.argument('instance_view', action='store_true', help='The instance view of a virtual machine extension.')
@@ -722,7 +723,8 @@ def load_arguments(self, _):
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName),
                    help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
-        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
+        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], deprecate_info=c.deprecate(target='--nat-pool-name', redirect='--nat-rule-name', hide=True))
+        c.argument('nat_rule_name', help='Name to use for the NAT rule v2 when creating a new load balancer. (NAT rule V2 is used to replace NAT pool)', options_list=['--lb-nat-rule-name', '--nat-rule-name'])
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
@@ -776,6 +778,8 @@ def load_arguments(self, _):
                        help='Set this Boolean property will allow VMSS to ignore AZ boundaries when constructing upgrade batches, and only consider Update Domain and maxBatchInstancePercent to determine the batch size')
             c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag(), min_api='2020-12-01',
                        help='Set this Boolean property will lead to all unhealthy instances in a scale set getting upgraded before any healthy instances')
+            c.argument('regular_priority_count', type=int, min_api='2022-08-01', is_preview=True, help='The base number of regular priority VMs that will be created in this scale set as it scales out. Must be greater than 0.')
+            c.argument('regular_priority_percentage', type=int, min_api='2022-08-01', is_preview=True, help='The percentage of VM instances, after the base regular priority count has been reached, that are expected to use regular priority. Must be between 0 and 100.')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
@@ -859,7 +863,7 @@ def load_arguments(self, _):
             c.argument('run_as_user', help='By default script process runs under system/root user. Specify custom user to host the process.')
             c.argument('run_as_password', help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
             c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
-            c.argument('output_blob_uri', help='Specify the Azure storage blob where script output stream will be uploaded.')
+            c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
 
     with self.argument_context('vm run-command delete') as c:
@@ -1136,6 +1140,7 @@ def load_arguments(self, _):
                        min_api='2021-04-01', is_preview=True)
             c.argument('v_cpus_available', type=int, min_api='2021-11-01', help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, min_api='2021-11-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
+            c.argument('disk_controller_type', disk_controller_type)
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
@@ -1307,11 +1312,12 @@ def load_arguments(self, _):
                    'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
 
     for scope in ['sig image-version create', 'sig image-version update']:
-        with self.argument_context(scope) as c:
+        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
             c.argument('target_regions', nargs='*',
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+            c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig show-community') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1558,6 +1564,7 @@ def load_arguments(self, _):
                    'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
                    'included.')
         c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
+        c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), is_preview=True, min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

@@ -28,6 +28,7 @@ class ImportFormat(Enum):
     OpenApi = "OpenApi"
     OpenApiJson = "OpenApiJson"
     Wsdl = "Wsdl"
+    GraphQL = "GraphQL"
 
 
 def load_arguments(self, _):
@@ -66,7 +67,11 @@ def load_arguments(self, _):
         c.argument('sku_name', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(),
-                   help='Create a managed identity for the API Management service to access other Azure resources.')
+                   help='Create a managed identity for the API Management service to access other Azure resources. Only meant to be used for Consumption SKU Service.')
+        c.argument('public_network_access', arg_type=get_three_state_flag(),
+                   help='Whether or not public endpoint access is allowed for this API Management service. If set to true, private endpoints are the exclusive access method.')
+        c.argument('disable_gateway', arg_type=get_three_state_flag(),
+                   help='Disable gateway in the master region. Only valid for an Api Management service deployed in multiple locations.')
 
     with self.argument_context('apim update') as c:
         c.argument(
@@ -81,7 +86,11 @@ def load_arguments(self, _):
         c.argument('sku_name', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(),
-                   help='Create a managed identity for the API Management service to access other Azure resources.')
+                   help='Create a managed identity for the API Management service to access other Azure resources. Only meant to be used for Consumption SKU Service.')
+        c.argument('public_network_access', arg_type=get_three_state_flag(),
+                   help='Whether or not public endpoint access is allowed for this API Management service. If set to true, private endpoints are the exclusive access method.')
+        c.argument('disable_gateway', arg_type=get_three_state_flag(),
+                   help='Disable gateway in the master region. Only valid for an Api Management service deployed in multiple locations.')
 
     with self.argument_context('apim backup') as c:
         c.argument('backup_name', help='The name of the backup file to create.')

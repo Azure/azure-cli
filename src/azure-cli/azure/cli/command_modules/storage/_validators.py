@@ -26,7 +26,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from ._client_factory import cf_blob_service, cf_share_service, cf_share_client
 
-storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+storage_account_key_options = {'primary': '1', 'secondary': '2', 'key1': '1', 'key2': '2'}
 logger = get_logger(__name__)
 
 
@@ -846,13 +846,15 @@ def validate_included_datasets_validator(include_class):
 
 
 def validate_key_name(namespace):
-    key_options = {'primary': '1', 'secondary': '2'}
-    if hasattr(namespace, 'key_type') and namespace.key_type:
-        namespace.key_name = namespace.key_type + key_options[namespace.key_name]
-    else:
-        namespace.key_name = storage_account_key_options[namespace.key_name]
+    key_type = 'key'
     if hasattr(namespace, 'key_type'):
+        key_type = namespace.key_type or 'key'
         del namespace.key_type
+
+    if namespace.key_name in ['primary', 'secondary']:
+        logger.warning("The 'primary' and 'secondary' options for --key are deprecated and "
+                       "will be removed in future release, please use 'key1' and 'key2' instead.")
+    namespace.key_name = key_type + storage_account_key_options[namespace.key_name]
 
 
 def validate_metadata(namespace):
@@ -1662,7 +1664,7 @@ def validate_azcopy_remove_arguments(cmd, namespace):
                                              'specified'))
     if valid_blob:
         client = blob_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name})
+            'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
         if not blob:
             blob = ''
         url = client.make_blob_url(container, blob)

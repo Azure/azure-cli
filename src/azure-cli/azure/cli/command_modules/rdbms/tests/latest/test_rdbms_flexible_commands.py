@@ -2123,24 +2123,18 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                             JMESPathCheck('sid', sid)]
 
             self.cmd('{} flexible-server ad-admin create -g {} -s {} -u {} -i {} --identity {}'
-                     .format(database_engine, resource_group, server, login, sid, identity_id[1]),
-                     checks=admin_checks)
+                     .format(database_engine, resource_group, server, login, sid, identity_id[1]))
 
-            self.cmd('{} flexible-server identity list -g {} -s {}'
-                     .format(database_engine, resource_group, server),
-                     checks=[
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
+            for server_name in [server, replica[0]]:
+                self.cmd('{} flexible-server ad-admin show -g {} -s {}'
+                        .format(database_engine, resource_group, server_name),
+                        checks=admin_checks)
 
-            self.cmd('{} flexible-server ad-admin show -g {} -s {}'
-                     .format(database_engine, resource_group, replica[0]),
-                     checks=admin_checks)
-
-            self.cmd('{} flexible-server identity list -g {} -s {}'
-                     .format(database_engine, resource_group, replica[0]),
-                     checks=[
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
+                self.cmd('{} flexible-server identity list -g {} -s {}'
+                        .format(database_engine, resource_group, server_name),
+                        checks=[
+                            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
+                            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
             # create replica 2
             self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
@@ -2152,6 +2146,12 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server ad-admin show -g {} -s {}'
                      .format(database_engine, resource_group, replica[1]),
                      checks=admin_checks)
+
+            # set aad_auth_only=ON in primary server and replica 2
+            for server_name in [server, replica[1]]:
+                self.cmd('{} flexible-server parameter set -g {} -s {} -n aad_auth_only -v ON'
+                        .format(database_engine, resource_group, server_name),
+                        checks=[JMESPathCheck('value', 'ON')])
 
             # try to remove identity 2 from primary server
             self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
@@ -2167,63 +2167,49 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server ad-admin delete -g {} -s {} --yes'
                      .format(database_engine, resource_group, server))
 
-            admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
-                              .format(database_engine, resource_group, server)).get_output_in_json()
-            self.assertEqual(0, len(admins))
+            for server_name in [server, replica[0], replica[1]]:
+                admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
+                                .format(database_engine, resource_group, server_name)).get_output_in_json()
+                self.assertEqual(0, len(admins))
 
-            admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
-                              .format(database_engine, resource_group, replica[0])).get_output_in_json()
-            self.assertEqual(0, len(admins))
-
-            admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
-                              .format(database_engine, resource_group, replica[1])).get_output_in_json()
-            self.assertEqual(0, len(admins))
+            # verify that aad_auth_only=OFF in primary server and all replicas
+            for server_name in [server, replica[0], replica[1]]:
+                self.cmd('{} flexible-server parameter show -g {} -s {} -n aad_auth_only'
+                        .format(database_engine, resource_group, server_name),
+                        checks=[JMESPathCheck('value', 'OFF')])
 
             # add identity 3 to primary server
             self.cmd('{} flexible-server identity assign -g {} -s {} -n {}'
-                     .format(database_engine, resource_group, server, identity_id[2]),
-                     checks=[
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
+                     .format(database_engine, resource_group, server, identity_id[2]))
 
-            self.cmd('{} flexible-server identity list -g {} -s {}'
-                     .format(database_engine, resource_group, replica[0]),
-                     checks=[
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
-
-            self.cmd('{} flexible-server identity list -g {} -s {}'
-                     .format(database_engine, resource_group, replica[1]),
-                     checks=[
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
-
-            # try to remove all identities from primary server
-            self.cmd('{} flexible-server identity remove -g {} -s {} -n {} {} {} --yes'
-                     .format(database_engine, resource_group, server, identity_id[0], identity_id[1], identity_id[2]),
-                     expect_failure=True)
+            for server_name in [server, replica[0], replica[1]]:
+                self.cmd('{} flexible-server identity list -g {} -s {}'
+                        .format(database_engine, resource_group, server_name),
+                        checks=[
+                            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
+                            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1])),
+                            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
 
             # remove identities 1 and 2 from primary server
             self.cmd('{} flexible-server identity remove -g {} -s {} -n {} {} --yes'
-                     .format(database_engine, resource_group, server, identity_id[0], identity_id[1]),
-                     checks=[
-                        JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[1])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
+                     .format(database_engine, resource_group, server, identity_id[0], identity_id[1]))
 
-            self.cmd('{} flexible-server identity list -g {} -s {}'
-                     .format(database_engine, resource_group, replica[0]),
-                     checks=[
-                        JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[1])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
+            for server_name in [server, replica[0], replica[1]]:
+                self.cmd('{} flexible-server identity list -g {} -s {}'
+                        .format(database_engine, resource_group, server_name),
+                        checks=[
+                            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[0])),
+                            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[1])),
+                            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
 
-            self.cmd('{} flexible-server identity list -g {} -s {}'
-                     .format(database_engine, resource_group, replica[1]),
-                     checks=[
-                        JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[0])),
-                        JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[1])),
-                        JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
+            # remove identity 3 from primary server
+            self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
+                     .format(database_engine, resource_group, server, identity_id[2]))
+
+            for server_name in [server, replica[0], replica[1]]:
+                self.cmd('{} flexible-server identity list -g {} -s {}'
+                        .format(database_engine, resource_group, server_name),
+                        checks=[
+                            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[0])),
+                            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[1])),
+                            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity_id[2]))])
