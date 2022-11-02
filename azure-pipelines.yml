@@ -19,10 +19,12 @@ parameters:
 - name: architectures
   type: object
   default:
-  - value: amd64
-    pool: ${{ variables.ubuntu_pool }}
-  - value: arm64
-    pool: ${{ variables.ubuntu_arm64_pool }}
+  - name: AMD64
+    value: amd64
+    pool: pool-ubuntu-2004
+  - name: ARM64
+    value: arm64
+    pool: ubuntu-arm64-2004-pool
 
 jobs:
 - job: CheckPullRequest
@@ -654,11 +656,14 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        2.0 ${{ arch.value }}:
-          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-          artifact: rpm-mariner2.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      2.0 AMD64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-amd64
+        pool: ${{ variables.ubuntu_pool }}
+      2.0 ARM64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-arm64
+        pool: ${{ variables.ubuntu_arm64_pool }}
   pool:
     name: $(pool)
   steps:
@@ -700,30 +705,49 @@ jobs:
   # Do not run this job for Pull Requests due to the slowness
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: ${{ variables.ubuntu_pool }}
+    name: $(pool)
   strategy:
     matrix:
-      Red Hat Universal Base Image 8:
-        dockerfile: ubi
-        image: registry.access.redhat.com/ubi8/ubi:8.4
-        artifact: rpm-ubi8
-        python_package: python39
-      Red Hat Universal Base Image 9:
-        dockerfile: ubi
-        image: registry.access.redhat.com/ubi9/ubi:9.0.0
-        artifact: rpm-ubi9
-        python_package: python3.9
-      Fedora 35:
-        dockerfile: fedora
-        image: fedora:35
-        artifact: rpm-fedora35
-        python_package: python3
-      Fedora 36:
-        dockerfile: fedora
-        image: fedora:36
-        artifact: rpm-fedora36
-        python_package: python3
+      ${{ each arch in parameters.architectures }}:
+        Red Hat Universal Base Image 8 ${{ arch.name }}:
+          dockerfile: ubi
+          image: registry.access.redhat.com/ubi8/ubi:8.4
+          artifact: rpm-ubi8-${{ arch.value }}
+          python_package: python39
+          pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 9 ${{ arch.name }}:
+          dockerfile: ubi
+          image: registry.access.redhat.com/ubi9/ubi:9.0.0
+          artifact: rpm-ubi9-${{ arch.value }}
+          python_package: python3.9
+          pool: ${{ arch.pool }}
+        Fedora 35 ${{ arch.name }}:
+          dockerfile: fedora
+          image: fedora:35
+          artifact: rpm-fedora35-${{ arch.value }}
+          python_package: python3
+          pool: ${{ arch.pool }}
+        Fedora 36 ${{ arch.name }}:
+          dockerfile: fedora
+          image: fedora:36
+          artifact: rpm-fedora36-${{ arch.value }}
+          python_package: python3
+          pool: ${{ arch.pool }}
   steps:
+  - bash: |
+      if [[ $(dpkg --print-architecture) == "amd64" ]]; then
+        echo "Docker is already installed on AMD64"
+        exit 0
+      fi
+      # https://docs.docker.com/engine/security/rootless/
+      /bin/bash -c "$(curl -fsSL https://get.docker.com)"
+      sudo apt-get install -y uidmap
+      dockerd-rootless-setuptool.sh install
+      export XDG_RUNTIME_DIR=/home/cloudtest/.docker/run
+      PATH=/usr/bin:/sbin:/usr/sbin:$PATH dockerd-rootless.sh &
+      sleep 5
+      docker context use rootless
+    displayName: Install Docker
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -748,37 +772,42 @@ jobs:
     - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: ${{ variables.ubuntu_pool }}
+    name: $(pool)
   strategy:
     matrix:
-      Red Hat Universal Base Image 8:
-        artifact: rpm-ubi8
-        distro: el8
-        image: registry.access.redhat.com/ubi8/ubi:8.4
-        python_package: python39
-        python_cmd: python3.9
-        pip_cmd: pip3.9
-      Red Hat Universal Base Image 9:
-        artifact: rpm-ubi9
-        distro: el9
-        image: registry.access.redhat.com/ubi9/ubi:9.0.0
-        python_package: python3.9
-        python_cmd: python3.9
-        pip_cmd: pip3.9
-      Fedora 35:
-        artifact: rpm-fedora35
-        distro: fc35
-        image: fedora:35
-        python_package: python3
-        python_cmd: python3
-        pip_cmd: pip3
-      Fedora 36:
-        artifact: rpm-fedora36
-        distro: fc36
-        image: fedora:36
-        python_package: python3
-        python_cmd: python3
-        pip_cmd: pip3
+      ${{ each arch in parameters.architectures }}:
+        Red Hat Universal Base Image 8 ${{ arch.name }}:
+          artifact: rpm-ubi8-${{ arch.value }}
+          distro: el8
+          image: registry.access.redhat.com/ubi8/ubi:8.4
+          python_package: python39
+          python_cmd: python3.9
+          pip_cmd: pip3.9
+          pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 9 ${{ arch.name }}:
+          artifact: rpm-ubi9-${{ arch.value }}
+          distro: el9
+          image: registry.access.redhat.com/ubi9/ubi:9.0.0
+          python_package: python3.9
+          python_cmd: python3.9
+          pip_cmd: pip3.9
+          pool: ${{ arch.pool }}
+        Fedora 35 ${{ arch.name }}:
+          artifact: rpm-fedora35-${{ arch.value }}
+          distro: fc35
+          image: fedora:35
+          python_package: python3
+          python_cmd: python3
+          pip_cmd: pip3
+          pool: ${{ arch.pool }}
+        Fedora 36 ${{ arch.name }}:
+          artifact: rpm-fedora36-${{ arch.value }}
+          distro: fc36
+          image: fedora:36
+          python_package: python3
+          python_cmd: python3
+          pip_cmd: pip3
+          pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -791,6 +820,21 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
       artifactName: $(artifact)
+
+  - bash: |
+      if [[ $(dpkg --print-architecture) == "amd64" ]]; then
+        echo "Docker is already installed on AMD64"
+        exit 0
+      fi
+      # https://docs.docker.com/engine/security/rootless/
+      /bin/bash -c "$(curl -fsSL https://get.docker.com)"
+      sudo apt-get install -y uidmap
+      dockerd-rootless-setuptool.sh install
+      export XDG_RUNTIME_DIR=/home/cloudtest/.docker/run
+      PATH=/usr/bin:/sbin:/usr/sbin:$PATH dockerd-rootless.sh &
+      sleep 5
+      docker context use rootless
+    displayName: Install Docker
 
   - bash: |
       set -ex
@@ -904,138 +948,6 @@ jobs:
         echo "== Test debian package on ${DISTRO} =="
         docker pull ${DISTRO_BASE_IMAGE}
         docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -e DEB_NAME=$DEB_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
-
-# TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
-- job: BuildRpmPackagesArm64
-  displayName: Build Rpm Packages ARM64
-  # Do not run this job for Pull Requests due to the slowness
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_arm64_pool }}
-  variables:
-    skipComponentGovernanceDetection: true
-  strategy:
-    matrix:
-      Red Hat Universal Base Image 8:
-        dockerfile: ubi
-        image: registry.access.redhat.com/ubi8/ubi:8.4
-        artifact: rpm-ubi8-arm64
-        python_package: python39
-      Red Hat Universal Base Image 9:
-        dockerfile: ubi
-        image: registry.access.redhat.com/ubi9/ubi:9.0.0
-        artifact: rpm-ubi9-arm64
-        python_package: python3.9
-      Fedora 35:
-        dockerfile: fedora
-        image: fedora:35
-        artifact: rpm-fedora35-arm64
-        python_package: python3
-      Fedora 36:
-        dockerfile: fedora
-        image: fedora:36
-        artifact: rpm-fedora36-arm64
-        python_package: python3
-  steps:
-  - bash: |
-      # https://docs.docker.com/engine/security/rootless/
-      /bin/bash -c "$(curl -fsSL https://get.docker.com)"
-      sudo apt-get install -y uidmap
-      dockerd-rootless-setuptool.sh install
-      export XDG_RUNTIME_DIR=/home/cloudtest/.docker/run
-      PATH=/usr/bin:/sbin:/usr/sbin:$PATH dockerd-rootless.sh &
-      sleep 5
-      docker context use rootless
-    displayName: Install Docker
-  - task: Bash@3
-    displayName: 'Build Rpm Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline.sh
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifact)
-
-- job: TestRpmPackageArm64
-  displayName: Test Rpm Package ARM64
-  timeoutInMinutes: 120
-  dependsOn:
-  - BuildRpmPackagesArm64
-  - ExtractMetadata
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_arm64_pool }}
-  variables:
-    skipComponentGovernanceDetection: true
-  strategy:
-    matrix:
-      Red Hat Universal Base Image 8:
-        artifact: rpm-ubi8-arm64
-        distro: el8
-        image: registry.access.redhat.com/ubi8/ubi:8.4
-        python_package: python39
-        python_cmd: python3.9
-        pip_cmd: pip3.9
-      Red Hat Universal Base Image 9:
-        artifact: rpm-ubi9-arm64
-        distro: el9
-        image: registry.access.redhat.com/ubi9/ubi:9.0.0
-        python_package: python3.9
-        python_cmd: python3.9
-        pip_cmd: pip3.9
-      Fedora 35:
-        artifact: rpm-fedora35-arm64
-        distro: fc35
-        image: fedora:35
-        python_package: python3
-        python_cmd: python3
-        pip_cmd: pip3
-      Fedora 36:
-        artifact: rpm-fedora36-arm64
-        distro: fc36
-        image: fedora:36
-        python_package: python3
-        python_cmd: python3
-        pip_cmd: pip3
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: $(artifact)
-
-  - bash: |
-      # https://docs.docker.com/engine/security/rootless/
-      /bin/bash -c "$(curl -fsSL https://get.docker.com)"
-      sudo apt-get install -y uidmap
-      dockerd-rootless-setuptool.sh install
-      export XDG_RUNTIME_DIR=/home/cloudtest/.docker/run
-      PATH=/usr/bin:/sbin:/usr/sbin:$PATH dockerd-rootless.sh &
-      sleep 5
-      docker context use rootless
-    displayName: Install Docker
-  - bash: |
-      set -ex
-
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm" -printf '%f\n')
-
-      echo "== Test rpm package on ${IMAGE} =="
-      docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -e PYTHON_PACKAGE=${PYTHON_PACKAGE} -e PYTHON_CMD=${PYTHON_CMD} -e PIP_CMD=${PIP_CMD} -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
-    displayName: 'Test Rpm Package'
 
 - job: BuildDebPackagesArm64
   displayName: Build Deb Packages ARM64
