@@ -128,6 +128,8 @@ def cli_cosmosdb_create(cmd,
                         analytical_storage_schema_type=None,
                         backup_policy_type=None,
                         databases_to_restore=None,
+                        gremlin_databases_to_restore=None,
+                        tables_to_restore=None,
                         is_restore_request=None,
                         restore_source=None,
                         restore_timestamp=None):
@@ -179,6 +181,8 @@ def cli_cosmosdb_create(cmd,
                                     default_identity=default_identity,
                                     backup_retention=backup_retention,
                                     databases_to_restore=databases_to_restore,
+                                    gremlin_databases_to_restore=gremlin_databases_to_restore,
+                                    tables_to_restore=tables_to_restore,
                                     arm_location=resource_group_location)
 
 
@@ -215,6 +219,8 @@ def _create_database_account(client,
                              backup_policy_type=None,
                              analytical_storage_schema_type=None,
                              databases_to_restore=None,
+                             gremlin_databases_to_restore=None,
+                             tables_to_restore=None,
                              is_restore_request=None,
                              restore_source=None,
                              restore_timestamp=None,
@@ -312,6 +318,12 @@ def _create_database_account(client,
 
         if databases_to_restore is not None:
             restore_parameters.databases_to_restore = databases_to_restore
+        
+        if gremlin_databases_to_restore is not None:
+            restore_parameters.gremlin_databases_to_restore = gremlin_databases_to_restore
+
+        if tables_to_restore is not None:
+            restore_parameters.tables_to_restore = tables_to_restore
 
     params = DatabaseAccountCreateUpdateParameters(
         location=arm_location,
@@ -1736,7 +1748,9 @@ def cli_cosmosdb_restore(cmd,
                          target_database_account_name,
                          restore_timestamp,
                          location,
-                         databases_to_restore=None):
+                         databases_to_restore=None,
+                         gremlin_databases_to_restore=None,
+                         tables_to_restore=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -1786,12 +1800,34 @@ def cli_cosmosdb_restore(cmd,
                     restore_timestamp_datetime_utc)
             except ResourceNotFoundError:
                 raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
-        elif target_restorable_account.api_type.lower() == "mongodb":
+        elif api_type == "mongodb":
             try:
                 from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
                 restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
                 restorable_resources = restorable_mongodb_resources_client.list(
                     arm_location_normalized,
+                    target_restorable_account.name,
+                    location,
+                    restore_timestamp_datetime_utc)
+            except ResourceNotFoundError:
+                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
+        elif "sql" in api_type and "gremlin" in api_type:
+            try:
+                from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_gremlin_resources
+                restorable_gremlin_resources_client = cf_restorable_gremlin_resources(cmd.cli_ctx, [])
+                restorable_resources = restorable_gremlin_resources_client.list(
+                    target_restorable_account.location,
+                    target_restorable_account.name,
+                    location,
+                    restore_timestamp_datetime_utc)
+            except ResourceNotFoundError:
+                raise CLIError("Cannot find a database account with name {} that is online at {} in location {}".format(account_name, restore_timestamp, location))
+        elif "sql" in api_type and "table" in api_type:
+            try:
+                from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_table_resources
+                restorable_table_resources_client = cf_restorable_table_resources(cmd.cli_ctx, [])
+                restorable_resources = restorable_table_resources_client.list(
+                    target_restorable_account.location,
                     target_restorable_account.name,
                     location,
                     restore_timestamp_datetime_utc)
@@ -1815,6 +1851,8 @@ def cli_cosmosdb_restore(cmd,
                                     restore_source=target_restorable_account.id,
                                     restore_timestamp=restore_timestamp_datetime_utc.isoformat(),
                                     databases_to_restore=databases_to_restore,
+                                    gremlin_databases_to_restore=gremlin_databases_to_restore,
+                                    tables_to_restore=tables_to_restore,
                                     arm_location=target_restorable_account.location)
 
 
@@ -1915,7 +1953,62 @@ def cli_mongo_db_retrieve_latest_backup_time(client,
                                                                           restoreLocation)
     return asyc_backupInfo.result()
 
+# latest restorable timestamp for gremlin graph and table
+def cli_gremlin_retrieve_latest_backup_time(client,
+                                            resource_group_name,
+                                            account_name,
+                                            database_name,
+                                            graph_name,
+                                            location):
+    try:
+        client.get_gremlin_database(resource_group_name, account_name, database_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
 
+    try:
+        client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Graph with name '{}' under database '{}' could not be found.".format(graph_name, database_name))
+        raise CLIError("{}".format(str(ex)))
+
+    restoreLocation = ContinuousBackupRestoreLocation(
+        location=location
+    )
+
+    asyc_backupInfo = client.begin_retrieve_continuous_backup_information(resource_group_name,
+                                                                          account_name,
+                                                                          database_name,
+                                                                          graph_name,
+                                                                          restoreLocation)
+    return asyc_backupInfo.result()
+
+
+def cli_table_retrieve_latest_backup_time(client,
+                                          resource_group_name,
+                                          account_name,
+                                          table_name,
+                                          location):
+    try:
+        client.get_table(resource_group_name, account_name, table_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Table with name '{}' could not be found.".format(table_name))
+        raise CLIError("{}".format(str(ex)))
+
+    restoreLocation = ContinuousBackupRestoreLocation(
+        location=location
+    )
+
+    asyc_backupInfo = client.begin_retrieve_continuous_backup_information(resource_group_name,
+                                                                          account_name,
+                                                                          table_name,
+                                                                          restoreLocation)
+    return asyc_backupInfo.result()
+
+    
 ######################
 # data plane APIs
 ######################

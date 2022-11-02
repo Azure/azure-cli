@@ -31,7 +31,7 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_mongo_user_definition_id)
 
 from azure.cli.command_modules.cosmosdb.actions import (
-    CreateLocation, CreateDatabaseRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
+    CreateLocation, CreateDatabaseRestoreResource, CreateGremlinDatabaseRestoreResource, CreateTableRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
 
@@ -85,6 +85,8 @@ def load_arguments(self, _):
         c.argument('restore_source', help="The restorable-database-account Id of the source account from which the account has to be restored. Required if --is-restore-request is set to true.", is_preview=True, arg_group='Restore')
         c.argument('restore_timestamp', action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to. Required if --is-restore-request is set to true.", is_preview=True, arg_group='Restore')
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource, is_preview=True, arg_group='Restore')
+        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, is_preview=True, arg_group='Restore')
+        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, is_preview=True, arg_group='Restore')
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -380,6 +382,8 @@ def load_arguments(self, _):
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to.")
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
+        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, is_preview=True)
+        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, is_preview=True)
 
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:
@@ -426,6 +430,8 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restorable_sql_database_rid', options_list=['--database-rid', '-d'], help="Rid of the database", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable Sql container event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable Sql container event feed", required=False)
 
     # Restorable Sql Resources
     with self.argument_context('cosmosdb sql restorable-resource') as c:
@@ -433,6 +439,8 @@ def load_arguments(self, _):
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
         c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable MongoDB collections event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable MongoDB collections event feed", required=False)
 
     # Restorable Mongodb Databases
     with self.argument_context('cosmosdb mongodb restorable-database') as c:
@@ -444,13 +452,63 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restorable_mongodb_database_rid', options_list=['--database-rid', '-d'], help="Rid of the database", required=True)
-
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable MongoDB collections event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable MongoDB collections event feed", required=False)
+        
     # Restorable mongodb Resources
     with self.argument_context('cosmosdb mongodb restorable-resource') as c:
         c.argument('location', options_list=['--location', '-l'], help="Azure Location of the account", required=True)
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
         c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Restorable Gremlin Databases
+    with self.argument_context('cosmosdb gremlin restorable-database') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+
+    # Restorable Gremlin Graphs
+    with self.argument_context('cosmosdb gremlin restorable-graph') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('restorable_gremlin_database_rid', options_list=['--database-rid', '-d'], help="Rid of the gremlin database", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable Gremlin graph event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable Gremlin graph event feed", required=False)
+
+    # Restorable Gremlin Resources
+    with self.argument_context('cosmosdb gremlin restorable-resource') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Azure Location of the account", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
+        c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Restorable Tables
+    with self.argument_context('cosmosdb table restorable-table') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable tables event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable tables event feed", required=False)
+
+    # Restorable table Resources
+    with self.argument_context('cosmosdb table restorable-resource') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Azure Location of the account", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
+        c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Retrive Gremlin Graph Backup Info
+    database_name_type = CLIArgumentType(options_list=['--database-name', '-d'], help='Database name.')
+    with self.argument_context('cosmosdb gremlin retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
+        c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB Gremlin database name')
+        c.argument('graph_name', options_list=['--graph-name', '-n'], required=True, help='Name of the CosmosDB Gremlin graph name')
+        c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
+
+    # Retrive Table Backup Info
+    with self.argument_context('cosmosdb table retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
+        c.argument('table_name', options_list=['--table-name', '-n'], required=True, help='Name of the CosmosDB Table name')
+        c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
 
     # Account locations
     with self.argument_context('cosmosdb locations show') as c:
@@ -542,6 +600,7 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb service') as c:
         c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the Cosmos DB database account.', id_part=None)
         c.argument('resource_group_name', completer=None, options_list=['--resource-group-name', '-g'], help='Name of the resource group of the database account.', id_part=None)
+        c.argument('service_kind', options_list=['--kind', '-k'], help="Service kind")
         c.argument('service_name', options_list=['--name', '-n'], help="Service Name.")
         c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
         c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")
