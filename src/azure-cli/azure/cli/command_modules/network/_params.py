@@ -1025,6 +1025,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network lb create') as c:
         c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='basic'))
         c.argument('edge_zone', edge_zone)
 
@@ -1091,11 +1092,13 @@ def load_arguments(self, _):
         c.argument('gateway_lb', gateway_lb)
 
     with self.argument_context('network lb probe') as c:
-        c.argument('interval', help='Probing time interval in seconds.')
+        c.argument('interval', type=int, help='Probing time interval in seconds.')
         c.argument('path', help='The endpoint to interrogate (http only).')
-        c.argument('port', help='The port to interrogate.')
+        c.argument('port', type=int, help='The port to interrogate.')
         c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
-        c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+        c.argument('threshold', type=int, help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+        c.argument('probe_threshold', type=int, help='The number of consecutive successful or failed probes in order '
+                                                     'to allow or deny traffic from being delivered to this endpoint.')
 
     with self.argument_context('network lb outbound-rule') as c:
         c.argument('backend_address_pool', options_list='--address-pool', help='Name or ID of the backend address pool.')
@@ -2146,6 +2149,7 @@ def load_arguments(self, _):
         c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
     with self.argument_context('network bastion rdp') as c:
         c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
+        c.argument('configure', help='Flag to configure RDP session.', action='store_true')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])

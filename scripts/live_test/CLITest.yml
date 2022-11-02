@@ -12,7 +12,7 @@ trigger:
     - '*'
 
 variables:
-- template: .azure-pipelines/templates/variables.yml
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
 #schedules:
 #- cron: "0 18 * * 5"
@@ -25,7 +25,7 @@ variables:
 jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
-  timeoutInMinutes: 9999
+  timeoutInMinutes: 0
   strategy:
     maxParallel: 5
     matrix:
@@ -445,6 +445,8 @@ jobs:
   timeoutInMinutes: 180
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -473,7 +475,7 @@ jobs:
         echo "set account"
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
         echo "send email to grid"
-        python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
+        python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)" "$(DB_USER)" "$(DB_HOST)" "$(DB_PORT)" "$(DB_SCHEME)"
         # python /mnt/vss/_work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources
         if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
