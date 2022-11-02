@@ -2223,24 +2223,38 @@ def remove_waf_exclusion_rule_set(client, resource_group_name, policy_name,
                                   rule_set_type, rule_set_version,
                                   match_variable, selector_match_operator, selector,
                                   rule_group_name=None):
+    remove_rule_set = None
+    remove_exclusion = None
     waf_policy = client.get(resource_group_name, policy_name)
-    to_be_deleted = None
+
     for exclusion in waf_policy.managed_rules.exclusions:
-        if exclusion.match_variable == match_variable \
-                and exclusion.selector_match_operator == selector_match_operator \
-                and exclusion.selector == selector:
+        if (exclusion.match_variable, exclusion.selector_match_operator, exclusion.selector) \
+           == (match_variable, selector_match_operator, selector):
             for rule_set in exclusion.exclusion_managed_rule_sets:
                 if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
                     if rule_group_name is None:
-                        to_be_deleted = rule_set
+                        remove_rule_set = rule_set
                         break
+
                     rule_group = next((rule_group for rule_group in rule_set.rule_groups if rule_group.rule_group_name == rule_group_name), None)
                     if rule_group is None:
                         err_msg = f"Rule set group [{rule_group_name}] is not found."
                         raise ResourceNotFoundError(err_msg)
+
                     rule_set.rule_groups.remove(rule_group)
-            if to_be_deleted:
-                exclusion.exclusion_managed_rule_sets.remove(to_be_deleted)
+                    if not rule_set.rule_groups:
+                        exclusion.exclusion_managed_rule_sets.remove(rule_set)
+                        if not exclusion.exclusion_managed_rule_sets:
+                            remove_exclusion = exclusion
+
+            if remove_rule_set:
+                exclusion.exclusion_managed_rule_sets.remove(remove_rule_set)
+                if not exclusion.exclusion_managed_rule_sets:
+                    remove_exclusion = exclusion
+
+    if remove_exclusion:
+        waf_policy.managed_rules.exclusions.remove(remove_exclusion)
+
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 
@@ -3912,7 +3926,6 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     if public_ip_address is None:
         logger.warning(
@@ -3924,8 +3937,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
     if not public_ip_address_allocation:
-        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
+        public_ip_address_allocation = 'Static' if (sku and sku.lower() == 'standard') else 'Dynamic'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -3933,8 +3945,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
     subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
+    private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
 
     network_id_template = resource_id(
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -3993,19 +4004,18 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_network_interfaces
-    return client.list(resource_group_name, load_balancer_name)
-
-
 def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, backend_pool_name, request):
-    client = network_client_factory(cmd.cli_ctx).load_balancers
-    return client.begin_list_inbound_nat_rule_port_mappings(
-        resource_group_name,
-        load_balancer_name,
-        backend_pool_name,
-        request
-    )
+    args = {
+        "resource_group": resource_group_name,
+        "name": load_balancer_name,
+        "backend_pool_name": backend_pool_name
+    }
+    if 'ip_configuration' in request:
+        args["ip_configuration"] = {'id': request['ip_configuration']}
+    if 'ip_address' in request:
+        args["ip_address"] = request['ip_address']
+    from .aaz.latest.network.lb import ListMapping
+    return ListMapping(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def create_lb_inbound_nat_rule(
@@ -4773,7 +4783,70 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
 
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                    path=None, interval=None, threshold=None):
+                    path=None, interval=None, threshold=None, probe_threshold=None):
+    from .aaz.latest.network.lb import Show
+    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": load_balancer_name
+    })
+
+    for probe in lb["probes"]:
+        probe["interval_in_seconds"] = probe.pop("intervalInSeconds")
+        probe["number_of_probes"] = probe.pop("numberOfProbes")
+        probe["probe_threshold"] = probe.pop("probeThreshold")
+        if "requestPath" in probe:
+            probe["request_path"] = probe.pop("requestPath")
+
+    probe_args = {
+        "name": item_name,
+        "interval_in_seconds": interval,
+        "number_of_probes": threshold,
+        "port": port,
+        "protocol": protocol,
+        "request_path": path,
+        "probe_threshold": probe_threshold
+    }
+    lb["probes"].append(probe_args)
+    lb["resource_group"] = resource_group_name
+
+    from .aaz.latest.network.lb import Create
+    probes = Create(cli_ctx=cmd.cli_ctx)(command_args=lb).result()["probes"]
+    return [probe for probe in probes if probe["name"] == item_name][0]
+
+
+def set_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol=None, port=None,
+                 path=None, interval=None, threshold=None, probe_threshold=None):
+    from .aaz.latest.network.lb import Show
+    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': load_balancer_name})
+    for probe in lb['probes']:
+        probe['interval_in_seconds'] = probe.pop('intervalInSeconds')
+        probe['number_of_probes'] = probe.pop('numberOfProbes')
+        probe['probe_threshold'] = probe.pop('probeThreshold')
+        if 'requestPath' in probe:
+            probe['request_path'] = probe.pop('requestPath')
+        if probe['name'] == item_name:
+            if protocol is not None:
+                probe['protocol'] = protocol
+            if port is not None:
+                probe['port'] = port
+            if path == '':
+                probe['request_path'] = None
+            elif path is not None:
+                probe['request_path'] = path
+            if interval is not None:
+                probe['interval_in_seconds'] = interval
+            if threshold is not None:
+                probe['number_of_probes'] = threshold
+            if probe_threshold is not None:
+                probe['probe_threshold'] = probe_threshold
+    lb['resource_group'] = resource_group_name
+    from .aaz.latest.network.lb import Update
+    poller = Update(cli_ctx=cmd.cli_ctx)(command_args=lb).result()['probes']
+    return [probe for probe in poller if probe['name'] == item_name][0]
+
+
+def create_cross_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
+                          path=None, interval=None, threshold=None):
     Probe = cmd.get_models('Probe')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
@@ -4785,8 +4858,8 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
     return get_property(poller.result().probes, item_name)
 
 
-def set_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
-                 path=None, interval=None, threshold=None):
+def set_cross_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
+                       path=None, interval=None, threshold=None):
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
         c.set_param('port', port)
@@ -5135,10 +5208,11 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
     elif load_balancer_inbound_nat_rule_ids is not None:
         instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
 
-    if application_security_groups == ['']:
-        instance.application_security_groups = None
-    elif application_security_groups:
-        instance.application_security_groups = application_security_groups
+    for config in parent.ip_configurations:
+        if application_security_groups == ['']:
+            config.application_security_groups = None
+        elif application_security_groups:
+            config.application_security_groups = application_security_groups
 
     if app_gateway_backend_address_pools == ['']:
         instance.application_gateway_backend_address_pools = None
@@ -6521,53 +6595,11 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 # endregion
 
 
-# region CustomIpPrefix
-def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_name, location=None,
-                            cidr=None, tags=None, zone=None, signed_message=None, authorization_message=None,
-                            custom_ip_prefix_parent=None, no_wait=False):
-
-    CustomIpPrefix = cmd.get_models('CustomIpPrefix')
-    prefix = CustomIpPrefix(
-        location=location,
-        cidr=cidr,
-        zones=zone,
-        tags=tags,
-        signed_message=signed_message,
-        authorization_message=authorization_message
-    )
-
-    if custom_ip_prefix_parent:
-        try:
-            prefix.custom_ip_prefix_parent = client.get(resource_group_name, custom_ip_prefix_name)
-        except ResourceNotFoundError:
-            raise ResourceNotFoundError("Custom ip prefix parent {} doesn't exist".format(custom_ip_prefix_name))
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
-
-
-def update_custom_ip_prefix(instance,
-                            signed_message=None,
-                            authorization_message=None,
-                            tags=None,
-                            commissioned_state=None):
-    if tags is not None:
-        instance.tags = tags
-    if signed_message is not None:
-        instance.signed_message = signed_message
-    if authorization_message is not None:
-        instance.authorization_message = authorization_message
-    if commissioned_state is not None:
-        instance.commissioned_state = commissioned_state[0].upper() + commissioned_state[1:] + 'ing'
-    return instance
-# endregion
-
-
 # region PublicIPAddresses
-def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                            allocation_method=None, dns_name=None,
-                            idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                            public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
+def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
+                     allocation_method=None, dns_name=None,
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
+                     public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
 
     public_ip_args = {
         'name': public_ip_address_name,
@@ -6580,20 +6612,11 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
         'ip_tags': ip_tags
     }
 
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        if is_valid_resource_id(public_ip_prefix):
-            public_ip_prefix_id = public_ip_prefix
-            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
-        else:
-            public_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIPPrefixes',
-                name=public_ip_prefix
-            )
-            public_ip_prefix_name = public_ip_prefix
-        public_ip_args['public_ip_prefix'] = public_ip_prefix_id
+    if public_ip_prefix:
+        metadata = parse_resource_id(public_ip_prefix)
+        resource_group_name = metadata["resource_group"]
+        public_ip_prefix_name = metadata["resource_name"]
+        public_ip_args["public_ip_prefix"] = public_ip_prefix
 
         # reuse prefix information
         pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
@@ -6610,9 +6633,9 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
-            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
+            public_ip_args['allocation_method'] = 'Static'
         else:
-            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
+            public_ip_args['allocation_method'] = 'Dynamic'
 
     public_ip_args['version'] = version
     public_ip_args['zone'] = zone
@@ -6632,88 +6655,10 @@ def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, lo
         public_ip_args['edge_zone'] = edge_zone
         public_ip_args['type'] = 'EdgeZone'
     if protection_mode:
-        public_ip_args['protection_mode'] = protection_mode
+        public_ip_args['ddos_protection_mode'] = protection_mode
 
     from .aaz.latest.network.public_ip import Create
-
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
-
-
-def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None):
-    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
-        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
-
-    public_ip_args = {
-        'location': location,
-        'tags': tags,
-        'public_ip_allocation_method': allocation_method,
-        'idle_timeout_in_minutes': idle_timeout,
-        'ip_address': ip_address,
-        'dns_settings': None
-    }
-
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        if is_valid_resource_id(public_ip_prefix):
-            public_ip_prefix_id = public_ip_prefix
-            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
-        else:
-            public_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIPPrefixes',
-                name=public_ip_prefix
-            )
-            public_ip_prefix_name = public_ip_prefix
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
-
-        # reuse prefix information
-        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
-        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
-        version = pip_obj.public_ip_address_version
-        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
-        zone = pip_obj.zones
-
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    if not allocation_method:
-        if sku and sku.lower() == 'standard':
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
-        else:
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
-
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        public_ip_args['public_ip_address_version'] = version
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        public_ip_args['zones'] = zone
-    if cmd.supported_api_version(min_api='2017-11-01'):
-        public_ip_args['ip_tags'] = ip_tags
-
-    if sku:
-        public_ip_args['sku'] = {'name': sku}
-    if tier:
-        if not sku:
-            public_ip_args['sku'] = {'name': 'Basic'}
-        public_ip_args['sku'].update({'tier': tier})
-
-    public_ip = PublicIPAddress(**public_ip_args)
-
-    if dns_name or reverse_fqdn:
-        public_ip.dns_settings = PublicIPAddressDnsSettings(
-            domain_name_label=dns_name,
-            reverse_fqdn=reverse_fqdn)
-
-    if edge_zone:
-        public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
 
 def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
@@ -8401,7 +8346,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 
-def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False):
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
@@ -8437,7 +8382,10 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             with open("conn.rdp", "w") as f:
                 f.write(response.text)
             rdpfilepath = os.getcwd() + "/conn.rdp"
-            command = [_get_rdp_path(), rdpfilepath]
+            command = [_get_rdp_path()]
+            if configure:
+                command.append("/edit")
+            command.append(rdpfilepath)
             launch_and_wait(command)
     else:
         raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")

@@ -167,7 +167,9 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         error_msg = "The command failed with an unexpected error. Here is the traceback:"
         az_error = azclierror.CLIInternalError(error_msg)
         az_error.set_exception_trace(ex)
-        az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+        az_error.set_recommendation(
+            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues\n"
+            "To open a new issue, please run `az feedback`")
 
     if isinstance(az_error, azclierror.ResourceNotFoundError):
         exit_code = 3

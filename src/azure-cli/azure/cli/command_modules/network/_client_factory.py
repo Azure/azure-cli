@@ -192,7 +192,3 @@ def cf_virtual_router_peering(cli_ctx, _):
 
 def cf_bastion_hosts(cli_ctx, _):
     return network_client_factory(cli_ctx).bastion_hosts
-
-
-def cf_custom_ip_prefixes(cli_ctx, _):
-    return network_client_factory(cli_ctx).custom_ip_prefixes

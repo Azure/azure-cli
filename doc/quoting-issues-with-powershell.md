@@ -1,41 +1,5 @@
 # Quoting issues with PowerShell
 
-**These issues have been fixed in Azure CLI 2.40.0 and PowerShell 7.3. Please update Azure CLI and PowerShell to the latest versions to avoid these issues.**
-
-With the latest versions, simply pass special characters as you normally would in pure PowerShell script or other shells, such as Bash.
-
-```powershell
-# Pass ampersand '&' as literal character
-> az --debug 'a&b'
-cli.knack.cli: Command arguments: ['--debug', 'a&b']
-
-> az --debug "a&b"
-cli.knack.cli: Command arguments: ['--debug', 'a&b']
-
-# Pass vertical bar '|' as literal character
-> az --debug 'a|b'
-cli.knack.cli: Command arguments: ['--debug', 'a|b']
-
-> az --debug "a|b"
-cli.knack.cli: Command arguments: ['--debug', 'a|b']
-
-# Surround double quotes with single quotes
-> az --debug '{"key": "value"}'
-cli.knack.cli: Command arguments: ['--debug', '{"key": "value"}']
-
-# Use backtick ` to escape double quotes 
-> az --debug "{`"key`": `"value`"}"
-cli.knack.cli: Command arguments: ['--debug', '{"key": "value"}']
-
-# Escape double quotes by doubling them
-> az --debug "{""key"": ""value""}"
-cli.knack.cli: Command arguments: ['--debug', '{"key": "value"}']
-```
-
----
-
-**Below content only applies to Azure CLI <= 2.39.0 and PowerShell <= 7.2.**
-
 These issues are being tracked at [#15529](https://github.com/Azure/azure-cli/issues/15529).
 
 ## Symptom

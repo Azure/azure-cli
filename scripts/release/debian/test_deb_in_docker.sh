@@ -26,6 +26,7 @@ ln -sf /opt/az/bin/python3 /usr/bin/python
 
 /opt/az/bin/python3 -m pip install pytest
 /opt/az/bin/python3 -m pip install pytest-xdist
+/opt/az/bin/python3 -m pip install pytest-forked
 
 find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs /opt/az/bin/python3 -m pip install --upgrade --ignore-installed
 find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs /opt/az/bin/python3 -m pip install --upgrade --ignore-installed --no-deps
