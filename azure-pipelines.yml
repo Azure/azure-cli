@@ -15,6 +15,15 @@ pr:
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
+parameters:
+- name: architectures
+  type: object
+  default:
+  - value: amd64
+    pool: ${{ variables.ubuntu_pool }}
+  - value: arm64
+    pool: ${{ variables.ubuntu_arm64_pool }}
+
 jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
@@ -643,14 +652,31 @@ jobs:
 - job: BuildRpmPackageMariner
   displayName: Build Rpm Package Mariner
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      2.0:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0
+      ${{ each arch in parameters.architectures }}:
+        2.0 ${{ arch.value }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+  pool:
+    name: $(pool)
   steps:
+  - bash: |
+      if [[ $(dpkg --print-architecture) == "amd64" ]]; then
+        echo "Docker is already installed on AMD64"
+        exit 0
+      fi
+      # https://docs.docker.com/engine/security/rootless/
+      /bin/bash -c "$(curl -fsSL https://get.docker.com)"
+      sudo apt-get install -y uidmap
+      dockerd-rootless-setuptool.sh install
+      export XDG_RUNTIME_DIR=/home/cloudtest/.docker/run
+      PATH=/usr/bin:/sbin:/usr/sbin:$PATH dockerd-rootless.sh &
+      sleep 5
+      docker context use rootless
+    displayName: Install Docker
+
   - task: Bash@3
     displayName: 'Build Rpm Package: Mariner'
     inputs:
@@ -878,47 +904,6 @@ jobs:
         echo "== Test debian package on ${DISTRO} =="
         docker pull ${DISTRO_BASE_IMAGE}
         docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -e DEB_NAME=$DEB_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
-
-- job: BuildRpmPackageMarinerArm64
-  displayName: Build Rpm Package Mariner ARM64
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_arm64_pool }}
-  variables:
-    # Disable Component Detection on ARM64
-    skipComponentGovernanceDetection: true
-  strategy:
-    matrix:
-      2.0:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-  steps:
-  - bash: |
-      # https://docs.docker.com/engine/security/rootless/
-      /bin/bash -c "$(curl -fsSL https://get.docker.com)"
-      sudo apt-get install -y uidmap
-      dockerd-rootless-setuptool.sh install
-      export XDG_RUNTIME_DIR=/home/cloudtest/.docker/run
-      PATH=/usr/bin:/sbin:/usr/sbin:$PATH dockerd-rootless.sh &
-      sleep 5
-      docker context use rootless
-    displayName: Install Docker
-  - task: Bash@3
-    displayName: 'Build Rpm Package: Mariner'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline_mariner.sh
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm-mariner'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifact)
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 - job: BuildRpmPackagesArm64
