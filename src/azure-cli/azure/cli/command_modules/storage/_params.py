@@ -540,9 +540,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('action', action_type)
 
     with self.argument_context('storage account show-connection-string') as c:
+        from ._validators import validate_key_name
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
         c.argument('sas_token', help='The SAS token to be used in the connection-string.')
-        c.argument('key_name', options_list=['--key'], help='The key to use.',
+        c.argument('key_name', options_list=['--key'], help='The key to use.', validator=validate_key_name,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
