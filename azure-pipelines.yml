@@ -474,6 +474,25 @@ jobs:
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
 
+- job: TestExtensionsDependency
+  displayName: Test Extensions Dependency
+  condition: succeeded()
+  timeoutInMinutes: 40
+
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python310:
+        python.version: '3.10'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
+  - bash: ./scripts/ci/test_extensions_dependency.sh
+    displayName: 'Install extensions'
+
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
