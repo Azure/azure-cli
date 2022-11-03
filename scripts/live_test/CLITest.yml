@@ -321,7 +321,7 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - bash: |
-        if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL") ]]; then
+        if [[ "$(USER_TARGET)" =~ "$(Target)" || (("$(USER_TARGET)" == "" || "$(USER_TARGET)" == "main") && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all") ]]; then
           echo "Match!"
           echo "##vso[task.setvariable variable=Match]1"
         else
@@ -478,7 +478,7 @@ jobs:
         python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)" "$(DB_USER)" "$(DB_HOST)" "$(DB_PORT)" "$(DB_SCHEME)"
         # python /mnt/vss/_work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources
-        if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
+        if [[ "$(USER_LIVE)" == "--live" && ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all") || "$(USER_TARGET)" == "" || "$(USER_TARGET)" == "main" || "$(USER_TARGET)" == "extensions" ]]; then
           python /mnt/vss/_work/1/s/scripts/live_test/clean.py
         fi
 #    - task: AzureCLI@2
