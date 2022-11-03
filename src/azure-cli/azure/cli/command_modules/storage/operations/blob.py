@@ -996,6 +996,17 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
 def copy_blob(client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
+    blob_type = kwargs.pop('destination_blob_type', None)
+    if blob_type is not None:
+        if blob_type == 'AppendBlob':
+            return client.append_block_from_url(copy_source_url=source_url, **kwargs)
+        elif blob_type == 'BlockBlob':
+            kwargs.pop('source_lease')
+            kwargs.pop('rehydrate_priority')
+            return client.upload_blob_from_url(source_url=source_url, **kwargs)
+        elif blob_type == 'PageBlob':
+            return client.upload_pages_from_url(source_url=source_url, offset=0, length=None, source_offset=0,
+                                            **kwargs)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
 
 
