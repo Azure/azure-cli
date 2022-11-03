@@ -60,7 +60,7 @@ examples:
 helps['account management-group'] = """
 type: group
 short-summary: Manage Azure subscription-level management groups.
-long-summary: For more information on Azure management groups, see [What are Azure management groups?](https://learn.microsoft.com/en-us/azure/governance/management-groups/overview)
+long-summary: For more information on Azure management groups, see [What are Azure management groups?](https://learn.microsoft.com/azure/governance/management-groups/overview)
 """
 
 helps['account management-group create'] = """
@@ -170,7 +170,7 @@ type: command
 short-summary: Show a deployment at subscription scope.
 examples:
   - name: Show a deployment at subscription scope.
-    text: az deployment show -n deployment01
+    text: az deployment show --name deployment01
 """
 
 helps['deployment delete'] = """
@@ -178,7 +178,7 @@ type: command
 short-summary: Delete a deployment at subscription scope.
 examples:
   - name: Delete a deployment at subscription scope.
-    text: az deployment delete -n deployment01
+    text: az deployment delete --name deployment01
 """
 
 helps['deployment cancel'] = """
@@ -186,7 +186,7 @@ type: command
 short-summary: Cancel a deployment at subscription scope.
 examples:
   - name: Cancel a deployment at subscription scope.
-    text: az deployment cancel -n deployment01
+    text: az deployment cancel --name deployment01
 """
 
 helps['deployment validate'] = """
@@ -215,7 +215,7 @@ examples:
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at subscription scope from a template-spec
     text: >
-        az deployment create --location WestUS --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
+        az deployment create --location WestUS --template-spec "/subscriptions/MySubscriptionId/resourceGroups/myRG/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment export'] = """
@@ -274,7 +274,7 @@ type: command
 short-summary: Show a deployment at subscription scope.
 examples:
   - name: Show a deployment at subscription scope.
-    text: az deployment sub show -n deployment01
+    text: az deployment sub show --name deployment01
 """
 
 helps['deployment sub delete'] = """
@@ -282,7 +282,7 @@ type: command
 short-summary: Delete a deployment at subscription scope.
 examples:
   - name: Delete a deployment at subscription scope.
-    text: az deployment sub delete -n deployment01
+    text: az deployment sub delete --name deployment01
 """
 
 helps['deployment sub cancel'] = """
@@ -290,7 +290,7 @@ type: command
 short-summary: Cancel a deployment at subscription scope.
 examples:
   - name: Cancel a deployment at subscription scope.
-    text: az deployment sub cancel -n deployment01
+    text: az deployment sub cancel --name deployment01
 """
 
 helps['deployment sub validate'] = """
@@ -366,7 +366,7 @@ short-summary: List deployment operations at subscription scope.
 examples:
   - name: List deployment operations at subscription scope.
     text: |
-        az deployment operation sub list --name mydeployment
+        az deployment operation sub list --name MyDeployment
 """
 
 helps['deployment operation sub show'] = """
@@ -392,7 +392,7 @@ type: command
 short-summary: Show a deployment at resource group.
 examples:
   - name: Show a deployment at resource group.
-    text: az deployment group show --resource-group MyResourceGroup -n deployment01
+    text: az deployment group show --resource-group MyResourceGroup --name deployment01
 """
 
 helps['deployment group delete'] = """
@@ -400,7 +400,7 @@ type: command
 short-summary: Delete a deployment at resource group.
 examples:
   - name: Delete a deployment at resource group.
-    text: az deployment group delete --resource-group MyResourceGroup -n deployment01
+    text: az deployment group delete --resource-group MyResourceGroup --name deployment01
 """
 
 helps['deployment group cancel'] = """
@@ -408,7 +408,7 @@ type: command
 short-summary: Cancel a deployment at resource group.
 examples:
   - name: Cancel a deployment at resource group.
-    text: az deployment group cancel --resource-group MyResourceGroup -n deployment01
+    text: az deployment group cancel --resource-group MyResourceGroup --name deployment01
 """
 
 helps['deployment group validate'] = """
@@ -438,7 +438,7 @@ examples:
             --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
   - name: Create a deployment at resource group from a local template file, using parameters from an array string.
     text: |
-      az deployment group create --resource-group testgroup --template-file demotemplate.json --parameters exampleString='inline string' exampleArray='("value1", "value2")'
+      az deployment group create --resource-group MyResourceGroup --template-file demotemplate.json --parameters exampleString='inline string' exampleArray='("value1", "value2")'
   - name: Create a deployment at resource group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
         az deployment group create --resource-group MyResourceGroup --name rollout01 \\
@@ -446,7 +446,7 @@ examples:
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at resource group scope from a template-spec
     text: >
-        az deployment group create --resource-group MyResourceGroup --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
+        az deployment group create --resource-group MyResourceGroup --template-spec "/subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment group what-if'] = """
@@ -512,7 +512,7 @@ type: command
 short-summary: List deployments at management group.
 examples:
   - name: List deployments at management group.
-    text: az deployment mg list -m testmg
+    text: az deployment mg list --management-group-id MyGroupId
 """
 
 helps['deployment mg show'] = """
@@ -520,7 +520,7 @@ type: command
 short-summary: Show a deployment at management group.
 examples:
   - name: Show a deployment at management group.
-    text: az deployment mg show -m testmg -n deployment01
+    text: az deployment mg show --management-group-id MyGroupId --name deployment01
 """
 
 helps['deployment mg delete'] = """
@@ -528,7 +528,7 @@ type: command
 short-summary: Delete a deployment at management group.
 examples:
   - name: Delete a deployment at management group.
-    text: az deployment mg delete -m testmg -n deployment01
+    text: az deployment mg delete --management-group-id MyManagementGroup --name deployment01
 """
 
 helps['deployment mg cancel'] = """
@@ -536,7 +536,7 @@ type: command
 short-summary: Cancel a deployment at management group.
 examples:
   - name: Cancel a deployment at management group.
-    text: az deployment mg cancel -m testmg -n deployment01
+    text: az deployment mg cancel --management-group-id MyManagementGroup --name deployment01
 """
 
 helps['deployment mg validate'] = """
@@ -544,10 +544,10 @@ type: command
 short-summary: Validate whether a template is valid at management group.
 examples:
   - name: Validate whether a template is valid at management group.
-    text: az deployment mg validate --management-group-id testmg --location WestUS --template-file {template-file}
+    text: az deployment mg validate --management-group-id MyManagementGroup --location WestUS --template-file {template-file}
   - name: Validate whether a template is valid at management group.
     text: |
-        az deployment mg validate --location WestUS --management-group-id testmg --name mydeployment --parameters @myparameters.json --template-file azuredeploy.json
+        az deployment mg validate --location WestUS --management-group-id MyManagementGroup --name MyDeployment --parameters @myparameters.json --template-file azuredeploy.json
 
 """
 
@@ -557,13 +557,13 @@ short-summary: Execute a deployment What-If operation at management group scope.
 examples:
   - name: Execute a deployment What-If operation at a management group.
     text: >
-        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        az deployment mg what-if --management-group-id MyManagementGroup --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
   - name: Execute a deployment What-If operation at a management group with ResourceIdOnly format.
     text: >
-        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+        az deployment mg what-if --management-group-id MyManagementGroup --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
   - name: Execute a deployment What-If operation at a management group without pretty-printing the result.
     text: >
-        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
+        az deployment mg what-if --management-group-id MyManagementGroup --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment mg create'] = """
@@ -576,12 +576,12 @@ examples:
             --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
   - name: Create a deployment at management group from a local template file, using parameters from a JSON string.
     text: |
-        az deployment mg create --management-group-id testmg --name rollout01 --location WestUS \\
+        az deployment mg create --management-group-id MyManagementGroup --name rollout01 --location WestUS \\
             --template-file azuredeploy.json \\
             --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
   - name: Create a deployment at management group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az deployment mg create --management-group-id testmg --name rollout01 --location WestUS \\
+        az deployment mg create --management-group-id MyManagementGroup --name rollout01 --location WestUS \\
             --template-file azuredeploy.json --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
@@ -591,7 +591,7 @@ type: command
 short-summary: Export the template used for a deployment.
 examples:
   - name: Export the template used for a deployment at management group.
-    text: az deployment mg export --management-group-id testmg --name MyDeployment
+    text: az deployment mg export --management-group-id MyManagementGroup --name MyDeployment
 """
 
 helps['deployment mg wait'] = """
@@ -632,7 +632,7 @@ type: command
 short-summary: Show a deployment at tenant scope.
 examples:
   - name: Show a deployment at tenant scope.
-    text: az deployment tenant show -n deployment01
+    text: az deployment tenant show --name deployment01
 """
 
 helps['deployment tenant delete'] = """
@@ -640,7 +640,7 @@ type: command
 short-summary: Delete a deployment at tenant scope.
 examples:
   - name: Delete a deployment at tenant scope.
-    text: az deployment tenant delete -n deployment01
+    text: az deployment tenant delete --name deployment01
 """
 
 helps['deployment tenant cancel'] = """
@@ -648,7 +648,7 @@ type: command
 short-summary: Cancel a deployment at tenant scope.
 examples:
   - name: Cancel a deployment at tenant scope.
-    text: az deployment tenant cancel -n deployment01
+    text: az deployment tenant cancel --name deployment01
 """
 
 helps['deployment tenant validate'] = """
@@ -659,7 +659,7 @@ examples:
     text: az deployment tenant validate --location WestUS --template-file {template-file}
   - name: Validate whether a template is valid at tenant scope.
     text: |
-        az deployment tenant validate --location WestUS --name mydeployment --parameters @myparameters.json --template-file azuredeploy.json
+        az deployment tenant validate --location WestUS --name MyDeployment --parameters @myparameters.json --template-file azuredeploy.json
 
 """
 
@@ -744,7 +744,7 @@ examples:
         az deployment-scripts list
   - name: Retrieve all deployment scripts found in a resource group
     text: |
-        az deployment-scripts list --resource-group contoso-rg
+        az deployment-scripts list --resource-group MyResourceGroup
 """
 
 helps['deployment-scripts show'] = """
@@ -753,7 +753,7 @@ short-summary: Retrieve a deployment script.
 examples:
   - name: Retrieve a deployment script found in the user's logged-in default subscription.
     text: >
-        az deployment-scripts show --resource-group contoso-rg --name contosoBashScript
+        az deployment-scripts show --resource-group MyResourceGroup --name MyBashScript
 """
 
 helps['deployment-scripts show-log'] = """
@@ -762,7 +762,7 @@ short-summary: Show deployment script logs.
 examples:
   - name: Retrieve deployment script logs found in the user's logged-in default subscription, max limit is 4MB.
     text: >
-        az deployment-scripts show-log --resource-group contoso-rg --name contosoBashScript
+        az deployment-scripts show-log --resource-group MyResourceGroup --name MyBashScript
 """
 
 helps['deployment-scripts delete'] = """
@@ -771,7 +771,7 @@ short-summary: Delete a deployment script.
 examples:
   - name: Delete a deployment script found in the user's logged-in default subscription.
     text: >
-        az deployment-scripts delete --resource-group contoso-rg --name contosoBashScript
+        az deployment-scripts delete --resource-group MyResourceGroup --name MyBashScript
 """
 
 helps['feature'] = """
@@ -950,7 +950,7 @@ short-summary: Check if a resource group exists.
 examples:
   - name: Check if 'MyResourceGroup' exists.
     text: >
-        az group exists -n MyResourceGroup
+        az group exists --name MyResourceGroup
 """
 
 helps['group list'] = """
@@ -971,8 +971,8 @@ type: group
 short-summary: Manage Azure resource group locks.
 long-summary:  >
     To manage resource group locks you must have access to `Microsoft.Authorization/*` or `Microsoft.Authorization/locks/*` actions.  
-    For information see [Management Locks - Create Or Update At Resource Group Level](https://learn.microsoft.com/en-us/rest/api/resources/management-locks/create-or-update-at-resource-group-level).
-    To learn about locks for subscriptions or individual resources, see [az lock](https://learn.microsoft.com/en-us/cli/azure/lock)
+    For information see [Management Locks - Create Or Update At Resource Group Level](https://learn.microsoft.com/rest/api/resources/management-locks/create-or-update-at-resource-group-level).
+    To learn about locks for subscriptions or individual resources, see [az lock](https://learn.microsoft.com/cli/azure/lock)
 """
 
 helps['group lock create'] = """
@@ -997,7 +997,7 @@ examples:
         az group lock delete --name MyLockName --resource-group MyResourceGroup
   - name: Delete a one or more resource group locks using the lock Id.  or a list of available lock Ids, run `az group lock list --resource-group MyResourceGroup -o json`.
     text: >
-        az group lock delete --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName
+        az group lock delete --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName
 """
 
 helps['group lock list'] = """
@@ -1008,7 +1008,7 @@ examples:
   - name: List all locks for a resource group.
     text: >
         az group lock list --resource-group MyResourceGroup
-  - name: List all locks meeting a filter criteria.  For more information on using the OData `$filter` query parameter, see [Use the $filter query parameter](https://learn.microsoft.com/en-us/graph/filter-query-parameter)
+  - name: List all locks meeting a filter criteria.  For more information on using the OData `$filter` query parameter, see [Use the $filter query parameter](https://learn.microsoft.com/graph/filter-query-parameter)
         az group lock list --filter-string "name eq 'MyLockName'"
   - name: List all locks meeting a `--query` criteria.
         az group lock list --resource-group MyResourceGroup --query "[?level=='ReadOnly']"  
@@ -1026,8 +1026,8 @@ examples:
       The `--resource-group` and `--name` parameters are not needed in this example as these values exist in the Id.
       For a list of available lock Ids, run `az group lock list --resource-group MyResourceGroup -o json`.
     text: >
-        az group lock show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName1 \\
-            /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName2 
+        az group lock show --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName1 \\
+            /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName2 
 """
 
 helps['group lock update'] = """
@@ -1039,11 +1039,11 @@ examples:
         az group lock update --name MyLockName --resource-group MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
   - name: Update a resource group lock using the Id.  For a list of available lock Ids, run `az group lock list --resource-group MyResourceGroup -o json`.
     text: >
-        az group lock update --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName --notes MyNewNote
+        az group lock update --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName --notes MyNewNote
   - name: Update several resource group locks at the same time using a space delimited list of Ids.
     text: >
-        az group lock update --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName1 \\
-            /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName2 \\
+        az group lock update --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName1 \\
+            /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Authorization/locks/MyLockName2 \\
             --notes MyNewNoteForAllIDs
 """
 
@@ -1086,7 +1086,7 @@ type: group
 short-summary: Manage Azure locks.
 long-summary: Locks can exist at three different scopes: subscription, resource group and resource. \
                 For more information on managing Azure locks, \
-                see [Management Locks](https://learn.microsoft.com/en-us/rest/api/resources/management-locks).
+                see [Management Locks](https://learn.microsoft.com/rest/api/resources/management-locks).
 """
 
 helps['lock create'] = """
@@ -1170,14 +1170,14 @@ short-summary: Create a managed application.
 examples:
   - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition ID.
     text: |
-        az managedapp create --resource-group MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog \\
-            -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
-            -d "/subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Solutions/applianceDefinitions/{ApplianceDefinition}"
+        az managedapp create --resource-group MyResourceGroup --name MyManagedApp --location westcentralus --kind ServiceCatalog \\
+            --managed-rg-id "/subscriptions/MySubscriptionId/resourceGroups/{ManagedResourceGroup}" \\
+            --managedapp-definition-id "/subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Solutions/applianceDefinitions/{ApplianceDefinition}"
   - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product.
     text: |
-        az managedapp create --resource-group MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace \\
-            -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
-            --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
+        az managedapp create --resource-group MyResourceGroup --name MyManagedApp --location westcentralus --kind MarketPlace \\
+            --management-group-id "/subscriptions/MySubscriptionId/resourceGroups/{ManagedResourceGroup}" \\
+            --plan-name MyAppliancePlan --plan-version "1.0" --plan-product "my-appliance" --plan-publisher MyPlanPublisher
 """
 
 helps['managedapp definition'] = """
@@ -1189,14 +1189,14 @@ helps['managedapp definition create'] = """
 type: command
 short-summary: Create a managed application definition.
 examples:
-  - name: Create a managed application defintion.
+  - name: Create a managed application definition.
     text: >
-        az managedapp definition create --resource-group MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+        az managedapp definition create --resource-group MyResourceGroup --name MyManagedAppDef --location eastus --display-name "MyManagedAppDef" \\
             --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --package-file-uri "https://path/to/myPackage.zip"
-  - name: Create a managed application defintion with inline values for createUiDefinition and mainTemplate.
+  - name: Create a managed application definition with inline values for createUiDefinition and mainTemplate.
     text: >
-        az managedapp definition create --resource-group MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+        az managedapp definition create --resource-group MyResourceGroup --name MyManagedAppDef --location eastus --display-name "MyManagedAppDef" \\
             --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
@@ -1205,14 +1205,14 @@ helps['managedapp definition update'] = """
 type: command
 short-summary: Update a managed application definition.
 examples:
-  - name: Update a managed application defintion.
+  - name: Update a managed application definition.
     text: >
-        az managedapp definition update --resource-group MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+        az managedapp definition update --resource-group MyResourceGroup --name MyManagedAppDef --location eastus --display-name "MyManagedAppDef" \\
             --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --package-file-uri "https://path/to/myPackage.zip"
-  - name: Update a managed application defintion with inline values for createUiDefinition and mainTemplate.
+  - name: Update a managed application definition with inline values for createUiDefinition and mainTemplate.
     text: >
-        az managedapp definition update --resource-group MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+        az managedapp definition update --resource-group MyResourceGroup --name MyManagedAppDef --location eastus --display-name "MyManagedAppDef" \\
             --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
@@ -1276,21 +1276,21 @@ examples:
            resource:          /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
              az policy assignment create --scope \\
                 "/providers/Microsoft.Management/managementGroups/MyManagementGroup" \\
-                    --policy {PolicyName} -p "{ \\"allowedLocations\\": \\
+                    --policy MyPolicyName -p "{ \\"allowedLocations\\": \\
                         { \\"value\\": [ \\"australiaeast\\", \\"eastus\\", \\"japaneast\\" ] } }"
   - name: Create a resource policy assignment and provide rule parameter values.
     text: |
-        az policy assignment create --policy {PolicyName} -p "{ \\"allowedLocations\\": \\
+        az policy assignment create --policy MyPolicyName -p "{ \\"allowedLocations\\": \\
             { \\"value\\": [ \\"australiaeast\\", \\"eastus\\", \\"japaneast\\" ] } }"
   - name: Create a resource policy assignment with a system assigned identity.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity
+        az policy assignment create --name myPolicy --policy MyPolicyName --assign-identity
   - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
+        az policy assignment create --name myPolicy --policy MyPolicyName --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
   - name: Create a resource policy assignment with an enforcement mode. It indicates whether a policy effect will be enforced or not during assignment creation and update. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
+        az policy assignment create --name myPolicy --policy MyPolicyName --enforcement-mode 'DoNotEnforce'
 """
 
 helps['policy assignment update'] = """
@@ -1322,10 +1322,10 @@ short-summary: Add a system assigned identity to a policy assignment.
 examples:
   - name: Add a system assigned managed identity to a policy assignment.
     text: >
-        az policy assignment identity assign --resource-group MyResourceGroup -n MyPolicyAssignment
+        az policy assignment identity assign --resource-group MyResourceGroup --name MyPolicyAssignment
   - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
     text: >
-        az policy assignment identity assign --resource-group MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+        az policy assignment identity assign --resource-group MyResourceGroup --name MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
 """
 
 helps['policy assignment identity remove'] = """
@@ -1353,10 +1353,10 @@ short-summary: Add a non-compliance message to a policy assignment.
 examples:
   - name: Add a non-compliance message to a policy assignment.
     text: >
-        az policy assignment non-compliance-message create --resource-group MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+        az policy assignment non-compliance-message create --resource-group MyResourceGroup --name MyPolicyAssignment --message 'Resources must follow naming standards'
   - name: Add a non-compliance message for a specific policy in an assigned policy set definition.
     text: >
-        az policy assignment non-compliance-message create --resource-group MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
+        az policy assignment non-compliance-message create --resource-group MyResourceGroup --name MyPolicySetAssignment --message 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
 """
 
 helps['policy assignment non-compliance-message list'] = """
@@ -1365,7 +1365,7 @@ short-summary: List the non-compliance messages for a policy assignment.
 examples:
   - name: List the non-compliance messages for a policy assignment.
     text: >
-        az policy assignment non-compliance-message list --resource-group MyResourceGroup -n MyPolicyAssignment
+        az policy assignment non-compliance-message list --resource-group MyResourceGroup --name MyPolicyAssignment
 """
 
 helps['policy assignment non-compliance-message delete'] = """
@@ -1374,10 +1374,10 @@ short-summary: Remove one or more non-compliance messages from a policy assignme
 examples:
   - name: Remove non-compliance messages from a policy assignment that contain a specific message and no policy definition reference ID.
     text: >
-        az policy assignment non-compliance-message delete --resource-group MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'
+        az policy assignment non-compliance-message delete --resource-group MyResourceGroup --name MyPolicyAssignment --message 'Resources must follow naming standards'
   - name: Remove non-compliance messages from a policy assignment that contain a specific message and a specific policy definition reference ID.
     text: >
-        az policy assignment non-compliance-message delete --resource-group MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
+        az policy assignment non-compliance-message delete --resource-group MyResourceGroup --name MyPolicySetAssignment --message 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
 """
 
 helps['policy assignment list'] = """
@@ -1423,7 +1423,7 @@ examples:
                         \\"strongType\\": \\"location\\", \\"displayName\\": \\"Allowed locations\\" } } }"
   - name: Create a read-only policy that can be applied within a management group.
     text: |
-        az policy definition create -n readOnlyStorage --management-group "MyManagementGroup" \\
+        az policy definition create --name readOnlyStorage --management-group "MyManagementGroup" \\
             --rules "{ \\"if\\": { \\"field\\": \\"type\\", \\
                 \\"equals\\": \\"Microsoft.Storage/storageAccounts/write\\" }, \\
                     \\"then\\": { \\"effect\\": \\"deny\\" } }"
@@ -1477,30 +1477,30 @@ short-summary: Create a policy set definition.
 examples:
   - name: Create a policy set definition.
     text: |
-        az policy set-definition create -n readOnlyStorage \\
-            --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+        az policy set-definition create --name readOnlyStorage \\
+            --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/MySubscriptionId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\", \\"parameters\\": \\
                     { \\"storageSku\\": { \\"value\\": \\"[parameters(\\\\"requiredSku\\\\")]\\" } } }]" \\
             --params "{ \\"requiredSku\\": { \\"type\\": \\"String\\" } }"
   - name: Create a policy set definition with parameters.
     text: |
-        az policy set-definition create -n readOnlyStorage \\
-            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+        az policy set-definition create --name readOnlyStorage \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/MySubscriptionId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition in a subscription.
     text: |
-        az policy set-definition create -n readOnlyStorage \\
+        az policy set-definition create --name readOnlyStorage \\
             --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' \\
             --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/ \\
                 0b1f6471-1bf0-4dda-aec3-111122223333/providers/Microsoft.Authorization/ \\
                     policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition with policy definition groups.
     text: |
-        az policy set-definition create -n computeRequirements \\
-            --definitions "[ { \\"policyDefinitionId \\": \\"/subscriptions/mySubId/providers/ \\
+        az policy set-definition create --name computeRequirements \\
+            --definitions "[ { \\"policyDefinitionId \\": \\"/subscriptions/MySubscriptionId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\", \\"groupNames\\": \\
                     [ \\"CostSaving\\", \\"Organizational\\" ] }, { \\"policyDefinitionId\\": \\
-                        \\"/subscriptions/mySubId/providers/Microsoft.Authorization/ \\
+                        \\"/subscriptions/MySubscriptionId/providers/Microsoft.Authorization/ \\
                             policyDefinitions/tagPolicy\\", \\"groupNames\\": [ \\
                                 \\"Organizational\\" ] } ]" \\
             --definition-groups "[{ \\"name\\": \\"CostSaving\\" }, { \\"name\\": \\"Organizational\\" } ]"
@@ -1512,7 +1512,7 @@ short-summary: Delete a policy set definition.
 examples:
   - name: Delete a policy set definition.
     text: |
-        az policy set-definition delete --management-group myMg --name MyPolicySetDefinition
+        az policy set-definition delete --management-group MyManagementGroup --name MyPolicySetDefinition
 """
 
 helps['policy set-definition list'] = """
@@ -1536,16 +1536,16 @@ examples:
   - name: Update a policy set definition.
     text: |-
         az policy set-definition update \\
-            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/MySubscriptionId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]' \\
             --name MyPolicySetDefinition
   - name: Update the groups and definitions within a policy set definition.
     text: |
-        az policy set-definition update -n computeRequirements \\
-            --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+        az policy set-definition update --name computeRequirements \\
+            --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/MySubscriptionId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\", \\"groupNames\\": [ \\
                     \\"CostSaving\\", \\"Organizational\\" ] }, { \\"policyDefinitionId\\": \\
-                        \\"/subscriptions/mySubId/providers/Microsoft.Authorization/ \\
+                        \\"/subscriptions/MySubscriptionId/providers/Microsoft.Authorization/ \\
                             policyDefinitions/tagPolicy\\", \\
                                 \\"groupNames\\": [ \\"Organizational\\" ] } ]" \\
             --definition-groups "[{ \\"name\\": \\"CostSaving\\" }, { \\"name\\": \\"Organizational\\" } ]"
@@ -1562,21 +1562,21 @@ short-summary: Create a policy exemption.
 examples:
   - name: Create a policy exemption in default subscription.
     text: |
-        az policy exemption create -n exemptTestVM \\
-            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+        az policy exemption create --name MyExemptVM \\
+            --policy-assignment "/subscriptions/MySubscriptionId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
             --exemption-category "Waiver"
   - name: Create a policy exemption in the resource group.
     text: |
-        az policy exemption create -n exemptTestVM \\
-            --policy-assignment "/subscriptions/mySubId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+        az policy exemption create --name MyExemptVM \\
+            --policy-assignment "/subscriptions/MySubscriptionId/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
             --exemption-category "Waiver" \\
             --resource-group "MyResourceGroup"
   - name: Create a policy exemption in a management group.
     text: |
-        az policy exemption create -n exemptTestVM \\
-            --policy-assignment "/providers/Microsoft.Management/managementGroups/myMG/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
+        az policy exemption create --name MyExemptVM \\
+            --policy-assignment "/providers/Microsoft.Management/managementGroups/MyManagementGroup/providers/Microsoft.Authorization/policyAssignments/limitVMSku" \\
             --exemption-category "Waiver" \\
-            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+            --scope "/providers/Microsoft.Management/managementGroups/MyManagementGroup"
 """
 
 helps['policy exemption delete'] = """
@@ -1608,18 +1608,18 @@ short-summary: Update a policy exemption.
 examples:
   - name: Update a policy exemption.
     text: |
-        az policy exemption update -n exemptTestVM \\
+        az policy exemption update --name MyExemptVM \\
             --exemption-category "Mitigated"
   - name: Update a policy exemption in the resource group.
     text: |
-        az policy exemption update -n exemptTestVM \\
+        az policy exemption update --name MyExemptVM \\
             --exemption-category "Mitigated" \\
             --resource-group "MyResourceGroup"
   - name: Update a policy exemption in a management group.
     text: |
-        az policy exemption update -n exemptTestVM \\
+        az policy exemption update --name MyExemptVM \\
             --exemption-category "Mitigated" \\
-            --scope "/providers/Microsoft.Management/managementGroups/myMG"
+            --scope "/providers/Microsoft.Management/managementGroups/MyManagementGroup"
 """
 
 helps['provider'] = """
@@ -1674,10 +1674,10 @@ examples:
 
   - name: Register a provider from RPaaS.
     text: |
-        az provider register -n 'Microsoft.Confluent' --accept-terms
+        az provider register --name 'Microsoft.Confluent' --accept-terms
   - name: Register a management group.
     text: |
-        az provider register --namespace Microsoft.Automation -m mgID
+        az provider register --namespace Microsoft.Automation --management-group-id mgID
 """
 
 helps['provider unregister'] = """
@@ -1700,22 +1700,22 @@ short-summary: create a resource.
 examples:
   - name: Create an API app by providing a full JSON configuration.
     text: |
-        az resource create --resource-group myRG -n myApiApp --resource-type Microsoft.web/sites \\
+        az resource create --resource-group myRG --name myApiApp --resource-type Microsoft.web/sites \\
             --is-full-object --properties "{ \\"kind\\": \\"api\\", \\"location\\": \\
                 \\"West US\\", \\"properties\\": { \\"serverFarmId\\": \\
-                    \\"/subscriptions/{SubID}/resourcegroups/{ResourceGroup} \\
-                        /providers/Microsoft.Web/serverfarms/{ServicePlan}\\" } }"
+                    \\"/subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup \\
+                        /providers/Microsoft.Web/serverfarms/MyServicePlan\\" } }"
   - name: Create a resource by loading JSON configuration from a file.
     text: >
-        az resource create --resource-group myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile
+        az resource create --resource-group myRG --name myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile
   - name: Create a web app with the minimum required configuration information.
     text: |
-        az resource create --resource-group myRG -n myWeb --resource-type Microsoft.web/sites \\
-            --properties "{ \\"serverFarmId\\":\\"/subscriptions/{SubID}/resourcegroups/ \\
-                {ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}\\" }"
+        az resource create --resource-group myRG --name myWeb --resource-type Microsoft.web/sites \\
+            --properties "{ \\"serverFarmId\\":\\"/subscriptions/MySubscriptionId/resourcegroups/ \\
+                MyResourceGroup/providers/Microsoft.Web/serverfarms/MyServicePlan\\" }"
   - name: Create a resource by using the latest api-version whether this version is a preview version.
     text: >
-        az resource create --resource-group myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
+        az resource create --resource-group myRG --name myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
   - name: Create a site extension to a web app
     text: |
         az resource create --resource-group myRG --api-version "2018-02-01" \\
@@ -1731,16 +1731,16 @@ short-summary: Delete a resource.
 examples:
   - name: Delete a virtual machine named 'MyVm'.
     text: >
-        az resource delete --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        az resource delete --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines"
   - name: Delete a web app using a resource identifier.
     text: >
-        az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+        az resource delete --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
   - name: Delete a subnet using a resource identifier.
     text: >
-        az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVNet/subnets/MySubnet
+        az resource delete --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVNet/subnets/MySubnet
   - name: Delete a virtual machine named 'MyVm' by using the latest api-version whether this version is a preview version.
     text: >
-        az resource delete --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
+        az resource delete --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
 """
 
 helps['resource invoke-action'] = """
@@ -1748,18 +1748,18 @@ type: command
 short-summary: Invoke an action on the resource.
 long-summary: >
     A list of possible actions corresponding to a resource can be found at https://docs.microsoft.com/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
-    request URI is https://management.azure.com/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VM}/powerOff?api-version={APIVersion} and the corresponding action is `powerOff`. This can
+    request URI is https://management.azure.com/subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVMName/powerOff?api-version={APIVersion} and the corresponding action is `powerOff`. This can
     be found at https://docs.microsoft.com/rest/api/compute/virtualmachines/virtualmachines-stop.
 examples:
   - name: Power-off a vm, specified by Id.
     text: >
         az resource invoke-action --action powerOff \\
-          --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName}
+          --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVMName
   - name: Capture information for a stopped vm.
     text: >
         az resource invoke-action --action capture \\
-          --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/ \\
-            Microsoft.Compute/virtualMachines/{VMName} \\
+          --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/ \\
+            Microsoft.Compute/virtualMachines/MyVMName \\
           --request-body "{ \\"vhdPrefix\\": \\"myPrefix\\", \\"destinationContainerName\\": \\
             \\"myContainer\\", \\"overwriteVhds\\": true }"
   - name: Invoke an action on the resource.
@@ -1779,18 +1779,18 @@ helps['resource link create'] = """
 type: command
 short-summary: Create a new link between resources.
 examples:
-  - name: Create a link from {SourceID} to {ResourceID} with notes
+  - name: Create a link from MySourceId to MyResourceId with notes
     text: >
-        az resource link create --link {SourceID} --target {ResourceID} --notes "SourceID depends on ResourceID"
+        az resource link create --link MySourceId --target MyResourceId --notes "SourceID depends on ResourceID"
 """
 
 helps['resource link delete'] = """
 type: command
 short-summary: Delete a link between resources.
 examples:
-  - name: Delete link {LinkID}
+  - name: Delete link MyLinkId
     text: >
-        az resource link delete --link {LinkID}
+        az resource link delete --link MyLinkId
 """
 
 helps['resource link list'] = """
@@ -1800,18 +1800,18 @@ examples:
   - name: List links, filtering with {filter-string}
     text: >
         az resource link list --filter {filter-string}
-  - name: List all links for resource group {ResourceGroup} in subscription {SubID}
+  - name: List all links for resource group MyResourceGroup in subscription MySubscriptionId
     text: >
-        az resource link list --scope /subscriptions/{SubID}/resourceGroups/{ResourceGroup}
+        az resource link list --scope /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup
 """
 
 helps['resource link update'] = """
 type: command
 short-summary: Update link between resources.
 examples:
-  - name: Update the notes for {LinkID} notes "some notes to explain this link"
+  - name: Update the notes for MyLinkId notes "some notes to explain this link"
     text: >
-        az resource link update --link {LinkID} --notes "some notes to explain this link"
+        az resource link update --link MyLinkId --notes "some notes to explain this link"
 """
 
 helps['resource list'] = """
@@ -1824,15 +1824,15 @@ examples:
   - name: List all resources with the name 'resourceName'.
     text: >
         az resource list --name 'resourceName'
-  - name: List all resources with the tag 'test'.
+  - name: List all resources with the tag 'MyTagName'.
     text: >
-        az resource list --tag test
-  - name: List all resources with a tag that starts with 'test'.
+        az resource list --tag MyTagName
+  - name: List all resources with a tag that starts with 'MyTagName'.
     text: >
-        az resource list --tag 'test*'
-  - name: List all resources with the tag 'test' that have the value 'example'.
+        az resource list --tag 'MyTagName*'
+  - name: List all resources with the tag 'MyTagName' that have the value 'example'.
     text: >
-        az resource list --tag test=example
+        az resource list --tag MyTagName=example
 """
 
 helps['resource lock'] = """
@@ -1849,7 +1849,7 @@ examples:
         az resource lock create --lock-type ReadOnly --name MyLockName --resource-group MyResourceGroup --resource MyVNet --resource-type Microsoft.Network/virtualNetworks
   - name: Create a read-only resource level lock on a VNet using a VNet id.
     text: >
-        az resource lock create --lock-type ReadOnly --name MyLockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}
+        az resource lock create --lock-type ReadOnly --name MyLockName --resource /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/VNetName
 """
 
 helps['resource lock delete'] = """
@@ -1861,10 +1861,10 @@ examples:
         az resource lock delete --name MyLockName --resource-group MyResourceGroup --resource MyVNet --resource-type Microsoft.Network/virtualNetworks
   - name: Delete a resource level lock on a VNet using a VNet id.
     text: >
-        az resource lock delete --name MyLockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VMName}
+        az resource lock delete --name MyLockName --resource /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVMName
   - name: Delete a resource-level lock.
     text: |
-        az resource lock delete --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+        az resource lock delete --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebApp
 """
 
 helps['resource lock list'] = """
@@ -1903,22 +1903,22 @@ short-summary: Get the details of a resource.
 examples:
   - name: Show a virtual machine resource named 'MyVm'.
     text: >
-        az resource show --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        az resource show --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines"
   - name: Show a web app using a resource identifier.
     text: >
-        az resource show --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+        az resource show --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
   - name: Show a subnet.
     text: >
-        az resource show --resource-group MyResourceGroup -n MySubnet --namespace Microsoft.Network --parent virtualnetworks/MyVNet --resource-type subnets
+        az resource show --resource-group MyResourceGroup --name MySubnet --namespace Microsoft.Network --parent virtualnetworks/MyVNet --resource-type subnets
   - name: Show a subnet using a resource identifier.
     text: >
-        az resource show --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVNet/subnets/MySubnet
+        az resource show --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVNet/subnets/MySubnet
   - name: Show an application gateway path rule.
     text: >
-        az resource show --resource-group MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
+        az resource show --resource-group MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules --name rule1
   - name: Show a virtual machine resource named 'MyVm' by using the latest api-version whether this version is a preview version.
     text: >
-        az resource show --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
+        az resource show --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
 """
 
 helps['resource tag'] = """
@@ -1927,16 +1927,16 @@ short-summary: Tag a resource.
 examples:
   - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1'.
     text: >
-        az resource tag --tags vmlist=vm1 --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        az resource tag --tags vmlist=vm1 --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines"
   - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
     text: >
-        az resource tag --tags vmlist=vm1 --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+        az resource tag --tags vmlist=vm1 --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebApp
   - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' incrementally. It doesn't empty the existing tags.
     text: >
-        az resource tag --tags vmlist=vm1 --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" -i
+        az resource tag --tags vmlist=vm1 --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines" -i
   - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' by using the latest api-version whether this version is a preview version.
     text: >
-        az resource tag --tags vmlist=vm1 --resource-group MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
+        az resource tag --tags vmlist=vm1 --resource-group MyResourceGroup --name MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
 """
 
 helps['resource update'] = """
@@ -1945,14 +1945,14 @@ short-summary: Update a resource.
 examples:
   - name: Update a webapp by using the latest api-version whether this version is a preview version.
     text: >
-        az resource update --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --set tags.key=value --latest-include-preview
+        az resource update --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebApp --set tags.key=value --latest-include-preview
   - name: Update a resource.
     text: |
         az resource update --ids $id --set properties.connectionType=Proxy
 
   - name: Update a resource.
     text: |
-        az resource update --name myresource --resource-group MyResourceGroup --resource-type subnets --set tags.key=value
+        az resource update --name MyResource --resource-group MyResourceGroup --resource-type subnets --set tags.key=value
 """
 
 helps['resource wait'] = """
@@ -1961,11 +1961,11 @@ short-summary: Place the CLI in a waiting state until a condition of a resources
 examples:
   - name: Place the CLI in a waiting state until a condition of a resources is met.
     text: |
-        az resource wait --exists --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+        az resource wait --exists --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebApp
 
   - name: Place the CLI in a waiting state until a condition of a resources is met.
     text: |
-        az resource wait --exists --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --include-response-body true
+        az resource wait --exists --ids /subscriptions/MySubscriptionId/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebApp --include-response-body true
 
   - name: Place the CLI in a waiting state until a condition of a resources is met.
     text: |
@@ -2000,13 +2000,13 @@ examples:
         az tag create --name MyTag
   - name: Create or update the entire set of tags on a subscription.
     text: >
-        az tag create --resource-id /subscriptions/{subId} --tags Dept=Finance Status=Normal
+        az tag create --resource-id /subscriptions/MySubscriptionId --tags Dept=Finance Status=Normal
   - name: Create or update the entire set of tags on a resource group.
     text: >
-        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --tags Dept=Finance Status=Normal
+        az tag create --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup --tags Dept=Finance Status=Normal
   - name: Create or update the entire set of tags on a resource.
     text: >
-        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --tags Dept=Finance Status=Normal
+        az tag create --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVMName --tags Dept=Finance Status=Normal
 """
 
 helps['tag delete'] = """
@@ -2020,13 +2020,13 @@ examples:
         az tag delete --name MyTag
   - name: Delete the entire set of tags on a subscription.
     text: >
-        az tag delete --resource-id /subscriptions/{sub-id}
+        az tag delete --resource-id /subscriptions/MySubscriptionId
   - name: Delete the entire set of tags on a resource group.
     text: >
-        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+        az tag delete --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup
   - name: Delete the entire set of tags on a resource.
     text: >
-        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+        az tag delete --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVMName
 """
 
 helps['tag list'] = """
@@ -2036,13 +2036,13 @@ long-summary: The az tag list command with an id lists the entire set of tags on
 examples:
   - name: List the entire set of tags on a subscription.
     text: >
-        az tag list --resource-id /subscriptions/{sub-id}
+        az tag list --resource-id /subscriptions/MySubscriptionId
   - name: List the entire set of tags on a resource group.
     text: >
-        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+        az tag list --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup
   - name: List the entire set of tags on a resource.
     text: >
-        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+        az tag list --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVMName
 """
 
 helps['tag update'] = """
@@ -2058,13 +2058,13 @@ long-summary: >
 examples:
   - name: Selectively update the set of tags on a subscription with "merge" Operation.
     text: >
-        az tag update --resource-id /subscriptions/{sub-id} --operation merge --tags key1=value1 key3=value3
+        az tag update --resource-id /subscriptions/MySubscriptionId --operation merge --tags key1=value1 key3=value3
   - name: Selectively update the set of tags on a resource group with "replace" Operation.
     text: >
-        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --operation replace --tags key1=value1 key3=value3
+        az tag update --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup --operation replace --tags key1=value1 key3=value3
   - name: Selectively update the set of tags on a resource with "delete" Operation.
     text: >
-        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --operation delete --tags key1=value1
+        az tag update --resource-id /subscriptions/MySubscriptionId/resourcegroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVMName --operation delete --tags key1=value1
 """
 
 helps['ts'] = """
@@ -2077,11 +2077,11 @@ type: command
 short-summary: Create a template spec and or template spec version.
 examples:
   - name: Create a template spec.
-    text: az ts create --resource-group MyResourceGroup --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
+    text: az ts create --resource-group MyResourceGroup --name TemplateSpecName --location WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
   - name: Create a template spec version.
-    text: az ts create --resource-group MyResourceGroup --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
+    text: az ts create --resource-group MyResourceGroup --name TemplateSpecName -v 2.0 --location WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
   - name: Create a template spec and a version of the template spec.
-    text: az ts create --resource-group MyResourceGroup --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
+    text: az ts create --resource-group MyResourceGroup --name TemplateSpecName -v 1.0 --location WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
 """
 
 helps['ts update'] = """
@@ -2145,7 +2145,7 @@ examples:
   - name: List all template specs in resource group.
     text: az ts list --resource-group MyResourceGroup
   - name: List all versions of parent template spec.
-    text: az ts list --resource-group MyResourceGroup -n TemplateSpecName
+    text: az ts list --resource-group MyResourceGroup --name TemplateSpecName
 """
 
 helps['bicep'] = """
@@ -2178,13 +2178,13 @@ type: command
 short-summary: Build a Bicep file.
 examples:
   - name: Build a Bicep file.
-    text: az bicep build --file {bicep_file}
+    text: az bicep build --file MyFileName.bicep
   - name: Build a Bicep file and print all output to stdout.
-    text: az bicep build --file {bicep_file} --stdout
+    text: az bicep build --file MyFileName.bicep --stdout
   - name: Build a Bicep file and save the result to the specified directory.
-    text: az bicep build --file {bicep_file} --outdir {out_dir}
+    text: az bicep build --file MyFileName.bicep --outdir c:\MyOutputFolderName
   - name: Build a Bicep file and save the result to the specified file.
-    text: az bicep build --file {bicep_file} --outfile {out_file}
+    text: az bicep build --file MyFileName.bicep --outfile c:\MyOutputFolderName\MyOutputFileName.json
 """
 
 helps['bicep decompile'] = """
@@ -2192,7 +2192,7 @@ type: command
 short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
-    text: az bicep decompile --file {json_template_file}
+    text: az bicep decompile --file 'path/to/file.json'
 """
 
 helps['bicep version'] = """
