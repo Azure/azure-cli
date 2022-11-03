@@ -357,6 +357,10 @@ def cf_postgres_flexible_db(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).databases
 
 
+def cf_postgres_check_resource_availability_with_location(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).check_name_availability_with_location
+
+
 def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
 
