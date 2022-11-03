@@ -15,11 +15,11 @@ from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers, cf_load_balancers,
-    cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
+    cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_security_rules, cf_subnets, cf_usages,
+    cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -198,16 +198,6 @@ def load_command_table(self, _):
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
-    )
-
-    network_nsg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
-        client_factory=cf_network_security_groups
-    )
-
-    network_nsg_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SecurityRulesOperations.{}',
-        client_factory=cf_security_rules
     )
 
     network_public_ip_sdk = CliCommandType(
@@ -887,8 +877,9 @@ def load_command_table(self, _):
     # endregion
 
     # region LocalGateways
-    from .aaz.latest.network.local_gateway import List
-    self.command_table['network local-gateway list'] = List(loader=self, table_transformer=transform_local_gateway_table_output)
+    with self.command_group('network local-gateway'):
+        from .aaz.latest.network.local_gateway import List
+        self.command_table['network local-gateway list'] = List(loader=self, table_transformer=transform_local_gateway_table_output)
     # endregion
 
     # region NetworkInterfaces: (NIC)
@@ -926,21 +917,17 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkSecurityGroups
-    with self.command_group('network nsg', network_nsg_sdk) as g:
-        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
-        g.generic_update_command('update', setter_name='begin_create_or_update')
+    with self.command_group('network nsg') as g:
+        from azure.cli.command_modules.network.aaz.latest.network.nsg import Create
+        self.command_table['network network nsg create'] = Create(loader=self, transform=transform_nsg_create_output)
 
-    with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
+    with self.command_group('network nsg rule') as g:
         g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
-        g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
-        g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
-        g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
-        g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
+        g.custom_command('create', 'create_nsg_rule')
+        from .aaz.latest.network.nsg.rule import Show
+        self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+        from azure.cli.command_modules.network.custom import NsgRuleUpdate
+        self.command_table['network nsg rule update'] = NsgRuleUpdate(loader=self)
     # endregion
 
     # region NetworkWatchers

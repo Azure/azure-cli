@@ -4280,7 +4280,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         ])
 
         # test generic update
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set properties.description="cool"',
                  checks=self.check('description', 'cool'))
 
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
