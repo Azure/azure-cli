@@ -725,15 +725,19 @@ def load_command_table(self, _):
 
     # region LoadBalancers
     with self.command_group('network lb') as g:
-        g.custom_command('create', 'create_load_balancer', validator=process_lb_create_namespace)
+        g.custom_command('create', 'create_load_balancer',
+                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
+                         supports_no_wait=True,
+                         table_transformer=deployment_validate_table_format,
+                         validator=process_lb_create_namespace,
+                         exception_handler=handle_template_based_exception)
         g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
         'inbound_nat_rules': 'inbound-nat-rule',
         'inbound_nat_pools': 'inbound-nat-pool',
-        'load_balancing_rules': 'rule',
-        'probes': 'probe',
+        'load_balancing_rules': 'rule'
     }
     for subresource, alias in property_map.items():
         with self.command_group('network lb {}'.format(alias), network_util) as g:
@@ -802,13 +806,12 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
-    with self.command_group('network lb probe', network_lb_sdk) as g:
+    with self.command_group('network lb probe') as g:
         g.custom_command('create', 'create_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_probe')
+        g.custom_command('update', 'set_lb_probe')
+
+    with self.command_group('network lb probe', network_util) as g:
+        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
@@ -870,10 +873,10 @@ def load_command_table(self, _):
                                  custom_func_name='set_cross_region_lb_rule')
 
     with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_probe')
+        g.custom_command('create', 'create_cross_lb_probe')
         g.generic_update_command('update', child_collection_prop_name='probes',
                                  setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_probe')
+                                 custom_func_name='set_cross_lb_probe')
     # endregion
 
     # region LocalGateways

@@ -457,11 +457,6 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        # The privateIPAddressVersion field is no longer returned in lb response message
-        # self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
-        #     self.check('frontendIPConfigurations[0].privateIPAddressVersion', 'IPv6')
-        # ])
-
     @ResourceGroupPreparer(name_prefix='test_network_lb_frontend_ip_zone', location='eastus2')
     def test_network_lb_frontend_ip_zone(self, resource_group):
         self.kwargs.update({
@@ -3267,8 +3262,8 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
             'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-cross-region-lb-address-pool-config.json')
         })
 
-        regional_lb_frontend_ip_address1 = self.cmd('network lb create -n {regional_lb1} -g {rg} --sku Standard').get_output_in_json()['frontendIPConfigurations'][0]['id']
-        regional_lb_frontend_ip_address2 = self.cmd('network lb create -n {regional_lb2} -g {rg} --sku Standard').get_output_in_json()['frontendIPConfigurations'][0]['id']
+        regional_lb_frontend_ip_address1 = self.cmd('network lb create -n {regional_lb1} -g {rg} --sku Standard').get_output_in_json()['loadBalancer']['frontendIPConfigurations'][0]['id']
+        regional_lb_frontend_ip_address2 = self.cmd('network lb create -n {regional_lb2} -g {rg} --sku Standard').get_output_in_json()['loadBalancer']['frontendIPConfigurations'][0]['id']
 
         self.kwargs.update({
             'regional_lb_frontend_ip_address1': regional_lb_frontend_ip_address1,
@@ -3305,8 +3300,6 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         for i in range(1, 4):
             self.cmd('network cross-region-lb probe create -g {{rg}} --lb-name {{lb}} -n probe{0} --port {0} --protocol http --path "/test{0}"'.format(i))
-        self.cmd('network lb probe list -g {rg} --lb-name {lb}',
-                 checks=self.check('length(@)', 3))
         self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --interval 20 --threshold 5')
         self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe2 --protocol tcp --path ""')
         self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
@@ -3383,8 +3376,8 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
         # test lb create with min params (new ip)
         self.cmd('network lb create -n {lb}1 -g {rg}', checks=[
-            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check('frontendIPConfigurations[0].resourceGroup', '{rg}')
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}')
         ])
 
         # test internet facing load balancer with new static public IP
@@ -3397,18 +3390,18 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internal load balancer create (existing subnet ID)
         self.kwargs['subnet_id'] = self.cmd('network vnet create -n {vnet} -g {rg} --subnet-name default').get_output_in_json()['newVNet']['subnets'][0]['id']
         self.cmd('network lb create -n {lb}3 -g {rg} --subnet {subnet_id} --private-ip-address {pri_ip}', checks=[
-            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Static'),
-            self.check('frontendIPConfigurations[0].privateIPAddress', '{pri_ip}'),
-            self.check('frontendIPConfigurations[0].resourceGroup', '{rg}'),
-            self.check("frontendIPConfigurations[0].subnet.id", '{subnet_id}')
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddress', '{pri_ip}'),
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check("loadBalancer.frontendIPConfigurations[0].properties.subnet.id", '{subnet_id}')
         ])
 
         # test internet facing load balancer with existing public IP (by name)
         self.cmd('network public-ip create -n {pub_ip} -g {rg}')
         self.cmd('network lb create -n {lb}4 -g {rg} --public-ip-address {pub_ip}', checks=[
-            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check('frontendIPConfigurations[0].resourceGroup', '{rg}'),
-            self.check("frontendIPConfigurations[0].publicIPAddress.contains(id, '{pub_ip}')", True)
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{pub_ip}')", True)
         ])
 
         self.cmd('network lb list', checks=[
@@ -3726,6 +3719,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         self.kwargs['lb'] = 'lb1'
         self.kwargs['lb2'] = 'lb2'
+        self.kwargs['probe5'] = 'probe5'
         self.cmd('network lb create -g {rg} -n {lb}')
 
         for i in range(1, 4):
@@ -3737,11 +3731,6 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
             self.check('intervalInSeconds', 20),
             self.check('numberOfProbes', 5)
-        ])
-        # test generic update
-        self.cmd('network lb probe update -g {rg} --lb-name {lb} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3', checks=[
-            self.check('intervalInSeconds', 15),
-            self.check('numberOfProbes', 3)
         ])
 
         self.cmd('network lb probe show -g {rg} --lb-name {lb} -n probe2', checks=[
@@ -3756,6 +3745,16 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb create -g {rg} -n {lb2} --sku standard')
         self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
         self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
+
+        # test --probe-threshold parameter
+        self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 5', checks=self.check('probeThreshold', 5))
+        self.cmd('network lb probe show -g {rg} --lb-name {lb2} -n {probe5}', checks=self.check('probeThreshold', 5))
+        self.cmd('network lb probe update -g {rg} --lb-name {lb2} -n {probe5} --port 443 --protocol https --path "/test1" --probe-threshold 6', checks=self.check('probeThreshold', 6))
+        self.cmd('network lb probe show -g {rg} --lb-name {lb2} -n {probe5}', checks=self.check('probeThreshold', 6))
+        self.cmd('network lb probe list -g {rg} --lb-name {lb2}', checks=[
+            self.check('length(@)', 2),
+            self.check('[1].probeThreshold', 6)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_rules', location='eastus2')
     def test_network_lb_rules(self, resource_group):

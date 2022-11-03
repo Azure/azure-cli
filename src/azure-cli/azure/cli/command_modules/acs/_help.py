@@ -413,12 +413,18 @@ parameters:
   - name: --disable-snapshot-controller
     type: bool
     short-summary: Disable CSI Snapshot Controller.
+  - name: --enable-blob-driver
+    type: bool
+    short-summary: Enable AzureBlob CSI Driver.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
   - name: --gpu-instance-profile
     type: string
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
+  - name: --enable-oidc-issuer
+    type: bool
+    short-summary: Enable OIDC issuer.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -683,9 +689,18 @@ parameters:
   - name: --disable-snapshot-controller
     type: bool
     short-summary: Disable CSI Snapshot Controller.
+  - name: --enable-blob-driver
+    type: bool
+    short-summary: Enable AzureBlob CSI Driver.
+  - name: --disable-blob-driver
+    type: bool
+    short-summary: Disable AzureBlob CSI Driver.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --enable-oidc-issuer
+    type: bool
+    short-summary: Enable OIDC issuer.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -1414,4 +1429,13 @@ helps['aks nodepool snapshot create'] = """
 helps['aks nodepool snapshot delete'] = """
     type: command
     short-summary: Delete a nodepool snapshot.
+"""
+
+helps['aks oidc-issuer'] = """
+    type: group
+    short-summary: oidc issuer related commands
+"""
+helps['aks oidc-issuer rotate-signing-keys'] = """
+    type: command
+    short-summary: Rotate oidc issuer service account signing keys
 """
