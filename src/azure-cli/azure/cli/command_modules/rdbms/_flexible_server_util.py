@@ -169,15 +169,17 @@ def get_postgres_tiers(sku_info):
     return list(sku_info.keys())
 
 
-def get_postgres_list_skus_info(cmd, location):
+def get_postgres_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.execute(location)
+    params = {'serverName': server_name} if server_name else None
+    list_skus_result = list_skus_client.execute(location, params=params)
     return _postgres_parse_list_skus(list_skus_result)
 
 
-def get_mysql_list_skus_info(cmd, location):
+def get_mysql_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.list(location)
+    params = {'serverName': server_name} if server_name else None
+    list_skus_result = list_skus_client.list(location, params=params)
     return _mysql_parse_list_skus(list_skus_result)
 
 
