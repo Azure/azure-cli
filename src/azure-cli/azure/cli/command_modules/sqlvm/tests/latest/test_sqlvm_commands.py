@@ -173,6 +173,7 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
 
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
@@ -356,6 +357,7 @@ class SqlVmScenarioTest(ScenarioTest):
         # test list sql vm should be empty
         self.cmd('sql vm list -g {}'.format(resource_group), checks=[NoneCheck()])
 
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_create')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
@@ -453,6 +455,7 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlServerLicenseType', 'PAYG'),
                      JMESPathCheck('sqlManagement', 'Full')
                  ])
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_license')
@@ -696,4 +699,3 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
-
