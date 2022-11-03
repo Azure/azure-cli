@@ -86,7 +86,7 @@ def get_container_name():
     :return:
     """
     logger.warning('Enter get_container_name()')
-    time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    time = datetime.datetime.now().strftime('%Y%m%d')
     # random_id = ''.join(random.choice(string.digits) for _ in range(6))
     name = USER_TARGET + '-' + BUILD_ID
     logger.warning('Exit get_container_name()')
