@@ -129,10 +129,11 @@ class IoTDpsTest(ScenarioTest):
         chain_name = self.create_random_name(prefix='certificate-', length=48)
 
         # Set up cert file for test
-        verification_file = "verify.cer"
-        cert_file = "testcert.cer"
-        key_file = "testkey.pvk"
-        chain_file = "testcert-chain.pem"
+        random_suffix = self.create_random_name(prefix='_', length=6)
+        verification_file = f"verify{random_suffix}.cer"
+        cert_file = f"testcert{random_suffix}.cer"
+        key_file = f"testkey{random_suffix}.pvk"
+        chain_file = f"testcert-chain{random_suffix}.pem"
         max_int = 9223372036854775807
         _create_test_cert(cert_file, key_file, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, max_int))
         _create_fake_chain_cert(cert_file, chain_file)
