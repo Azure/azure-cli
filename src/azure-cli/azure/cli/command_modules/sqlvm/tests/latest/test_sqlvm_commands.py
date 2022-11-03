@@ -21,6 +21,7 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 # Constants
@@ -28,7 +29,6 @@ sqlvm_name_prefix = 'clisqlvm'
 sqlvm_domain_prefix = 'domainvm'
 sqlvm_group_prefix = 'sqlgroup'
 sqlvm_max_length = 15
-
 
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
@@ -44,7 +44,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
+        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image microsoftsqlserver:sql2019-ws2022:enterprise:latest'
                     ' --size Standard_DS2_v2 --nsg-rule NONE')
         execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
         return {self.parameter_name: name}
@@ -62,7 +62,6 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
-
 
 class DomainPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_domain_prefix, location='westus',
@@ -110,6 +109,7 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class SqlVmScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
     @LogAnalyticsWorkspacePreparer(location="westus")
@@ -173,6 +173,7 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
     @StorageAccountPreparer()
@@ -355,6 +356,7 @@ class SqlVmScenarioTest(ScenarioTest):
         # test list sql vm should be empty
         self.cmd('sql vm list -g {}'.format(resource_group), checks=[NoneCheck()])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_create')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm2')
@@ -452,6 +454,7 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlManagement', 'Full')
                  ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_license')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
     def test_sqlvm_update_license_and_sku(self, resource_group, resource_group_location, sqlvm1):
@@ -628,11 +631,12 @@ class SqlVmGroupScenarioTest(ScenarioTest):
         # test list sql vm should be empty
         self.cmd('sql vm group list -g {}'.format(resource_group), checks=[NoneCheck()])
 
-'''
+
 class SqlVmAndGroupScenarioTest(ScenarioTest):
     """
     This is a very lengthy test, it may take more than 45 minutes to run. For now this test is failing, leaving it commented to prevent failures
     """
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @DomainPreparer()
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
@@ -663,7 +667,7 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         sqlvmgroup = self.cmd('sql vm group create -n {} -g {} -l {} -i {} -s {} -f {} -p {} -k {} -e {} -u {} --bootstrap-acc {}'
-                              .format('cligroup', resource_group, resource_group_location, 'SQL2017-WS2016', 'Enterprise',
+                              .format('cligroup', resource_group, resource_group_location, 'sql2019-ws2022', 'enterprise',
                                       'domain.com', 'admin123', key[0]['value'], 'admin123', sa['primaryEndpoints']['blob'], 'admin123')).get_output_in_json()
 
         # test create sqlvm1
@@ -692,4 +696,4 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
-'''
+
