@@ -87,8 +87,8 @@ def get_container_name():
     """
     logger.warning('Enter get_container_name()')
     time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    random_id = ''.join(random.choice(string.digits) for _ in range(6))
-    name = time + '-' + random_id
+    # random_id = ''.join(random.choice(string.digits) for _ in range(6))
+    name = USER_TARGET + '-' + BUILD_ID
     logger.warning('Exit get_container_name()')
     return name
 

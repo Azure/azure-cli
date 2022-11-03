@@ -55,7 +55,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     os.system(cmd)
 
     # Upload to latest container if it is a full live test of official repo dev branch
-    if USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_TARGET == '' and USER_LIVE == '--live':
+    if USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_TARGET == 'ALL' and USER_LIVE == '--live':
         cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac --overwrite'
         logger.warning('Running: ' + cmd)
         os.system(cmd)
