@@ -95,6 +95,9 @@ examples:
   - name: Create a SQL virtual machine group for SQL2016-WS2016 Enterprise virtual machines.
     text: >
         az sql vm group create -n sqlvmgroup -l eastus -g myresourcegroup --image-offer SQL2016-WS2016 --image-sku Enterprise --domain-fqdn Domain.com --operator-acc testop --service-acc testservice --sa-key {PublicKey} --storage-account 'https://storacc.blob.core.windows.net/'
+  - name: Create a SQL virtual machine group for SQL2019-WS2022 Enterprise virtual machines with MultiSubnet.
+    text: >
+        az sql vm group create -n sqlvmgroup -l eastus -g myresourcegroup --image-offer SQL2019-WS2022 --image-sku Enterprise --cluster-subnet-type MultiSubnet --domain-fqdn Domain.com --operator-acc testop --service-acc testservice --sa-key {PublicKey} --storage-account 'https://storacc.blob.core.windows.net/'
 """
 
 helps['sql vm group update'] = """

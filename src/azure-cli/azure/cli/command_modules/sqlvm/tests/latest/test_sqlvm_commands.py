@@ -556,6 +556,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
     def test_sqlvm_group_mgmt(self, resource_group, resource_group_location, storage_account1, storage_account2):
 
         name = 'sqlvmgroup'
+        name_two = 'sqlvmgrouptwo'
         image_offer = 'SQL2017-WS2016'
         image_sku = 'Enterprise'
         domain = 'domain.com'
@@ -584,8 +585,18 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                                   JMESPathCheck('provisioningState', "Succeeded")
                               ]).get_output_in_json()
 
+        # create sql vm group with multi subnet
+        sqlvmgrouptwo = self.cmd('sql vm group create -n {} -g {} -l {} -i {} -s {} -f {} -p {} -k {} -e {} -u {} --cluster-subnet-type MultiSubnet'
+                              .format(name_two, resource_group, resource_group_location, image_offer, image_sku,
+                                      domain, operator_acc, key_1[0]['value'], sql_service_acc, sa_1['primaryEndpoints']['blob']),
+                              checks=[
+                                  JMESPathCheck('name', name_two),
+                                  JMESPathCheck('location', resource_group_location),
+                                  JMESPathCheck('provisioningState', "Succeeded")
+                              ]).get_output_in_json()
+
         # test list sqlvm should be 1
-        self.cmd('sql vm group list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('sql vm group list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 2)])
 
         # test show of the group
         self.cmd('sql vm group show -n {} -g {}'
@@ -626,9 +637,14 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                      JMESPathCheck('wsfcDomainProfile.clusterOperatorAccount', 'my' + operator_acc)
                  ])
 
-        # test delete vm
+        # test delete group
         self.cmd('sql vm group delete -n {} -g {} --yes'
                  .format(name, resource_group),
+                 checks=NoneCheck())
+
+        # test delete group
+        self.cmd('sql vm group delete -n {} -g {} --yes'
+                 .format(name_two, resource_group),
                  checks=NoneCheck())
 
         # test list sql vm should be empty

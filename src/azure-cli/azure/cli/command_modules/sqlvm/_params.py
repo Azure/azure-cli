@@ -19,7 +19,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlImageSku,
     SqlManagementMode,
     AssessmentDayOfWeek,
-    LeastPrivilegeMode
+    LeastPrivilegeMode,
+    ClusterSubnetType
 )
 
 from azure.cli.core.commands.parameters import (
@@ -98,7 +99,7 @@ def load_arguments(self, _):
                    help='Organizational Unit path in which the nodes and cluster will be present. Example: OU=WSCluster,DC=testdomain,DC=com')
         c.argument('cluster_subnet_type',
                    help='Cluster subnet type.',
-                   arg_type=get_enum_type(SqlVmGroupImageSku))
+                   arg_type=get_enum_type(ClusterSubnetType))
 
     ###############################################
     #    availability group listener params       #
