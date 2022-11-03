@@ -321,7 +321,7 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - bash: |
-        if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) ]]; then
+        if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL") ]]; then
           echo "Match!"
           echo "##vso[task.setvariable variable=Match]1"
         else
