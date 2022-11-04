@@ -22,6 +22,7 @@ variables:
 #    - CLITest
 #  always: true
 
+# https://stackoverflow.com/questions/54372758/azure-devops-yaml-pipelines-specification-of-matrix-through-build-variable
 jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
@@ -135,6 +136,8 @@ jobs:
         Target: security
       servicebus:
         Target: servicebus
+      serviceconnector:
+        Target: serviceconnector
       servicefabric:
         Target: servicefabric
       signalr:
@@ -153,6 +156,10 @@ jobs:
         Target: vm
       ext-account:
         Target: ext-account
+      ext-acrtransfer:
+        Target: ext-acrtransfer
+      ext-ad:
+        Target: ext-ad
       ext-aem:
         Target: ext-aem
       ext-ai-examples:
@@ -163,92 +170,132 @@ jobs:
         Target: ext-alertsmanagement
       ext-alias:
         Target: ext-alias
+      ext-amg:
+        Target: ext-amg
       ext-application-insights:
         Target: ext-application-insights
+      ext-appservice-kube:
+        Target: ext-appservice-kube
       ext-attestation:
         Target: ext-attestation
-      ext-azure-batch-cli-extensions:
-        Target: ext-azure-batch-cli-extensions
-      ext-azure-cli-iot-ext:
-        Target: ext-azure-cli-iot-ext
-      ext-azure-cli-ml:
-        Target: ext-azure-cli-ml
-      ext-azure-devops:
-        Target: ext-azure-devops
+      ext-authV2:
+        Target: ext-authV2
       ext-azure-firewall:
         Target: ext-azure-firewall
-      ext-azure-iot:
-        Target: ext-azure-iot
       ext-blockchain:
         Target: ext-blockchain
       ext-blueprint:
         Target: ext-blueprint
-      ext-codespaces:
-        Target: ext-codespaces
+      ext-change-analysis:
+        Target: ext-change-analysis
+      ext-cli-translator:
+        Target: ext-cli-translator
+      ext-cloudservice:
+        Target: ext-cloudservice
+      ext-communication:
+        Target: ext-communication
+      ext-confidentialledger:
+        Target: ext-confidentialledger
+      ext-confluent:
+        Target: ext-confluent
       ext-connectedk8s:
         Target: ext-connectedk8s
       ext-connectedmachine:
         Target: ext-connectedmachine
+      ext-connectedvmware:
+        Target: ext-connectedvmware
+      ext-connection-monitor-preview:
+        Target: ext-connection-monitor-preview
+      ext-containerapp:
+        Target: ext-containerapp
+      ext-containerapp-preview:
+        Target: ext-containerapp-preview
+      ext-cosmosdb-preview:
+        Target: ext-cosmosdb-preview
       ext-costmanagement:
         Target: ext-costmanagement
-      ext-csvmware:
-        Target: ext-csvmware
       ext-custom-providers:
         Target: ext-custom-providers
       ext-databox:
         Target: ext-databox
       ext-databricks:
         Target: ext-databricks
+      ext-datadog:
+        Target: ext-datadog
       ext-datafactory:
         Target: ext-datafactory
+      ext-datamigration:
+        Target: ext-datamigration
+      ext-dataprotection:
+        Target: ext-dataprotection
       ext-datashare:
         Target: ext-datashare
       ext-db-up:
         Target: ext-db-up
-      ext-deploy-to-azure:
-        Target: ext-deploy-to-azure
       ext-desktopvirtualization:
         Target: ext-desktopvirtualization
       ext-dev-spaces:
         Target: ext-dev-spaces
+      ext-diskpool:
+        Target: ext-diskpool
       ext-dms-preview:
         Target: ext-dms-preview
+      ext-dnc:
+        Target: ext-dnc
+      ext-dns-resolver:
+        Target: ext-dns-resolver
+      ext-dynatrace:
+        Target: ext-dynatrace
+      ext-edgeorder:
+        Target: ext-edgeorder
+      ext-elastic:
+        Target: ext-elastic
+      ext-elastic-san:
+        Target: ext-elastic-san
       ext-eventgrid:
         Target: ext-eventgrid
-      ext-express-route:
-        Target: ext-express-route
       ext-express-route-cross-connection:
         Target: ext-express-route-cross-connection
+      ext-fleet:
+        Target: ext-fleet
+      ext-fluid-relay:
+        Target: ext-fluid-relay
       ext-footprint:
         Target: ext-footprint
       ext-front-door:
         Target: ext-front-door
-      ext-fzf:
-        Target: ext-fzf
+      ext-functionapp:
+        Target: ext-functionapp
       ext-guestconfig:
         Target: ext-guestconfig
       ext-hack:
         Target: ext-hack
       ext-hardware-security-modules:
         Target: ext-hardware-security-modules
+      ext-healthbot:
+        Target: ext-healthbot
       ext-healthcareapis:
         Target: ext-healthcareapis
       ext-hpc-cache:
         Target: ext-hpc-cache
-      ext-image-copy-extension:
-        Target: ext-image-copy-extension
+      ext-image-copy:
+        Target: ext-image-copy
+      ext-image-gallery:
+        Target: ext-image-gallery
       ext-import-export:
         Target: ext-import-export
+      ext-init:
+        Target: ext-init
       ext-interactive:
         Target: ext-interactive
       ext-internet-analyzer:
         Target: ext-internet-analyzer
       ext-ip-group:
         Target: ext-ip-group
-      ext-k8sconfiguration:
-        Target: ext-k8sconfiguration
-      ext-keyvault-preview:
-        Target: ext-keyvault-preview
+      ext-k8s-configuration:
+        Target: ext-k8s-configuration
+      ext-k8s-extension:
+        Target: ext-k8s-extension
       ext-kusto:
         Target: ext-kusto
       ext-log-analytics:
@@ -257,6 +304,8 @@ jobs:
         Target: ext-log-analytics-solution
       ext-logic:
         Target: ext-logic
+      ext-logz:
+        Target: ext-logz
       ext-maintenance:
         Target: ext-maintenance
       ext-managementpartner:
@@ -265,24 +314,58 @@ jobs:
         Target: ext-mesh
       ext-mixed-reality:
         Target: ext-mixed-reality
+      ext-monitor-control-service:
+        Target: ext-monitor-control-service
       ext-netappfiles-preview:
         Target: ext-netappfiles-preview
+      ext-network-manager:
+        Target: ext-network-manager
+      ext-next:
+        Target: ext-next
+      ext-nginx:
+        Target: ext-nginx
       ext-notification-hub:
         Target: ext-notification-hub
+      ext-offazure:
+        Target: ext-offazure
+      ext-orbital:
+        Target: ext-orbital
       ext-peering:
         Target: ext-peering
       ext-portal:
         Target: ext-portal
       ext-powerbidedicated:
         Target: ext-powerbidedicated
-      ext-privatedns:
-        Target: ext-privatedns
+      ext-providerhub:
+        Target: ext-providerhub
+      ext-purview:
+        Target: ext-purview
+      ext-quantum:
+        Target: ext-quantum
+      ext-quota:
+        Target: ext-quota
+      ext-rdbms-connect:
+        Target: ext-rdbms-connect
+      ext-redisenterprise:
+        Target: ext-redisenterprise
+      ext-reservation:
+        Target: ext-reservation
       ext-resource-graph:
         Target: ext-resource-graph
-      ext-sap-hana:
-        Target: ext-sap-hana
+      ext-resource-mover:
+        Target: ext-resource-mover
+      ext-scenario-guide:
+        Target: ext-scenario-guide
       ext-scheduled-query:
         Target: ext-scheduled-query
+      ext-scvmm:
+        Target: ext-scvmm
+      ext-securityinsight:
+        Target: ext-securityinsight
+      ext-serial-console:
+        Target: ext-serial-console
+      ext-spring:
+        Target: ext-spring
       ext-spring-cloud:
         Target: ext-spring-cloud
       ext-ssh:
@@ -291,8 +374,6 @@ jobs:
         Target: ext-stack-hci
       ext-storage-blob-preview:
         Target: ext-storage-blob-preview
-      ext-storage-or-preview:
-        Target: ext-storage-or-preview
       ext-storage-preview:
         Target: ext-storage-preview
       ext-storagesync:
@@ -303,10 +384,12 @@ jobs:
         Target: ext-subscription
       ext-support:
         Target: ext-support
-      ext-synapse:
-        Target: ext-synapse
+      ext-swiftlet:
+        Target: ext-swiftlet
       ext-timeseriesinsights:
         Target: ext-timeseriesinsights
+      ext-traffic-collector:
+        Target: ext-traffic-collector
       ext-virtual-network-tap:
         Target: ext-virtual-network-tap
       ext-virtual-wan:
@@ -317,6 +400,8 @@ jobs:
         Target: ext-vmware
       ext-webapp:
         Target: ext-webapp
+      ext-webpubsub:
+        Target: ext-webpubsub
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
