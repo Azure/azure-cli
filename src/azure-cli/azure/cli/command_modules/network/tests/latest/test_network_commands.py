@@ -981,10 +981,23 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
 
         # create an ag with ssl profile
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
-        self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
-                 '--ssl-profile name={name} client-auth-configuration=True min-protocol-version=TLSv1_0 '
-                 'cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom --priority 1001',
-                 checks=[self.check('length(applicationGateway.sslProfiles)', 1)])
+        self.cmd(
+            "network application-gateway create -n {gw} -g {rg} --public-ip-address {ip} --sku Standard_v2 --priority 1001 "
+            "--ssl-profile name={name} min-protocol-version=TLSv1_0 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
+            checks=[
+                self.check("length(applicationGateway.sslProfiles)", 1),
+                self.check("applicationGateway.sslProfiles[0].properties.clientAuthConfiguration.verifyClientCertIssuerDN", True),
+                self.check("applicationGateway.sslProfiles[0].properties.clientAuthConfiguration.verifyClientRevocation", "None"),
+            ]
+        )
+        # set client cert revocation option
+        self.cmd(
+            "network application-gateway update -n {gw} -g {rg} --ssl-profiles [0].client-auth-configuration.verify-client-revocation=OCSP",
+            checks=[
+                self.check("sslProfiles[0].clientAuthConfiguration.verifyClientCertIssuerDN", True),
+                self.check("sslProfiles[0].clientAuthConfiguration.verifyClientRevocation", "OCSP"),
+            ]
+        )
 
         self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name1} '
                  '--client-auth-configuration True --min-protocol-version TLSv1_0 '
