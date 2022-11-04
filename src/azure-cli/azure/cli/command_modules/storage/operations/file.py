@@ -184,8 +184,8 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
                 'file_name': os.path.basename(formatted_dst)
             }
             file = create_file_url(client, **kwargs)
-            type = guess_content_type(src, content_settings, settings_class).content_type
-            res.append({'File':file, 'Type': type})
+            guessed_type = guess_content_type(src, content_settings, settings_class).content_type
+            res.append({'File': file, 'Type': guessed_type})
         return res
 
     # TODO: Performance improvement
