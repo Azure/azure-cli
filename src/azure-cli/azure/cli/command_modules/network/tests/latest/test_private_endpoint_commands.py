@@ -1562,13 +1562,13 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # One default private link would be here
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
-        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
-        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+        # The frontendIpConfigurations must be associated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIPConfigurations'][0]['privateLinkConfiguration']['id'],
                          show_appgw_data['privateLinkConfigurations'][0]['id'])
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
-        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIPAllocationMethod'],
                          'Dynamic')
-        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], None)
+        self.assertNotIn("primary", show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0])
 
         appgw_vnet = self.cmd('network vnet show -g {rg} -n "{appgw}Vnet"').get_output_in_json()
         self.assertEqual(len(appgw_vnet['subnets']), 2)
@@ -1652,11 +1652,11 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # One default private link would be here
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
-        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
-        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+        # The frontendIpConfigurations must be associated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIPConfigurations'][0]['privateLinkConfiguration']['id'],
                          show_appgw_data['privateLinkConfigurations'][0]['id'])
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
-        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIPAllocationMethod'],
                          'Dynamic')
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], True)
 

@@ -759,7 +759,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
         self.cmd("network application-gateway create -n {ag_name} -g {rg} --sku WAF_Medium")
 
-        self.kwargs["front_ip"] = self.cmd("network application-gateway show -n {ag_name} -g {rg}").get_output_in_json()["frontendIpConfigurations"][0]["name"]
+        self.kwargs["front_ip"] = self.cmd("network application-gateway show -n {ag_name} -g {rg}").get_output_in_json()["frontendIPConfigurations"][0]["name"]
         self.cmd("network application-gateway frontend-port create -n {port_name} -g {rg} --gateway-name {ag_name} --port 8080")
         self.cmd("network application-gateway http-listener create -n {lisener_name} -g {rg} --gateway-name {ag_name} --frontend-ip {front_ip} --frontend-port {port_name}")
 
@@ -790,7 +790,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
                  "--priority 1001")
         show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
 
-        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertEqual(len(show_data["frontendIPConfigurations"]), 2)
 
         # Those assertions are not stable, because the order in array frontendIpConfigurations is not fixed
         # self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
@@ -1212,8 +1212,8 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n ag3 --subnet subnet1 --private-ip-address {private_ip} --cert-file "{path}" --cert-password {pass} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag3 --exists')
         self.cmd('network application-gateway show -g {rg} -n ag3', checks=[
-            self.check('frontendIpConfigurations[0].privateIpAddress', '{private_ip}'),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Static')
+            self.check('frontendIPConfigurations[0].privateIPAddress', '{private_ip}'),
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Static')
         ])
         self.kwargs['path'] = os.path.join(TEST_DIR, 'TestCert2.pfx')
         self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name ag3 -n ag3SslCert --cert-file "{path}" --cert-password {pass}')
@@ -1289,7 +1289,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
                  '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
                  '--priority {priority}')
         show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
-        frontend_ip = show_appgw_data['frontendIpConfigurations'][0]['name']
+        frontend_ip = show_appgw_data['frontendIPConfigurations'][0]['name']
         self.kwargs.update({
             'appgw_frontend_ip': frontend_ip
         })
@@ -1472,7 +1472,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n ip-1 --sku Standard')
 
         # sku=WAF_v2 is necessary for updating HTTP listener's WAF configuration
-        create_res = self.cmd('network application-gateway create -g {rg} --name {ag} --public-ip-address ip-1 --sku WAF_v2 --priority 1001').get_output_in_json()
+        self.cmd('network application-gateway waf-policy create -n waf_1 -g {rg}')
+        create_res = self.cmd('network application-gateway create -g {rg} --name {ag} --public-ip-address ip-1 --sku WAF_v2 --priority 1001 --waf-policy waf_1').get_output_in_json()
         self.assertEqual(len(create_res['applicationGateway']['httpListeners']), 1)
         self.assertIsNone(create_res['applicationGateway']['httpListeners'][0].get('firewallPolicy'))
 
@@ -2064,8 +2065,8 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_Medium --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
         self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
-            self.check("frontendIpConfigurations[0].publicIpAddress.contains(id, '{ip}')", True),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
+            self.check("frontendIPConfigurations[0].publicIPAddress.contains(id, '{ip}')", True),
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
         self.cmd('network application-gateway waf-config show -g {rg} --gateway-name {ag}', checks=[
@@ -2076,7 +2077,7 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         ])
         # test list rule sets
         self.cmd('network application-gateway waf-config list-rule-sets --group *', checks=[
-            self.check('length(@)', 5)
+            self.check('length(@)', 6)
         ])
 
 
