@@ -164,7 +164,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self.print_description_list(help_file.children)
         print('\nHere are the Partner Commands:\n\n    dev                 : Run Azure Developer CLI (azd). '
               '\n                          To learn more about azd, please visit: '
-              'https://learn.microsoft.com/azure/developer/azure-developer-cli/')
+              '\n                          https://learn.microsoft.com/azure/developer/azure-developer-cli/')
 
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
@@ -183,7 +183,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         if delimiters == '':
             print('Partner Commands:\n    dev                         : Run Azure Developer CLI (azd). '
                   '\n                                  To learn more about azd, please visit: '
-                  'https://learn.microsoft.com/azure/developer/azure-developer-cli/')
+                  '\n                                  https://learn.microsoft.com/azure/developer/azure-developer-cli/')
 
     def get_examples(self, command, parser, is_group):
         """Get examples of a certain command from the help file.
