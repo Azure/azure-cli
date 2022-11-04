@@ -86,7 +86,7 @@ def flexible_server_create(cmd, client,
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
-    server_result = firewall_name = subnet_id = None
+    server_result = firewall_name = None
 
     network, start_ip, end_ip = flexible_server_provision_network_resource(cmd=cmd,
                                                                            resource_group_name=resource_group_name,
@@ -156,6 +156,7 @@ def flexible_server_create(cmd, client,
     version = server_result.version
     sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
+    subnet_id = network.delegated_subnet_resource_id
 
     logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
                    '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
@@ -281,7 +282,7 @@ def flexible_server_georestore(cmd, client,
 
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
         validate_georestore_location(db_context, location)
-        validate_georestore_network(source_server_object, public_access, vnet, subnet)
+        validate_georestore_network(source_server_object, public_access, vnet, subnet, 'mysql')
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -555,7 +556,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 

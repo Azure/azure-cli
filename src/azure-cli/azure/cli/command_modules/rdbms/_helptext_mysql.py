@@ -254,14 +254,14 @@ examples:
       Private access server will use different private dns zone.
     text: az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew --source-server testserver --location newLocation
   - name: >
-      Geo-estore public access or private access server 'testserver' as a new server 'testserverNew' with new subnet.
+      Geo-restore public access or private access server 'testserver' as a new server 'testserverNew' with new subnet.
       New vnet, subnet, and private dns zone for the restored server will be provisioned. Please refer to 'flexible-server create' command for more private access scenarios.
     text: >
       az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew \\
         --source-server testserver --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.mysql.database.azure.com --location newLocation
-  - name: Gep-estore private access server 'testserver' as a new server 'testserverNew' with public access.
+  - name: Geo-restore private access server 'testserver' as a new server 'testserverNew' with public access.
     text: >
       az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew  --source-server testserver --public-access Enabled --location newLocation
 """
@@ -465,7 +465,7 @@ type: command
 short-summary: List all read replicas for a given server.
 examples:
   - name: List all read replicas for master server 'testserver'.
-    text: az mysql flexible-server replica list -g testGroup -n primaryservername
+    text: az mysql flexible-server replica list -g testGroup -n testserver
 """
 
 helps['mysql flexible-server replica stop-replication'] = """
