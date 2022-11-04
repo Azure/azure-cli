@@ -6,6 +6,7 @@
 """
 Generate index.html of testing results HTML pages.
 """
+import datetime
 import traceback
 import os
 import re
@@ -45,7 +46,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
                 data.append({'name': name, 'url': url})
         break
     logger.warning(data)
-    html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+    html = render(data, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
     with open('index.html', 'w') as f:
         f.write(html)
 
@@ -64,12 +65,10 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     return html
 
 
-def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
+def render(data, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
     """
     Return a HTML string
     :param data:
-    :param container:
-    :param container_url:
     :param testdata:
     :param USER_REPO:
     :param USER_BRANCH:
@@ -95,7 +94,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     """
 
     live = 'True' if USER_LIVE == '--live' else 'False'
-    date = container.split('-')[0]
+    date = datetime.datetime.now().strftime('%Y%m%d')
 
     content += """
     <p>
