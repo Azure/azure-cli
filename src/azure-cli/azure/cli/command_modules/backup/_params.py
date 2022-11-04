@@ -32,7 +32,7 @@ allowed_rehyd_priority_type = ['Standard', 'High']
 
 backup_management_type_help = """Specify the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
-workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. 'MSSQL' and 'SQLDataBase' can be used interchangeably, as can 'SAPHANA' and 'SAPHanaDatabase'."""
+workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. 'MSSQL' and 'SQLDataBase' can be used interchangeably for SQL in Azure VM, as can 'SAPHANA' and 'SAPHanaDatabase' for SAP HANA in Azure VM."""
 protectable_item_type_help = """Specify the type of items within the Resource which should be discovered and protected by Azure Backup. 'HANAInstance' and 'SAPHanaSystem' can be used interchangeably."""
 restore_mode_help = """Specify the restore mode."""
 resolve_conflict_help = "Instruction if there's a conflict with the restored data."
