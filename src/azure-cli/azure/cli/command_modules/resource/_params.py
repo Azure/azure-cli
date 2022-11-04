@@ -106,7 +106,7 @@ def load_arguments(self, _):
     stacks_delete_all_type = CLIArgumentType(options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
     stacks_deny_settings_mode = CLIArgumentType(help='Defines how resources deployed by the deployment stack are locked.')
     stacks_excluded_principals = CLIArgumentType(help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
-    stacks_excluded_actions = CLIArgumentType(help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted. If the denySetting mode is set to 'denyWriteAndDelete', then the following actions are automatically appended to 'excludedActions': '*/read' and 'Microsoft.Authorization/locks/delete'. If the denySetting mode is set to 'denyDelete', then the following actions are automatically appended to 'excludedActions': 'Microsoft.Authorization/locks/delete'. Duplicate actions will be removed.")
+    stacks_excluded_actions = CLIArgumentType(help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(help='DenySettings will be applied to child scopes.')
     stacks_snapshot_type = CLIArgumentType(options_list=['--id'], help='The deployment stack snapshot resource id.')
     stacks_snapshot_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The deployment stack snapshot name.')
