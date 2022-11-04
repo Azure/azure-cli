@@ -5302,6 +5302,16 @@ def remove_nic_ip_config_inbound_nat_rule(
 
 
 # region NetworkSecurityGroups
+def create_nsg(cmd, resource_group_name, network_security_group_name, location=None, tags=None):
+    from azure.cli.command_modules.network.aaz.latest.network.nsg import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": network_security_group_name,
+        "location": location,
+        "tags": tags
+    })
+
+
 def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name):
 
     if not val:
@@ -7750,10 +7760,9 @@ def create_virtual_hub(cmd,
             raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
                 virtual_hub_name, resource_group_name))
 
-    SubResource = cmd.get_models('SubResource')
+    SubResource, HubIpConfiguration, PublicIPAddress = cmd.get_models('SubResource',
+                                                                      'HubIpConfiguration', 'PublicIPAddress')
 
-    VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
-                                                                     'PublicIPAddress')
     args = {
         'resource_group': resource_group_name,
         'name': virtual_hub_name,

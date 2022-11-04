@@ -921,8 +921,7 @@ def load_command_table(self, _):
 
     # region NetworkSecurityGroups
     with self.command_group('network nsg') as g:
-        from azure.cli.command_modules.network.aaz.latest.network.nsg import Create
-        self.command_table['network network nsg create'] = Create(loader=self, transform=transform_nsg_create_output)
+        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
 
     with self.command_group('network nsg rule') as g:
         g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])

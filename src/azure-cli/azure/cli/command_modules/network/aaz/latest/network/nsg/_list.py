@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/networksecuritygroups", "2021-08-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/networksecuritygroups", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups", "2022-01-01"],
         ]
     }
 
@@ -114,7 +114,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -198,7 +198,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -1188,6 +1188,9 @@ def _build_schema_network_security_group_read(_schema):
     properties.flow_logs = AAZListType(
         serialized_name="flowLogs",
         flags={"read_only": True},
+    )
+    properties.flush_connection = AAZBoolType(
+        serialized_name="flushConnection",
     )
     properties.network_interfaces = AAZListType(
         serialized_name="networkInterfaces",

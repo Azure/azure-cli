@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network nsg create",
-)
 class Create(AAZCommand):
     """Create a network security group.
 
@@ -22,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups/{}", "2022-01-01"],
         ]
     }
 
@@ -54,25 +51,21 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            arg_group="Parameters",
-            help="Resource location.",
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="Parameters",
-            help="Resource tags.",
+            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
         )
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
+
+        # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
         return cls._args_schema
@@ -188,7 +181,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -1200,6 +1193,9 @@ def _build_schema_network_security_group_read(_schema):
     properties.flow_logs = AAZListType(
         serialized_name="flowLogs",
         flags={"read_only": True},
+    )
+    properties.flush_connection = AAZBoolType(
+        serialized_name="flushConnection",
     )
     properties.network_interfaces = AAZListType(
         serialized_name="networkInterfaces",

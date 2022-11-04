@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups/{}", "2022-01-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -1104,6 +1104,9 @@ def _build_schema_network_security_group_read(_schema):
     properties.flow_logs = AAZListType(
         serialized_name="flowLogs",
         flags={"read_only": True},
+    )
+    properties.flush_connection = AAZBoolType(
+        serialized_name="flushConnection",
     )
     properties.network_interfaces = AAZListType(
         serialized_name="networkInterfaces",

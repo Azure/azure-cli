@@ -28,9 +28,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups/{}/securityrules/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networksecuritygroups/{}/securityrules/{}", "2022-01-01"],
         ]
     }
 
@@ -65,6 +65,32 @@ class Create(AAZCommand):
             help="Name of the network security group rule.",
             required=True,
             id_part="child_name_1",
+        )
+        _args_schema.access = AAZStrArg(
+            options=["--access"],
+            help="Allowed values: Allow, Deny.",
+            default="Allow",
+            enum={"Allow": "Allow", "Deny": "Deny"},
+        )
+        _args_schema.description = AAZStrArg(
+            options=["--description"],
+            help="Rule description.",
+        )
+        _args_schema.direction = AAZStrArg(
+            options=["--direction"],
+            help="Allowed values: Inbound, Outbound.",
+            default="Inbound",
+            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
+        )
+        _args_schema.priority = AAZIntArg(
+            options=["--priority"],
+            help="Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.",
+        )
+        _args_schema.protocol = AAZStrArg(
+            options=["--protocol"],
+            help="etwork protocol this rule applies to.  Allowed values: *, Ah, Esp, Icmp, Tcp, Udp.",
+            default="*",
+            enum={"*": "*", "Ah": "Ah", "Esp": "Esp", "Icmp": "Icmp", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
         # define Arg Group "Destination"
@@ -107,41 +133,6 @@ class Create(AAZCommand):
 
         destination_port_ranges = cls._args_schema.destination_port_ranges
         destination_port_ranges.Element = AAZStrArg()
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.access = AAZStrArg(
-            options=["--access"],
-            arg_group="Properties",
-            help="Allowed values: Allow, Deny.",
-            default="Allow",
-            enum={"Allow": "Allow", "Deny": "Deny"},
-        )
-        _args_schema.description = AAZStrArg(
-            options=["--description"],
-            arg_group="Properties",
-            help="Rule description.",
-        )
-        _args_schema.direction = AAZStrArg(
-            options=["--direction"],
-            arg_group="Properties",
-            help="Allowed values: Inbound, Outbound.",
-            default="Inbound",
-            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
-        )
-        _args_schema.priority = AAZIntArg(
-            options=["--priority"],
-            arg_group="Properties",
-            help="Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.",
-        )
-        _args_schema.protocol = AAZStrArg(
-            options=["--protocol"],
-            arg_group="Properties",
-            help="etwork protocol this rule applies to.  Allowed values: *, Ah, Esp, Icmp, Tcp, Udp.",
-            default="*",
-            enum={"*": "*", "Ah": "Ah", "Esp": "Esp", "Icmp": "Icmp", "Tcp": "Tcp", "Udp": "Udp"},
-        )
 
         # define Arg Group "SecurityRuleParameters"
 
@@ -293,7 +284,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
