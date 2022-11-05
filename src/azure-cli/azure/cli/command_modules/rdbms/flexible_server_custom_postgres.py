@@ -369,7 +369,9 @@ def flexible_list_skus(cmd, client, location):
     return result
 
 
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, location=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
+                            location=None, vnet=None, vnet_address_prefix=None, subnet=None,
+                            subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False, yes=False):
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -397,11 +399,37 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not zone:
         zone = source_server_object.availability_zone
 
+    location = ''.join(location.lower().split())
+
+    db_context = DbContext(
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
+        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
+        logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
+    validate_server_name(db_context, replica_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+
     parameters = postgresql_flexibleservers.models.Server(
         source_server_resource_id=source_server_id,
         location=location,
         availability_zone=zone,
         create_mode="Replica")
+
+    if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):
+        parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
+                                                                              resource_group_name=resource_group_name,
+                                                                              server_name=replica_name,
+                                                                              location=location,
+                                                                              db_context=db_context,
+                                                                              private_dns_zone_arguments=private_dns_zone_arguments,
+                                                                              public_access='Disabled',
+                                                                              vnet=vnet,
+                                                                              subnet=subnet,
+                                                                              vnet_address_prefix=vnet_address_prefix,
+                                                                              subnet_address_prefix=subnet_address_prefix,
+                                                                              yes=yes)
+    else:
+        parameters.network = source_server_object.network
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
@@ -434,7 +462,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
         cf_availability_without_location=cf_postgres_check_resource_availability,
         cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
-        logging_name='PostgreSQL', command_group='postgres', server_client=client, location=source_server_object.location)
+        logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     validate_georestore_network(source_server_object, None, vnet, subnet, 'postgres')
@@ -446,8 +474,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         create_mode="GeoRestore",
         availability_zone=zone
     )
-
-    db_context.location = location
 
     if source_server_object.network.public_network_access == 'Disabled':
         parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,

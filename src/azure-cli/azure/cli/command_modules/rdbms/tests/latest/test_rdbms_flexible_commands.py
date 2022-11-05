@@ -1123,15 +1123,18 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
     postgres_location = 'eastus'
     mysql_location = 'northeurope'
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_replica_mgmt(self, resource_group):
-        self._test_flexible_server_replica_mgmt('postgres', resource_group)
+        self._test_flexible_server_replica_mgmt('postgres', resource_group, True)
+        self._test_flexible_server_replica_mgmt('postgres', resource_group, False)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
-        self._test_flexible_server_replica_mgmt('mysql', resource_group)
+        self._test_flexible_server_replica_mgmt('mysql', resource_group, False)
 
-    def _test_flexible_server_replica_mgmt(self, database_engine, resource_group):
+    def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         if database_engine == 'postgres':
             location = self.postgres_location
             primary_role = 'Primary'
@@ -1142,19 +1145,32 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             replica_role = 'Replica'
 
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
-                    self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
+        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+
+        if vnet_enabled:
+            master_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
+            master_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
+            master_vnet_args = F'--vnet {master_vnet} --subnet {master_subnet} --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.0.0/24'
+            master_vnet_check = [JMESPathCheck('network.delegatedSubnetResourceId', F'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{master_vnet}/subnets/{master_subnet}')]
+            replica_subnet = [self.create_random_name(F'SUBNET{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+            replica_vnet_args = [F'--vnet {master_vnet} --subnet {replica_subnet[i]} --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.{i+1}.0/24 --yes' for i in range(2)]
+            replica_vnet_check = [[JMESPathCheck('network.delegatedSubnetResourceId', F'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{master_vnet}/subnets/{replica_subnet[i]}')] for i in range(2)]
+        else:
+            master_vnet_args = '--public-access none'
+            master_vnet_check = []
+            replica_vnet_args = [''] * 2
+            replica_vnet_check = [[]] * 2
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D2ds_v4'
-                 .format(database_engine, resource_group, master_server, location, 256))
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --yes'
+                 .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
+                          checks=[JMESPathCheck('replicationRole', primary_role)] + master_vnet_check).get_output_in_json()
 
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2'
-                 .format(database_engine, resource_group, replicas[0], result['id']),
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
+                 .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('availabilityZone', 2),
@@ -1163,7 +1179,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
+                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0])
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
@@ -1195,15 +1211,15 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test delete master server
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
-                .format(database_engine, resource_group, replicas[1], result['id']),
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
+                .format(database_engine, resource_group, replicas[1], result['id'], replica_vnet_args[1]),
                 checks=[
                     JMESPathCheck('name', replicas[1]),
                     JMESPathCheck('resourceGroup', resource_group),
                     JMESPathCheck('sku.name', result['sku']['name']),
                     JMESPathCheck('replicationRole', replica_role),
                     JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replicaCapacity', '0')])
+                    JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[1])
 
         if database_engine == 'mysql':
             self.cmd('{} flexible-server delete -g {} --name {} --yes'

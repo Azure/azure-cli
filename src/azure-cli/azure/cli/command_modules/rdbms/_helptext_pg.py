@@ -443,8 +443,15 @@ helps['postgres flexible-server replica create'] = """
 type: command
 short-summary: Create a read replica for a server.
 examples:
-  - name: Create a read replica 'testReplicaServer' for 'testserver' in the specified zone and location if available.
+  - name: Create a read replica 'testReplicaServer' for 'testserver' with public or private access in the specified zone and location if available.
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --zone 3 --location testLocation
+  - name: Create a read replica 'testReplicaServer' with new subnet for 'testserver' with private access.
+    text: >
+      az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup \\
+        --source-server testserver --zone 3 --location testLocation \\
+        --vnet newVnet --subnet newSubnet \\
+        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
+        --private-dns-zone testDNS.postgres.database.azure.com
 """
 
 helps['postgres flexible-server replica list'] = """

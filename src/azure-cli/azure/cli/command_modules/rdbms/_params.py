@@ -633,6 +633,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('replica_name', options_list=['--replica-name'],
                        help='The name of the server to restore to.')
             c.argument('zone', arg_type=zone_arg_type)
+            if command_group == 'postgres':
+                c.argument('vnet', arg_type=vnet_arg_type)
+                c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
+                c.argument('subnet', arg_type=subnet_arg_type)
+                c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
+                c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+                c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)
