@@ -3677,7 +3677,7 @@ class NetworkPrivateLinkDesktopVirtualizationScenarioTest(ScenarioTest):
     def test_desktopvirtualization_private_endpoint(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
-            'location': "westus2"
+            'location': "westus2",
             'vnet': self.create_random_name('cli-vnet-dv', 20),
             'subnet': self.create_random_name('cli-subnet-dv', 20),
             'hostpoolName': self.create_random_name('cli-test-dv-hp', 20),
