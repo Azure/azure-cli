@@ -184,7 +184,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub device stream commands
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
-                            min_api="2019-07-01-preview") as g:
+                            min_api="2019-07-01-preview", is_preview=True) as g:
         g.custom_show_command('show', 'iot_hub_devicestream_show')
 
     # iot central commands
