@@ -9,6 +9,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 from knack.log import get_logger
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
+from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -98,11 +99,12 @@ def list_nics(cmd, resource_group_name=None):
 
 
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
-    client = network_client_factory(cmd.cli_ctx).network_security_groups
-    nsg = client.get(resource_group_name, network_security_group_name)
-    rules = nsg.security_rules
+    from azure.cli.command_modules.network.aaz.latest.network.nsg import Show
+    nsg = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
+                                                  'name': network_security_group_name})
+    rules = nsg['securityRules']
     if include_default:
-        rules = rules + nsg.default_security_rules
+        rules = rules + nsg['defaultSecurityRules']
     return rules
 
 
@@ -5301,10 +5303,13 @@ def remove_nic_ip_config_inbound_nat_rule(
 
 # region NetworkSecurityGroups
 def create_nsg(cmd, resource_group_name, network_security_group_name, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).network_security_groups
-    NetworkSecurityGroup = cmd.get_models('NetworkSecurityGroup')
-    nsg = NetworkSecurityGroup(location=location, tags=tags)
-    return client.begin_create_or_update(resource_group_name, network_security_group_name, nsg)
+    from azure.cli.command_modules.network.aaz.latest.network.nsg import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": network_security_group_name,
+        "location": location,
+        "tags": tags
+    })
 
 
 def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name):
@@ -5324,23 +5329,25 @@ def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name)
 def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
-        kwargs[key] = asgs
+        kwargs[key] = [{"id": asg} for asg in asgs]
         if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
 
-def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
-                               priority, description=None, protocol=None, access=None, direction=None,
-                               source_port_ranges='*', source_address_prefixes='*',
-                               destination_port_ranges=80, destination_address_prefixes='*',
-                               source_asgs=None, destination_asgs=None):
+def create_nsg_rule(cmd, resource_group_name, network_security_group_name, security_rule_name,
+                    priority, description=None, protocol=None, access=None, direction=None,
+                    source_port_ranges='*', source_address_prefixes='*',
+                    destination_port_ranges=80, destination_address_prefixes='*',
+                    source_asgs=None, destination_asgs=None):
     kwargs = {
         'protocol': protocol,
         'direction': direction,
         'description': description,
         'priority': priority,
         'access': access,
-        'name': security_rule_name
+        'name': security_rule_name,
+        'resource_group': resource_group_name,
+        'nsg_name': network_security_group_name,
     }
     _create_singular_or_plural_property(kwargs, source_address_prefixes,
                                         'source_address_prefix', 'source_address_prefixes')
@@ -5355,103 +5362,89 @@ def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_
     kwargs['source_address_prefix'] = kwargs['source_address_prefix'] or ''
     kwargs['destination_address_prefix'] = kwargs['destination_address_prefix'] or ''
 
-    if cmd.supported_api_version(min_api='2017-09-01'):
-        _handle_asg_property(kwargs, 'source_application_security_groups', source_asgs)
-        _handle_asg_property(kwargs, 'destination_application_security_groups', destination_asgs)
+    _handle_asg_property(kwargs, 'source_asgs', source_asgs)
+    _handle_asg_property(kwargs, 'destination_asgs', destination_asgs)
 
-    SecurityRule = cmd.get_models('SecurityRule')
-    settings = SecurityRule(**kwargs)
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.security_rules.begin_create_or_update(
-        resource_group_name, network_security_group_name, security_rule_name, settings)
+    from .aaz.latest.network.nsg.rule import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=kwargs)
 
 
-def create_nsg_rule_2017_03_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
-                               priority, description=None, protocol=None, access=None, direction=None,
-                               source_port_range='*', source_address_prefix='*',
-                               destination_port_range=80, destination_address_prefix='*'):
-    SecurityRule = cmd.get_models('SecurityRule')
-    settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
-                            destination_address_prefix=destination_address_prefix, access=access,
-                            direction=direction,
-                            description=description, source_port_range=source_port_range,
-                            destination_port_range=destination_port_range, priority=priority,
-                            name=security_rule_name)
+class NsgRuleUpdate(_NsgRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArgFormat, AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.destination_asgs = AAZListArg(
+            options=['--destination-asgs'],
+            arg_group="Destination",
+            help="Space-separated list of application security group names or supports one application security group name or ID.",
+        )
+        args_schema.destination_asgs.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
+            )
+        )
+        args_schema.source_asgs = AAZListArg(
+            options=['--source-asgs'],
+            arg_group="Source",
+            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID.")
+        args_schema.source_asgs.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
+            ))
 
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.security_rules.begin_create_or_update(
-        resource_group_name, network_security_group_name, security_rule_name, settings)
+        return args_schema
 
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("destination_asgs_id", "source_asgs_id")]
+        return args
 
-def _update_singular_or_plural_property(instance, val, singular_name, plural_name):
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.destination_asgs:
+            destination_asg = str(args.destination_asgs[0])
+            if destination_asg == 'None' or parse_resource_id(destination_asg)["resource_name"] == '':
+                args.destination_asgs_id = None
+            else:
+                args.destination_asgs_id = [{"id": asg} for asg in args.destination_asgs]
 
-    if val is None:
-        return
-    if not isinstance(val, list):
-        val = [val]
-    if len(val) > 1:
-        setattr(instance, plural_name, val)
-        setattr(instance, singular_name, None)
-    else:
-        setattr(instance, plural_name, None)
-        setattr(instance, singular_name, val[0])
+        if args.source_asgs:
+            source_asg = str(args.source_asgs[0])
+            if source_asg == 'None' or parse_resource_id(source_asg)["resource_name"] == '':
+                args.source_asgs_id = None
+            else:
+                args.source_asgs_id = [{"id": asg} for asg in args.source_asgs]
 
+    def pre_instance_update(self, instance):
+        if instance.properties.sourceAddressPrefix:
+            instance.properties.sourceAddressPrefixes = [instance.properties.sourceAddressPrefix]
+            instance.properties.sourceAddressPrefix = ''
+        if instance.properties.destinationAddressPrefix:
+            instance.properties.destinationAddressPrefixes = [instance.properties.destinationAddressPrefix]
+            instance.properties.destinationAddressPrefix = ''
+        if instance.properties.sourcePortRange:
+            instance.properties.sourcePortRanges = [instance.properties.sourcePortRange]
+            instance.properties.sourcePortRange = None
+        if instance.properties.destinationPortRange:
+            instance.properties.destinationPortRanges = [instance.properties.destinationPortRange]
+            instance.properties.destinationPortRange = None
 
-def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=None,
-                               destination_address_prefixes=None, access=None, direction=None, description=None,
-                               source_port_ranges=None, destination_port_ranges=None, priority=None,
-                               source_asgs=None, destination_asgs=None):
-    # No client validation as server side returns pretty good errors
-    instance.protocol = protocol if protocol is not None else instance.protocol
-    instance.access = access if access is not None else instance.access
-    instance.direction = direction if direction is not None else instance.direction
-    instance.description = description if description is not None else instance.description
-    instance.priority = priority if priority is not None else instance.priority
-
-    _update_singular_or_plural_property(instance, source_address_prefixes,
-                                        'source_address_prefix', 'source_address_prefixes')
-    _update_singular_or_plural_property(instance, destination_address_prefixes,
-                                        'destination_address_prefix', 'destination_address_prefixes')
-    _update_singular_or_plural_property(instance, source_port_ranges,
-                                        'source_port_range', 'source_port_ranges')
-    _update_singular_or_plural_property(instance, destination_port_ranges,
-                                        'destination_port_range', 'destination_port_ranges')
-
-    # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
-    instance.source_address_prefix = instance.source_address_prefix or ''
-    instance.destination_address_prefix = instance.destination_address_prefix or ''
-
-    if source_asgs == ['']:
-        instance.source_application_security_groups = None
-    elif source_asgs:
-        instance.source_application_security_groups = source_asgs
-
-    if destination_asgs == ['']:
-        instance.destination_application_security_groups = None
-    elif destination_asgs:
-        instance.destination_application_security_groups = destination_asgs
-
-    return instance
-
-
-def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=None,
-                               destination_address_prefix=None, access=None, direction=None, description=None,
-                               source_port_range=None, destination_port_range=None, priority=None):
-    # No client validation as server side returns pretty good errors
-    instance.protocol = protocol if protocol is not None else instance.protocol
-    instance.source_address_prefix = (source_address_prefix if source_address_prefix is not None
-                                      else instance.source_address_prefix)
-    instance.destination_address_prefix = destination_address_prefix \
-        if destination_address_prefix is not None else instance.destination_address_prefix
-    instance.access = access if access is not None else instance.access
-    instance.direction = direction if direction is not None else instance.direction
-    instance.description = description if description is not None else instance.description
-    instance.source_port_range = source_port_range \
-        if source_port_range is not None else instance.source_port_range
-    instance.destination_port_range = destination_port_range \
-        if destination_port_range is not None else instance.destination_port_range
-    instance.priority = priority if priority is not None else instance.priority
-    return instance
+    def post_instance_update(self, instance):
+        if instance.properties.sourceAddressPrefixes and len(instance.properties.sourceAddressPrefixes) == 1:
+            instance.properties.sourceAddressPrefix = instance.properties.sourceAddressPrefixes[0]
+            instance.properties.sourceAddressPrefixes = None
+        if instance.properties.destinationAddressPrefixes and len(instance.properties.destinationAddressPrefixes) == 1:
+            instance.properties.destinationAddressPrefix = instance.properties.destinationAddressPrefixes[0]
+            instance.properties.destinationAddressPrefixes = None
+        if instance.properties.sourcePortRanges and len(instance.properties.sourcePortRanges) == 1:
+            instance.properties.sourcePortRange = instance.properties.sourcePortRanges[0]
+            instance.properties.sourcePortRanges = None
+        if instance.properties.destinationPortRanges and len(instance.properties.destinationPortRanges) == 1:
+            instance.properties.destinationPortRange = instance.properties.destinationPortRanges[0]
+            instance.properties.destinationPortRanges = None
 # endregion
 
 
@@ -6661,37 +6654,6 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
-def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
-                     public_ip_prefix=None):
-    if dns_name is not None or reverse_fqdn is not None:
-        if instance.dns_settings:
-            if dns_name is not None:
-                instance.dns_settings.domain_name_label = dns_name
-            if reverse_fqdn is not None:
-                instance.dns_settings.reverse_fqdn = reverse_fqdn
-        else:
-            PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
-                                                               reverse_fqdn=reverse_fqdn)
-    if allocation_method is not None:
-        instance.public_ip_allocation_method = allocation_method
-    if version is not None:
-        instance.public_ip_address_version = version
-    if idle_timeout is not None:
-        instance.idle_timeout_in_minutes = idle_timeout
-    if tags is not None:
-        instance.tags = tags
-    if sku is not None:
-        instance.sku.name = sku
-    if ip_tags:
-        instance.ip_tags = ip_tags
-    if public_ip_prefix:
-        SubResource = cmd.get_models('SubResource')
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    return instance
-
-
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
                             version=None, location=None, tags=None, zone=None, edge_zone=None,
                             custom_ip_prefix_name=None):
@@ -7780,7 +7742,7 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 
 
 # region VirtualHub
-def create_virtual_hub(cmd, client,
+def create_virtual_hub(cmd,
                        resource_group_name,
                        virtual_hub_name,
                        hosted_subnet,
@@ -7789,23 +7751,27 @@ def create_virtual_hub(cmd, client,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
     from azure.cli.core.commands import LongRunningOperation
+    from .aaz.latest.network.routeserver import Show
+    from .aaz.latest.network.routeserver import List
 
-    try:
-        client.get(resource_group_name, virtual_hub_name)
-        raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
-            virtual_hub_name, resource_group_name))
-    except HttpResponseError:
-        pass
+    list_result = List(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name})
+    for x in list_result:
+        if x['name'] == virtual_hub_name:
+            raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
+                virtual_hub_name, resource_group_name))
 
-    SubResource = cmd.get_models('SubResource')
+    SubResource, HubIpConfiguration, PublicIPAddress = cmd.get_models('SubResource',
+                                                                      'HubIpConfiguration', 'PublicIPAddress')
 
-    VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
-                                                                     'PublicIPAddress')
-
-    hub = VirtualHub(tags=tags, location=location,
-                     virtual_wan=None,
-                     sku='Standard')
-    vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
+    args = {
+        'resource_group': resource_group_name,
+        'name': virtual_hub_name,
+        'location': location,
+        'tags': tags,
+        'sku': 'Standard',
+    }
+    from azure.cli.command_modules.network.aaz.latest.network.routeserver import Create
+    vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
     ip_config = HubIpConfiguration(
@@ -7823,13 +7789,14 @@ def create_virtual_hub(cmd, client,
             vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
         except HttpResponseError:
             pass
-        client.begin_delete(resource_group_name, virtual_hub_name)
+        from .aaz.latest.network.routeserver import Delete
+        Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
         raise ex
 
-    return client.get(resource_group_name, virtual_hub_name)
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 
 
-def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
+def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
@@ -7837,7 +7804,8 @@ def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wa
         ip_config = ip_configs[0]   # There will always be only 1
         poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
         LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
+    from .aaz.latest.network.routeserver import Delete
+    return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
 
 
