@@ -19,7 +19,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_subnets, cf_usages,
+    cf_subnets,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -307,9 +307,9 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkRoot
-    usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
-    with self.command_group('network') as g:
-        g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
+    with self.command_group('network'):
+        from azure.cli.command_modules.network.aaz.latest.network import ListUsages
+        self.command_table['network list-usages'] = ListUsages(loader=self, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
     # endregion
 
     # region ApplicationGateways

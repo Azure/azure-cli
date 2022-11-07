@@ -132,10 +132,6 @@ def cf_subnets(cli_ctx, _):
     return network_client_factory(cli_ctx).subnets
 
 
-def cf_usages(cli_ctx, _):
-    return network_client_factory(cli_ctx).usages
-
-
 def cf_virtual_network_gateway_connections(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_gateway_connections
 
