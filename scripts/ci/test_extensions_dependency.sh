@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-pwd
 python3 -m venv env
 source env/bin/activate
 pip install --upgrade pip
-source /scripts/install_full.sh
+source ./scripts/install_full.sh
+
+cp -r env/lib lib_backup
 
 echo "Listing Available Extensions:"
 az extension list-available -otable
@@ -13,21 +14,33 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 
 output=$(az extension list-available --query [].name -otsv)
 
+ignore_list='attestation cloud-service functionapp serial-console'
+
 exit_code=0
 for ext in $output; do
     echo
-    # Use regex to detect if $ext is in $ignore_list
 
     echo "Verifying extension:" $ext
-    url=$(python -c 'from azure.cli.core.extension._resolve import  resolve_from_index;print(resolve_from_index("$ext")[0])')
-    curl -O $url
-    pip install *.whl --dry-run
+    url=$(python -c "from azure.cli.core.extension._resolve import  resolve_from_index;print(resolve_from_index('$ext')[0])")
+    echo Download $url
+    curl -sOL $url
+    pip install *.whl
+    # pip still install new package even if conflict occurs, use pip check to verify
+    pip check
     if [ $? != 0 ]
         then
-            exit_code=1
-            echo "Failed to install:" $ext
+            echo "Dependency conflict detected:" $ext
+            # Use regex to detect if $ext is in $ignore_list
+            if [[ $ignore_list =~ $ext ]]; then
+                echo "Ignore extension: $ext"
+            else
+                exit_code=1
+            fi
         fi
     rm *.whl
+    deactivate
+    rsync -au --delete "lib_backup/" "env/lib"
+    source env/bin/activate
 
 done
 
