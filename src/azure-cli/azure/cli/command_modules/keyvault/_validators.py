@@ -276,8 +276,8 @@ def _fetch_default_cvm_policy():
         policy = requests.get(default_cvm_policy_url)
         return json.loads(policy.content)
     except Exception:  # pylint: disable=broad-except
-        logger.debug(f"Fail to fetch default cvm policy from {default_cvm_policy_url}\n"
-                     f"Use local cvm policy as fallback")
+        logger.debug("Fail to fetch default cvm policy from %s,use local cvm policy as fallback",
+                     default_cvm_policy_url)
     return fallback_cvm_policy
 
 
