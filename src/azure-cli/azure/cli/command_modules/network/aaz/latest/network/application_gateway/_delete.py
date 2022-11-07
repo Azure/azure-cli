@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network custom-ip prefix delete",
+    "network application-gateway delete",
 )
 class Delete(AAZCommand):
-    """Delete a custom IP prefix resource.
+    """Delete an application gateway.
 
-    :example: Delete a custom IP prefix resource.
-        az network custom-ip prefix delete --name MyCustomIpPrefix --resource-group MyResourceGroup
+    :example: Delete an application gateway.
+        az network application-gateway delete -g MyResourceGroup -n MyAppGateway
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/customipprefixes/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01"],
         ]
     }
 
@@ -47,7 +47,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the custom IP prefix.",
+            help="Name of the application gateway.",
             required=True,
             id_part="name",
         )
@@ -58,7 +58,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.CustomIPPrefixesDelete(ctx=self.ctx)()
+        yield self.ApplicationGatewaysDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,7 +69,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class CustomIPPrefixesDelete(AAZHttpOperation):
+    class ApplicationGatewaysDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -108,7 +108,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/customIpPrefixes/{customIpPrefixName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
                 **self.url_parameters
             )
 
@@ -124,7 +124,7 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "customIpPrefixName", self.ctx.args.name,
+                    "applicationGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

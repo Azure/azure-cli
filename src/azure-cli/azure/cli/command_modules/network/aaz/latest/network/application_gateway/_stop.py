@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network custom-ip prefix delete",
+    "network application-gateway stop",
 )
-class Delete(AAZCommand):
-    """Delete a custom IP prefix resource.
+class Stop(AAZCommand):
+    """Stop an application gateway.
 
-    :example: Delete a custom IP prefix resource.
-        az network custom-ip prefix delete --name MyCustomIpPrefix --resource-group MyResourceGroup
+    :example: Stop an application gateway.
+        az network application-gateway stop -g MyResourceGroup -n MyAppGateway
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/customipprefixes/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}/stop", "2022-05-01"],
         ]
     }
 
@@ -47,9 +47,8 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the custom IP prefix.",
+            help="Name of the application gateway.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -58,7 +57,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.CustomIPPrefixesDelete(ctx=self.ctx)()
+        yield self.ApplicationGatewaysStop(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,7 +68,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class CustomIPPrefixesDelete(AAZHttpOperation):
+    class ApplicationGatewaysStop(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -93,28 +92,19 @@ class Delete(AAZCommand):
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/customIpPrefixes/{customIpPrefixName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/stop",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -124,7 +114,7 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "customIpPrefixName", self.ctx.args.name,
+                    "applicationGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -151,8 +141,5 @@ class Delete(AAZCommand):
         def on_200(self, session):
             pass
 
-        def on_204(self, session):
-            pass
 
-
-__all__ = ["Delete"]
+__all__ = ["Stop"]
